@@ -21,7 +21,7 @@ export async function apiFetch<S extends z.ZodType>(
   const headers = new Headers(init?.headers);
   headers.set('Accept', 'application/json');
   const res = await fetch(`/api/v1${path}`, { credentials: 'include', ...init, headers });
-  const body: unknown = await res.json().catch(() => null);
+  const body: unknown = res.status === 204 ? null : await res.json().catch(() => null);
   if (!res.ok) {
     const parsed = apiErrorSchema.safeParse(body);
     throw parsed.success
@@ -29,4 +29,19 @@ export async function apiFetch<S extends z.ZodType>(
       : new ApiError(res.status, 'HTTP_ERROR', res.statusText);
   }
   return schema.parse(body);
+}
+
+/** Sends a JSON body (POST/PATCH/…) and validates the response with `schema`. */
+export function apiSend<S extends z.ZodType>(
+  path: string,
+  schema: S,
+  method: 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+  body?: unknown,
+): Promise<z.infer<S>> {
+  return apiFetch(path, schema, {
+    method,
+    ...(body === undefined
+      ? {}
+      : { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }),
+  });
 }

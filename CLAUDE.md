@@ -30,6 +30,8 @@ The visual source of truth is the `design/` folder (exported from Claude Design)
 - TypeScript strict, no `any`. ESLint + Prettier. Small files, feature folders.
 - API: REST, JSON, prefix `/api/v1`. Validate every input with zod schemas from `packages/shared`. Errors are `{ error: { code, message } }` with proper HTTP status.
 - Every query is scoped by the caller's workspace membership. Never trust IDs from the client without checking access.
+- Auth: cookie `kite_session` (random 32-byte token; `sessions.id` stores its SHA-256), 30-day sliding expiry. Protected routes use `preHandler: app.authenticate`, then `requireWorkspaceMember(request, workspaceId, minRole?)` or `loadProjectAccess(request, projectId, minRole?)` from `apps/api/src/auth/access.ts`. A resource in a workspace the caller isn't a member of answers **404** (never confirm it exists); 403 only for a member below the required role.
+- CSRF: every POST/PUT/PATCH/DELETE must carry `Origin: WEB_ORIGIN` (rejected with 403 `CSRF_REJECTED` otherwise). API tests send it via `ORIGIN` from `test/fixtures.ts`.
 - IDs are UUIDv7 (time-sortable). Timestamps are `timestamptz`. Due/start dates are `date` (no time).
 - Ordering inside lists/columns uses fractional index strings (`fractional-indexing` package) in a `position` column (`text COLLATE "C"`, so keys sort byte-wise), so moving a card updates one row.
 - Every task mutation writes an `activity` row in the same transaction, then emits a realtime event after commit.

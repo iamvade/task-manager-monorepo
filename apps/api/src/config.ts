@@ -11,6 +11,8 @@ const envSchema = z.object({
   TEST_DATABASE_URL: z.url().optional(),
   WEB_ORIGIN: z.url().default('http://localhost:5173'),
   COOKIE_SECRET: z.string().min(32),
+  /** Set when running behind a reverse proxy so `request.ip` (per-IP rate limits) is the client's. */
+  TRUST_PROXY: z.stringbool().default(false),
 });
 
 export type Config = z.infer<typeof envSchema>;

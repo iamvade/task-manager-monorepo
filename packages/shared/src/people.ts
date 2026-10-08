@@ -6,3 +6,13 @@ export function shortName(name: string): string {
   if (!last) return first;
   return `${first} ${last.charAt(0)}.`;
 }
+
+/** "Anu Bold" → "AB"; a single word gives one letter ("Anu" → "A"). */
+export function initialsFor(name: string): string {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join('');
+}

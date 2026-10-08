@@ -122,6 +122,8 @@ URL: view, filters, sort, group, `?task=KEY`. localStorage: sidebar collapsed, o
 ### 2.5 Not designed (derive from existing language)
 Login, invite accept, Settings, ⌘K palette, shortcuts help, filter/sort/group menus, all "…" menus, toasts, skeletons, errors, populated Inbox, `/t/:key` page, Share dialog, workspace switcher menu, new space/project dialogs, notification settings, space-level List/Board, dark mode outside List. Rules: popovers/menus = surface, 1px border, radius 10, padding 4, `--shadow-popover`, 32px options with 6px radius, accent ✓ on selected; dialogs = modal style.
 
+**Login / invite accept (derived, phase 3)**: page `--bg-subtle`; 56px header with 24px accent "K" tile + "Kite" (14/600) left and the МН/EN segmented switcher (default track `--surface-2`) right. Centered card 400px max, top offset `min(12vh, 112px)`, `--surface`, 1px `--border`, radius 14, padding 32, `--shadow-modal`. Title 20/28 600 −0.01em, subtitle 13px muted. Fields: label 13/500 `--text-2` above a 38px input (radius 8, `--border-control`, `--control` bg, focus ring 2px accent-ink offset 1 on the field); password fields have a 28px show/hide icon button. Primary button 40px full width. Form error banner: danger soft `#FDECEC/#B42318`, radius 8, 13/500, `role="alert"`.
+
 ### 2.6 PROMPTS.md vs designs (resolved; PROMPTS updated)
 - Checkbox is native square 16px with `accent-color` (not round).
 - List tags: all chips, clipped by the cell; "+N" only on Board.

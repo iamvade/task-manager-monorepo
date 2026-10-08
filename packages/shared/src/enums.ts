@@ -81,3 +81,20 @@ export const ACTIVITY_TYPES = [
 ] as const;
 export const activityTypeSchema = z.enum(ACTIVITY_TYPES);
 export type ActivityType = z.infer<typeof activityTypeSchema>;
+
+/** Accent colors a user can pick; stored as the hex value in `users.accent`. */
+export const ACCENTS = ['#6E56CF', '#2F6FEB', '#0F766E', '#3F3F46'] as const;
+export const accentSchema = z.enum(ACCENTS);
+export type Accent = z.infer<typeof accentSchema>;
+
+/** Palette keys used for avatars (subset of PALETTE_KEYS). */
+export const AVATAR_COLORS = [
+  'indigo',
+  'green',
+  'rose',
+  'amber',
+  'sky',
+  'purple',
+  'teal',
+  'yellow',
+] as const satisfies readonly PaletteKey[];

@@ -1,26 +1,146 @@
 @import 'tailwindcss';
 
-/* Minimal tokens for the scaffold; the full light/dark token set (CLAUDE.md) lands with the UI phases. */
+/*
+ * Design tokens (CLAUDE.md "Design tokens"). Light by default; `data-theme="dark"` on <html> switches
+ * to the dark palette. `theme.ts` resolves the user's `system` preference to light/dark and sets it.
+ * `--accent` and `--accent-ink-dark` are set from the user's accent by `theme.ts`.
+ */
 :root {
-  --bg: #ffffff;
-  --text: #18181b;
-  --text-muted: #6b6b74;
+  color-scheme: light;
   --accent: #6e56cf;
+  --accent-ink-dark: #b4a5ff;
+
+  --bg: #ffffff;
+  --bg-sidebar: #f7f7f8;
+  --bg-subtle: #fafafb;
+  --surface: #ffffff;
+  --control: #ffffff;
+  --surface-2: #f4f4f5;
+  --hover: #f4f4f5;
+  --nav-hover: #ededf0;
+  --chip: #f1f1f3;
+  --chip-fg: #52525b;
+  --border: #e6e6ea;
+  --border-control: #e6e6ea;
+  --border-subtle: #efeff2;
+  --border-strong: #d4d4d8;
+  --text: #18181b;
+  --text-body: #27272a;
+  --text-2: #3f3f46;
+  --text-3: #52525b;
+  --text-muted: #6b6b74;
+  --icon-muted: #71717a;
+  --text-faint: #a1a1aa;
+  --accent-ink: var(--accent);
+  --accent-soft: color-mix(in srgb, var(--accent) 10%, transparent);
+  --danger: #c42b1c;
+  --danger-soft: #fdecec;
+  --danger-soft-fg: #b42318;
+  --warning: #b45309;
+  --success: #16a34a;
+  --segment-track: #f4f4f5;
+  --segment-active: #ffffff;
+
+  --shadow-segment: 0 1px 2px rgba(24, 24, 27, 0.08);
+  --shadow-popover: 0 8px 24px rgba(24, 24, 27, 0.12);
+  --shadow-popover-lg: 0 12px 32px rgba(24, 24, 27, 0.14);
+  --shadow-drawer: -12px 0 32px rgba(24, 24, 27, 0.1);
+  --shadow-modal: 0 24px 64px rgba(24, 24, 27, 0.2), 0 2px 6px rgba(24, 24, 27, 0.06);
+  --shadow-drag: 0 2px 4px rgba(24, 24, 27, 0.06), 0 16px 32px rgba(24, 24, 27, 0.14);
+  --ring-soft: 0 0 0 3px var(--accent-soft);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #111113;
+  --bg-sidebar: #161618;
+  --bg-subtle: #18181b;
+  --surface: #1f1f23;
+  --control: #18181b;
+  --surface-2: #26262b;
+  --hover: #1f1f23;
+  --nav-hover: #1f1f23;
+  --chip: #232328;
+  --chip-fg: #b4b4bc;
+  --border: #26262b;
+  --border-control: #2a2a30;
+  --border-subtle: #1f1f23;
+  --border-strong: #3a3a42;
+  --text: #ededef;
+  --text-body: #c9c9d1;
+  --text-2: #c9c9d1;
+  --text-3: #b4b4bc;
+  --text-muted: #8e8e98;
+  --icon-muted: #8e8e98;
+  --text-faint: #5e5e68;
+  --accent-ink: var(--accent-ink-dark);
+  --accent-soft: color-mix(in srgb, var(--accent) 20%, transparent);
+  --danger: #f87171;
+  --danger-soft: rgba(248, 113, 113, 0.12);
+  --danger-soft-fg: #f87171;
+  --warning: #fbbf24;
+  --success: #22c55e;
+  --segment-track: #26262b;
+  --segment-active: #1f1f23;
 }
 
 @theme inline {
   --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Geist Mono', ui-monospace, monospace;
+
   --color-bg: var(--bg);
+  --color-bg-sidebar: var(--bg-sidebar);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-surface: var(--surface);
+  --color-control: var(--control);
+  --color-surface-2: var(--surface-2);
+  --color-hover: var(--hover);
+  --color-chip: var(--chip);
+  --color-border: var(--border);
+  --color-border-control: var(--border-control);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
   --color-text: var(--text);
+  --color-text-body: var(--text-body);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
   --color-text-muted: var(--text-muted);
+  --color-icon-muted: var(--icon-muted);
+  --color-text-faint: var(--text-faint);
   --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-soft-fg: var(--danger-soft-fg);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-segment-track: var(--segment-track);
+  --color-segment-active: var(--segment-active);
+  /* Shadows keep their token names; use them as `shadow-[var(--shadow-modal)]`. */
 }
 
 body {
+  margin: 0;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
   font-size: 14px;
   line-height: 20px;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+:where(button, a, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent-ink);
+  outline-offset: 1px;
 }

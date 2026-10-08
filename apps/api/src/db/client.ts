@@ -3,6 +3,9 @@ import pg from 'pg';
 import * as schema from './schema/index.js';
 
 export type Db = NodePgDatabase<typeof schema>;
+export type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
+/** For helpers that run either standalone or inside a caller's transaction. */
+export type DbOrTx = Db | Tx;
 
 export interface DbHandle {
   db: Db;

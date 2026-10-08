@@ -8,10 +8,15 @@ import {
   validatorCompiler,
   type ZodTypeProvider,
 } from 'fastify-type-provider-zod';
+import { registerAuth } from './auth/plugin.js';
 import type { Config } from './config.js';
 import type { Db } from './db/client.js';
 import { registerErrorHandlers } from './errors.js';
+import { authRoutes } from './routes/auth.js';
 import { healthRoutes } from './routes/health.js';
+import { inviteRoutes } from './routes/invites.js';
+import { meRoutes } from './routes/me.js';
+import { projectRoutes } from './routes/projects.js';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -35,7 +40,10 @@ function loggerOptions(config: Config): FastifyServerOptions['logger'] {
 }
 
 export async function buildApp(config: Config, db: Db) {
-  const app = Fastify({ logger: loggerOptions(config) }).withTypeProvider<ZodTypeProvider>();
+  const app = Fastify({
+    logger: loggerOptions(config),
+    trustProxy: config.TRUST_PROXY,
+  }).withTypeProvider<ZodTypeProvider>();
 
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
@@ -47,10 +55,15 @@ export async function buildApp(config: Config, db: Db) {
   await app.register(cors, { origin: config.WEB_ORIGIN, credentials: true });
   await app.register(rateLimit, { max: 300, timeWindow: '1 minute' });
   await app.register(cookie, { secret: config.COOKIE_SECRET });
+  registerAuth(app);
 
   await app.register(
     async (api) => {
       await api.register(healthRoutes);
+      await api.register(authRoutes);
+      await api.register(meRoutes);
+      await api.register(inviteRoutes);
+      await api.register(projectRoutes);
     },
     { prefix: '/api/v1' },
   );

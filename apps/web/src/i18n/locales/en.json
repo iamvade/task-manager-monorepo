@@ -6,5 +6,49 @@
     "checking": "Checking API…",
     "ok": "API connected",
     "down": "API unreachable"
+  },
+  "common": {
+    "loading": "Loading…",
+    "genericError": "Something went wrong. Please try again."
+  },
+  "language": {
+    "label": "Language"
+  },
+  "nav": {
+    "myTasks": "My Tasks"
+  },
+  "auth": {
+    "signInTitle": "Sign in to Kite",
+    "signInSubtitle": "Use your work email to continue.",
+    "email": "Email",
+    "password": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "signOut": "Sign out",
+    "invalidCredentials": "Invalid email or password.",
+    "rateLimited": "Too many attempts. Wait a moment and try again.",
+    "signedInAs": "Signed in as {{name}}"
+  },
+  "invite": {
+    "title": "Join {{workspace}}",
+    "invitedAs": "This invite was sent to {{email}}.",
+    "name": "Full name",
+    "newPassword": "Password",
+    "passwordHint": "At least 8 characters",
+    "confirmPassword": "Confirm password",
+    "passwordTooShort": "Password must be at least 8 characters.",
+    "passwordMismatch": "Passwords don't match.",
+    "createAccount": "Create account and join",
+    "creating": "Creating…",
+    "join": "Join workspace",
+    "joining": "Joining…",
+    "signInToJoin": "You already have an account with this email. Sign in to join.",
+    "signedInAsOther": "You're signed in as {{email}}. Sign in with the invited email to join.",
+    "switchAccount": "Use another account",
+    "invalidTitle": "This invite isn't valid",
+    "invalidBody": "The link has expired or was already used. Ask the person who invited you for a new one.",
+    "goToSignIn": "Go to sign in"
   }
 }

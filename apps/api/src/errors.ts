@@ -17,11 +17,29 @@ export function errorBody(code: string, message: string): ApiErrorBody {
   return { error: { code, message } };
 }
 
+/** An error the handler turns into `{ error: { code, message } }` with `statusCode`. */
+export class HttpError extends Error {
+  constructor(
+    readonly statusCode: number,
+    readonly code: string,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'HttpError';
+  }
+}
+
+export const httpError = (statusCode: number, code: string, message: string) =>
+  new HttpError(statusCode, code, message);
+
 /** Makes every error response use the `{ error: { code, message } }` envelope. */
 export function registerErrorHandlers(app: FastifyInstance): void {
-  app.setErrorHandler<FastifyError>((err, request, reply) => {
+  app.setErrorHandler<FastifyError | HttpError>((err, request, reply) => {
     if (hasZodFastifySchemaValidationErrors(err)) {
       return reply.code(400).send(errorBody('VALIDATION_ERROR', err.message));
+    }
+    if (err instanceof HttpError) {
+      return reply.code(err.statusCode).send(errorBody(err.code, err.message));
     }
     const status = err.statusCode ?? 500;
     if (status < 500) {
