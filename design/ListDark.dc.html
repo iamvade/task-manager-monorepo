@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>App Redesign — List view (dark)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#111113}
+a{color:#B4B4BC;text-decoration:none}a:hover{color:#EDEDEF}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit;color:inherit}
+.nav:hover{background:#1F1F23}
+.ghost:hover{background:#1F1F23}
+.row:hover{background:#18181B}
+.row .more{opacity:0}
+.row:hover .more,.row .more:focus-visible{opacity:1}
+.ghost:focus-visible,.nav:focus-visible,.row a:focus-visible,.row button:focus-visible,input:focus-visible{outline:2px solid #B4A5FF;outline-offset:1px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</helmet>
+
+<div style="display: flex; flex-wrap: wrap; min-height: 100vh; color-scheme: dark; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 14px; line-height: 20px; color: #EDEDEF; background: #111113; -webkit-font-smoothing: antialiased">
+
+  <!-- SIDEBAR -->
+  <nav aria-label="Workspace" style="flex: 1 1 248px; max-width: 248px; min-width: 220px; box-sizing: border-box; background: #161618; border-right: 1px solid #26262B; display: flex; flex-direction: column; gap: 16px; padding: 12px 8px">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 4px">
+      <button class="ghost" style="flex: 1; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; text-align: left">
+        <span style="width: 24px; height: 24px; border-radius: 6px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">K</span>
+        <span style="flex: 1; font-weight: 600; font-size: 14px">Kite Studio</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8E8E98" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+      </button>
+      <button class="ghost" aria-label="Collapse sidebar" style="width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B4B4BC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 3v18"></path><path d="m16 15-3-3 3-3"></path></svg>
+      </button>
+    </div>
+    <div style="padding: 0 4px">
+      <label style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; border: 1px solid #2A2A30; border-radius: 8px; background: #1B1B1E">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8E8E98" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <span class="sr">Search</span>
+        <input type="search" placeholder="Search" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-size: 13px; padding: 0">
+        <kbd style="font-family: inherit; font-size: 11px; color: #8E8E98; border: 1px solid #2A2A30; border-radius: 4px; padding: 0 4px; line-height: 16px">⌘K</kbd>
+      </label>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <a class="nav" href="#" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #C9C9D1">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12 2.5 2.5 4.5-5"></path></svg>
+        <span style="flex: 1; font-weight: 500">My Tasks</span><span style="font-size: 12px; color: #8E8E98">7</span>
+      </a>
+      <a class="nav" href="#" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #C9C9D1">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+        <span style="flex: 1; font-weight: 500">Inbox</span>
+        <span style="min-width: 20px; height: 18px; padding: 0 6px; box-sizing: border-box; border-radius: 9px; background: {{accent}}; color: #FFFFFF; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">3</span>
+      </a>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <div style="display: flex; align-items: center; justify-content: space-between; height: 28px; padding: 0 4px 0 12px">
+        <span style="font-size: 12px; font-weight: 500; color: #8E8E98">Spaces</span>
+        <button class="ghost" aria-label="New space" style="width: 24px; height: 24px; border: 0; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8E8E98" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+        </button>
+      </div>
+      <sc-for list="{{spaces}}" as="sp" hint-placeholder-count="3">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <button class="nav" onClick="{{sp.toggle}}" aria-expanded="{{sp.open}}" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px 0 8px; border: 0; border-radius: 8px; background: transparent; text-align: left">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8E8E98" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{sp.chevStyle}}"><path d="m9 6 6 6-6 6"></path></svg>
+            <span style="width: 18px; height: 18px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; {{sp.badgeStyle}}">{{sp.initial}}</span>
+            <span style="flex: 1; font-weight: 500; color: #C9C9D1">{{sp.name}}</span>
+          </button>
+          <sc-if value="{{sp.open}}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <sc-for list="{{sp.projects}}" as="p" hint-placeholder-count="3">
+                <a class="nav" href="#" style="display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px 0 34px; border-radius: 8px; {{p.style}}">
+                  <span style="width: 6px; height: 6px; border-radius: 3px; {{p.dotStyle}}"></span>
+                  <span style="flex: 1; font-size: 13px">{{p.name}}</span>
+                </a>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+    <div style="margin-top: auto; display: flex; flex-direction: column; gap: 2px; border-top: 1px solid #26262B; padding-top: 8px">
+      <a class="nav" href="#" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #C9C9D1">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6M22 11h-6"></path></svg>
+        <span style="font-weight: 500">Invite teammates</span>
+      </a>
+      <div style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px">
+        <span style="width: 24px; height: 24px; border-radius: 12px; background: #312E81; color: #C7D2FE; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">AB</span>
+        <span style="flex: 1; font-size: 13px; font-weight: 500">Anu Bold</span>
+        <span style="width: 8px; height: 8px; border-radius: 4px; background: #22C55E" aria-label="Online"></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+    <header style="display: flex; flex-direction: column; border-bottom: 1px solid #26262B">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; min-height: 56px; padding: 8px 24px; box-sizing: border-box">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <nav aria-label="Breadcrumb" style="display: flex; align-items: center; gap: 6px; font-size: 14px">
+            <a href="#" style="display: flex; align-items: center; gap: 6px">
+              <span style="width: 18px; height: 18px; border-radius: 5px; background: #2E1065; color: #DDD6FE; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600">P</span>Product
+            </a>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5E5E68" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+            <span aria-current="page" style="font-weight: 600">App Redesign</span>
+          </nav>
+          <button class="ghost" aria-label="Add to favorites" style="width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8E8E98" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9z"></path></svg>
+          </button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px">
+          <div style="display: flex; align-items: center" aria-label="7 project members">
+            <sc-for list="{{memberStack}}" as="m" hint-placeholder-count="4">
+              <span title="{{m.name}}" style="width: 26px; height: 26px; margin-left: -6px; border-radius: 13px; border: 2px solid #111113; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{m.style}}">{{m.initials}}</span>
+            </sc-for>
+            <span style="height: 26px; margin-left: -6px; padding: 0 6px; border-radius: 13px; border: 2px solid #111113; background: #232328; color: #B4B4BC; font-size: 11px; font-weight: 500; display: flex; align-items: center">+3</span>
+          </div>
+          <button class="ghost" style="height: 32px; padding: 0 12px; border: 1px solid #2A2A30; border-radius: 8px; background: #18181B; font-size: 13px; font-weight: 500">Share</button>
+          <button class="ghost" aria-label="Project options" style="width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#B4B4BC" aria-hidden="true"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg>
+          </button>
+        </div>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px; padding: 0 24px">
+        <div role="tablist" aria-label="View" style="display: flex; gap: 4px; font-size: 13px; font-weight: 500">
+          <a href="#" role="tab" aria-selected="true" style="display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 10px; color: #EDEDEF; box-shadow: inset 0 -2px 0 {{accentInk}}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path></svg>List
+          </a>
+          <a href="#" role="tab" aria-selected="false" style="display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 10px; color: #8E8E98">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 3v18M15 3v18"></path></svg>Board
+          </a>
+          <a href="#" role="tab" aria-selected="false" style="display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 10px; color: #8E8E98">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>Calendar
+          </a>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-bottom: 8px">
+          <button class="ghost" style="display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border: 1px solid #2A2A30; border-radius: 8px; background: #18181B; font-size: 13px; color: #C9C9D1">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"></path></svg>
+            Filter
+            <span style="height: 18px; padding: 0 6px; border-radius: 9px; background: {{accentSoft}}; color: {{accentInk}}; font-size: 11px; font-weight: 600; display: flex; align-items: center">1</span>
+          </button>
+          <button class="ghost" style="display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border: 1px solid #2A2A30; border-radius: 8px; background: #18181B; font-size: 13px; color: #C9C9D1">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"></path></svg>
+            Sort: Due date
+          </button>
+          <button class="ghost" style="display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border: 1px solid #2A2A30; border-radius: 8px; background: #18181B; font-size: 13px; color: #C9C9D1">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>
+            Group: Status
+          </button>
+          <div style="width: 1px; height: 20px; background: #2A2A30; margin: 0 4px"></div>
+          <a href="CreateTask.dc.html" style="display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 8px; background: {{accent}}; color: #FFFFFF; font-size: 13px; font-weight: 500">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>New Task
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 24px 0">
+      <span style="display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 4px 0 10px; border: 1px solid #2A2A30; border-radius: 13px; font-size: 12px; color: #C9C9D1">
+        <span style="color: #8E8E98">Sprint is</span> Oct 6 – Oct 24
+        <button class="ghost" aria-label="Remove filter" style="width: 20px; height: 20px; border: 0; border-radius: 10px; background: transparent; display: flex; align-items: center; justify-content: center">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8E8E98" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+      </span>
+      <span style="font-size: 12px; color: #8E8E98">{{summary}}</span>
+    </div>
+
+    <div style="padding: 8px 24px 32px; overflow-x: auto">
+      <div style="min-width: 960px" role="table" aria-label="App Redesign tasks">
+        <div role="row" style="display: grid; grid-template-columns: 40px minmax(0, 1fr) 152px 112px 104px 232px 40px; align-items: center; height: 36px; padding: 0 8px; border-bottom: 1px solid #26262B; font-size: 12px; font-weight: 500; color: #8E8E98">
+          <span role="columnheader"><span class="sr">Complete</span></span>
+          <span role="columnheader">Task name</span>
+          <span role="columnheader">Assignee</span>
+          <span role="columnheader">Due date</span>
+          <span role="columnheader">Priority</span>
+          <span role="columnheader">Tags</span>
+          <span role="columnheader"><span class="sr">Actions</span></span>
+        </div>
+
+        <sc-for list="{{groups}}" as="g" hint-placeholder-count="4">
+          <div role="rowgroup" style="display: flex; flex-direction: column; padding-top: 16px">
+            <div style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 8px">
+              <button class="ghost" onClick="{{g.toggle}}" aria-expanded="{{g.open}}" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px 0 4px; border: 0; border-radius: 6px; background: transparent">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8E8E98" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{g.chevStyle}}"><path d="m9 6 6 6-6 6"></path></svg>
+                <span aria-hidden="true" style="width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; {{g.dotStyle}}"></span>
+                <span style="font-size: 14px; font-weight: 600">{{g.label}}</span>
+                <span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 10px; background: #232328; color: #B4B4BC; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center">{{g.count}}</span>
+              </button>
+              <button class="ghost" aria-label="Add task to {{g.label}}" style="width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8E8E98" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+              </button>
+            </div>
+            <sc-if value="{{g.open}}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; flex-direction: column; border-top: 1px solid #1F1F23">
+                <sc-for list="{{g.tasks}}" as="t" hint-placeholder-count="4">
+                  <div class="row" role="row" style="display: grid; grid-template-columns: 40px minmax(0, 1fr) 152px 112px 104px 232px 40px; align-items: center; height: 44px; padding: 0 8px; border-bottom: 1px solid #1F1F23">
+                    <span role="cell" style="display: flex; align-items: center; justify-content: center">
+                      <input type="checkbox" checked="{{t.done}}" onChange="{{t.toggle}}" aria-label="Mark {{t.name}} complete" style="width: 16px; height: 16px; margin: 0; accent-color: {{accentInk}}; cursor: pointer">
+                    </span>
+                    <span role="cell" style="display: flex; align-items: center; gap: 8px; min-width: 0; padding-right: 16px">
+                      <a href="#" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; {{t.nameStyle}}">{{t.name}}</a>
+                      <sc-if value="{{t.hasSub}}" hint-placeholder-val="{{ false }}">
+                        <span style="flex: none; display: flex; align-items: center; gap: 4px; font-size: 12px; color: #8E8E98">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3v12a3 3 0 0 0 3 3h9"></path><path d="m15 15 3 3-3 3"></path></svg>{{t.sub}}
+                        </span>
+                      </sc-if>
+                      <sc-if value="{{t.hasComments}}" hint-placeholder-val="{{ false }}">
+                        <span style="flex: none; display: flex; align-items: center; gap: 4px; font-size: 12px; color: #8E8E98">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>{{t.comments}}
+                        </span>
+                      </sc-if>
+                    </span>
+                    <span role="cell" style="display: flex; align-items: center; gap: 8px; min-width: 0">
+                      <span style="flex: none; width: 24px; height: 24px; border-radius: 12px; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{t.person.style}}">{{t.person.initials}}</span>
+                      <span style="font-size: 13px; color: #C9C9D1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{t.person.name}}</span>
+                    </span>
+                    <span role="cell" style="font-size: 13px; {{t.dueStyle}}">{{t.due}}</span>
+                    <span role="cell" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #C9C9D1">
+                      <svg width="14" height="14" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{t.flagStyle}}"><path d="M4 22V4"></path><path d="M4 4h12l-2 4 2 4H4"></path></svg>{{t.priority}}
+                    </span>
+                    <span role="cell" style="display: flex; gap: 4px; overflow: hidden">
+                      <sc-for list="{{t.tags}}" as="tag" hint-placeholder-count="2">
+                        <span style="flex: none; height: 22px; padding: 0 8px; border-radius: 6px; font-size: 12px; font-weight: 500; display: flex; align-items: center; white-space: nowrap; {{tag.style}}">{{tag.label}}</span>
+                      </sc-for>
+                    </span>
+                    <span role="cell" style="display: flex; justify-content: center">
+                      <button class="more ghost" aria-label="More actions for {{t.name}}" style="width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#8E8E98" aria-hidden="true"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg>
+                      </button>
+                    </span>
+                  </div>
+                </sc-for>
+                <button class="ghost" style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 0 0 20px; border: 0; background: transparent; font-size: 13px; color: #8E8E98; text-align: left">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Add task
+                </button>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"$preview":{"width":1440,"height":980}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { openSpaces: { product: true }, closedGroups: { done: true }, done: {} };
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const accent = this.props.accent ?? '#6E56CF';
+    const inks = { '#6E56CF': '#B4A5FF', '#2F6FEB': '#93B4FF', '#0F766E': '#5EEAD4', '#3F3F46': '#D4D4D8' };
+    const accentInk = inks[String(accent).toUpperCase()] || inks[accent] || '#B4A5FF';
+    const accentSoft = accent + '33';
+
+    const people = {
+      anu: { name: 'Anu B.', initials: 'AB', style: 'background:#312E81;color:#C7D2FE' },
+      tem: { name: 'Temuulen G.', initials: 'TG', style: 'background:#14532D;color:#BBF7D0' },
+      sara: { name: 'Sara K.', initials: 'SK', style: 'background:#881337;color:#FECDD3' },
+      dorj: { name: 'Dorj E.', initials: 'DE', style: 'background:#78350F;color:#FDE68A' },
+      mia: { name: 'Mia L.', initials: 'ML', style: 'background:#0C4A6E;color:#BAE6FD' },
+      oyu: { name: 'Oyuka N.', initials: 'ON', style: 'background:#581C87;color:#E9D5FF' }
+    };
+    const neutralTag = 'background:#232328;color:#C9C9D1';
+    const tagColors = {
+      'Research': 'background:rgba(59,130,246,0.16);color:#93C5FD',
+      'UX': 'background:rgba(139,116,240,0.18);color:#C4B5FD',
+      'UI': 'background:rgba(139,116,240,0.18);color:#C4B5FD',
+      'Design system': 'background:rgba(20,184,166,0.16);color:#5EEAD4',
+      'Analytics': 'background:rgba(249,115,22,0.16);color:#FDBA74',
+      'A11y': 'background:rgba(34,197,94,0.16);color:#86EFAC',
+      'Onboarding': 'background:rgba(236,72,153,0.16);color:#F9A8D4'
+    };
+    const prio = {
+      Urgent: 'fill:#F87171;stroke:#F87171', High: 'fill:#FB923C;stroke:#FB923C',
+      Medium: 'fill:#FACC15;stroke:#FACC15', Low: 'fill:none;stroke:#71717A'
+    };
+    const dueStyles = {
+      overdue: 'color:#F87171;font-weight:500', today: 'color:#FBBF24;font-weight:500',
+      soon: 'color:#C9C9D1', later: 'color:#8E8E98', done: 'color:#5E5E68'
+    };
+
+    const raw = [
+      { id: 'todo', label: 'To Do', dot: 'border:2px solid #71717A', tasks: [
+        { id: 't1', name: 'Audit current navigation patterns', p: 'tem', due: 'Oct 14', dk: 'later', pr: 'Medium', tags: ['Research', 'UX'], comments: 2 },
+        { id: 't2', name: 'Define color tokens for dark mode', p: 'sara', due: 'Oct 16', dk: 'later', pr: 'Low', tags: ['Design system'] },
+        { id: 't3', name: 'Migration plan for the settings screen', p: 'dorj', due: 'Oct 20', dk: 'later', pr: 'Medium', tags: ['Frontend', 'Docs'] },
+        { id: 't4', name: 'Usability test script — new onboarding', p: 'mia', due: 'Oct 22', dk: 'later', pr: 'Low', tags: ['Research'] },
+        { id: 't5', name: 'Empty states for search results', p: 'sara', due: 'Oct 23', dk: 'later', pr: 'Medium', tags: ['UI'] }
+      ]},
+      { id: 'progress', label: 'In Progress', dot: 'border:2px solid #F59E0B;background:linear-gradient(90deg,#F59E0B 50%,transparent 50%)', tasks: [
+        { id: 't6', name: 'Product card component v2', p: 'sara', due: 'Tomorrow', dk: 'soon', pr: 'High', tags: ['Design system', 'UI'], sub: '3/5', comments: 4 },
+        { id: 't7', name: 'Implement new bottom tab bar', p: 'tem', due: 'Oct 10', dk: 'soon', pr: 'Urgent', tags: ['iOS', 'Android'], sub: '1/4' },
+        { id: 't8', name: 'Redesign onboarding flow (3 screens)', p: 'anu', due: 'Oct 12', dk: 'later', pr: 'High', tags: ['Onboarding', 'UX'], comments: 7 },
+        { id: 't9', name: 'Update analytics events for checkout', p: 'oyu', due: 'Oct 15', dk: 'later', pr: 'Medium', tags: ['Analytics'] }
+      ]},
+      { id: 'review', label: 'In Review', dot: 'border:2px solid ' + accentInk + ';background:' + accentSoft, tasks: [
+        { id: 't10', name: 'Accessibility pass on primary buttons', p: 'mia', due: 'Oct 7', dk: 'overdue', pr: 'High', tags: ['A11y'], comments: 3 },
+        { id: 't11', name: 'Checkout page — responsive layout', p: 'dorj', due: 'Today', dk: 'today', pr: 'Urgent', tags: ['Frontend'], comments: 5 },
+        { id: 't12', name: 'Icon set refresh (48 icons)', p: 'sara', due: 'Oct 13', dk: 'later', pr: 'Low', tags: ['UI'] }
+      ]},
+      { id: 'done', label: 'Done', dot: 'border:2px solid #22C55E;background:#22C55E', tasks: [
+        { id: 't13', name: 'Kickoff and goals doc', p: 'anu', due: 'Sep 29', dk: 'done', pr: 'Medium', tags: ['Docs'], isDone: true },
+        { id: 't14', name: 'Competitive teardown — 5 apps', p: 'mia', due: 'Oct 1', dk: 'done', pr: 'Low', tags: ['Research'], isDone: true },
+        { id: 't15', name: 'Stakeholder interviews', p: 'anu', due: 'Oct 2', dk: 'done', pr: 'Medium', tags: ['Research'], isDone: true },
+        { id: 't16', name: 'Visual direction moodboard', p: 'sara', due: 'Oct 3', dk: 'done', pr: 'Low', tags: ['UI'], isDone: true }
+      ]}
+    ];
+
+    const doneMap = s.done || {};
+    const closed = s.closedGroups || {};
+    let doneCount = 0, total = 0;
+    const groups = raw.map((g) => {
+      const open = !closed[g.id];
+      return {
+        label: g.label, count: g.tasks.length, open, dotStyle: g.dot,
+        chevStyle: 'transition:transform .15s;transform:rotate(' + (open ? 90 : 0) + 'deg)',
+        toggle: () => this.setState({ closedGroups: { ...(this.state.closedGroups || {}), [g.id]: open } }),
+        tasks: g.tasks.map((t) => {
+          const done = doneMap[t.id] !== undefined ? doneMap[t.id] : !!t.isDone;
+          total += 1; if (done) doneCount += 1;
+          return {
+            name: t.name, done,
+            toggle: () => this.setState({ done: { ...(this.state.done || {}), [t.id]: !done } }),
+            nameStyle: done ? 'color:#5E5E68;text-decoration:line-through' : 'color:#EDEDEF',
+            person: people[t.p], due: t.due,
+            dueStyle: done ? dueStyles.done : dueStyles[t.dk],
+            priority: t.pr, flagStyle: prio[t.pr],
+            tags: t.tags.map((x) => ({ label: x, style: tagColors[x] || neutralTag })),
+            hasSub: !!t.sub, sub: t.sub || '',
+            hasComments: !!t.comments, comments: t.comments || 0
+          };
+        })
+      };
+    });
+
+    const openSpaces = s.openSpaces || {};
+    const spaces = [
+      { id: 'product', name: 'Product', initial: 'P', badge: 'background:#2E1065;color:#DDD6FE', projects: ['App Redesign', 'Checkout v2', 'Q4 Roadmap'] },
+      { id: 'engineering', name: 'Engineering', initial: 'E', badge: 'background:#14532D;color:#BBF7D0', projects: ['Platform migration', 'Mobile release 4.2', 'Bug triage'] },
+      { id: 'design', name: 'Design', initial: 'D', badge: 'background:#4C0519;color:#FECDD3', projects: ['Design system', 'Brand refresh'] }
+    ].map((sp) => {
+      const open = !!openSpaces[sp.id];
+      return {
+        name: sp.name, initial: sp.initial, badgeStyle: sp.badge, open,
+        chevStyle: 'transition:transform .15s;transform:rotate(' + (open ? 90 : 0) + 'deg)',
+        toggle: () => this.setState({ openSpaces: { ...(this.state.openSpaces || {}), [sp.id]: !open } }),
+        projects: sp.projects.map((name) => {
+          const active = name === 'App Redesign';
+          return {
+            name,
+            style: active ? 'background:' + accentSoft + ';color:' + accentInk + ';font-weight:500' : 'color:#C9C9D1',
+            dotStyle: active ? 'background:' + accentInk : 'background:#4A4A52'
+          };
+        })
+      };
+    });
+
+    return {
+      accent, accentInk, accentSoft, groups, spaces,
+      summary: total + ' tasks · ' + doneCount + ' done',
+      memberStack: [people.anu, people.sara, people.tem, people.dorj]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Partner Portal — no tasks yet</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#52525B;text-decoration:none}a:hover{color:#18181B}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit;color:inherit}
+.nav:hover{background:#EDEDF0}
+.ghost:hover{background:#F4F4F5}
+.tpl:hover{border-color:#D4D4D8;background:#FAFAFB}
+.ghost:focus-visible,.nav:focus-visible,.tpl:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #6E56CF;outline-offset:1px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</helmet>
+
+<div style="display: flex; flex-wrap: wrap; min-height: 100vh; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 14px; line-height: 20px; color: #18181B; background: #FFFFFF; -webkit-font-smoothing: antialiased">
+
+  <!-- SIDEBAR -->
+  <nav aria-label="Workspace" style="flex: 1 1 248px; max-width: 248px; min-width: 220px; box-sizing: border-box; background: #F7F7F8; border-right: 1px solid #E6E6EA; display: flex; flex-direction: column; gap: 16px; padding: 12px 8px">
+    <div style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px">
+      <span style="width: 24px; height: 24px; border-radius: 6px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">K</span>
+      <span style="flex: 1; font-weight: 600">Kite Studio</span>
+    </div>
+    <div style="padding: 0 4px">
+      <label style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <span class="sr">Search</span>
+        <input type="search" placeholder="Search" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-size: 13px; padding: 0">
+        <kbd style="font-family: inherit; font-size: 11px; color: #6B6B74; border: 1px solid #E6E6EA; border-radius: 4px; padding: 0 4px; line-height: 16px">⌘K</kbd>
+      </label>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <a class="nav" href="MyTasks.dc.html" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12 2.5 2.5 4.5-5"></path></svg>
+        <span style="flex: 1; font-weight: 500">My Tasks</span><span style="font-size: 12px; color: #6B6B74">10</span>
+      </a>
+      <a class="nav" href="EmptyInbox.dc.html" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+        <span style="flex: 1; font-weight: 500">Inbox</span>
+      </a>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <span style="height: 28px; padding: 0 12px; display: flex; align-items: center; font-size: 12px; font-weight: 500; color: #6B6B74">Spaces</span>
+      <span style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px 0 8px; color: #3F3F46; font-weight: 500">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="transform: rotate(90deg)"><path d="m9 6 6 6-6 6"></path></svg>
+        <span style="width: 18px; height: 18px; border-radius: 5px; background: #EDE9FE; color: #5B21B6; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600">P</span>Product
+      </span>
+      <a class="nav" href="Main.dc.html" style="display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px 0 34px; border-radius: 8px; color: #3F3F46; font-size: 13px"><span style="width: 6px; height: 6px; border-radius: 3px; background: #C4C4CC"></span>App Redesign</a>
+      <a class="nav" href="#" style="display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px 0 34px; border-radius: 8px; color: #3F3F46; font-size: 13px"><span style="width: 6px; height: 6px; border-radius: 3px; background: #C4C4CC"></span>Checkout v2</a>
+      <a class="nav" href="#" style="display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px 0 34px; border-radius: 8px; color: #3F3F46; font-size: 13px"><span style="width: 6px; height: 6px; border-radius: 3px; background: #C4C4CC"></span>Q4 Roadmap</a>
+      <a class="nav" href="#" aria-current="page" style="display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px 0 34px; border-radius: 8px; background: {{accentSoft}}; color: {{accent}}; font-size: 13px; font-weight: 500"><span style="width: 6px; height: 6px; border-radius: 3px; background: {{accent}}"></span>Partner Portal<span style="margin-left: auto; font-size: 11px; font-weight: 500; padding: 0 6px; border-radius: 4px; background: #FFFFFF; color: {{accent}}">New</span></a>
+      <span style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px 0 8px; color: #3F3F46; font-weight: 500">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+        <span style="width: 18px; height: 18px; border-radius: 5px; background: #DCFCE7; color: #166534; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600">E</span>Engineering
+      </span>
+      <span style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px 0 8px; color: #3F3F46; font-weight: 500">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+        <span style="width: 18px; height: 18px; border-radius: 5px; background: #FFE4E6; color: #9F1239; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600">D</span>Design
+      </span>
+    </div>
+    <div style="margin-top: auto; display: flex; align-items: center; gap: 8px; height: 40px; padding: 8px 12px 0; border-top: 1px solid #E6E6EA">
+      <span style="width: 24px; height: 24px; border-radius: 12px; background: #E0E7FF; color: #3730A3; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">AB</span>
+      <span style="flex: 1; font-size: 13px; font-weight: 500">Anu Bold</span>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+    <header style="display: flex; flex-direction: column; border-bottom: 1px solid #E6E6EA">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; min-height: 56px; padding: 8px 24px; box-sizing: border-box">
+        <nav aria-label="Breadcrumb" style="display: flex; align-items: center; gap: 6px; font-size: 14px">
+          <a href="#" style="display: flex; align-items: center; gap: 6px"><span style="width: 18px; height: 18px; border-radius: 5px; background: #EDE9FE; color: #5B21B6; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600">P</span>Product</a>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+          <span aria-current="page" style="font-weight: 600">Partner Portal</span>
+        </nav>
+        <div style="display: flex; align-items: center; gap: 12px">
+          <span title="Anu B." style="width: 26px; height: 26px; border-radius: 13px; background: #E0E7FF; color: #3730A3; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center">AB</span>
+          <button class="ghost" style="height: 32px; padding: 0 12px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-size: 13px; font-weight: 500">Share</button>
+        </div>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px; padding: 0 24px">
+        <div role="tablist" aria-label="View" style="display: flex; gap: 4px; font-size: 13px; font-weight: 500">
+          <a href="#" role="tab" aria-selected="true" style="height: 40px; padding: 0 10px; display: flex; align-items: center; color: #18181B; box-shadow: inset 0 -2px 0 {{accent}}">List</a>
+          <a href="#" role="tab" aria-selected="false" style="height: 40px; padding: 0 10px; display: flex; align-items: center; color: #6B6B74">Board</a>
+          <a href="#" role="tab" aria-selected="false" style="height: 40px; padding: 0 10px; display: flex; align-items: center; color: #6B6B74">Calendar</a>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; padding-bottom: 8px">
+          <button disabled="disabled" style="height: 32px; padding: 0 10px; border: 1px solid #EFEFF2; border-radius: 8px; background: #FFFFFF; font-size: 13px; color: #A1A1AA; cursor: not-allowed">Filter</button>
+          <div style="width: 1px; height: 20px; background: #E6E6EA; margin: 0 4px"></div>
+          <a href="CreateTask.dc.html" style="display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 8px; background: {{accent}}; color: #FFFFFF; font-size: 13px; font-weight: 500">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>New Task
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; padding: 72px 24px 48px">
+      <div style="width: 100%; max-width: 560px; display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center">
+
+        <!-- Illustration: ghost task rows -->
+        <div aria-hidden="true" style="position: relative; width: 320px; max-width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #E6E6EA; border-radius: 14px; background: #FFFFFF; display: flex; flex-direction: column; gap: 8px">
+          <div style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; background: #FAFAFB"><span style="width: 14px; height: 14px; border: 1.5px solid #D4D4D8; border-radius: 4px"></span><span style="width: 52%; height: 8px; border-radius: 4px; background: #E6E6EA"></span><span style="margin-left: auto; width: 20px; height: 20px; border-radius: 10px; background: #EFEFF2"></span></div>
+          <div style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; background: #FAFAFB"><span style="width: 14px; height: 14px; border: 1.5px solid #D4D4D8; border-radius: 4px"></span><span style="width: 38%; height: 8px; border-radius: 4px; background: #E6E6EA"></span><span style="width: 36px; height: 14px; border-radius: 4px; background: {{accentSoft}}"></span><span style="margin-left: auto; width: 20px; height: 20px; border-radius: 10px; background: #EFEFF2"></span></div>
+          <div style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 8px; border: 1px dashed {{accent}}; background: {{accentSoft}}"><span style="width: 14px; height: 14px; border: 1.5px solid {{accent}}; border-radius: 4px"></span><span style="width: 44%; height: 8px; border-radius: 4px; background: {{accent}}; opacity: 0.35"></span></div>
+          <span style="position: absolute; right: -14px; bottom: -14px; width: 36px; height: 36px; border-radius: 18px; background: {{accent}}; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 4px #FFFFFF">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+          </span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Partner Portal has no tasks yet</h1>
+          <p style="margin: 0; font-size: 14px; line-height: 22px; color: #52525B">Add the first piece of work to get things moving. Tasks show up here grouped by status, and teammates you invite can pick them up.</p>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px">
+          <a href="CreateTask.dc.html" style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 8px; background: {{accent}}; color: #FFFFFF; font-size: 14px; font-weight: 500">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+            Create first task
+            <kbd style="font-family: inherit; font-size: 11px; line-height: 16px; padding: 0 5px; border-radius: 4px; background: rgba(255, 255, 255, 0.2); color: #FFFFFF">C</kbd>
+          </a>
+          <button class="ghost" style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-size: 14px; font-weight: 500; color: #3F3F46">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"></path></svg>
+            Import from CSV
+          </button>
+          <button class="ghost" style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border: 0; border-radius: 8px; background: transparent; font-size: 14px; font-weight: 500; color: #3F3F46">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6M22 11h-6"></path></svg>
+            Invite teammates
+          </button>
+        </div>
+
+        <div style="width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 24px; padding-top: 24px; border-top: 1px solid #EFEFF2">
+          <span style="font-size: 12px; font-weight: 500; color: #6B6B74">Or start from a template</span>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; text-align: left">
+            <sc-for list="{{templates}}" as="t" hint-placeholder-count="3">
+              <button class="tpl" style="display: flex; flex-direction: column; gap: 6px; padding: 12px; border: 1px solid #E6E6EA; border-radius: 10px; background: #FFFFFF; text-align: left">
+                <span style="width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; {{t.iconStyle}}">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{t.icon}}"></path></svg>
+                </span>
+                <span style="font-size: 13px; font-weight: 600">{{t.name}}</span>
+                <span style="font-size: 12px; line-height: 16px; color: #6B6B74">{{t.desc}}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const accent = this.props.accent ?? '#6E56CF';
+    return {
+      accent,
+      accentSoft: accent + '1A',
+      templates: [
+        { name: 'Product launch', desc: '18 tasks across planning, build and go-live', icon: 'M4.5 16.5c-1.5 1.3-2 5-2 5s3.7-.5 5-2c.7-.8.7-2.1-.1-2.9a2.2 2.2 0 0 0-2.9-.1zM12 15l-3-3a22 22 0 0 1 2-4A12.9 12.9 0 0 1 22 2c0 2.7-.8 7.5-6 11a22 22 0 0 1-4 2z', iconStyle: 'background:#EDE9FE;color:#5B21B6' },
+        { name: 'Sprint planning', desc: '12 tasks for a two-week cycle', icon: 'M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5', iconStyle: 'background:#E0F2FE;color:#075985' },
+        { name: 'Bug triage', desc: '6 tasks plus priority and severity fields', icon: 'M8 2l1.9 1.9M16 2l-1.9 1.9M9 7.1V6a3 3 0 1 1 6 0v1.1M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6zM12 20v-9M6 13H2M22 13h-4', iconStyle: 'background:#FFE4E6;color:#9F1239' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

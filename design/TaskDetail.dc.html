@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>App Redesign — Task detail</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#5B45B8;text-decoration:none}a:hover{color:#3F2E8C}
+button{font:inherit;color:inherit;cursor:pointer}
+input,textarea{font:inherit;color:inherit}
+.ghost:hover{background:#F4F4F5}
+.field:hover{background:#F4F4F5}
+.edit:hover{border-color:#E6E6EA}
+.edit:focus{border-color:#6E56CF;outline:none}
+.sub:hover{background:#FAFAFB}
+.ghost:focus-visible,.field:focus-visible,.sub button:focus-visible,input:focus-visible{outline:2px solid #6E56CF;outline-offset:1px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</helmet>
+
+<div style="position: relative; display: flex; flex-wrap: wrap; min-height: 100vh; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 14px; line-height: 20px; color: #18181B; background: #FFFFFF; -webkit-font-smoothing: antialiased; overflow: hidden">
+
+  <!-- ================= BACKGROUND: List view (inactive behind the drawer) ================= -->
+  <div aria-hidden="true" style="flex: 1 1 248px; max-width: 248px; min-width: 220px; box-sizing: border-box; background: #F7F7F8; border-right: 1px solid #E6E6EA; display: flex; flex-direction: column; gap: 16px; padding: 12px 8px">
+    <div style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px">
+      <span style="width: 24px; height: 24px; border-radius: 6px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">K</span>
+      <span style="font-weight: 600">Kite Studio</span>
+    </div>
+    <div style="margin: 0 4px; height: 32px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; display: flex; align-items: center; padding: 0 8px; font-size: 13px; color: #6B6B74">Search</div>
+    <div style="display: flex; flex-direction: column; gap: 2px; padding: 0 12px; color: #3F3F46; font-weight: 500">
+      <span style="height: 32px; display: flex; align-items: center">My Tasks</span>
+      <span style="height: 32px; display: flex; align-items: center">Inbox</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <span style="height: 28px; padding: 0 12px; font-size: 12px; font-weight: 500; color: #6B6B74; display: flex; align-items: center">Spaces</span>
+      <span style="height: 32px; padding: 0 12px; display: flex; align-items: center; gap: 8px; font-weight: 500; color: #3F3F46"><span style="width: 18px; height: 18px; border-radius: 5px; background: #EDE9FE; color: #5B21B6; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">P</span>Product</span>
+      <span style="height: 30px; margin: 0 0 0 0; padding: 0 12px 0 34px; border-radius: 8px; display: flex; align-items: center; font-size: 13px; font-weight: 500; background: {{accentSoft}}; color: {{accent}}">App Redesign</span>
+      <span style="height: 30px; padding: 0 12px 0 34px; display: flex; align-items: center; font-size: 13px; color: #3F3F46">Checkout v2</span>
+      <span style="height: 30px; padding: 0 12px 0 34px; display: flex; align-items: center; font-size: 13px; color: #3F3F46">Q4 Roadmap</span>
+      <span style="height: 32px; padding: 0 12px; display: flex; align-items: center; gap: 8px; font-weight: 500; color: #3F3F46"><span style="width: 18px; height: 18px; border-radius: 5px; background: #DCFCE7; color: #166534; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">E</span>Engineering</span>
+      <span style="height: 32px; padding: 0 12px; display: flex; align-items: center; gap: 8px; font-weight: 500; color: #3F3F46"><span style="width: 18px; height: 18px; border-radius: 5px; background: #FFE4E6; color: #9F1239; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">D</span>Design</span>
+    </div>
+  </div>
+
+  <div aria-hidden="true" style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+    <div style="display: flex; align-items: center; height: 56px; padding: 0 24px; gap: 6px; font-size: 14px"><span style="color: #52525B">Product</span><span style="color: #A1A1AA">/</span><span style="font-weight: 600">App Redesign</span></div>
+    <div style="display: flex; align-items: flex-end; justify-content: space-between; padding: 0 24px; border-bottom: 1px solid #E6E6EA">
+      <div style="display: flex; gap: 4px; font-size: 13px; font-weight: 500">
+        <span style="height: 40px; padding: 0 10px; display: flex; align-items: center; box-shadow: inset 0 -2px 0 {{accent}}">List</span>
+        <span style="height: 40px; padding: 0 10px; display: flex; align-items: center; color: #6B6B74">Board</span>
+        <span style="height: 40px; padding: 0 10px; display: flex; align-items: center; color: #6B6B74">Calendar</span>
+      </div>
+      <span style="margin-bottom: 8px; height: 32px; padding: 0 12px; border-radius: 8px; background: {{accent}}; color: #FFFFFF; font-size: 13px; font-weight: 500; display: flex; align-items: center">+ New Task</span>
+    </div>
+    <div style="padding: 8px 24px">
+      <sc-for list="{{bgGroups}}" as="g" hint-placeholder-count="3">
+        <div style="display: flex; flex-direction: column; padding-top: 16px">
+          <div style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; font-weight: 600">
+            <span style="width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; {{g.dot}}"></span>{{g.label}}
+            <span style="height: 20px; padding: 0 6px; border-radius: 10px; background: #F1F1F3; color: #52525B; font-size: 12px; font-weight: 500; display: flex; align-items: center">{{g.count}}</span>
+          </div>
+          <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="3">
+            <div style="display: grid; grid-template-columns: 40px minmax(0, 1fr) 152px 112px 104px; align-items: center; height: 44px; padding: 0 8px; border-bottom: 1px solid #EFEFF2; {{r.rowStyle}}">
+              <span style="width: 14px; height: 14px; margin-left: 12px; border: 1.5px solid #C4C4CC; border-radius: 4px"></span>
+              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{r.name}}</span>
+              <span style="font-size: 13px; color: #3F3F46">{{r.who}}</span>
+              <span style="font-size: 13px; color: #52525B">{{r.due}}</span>
+              <span style="font-size: 13px; color: #52525B">{{r.pr}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- Scrim -->
+  <a href="Main.dc.html" aria-label="Close task and return to list" style="position: absolute; inset: 0; background: rgba(24, 24, 27, 0.28)"></a>
+
+  <!-- ================= DRAWER ================= -->
+  <aside role="dialog" aria-modal="true" aria-labelledby="task-title" style="position: absolute; top: 0; right: 0; bottom: 0; width: 40%; min-width: min(520px, 100%); max-width: 100%; box-sizing: border-box; background: #FFFFFF; border-left: 1px solid #E6E6EA; box-shadow: -12px 0 32px rgba(24, 24, 27, 0.10); display: flex; flex-direction: column; overflow-y: auto">
+
+    <!-- Drawer header -->
+    <div style="position: sticky; top: 0; z-index: 3; display: flex; align-items: center; gap: 8px; height: 56px; padding: 0 16px 0 24px; background: #FFFFFF; border-bottom: 1px solid #E6E6EA; flex: none">
+      <nav aria-label="Task location" style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; font-size: 13px; color: #52525B">
+        <a href="Main.dc.html" style="color: #52525B">App Redesign</a>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+        <span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #6B6B74">APP-142</span>
+      </nav>
+      <button class="ghost" style="display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-size: 13px; font-weight: 500; color: #3F3F46">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>
+        Mark complete
+      </button>
+      <button class="ghost" aria-label="Copy link to task" style="width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"></path><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path></svg>
+      </button>
+      <button class="ghost" aria-label="Open as full page" style="width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path></svg>
+      </button>
+      <button class="ghost" aria-label="More task actions" style="width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#52525B" aria-hidden="true"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg>
+      </button>
+      <div style="width: 1px; height: 20px; background: #E6E6EA"></div>
+      <a href="Main.dc.html" class="ghost" aria-label="Close" style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+      </a>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 24px; padding: 24px 24px 32px">
+
+      <!-- Title -->
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <label for="task-title" class="sr">Task title</label>
+        <textarea id="task-title" class="edit" rows="2" style="margin: 0 -8px; padding: 4px 8px; border: 1px solid transparent; border-radius: 8px; background: transparent; resize: none; font-size: 22px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em">Checkout page — responsive layout</textarea>
+        <span style="font-size: 12px; color: #6B6B74">Created by Anu B. on Oct 1 · Updated 2 hours ago</span>
+      </div>
+
+      <!-- Properties -->
+      <div style="display: grid; grid-template-columns: 112px minmax(0, 1fr); row-gap: 4px; align-items: center; font-size: 13px">
+
+        <span style="display: flex; align-items: center; gap: 8px; color: #6B6B74; height: 36px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"></path></svg>Status
+        </span>
+        <div style="position: relative">
+          <button class="field" onClick="{{toggleStatus}}" aria-haspopup="listbox" aria-expanded="{{statusOpen}}" style="display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-weight: 500">
+            <span aria-hidden="true" style="width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; {{status.dot}}"></span>
+            {{status.label}}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+          </button>
+          <sc-if value="{{statusOpen}}" hint-placeholder-val="{{ false }}">
+            <div role="listbox" aria-label="Status" style="position: absolute; top: 38px; left: 0; z-index: 4; width: 220px; padding: 4px; background: #FFFFFF; border: 1px solid #E6E6EA; border-radius: 10px; box-shadow: 0 8px 24px rgba(24, 24, 27, 0.12); display: flex; flex-direction: column">
+              <sc-for list="{{statusOptions}}" as="o" hint-placeholder-count="4">
+                <button role="option" aria-selected="{{o.selected}}" class="ghost" onClick="{{o.pick}}" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; text-align: left">
+                  <span aria-hidden="true" style="width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; {{o.dot}}"></span>
+                  <span style="flex: 1">{{o.label}}</span>
+                  <sc-if value="{{o.selected}}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg></sc-if>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+
+        <span style="display: flex; align-items: center; gap: 8px; color: #6B6B74; height: 36px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>Assignees
+        </span>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px">
+          <sc-for list="{{assignees}}" as="p" hint-placeholder-count="2">
+            <span style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 3px; border: 1px solid #E6E6EA; border-radius: 14px">
+              <span style="width: 22px; height: 22px; border-radius: 11px; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{p.style}}">{{p.initials}}</span>
+              {{p.name}}
+            </span>
+          </sc-for>
+          <button class="ghost" aria-label="Add assignee" style="width: 28px; height: 28px; border: 1px dashed #D4D4D8; border-radius: 14px; background: transparent; display: flex; align-items: center; justify-content: center">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+          </button>
+        </div>
+
+        <span style="display: flex; align-items: center; gap: 8px; color: #6B6B74; height: 36px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>Due date
+        </span>
+        <div>
+          <button class="field" style="display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; color: #B45309; font-weight: 500">
+            Today, Oct 8
+            <span style="font-weight: 400; color: #6B6B74">· Started Oct 4</span>
+          </button>
+        </div>
+
+        <span style="display: flex; align-items: center; gap: 8px; color: #6B6B74; height: 36px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4"></path><path d="M4 4h12l-2 4 2 4H4"></path></svg>Priority
+        </span>
+        <div>
+          <button class="field" style="display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; font-weight: 500">
+            <svg width="14" height="14" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="fill: #DC2626; stroke: #DC2626"><path d="M4 22V4"></path><path d="M4 4h12l-2 4 2 4H4"></path></svg>
+            Urgent
+          </button>
+        </div>
+
+        <span style="display: flex; align-items: center; gap: 8px; color: #6B6B74; height: 36px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"></path><circle cx="7.5" cy="7.5" r="1.2" fill="currentColor"></circle></svg>Tags
+        </span>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding-left: 10px">
+          <span style="height: 22px; padding: 0 8px; border-radius: 6px; font-size: 12px; font-weight: 500; display: flex; align-items: center; background: #F1F1F3; color: #3F3F46">Frontend</span>
+          <span style="height: 22px; padding: 0 8px; border-radius: 6px; font-size: 12px; font-weight: 500; display: flex; align-items: center; background: #E8F1FD; color: #1D4ED8">Checkout</span>
+          <span style="height: 22px; padding: 0 8px; border-radius: 6px; font-size: 12px; font-weight: 500; display: flex; align-items: center; background: #E6F4EA; color: #166534">Mobile web</span>
+          <button class="ghost" aria-label="Add tag" style="width: 24px; height: 24px; border: 0; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <section aria-labelledby="desc-h" style="display: flex; flex-direction: column; gap: 8px">
+        <h3 id="desc-h" style="margin: 0; font-size: 13px; font-weight: 600; color: #3F3F46">Description</h3>
+        <div style="border: 1px solid {{accent}}; border-radius: 10px; box-shadow: 0 0 0 3px {{accentSoft}}">
+          <div role="toolbar" aria-label="Formatting" style="display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: 4px; border-bottom: 1px solid #EFEFF2">
+            <button class="ghost" style="display: flex; align-items: center; gap: 4px; height: 28px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; font-size: 12px; color: #3F3F46">Text <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+            <span style="width: 1px; height: 16px; background: #E6E6EA; margin: 0 4px"></span>
+            <button class="ghost" aria-label="Bold" style="width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; font-weight: 700; font-size: 13px">B</button>
+            <button class="ghost" aria-label="Italic" style="width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; font-style: italic; font-size: 13px; font-family: Georgia, serif">I</button>
+            <button class="ghost" aria-label="Strikethrough" style="width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; text-decoration: line-through; font-size: 13px">S</button>
+            <button class="ghost" aria-label="Inline code" style="width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3F3F46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 7-5 5 5 5M16 7l5 5-5 5"></path></svg></button>
+            <span style="width: 1px; height: 16px; background: #E6E6EA; margin: 0 4px"></span>
+            <button class="ghost" aria-label="Bulleted list" style="width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3F3F46" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"></path></svg></button>
+            <button class="ghost" aria-label="Numbered list" style="width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3F3F46" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 6h11M10 12h11M10 18h11M4 4v4M3 18h3l-3 3h3"></path></svg></button>
+            <button class="ghost" aria-label="Link" style="width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3F3F46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"></path><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path></svg></button>
+            <button class="ghost" aria-label="Mention someone" style="width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; font-size: 14px; color: #3F3F46">@</button>
+          </div>
+          <div style="padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; font-size: 14px; line-height: 22px; color: #27272A">
+            <p style="margin: 0">Make checkout work cleanly from 360px to 1440px. Below 768px the order summary currently overlaps the payment form, and the promo code field overflows its container.</p>
+            <h4 style="margin: 4px 0 0; font-size: 14px; font-weight: 600">Acceptance criteria</h4>
+            <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px">
+              <li>Order summary collapses into an accordion under <code style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; padding: 1px 5px; border-radius: 4px; background: #F4F4F5">768px</code></li>
+              <li>Payment fields stack to one column; inputs are at least 44px tall</li>
+              <li>Sticky <strong>Place order</strong> bar on mobile with the total always visible</li>
+              <li>No horizontal scroll at 360px</li>
+            </ul>
+            <p style="margin: 0">Specs: <a href="#" style="text-decoration: underline; text-underline-offset: 2px">Checkout — responsive specs</a>. Ping <a href="#" style="padding: 1px 6px; border-radius: 6px; background: {{accentSoft}}; color: {{accent}}; font-weight: 500">@Sara K.</a> for promo-code edge cases.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Subtasks -->
+      <section aria-labelledby="sub-h" style="display: flex; flex-direction: column; gap: 8px">
+        <div style="display: flex; align-items: center; gap: 12px">
+          <h3 id="sub-h" style="margin: 0; font-size: 13px; font-weight: 600; color: #3F3F46">Subtasks</h3>
+          <span style="font-size: 12px; color: #6B6B74">{{subDoneCount}}/{{subTotal}}</span>
+          <span style="flex: 1; max-width: 160px; height: 4px; border-radius: 2px; background: #EFEFF2; display: flex; overflow: hidden">
+            <span style="height: 4px; border-radius: 2px; width: {{subPct}}%; {{subBarStyle}}"></span>
+          </span>
+        </div>
+        <div style="display: flex; flex-direction: column; border: 1px solid #E6E6EA; border-radius: 10px; overflow: hidden">
+          <sc-for list="{{subtasks}}" as="s" hint-placeholder-count="6">
+            <div class="sub" style="display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 12px; border-bottom: 1px solid #EFEFF2">
+              <input type="checkbox" checked="{{s.done}}" onChange="{{s.toggle}}" aria-label="{{s.text}}" style="width: 16px; height: 16px; margin: 0; accent-color: {{accent}}; cursor: pointer; flex: none">
+              <span style="flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; {{s.textStyle}}">{{s.text}}</span>
+              <sc-if value="{{s.hasDue}}" hint-placeholder-val="{{ false }}">
+                <span style="font-size: 12px; color: #52525B">{{s.due}}</span>
+              </sc-if>
+              <span title="{{s.person.name}}" style="flex: none; width: 22px; height: 22px; border-radius: 11px; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{s.person.style}}">{{s.person.initials}}</span>
+            </div>
+          </sc-for>
+          <label style="display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 12px; color: #6B6B74">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+            <span class="sr">New subtask</span>
+            <input type="text" placeholder="Add subtask" style="flex: 1; border: 0; outline: none; background: transparent; font-size: 14px; padding: 0">
+          </label>
+        </div>
+      </section>
+
+      <!-- Attachments -->
+      <section aria-labelledby="att-h" style="display: flex; flex-direction: column; gap: 8px">
+        <div style="display: flex; align-items: center; justify-content: space-between">
+          <h3 id="att-h" style="margin: 0; font-size: 13px; font-weight: 600; color: #3F3F46">Attachments <span style="font-weight: 400; color: #6B6B74">3</span></h3>
+          <button class="ghost" style="display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; font-size: 12px; font-weight: 500; color: #3F3F46">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.4 11.1-8.5 8.5a6 6 0 0 1-8.5-8.5l8.5-8.5a4 4 0 0 1 5.7 5.7l-8.5 8.5a2 2 0 0 1-2.8-2.8l7.8-7.8"></path></svg>
+            Attach
+          </button>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+          <a href="#" style="display: flex; flex-direction: column; border: 1px solid #E6E6EA; border-radius: 10px; overflow: hidden; color: #18181B">
+            <span aria-hidden="true" style="height: 88px; background: #F4F4F5; display: flex; align-items: center; justify-content: center; gap: 8px">
+              <span style="width: 40px; height: 72px; border-radius: 6px; background: #FFFFFF; border: 1px solid #E6E6EA; display: flex; flex-direction: column; gap: 4px; padding: 6px; box-sizing: border-box"><span style="height: 4px; border-radius: 2px; background: #D4D4D8"></span><span style="height: 12px; border-radius: 2px; background: #E6E6EA"></span><span style="height: 4px; border-radius: 2px; background: #E6E6EA"></span><span style="margin-top: auto; height: 8px; border-radius: 2px; background: {{accent}}"></span></span>
+            </span>
+            <span style="display: flex; flex-direction: column; padding: 8px 10px">
+              <span style="font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">checkout-mobile-360.png</span>
+              <span style="font-size: 12px; color: #6B6B74">248 KB · Dorj E.</span>
+            </span>
+          </a>
+          <a href="#" style="display: flex; flex-direction: column; border: 1px solid #E6E6EA; border-radius: 10px; overflow: hidden; color: #18181B">
+            <span aria-hidden="true" style="height: 88px; background: #F4F4F5; display: flex; align-items: center; justify-content: center">
+              <span style="width: 96px; height: 68px; border-radius: 6px; background: #FFFFFF; border: 1px solid #E6E6EA; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 6px; box-sizing: border-box"><span style="border-radius: 2px; background: #E6E6EA"></span><span style="border-radius: 2px; background: #EFEFF2"></span><span style="border-radius: 2px; background: #EFEFF2"></span><span style="border-radius: 2px; background: {{accent}}"></span></span>
+            </span>
+            <span style="display: flex; flex-direction: column; padding: 8px 10px">
+              <span style="font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">checkout-tablet-768.png</span>
+              <span style="font-size: 12px; color: #6B6B74">312 KB · Dorj E.</span>
+            </span>
+          </a>
+          <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #E6E6EA; border-radius: 10px; color: #18181B">
+            <span aria-hidden="true" style="flex: none; width: 36px; height: 36px; border-radius: 8px; background: #FDECEC; color: #B42318; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center">PDF</span>
+            <span style="display: flex; flex-direction: column; min-width: 0">
+              <span style="font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">QA-checklist-checkout.pdf</span>
+              <span style="font-size: 12px; color: #6B6B74">84 KB · Bat O.</span>
+            </span>
+          </a>
+          <label style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border: 1px dashed #D4D4D8; border-radius: 10px; font-size: 13px; color: #6B6B74; cursor: pointer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"></path></svg>
+            Drop files or browse
+            <input type="file" class="sr">
+          </label>
+        </div>
+      </section>
+
+      <!-- Activity -->
+      <section aria-labelledby="act-h" style="display: flex; flex-direction: column; gap: 12px; border-top: 1px solid #E6E6EA; padding-top: 20px">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+          <h3 id="act-h" style="margin: 0; font-size: 13px; font-weight: 600; color: #3F3F46">Activity</h3>
+          <div role="tablist" aria-label="Activity filter" style="display: flex; gap: 2px; padding: 2px; border-radius: 8px; background: #F4F4F5">
+            <sc-for list="{{tabs}}" as="tb" hint-placeholder-count="3">
+              <button role="tab" aria-selected="{{tb.active}}" onClick="{{tb.pick}}" style="height: 26px; padding: 0 10px; border: 0; border-radius: 6px; font-size: 12px; font-weight: 500; {{tb.style}}">{{tb.label}}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px">
+          <sc-for list="{{activity}}" as="a" hint-placeholder-count="6">
+            <li style="display: flex; flex-direction: column">
+              <sc-if value="{{a.isHistory}}" hint-placeholder-val="{{ true }}">
+                <div style="display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; font-size: 13px; line-height: 20px; color: #52525B">
+                  <span aria-hidden="true" style="flex: none; width: 24px; height: 20px; display: flex; align-items: center; justify-content: center">
+                    <span style="width: 8px; height: 8px; box-sizing: border-box; border-radius: 4px; {{a.markStyle}}"></span>
+                  </span>
+                  <span style="flex: 1"><sc-for list="{{a.parts}}" as="pt" hint-placeholder-count="3"><sc-if value="{{pt.isText}}" hint-placeholder-val="{{ true }}"><span>{{pt.text}}</span></sc-if><sc-if value="{{pt.isBold}}" hint-placeholder-val="{{ false }}"><strong style="font-weight: 600; color: #18181B">{{pt.text}}</strong></sc-if><sc-if value="{{pt.isPill}}" hint-placeholder-val="{{ false }}"><span style="display: inline-flex; align-items: center; gap: 5px; height: 20px; padding: 0 7px; border-radius: 6px; vertical-align: middle; font-size: 12px; font-weight: 500; {{pt.style}}"><span style="width: 8px; height: 8px; box-sizing: border-box; border-radius: 4px; {{pt.dot}}"></span>{{pt.text}}</span></sc-if></sc-for></span>
+                  <time style="flex: none; font-size: 12px; color: #6B6B74">{{a.time}}</time>
+                </div>
+              </sc-if>
+              <sc-if value="{{a.isComment}}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; align-items: flex-start; gap: 10px; padding: 8px 0">
+                  <span style="flex: none; width: 24px; height: 24px; border-radius: 12px; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{a.person.style}}">{{a.person.initials}}</span>
+                  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border: 1px solid #E6E6EA; border-radius: 10px; background: #FFFFFF">
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 13px">
+                      <strong style="font-weight: 600">{{a.person.name}}</strong>
+                      <time style="font-size: 12px; color: #6B6B74">{{a.time}}</time>
+                      <span style="flex: 1"></span>
+                      <button class="ghost" aria-label="Comment options" style="width: 24px; height: 24px; border: 0; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="#71717A" aria-hidden="true"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg></button>
+                    </div>
+                    <p style="margin: 0; font-size: 14px; line-height: 22px; color: #27272A"><sc-for list="{{a.parts}}" as="pt" hint-placeholder-count="3"><sc-if value="{{pt.isText}}" hint-placeholder-val="{{ true }}"><span>{{pt.text}}</span></sc-if><sc-if value="{{pt.isMention}}" hint-placeholder-val="{{ false }}"><a href="#" style="padding: 1px 6px; border-radius: 6px; font-weight: 500; {{mentionStyle}}">@{{pt.text}}</a></sc-if></sc-for></p>
+                    <div style="display: flex; gap: 12px; font-size: 12px">
+                      <button class="ghost" style="height: 24px; padding: 0 6px; margin-left: -6px; border: 0; border-radius: 6px; background: transparent; color: #52525B; font-size: 12px">Reply</button>
+                      <sc-if value="{{a.hasReplies}}" hint-placeholder-val="{{ false }}">
+                        <span style="display: flex; align-items: center; color: #6B6B74">{{a.replies}}</span>
+                      </sc-if>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+            </li>
+          </sc-for>
+        </ol>
+
+        <!-- Composer with @mention autocomplete -->
+        <div style="display: flex; align-items: flex-start; gap: 10px; padding-top: 4px">
+          <span style="flex: none; width: 24px; height: 24px; border-radius: 12px; background: #E0E7FF; color: #3730A3; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center">AB</span>
+          <div style="position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; border: 1px solid {{accent}}; border-radius: 10px; box-shadow: 0 0 0 3px {{accentSoft}}">
+            <div role="listbox" aria-label="Mention suggestions" style="position: absolute; left: 12px; bottom: calc(100% + 6px); z-index: 2; width: 240px; padding: 4px; background: #FFFFFF; border: 1px solid #E6E6EA; border-radius: 10px; box-shadow: 0 8px 24px rgba(24, 24, 27, 0.12); display: flex; flex-direction: column">
+              <span style="padding: 4px 8px; font-size: 11px; font-weight: 500; color: #6B6B74">People</span>
+              <button role="option" aria-selected="true" style="display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 8px; border: 0; border-radius: 6px; background: {{accentSoft}}; text-align: left">
+                <span style="width: 22px; height: 22px; border-radius: 11px; background: #CCFBF1; color: #115E59; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center">BO</span>
+                <span style="flex: 1; font-size: 13px; font-weight: 500">Bat O.</span>
+                <span style="font-size: 12px; color: #6B6B74">Eng lead</span>
+              </button>
+              <button role="option" aria-selected="false" class="ghost" style="display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; text-align: left">
+                <span style="width: 22px; height: 22px; border-radius: 11px; background: #FEF9C3; color: #854D0E; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center">BT</span>
+                <span style="flex: 1; font-size: 13px; font-weight: 500">Bayarmaa T.</span>
+                <span style="font-size: 12px; color: #6B6B74">QA</span>
+              </button>
+            </div>
+            <label for="comment" class="sr">Write a comment</label>
+            <textarea id="comment" rows="2" style="border: 0; outline: none; resize: none; padding: 10px 12px 4px; background: transparent; font-size: 14px; line-height: 22px">Thanks Dorj — looping in @Ba</textarea>
+            <div style="display: flex; align-items: center; gap: 2px; padding: 4px 6px 6px">
+              <button class="ghost" aria-label="Attach file" style="width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.4 11.1-8.5 8.5a6 6 0 0 1-8.5-8.5l8.5-8.5a4 4 0 0 1 5.7 5.7l-8.5 8.5a2 2 0 0 1-2.8-2.8l7.8-7.8"></path></svg></button>
+              <button class="ghost" aria-label="Mention someone" style="width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; font-size: 14px; color: #52525B">@</button>
+              <span style="flex: 1; font-size: 12px; color: #6B6B74; padding-left: 4px">⌘ Enter to send</span>
+              <button style="height: 30px; padding: 0 12px; border: 0; border-radius: 8px; background: {{accent}}; color: #FFFFFF; font-size: 13px; font-weight: 500">Comment</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </aside>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"$preview":{"width":1440,"height":1800}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { statusOpen: false, status: 'review', sub: {}, tab: 'all' };
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const accent = this.props.accent ?? '#6E56CF';
+    const accentSoft = accent + '1A';
+
+    const people = {
+      anu: { name: 'Anu B.', initials: 'AB', style: 'background:#E0E7FF;color:#3730A3' },
+      dorj: { name: 'Dorj E.', initials: 'DE', style: 'background:#FEF3C7;color:#92400E' },
+      sara: { name: 'Sara K.', initials: 'SK', style: 'background:#FFE4E6;color:#9F1239' },
+      bat: { name: 'Bat O.', initials: 'BO', style: 'background:#CCFBF1;color:#115E59' },
+      tem: { name: 'Temuulen G.', initials: 'TG', style: 'background:#DCFCE7;color:#166534' },
+      mia: { name: 'Mia L.', initials: 'ML', style: 'background:#E0F2FE;color:#075985' }
+    };
+
+    const statuses = {
+      todo: { label: 'To Do', dot: 'border:2px solid #A1A1AA', pill: 'background:#F1F1F3;color:#3F3F46' },
+      progress: { label: 'In Progress', dot: 'border:2px solid #D97706;background:linear-gradient(90deg,#D97706 50%,transparent 50%)', pill: 'background:#FDF0DC;color:#92400E' },
+      review: { label: 'In Review', dot: 'border:2px solid ' + accent + ';background:' + accent + '33', pill: 'background:' + accentSoft + ';color:' + accent },
+      done: { label: 'Done', dot: 'border:2px solid #16A34A;background:#16A34A', pill: 'background:#E3F4E8;color:#166534' }
+    };
+    const statusKey = s.status || 'review';
+    const statusOptions = Object.keys(statuses).map((k) => ({
+      label: statuses[k].label, dot: statuses[k].dot, selected: k === statusKey,
+      pick: () => this.setState({ status: k, statusOpen: false })
+    }));
+
+    const subDefs = [
+      { id: 's1', text: 'Breakpoint audit at 360 / 768 / 1024 / 1440', p: 'dorj', done: true },
+      { id: 's2', text: 'Collapse order summary into an accordion', p: 'dorj', done: true },
+      { id: 's3', text: 'Single-column payment form, 44px inputs', p: 'dorj', done: true },
+      { id: 's4', text: 'Sticky “Place order” bar on mobile', p: 'anu', done: true },
+      { id: 's5', text: 'Fix promo code field overflow (24-char codes)', p: 'dorj', done: true },
+      { id: 's6', text: 'QA on iOS Safari and Android Chrome', p: 'bat', done: false, due: 'Oct 9' }
+    ];
+    const subMap = s.sub || {};
+    let subDoneCount = 0;
+    const subtasks = subDefs.map((d) => {
+      const done = subMap[d.id] !== undefined ? subMap[d.id] : d.done;
+      if (done) subDoneCount += 1;
+      return {
+        text: d.text, done: done, person: people[d.p],
+        hasDue: !!d.due && !done, due: d.due || '',
+        textStyle: done ? 'color:#6B6B74;text-decoration:line-through' : 'color:#18181B',
+        toggle: () => this.setState({ sub: { ...(this.state.sub || {}), [d.id]: !done } })
+      };
+    });
+    const subTotal = subDefs.length;
+    const subPct = Math.round((subDoneCount / subTotal) * 100);
+
+    const T = (text) => ({ isText: true, text: text });
+    const B = (text) => ({ isBold: true, text: text });
+    const M = (text) => ({ isMention: true, text: text });
+    const P = (k) => ({ isPill: true, text: statuses[k].label, style: statuses[k].pill, dot: statuses[k].dot });
+    const H = (parts, time, mark) => ({ isHistory: true, isComment: false, parts: parts, time: time, markStyle: mark || 'background:#C4C4CC' });
+    const C = (who, parts, time, replies) => ({ isHistory: false, isComment: true, person: people[who], parts: parts, time: time, hasReplies: !!replies, replies: replies || '' });
+
+    const feed = [
+      H([B('Anu B.'), T(' created this task')], 'Oct 1'),
+      H([B('Anu B.'), T(' set priority to '), B('High')], 'Oct 1'),
+      C('sara', [T('Heads up on the promo field — the partner campaign uses codes up to 24 characters. '), M('Dorj E.'), T(' can we make sure those don’t clip on 360px?')], 'Oct 3', '1 reply'),
+      H([B('Dorj E.'), T(' changed status from '), P('todo'), T(' to '), P('progress')], 'Oct 4'),
+      H([B('Dorj E.'), T(' attached '), B('checkout-mobile-360.png')], 'Oct 6'),
+      H([B('Anu B.'), T(' changed priority from High to '), B('Urgent')], 'Oct 7', 'background:#DC2626'),
+      H([B('Bat O.'), T(' changed status to '), P('review')], 'Yesterday, 4:12 PM', 'background:' + accent),
+      C('bat', [T('Looks good at 360 and 768. One issue: on iOS Safari the sticky bar covers the last field when the keyboard is open. '), M('Dorj E.'), T(' can you add bottom padding equal to the bar height?')], 'Yesterday, 4:20 PM'),
+      H([B('Dorj E.'), T(' completed subtask '), B('Fix promo code field overflow')], '3 hours ago', 'background:#16A34A'),
+      C('dorj', [T('Fixed in the latest preview build. '), M('Bat O.'), T(' ready for another look — leaving the QA subtask open until Android is checked.')], '2 hours ago')
+    ];
+    const tab = s.tab || 'all';
+    const activity = feed.filter((a) => tab === 'all' || (tab === 'comments' ? a.isComment : a.isHistory));
+    const tabs = [['all', 'All'], ['comments', 'Comments'], ['history', 'History']].map(([id, label]) => ({
+      label: label, active: tab === id,
+      pick: () => this.setState({ tab: id }),
+      style: tab === id ? 'background:#FFFFFF;color:#18181B;box-shadow:0 1px 2px rgba(24,24,27,0.08)' : 'background:transparent;color:#52525B'
+    }));
+
+    const row = (name, who, due, pr, active) => ({ name, who, due, pr, rowStyle: active ? 'background:' + accentSoft : '' });
+    const bgGroups = [
+      { label: 'To Do', count: 5, dot: statuses.todo.dot, rows: [
+        row('Audit current navigation patterns', 'Temuulen G.', 'Oct 14', 'Medium'),
+        row('Define color tokens for dark mode', 'Sara K.', 'Oct 16', 'Low'),
+        row('Migration plan for the settings screen', 'Dorj E.', 'Oct 20', 'Medium'),
+        row('Usability test script — new onboarding', 'Mia L.', 'Oct 22', 'Low'),
+        row('Empty states for search results', 'Sara K.', 'Oct 23', 'Medium')
+      ]},
+      { label: 'In Progress', count: 4, dot: statuses.progress.dot, rows: [
+        row('Product card component v2', 'Sara K.', 'Tomorrow', 'High'),
+        row('Implement new bottom tab bar', 'Temuulen G.', 'Oct 10', 'Urgent'),
+        row('Redesign onboarding flow (3 screens)', 'Anu B.', 'Oct 12', 'High'),
+        row('Update analytics events for checkout', 'Oyuka N.', 'Oct 15', 'Medium')
+      ]},
+      { label: 'In Review', count: 3, dot: statuses.review.dot, rows: [
+        row('Accessibility pass on primary buttons', 'Mia L.', 'Oct 7', 'High'),
+        row('Checkout page — responsive layout', 'Dorj E.', 'Today', 'Urgent', true),
+        row('Icon set refresh (48 icons)', 'Sara K.', 'Oct 13', 'Low')
+      ]},
+      { label: 'Done', count: 4, dot: statuses.done.dot, rows: [] }
+    ];
+
+    return {
+      accent, accentSoft,
+      statusOpen: !!s.statusOpen,
+      toggleStatus: () => this.setState({ statusOpen: !this.state.statusOpen }),
+      status: statuses[statusKey], statusOptions,
+      assignees: [people.dorj, people.anu],
+      subtasks, subDoneCount, subTotal, subPct,
+      subBarStyle: subDoneCount === subTotal ? 'background:#16A34A' : 'background:' + accent,
+      tabs, activity,
+      mentionStyle: 'background:' + accentSoft + ';color:' + accent,
+      bgGroups
+    };
+  }
+}
+</script>
+</body>
+</html>

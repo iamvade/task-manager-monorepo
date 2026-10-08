@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<title>Апп шинэчлэл — Жагсаалт</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#52525B;text-decoration:none}a:hover{color:#18181B}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit;color:inherit}
+.nav:hover{background:#EDEDF0}
+.ghost:hover{background:#F4F4F5}
+.row:hover{background:#FAFAFB}
+.row .more{opacity:0}
+.row:hover .more,.row .more:focus-visible{opacity:1}
+.ghost:focus-visible,.nav:focus-visible,.seg:focus-visible,.row button:focus-visible,input:focus-visible{outline:2px solid #6E56CF;outline-offset:1px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</helmet>
+
+<div lang="{{lang}}" style="display: flex; flex-wrap: wrap; min-height: 100vh; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 14px; line-height: 20px; color: #18181B; background: #FFFFFF; -webkit-font-smoothing: antialiased">
+
+  <!-- ============ SIDEBAR (expanded) ============ -->
+  <sc-if value="{{sidebarOpen}}" hint-placeholder-val="{{ true }}">
+  <nav aria-label="{{L.workspace}}" style="flex: 1 1 248px; max-width: 248px; min-width: 220px; box-sizing: border-box; background: #F7F7F8; border-right: 1px solid #E6E6EA; display: flex; flex-direction: column; gap: 16px; padding: 12px 8px">
+
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 4px">
+      <button class="ghost" style="flex: 1; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; text-align: left">
+        <span style="width: 24px; height: 24px; border-radius: 6px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">K</span>
+        <span style="flex: 1; font-weight: 600; font-size: 14px">Kite Studio</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+      </button>
+      <button class="ghost" onClick="{{toggleSidebar}}" aria-label="{{L.collapse}}" style="width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 3v18"></path><path d="m16 15-3-3 3-3"></path></svg>
+      </button>
+    </div>
+
+    <div style="padding: 0 4px">
+      <label style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <span class="sr">{{L.search}}</span>
+        <input type="search" placeholder="{{L.search}}" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-size: 13px; padding: 0">
+        <kbd style="font-family: inherit; font-size: 11px; color: #6B6B74; border: 1px solid #E6E6EA; border-radius: 4px; padding: 0 4px; line-height: 16px">⌘K</kbd>
+      </label>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <a class="nav" href="MyTasks.dc.html" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12 2.5 2.5 4.5-5"></path></svg>
+        <span style="flex: 1; font-weight: 500">{{L.myTasks}}</span>
+        <span style="font-size: 12px; color: #6B6B74">7</span>
+      </a>
+      <a class="nav" href="#" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+        <span style="flex: 1; font-weight: 500">{{L.inbox}}</span>
+        <span style="min-width: 20px; height: 18px; padding: 0 6px; box-sizing: border-box; border-radius: 9px; background: {{accent}}; color: #FFFFFF; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">3</span>
+      </a>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <div style="display: flex; align-items: center; justify-content: space-between; height: 28px; padding: 0 4px 0 12px">
+        <span style="font-size: 12px; font-weight: 500; color: #6B6B74">{{L.spaces}}</span>
+        <button class="ghost" aria-label="{{L.newSpace}}" style="width: 24px; height: 24px; border: 0; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B74" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+        </button>
+      </div>
+
+      <sc-for list="{{spaces}}" as="sp" hint-placeholder-count="3">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <button class="nav" onClick="{{sp.toggle}}" aria-expanded="{{sp.open}}" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px 0 8px; border: 0; border-radius: 8px; background: transparent; text-align: left">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{sp.chevStyle}}"><path d="m9 6 6 6-6 6"></path></svg>
+            <span style="width: 18px; height: 18px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; {{sp.badgeStyle}}">{{sp.initial}}</span>
+            <span style="flex: 1; font-weight: 500; color: #3F3F46">{{sp.name}}</span>
+          </button>
+          <sc-if value="{{sp.open}}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <sc-for list="{{sp.projects}}" as="p" hint-placeholder-count="3">
+                <a class="nav" href="#" style="display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px 0 34px; border-radius: 8px; {{p.style}}">
+                  <span style="width: 6px; height: 6px; border-radius: 3px; {{p.dotStyle}}"></span>
+                  <span style="flex: 1; font-size: 13px">{{p.name}}</span>
+                </a>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="margin-top: auto; display: flex; flex-direction: column; gap: 2px; border-top: 1px solid #E6E6EA; padding-top: 8px">
+      <div style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px 0 12px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3F3F46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path></svg>
+        <span id="lang-label" style="flex: 1; font-weight: 500; color: #3F3F46">{{L.language}}</span>
+        <div role="radiogroup" aria-labelledby="lang-label" style="display: flex; gap: 2px; padding: 2px; border-radius: 7px; background: #EDEDF0">
+          <sc-for list="{{langs}}" as="lg" hint-placeholder-count="2">
+            <button class="seg" role="radio" aria-checked="{{lg.active}}" onClick="{{lg.pick}}" lang="{{lg.code}}" title="{{lg.full}}" style="height: 24px; padding: 0 8px; border: 0; border-radius: 5px; font-size: 12px; font-weight: 600; {{lg.style}}">{{lg.short}}</button>
+          </sc-for>
+        </div>
+      </div>
+      <a class="nav" href="#" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6M22 11h-6"></path></svg>
+        <span style="font-weight: 500">{{L.invite}}</span>
+      </a>
+      <a class="nav" href="#" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.830l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        <span style="font-weight: 500">{{L.settings}}</span>
+      </a>
+      <div style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px">
+        <span style="width: 24px; height: 24px; border-radius: 12px; background: #E0E7FF; color: #3730A3; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">{{me.initials}}</span>
+        <span style="flex: 1; font-size: 13px; font-weight: 500">{{me.full}}</span>
+        <span style="width: 8px; height: 8px; border-radius: 4px; background: #16A34A" aria-label="{{L.online}}"></span>
+      </div>
+    </div>
+  </nav>
+  </sc-if>
+
+  <!-- ============ SIDEBAR (collapsed rail) ============ -->
+  <sc-if value="{{sidebarClosed}}" hint-placeholder-val="{{ false }}">
+  <nav aria-label="{{L.workspace}}" style="flex: 0 0 56px; box-sizing: border-box; background: #F7F7F8; border-right: 1px solid #E6E6EA; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 0">
+    <span style="width: 28px; height: 28px; border-radius: 7px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">K</span>
+    <button class="ghost" onClick="{{toggleSidebar}}" aria-label="{{L.expand}}" style="width: 36px; height: 36px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 3v18"></path><path d="m14 9 3 3-3 3"></path></svg>
+    </button>
+    <button class="ghost" aria-label="{{L.search}}" style="width: 36px; height: 36px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+    </button>
+    <button class="ghost" aria-label="{{L.myTasks}}" style="width: 36px; height: 36px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12 2.5 2.5 4.5-5"></path></svg>
+    </button>
+    <button class="ghost" aria-label="{{L.inbox}}" style="width: 36px; height: 36px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+    </button>
+    <div style="width: 24px; height: 1px; background: #E6E6EA; margin: 4px 0"></div>
+    <sc-for list="{{spaces}}" as="sp" hint-placeholder-count="3">
+      <button class="ghost" aria-label="{{sp.name}}" style="width: 36px; height: 36px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center">
+        <span style="width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; {{sp.badgeStyle}}">{{sp.initial}}</span>
+      </button>
+    </sc-for>
+    <span style="flex: 1"></span>
+    <button class="ghost" onClick="{{cycleLang}}" aria-label="{{L.language}}: {{curLang.full}}" style="width: 36px; height: 28px; border: 1px solid #E6E6EA; border-radius: 6px; background: #FFFFFF; font-size: 11px; font-weight: 600; color: #3F3F46">{{curLang.short}}</button>
+  </nav>
+  </sc-if>
+
+  <!-- ============ MAIN ============ -->
+  <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+
+    <header style="display: flex; flex-direction: column; border-bottom: 1px solid #E6E6EA">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; min-height: 56px; padding: 8px 24px; box-sizing: border-box">
+        <div style="display: flex; align-items: center; gap: 8px; min-width: 0">
+          <nav aria-label="{{L.breadcrumb}}" style="display: flex; align-items: center; gap: 6px; font-size: 14px">
+            <a href="#" style="display: flex; align-items: center; gap: 6px">
+              <span style="width: 18px; height: 18px; border-radius: 5px; background: #EDE9FE; color: #5B21B6; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600">{{L.productInitial}}</span>
+              {{L.product}}
+            </a>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+            <span aria-current="page" style="font-weight: 600">{{L.project}}</span>
+          </nav>
+          <button class="ghost" aria-label="{{L.favorite}}" style="width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9z"></path></svg>
+          </button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px">
+          <div style="display: flex; align-items: center" aria-label="{{L.members}}">
+            <sc-for list="{{memberStack}}" as="m" hint-placeholder-count="4">
+              <span title="{{m.name}}" style="width: 26px; height: 26px; margin-left: -6px; border-radius: 13px; border: 2px solid #FFFFFF; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{m.style}}">{{m.initials}}</span>
+            </sc-for>
+            <span style="height: 26px; margin-left: -6px; padding: 0 6px; border-radius: 13px; border: 2px solid #FFFFFF; background: #F1F1F3; color: #52525B; font-size: 11px; font-weight: 500; display: flex; align-items: center">+3</span>
+          </div>
+          <button class="ghost" style="height: 32px; padding: 0 12px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-size: 13px; font-weight: 500">{{L.share}}</button>
+          <button class="ghost" aria-label="{{L.projectOptions}}" style="width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#52525B" aria-hidden="true"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg>
+          </button>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px; padding: 0 24px">
+        <div role="tablist" aria-label="{{L.view}}" style="display: flex; gap: 4px">
+          <sc-for list="{{views}}" as="v" hint-placeholder-count="3">
+            <button role="tab" aria-selected="{{v.active}}" onClick="{{v.select}}" style="display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 10px; border: 0; background: transparent; font-size: 13px; font-weight: 500; {{v.style}}">
+              <sc-if value="{{v.isList}}" hint-placeholder-val="{{ true }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path></svg></sc-if>
+              <sc-if value="{{v.isBoard}}" hint-placeholder-val="{{ false }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 3v18M15 3v18"></path></svg></sc-if>
+              <sc-if value="{{v.isCal}}" hint-placeholder-val="{{ false }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg></sc-if>
+              {{v.label}}
+            </button>
+          </sc-for>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-bottom: 8px">
+          <button class="ghost" style="display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-size: 13px; color: #3F3F46">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"></path></svg>
+            {{L.filter}}
+            <span style="height: 18px; padding: 0 6px; border-radius: 9px; background: {{accentSoft}}; color: {{accentInk}}; font-size: 11px; font-weight: 600; display: flex; align-items: center">1</span>
+          </button>
+          <button class="ghost" style="display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-size: 13px; color: #3F3F46">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"></path></svg>
+            {{L.sort}}
+          </button>
+          <button class="ghost" style="display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-size: 13px; color: #3F3F46">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>
+            {{L.group}}
+          </button>
+          <div style="width: 1px; height: 20px; background: #E6E6EA; margin: 0 4px"></div>
+          <a href="CreateTask.dc.html" style="display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 8px; background: {{accent}}; color: #FFFFFF; font-size: 13px; font-weight: 500">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+            {{L.newTask}}
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Active filter strip -->
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 24px 0">
+      <span style="display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 4px 0 10px; border: 1px solid #E6E6EA; border-radius: 13px; font-size: 12px; color: #3F3F46">
+        <span style="color: #6B6B74">{{L.sprintIs}}</span> {{L.sprintRange}}
+        <button class="ghost" aria-label="{{L.removeFilter}}" style="width: 20px; height: 20px; border: 0; border-radius: 10px; background: transparent; display: flex; align-items: center; justify-content: center">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+      </span>
+      <span style="font-size: 12px; color: #6B6B74">{{summary}}</span>
+    </div>
+
+    <!-- ===== LIST VIEW ===== -->
+    <sc-if value="{{isList}}" hint-placeholder-val="{{ true }}">
+    <div style="padding: 8px 24px 32px; overflow-x: auto">
+      <div style="min-width: 960px" role="table" aria-label="{{L.tableLabel}}">
+
+        <div role="row" style="display: grid; grid-template-columns: 40px minmax(0, 1fr) 152px 120px 112px 224px 40px; align-items: center; height: 36px; padding: 0 8px; border-bottom: 1px solid #E6E6EA; font-size: 12px; font-weight: 500; color: #6B6B74">
+          <span role="columnheader"><span class="sr">{{L.complete}}</span></span>
+          <span role="columnheader">{{L.colName}}</span>
+          <span role="columnheader">{{L.colAssignee}}</span>
+          <span role="columnheader">{{L.colDue}}</span>
+          <span role="columnheader">{{L.colPriority}}</span>
+          <span role="columnheader">{{L.colTags}}</span>
+          <span role="columnheader"><span class="sr">{{L.actions}}</span></span>
+        </div>
+
+        <sc-for list="{{groups}}" as="g" hint-placeholder-count="4">
+          <div role="rowgroup" style="display: flex; flex-direction: column; padding-top: 16px">
+
+            <div style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 8px">
+              <button class="ghost" onClick="{{g.toggle}}" aria-expanded="{{g.open}}" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px 0 4px; border: 0; border-radius: 6px; background: transparent">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{g.chevStyle}}"><path d="m9 6 6 6-6 6"></path></svg>
+                <span aria-hidden="true" style="width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; {{g.dotStyle}}"></span>
+                <span style="font-size: 14px; font-weight: 600">{{g.label}}</span>
+                <span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 10px; background: #F1F1F3; color: #52525B; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center">{{g.count}}</span>
+              </button>
+              <button class="ghost" aria-label="{{g.addLabel}}" style="width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+              </button>
+            </div>
+
+            <sc-if value="{{g.open}}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; flex-direction: column; border-top: 1px solid #EFEFF2">
+                <sc-for list="{{g.tasks}}" as="t" hint-placeholder-count="4">
+                  <div class="row" role="row" style="display: grid; grid-template-columns: 40px minmax(0, 1fr) 152px 120px 112px 224px 40px; align-items: center; height: {{rowH}}px; padding: 0 8px; border-bottom: 1px solid #EFEFF2">
+                    <span role="cell" style="display: flex; align-items: center; justify-content: center">
+                      <input type="checkbox" checked="{{t.done}}" onChange="{{t.toggle}}" aria-label="{{t.checkLabel}}" style="width: 16px; height: 16px; margin: 0; accent-color: {{accent}}; cursor: pointer">
+                    </span>
+                    <span role="cell" style="display: flex; align-items: center; gap: 8px; min-width: 0; padding-right: 16px">
+                      <a href="{{t.href}}" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; {{t.nameStyle}}">{{t.name}}</a>
+                      <sc-if value="{{t.hasSub}}" hint-placeholder-val="{{ false }}">
+                        <span style="flex: none; display: flex; align-items: center; gap: 4px; font-size: 12px; color: #6B6B74">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3v12a3 3 0 0 0 3 3h9"></path><path d="m15 15 3 3-3 3"></path></svg>
+                          {{t.sub}}
+                        </span>
+                      </sc-if>
+                      <sc-if value="{{t.hasComments}}" hint-placeholder-val="{{ false }}">
+                        <span style="flex: none; display: flex; align-items: center; gap: 4px; font-size: 12px; color: #6B6B74">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                          {{t.comments}}
+                        </span>
+                      </sc-if>
+                    </span>
+                    <span role="cell" style="display: flex; align-items: center; gap: 8px; min-width: 0">
+                      <span style="flex: none; width: 24px; height: 24px; border-radius: 12px; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{t.person.style}}">{{t.person.initials}}</span>
+                      <span style="font-size: 13px; color: #3F3F46; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{t.person.name}}</span>
+                    </span>
+                    <span role="cell" style="font-size: 13px; white-space: nowrap; {{t.dueStyle}}">{{t.due}}</span>
+                    <span role="cell" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #3F3F46">
+                      <svg width="14" height="14" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; {{t.flagStyle}}"><path d="M4 22V4"></path><path d="M4 4h12l-2 4 2 4H4"></path></svg>
+                      {{t.priority}}
+                    </span>
+                    <span role="cell" style="display: flex; gap: 4px; overflow: hidden">
+                      <sc-for list="{{t.tags}}" as="tag" hint-placeholder-count="2">
+                        <span style="flex: none; height: 22px; padding: 0 8px; border-radius: 6px; font-size: 12px; font-weight: 500; display: flex; align-items: center; white-space: nowrap; {{tag.style}}">{{tag.label}}</span>
+                      </sc-for>
+                    </span>
+                    <span role="cell" style="display: flex; justify-content: center">
+                      <button class="more ghost" aria-label="{{t.moreLabel}}" style="width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#71717A" aria-hidden="true"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg>
+                      </button>
+                    </span>
+                  </div>
+                </sc-for>
+                <button class="ghost" style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 0 0 20px; border: 0; background: transparent; font-size: 13px; color: #6B6B74; text-align: left">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+                  {{L.addTask}}
+                </button>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ===== Other views (not yet designed) ===== -->
+    <sc-if value="{{notList}}" hint-placeholder-val="{{ false }}">
+      <div style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 64px 24px">
+        <div style="max-width: 380px; text-align: center; display: flex; flex-direction: column; gap: 8px; align-items: center">
+          <span style="font-size: 16px; font-weight: 600">{{viewTitle}}</span>
+          <span style="font-size: 13px; color: #6B6B74">{{L.notYet}}</span>
+        </div>
+      </div>
+    </sc-if>
+
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"language":{"editor":"enum","default":"mn","options":["mn","en"]},"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"density":{"editor":"enum","default":"comfortable","options":["comfortable","compact"]},"$preview":{"width":1440,"height":980}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      lang: undefined,
+      sidebarOpen: true,
+      view: 'list',
+      openSpaces: { product: true, engineering: false, design: false },
+      closedGroups: { done: true },
+      done: {}
+    };
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const lang = s.lang || this.props.language || 'mn';
+    const mn = lang === 'mn';
+    const pick = (pair) => (mn ? pair[0] : pair[1]);
+    const accent = this.props.accent ?? '#6E56CF';
+    const density = this.props.density ?? 'comfortable';
+    const rowH = density === 'compact' ? 36 : 44;
+    const accentSoft = accent + '1A';
+    const accentInk = accent;
+
+    const STR = {
+      mn: {
+        workspace: 'Ажлын орчин', search: 'Хайх', collapse: 'Хажуу самбарыг хураах', expand: 'Хажуу самбарыг дэлгэх',
+        myTasks: 'Миний ажлууд', inbox: 'Мэдэгдэл', spaces: 'Орон зай', newSpace: 'Шинэ орон зай',
+        language: 'Хэл', invite: 'Хамт олноо урих', settings: 'Тохиргоо', online: 'Онлайн',
+        breadcrumb: 'Байршил', product: 'Бүтээгдэхүүн', productInitial: 'Б', project: 'Апп шинэчлэл',
+        favorite: 'Дуртайд нэмэх', members: 'Төслийн 7 гишүүн', share: 'Хуваалцах', projectOptions: 'Төслийн сонголтууд',
+        view: 'Харагдац', filter: 'Шүүлтүүр', sort: 'Эрэмбэ: Дуусах огноо', group: 'Бүлэглэх: Төлөв', newTask: 'Шинэ ажил',
+        sprintIs: 'Спринт:', sprintRange: '10-р сарын 6 – 24', removeFilter: 'Шүүлтүүрийг арилгах',
+        tableLabel: 'Апп шинэчлэл төслийн ажлууд', complete: 'Дууссан', colName: 'Ажлын нэр', colAssignee: 'Хариуцагч',
+        colDue: 'Дуусах огноо', colPriority: 'Ач холбогдол', colTags: 'Шошго', actions: 'Үйлдэл',
+        addTask: 'Ажил нэмэх', notYet: 'Энэ харагдацыг дараагийн ээлжинд зурна. Ажлуудыг харахын тулд Жагсаалт руу буцна уу.',
+        viewSuffix: ' харагдац', tasksWord: 'ажил', doneWord: 'дууссан'
+      },
+      en: {
+        workspace: 'Workspace', search: 'Search', collapse: 'Collapse sidebar', expand: 'Expand sidebar',
+        myTasks: 'My Tasks', inbox: 'Inbox', spaces: 'Spaces', newSpace: 'New space',
+        language: 'Language', invite: 'Invite teammates', settings: 'Settings', online: 'Online',
+        breadcrumb: 'Breadcrumb', product: 'Product', productInitial: 'P', project: 'App Redesign',
+        favorite: 'Add to favorites', members: '7 project members', share: 'Share', projectOptions: 'Project options',
+        view: 'View', filter: 'Filter', sort: 'Sort: Due date', group: 'Group: Status', newTask: 'New Task',
+        sprintIs: 'Sprint is', sprintRange: 'Oct 6 – Oct 24', removeFilter: 'Remove filter',
+        tableLabel: 'App Redesign tasks', complete: 'Complete', colName: 'Task name', colAssignee: 'Assignee',
+        colDue: 'Due date', colPriority: 'Priority', colTags: 'Tags', actions: 'Actions',
+        addTask: 'Add task', notYet: 'This view is next on the design list. Switch back to List to see the App Redesign tasks.',
+        viewSuffix: ' view', tasksWord: 'tasks', doneWord: 'done'
+      }
+    };
+    const L = STR[lang] || STR.mn;
+
+    const langDefs = [
+      { code: 'mn', short: 'МН', full: 'Монгол' },
+      { code: 'en', short: 'EN', full: 'English' }
+    ];
+    const langs = langDefs.map((d) => ({
+      ...d, active: d.code === lang,
+      pick: () => this.setState({ lang: d.code }),
+      style: d.code === lang ? 'background:#FFFFFF;color:#18181B;box-shadow:0 1px 2px rgba(24,24,27,0.08)' : 'background:transparent;color:#6B6B74'
+    }));
+    const curLang = langDefs.find((d) => d.code === lang) || langDefs[0];
+
+    const P = (mnName, enName, mnI, enI, style) => ({ name: mn ? mnName : enName, initials: mn ? mnI : enI, style });
+    const people = {
+      anu: P('Ану Б.', 'Anu B.', 'АБ', 'AB', 'background:#E0E7FF;color:#3730A3'),
+      tem: P('Тэмүүлэн Г.', 'Temuulen G.', 'ТГ', 'TG', 'background:#DCFCE7;color:#166534'),
+      sara: P('Сараа К.', 'Sara K.', 'СК', 'SK', 'background:#FFE4E6;color:#9F1239'),
+      dorj: P('Дорж Э.', 'Dorj E.', 'ДЭ', 'DE', 'background:#FEF3C7;color:#92400E'),
+      mia: P('Мишээл Л.', 'Mia L.', 'МЛ', 'ML', 'background:#E0F2FE;color:#075985'),
+      oyu: P('Оюука Н.', 'Oyuka N.', 'ОН', 'ON', 'background:#F3E8FF;color:#6B21A8')
+    };
+    const me = { initials: mn ? 'АБ' : 'AB', full: mn ? 'Ану Болд' : 'Anu Bold' };
+
+    const tagDefs = {
+      research: [['Судалгаа', 'Research'], 'background:#E8F1FD;color:#1D4ED8'],
+      ux: [['UX', 'UX'], 'background:#F1EEFD;color:#5B45B8'],
+      ui: [['UI', 'UI'], 'background:#F1EEFD;color:#5B45B8'],
+      ds: [['Дизайн систем', 'Design system'], 'background:#E3F4F1;color:#0F766E'],
+      fe: [['Фронтенд', 'Frontend'], 'background:#F1F1F3;color:#3F3F46'],
+      ios: [['iOS', 'iOS'], 'background:#F1F1F3;color:#3F3F46'],
+      android: [['Android', 'Android'], 'background:#F1F1F3;color:#3F3F46'],
+      analytics: [['Аналитик', 'Analytics'], 'background:#FDF1E1;color:#9A3412'],
+      a11y: [['Хүртээмж', 'A11y'], 'background:#E6F4EA;color:#166534'],
+      onboarding: [['Танилцуулга', 'Onboarding'], 'background:#FCEBF3;color:#9D174D'],
+      docs: [['Баримт', 'Docs'], 'background:#F1F1F3;color:#3F3F46']
+    };
+    const prioDefs = {
+      urgent: [['Яаралтай', 'Urgent'], 'fill:#DC2626;stroke:#DC2626'],
+      high: [['Өндөр', 'High'], 'fill:#EA580C;stroke:#EA580C'],
+      medium: [['Дунд', 'Medium'], 'fill:#CA8A04;stroke:#CA8A04'],
+      low: [['Бага', 'Low'], 'fill:none;stroke:#A1A1AA']
+    };
+    const dueStyles = {
+      overdue: 'color:#C42B1C;font-weight:500', today: 'color:#B45309;font-weight:500',
+      soon: 'color:#3F3F46', later: 'color:#6B6B74', done: 'color:#A1A1AA'
+    };
+    const D = (m, d) => (mn ? m + '-р сарын ' + d : ['', '', '', '', '', '', '', '', '', 'Sep', 'Oct'][m] + ' ' + d);
+    const TODAY = ['Өнөөдөр', 'Today'];
+    const TOMORROW = ['Маргааш', 'Tomorrow'];
+
+    const raw = [
+      { id: 'todo', label: ['Хийх', 'To Do'], dot: 'border:2px solid #A1A1AA', tasks: [
+        { id: 't1', n: ['Одоогийн навигацийн хэв маягийг шалгах', 'Audit current navigation patterns'], p: 'tem', due: [10, 14], dk: 'later', pr: 'medium', tags: ['research', 'ux'], comments: 2 },
+        { id: 't2', n: ['Бараан горимын өнгөний токен тодорхойлох', 'Define color tokens for dark mode'], p: 'sara', due: [10, 16], dk: 'later', pr: 'low', tags: ['ds'] },
+        { id: 't3', n: ['Тохиргооны дэлгэцийн шилжүүлэлтийн төлөвлөгөө', 'Migration plan for the settings screen'], p: 'dorj', due: [10, 20], dk: 'later', pr: 'medium', tags: ['fe', 'docs'] },
+        { id: 't4', n: ['Хэрэглээний тестийн скрипт — шинэ танилцуулга', 'Usability test script — new onboarding'], p: 'mia', due: [10, 22], dk: 'later', pr: 'low', tags: ['research'] },
+        { id: 't5', n: ['Хайлтын үр дүнгийн хоосон төлөвүүд', 'Empty states for search results'], p: 'sara', due: [10, 23], dk: 'later', pr: 'medium', tags: ['ui'] }
+      ]},
+      { id: 'progress', label: ['Хийгдэж буй', 'In Progress'], dot: 'border:2px solid #D97706;background:linear-gradient(90deg,#D97706 50%,transparent 50%)', tasks: [
+        { id: 't6', n: ['Бүтээгдэхүүний картын компонент v2', 'Product card component v2'], p: 'sara', dueWord: TOMORROW, dk: 'soon', pr: 'high', tags: ['ds', 'ui'], sub: '3/5', comments: 4 },
+        { id: 't7', n: ['Шинэ доод таб самбар хэрэгжүүлэх', 'Implement new bottom tab bar'], p: 'tem', due: [10, 10], dk: 'soon', pr: 'urgent', tags: ['ios', 'android'], sub: '1/4' },
+        { id: 't8', n: ['Танилцуулах урсгалыг шинэчлэх (3 дэлгэц)', 'Redesign onboarding flow (3 screens)'], p: 'anu', due: [10, 12], dk: 'later', pr: 'high', tags: ['onboarding', 'ux'], comments: 7 },
+        { id: 't9', n: ['Төлбөрийн хэсгийн аналитик эвентүүдийг шинэчлэх', 'Update analytics events for checkout'], p: 'oyu', due: [10, 15], dk: 'later', pr: 'medium', tags: ['analytics'] }
+      ]},
+      { id: 'review', label: ['Хянагдаж буй', 'In Review'], dot: 'border:2px solid ' + accent + ';background:' + accent + '33', tasks: [
+        { id: 't10', n: ['Үндсэн товчлууруудын хүртээмжийн шалгалт', 'Accessibility pass on primary buttons'], p: 'mia', due: [10, 7], dk: 'overdue', pr: 'high', tags: ['a11y'], comments: 3 },
+        { id: 't11', n: ['Төлбөрийн хуудас — респонсив байрлал', 'Checkout page — responsive layout'], p: 'dorj', dueWord: TODAY, dk: 'today', pr: 'urgent', tags: ['fe'], comments: 5, href: 'TaskDetail.dc.html' },
+        { id: 't12', n: ['Дүрс тэмдгийн багц шинэчлэх (48 дүрс)', 'Icon set refresh (48 icons)'], p: 'sara', due: [10, 13], dk: 'later', pr: 'low', tags: ['ui'] }
+      ]},
+      { id: 'done', label: ['Дууссан', 'Done'], dot: 'border:2px solid #16A34A;background:#16A34A', tasks: [
+        { id: 't13', n: ['Эхлэлийн уулзалт ба зорилгын баримт', 'Kickoff and goals doc'], p: 'anu', due: [9, 29], dk: 'done', pr: 'medium', tags: ['docs'], isDone: true },
+        { id: 't14', n: ['Өрсөлдөгчдийн шинжилгээ — 5 апп', 'Competitive teardown — 5 apps'], p: 'mia', due: [10, 1], dk: 'done', pr: 'low', tags: ['research'], isDone: true },
+        { id: 't15', n: ['Оролцогч талуудтай ярилцлага', 'Stakeholder interviews'], p: 'anu', due: [10, 2], dk: 'done', pr: 'medium', tags: ['research'], isDone: true },
+        { id: 't16', n: ['Визуал чиглэлийн мүүдборд', 'Visual direction moodboard'], p: 'sara', due: [10, 3], dk: 'done', pr: 'low', tags: ['ui'], isDone: true }
+      ]}
+    ];
+
+    const doneMap = s.done || {};
+    const closed = s.closedGroups || {};
+    let doneCount = 0, total = 0;
+
+    const groups = raw.map((g) => {
+      const open = !closed[g.id];
+      const label = pick(g.label);
+      const tasks = g.tasks.map((t) => {
+        const done = doneMap[t.id] !== undefined ? doneMap[t.id] : !!t.isDone;
+        total += 1; if (done) doneCount += 1;
+        const name = pick(t.n);
+        return {
+          name, done, href: t.href || '#',
+          toggle: () => this.setState({ done: { ...(this.state.done || {}), [t.id]: !done } }),
+          checkLabel: mn ? '«' + name + '» ажлыг дууссан гэж тэмдэглэх' : 'Mark ' + name + ' complete',
+          moreLabel: mn ? '«' + name + '» — нэмэлт үйлдэл' : 'More actions for ' + name,
+          nameStyle: done ? 'color:#A1A1AA;text-decoration:line-through' : 'color:#18181B',
+          person: people[t.p],
+          due: t.dueWord ? pick(t.dueWord) : D(t.due[0], t.due[1]),
+          dueStyle: done ? dueStyles.done : dueStyles[t.dk],
+          priority: pick(prioDefs[t.pr][0]),
+          flagStyle: prioDefs[t.pr][1],
+          tags: t.tags.map((k) => ({ label: pick(tagDefs[k][0]), style: tagDefs[k][1] })),
+          hasSub: !!t.sub, sub: t.sub || '',
+          hasComments: !!t.comments, comments: t.comments || 0
+        };
+      });
+      return {
+        label, count: g.tasks.length, open, dotStyle: g.dot,
+        addLabel: mn ? '«' + label + '» бүлэгт ажил нэмэх' : 'Add task to ' + label,
+        chevStyle: 'transition:transform .15s;transform:rotate(' + (open ? 90 : 0) + 'deg)',
+        toggle: () => this.setState({ closedGroups: { ...(this.state.closedGroups || {}), [g.id]: open } }),
+        tasks
+      };
+    });
+
+    const openSpaces = s.openSpaces || {};
+    const spaceDefs = [
+      { id: 'product', name: ['Бүтээгдэхүүн', 'Product'], initial: ['Б', 'P'], badge: 'background:#EDE9FE;color:#5B21B6',
+        projects: [['Апп шинэчлэл', 'App Redesign', true], ['Төлбөрийн хуудас v2', 'Checkout v2'], ['Q4 замын зураг', 'Q4 Roadmap']] },
+      { id: 'engineering', name: ['Инженерчлэл', 'Engineering'], initial: ['И', 'E'], badge: 'background:#DCFCE7;color:#166534',
+        projects: [['Платформ шилжүүлэлт', 'Platform migration'], ['Мобайл хувилбар 4.2', 'Mobile release 4.2'], ['Алдааны ангилал', 'Bug triage']] },
+      { id: 'design', name: ['Дизайн', 'Design'], initial: ['Д', 'D'], badge: 'background:#FFE4E6;color:#9F1239',
+        projects: [['Дизайн систем', 'Design system'], ['Брэнд шинэчлэл', 'Brand refresh']] }
+    ];
+    const spaces = spaceDefs.map((sp) => {
+      const open = !!openSpaces[sp.id];
+      return {
+        name: pick(sp.name), initial: pick(sp.initial), badgeStyle: sp.badge, open,
+        chevStyle: 'transition:transform .15s;transform:rotate(' + (open ? 90 : 0) + 'deg)',
+        toggle: () => this.setState({ openSpaces: { ...(this.state.openSpaces || {}), [sp.id]: !open } }),
+        projects: sp.projects.map((pr) => {
+          const active = !!pr[2];
+          return {
+            name: mn ? pr[0] : pr[1],
+            style: active ? 'background:' + accentSoft + ';color:' + accentInk + ';font-weight:500' : 'color:#3F3F46',
+            dotStyle: active ? 'background:' + accent : 'background:#C4C4CC'
+          };
+        })
+      };
+    });
+
+    const view = s.view || 'list';
+    const viewDefs = [['list', ['Жагсаалт', 'List']], ['board', ['Самбар', 'Board']], ['calendar', ['Календарь', 'Calendar']]];
+    const views = viewDefs.map(([id, label]) => ({
+      label: pick(label), active: view === id,
+      isList: id === 'list', isBoard: id === 'board', isCal: id === 'calendar',
+      select: () => this.setState({ view: id }),
+      style: view === id ? 'color:#18181B;box-shadow:inset 0 -2px 0 ' + accent : 'color:#6B6B74;box-shadow:none'
+    }));
+    const curView = viewDefs.find((v) => v[0] === view) || viewDefs[0];
+
+    const sidebarOpen = s.sidebarOpen !== false;
+
+    return {
+      lang, L, langs, curLang, me,
+      cycleLang: () => this.setState({ lang: lang === 'mn' ? 'en' : 'mn' }),
+      accent, accentSoft, accentInk, rowH,
+      sidebarOpen, sidebarClosed: !sidebarOpen,
+      toggleSidebar: () => this.setState({ sidebarOpen: !sidebarOpen }),
+      spaces, views,
+      isList: view === 'list', notList: view !== 'list',
+      viewTitle: pick(curView[1]) + L.viewSuffix,
+      groups,
+      summary: total + ' ' + L.tasksWord + ' · ' + doneCount + ' ' + L.doneWord,
+      memberStack: [people.anu, people.sara, people.tem, people.dorj]
+    };
+  }
+}
+</script>
+</body>
+</html>
