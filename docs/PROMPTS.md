@@ -111,6 +111,7 @@ Build the tasks API. This is the core, so be careful with transactions and order
 - POST /tasks/:id/move — { statusId, beforeId?, afterId? } computes a fractional position between neighbors. Used by Board drag-and-drop and list reorder.
 - PUT /tasks/:id/assignees, PUT /tasks/:id/tags (replace sets), POST /tasks/:id/complete toggle (for list checkboxes: moves to/from the Done status).
 - DELETE /tasks/:id (soft delete) and POST /tasks/:id/restore.
+- GET /spaces/:id/tasks with the same filters and sorts, across all projects in the space (powers space-level List/Board/Calendar).
 - GET /workspaces/:id/search?q= for the ⌘K palette: tasks by title/key, projects, people. Limit 20.
 
 Every mutation writes an activity row in the same transaction with a payload that lets the UI render lines like "Dorj E. changed status from To Do to In Progress" and "Anu B. changed priority from High to Urgent". Create an internal event bus (emit after commit) that later phases use for notifications and realtime.
@@ -137,11 +138,11 @@ Tests for mention extraction, permissions on edit/delete, upload validation.
 ```
 Build notifications for the Inbox (design/EmptyInbox.dc.html shows tabs All / Mentions / Assigned to me / Archived).
 
-- Subscribe to the event bus from phase 5: create notifications for (a) @mentions, (b) being added as assignee, (c) new comments on followed tasks, (d) status changes on followed tasks. Never notify the actor about their own action. Collapse duplicates for the same task within 5 minutes.
+- Subscribe to the event bus from phase 5: create notifications for (a) @mentions, (b) being added as assignee, (c) new comments on followed tasks, (d) status changes on followed tasks. Never notify the actor about their own action. Respect each recipient's users.notification_prefs (per-type toggles). Collapse duplicates for the same task within 5 minutes.
 - GET /me/notifications?tab=all|mentions|assigned|archived with cursor pagination; includes task key/title, project, actor, a snippet.
 - POST /me/notifications/:id/read, POST /me/notifications/read-all, POST /me/notifications/:id/archive.
 - A daily job (simple setInterval in-process is fine for now) that archives read notifications older than 30 days, as the empty-state copy says.
-- GET /me/home for My Tasks (design/MyTasks.dc.html): my open tasks grouped into Overdue / Today / This Week / Later (in my timezone), stats (due today, completed this week + delta vs last week, overdue count + "oldest is N days late"), completed-per-day for the last 7 days (the week bar chart), and recent activity on my tasks with unread flags.
+- GET /me/home for My Tasks (design/MyTasks.dc.html): my open tasks grouped into Overdue / Today / This Week / Later (in my timezone), stats (due today, completed this week + delta vs last week, overdue count + "oldest is N days late"), completed-per-day for the current week, Mon–Sun (the week bar chart; the delta compares Mon→today with the same span last week), and recent activity on my tasks with unread flags.
 
 Tests for grouping boundaries (timezone!) and notification fan-out.
 ```
@@ -154,7 +155,7 @@ Build the frontend foundation and the app shell from design/Main.dc.html (sideba
 - Design tokens as CSS variables in src/styles/tokens.css exactly as listed in CLAUDE.md, with light and dark themes (data-theme on <html>, "system" follows prefers-color-scheme). Map them into Tailwind v4's @theme so classes like bg-surface, text-muted, border-default work. Accent is a runtime variable set from the user's preference; derive --accent-soft from it.
 - Load Geist from Google Fonts.
 - i18next with mn (default) and en. Copy every string from the STR tables in the design files into locales/mn.json and locales/en.json. Date formatting helper: "Өнөөдөр"/"Today", "Маргааш"/"Tomorrow", "10-р сарын 14"/"Oct 14", plus overdue/today/soon/later color classes.
-- Reusable components (match the designs pixel-for-pixel; put them in src/components/ui): Avatar, AvatarStack (+N), StatusDot (4 variants), PriorityFlag, TagChip, DueDate, Kbd, SegmentedControl, IconButton (ghost), Button (primary/secondary), Popover + searchable Picker (used for assignee/date/project/status), Checkbox (round task checkbox), Tooltip, EmptyState.
+- Reusable components (match the designs pixel-for-pixel; put them in src/components/ui): Avatar, AvatarStack (+N), StatusDot (4 variants), PriorityFlag, TagChip, DueDate, Kbd, SegmentedControl, IconButton (ghost), Button (primary/secondary), Popover + searchable Picker (used for assignee/date/project/status), Checkbox (native square 16px with accent-color, as in the designs), Tooltip, EmptyState.
 - Sidebar: workspace switcher (Kite Studio), search box with ⌘K hint, My Tasks with count, Inbox with unread badge, Spaces list with expand/collapse and projects (active project highlighted with accent-soft), + new space, language switcher (МН / EN segmented control), invite teammates, settings, my avatar with online dot. Collapsible to the icon rail shown in the design; remember state in localStorage.
 - Top bar: breadcrumb (space badge › project), favorite star, member avatar stack, Share, project options menu, view switcher (List / Board / Calendar with icons, underline in accent), Filter, Sort, Group, active filter chip (e.g. "Sprint is Oct 6 – Oct 24" with remove ×), + New Task primary button.
 - Routing per CLAUDE.md; view switcher changes the URL. Loading skeletons and an error boundary.
@@ -169,13 +170,14 @@ Done when: logged in as Anu, the shell matches design/Main.dc.html with real sid
 Build the project List view exactly like design/Main.dc.html (and ListDark.dc.html in dark mode).
 
 - Tasks grouped by status with collapsible group headers (chevron rotate, status dot, label, count, "+ add task" button). Done is collapsed by default. Remember collapsed groups per project in localStorage.
-- Columns: checkbox, task name (with subtask "3/5" and comment-count indicators), assignee (avatar + name), due date (colored by overdue/today/soon/later), priority (flag + label), tags (max 2 chips + "+N"), row "more" menu that appears on hover/focus. Row height from density preference (44/36).
+- Columns: checkbox, task name (with subtask "3/5" and comment-count indicators), assignee (avatar + name), due date (colored by overdue/today/soon/later), priority (flag + label), tags (all chips, clipped by the cell; "+N" overflow is Board-only), row "more" menu that appears on hover/focus. Row height from density preference (44/36).
 - Clicking the checkbox completes the task optimistically (strike-through, moves to Done group). Clicking the row opens the task drawer (?task=APP-142).
 - Inline "add task" row at the bottom of a group: type a title, Enter creates in that status, Esc cancels, focus stays for rapid entry.
 - Inline edits from cells: click assignee/due/priority/tags to open the shared Picker popovers.
 - Filter menu (status, assignee incl. me/unassigned, priority, tags, sprint, due range), Sort menu, Group by (status / assignee / priority / none). Filters live in the URL query string so links are shareable; show active filters as removable chips.
 - Drag to reorder within a group and move between groups (dnd-kit), calling /tasks/:id/move.
 - Keyboard: j/k to move selection, Enter to open, x to toggle complete.
+- Space-level list at /s/:spaceId/list: same component over GET /spaces/:id/tasks, grouped by status category, with the project shown on each row.
 - Empty project shows design/EmptyProject.dc.html: illustration area, headline "<Project> has no tasks yet", "+ New task" button, and the three template cards calling the from-template endpoint.
 
 Done when it matches the design side by side with seed data, and toggling/creating/reordering persists after refresh.
@@ -184,9 +186,9 @@ Done when it matches the design side by side with seed data, and toggling/creati
 ## Phase 10 — Task detail drawer
 
 ```
-Build the task detail drawer from design/TaskDetail.dc.html. Opens from the right (about 40% width, min 560px) over the current view when ?task=KEY is in the URL; Esc or the close button removes the param. "Open as full page" goes to /t/KEY with the same component in a page layout.
+Build the task detail drawer from design/TaskDetail.dc.html. Opens from the right (about 40% width, min 520px) over the current view when ?task=KEY is in the URL; Esc or the close button removes the param. "Open as full page" goes to /t/KEY with the same component in a page layout.
 
-Header: breadcrumb (space › project › APP-142), copy-link button (copies URL, shows a toast), more actions menu (duplicate, move to project, delete with undo toast), close.
+Header: breadcrumb (project › APP-142), copy-link button (copies URL, shows a toast), more actions menu (duplicate, move to project, delete with undo toast), close.
 
 Body:
 - Editable title (contenteditable-style input, saves on blur/Enter).
@@ -207,10 +209,11 @@ Every change updates the list/board caches so the background view stays in sync.
 Build the Board view from design/Board.dc.html.
 
 - One column per status: colored status dot, label, count, column menu, "+ Add task" at the bottom. Header shows "16 tasks · 4 done".
-- Cards: title (strike-through when done), up to 2 tag chips + "+N", subtask progress "2/5" with mini icon, due date (red when overdue), priority flag, assignee avatars. Click opens the drawer.
+- Cards: title (done: muted title + green check icon, no strike-through), up to 2 tag chips + "+N", subtask progress "2/5" with mini icon, due date (red when overdue), priority flag, assignee avatars. Click opens the drawer.
 - Drag and drop with dnd-kit: the dragged card is lifted with rotate(2.5deg) and a shadow, the original spot shows the dashed ghost at 40% opacity, and the target column shows the "Drop to move to <status>" placeholder exactly as in the design. Keyboard drag support (dnd-kit sensors) for accessibility.
 - On drop: optimistic move, POST /tasks/:id/move with neighbors, rollback with an error toast on failure.
 - Same filters as the List view (shared filter state from the URL). Horizontal scroll if columns overflow; columns scroll vertically independently.
+- Space-level board at /s/:spaceId/board: columns are the 4 status categories, cards show their project.
 ```
 
 ## Phase 12 — Quick create modal, ⌘K, shortcuts
@@ -232,7 +235,7 @@ Build the quick create modal from design/CreateTask.dc.html and global keyboard 
 Build /my-tasks from design/MyTasks.dc.html using GET /me/home.
 
 - Greeting "Good morning, Anu" (time-of-day aware, translated) and the date "Thursday, October 8".
-- Stat cards: Due today, Completed this week with "+3 vs last week" delta, Overdue with "oldest is 2 days late". Mini bar chart of completions over the last 7 days (simple SVG, accent bars, today highlighted).
+- Stat cards: Due today, Completed this week with "+3 vs last week" delta, Overdue with "oldest is 2 days late". Mini bar chart of completions for the current week, Mon–Sun (simple SVG; past days accent at 40%, today accent, future days grey).
 - Sections Overdue (red label, hint "Reschedule or close these first"), Today, This Week (with date range hint), Later. Collapsible, counts of open tasks. Each row: checkbox, title, space badge + project name, due date, priority. Completing optimistically updates the stat cards.
 - Right panel "Recent activity": unread dot, actor, action, quoted comment snippet when relevant, time; "Show older activity" pagination; "View inbox" link.
 ```
@@ -243,7 +246,7 @@ Build /my-tasks from design/MyTasks.dc.html using GET /me/home.
 Build the Calendar from design/Calendar.dc.html, used at /s/:spaceId/calendar (all projects in the space with a project filter) and /p/:projectId/calendar.
 
 - Header: "Today" button, prev/next arrows, month/year label, Month / Week segmented control, project filter pills with each project's color (toggle visibility), "All projects".
-- Month grid (weeks start Monday, Mongolian weekday names in mn): tasks as colored pills by project (strike-through when done), max 2–3 visible per day then "+3 more" which opens a popover listing all. Today's date highlighted with accent.
+- Month grid (weeks start Monday, Mongolian weekday names in mn): tasks as colored pills by project (strike-through when done), up to 3 shown per day; if more, show 2 then "+N more", which opens a popover listing all. Today's date highlighted with accent.
 - Week view: 7 columns with all pills stacked.
 - Right panel "Unscheduled": tasks with no due date, filter input, add button; empty state "Everything is scheduled."
 - Drag a pill to another day to change its due date; drag from Unscheduled onto a day to schedule; drag a pill onto the Unscheduled panel to clear the date. Show the drop-target highlight like the design. Optimistic updates.
@@ -254,7 +257,7 @@ Build the Calendar from design/Calendar.dc.html, used at /s/:spaceId/calendar (a
 
 ```
 1. Inbox at /inbox: tabs All / Mentions / Assigned to me / Archived, notification rows (unread dot, actor avatar, "Sara K. mentioned you in APP-142", snippet, time), click marks read and opens the task drawer, hover actions (mark read, archive), "Mark all as read". Empty state exactly like design/EmptyInbox.dc.html including "View 24 archived notifications" with the real count. Sidebar unread badge stays in sync.
-2. /settings: profile (name, initials color), language, timezone, theme (light/dark/system), accent color (the 4 swatches from the designs), density (comfortable/compact), workspace members list with invite form and role change (admins only).
+2. /settings: profile (name, initials color), language, timezone, theme (light/dark/system), accent color (the 4 swatches from the designs), density (comfortable/compact), notifications (per-type toggles for mentions, assignments, comments, status changes; the Inbox bell and "Notification settings" button link here), workspace members list with invite form and role change (admins only).
 3. Polish pass: compare every screen with its design file in both languages and both themes; fix spacing, colors, truncation of long Mongolian strings (they run longer than English — make sure nothing overflows), focus states, and hover states. Add toasts for errors and undo actions. List anything you couldn't match.
 ```
 
@@ -266,7 +269,7 @@ Add realtime updates so teammates see changes without refreshing.
 - API: a WebSocket endpoint /api/v1/ws authenticated by the session cookie. Clients subscribe to their workspace. On every event-bus event after commit, broadcast a small typed message (defined in packages/shared): task.created/updated/moved/deleted, comment.created, subtask.changed, notification.created (to that user only). Include the actor id and the minimal changed data.
 - Keep it single-instance for now, but put the broadcaster behind an interface and note in the README how to switch to Postgres LISTEN/NOTIFY or Redis if we run several API instances.
 - Web: one WebSocket connection with auto-reconnect and backoff. On messages, patch TanStack Query caches (or invalidate the affected queries) for list, board, calendar, drawer, my-tasks and inbox. Ignore echoes of my own optimistic changes. Show a subtle "Reconnecting…" indicator when disconnected and refetch on reconnect.
-- Presence (optional, small): show who else is viewing the same task in the drawer header.
+- Presence: online dots (sidebar user, member avatar stacks) and who else is viewing the same task in the drawer header. Kept in WS server memory, not the DB.
 
 Test it with two browsers logged in as different users.
 ```
