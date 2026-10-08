@@ -11,6 +11,9 @@ export const meRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     {
       preHandler: app.authenticate,
       schema: {
+        tags: ['Me'],
+        summary: 'Update profile and preferences',
+        description: 'Name, locale, time zone, theme, accent, density.',
         body: updateMeSchema,
         response: { 200: meResponseSchema, 400: apiErrorSchema, 401: apiErrorSchema },
       },

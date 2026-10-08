@@ -20,7 +20,7 @@ The visual source of truth is the `design/` folder (exported from Claude Design)
 
 - **Monorepo:** pnpm workspaces. `apps/web`, `apps/api`, `packages/shared`.
 - **Frontend (`apps/web`):** Vite, React 18, TypeScript (strict), React Router, TanStack Query (server state), Zustand (UI state only), Tailwind CSS v4 driven by CSS variables (design tokens), dnd-kit (drag and drop), TipTap (rich text + @mentions), date-fns, i18next (mn/en), lucide-react icons, cmdk (⌘K palette).
-- **Backend (`apps/api`):** Node 20+, Fastify 5, TypeScript (strict), Drizzle ORM + drizzle-kit migrations, PostgreSQL 16, zod via `fastify-type-provider-zod`, argon2 password hashing, cookie sessions, `@fastify/websocket` for realtime, `@fastify/multipart` for uploads, `@fastify/rate-limit`, `@fastify/helmet`, `@fastify/cors`, pino logging.
+- **Backend (`apps/api`):** Node 20+, Fastify 5, TypeScript (strict), Drizzle ORM + drizzle-kit migrations, PostgreSQL 16, zod via `fastify-type-provider-zod`, argon2 password hashing, cookie sessions, `@fastify/websocket` for realtime, `@fastify/multipart` for uploads, `@fastify/rate-limit`, `@fastify/helmet`, `@fastify/cors`, `@fastify/swagger` + `@fastify/swagger-ui` (OpenAPI 3.1 generated from the zod route schemas, Swagger UI at `/api/docs`, off in production unless `API_DOCS=true`), pino logging.
 - **Shared (`packages/shared`):** zod schemas, DTO types, enums, event names — imported by both apps. Never duplicate a type across apps.
 - **Dev infra:** `docker-compose.yml` with Postgres 16. Local file storage in `apps/api/uploads` behind a `Storage` interface (S3 later).
 - **Testing:** Vitest everywhere; API integration tests with `app.inject()` against a real test database; Playwright for a few end-to-end flows.
@@ -29,6 +29,7 @@ The visual source of truth is the `design/` folder (exported from Claude Design)
 
 - TypeScript strict, no `any`. ESLint + Prettier. Small files, feature folders.
 - API: REST, JSON, prefix `/api/v1`. Validate every input with zod schemas from `packages/shared`. Errors are `{ error: { code, message } }` with proper HTTP status.
+- OpenAPI: every route's `schema` declares `tags` (one of the tags in `apps/api/src/docs.ts`), a `summary`, a `description` when behavior isn't obvious (role limits, 409 codes), and response schemas for success and error statuses. Public routes set `security: []`. Shared request/response schemas get `.meta({ id: 'Name' })` so they appear as named models. `test/docs.test.ts` fails if an operation lacks a tag or summary.
 - Every query is scoped by the caller's workspace membership. Never trust IDs from the client without checking access.
 - Auth: cookie `kite_session` (random 32-byte token; `sessions.id` stores its SHA-256), 30-day sliding expiry. Protected routes use `preHandler: app.authenticate`, then `requireWorkspaceMember(request, workspaceId, minRole?)` or `loadProjectAccess(request, projectId, minRole?)` from `apps/api/src/auth/access.ts`. A resource in a workspace the caller isn't a member of answers **404** (never confirm it exists); 403 only for a member below the required role.
 - CSRF: every POST/PUT/PATCH/DELETE must carry `Origin: WEB_ORIGIN` (rejected with 403 `CSRF_REJECTED` otherwise). API tests send it via `ORIGIN` from `test/fixtures.ts`.

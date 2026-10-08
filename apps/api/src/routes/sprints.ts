@@ -16,6 +16,9 @@ export const sprintRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     {
       preHandler: app.authenticate,
       schema: {
+        tags: ['Sprints'],
+        summary: 'List sprints',
+        description: 'By start date.',
         params: projectParams,
         response: { 200: z.array(sprintSchema), 401: err, 404: err },
       },
@@ -36,6 +39,8 @@ export const sprintRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     {
       preHandler: app.authenticate,
       schema: {
+        tags: ['Sprints'],
+        summary: 'Create a sprint',
         params: projectParams,
         body: createSprintSchema,
         response: { 201: sprintSchema, 400: err, 401: err, 404: err },

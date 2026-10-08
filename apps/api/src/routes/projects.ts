@@ -54,6 +54,10 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     {
       preHandler: app.authenticate,
       schema: {
+        tags: ['Projects'],
+        summary: 'Create a project',
+        description:
+          'Without `key` a unique one is generated from the name; a taken key answers 409 `PROJECT_KEY_TAKEN`. Creates the four default statuses and adds the creator to the project team.',
         params: z.object({ workspaceId: z.uuid() }),
         body: createProjectSchema,
         response: { 201: projectDetailSchema, 400: err, 401: err, 404: err, 409: err },
@@ -109,6 +113,10 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     {
       preHandler: app.authenticate,
       schema: {
+        tags: ['Projects'],
+        summary: 'Get a project',
+        description:
+          "Statuses, team, active sprint (in the caller's time zone) and task counts per status.",
         params: projectParams,
         response: { 200: projectDetailSchema, 401: err, 404: err },
       },
@@ -124,6 +132,9 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     {
       preHandler: app.authenticate,
       schema: {
+        tags: ['Projects'],
+        summary: 'Update a project',
+        description: 'Name, key or color. 409 `PROJECT_KEY_TAKEN` when the key is in use.',
         params: projectParams,
         body: updateProjectSchema,
         response: { 200: projectDetailSchema, 400: err, 401: err, 404: err, 409: err },
@@ -150,6 +161,10 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     {
       preHandler: app.authenticate,
       schema: {
+        tags: ['Projects'],
+        summary: 'Reorder or move a project',
+        description:
+          'Neighbors after the move (`prevId`, `nextId`), optionally into another space of the same workspace (`spaceId`).',
         params: projectParams,
         body: moveProjectSchema,
         response: { 200: projectDetailSchema, 400: err, 401: err, 404: err },
@@ -180,6 +195,9 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       {
         preHandler: app.authenticate,
         schema: {
+          tags: ['Projects'],
+          summary: action === 'archive' ? 'Archive a project' : 'Restore an archived project',
+          description: 'Admin or owner. Archived projects leave the sidebar but stay readable.',
           params: projectParams,
           response: { 200: projectDetailSchema, 401: err, 403: err, 404: err },
         },
@@ -201,7 +219,13 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     '/projects/:projectId/favorite',
     {
       preHandler: app.authenticate,
-      schema: { params: projectParams, response: { 204: z.null(), 401: err, 404: err } },
+      schema: {
+        tags: ['Projects'],
+        summary: 'Add to favorites',
+        description: 'Idempotent.',
+        params: projectParams,
+        response: { 204: z.null(), 401: err, 404: err },
+      },
     },
     async (request, reply) => {
       const { project } = await loadProjectAccess(request, request.params.projectId);
@@ -218,7 +242,13 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     '/projects/:projectId/favorite',
     {
       preHandler: app.authenticate,
-      schema: { params: projectParams, response: { 204: z.null(), 401: err, 404: err } },
+      schema: {
+        tags: ['Projects'],
+        summary: 'Remove from favorites',
+        description: 'Idempotent.',
+        params: projectParams,
+        response: { 204: z.null(), 401: err, 404: err },
+      },
     },
     async (request, reply) => {
       const { project } = await loadProjectAccess(request, request.params.projectId);

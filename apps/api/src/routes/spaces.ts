@@ -35,6 +35,10 @@ export const spaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     {
       preHandler: app.authenticate,
       schema: {
+        tags: ['Spaces'],
+        summary: 'Create a space',
+        description:
+          'Appended after the last space. `initial` defaults to the first letter of the name.',
         params: z.object({ workspaceId: z.uuid() }),
         body: createSpaceSchema,
         response: { 201: spaceSchema, 400: err, 401: err, 404: err },
@@ -67,6 +71,8 @@ export const spaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     {
       preHandler: app.authenticate,
       schema: {
+        tags: ['Spaces'],
+        summary: 'Rename or recolor a space',
         params: spaceParams,
         body: updateSpaceSchema,
         response: { 200: spaceSchema, 400: err, 401: err, 404: err },
@@ -88,6 +94,10 @@ export const spaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     {
       preHandler: app.authenticate,
       schema: {
+        tags: ['Spaces'],
+        summary: 'Reorder a space',
+        description:
+          'Send the neighbors after the move (`prevId`, `nextId`; `null` = list edge). Both null moves it to the end.',
         params: spaceParams,
         body: moveSchema,
         response: { 200: spaceSchema, 400: err, 401: err, 404: err },
@@ -115,6 +125,10 @@ export const spaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     {
       preHandler: app.authenticate,
       schema: {
+        tags: ['Spaces'],
+        summary: 'Delete an empty space',
+        description:
+          'Admin or owner. 409 `SPACE_NOT_EMPTY` while it still has projects (archived ones included).',
         params: spaceParams,
         response: { 204: z.null(), 401: err, 403: err, 404: err, 409: err },
       },

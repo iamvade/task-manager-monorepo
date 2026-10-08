@@ -31,6 +31,9 @@ export const tagRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     {
       preHandler: app.authenticate,
       schema: {
+        tags: ['Tags'],
+        summary: 'List tags',
+        description: 'By name.',
         params: z.object({ workspaceId: z.uuid() }),
         response: { 200: z.array(tagSchema), 401: err, 404: err },
       },
@@ -51,6 +54,9 @@ export const tagRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     {
       preHandler: app.authenticate,
       schema: {
+        tags: ['Tags'],
+        summary: 'Create a tag',
+        description: '409 `TAG_EXISTS` when the name is taken.',
         params: z.object({ workspaceId: z.uuid() }),
         body: createTagSchema,
         response: { 201: tagSchema, 400: err, 401: err, 404: err, 409: err },
@@ -77,6 +83,9 @@ export const tagRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     {
       preHandler: app.authenticate,
       schema: {
+        tags: ['Tags'],
+        summary: 'Rename or recolor a tag',
+        description: '409 `TAG_EXISTS` when the name is taken.',
         params: tagParams,
         body: updateTagSchema,
         response: { 200: tagSchema, 400: err, 401: err, 404: err, 409: err },
@@ -95,7 +104,13 @@ export const tagRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     '/tags/:tagId',
     {
       preHandler: app.authenticate,
-      schema: { params: tagParams, response: { 204: z.null(), 401: err, 403: err, 404: err } },
+      schema: {
+        tags: ['Tags'],
+        summary: 'Delete a tag',
+        description: 'Admin or owner. Removes it from every task.',
+        params: tagParams,
+        response: { 204: z.null(), 401: err, 403: err, 404: err },
+      },
     },
     async (request, reply) => {
       const { tag } = await loadTagAccess(request, request.params.tagId, 'admin');

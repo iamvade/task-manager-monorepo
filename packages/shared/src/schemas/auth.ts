@@ -26,10 +26,12 @@ export const timezoneSchema = z.string().refine((tz) => {
   }
 }, 'Unknown time zone');
 
-export const loginRequestSchema = z.object({
-  email: emailSchema,
-  password: z.string().min(1).max(200),
-});
+export const loginRequestSchema = z
+  .object({
+    email: emailSchema,
+    password: z.string().min(1).max(200),
+  })
+  .meta({ id: 'LoginRequest' });
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
 
 export const meUserSchema = z.object({
@@ -59,11 +61,13 @@ export const meWorkspaceSchema = z.object({
 });
 
 /** `GET /auth/me`, and the body of a successful login / invite accept / `PATCH /me`. */
-export const meResponseSchema = z.object({
-  user: meUserSchema,
-  preferences: preferencesSchema,
-  workspaces: z.array(meWorkspaceSchema),
-});
+export const meResponseSchema = z
+  .object({
+    user: meUserSchema,
+    preferences: preferencesSchema,
+    workspaces: z.array(meWorkspaceSchema),
+  })
+  .meta({ id: 'Me' });
 export type MeResponse = z.infer<typeof meResponseSchema>;
 
 export const updateMeSchema = z
@@ -77,40 +81,49 @@ export const updateMeSchema = z
   })
   .partial()
   .strict()
-  .refine((body) => Object.keys(body).length > 0, 'Nothing to update');
+  .refine((body) => Object.keys(body).length > 0, 'Nothing to update')
+  .meta({ id: 'UpdateMe' });
 export type UpdateMe = z.infer<typeof updateMeSchema>;
 
 /** Owners are made at workspace creation, never invited. */
 export const inviteRoleSchema = z.enum(['admin', 'member']);
 
-export const createInviteSchema = z.object({
-  email: emailSchema,
-  role: inviteRoleSchema.default('member'),
-});
+export const createInviteSchema = z
+  .object({
+    email: emailSchema,
+    role: inviteRoleSchema.default('member'),
+  })
+  .meta({ id: 'CreateInvite' });
 export type CreateInvite = z.infer<typeof createInviteSchema>;
 
-export const inviteSchema = z.object({
-  id: z.uuid(),
-  email: z.string(),
-  role: inviteRoleSchema,
-  expiresAt: z.iso.datetime(),
-});
+export const inviteSchema = z
+  .object({
+    id: z.uuid(),
+    email: z.string(),
+    role: inviteRoleSchema,
+    expiresAt: z.iso.datetime(),
+  })
+  .meta({ id: 'Invite' });
 export type Invite = z.infer<typeof inviteSchema>;
 
 /** `GET /invites/:token` — what the accept page shows before the user commits. */
-export const invitePreviewSchema = z.object({
-  workspace: z.object({ name: z.string() }),
-  email: z.string(),
-  role: inviteRoleSchema,
-  expiresAt: z.iso.datetime(),
-  /** True when the email already has an account: accept by signing in instead of creating one. */
-  accountExists: z.boolean(),
-});
+export const invitePreviewSchema = z
+  .object({
+    workspace: z.object({ name: z.string() }),
+    email: z.string(),
+    role: inviteRoleSchema,
+    expiresAt: z.iso.datetime(),
+    /** True when the email already has an account: accept by signing in instead of creating one. */
+    accountExists: z.boolean(),
+  })
+  .meta({ id: 'InvitePreview' });
 export type InvitePreview = z.infer<typeof invitePreviewSchema>;
 
 /** Name + password are required for a new account and ignored for an existing one. */
-export const acceptInviteSchema = z.object({
-  name: nameSchema.optional(),
-  password: passwordSchema.optional(),
-});
+export const acceptInviteSchema = z
+  .object({
+    name: nameSchema.optional(),
+    password: passwordSchema.optional(),
+  })
+  .meta({ id: 'AcceptInvite' });
 export type AcceptInvite = z.infer<typeof acceptInviteSchema>;

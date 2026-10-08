@@ -9,8 +9,9 @@ import {
   type ZodTypeProvider,
 } from 'fastify-type-provider-zod';
 import { registerAuth } from './auth/plugin.js';
-import type { Config } from './config.js';
+import { docsEnabled, type Config } from './config.js';
 import type { Db } from './db/client.js';
+import { registerDocs } from './docs.js';
 import { registerErrorHandlers } from './errors.js';
 import { authRoutes } from './routes/auth.js';
 import { healthRoutes } from './routes/health.js';
@@ -63,6 +64,7 @@ export async function buildApp(config: Config, db: Db) {
   await app.register(rateLimit, { max: 300, timeWindow: '1 minute' });
   await app.register(cookie, { secret: config.COOKIE_SECRET });
   registerAuth(app);
+  if (docsEnabled(config)) await registerDocs(app);
 
   await app.register(
     async (api) => {

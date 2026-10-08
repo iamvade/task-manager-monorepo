@@ -62,6 +62,10 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       preHandler: app.authenticate,
       config: { rateLimit: { max: 20, timeWindow: '1 minute' } },
       schema: {
+        tags: ['Invites'],
+        summary: 'Invite someone',
+        description:
+          'Admin or owner. Replaces any earlier pending invite for the same email; in development the link is logged to the console.',
         params: z.object({ workspaceId: z.uuid() }),
         body: createInviteSchema,
         response: { 201: inviteSchema, 401: err, 403: err, 404: err, 409: err },
@@ -123,7 +127,14 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     '/invites/:token',
     {
       config: { rateLimit: { max: 30, timeWindow: '1 minute' } },
-      schema: { params: tokenParams, response: { 200: invitePreviewSchema, 404: err } },
+      schema: {
+        tags: ['Invites'],
+        summary: 'Preview an invite',
+        description: 'What the accept page shows before joining.',
+        security: [],
+        params: tokenParams,
+        response: { 200: invitePreviewSchema, 404: err },
+      },
     },
     async (request) => {
       const row = await findPendingInvite(app.db, request.params.token);
@@ -148,6 +159,11 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     {
       config: { rateLimit: { max: 10, timeWindow: '1 minute' } },
       schema: {
+        tags: ['Invites'],
+        summary: 'Accept an invite',
+        description:
+          'New accounts send `name` and `password`; an existing account must be signed in as the invited email.',
+        security: [{}, { cookieAuth: [] }],
         params: tokenParams,
         body: acceptInviteSchema,
         response: { 200: meResponseSchema, 400: err, 401: err, 404: err },

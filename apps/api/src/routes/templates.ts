@@ -14,6 +14,10 @@ export const templateRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     {
       preHandler: app.authenticate,
       schema: {
+        tags: ['Templates'],
+        summary: 'Fill a project from a template',
+        description:
+          "`product-launch` (18 tasks), `sprint-planning` (12 tasks in a new two-week sprint starting today) or `bug-triage` (6 tasks with S1–S4 severity tags). Only for a project without tasks (409 `PROJECT_NOT_EMPTY`). Titles use the caller's language; due dates count from today in their time zone.",
         params: z.object({ projectId: z.uuid() }),
         body: applyTemplateSchema,
         response: { 201: applyTemplateResponseSchema, 400: err, 401: err, 404: err, 409: err },

@@ -7,7 +7,7 @@ Team task manager (spaces → projects → tasks) with List, Board and Calendar 
 | Path              | What                                                                     |
 | ----------------- | ------------------------------------------------------------------------ |
 | `apps/web`        | Vite + React 18 SPA (React Router, TanStack Query, Tailwind v4, i18next) |
-| `apps/api`        | Fastify 5 REST API (`/api/v1`), Drizzle ORM, PostgreSQL 16               |
+| `apps/api`        | Fastify 5 REST API (`/api/v1`), Drizzle ORM, PostgreSQL 16, OpenAPI docs |
 | `packages/shared` | zod schemas, DTO types and enums used by both apps                       |
 | `design/`         | Design exports (read as source; they don't render standalone)            |
 
@@ -41,6 +41,19 @@ The web dev server proxies `/api` to the API, so the browser sees one origin and
 
 **Port 5432 already taken** (e.g. a local Postgres)? Set `POSTGRES_PORT=5433` in `.env` and use port `5433` in both URLs in `apps/api/.env`.
 
+## API docs
+
+With `pnpm dev` running, open **http://localhost:5173/api/docs** for Swagger UI. The OpenAPI 3.1 spec is at `/api/docs/json`. It is generated from the routes' zod schemas (shared with the web app via `packages/shared`), so it never drifts from what the API validates.
+
+To try requests from the UI:
+
+1. Run `POST /auth/login` with `{ "email": "anu@kite.test", "password": "password123" }`. The browser stores the `kite_session` cookie and sends it with every later request.
+2. Call anything else, e.g. `GET /auth/me` for your workspace ID, then `GET /workspaces/{workspaceId}/sidebar`.
+
+Use the web dev server URL (`:5173`), not the API directly (`:3000`): mutations must carry `Origin: WEB_ORIGIN` (CSRF check), which the browser only sends when the docs are served from the web origin.
+
+Docs are on by default everywhere except `NODE_ENV=production`. Set `API_DOCS=true` or `false` in `apps/api/.env` to override.
+
 ## Scripts (run from the repo root)
 
 | Script             | Does                                                         |
@@ -62,6 +75,6 @@ The web dev server proxies `/api` to the API, so the browser sees one origin and
 `db:seed` / `db:reset` recreate the workspace from the designs: **Kite Studio**, eight people (log in as `anu@kite.test`, everyone's password is `password123`), the Product / Engineering / Design spaces with their projects, App Redesign's tasks (APP-142 is the task from the detail drawer), Anu's My Tasks and the October calendar. Design dates are shifted so that Oct 8 2026 is today.
 
 - `SEED_LANG=mn|en` (default `mn`): language of task, project, space, tag and people names that the designs have in both languages.
-- `SEED_TODAY=2026-10-08`: pin "today" for an exact match with the mockups (weekday-based views such as My Tasks' *This Week* only match on a Thursday).
+- `SEED_TODAY=2026-10-08`: pin "today" for an exact match with the mockups (weekday-based views such as My Tasks' _This Week_ only match on a Thursday).
 
 API tests run against `TEST_DATABASE_URL` (the `kite_test` database); migrations are applied to it automatically before the suite.

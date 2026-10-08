@@ -18,6 +18,8 @@ export const projectMemberRoutes: FastifyPluginCallbackZod = (app, _opts, done) 
     {
       preHandler: app.authenticate,
       schema: {
+        tags: ['Project members'],
+        summary: 'List the project team',
         params: projectParams,
         response: { 200: z.array(workspaceMemberSchema), 401: err, 404: err },
       },
@@ -33,6 +35,10 @@ export const projectMemberRoutes: FastifyPluginCallbackZod = (app, _opts, done) 
     {
       preHandler: app.authenticate,
       schema: {
+        tags: ['Project members'],
+        summary: 'Add to the project team',
+        description:
+          'Idempotent. The user must be a workspace member (404 `USER_NOT_FOUND` otherwise).',
         params: memberParams,
         response: { 200: workspaceMemberSchema, 401: err, 404: err },
       },
@@ -55,7 +61,13 @@ export const projectMemberRoutes: FastifyPluginCallbackZod = (app, _opts, done) 
     '/projects/:projectId/members/:userId',
     {
       preHandler: app.authenticate,
-      schema: { params: memberParams, response: { 204: z.null(), 401: err, 404: err } },
+      schema: {
+        tags: ['Project members'],
+        summary: 'Remove from the project team',
+        description: 'Idempotent.',
+        params: memberParams,
+        response: { 204: z.null(), 401: err, 404: err },
+      },
     },
     async (request, reply) => {
       const { project } = await loadProjectAccess(request, request.params.projectId);

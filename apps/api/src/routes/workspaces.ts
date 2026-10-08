@@ -41,7 +41,14 @@ export const workspaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     '/workspaces/:workspaceId/sidebar',
     {
       preHandler: app.authenticate,
-      schema: { params, response: { 200: sidebarResponseSchema, 401: err, 404: err } },
+      schema: {
+        tags: ['Workspaces'],
+        summary: 'Sidebar',
+        description:
+          'Spaces with their non-archived projects (by position), favorites, open tasks assigned to me and unread inbox count, in one request.',
+        params,
+        response: { 200: sidebarResponseSchema, 401: err, 404: err },
+      },
     },
     async (request) => {
       const { workspaceId } = request.params;
@@ -119,7 +126,12 @@ export const workspaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     '/workspaces/:workspaceId/members',
     {
       preHandler: app.authenticate,
-      schema: { params, response: { 200: z.array(workspaceMemberSchema), 401: err, 404: err } },
+      schema: {
+        tags: ['Workspaces'],
+        summary: 'List workspace members',
+        params,
+        response: { 200: z.array(workspaceMemberSchema), 401: err, 404: err },
+      },
     },
     async (request) => {
       await requireWorkspaceMember(request, request.params.workspaceId);
@@ -132,6 +144,10 @@ export const workspaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     {
       preHandler: app.authenticate,
       schema: {
+        tags: ['Workspaces'],
+        summary: 'Suggest a project key',
+        description:
+          'A 2–4 letter key derived from the name (Mongolian is transliterated), unique in the workspace.',
         params,
         querystring: projectKeySuggestionQuerySchema,
         response: { 200: projectKeySuggestionSchema, 400: err, 401: err, 404: err },

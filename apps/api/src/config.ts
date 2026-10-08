@@ -13,9 +13,14 @@ const envSchema = z.object({
   COOKIE_SECRET: z.string().min(32),
   /** Set when running behind a reverse proxy so `request.ip` (per-IP rate limits) is the client's. */
   TRUST_PROXY: z.stringbool().default(false),
+  /** OpenAPI spec + Swagger UI at /api/docs. Unset = on everywhere except production. */
+  API_DOCS: z.stringbool().optional(),
 });
 
 export type Config = z.infer<typeof envSchema>;
+
+export const docsEnabled = (config: Config): boolean =>
+  config.API_DOCS ?? config.NODE_ENV !== 'production';
 
 /**
  * Reads `.env` from the API package directory (if present) into `process.env`,

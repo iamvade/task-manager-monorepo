@@ -33,7 +33,15 @@ export const authRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     '/auth/login',
     {
       config: { rateLimit: { max: 10, timeWindow: '1 minute' } },
-      schema: { body: loginRequestSchema, response: { 200: meResponseSchema, ...errorResponses } },
+      schema: {
+        tags: ['Auth'],
+        summary: 'Sign in',
+        description:
+          'Sets the `kite_session` cookie. Rate-limited per IP and per email; wrong email or password answers 401 `INVALID_CREDENTIALS` either way.',
+        security: [],
+        body: loginRequestSchema,
+        response: { 200: meResponseSchema, ...errorResponses },
+      },
     },
     async (request, reply) => {
       // `isAllowed` only means "skipped (allow list)"; `isExceeded` is the actual verdict.
@@ -61,7 +69,12 @@ export const authRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     '/auth/logout',
     {
       preHandler: app.authenticate,
-      schema: { response: { 204: z.null(), 401: apiErrorSchema } },
+      schema: {
+        tags: ['Auth'],
+        summary: 'Sign out',
+        description: 'Deletes the session and clears the cookie.',
+        response: { 204: z.null(), 401: apiErrorSchema },
+      },
     },
     async (request, reply) => {
       const { sessionId } = requireAuth(request);
@@ -75,7 +88,12 @@ export const authRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     '/auth/me',
     {
       preHandler: app.authenticate,
-      schema: { response: { 200: meResponseSchema, 401: apiErrorSchema } },
+      schema: {
+        tags: ['Auth'],
+        summary: 'Current user',
+        description: 'User, preferences and workspace memberships.',
+        response: { 200: meResponseSchema, 401: apiErrorSchema },
+      },
     },
     async (request) => buildMe(app.db, requireAuth(request).user),
   );
