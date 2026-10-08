@@ -1,0 +1,7 @@
+pnpm-lock.yaml
+design/
+dist/
+coverage/
+apps/api/drizzle/
+CLAUDE.md
+docs/

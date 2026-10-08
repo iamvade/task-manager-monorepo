@@ -1,0 +1,26 @@
+@import 'tailwindcss';
+
+/* Minimal tokens for the scaffold; the full light/dark token set (CLAUDE.md) lands with the UI phases. */
+:root {
+  --bg: #ffffff;
+  --text: #18181b;
+  --text-muted: #6b6b74;
+  --accent: #6e56cf;
+}
+
+@theme inline {
+  --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
+  --color-bg: var(--bg);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--accent);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 20px;
+}

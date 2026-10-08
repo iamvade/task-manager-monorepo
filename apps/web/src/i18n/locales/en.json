@@ -1,0 +1,10 @@
+{
+  "app": {
+    "name": "Kite Tasks"
+  },
+  "health": {
+    "checking": "Checking API…",
+    "ok": "API connected",
+    "down": "API unreachable"
+  }
+}

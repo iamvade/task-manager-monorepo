@@ -1,0 +1,10 @@
+{
+  "app": {
+    "name": "Kite Tasks"
+  },
+  "health": {
+    "checking": "API шалгаж байна…",
+    "ok": "API холбогдсон",
+    "down": "API холбогдсонгүй"
+  }
+}
