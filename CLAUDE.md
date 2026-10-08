@@ -31,7 +31,7 @@ The visual source of truth is the `design/` folder (exported from Claude Design)
 - API: REST, JSON, prefix `/api/v1`. Validate every input with zod schemas from `packages/shared`. Errors are `{ error: { code, message } }` with proper HTTP status.
 - Every query is scoped by the caller's workspace membership. Never trust IDs from the client without checking access.
 - IDs are UUIDv7 (time-sortable). Timestamps are `timestamptz`. Due/start dates are `date` (no time).
-- Ordering inside lists/columns uses fractional index strings (`fractional-indexing` package) in a `position` column, so moving a card updates one row.
+- Ordering inside lists/columns uses fractional index strings (`fractional-indexing` package) in a `position` column (`text COLLATE "C"`, so keys sort byte-wise), so moving a card updates one row.
 - Every task mutation writes an `activity` row in the same transaction, then emits a realtime event after commit.
 - Frontend: all server data through TanStack Query hooks in `src/api/`. Mutations are optimistic for checkbox toggles, drag moves, and status/priority changes, with rollback on error.
 - All UI strings through i18next (`mn.json`, `en.json`). Mongolian is the default. Take Mongolian copy from the `STR.mn` tables in the design files. Mongolian dates look like `10-р сарын 14`; English like `Oct 14`.
@@ -47,10 +47,10 @@ The visual source of truth is the `design/` folder (exported from Claude Design)
 - `workspace_members` — workspace_id, user_id, role (`owner`|`admin`|`member`), title (nullable job title shown as a role hint, e.g. "Eng lead"), joined_at
 - `invites` — id, workspace_id, email, token_hash, role, expires_at, accepted_at
 - `spaces` — id, workspace_id, name, initial, color (palette key), position
-- `projects` — id, space_id, name, key (e.g. `APP`, unique per workspace), color (palette key), task_seq (int), position, archived_at, created_at. Every workspace member can see and edit every project.
+- `projects` — id, workspace_id (denormalized from the space, so `key` can be unique per workspace; composite FK `(space_id, workspace_id)` → spaces keeps it consistent), space_id, name, key (e.g. `APP`, unique per workspace), color (palette key), task_seq (int), position, archived_at, created_at. Every workspace member can see and edit every project.
 - `project_members` — project_id, user_id (the project's team: header avatar stack, suggested assignees and @mentions; not an access boundary)
 - `favorites` — user_id, project_id
-- `statuses` — id, project_id, name (nullable: null = default status, the UI shows the translated name for its category), category (`todo`|`in_progress`|`review`|`done`), color, position. New projects get 4 defaults (name null): To Do / In Progress / In Review / Done.
+- `statuses` — id, project_id, name (nullable: null = default status, the UI shows the translated name for its category), category (`todo`|`in_progress`|`review`|`done`), color (nullable: null = the category's color), position. New projects get 4 defaults (name null): To Do / In Progress / In Review / Done.
 - `sprints` — id, project_id, name, start_date, end_date
 - `tasks` — id, project_id, number (unique per project → shown as `APP-142`), status_id, sprint_id?, title, description (jsonb, TipTap doc), description_text (for search), priority (`urgent`|`high`|`medium`|`low`|`none`), start_date?, due_date?, position, created_by, completed_at?, created_at, updated_at, deleted_at?
 - `task_assignees` — task_id, user_id
@@ -64,6 +64,7 @@ The visual source of truth is the `design/` folder (exported from Claude Design)
 - Indexes: tasks(project_id, status_id, position), tasks(due_date), task_assignees(user_id), notifications(user_id, read_at), pg_trgm GIN on tasks.title for search.
 - Colors (`users.avatar_color`, `spaces.color`, `projects.color`, `tags.color`) are palette keys such as `violet`, `blue`, `neutral`. The frontend maps each key to exact light/dark values from the designs (`docs/design-notes.md` Appendix A).
 - Online presence is ephemeral (kept in the WebSocket server's memory), not stored.
+- Seed (`apps/api/src/db/seed/data.ts`) mirrors the designs; dates shift so Oct 8 2026 = today. Eight people: the seven in Main plus Bayarmaa T. (QA, `yellow`) from TaskDetail/Calendar. Where Calendar and My Tasks disagree about Anu's tasks, My Tasks wins (Calendar's past "AB" items are done, future ones reassigned).
 
 ## Design tokens (from the designs)
 

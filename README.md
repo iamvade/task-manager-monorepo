@@ -53,7 +53,15 @@ The web dev server proxies `/api` to the API, so the browser sees one origin and
 | `pnpm test`        | Vitest in every package (API tests need `docker compose up`) |
 | `pnpm db:generate` | Generate a migration from `apps/api/src/db/schema`           |
 | `pnpm db:migrate`  | Apply migrations                                             |
-| `pnpm db:seed`     | Insert sample data                                           |
+| `pnpm db:seed`     | Insert the sample data from the designs                      |
 | `pnpm db:reset`    | Drop everything, migrate, seed (refuses in production)       |
+| `pnpm db:print`    | Print a project's tasks by status (`pnpm db:print CHK`)      |
+
+### Sample data
+
+`db:seed` / `db:reset` recreate the workspace from the designs: **Kite Studio**, eight people (log in as `anu@kite.test`, everyone's password is `password123`), the Product / Engineering / Design spaces with their projects, App Redesign's tasks (APP-142 is the task from the detail drawer), Anu's My Tasks and the October calendar. Design dates are shifted so that Oct 8 2026 is today.
+
+- `SEED_LANG=mn|en` (default `mn`): language of task, project, space, tag and people names that the designs have in both languages.
+- `SEED_TODAY=2026-10-08`: pin "today" for an exact match with the mockups (weekday-based views such as My Tasks' *This Week* only match on a Thursday).
 
 API tests run against `TEST_DATABASE_URL` (the `kite_test` database); migrations are applied to it automatically before the suite.

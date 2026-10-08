@@ -17,7 +17,8 @@
     "db:generate": "pnpm --filter @kite/api db:generate",
     "db:migrate": "pnpm --filter @kite/api db:migrate",
     "db:seed": "pnpm --filter @kite/api db:seed",
-    "db:reset": "pnpm --filter @kite/api db:reset"
+    "db:reset": "pnpm --filter @kite/api db:reset",
+    "db:print": "pnpm --filter @kite/api db:print"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

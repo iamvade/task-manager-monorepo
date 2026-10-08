@@ -12,7 +12,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/scripts/migrate.ts",
     "db:seed": "tsx src/scripts/seed.ts",
-    "db:reset": "tsx src/scripts/reset.ts"
+    "db:reset": "tsx src/scripts/reset.ts",
+    "db:print": "tsx src/scripts/print-project.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.2",
@@ -20,10 +21,13 @@
     "@fastify/helmet": "^13.1.1",
     "@fastify/rate-limit": "^11.2.0",
     "@kite/shared": "workspace:*",
+    "argon2": "^0.45.1",
     "drizzle-orm": "^0.45.3",
     "fastify": "^5.12.5",
     "fastify-type-provider-zod": "^7.0.0",
+    "fractional-indexing": "^4.0.0",
     "pg": "^8.23.1",
+    "uuidv7": "^1.2.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {
