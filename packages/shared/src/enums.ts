@@ -98,3 +98,16 @@ export const AVATAR_COLORS = [
   'teal',
   'yellow',
 ] as const satisfies readonly PaletteKey[];
+
+/** Categories of the four statuses every new project starts with, in board order. */
+export const DEFAULT_STATUS_CATEGORIES = [
+  'todo',
+  'in_progress',
+  'review',
+  'done',
+] as const satisfies readonly StatusCategory[];
+
+/** Project templates offered on the empty-project screen. */
+export const TEMPLATE_IDS = ['product-launch', 'sprint-planning', 'bug-triage'] as const;
+export const templateIdSchema = z.enum(TEMPLATE_IDS);
+export type TemplateId = z.infer<typeof templateIdSchema>;

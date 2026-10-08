@@ -1,7 +1,7 @@
 import type { WorkspaceRole } from '@kite/shared';
 import { and, eq } from 'drizzle-orm';
 import type { FastifyRequest } from 'fastify';
-import { projects, spaces, workspaceMembers } from '../db/schema/index.js';
+import { projects, spaces, tags, workspaceMembers } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
 import { requireAuth } from './plugin.js';
 
@@ -65,4 +65,48 @@ export async function loadProjectAccess(
   if (!row) throw httpError(404, 'NOT_FOUND', 'Project not found');
   checkRole(row.role, minRole);
   return { ...row, workspaceId: row.space.workspaceId };
+}
+
+/** The caller's role in `workspaceId`, or 404 — the shared tail of the `load*Access` helpers. */
+async function roleIn(request: FastifyRequest, workspaceId: string, what: string) {
+  const { user } = requireAuth(request);
+  const [membership] = await request.server.db
+    .select({ role: workspaceMembers.role })
+    .from(workspaceMembers)
+    .where(and(eq(workspaceMembers.workspaceId, workspaceId), eq(workspaceMembers.userId, user.id)))
+    .limit(1);
+  if (!membership) throw httpError(404, 'NOT_FOUND', `${what} not found`);
+  return membership.role;
+}
+
+/** A space in a workspace the caller belongs to; 404 otherwise. */
+export async function loadSpaceAccess(
+  request: FastifyRequest,
+  spaceId: string,
+  minRole: WorkspaceRole = 'member',
+) {
+  requireAuth(request);
+  const [space] = await request.server.db
+    .select()
+    .from(spaces)
+    .where(eq(spaces.id, spaceId))
+    .limit(1);
+  if (!space) throw httpError(404, 'NOT_FOUND', 'Space not found');
+  const role = await roleIn(request, space.workspaceId, 'Space');
+  checkRole(role, minRole);
+  return { space, role };
+}
+
+/** A tag in a workspace the caller belongs to; 404 otherwise. */
+export async function loadTagAccess(
+  request: FastifyRequest,
+  tagId: string,
+  minRole: WorkspaceRole = 'member',
+) {
+  requireAuth(request);
+  const [tag] = await request.server.db.select().from(tags).where(eq(tags.id, tagId)).limit(1);
+  if (!tag) throw httpError(404, 'NOT_FOUND', 'Tag not found');
+  const role = await roleIn(request, tag.workspaceId, 'Tag');
+  checkRole(role, minRole);
+  return { tag, role };
 }

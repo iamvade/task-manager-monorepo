@@ -217,14 +217,6 @@ export const PROJECTS = {
 } as const satisfies Record<string, ProjectDef>;
 export type ProjectRef = keyof typeof PROJECTS;
 
-/** Default statuses every project starts with (name null → translated by category in the UI). */
-export const DEFAULT_STATUS_CATEGORIES: readonly StatusCategory[] = [
-  'todo',
-  'in_progress',
-  'review',
-  'done',
-];
-
 export const SPRINT = { project: 'app', start: [10, 6], end: [10, 24] } as const satisfies {
   project: ProjectRef;
   start: MonthDay;

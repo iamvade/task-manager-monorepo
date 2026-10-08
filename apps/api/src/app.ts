@@ -16,7 +16,14 @@ import { authRoutes } from './routes/auth.js';
 import { healthRoutes } from './routes/health.js';
 import { inviteRoutes } from './routes/invites.js';
 import { meRoutes } from './routes/me.js';
+import { projectMemberRoutes } from './routes/project-members.js';
 import { projectRoutes } from './routes/projects.js';
+import { spaceRoutes } from './routes/spaces.js';
+import { sprintRoutes } from './routes/sprints.js';
+import { statusRoutes } from './routes/statuses.js';
+import { tagRoutes } from './routes/tags.js';
+import { templateRoutes } from './routes/templates.js';
+import { workspaceRoutes } from './routes/workspaces.js';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -63,7 +70,14 @@ export async function buildApp(config: Config, db: Db) {
       await api.register(authRoutes);
       await api.register(meRoutes);
       await api.register(inviteRoutes);
+      await api.register(workspaceRoutes);
+      await api.register(spaceRoutes);
       await api.register(projectRoutes);
+      await api.register(projectMemberRoutes);
+      await api.register(tagRoutes);
+      await api.register(statusRoutes);
+      await api.register(sprintRoutes);
+      await api.register(templateRoutes);
     },
     { prefix: '/api/v1' },
   );

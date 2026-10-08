@@ -1,4 +1,5 @@
 import {
+  DEFAULT_STATUS_CATEGORIES,
   richTextToPlain,
   shortName,
   type ActivityType,
@@ -15,7 +16,6 @@ import type { Db } from '../client.js';
 import * as schema from '../schema/index.js';
 import {
   ATTACHMENTS,
-  DEFAULT_STATUS_CATEGORIES,
   DESCRIPTIONS,
   EVENTS,
   ME,

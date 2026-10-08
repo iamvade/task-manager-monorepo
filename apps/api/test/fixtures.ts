@@ -1,5 +1,5 @@
 import { apiErrorSchema, type WorkspaceRole } from '@kite/shared';
-import type { FastifyInstance, LightMyRequestResponse } from 'fastify';
+import type { FastifyInstance, InjectOptions, LightMyRequestResponse } from 'fastify';
 import { uuidv7 } from 'uuidv7';
 import { hashPassword } from '../src/auth/password.js';
 import { SESSION_COOKIE } from '../src/auth/sessions.js';
@@ -58,13 +58,17 @@ export async function addMember(
   await db.insert(workspaceMembers).values({ workspaceId, userId, role });
 }
 
-export async function createProject(db: Db, workspaceId: string) {
-  const space = one(
+export async function createSpace(db: Db, workspaceId: string, position = 'a0') {
+  return one(
     await db
       .insert(spaces)
-      .values({ workspaceId, name: 'Space', initial: 'S', color: 'violet', position: 'a0' })
+      .values({ workspaceId, name: 'Space', initial: 'S', color: 'violet', position })
       .returning(),
   );
+}
+
+export async function createProject(db: Db, workspaceId: string) {
+  const space = await createSpace(db, workspaceId);
   return one(
     await db
       .insert(projects)
@@ -103,4 +107,20 @@ export async function login(app: FastifyInstance, email: string, password = PASS
 /** The `error.code` of an API error response. */
 export function errorCode(res: LightMyRequestResponse) {
   return apiErrorSchema.parse(res.json()).error.code;
+}
+
+type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+
+/**
+ * Request helper for a signed-in user (or anonymous without `cookie`). Mutations carry the web
+ * `Origin` so they pass the CSRF check.
+ */
+export function apiClient(app: FastifyInstance, cookie?: string) {
+  return (method: Method, path: string, payload?: InjectOptions['payload']) =>
+    app.inject({
+      method,
+      url: `/api/v1${path}`,
+      headers: { ...(cookie ? { cookie } : {}), ...(method === 'GET' ? {} : { origin: ORIGIN }) },
+      ...(payload === undefined ? {} : { payload }),
+    });
 }
