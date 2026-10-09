@@ -1,7 +1,10 @@
 import '@testing-library/jest-dom/vitest';
-import { cleanup } from '@testing-library/react';
+import { cleanup, configure } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
 import '../i18n';
+
+// Files run in parallel; under load a first render can take longer than the 1s default.
+configure({ asyncUtilTimeout: 3000 });
 
 afterEach(() => {
   cleanup();
@@ -20,3 +23,16 @@ Range.prototype.getBoundingClientRect = emptyRect;
 Range.prototype.getClientRects = emptyRects;
 Element.prototype.getClientRects = emptyRects;
 document.elementFromPoint = () => null;
+
+// cmdk (⌘K palette) observes its list's size; jsdom has no ResizeObserver.
+globalThis.ResizeObserver = class ResizeObserver {
+  observe() {
+    // no-op
+  }
+  unobserve() {
+    // no-op
+  }
+  disconnect() {
+    // no-op
+  }
+};

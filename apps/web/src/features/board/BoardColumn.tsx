@@ -124,6 +124,8 @@ export interface BoardColumnProps {
   adding: boolean;
   onStartAdd: () => void;
   onCancelAdd: () => void;
+  /** Header "+" and "Add task to …": the quick-create modal in this column. */
+  onCreate: () => void;
   taskHref: (task: TaskListItem) => string;
   showProject: boolean;
 }
@@ -148,6 +150,7 @@ export function BoardColumn({
   adding,
   onStartAdd,
   onCancelAdd,
+  onCreate,
   taskHref,
   showProject,
 }: BoardColumnProps) {
@@ -155,16 +158,12 @@ export function BoardColumn({
   const { setNodeRef } = useDroppable({ id: `${COLUMN_PREFIX}${columnKey}`, disabled: !dnd });
   const sectionLabel = t('board.columnLabel', { status: label, count: tasks.length });
   const menuItems: MenuItem[] = [
-    ...(onAdd
-      ? [
-          {
-            id: 'add',
-            label: t('board.addTaskTo', { status: label }),
-            icon: <PlusIcon size={14} />,
-            onSelect: onStartAdd,
-          },
-        ]
-      : []),
+    {
+      id: 'add',
+      label: t('board.addTaskTo', { status: label }),
+      icon: <PlusIcon size={14} />,
+      onSelect: onCreate,
+    },
     {
       id: 'collapse',
       label: collapsed
@@ -228,15 +227,13 @@ export function BoardColumn({
           {tasks.length}
         </span>
         <span className="flex-1" />
-        {onAdd && (
-          <IconButton
-            label={t('board.addTaskTo', { status: label })}
-            title={t('board.addTaskTo', { status: label })}
-            icon={<PlusIcon size={14} />}
-            onClick={onStartAdd}
-            className="text-3"
-          />
-        )}
+        <IconButton
+          label={t('board.addTaskTo', { status: label })}
+          title={t('board.addTaskTo', { status: label })}
+          icon={<PlusIcon size={14} />}
+          onClick={onCreate}
+          className="text-3"
+        />
         <Menu
           label={t('board.columnOptions', { status: label })}
           placement="bottom-end"

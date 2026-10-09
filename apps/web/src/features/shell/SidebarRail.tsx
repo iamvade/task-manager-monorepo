@@ -19,13 +19,7 @@ export function SidebarRail() {
   const sidebar = useSidebar(workspace?.id);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
 
-  function expandAndSearch() {
-    toggleSidebar();
-    // The search field mounts with the expanded sidebar.
-    requestAnimationFrame(() => {
-      document.querySelector<HTMLInputElement>('nav input[type="search"]')?.focus();
-    });
-  }
+  const openPalette = useUiStore((s) => s.setPaletteOpen);
 
   return (
     <nav
@@ -42,7 +36,9 @@ export function SidebarRail() {
       <IconButton
         label={t('shell.search')}
         size={36}
-        onClick={expandAndSearch}
+        onClick={() => {
+          openPalette(true);
+        }}
         icon={<SearchIcon size={16} />}
       />
       <RailLink to="/my-tasks" label={t('shell.myTasks')}>

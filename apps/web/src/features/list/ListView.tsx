@@ -1,5 +1,5 @@
 import type { ProjectDetail, SidebarSpace } from '@kite/shared';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutletContext } from 'react-router';
 import { useTags } from '../../api/tags';
@@ -7,6 +7,7 @@ import { useProjectTasks, useSpaceTasks } from '../../api/tasks';
 import { useCurrentWorkspace, useWorkspaceMembers } from '../../api/workspaces';
 import { useAuth } from '../../auth/useAuth';
 import { ErrorState } from '../../components/ErrorState';
+import { useUiStore } from '../../stores/ui';
 import { toTaskQuery } from '../views/taskQuery';
 import { useViewParams } from '../views/useViewParams';
 import { EmptyProject } from './EmptyProject';
@@ -24,7 +25,7 @@ function useListQuery(scope: 'project' | 'space') {
 /** `/p/:projectId/list`. */
 export function ListView() {
   const project = useOutletContext<ProjectDetail>();
-  // Fresh state (selection, add row, empty-state choice) per project.
+  // Fresh state (selection, add row) per project.
   return <ProjectList key={project.id} project={project} />;
 }
 
@@ -34,14 +35,15 @@ function ProjectList({ project }: { project: ProjectDetail }) {
   const tasks = useProjectTasks(project.id, query);
   const members = useWorkspaceMembers(project.workspaceId);
   const tags = useTags(project.workspaceId);
-  const [createFirst, setCreateFirst] = useState(false);
+  const openCreate = useUiStore((s) => s.openCreate);
 
-  if (project.taskCount === 0 && !createFirst) {
+  // Shown until the first task exists (creating one refreshes the project's task count).
+  if (project.taskCount === 0) {
     return (
       <EmptyProject
         project={project}
         onCreateFirst={() => {
-          setCreateFirst(true);
+          openCreate({ projectId: project.id });
         }}
       />
     );
@@ -49,7 +51,6 @@ function ProjectList({ project }: { project: ProjectDetail }) {
   if (tasks.isPending) return <ListSkeleton />;
   if (tasks.isError) return <ErrorState error={tasks.error} />;
 
-  const firstTodo = project.statuses.find((s) => s.category === 'todo') ?? project.statuses[0];
   return (
     <TaskTable
       scope="project"
@@ -59,7 +60,6 @@ function ProjectList({ project }: { project: ProjectDetail }) {
       project={project}
       members={members.data ?? []}
       tags={tags.data ?? []}
-      initialAdding={createFirst && firstTodo ? `status:${firstTodo.id}` : null}
     />
   );
 }

@@ -27,6 +27,13 @@ export function ViewToolbar({ project = null, empty = false }: ViewToolbarProps)
   const workspace = useCurrentWorkspace();
   const openCreate = useUiStore((s) => s.openCreate);
   const board = useCurrentView() === 'board';
+  const newTask = () => {
+    openCreate(
+      project
+        ? { projectId: project.id, ...(view.sprintId ? { sprintId: view.sprintId } : {}) }
+        : {},
+    );
+  };
 
   if (empty) {
     return (
@@ -39,11 +46,7 @@ export function ViewToolbar({ project = null, empty = false }: ViewToolbarProps)
           {t('toolbar.filter')}
         </button>
         <div aria-hidden="true" className="mx-1 h-5 w-px bg-[var(--border-control)]" />
-        <Button
-          variant="primary"
-          icon={<PlusIcon size={14} strokeWidth={2.5} />}
-          onClick={openCreate}
-        >
+        <Button variant="primary" icon={<PlusIcon size={14} strokeWidth={2.5} />} onClick={newTask}>
           {t('toolbar.newTask')}
         </Button>
       </div>
@@ -118,11 +121,7 @@ export function ViewToolbar({ project = null, empty = false }: ViewToolbarProps)
         />
       )}
       <div aria-hidden="true" className="mx-1 h-5 w-px bg-[var(--border-control)]" />
-      <Button
-        variant="primary"
-        icon={<PlusIcon size={14} strokeWidth={2.5} />}
-        onClick={openCreate}
-      >
+      <Button variant="primary" icon={<PlusIcon size={14} strokeWidth={2.5} />} onClick={newTask}>
         {t('toolbar.newTask')}
       </Button>
     </div>

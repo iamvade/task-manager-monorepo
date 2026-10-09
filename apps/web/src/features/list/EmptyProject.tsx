@@ -1,5 +1,5 @@
 import type { PaletteKey, ProjectDetail, TemplateId } from '@kite/shared';
-import { useEffect, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useApplyTemplate } from '../../api/projects';
@@ -73,7 +73,7 @@ function Illustration() {
 
 interface EmptyProjectProps {
   project: ProjectDetail;
-  /** "Create first task" (and `C`): show the list with the add row open. */
+  /** "Create first task" (`C` is global): the quick-create modal for this project. */
   onCreateFirst: () => void;
 }
 
@@ -81,22 +81,6 @@ interface EmptyProjectProps {
 export function EmptyProject({ project, onCreateFirst }: EmptyProjectProps) {
   const { t } = useTranslation();
   const apply = useApplyTemplate(project);
-
-  // `C` = new task, as the kbd hint on the button says.
-  useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key !== 'c' || event.metaKey || event.ctrlKey || event.altKey) return;
-      const target = event.target as HTMLElement | null;
-      if (target?.closest('input, textarea, select, [contenteditable="true"], [role="dialog"]'))
-        return;
-      event.preventDefault();
-      onCreateFirst();
-    }
-    document.addEventListener('keydown', onKeyDown);
-    return () => {
-      document.removeEventListener('keydown', onKeyDown);
-    };
-  }, [onCreateFirst]);
 
   return (
     <div className="flex flex-1 flex-col items-center px-6 pt-[72px] pb-12">

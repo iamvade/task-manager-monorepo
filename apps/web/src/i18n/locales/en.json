@@ -581,7 +581,16 @@
     "hints": {
       "create": "Create",
       "createAndOpen": "Create and open"
-    }
+    },
+    "assignee": "Assignee",
+    "dueDate": "Due date",
+    "priority": "Priority",
+    "status": "Status",
+    "tags": "Tags",
+    "noTags": "No tags",
+    "created": "Created {{key}}",
+    "openTask": "Open",
+    "failed": "Couldn't create the task. Try again."
   },
   "emptyProject": {
     "newBadge": "New",
@@ -629,5 +638,61 @@
     },
     "markRead": "Mark as read",
     "archive": "Archive"
+  },
+  "palette": {
+    "label": "Command palette",
+    "placeholder": "Search tasks, projects, people or run a command…",
+    "loading": "Searching…",
+    "groups": {
+      "actions": "Actions",
+      "tasks": "Tasks",
+      "projects": "Projects",
+      "people": "People"
+    },
+    "actions": {
+      "newTask": "New task",
+      "goMyTasks": "Go to My Tasks",
+      "goInbox": "Go to Inbox",
+      "switchTheme": "Switch theme",
+      "switchLanguage": "Switch language",
+      "shortcuts": "Keyboard shortcuts"
+    },
+    "personTasks": "View tasks",
+    "hints": {
+      "navigate": "navigate",
+      "open": "open",
+      "close": "close"
+    }
+  },
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "close": "Close",
+    "then": "then",
+    "groups": {
+      "general": "General",
+      "list": "List",
+      "create": "Quick create",
+      "pickers": "Pickers"
+    },
+    "items": {
+      "palette": "Open the command palette",
+      "newTask": "New task",
+      "help": "Show keyboard shortcuts",
+      "goInbox": "Go to Inbox",
+      "goMyTasks": "Go to My Tasks",
+      "close": "Close the drawer or dialog",
+      "nextPrev": "Next / previous task",
+      "open": "Open the selected task",
+      "complete": "Complete / reopen",
+      "assignee": "Assignee",
+      "due": "Due date",
+      "project": "Project",
+      "create": "Create",
+      "createOpen": "Create and open",
+      "navigate": "Move through options",
+      "select": "Select",
+      "clear": "Unassign / clear",
+      "closePicker": "Close the picker"
+    }
   }
 }

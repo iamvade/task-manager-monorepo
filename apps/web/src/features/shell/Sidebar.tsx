@@ -1,5 +1,5 @@
 import type { SidebarResponse } from '@kite/shared';
-import { useEffect, type RefObject } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
 import { useCurrentWorkspace, useSidebar } from '../../api/workspaces';
@@ -25,12 +25,8 @@ import { useShellLocation } from './useShellLocation';
 import { SidebarUser } from './UserMenu';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 
-interface SidebarProps {
-  searchRef: RefObject<HTMLInputElement>;
-}
-
 /** Expanded sidebar (Main.dc.html): 248px (min 220), --bg-sidebar, gap 16, padding 12/8. */
-export function Sidebar({ searchRef }: SidebarProps) {
+export function Sidebar() {
   const { t } = useTranslation();
   const workspace = useCurrentWorkspace();
   const sidebar = useSidebar(workspace?.id);
@@ -51,7 +47,7 @@ export function Sidebar({ searchRef }: SidebarProps) {
         />
       </div>
 
-      <SidebarSearch ref={searchRef} />
+      <SidebarSearch />
 
       <div className="flex flex-col gap-0.5">
         <NavItem

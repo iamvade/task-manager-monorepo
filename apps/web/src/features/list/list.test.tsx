@@ -75,7 +75,13 @@ const LIST = `/p/${PROJECT_ID}/list?sprint=none`;
 describe('project list', () => {
   beforeEach(async () => {
     localStorage.clear();
-    useUiStore.setState({ collapsedGroups: {}, lastWorkspaceId: null });
+    useUiStore.setState({
+      collapsedGroups: {},
+      lastWorkspaceId: null,
+      createOpen: false,
+      paletteOpen: false,
+      shortcutsOpen: false,
+    });
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date('2026-10-08T03:00:00Z'));
     await i18n.changeLanguage('mn');
@@ -193,11 +199,7 @@ describe('project list', () => {
     renderAt(LIST);
 
     await screen.findByRole('table');
-    fireEvent.click(
-      within(group('Хийгдэж буй')).getByRole('button', {
-        name: '«Хийгдэж буй» бүлэгт ажил нэмэх',
-      }),
-    );
+    fireEvent.click(within(group('Хийгдэж буй')).getByRole('button', { name: 'Ажил нэмэх' }));
     const input = within(group('Хийгдэж буй')).getByRole('textbox', { name: 'Шинэ ажлын нэр' });
     expect(input).toHaveFocus();
     fireEvent.change(input, { target: { value: '  Write release blog ' } });
@@ -312,21 +314,40 @@ describe('project list', () => {
     expect(await screen.findByText('Audit current navigation patterns')).toBeInTheDocument();
   });
 
-  it('"Create first task" opens the add row in To Do', async () => {
+  it('"Create first task" opens quick create for the project', async () => {
     const empty = { ...PROJECT_WITH_STATUSES, taskCount: 0, doneCount: 0, activeSprint: null };
     api(undefined, newState([], empty));
     renderAt(`/p/${PROJECT_ID}/list`);
 
     fireEvent.click(await screen.findByRole('button', { name: /Эхний ажлаа үүсгэх/ }));
-    const input = await within(await waitFor(() => group('Хийх'))).findByRole('textbox');
-    expect(input).toHaveFocus();
+    const dialog = await screen.findByRole('dialog', { name: 'Шинэ ажил' });
+    await waitFor(() => {
+      expect(within(dialog).getByRole('textbox', { name: 'Ажлын нэр' })).toHaveFocus();
+    });
+    expect(useUiStore.getState().createDefaults).toEqual({ projectId: PROJECT_ID });
+  });
+
+  it('a group header "+" opens quick create with the group\'s status', async () => {
+    api();
+    renderAt(LIST);
+    await screen.findByRole('table');
+    fireEvent.click(
+      within(group('Хийгдэж буй')).getByRole('button', {
+        name: '«Хийгдэж буй» бүлэгт ажил нэмэх',
+      }),
+    );
+    expect(useUiStore.getState().createDefaults).toEqual({
+      projectId: PROJECT_ID,
+      statusId: statusOf('in_progress').id,
+    });
+    expect(await screen.findByRole('dialog', { name: 'Шинэ ажил' })).toBeInTheDocument();
   });
 });
 
 describe('space list', () => {
   beforeEach(async () => {
     localStorage.clear();
-    useUiStore.setState({ collapsedGroups: {} });
+    useUiStore.setState({ collapsedGroups: {}, createOpen: false });
     await i18n.changeLanguage('mn');
   });
 

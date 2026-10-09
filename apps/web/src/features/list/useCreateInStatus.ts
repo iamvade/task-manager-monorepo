@@ -1,15 +1,9 @@
 import type { ProjectDetail, Status, TaskListItem, WorkspaceMember } from '@kite/shared';
-import { useRef } from 'react';
 import { useCreateTask } from '../../api/tasks';
+import { buildOptimisticTask } from '../create/optimisticTask';
 import { useViewParams } from '../views/useViewParams';
-import { placeInStatus } from './positions';
 
-export const statusRef = (s: Status): TaskListItem['status'] => ({
-  id: s.id,
-  name: s.name,
-  category: s.category,
-  color: s.color,
-});
+export { statusRef } from '../create/optimisticTask';
 
 export interface CreateDefaults {
   assigneeIds?: string[];
@@ -27,7 +21,6 @@ export function useCreateInStatus(
 ) {
   const create = useCreateTask(project?.id ?? '');
   const { sprintId } = useViewParams();
-  const tempSeq = useRef(0);
 
   return (status: Status, title: string, defaults: CreateDefaults = {}) => {
     if (!project) return;
@@ -39,8 +32,6 @@ export function useCreateInStatus(
         initials,
         avatarColor,
       }));
-    const now = new Date().toISOString();
-    tempSeq.current += 1;
     create.mutate({
       body: {
         title,
@@ -51,38 +42,12 @@ export function useCreateInStatus(
         ...(sprintId ? { sprintId } : {}),
         position: 'bottom',
       },
-      optimistic: {
-        id: `temp-${String(tempSeq.current)}`,
-        key: `${project.key}-…`,
-        number: 0,
-        project: {
-          id: project.id,
-          spaceId: project.spaceId,
-          key: project.key,
-          name: project.name,
-          color: project.color,
-        },
-        status: statusRef(status),
-        title,
-        priority: defaults.priority ?? 'none',
-        startDate: null,
-        dueDate: null,
-        position: placeInStatus(
-          tasks.filter((x) => x.status.id === status.id),
-          '',
-          null,
-          null,
-        ).position,
-        sprintId,
-        completedAt: status.category === 'done' ? now : null,
-        createdAt: now,
-        updatedAt: now,
-        assignees,
-        tags: [],
-        subtaskProgress: { done: 0, total: 0 },
-        commentCount: 0,
-        attachmentCount: 0,
-      },
+      optimistic: buildOptimisticTask(
+        project,
+        status,
+        { title, priority: defaults.priority, assignees, sprintId },
+        tasks,
+      ),
     });
   };
 }

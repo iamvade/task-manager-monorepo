@@ -43,8 +43,9 @@ import {
   useUpdateTask,
 } from '../../api/tasks';
 import { useAuth } from '../../auth/useAuth';
+import { isEditableTarget } from '../../lib/keyboard';
 import { useCopyLink } from '../../lib/useCopyLink';
-import { useUiStore } from '../../stores/ui';
+import { useUiStore, type CreateDefaults } from '../../stores/ui';
 import type { ListScope } from '../views/taskQuery';
 import { useViewParams } from '../views/useViewParams';
 import { AddTaskRow } from './AddTaskRow';
@@ -66,20 +67,9 @@ interface TaskTableProps {
   project: ProjectDetail | null;
   members: readonly WorkspaceMember[];
   tags: readonly Tag[];
-  /** Group whose inline add row starts open (empty project → "Create first task"). */
-  initialAdding?: string | null;
 }
 
 const GROUP_PREFIX = 'group:';
-
-function isEditable(target: EventTarget | null) {
-  if (!(target instanceof HTMLElement)) return false;
-  return (
-    target.isContentEditable ||
-    ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) ||
-    Boolean(target.closest('[role="dialog"], [role="menu"], [role="listbox"]'))
-  );
-}
 
 /**
  * The List (Main.dc.html table): grouped rows, inline add, cell pickers, drag and drop
@@ -93,7 +83,6 @@ export function TaskTable({
   project,
   members,
   tags,
-  initialAdding = null,
 }: TaskTableProps) {
   const { t } = useTranslation();
   const { me } = useAuth();
@@ -131,7 +120,8 @@ export function TaskTable({
   const { copied, copy } = useCopyLink();
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [adding, setAdding] = useState<string | null>(initialAdding);
+  const [adding, setAdding] = useState<string | null>(null);
+  const openCreate = useUiStore((s) => s.openCreate);
 
   const firstOf = (category: Status['category']) =>
     statuses?.find((s) => s.category === category) ?? null;
@@ -155,6 +145,27 @@ export function TaskTable({
           position: task.position,
         };
     complete.mutate({ task, done, optimistic });
+  }
+
+  /** Quick-create defaults for a group's header "+" (project list: the group's fields). */
+  function createDefaultsFor(group: TaskGroup): CreateDefaults {
+    const sprint = view.sprintId ? { sprintId: view.sprintId } : {};
+    if (project && group.defaults) {
+      const { statusId, assigneeIds, priority } = group.defaults;
+      return {
+        projectId: project.id,
+        ...(statusId ? { statusId } : {}),
+        ...(assigneeIds?.[0] ? { assigneeId: assigneeIds[0] } : {}),
+        ...(priority ? { priority } : {}),
+        ...sprint,
+      };
+    }
+    // Space list: groups are status categories, people or priorities across projects.
+    const [field, value] = group.key.split(':');
+    if (field === 'category') return { statusCategory: value as Status['category'] };
+    if (field === 'assignee' && value && value !== 'none') return { assigneeId: value };
+    if (field === 'priority') return { priority: value as TaskListItem['priority'] };
+    return {};
   }
 
   function createIn(group: TaskGroup, title: string) {
@@ -217,7 +228,7 @@ export function TaskTable({
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.metaKey || event.ctrlKey || event.altKey || event.defaultPrevented) return;
-      if (isEditable(event.target)) return;
+      if (isEditableTarget(event.target, true)) return;
       const state = keyState.current;
       const ids = state.visibleIds.filter((id) => !id.startsWith('temp-'));
       const index = state.selectedId ? ids.indexOf(state.selectedId) : -1;
@@ -416,6 +427,9 @@ export function TaskTable({
                   if (!isOpen(group)) setGroupCollapsed(listKey, group.key, false);
                   setAdding(group.key);
                 }}
+                onCreate={() => {
+                  openCreate(createDefaultsFor(group));
+                }}
                 onCancelAdd={() => {
                   setAdding((current) => (current === group.key ? null : current));
                 }}
@@ -451,6 +465,8 @@ interface GroupSectionProps {
   onStartAdd: () => void;
   onCancelAdd: () => void;
   onSubmitAdd: (title: string) => void;
+  /** Header "+": quick-create modal with the group's fields. */
+  onCreate: () => void;
 }
 
 function GroupSection({
@@ -469,6 +485,7 @@ function GroupSection({
   onStartAdd,
   onCancelAdd,
   onSubmitAdd,
+  onCreate,
 }: GroupSectionProps) {
   const { t } = useTranslation();
   const { setNodeRef } = useDroppable({ id: `${GROUP_PREFIX}${group.key}`, disabled: !dndEnabled });
@@ -490,7 +507,7 @@ function GroupSection({
           marker={group.marker}
           open={open}
           onToggle={onToggle}
-          onAdd={canAdd ? onStartAdd : undefined}
+          onAdd={onCreate}
           bodyId={bodyId}
         />
       )}

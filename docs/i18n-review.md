@@ -408,7 +408,7 @@ Not drawn in TaskDetail.dc.html but needed by the same UI: editing states, menus
 2. **Activity**: "Үйл ажиллагаа" (section), "Сүүлийн үйл ажиллагаа" (Recent activity); tabs Бүгд / Сэтгэгдэл / Түүх.
 3. **Comment button** in the composer drafted as "Илгээх" (Send).
 4. **Weekday + date** (mn "10-р сарын 9, Ба" vs en "Fri, Oct 9"): order, and width in My Tasks' 100px due column.
-5. **Due picker placeholder** «дараа баасан» only helps if the Mongolian date parser (phase 12) understands it.
+5. **Due picker placeholder** «дараа баасан»: the phase 12 parser understands it (next week's Friday, like English "next fri"), plus өнөөдөр, маргааш, нөгөөдөр, дараа долоо хоног, weekday names, «N хоногийн дараа» and «10-р сарын 14».
 6. **Inbox empty title**: "Бүх мэдэгдлээ үзсэн байна" (not literal).
 7. **Template names**: "Бүтээгдэхүүн гаргах" (Product launch), "Алдаа ангилах" (Bug triage).
 8. **Dropzone**: "Drop files or browse" split so "browse" is a `<browse>` link (assumption).

@@ -14,8 +14,11 @@ export interface RichTextEditorProps {
   label: string;
   placeholder: string;
   mentions: readonly MentionCandidate[];
-  /** description: toolbar on top, suggestions below; comment: compact, suggestions above. */
-  variant: 'description' | 'comment';
+  /**
+   * description: toolbar on top, suggestions below; comment: compact, suggestions above;
+   * plain: borderless text, no toolbar (quick create's description).
+   */
+  variant: 'description' | 'comment' | 'plain';
   autoFocus?: boolean;
   /** ⌘/Ctrl+Enter. */
   onSubmit?: () => void;
@@ -87,7 +90,9 @@ export function RichTextEditor({
           'rich-text outline-none',
           variant === 'description'
             ? 'min-h-[88px] px-4 pt-3 pb-4'
-            : 'max-h-[240px] min-h-[44px] overflow-y-auto px-3 pt-2.5 pb-1',
+            : variant === 'plain'
+              ? 'max-h-[280px] min-h-[44px] overflow-y-auto py-1 text-3'
+              : 'max-h-[240px] min-h-[44px] overflow-y-auto px-3 pt-2.5 pb-1',
         ),
       },
       handleKeyDown: (_view, event) => {
@@ -128,7 +133,9 @@ export function RichTextEditor({
   return (
     <div
       className={cn(
-        'flex min-w-0 flex-col rounded-[10px] border bg-surface transition-shadow focus-within:border-accent focus-within:shadow-ring-soft',
+        'flex min-w-0 flex-col',
+        variant !== 'plain' &&
+          'rounded-[10px] border bg-surface transition-shadow focus-within:border-accent focus-within:shadow-ring-soft',
         variant === 'description' ? 'border-default' : 'border-control',
         className,
       )}

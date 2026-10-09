@@ -6,6 +6,8 @@ export const queryKeys = {
   project: (projectId: string) => ['projects', projectId] as const,
   sprints: (projectId: string) => ['projects', projectId, 'sprints'] as const,
   tags: (workspaceId: string) => ['workspaces', workspaceId, 'tags'] as const,
+  /** ⌘K results; under `workspaces` (task writes don't refresh it — results are short-lived). */
+  search: (workspaceId: string, q: string) => ['workspaces', workspaceId, 'search', q] as const,
   /** Prefix of every task query (lists + details): one invalidation refreshes them all. */
   tasks: ['tasks'] as const,
   taskLists: ['tasks', 'list'] as const,

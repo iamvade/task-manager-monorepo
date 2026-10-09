@@ -73,7 +73,13 @@ function stubLayout() {
 describe('board', () => {
   beforeEach(async () => {
     localStorage.clear();
-    useUiStore.setState({ collapsedGroups: {}, lastWorkspaceId: null });
+    useUiStore.setState({
+      collapsedGroups: {},
+      lastWorkspaceId: null,
+      createOpen: false,
+      paletteOpen: false,
+      shortcutsOpen: false,
+    });
     useToastStore.setState({ toasts: [] });
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date('2026-10-08T03:00:00Z'));
@@ -219,7 +225,12 @@ describe('board', () => {
     renderAt(`/s/${SPACE_ID}/board`);
     const todo = await screen.findByRole('region', { name: 'To Do, 2 tasks' });
     expect(within(todo).getAllByText('App Redesign')).toHaveLength(2);
+    // No inline add across projects; the header "+" opens quick create in that category.
     expect(screen.queryByRole('button', { name: 'Add task' })).toBeNull();
-    expect(screen.queryByRole('button', { name: /^Add task to/ })).toBeNull();
+    fireEvent.click(within(todo).getByRole('button', { name: 'Add task to To Do' }));
+    expect(useUiStore.getState()).toMatchObject({
+      createOpen: true,
+      createDefaults: { statusCategory: 'todo' },
+    });
   });
 });

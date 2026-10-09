@@ -78,6 +78,7 @@ export function Board({ scope, boardKey, label, tasks, project, members }: Board
 
   const stored = useUiStore((s) => s.collapsedGroups[boardKey]);
   const setCollapsed = useUiStore((s) => s.setGroupCollapsed);
+  const openCreate = useUiStore((s) => s.openCreate);
   const [adding, setAdding] = useState<string | null>(null);
   const createInStatus = useCreateInStatus(project, tasks, members);
   const move = useMoveTask();
@@ -301,6 +302,20 @@ export function Board({ scope, boardKey, label, tasks, project, members }: Board
                   }}
                   onCancelAdd={() => {
                     setAdding((current) => (current === column.key ? null : current));
+                  }}
+                  onCreate={() => {
+                    openCreate(
+                      project && status
+                        ? {
+                            projectId: project.id,
+                            statusId: status.id,
+                            ...(view.sprintId ? { sprintId: view.sprintId } : {}),
+                          }
+                        : {
+                            statusCategory:
+                              column.marker.kind === 'status' ? column.marker.category : 'todo',
+                          },
+                    );
                   }}
                   taskHref={taskHref}
                   showProject={scope === 'space'}

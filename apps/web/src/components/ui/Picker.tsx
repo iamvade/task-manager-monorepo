@@ -25,6 +25,12 @@ interface PickerProps<T> {
   label: string;
   /** Show the ↑↓ ↵ (⌫) hints footer. */
   footerHints?: boolean;
+  /**
+   * Controlled search text. When given, `items` are shown as passed (the caller filters,
+   * e.g. the due picker prepending a parsed date).
+   */
+  query?: string;
+  onQueryChange?: (query: string) => void;
 }
 
 /**
@@ -47,10 +53,18 @@ export function Picker<T>({
   emptyText,
   label,
   footerHints,
+  query: queryProp,
+  onQueryChange,
 }: PickerProps<T>) {
   const { t } = useTranslation();
   const id = useId();
-  const [query, setQuery] = useState('');
+  const [queryState, setQueryState] = useState('');
+  const controlled = queryProp !== undefined;
+  const query = queryProp ?? queryState;
+  const setQuery = (next: string) => {
+    if (!controlled) setQueryState(next);
+    onQueryChange?.(next);
+  };
   const [active, setActive] = useState(0);
   const selectedKeys = useMemo(
     () => new Set(value === null ? [] : typeof value === 'string' ? [value] : value),
@@ -59,10 +73,10 @@ export function Picker<T>({
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return items;
+    if (!q || controlled) return items;
     const match = search?.filter ?? ((item: T) => getLabel(item).toLowerCase().includes(q));
     return items.filter((item) => match(item, q));
-  }, [items, query, search, getLabel]);
+  }, [items, query, controlled, search, getLabel]);
 
   const activeIndex = Math.min(active, filtered.length - 1);
 

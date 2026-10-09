@@ -1,8 +1,9 @@
 import { addDays, startOfWeek } from '@kite/shared';
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Picker } from '../../components/ui/Picker';
 import { Popover, type TriggerProps } from '../../components/ui/Popover';
+import { parseDue } from '../../lib/parseDue';
 import { useDates } from '../../lib/useDates';
 
 interface DuePickerProps {
@@ -10,6 +11,8 @@ interface DuePickerProps {
   onChange: (date: string | null) => void;
   trigger: (props: TriggerProps, open: boolean) => ReactElement;
   label: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 interface DueOption {
@@ -45,56 +48,69 @@ type DueLabelKey =
   | 'create.due.none';
 
 /**
- * Due date picker (264px): a date field on top (CreateTask's "Type a date" row; a native date
- * input), then Today / Tomorrow / This weekend / Next week / In two weeks / No due date with the
- * weekday hint. ⌫ clears.
+ * Due date picker (264px): "Type a date, e.g. “next fri”" on top (English via chrono-node,
+ * simple Mongolian keywords), then Today / Tomorrow / This weekend / Next week / In two weeks /
+ * No due date with the resolved date. A typed date shows as the first option; ⌫ clears.
  */
-export function DuePicker({ value, onChange, trigger, label }: DuePickerProps) {
+export function DuePicker({ value, onChange, trigger, label, open, onOpenChange }: DuePickerProps) {
   const { t } = useTranslation();
   const dates = useDates();
-  const options = dueOptions(dates.today, (key) => t(key));
-  const selected = options.find((o) => o.date === value)?.id ?? null;
+  const [query, setQuery] = useState('');
+  const presets = dueOptions(dates.today, (key) => t(key));
+  const selected = presets.find((o) => o.date === value)?.id ?? (value ? `typed:${value}` : null);
+
+  const q = query.trim().toLowerCase();
+  const parsed = q ? parseDue(q, dates.today) : null;
+  const matching = q ? presets.filter((o) => o.label.toLowerCase().includes(q)) : presets;
+  const options: DueOption[] =
+    parsed && !matching.some((o) => o.date === parsed)
+      ? [{ id: `typed:${parsed}`, label: dates.formatWeekday(parsed), date: parsed }, ...matching]
+      : matching;
 
   return (
-    <Popover trigger={trigger} label={label} width={264} elevation="lg">
+    <Popover
+      trigger={trigger}
+      label={label}
+      width={264}
+      elevation="lg"
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) setQuery('');
+        onOpenChange?.(next);
+      }}
+    >
       {(close) => (
-        <div className="flex flex-col">
-          <label className="-mx-1 -mt-1 mb-1 flex h-[38px] items-center gap-2 border-b border-subtle px-3">
-            <span className="sr-only">{t('create.typeDate')}</span>
-            <input
-              type="date"
-              value={value ?? ''}
-              onChange={(e) => {
-                if (!e.target.value) return;
-                onChange(e.target.value);
-                close();
-              }}
-              className="min-w-0 flex-1 border-0 bg-transparent p-0 text-[13px] text-default outline-none focus-visible:outline-none"
-            />
-          </label>
-          <Picker
-            items={options}
-            value={selected}
-            getKey={(o) => o.id}
-            getLabel={(o) => o.label}
-            label={t('picker.dueLabel')}
-            onSelect={(o) => {
-              onChange(o.date);
-            }}
-            onClear={() => {
-              onChange(null);
-            }}
-            onClose={close}
-            renderItem={(o) => (
-              <>
-                <span className="flex-1 truncate">{o.label}</span>
-                {o.date && (
-                  <span className="text-[12px] text-muted">{dates.formatWeekday(o.date)}</span>
-                )}
-              </>
-            )}
-          />
-        </div>
+        <Picker
+          items={options}
+          value={selected}
+          getKey={(o) => o.id}
+          getLabel={(o) => o.label}
+          label={t('picker.dueLabel')}
+          search={{ placeholder: t('create.typeDatePlaceholder') }}
+          query={query}
+          onQueryChange={setQuery}
+          onSelect={(o) => {
+            onChange(o.date);
+          }}
+          onClear={() => {
+            onChange(null);
+          }}
+          onClose={() => {
+            setQuery('');
+            close();
+          }}
+          renderItem={(o) => (
+            <>
+              <span className="flex-1 truncate">{o.label}</span>
+              {o.date && !o.id.startsWith('typed:') && (
+                <span className="text-[12px] text-muted">{dates.formatWeekday(o.date)}</span>
+              )}
+              {o.id.startsWith('typed:') && q && (
+                <span className="truncate text-[12px] text-muted">{query.trim()}</span>
+              )}
+            </>
+          )}
+        />
       )}
     </Popover>
   );

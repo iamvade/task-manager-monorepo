@@ -1,12 +1,12 @@
 import { shortName, type Theme } from '@kite/shared';
-import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
-import { meQueryKey, useLogout, useUpdateMe } from '../../api/auth';
+import { useLogout } from '../../api/auth';
 import { useAuth } from '../../auth/useAuth';
 import { Avatar } from '../../components/ui/Avatar';
 import { Popover } from '../../components/ui/Popover';
 import { SegmentedControl } from '../../components/ui/SegmentedControl';
+import { useTheme } from './useTheme';
 
 /**
  * Sidebar footer: my avatar, full name and online dot (Main.dc.html). Not designed: clicking
@@ -15,19 +15,10 @@ import { SegmentedControl } from '../../components/ui/SegmentedControl';
 export function SidebarUser() {
   const { t } = useTranslation();
   const { me } = useAuth();
-  const updateMe = useUpdateMe();
+  const { setTheme } = useTheme();
   const logout = useLogout();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   if (!me) return null;
-
-  function setTheme(theme: Theme) {
-    if (!me) return;
-    const previous = me;
-    // Optimistic: AuthProvider applies the theme as soon as the cached profile changes.
-    queryClient.setQueryData(meQueryKey, { ...me, preferences: { ...me.preferences, theme } });
-    updateMe.mutate({ theme }, { onError: () => queryClient.setQueryData(meQueryKey, previous) });
-  }
 
   return (
     <Popover

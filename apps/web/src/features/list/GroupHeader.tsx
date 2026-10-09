@@ -13,7 +13,7 @@ interface GroupHeaderProps {
   marker: GroupMarker;
   open: boolean;
   onToggle: () => void;
-  /** Header "+" (opens the inline add row); omitted where adding isn't possible. */
+  /** Header "+" (opens the quick-create modal with the group's fields). */
   onAdd?: () => void;
   /** Id of the group body, for aria-controls. */
   bodyId: string;

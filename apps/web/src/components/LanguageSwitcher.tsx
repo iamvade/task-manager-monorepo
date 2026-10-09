@@ -1,30 +1,13 @@
 import type { Locale } from '@kite/shared';
 import { useTranslation } from 'react-i18next';
-import { useUpdateMe } from '../api/auth';
-import { useAuth } from '../auth/useAuth';
-import { storeLanguage } from '../preferences';
 import { SegmentedControl, type SegmentOption } from './ui/SegmentedControl';
+import { useLanguage } from './useLanguage';
 
 // Language names are shown in their own language, never translated.
 const LANGUAGES: readonly SegmentOption<Locale>[] = [
   { value: 'mn', label: 'МН', lang: 'mn', title: 'Монгол' },
   { value: 'en', label: 'EN', lang: 'en', title: 'English' },
 ];
-
-function useLanguage() {
-  const { i18n } = useTranslation();
-  const { me } = useAuth();
-  const updateMe = useUpdateMe();
-  const current: Locale = i18n.language === 'en' ? 'en' : 'mn';
-
-  function change(locale: Locale) {
-    if (locale === current) return;
-    void i18n.changeLanguage(locale);
-    storeLanguage(locale);
-    if (me) updateMe.mutate({ locale });
-  }
-  return { current, change };
-}
 
 interface LanguageSwitcherProps {
   /** segmented = МН / EN radio group; cycle = one 36×28 button that flips (sidebar rail). */
