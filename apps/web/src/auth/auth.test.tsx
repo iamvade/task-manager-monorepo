@@ -69,9 +69,10 @@ describe('auth flow', () => {
     fireEvent.change(screen.getByLabelText('Нууц үг'), { target: { value: 'password123' } });
     fireEvent.click(screen.getByRole('button', { name: 'Нэвтрэх' }));
 
-    expect(
-      await screen.findByRole('heading', { level: 1, name: 'Миний ажлууд' }),
-    ).toBeInTheDocument();
+    // Retry until the page settles: the shell can re-render right after the redirect.
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { level: 1, name: 'Миний ажлууд' })).toBeInTheDocument();
+    });
     expect(router.state.location.pathname).toBe('/my-tasks');
     const loginCall = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST');
     expect(JSON.parse(loginCall?.[1]?.body as string)).toEqual({
