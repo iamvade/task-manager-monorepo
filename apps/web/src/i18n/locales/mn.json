@@ -247,7 +247,21 @@
     "subtasksDone_one": "Дэд ажил: {{done}}/{{count}} дууссан",
     "subtasksDone_other": "Дэд ажил: {{done}}/{{count}} дууссан",
     "dueOverdue": "{{date}} · Хугацаа хэтэрсэн",
-    "moreTags": "+{{count}}"
+    "moreTags": "+{{count}}",
+    "columnsBy": "Баганаар",
+    "moveFailed": "Ажлыг шилжүүлж чадсангүй",
+    "collapseColumn": "«{{status}}» баганыг хураах",
+    "expandColumn": "«{{status}}» баганыг дэлгэх",
+    "addTaskPlaceholder": "Ажлын нэр — Enter дарж нэмэх",
+    "dnd": {
+      "instructions": "Картыг авахын тулд Space дарна уу. Сумаар зөөж, Space дарж тавина, Esc дарж болино.",
+      "picked": "«{{title}}» ажлыг авлаа.",
+      "over": "«{{title}}» → {{status}}.",
+      "notOver": "«{{title}}» баганын гадна байна.",
+      "dropped": "«{{title}}» шилжлээ: {{status}}.",
+      "cancelled": "«{{title}}» шилжүүлэлтийг цуцаллаа."
+    },
+    "label": "{{project}} — самбар"
   },
   "drawer": {
     "closeToList": "Ажлыг хаагаад жагсаалт руу буцах",

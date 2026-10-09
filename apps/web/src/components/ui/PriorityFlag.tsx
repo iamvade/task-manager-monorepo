@@ -14,10 +14,12 @@ interface PriorityFlagProps {
   size?: 12 | 14;
   /** Show the translated priority name after the flag (List cell: 13px, --text-2). */
   showLabel?: boolean;
+  /** Accessible name of the bare flag; defaults to the priority name. */
+  label?: string;
 }
 
 /** Flag icon: filled for urgent/high/medium, outline for low and none. */
-export function PriorityFlag({ priority, size = 14, showLabel }: PriorityFlagProps) {
+export function PriorityFlag({ priority, size = 14, showLabel, label }: PriorityFlagProps) {
   const { t } = useTranslation();
   const color = COLOR[priority];
   const filled = priority === 'urgent' || priority === 'high' || priority === 'medium';
@@ -30,7 +32,7 @@ export function PriorityFlag({ priority, size = 14, showLabel }: PriorityFlagPro
       strokeLinecap="round"
       strokeLinejoin="round"
       role={showLabel ? undefined : 'img'}
-      aria-label={showLabel ? undefined : t(`priority.${priority}`)}
+      aria-label={showLabel ? undefined : (label ?? t(`priority.${priority}`))}
       aria-hidden={showLabel ? true : undefined}
       style={{ flex: 'none', stroke: color, fill: filled ? color : 'none' }}
     >

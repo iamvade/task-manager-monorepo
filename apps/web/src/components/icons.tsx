@@ -199,3 +199,19 @@ export const TrashIcon = make(
 );
 export const MoveIcon = make(<path d="M5 12h14M13 6l6 6-6 6" />);
 export const PencilIcon = make(<path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4" />);
+
+// Board.dc.html
+export const ColumnsIcon = make(
+  <>
+    <rect x="3" y="3" width="7" height="7" rx="1" />
+    <rect x="14" y="3" width="7" height="7" rx="1" />
+    <rect x="3" y="14" width="7" height="7" rx="1" />
+    <rect x="14" y="14" width="7" height="7" rx="1" />
+  </>,
+);
+export const DoneCircleIcon = make(
+  <>
+    <circle cx="12" cy="12" r="10" fill="currentColor" stroke="none" />
+    <path d="m7.5 12.5 3 3 6-6.5" stroke="#FFFFFF" strokeWidth="2.5" />
+  </>,
+);

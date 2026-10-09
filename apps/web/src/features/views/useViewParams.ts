@@ -1,6 +1,7 @@
 import { PRIORITIES, type Priority } from '@kite/shared';
 import { useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router';
+import { useCurrentView } from './useCurrentView';
 
 export const SORT_FIELDS = ['due', 'priority', 'created', 'manual'] as const;
 export type SortField = (typeof SORT_FIELDS)[number];
@@ -76,6 +77,8 @@ function pick<T extends string>(value: string | null, allowed: readonly T[], fal
 /** View state that lives in the URL so links are shareable: filters, sort, group. */
 export function useViewParams() {
   const [params, setParams] = useSearchParams();
+  // The board shows manual (column) order unless a sort is picked (Board.dc.html "Sort: Manual").
+  const defaultSort: SortField = useCurrentView() === 'board' ? 'manual' : 'due';
   const filters = useMemo(() => readFilters(params), [params]);
 
   const update = useCallback(
@@ -102,7 +105,8 @@ export function useViewParams() {
     sprintId: filters.sprint,
     hasFilterParams: FILTER_PARAMS.some((key) => params.has(key)),
     activeFilterCount: activeFilterFields(filters).length,
-    sort: pick(params.get('sort'), SORT_FIELDS, 'due'),
+    defaultSort,
+    sort: pick(params.get('sort'), SORT_FIELDS, defaultSort),
     group: pick(params.get('group'), GROUP_FIELDS, 'status'),
     update,
   };

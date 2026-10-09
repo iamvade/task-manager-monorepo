@@ -247,7 +247,21 @@
     "subtasksDone_one": "{{done}}/{{count}} subtask done",
     "subtasksDone_other": "{{done}}/{{count}} subtasks done",
     "dueOverdue": "{{date}} · Overdue",
-    "moreTags": "+{{count}}"
+    "moreTags": "+{{count}}",
+    "columnsBy": "Columns by",
+    "moveFailed": "Couldn't move the task",
+    "collapseColumn": "Collapse {{status}}",
+    "expandColumn": "Expand {{status}}",
+    "addTaskPlaceholder": "Task name — Enter to add",
+    "dnd": {
+      "instructions": "To pick up a card, press Space. Use the arrow keys to move it, Space to drop it in place, or Escape to cancel.",
+      "picked": "Picked up {{title}}.",
+      "over": "{{title}} is over {{status}}.",
+      "notOver": "{{title}} is not over a column.",
+      "dropped": "{{title}} was dropped in {{status}}.",
+      "cancelled": "Moving {{title}} was cancelled."
+    },
+    "label": "{{project}} board"
   },
   "drawer": {
     "closeToList": "Close task and return to list",

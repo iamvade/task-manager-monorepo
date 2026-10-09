@@ -385,6 +385,23 @@ Not drawn in TaskDetail.dc.html but needed by the same UI: editing states, menus
 | `history.deleted` | &lt;b>{{actor}}&lt;/b> deleted this task | &lt;b>{{actor}}&lt;/b> энэ ажлыг устгасан | History line |
 | `history.restored` | &lt;b>{{actor}}&lt;/b> restored this task | &lt;b>{{actor}}&lt;/b> энэ ажлыг сэргээсэн | History line |
 
+## `board` additions (phase 11, derived)
+
+| key | en | mn (draft) | where |
+|---|---|---|---|
+| `label` | {{project}} board | {{project}} — самбар | Board region aria-label |
+| `columnsBy` | Columns by | Баганаар | "Columns: Status" menu aria-label |
+| `moveFailed` | Couldn't move the task | Ажлыг шилжүүлж чадсангүй | Toast — move rolled back |
+| `collapseColumn` | Collapse {{status}} | «{{status}}» баганыг хураах | Column … menu |
+| `expandColumn` | Expand {{status}} | «{{status}}» баганыг дэлгэх | Column … menu / collapsed strip |
+| `addTaskPlaceholder` | Task name — Enter to add | Ажлын нэр — Enter дарж нэмэх | Column inline add input |
+| `dnd.instructions` | To pick up a card, press Space. Use the arrow keys to move it, Space to drop it in place, or Escape to cancel. | Картыг авахын тулд Space дарна уу. Сумаар зөөж, Space дарж тавина, Esc дарж болино. | Screen-reader drag announcement |
+| `dnd.picked` | Picked up {{title}}. | «{{title}}» ажлыг авлаа. | Screen-reader drag announcement |
+| `dnd.over` | {{title}} is over {{status}}. | «{{title}}» → {{status}}. | Screen-reader drag announcement |
+| `dnd.notOver` | {{title}} is not over a column. | «{{title}}» баганын гадна байна. | Screen-reader drag announcement |
+| `dnd.dropped` | {{title}} was dropped in {{status}}. | «{{title}}» шилжлээ: {{status}}. | Screen-reader drag announcement |
+| `dnd.cancelled` | Moving {{title}} was cancelled. | «{{title}}» шилжүүлэлтийг цуцаллаа. | Screen-reader drag announcement |
+
 ## Open questions
 
 1. **Unscheduled**: drafted "Огноогүй" (no date) rather than "Хуваарьгүй"; the hint uses "…хуваарьт оруулна уу". Pick one term.

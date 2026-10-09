@@ -151,6 +151,14 @@ Login, invite accept, Settings, ⌘K palette, shortcuts help, filter/sort/group 
 - Composer is sticky at the bottom of the scroll area (border-top `--border-subtle`); resting border `--border-control`, focused accent + ring. A sent comment appears at once (dimmed until saved) and scrolls into view.
 - Toasts (not designed): bottom center, inverted like the tooltip (`--tooltip-bg/fg`), radius 10, 13px, `--shadow-popover`, action in accent-ink-dark, × to dismiss, 5s.
 
+**Board (derived, phase 11)**:
+- Shares the List's URL filters and query cache (sort is client-side). Toolbar: Sort keeps its menu but defaults to Manual on the board (`sort` absent = manual there, due date on the List); Group becomes "Columns: Status" (single option for now). Dropping a card while sorted by another field clears `sort` so the dropped order shows.
+- Columns fill the remaining height; each card list scrolls on its own, the board scrolls sideways. Column "…" menu: Add task, Collapse/Expand; a collapsed column is a 44px strip (dot, count, vertical label), remembered per board (`board:p:<id>` in `collapsedGroups`). Done is open by default (unlike the List).
+- Inline add: the column's "+" or "+ Add task" opens a card-styled input (44px, accent border + ring) at the bottom; Enter adds and keeps it open, Esc/blur-empty closes.
+- Drag: cards never shift; the source stays as the ghost, the lifted copy follows the pointer, and the 116px placeholder shows where the card lands (hidden when the drop would be a no-op). Keyboard: Space picks up, ←/→ jump to the neighbouring column (same slot), ↑/↓ step through slots, Space/Enter drops, Esc cancels; screen-reader announcements are translated. A failed move rolls back with a "Couldn't move the task" toast.
+- Space board: columns are the 4 categories, each card starts with an 8px project dot + project name (12px muted); no drag and no inline add (statuses belong to each project), column menu only collapses.
+- Card assignee stacks ring in `--surface` (not `--bg`), max 3 + "+N". Card due tones: overdue 600 + "· Overdue", today 500, done muted, others `--text-3`.
+
 ### 2.6 PROMPTS.md vs designs (resolved; PROMPTS updated)
 - Checkbox is native square 16px with `accent-color` (not round).
 - List tags: all chips, clipped by the cell; "+N" only on Board.

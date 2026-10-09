@@ -3,6 +3,7 @@ import { Navigate, createBrowserRouter, type RouteObject } from 'react-router';
 import { RedirectIfAuthed, RequireAuth } from './auth/RouteGuards';
 import { RouteError } from './components/ErrorState';
 import { ListView, SpaceListView } from './features/list/ListView';
+import { BoardView, SpaceBoardView } from './features/board/BoardView';
 import { ProjectLayout } from './features/project/ProjectLayout';
 import { AppShell } from './features/shell/AppShell';
 import { SpaceLayout } from './features/space/SpaceLayout';
@@ -15,10 +16,10 @@ import { SettingsPage } from './pages/SettingsPage';
 import { TaskPage } from './pages/TaskPage';
 
 /** List / Board / Calendar children of the project and space routes. */
-const viewRoutes = (list: ReactElement): RouteObject[] => [
+const viewRoutes = (list: ReactElement, board: ReactElement): RouteObject[] => [
   { index: true, element: <Navigate to="list" replace /> },
   { path: 'list', element: list },
-  { path: 'board', element: <ViewPlaceholder view="board" /> },
+  { path: 'board', element: board },
   { path: 'calendar', element: <ViewPlaceholder view="calendar" /> },
 ];
 
@@ -42,12 +43,12 @@ export const routes: RouteObject[] = [
               {
                 path: '/p/:projectId',
                 element: <ProjectLayout />,
-                children: viewRoutes(<ListView />),
+                children: viewRoutes(<ListView />, <BoardView />),
               },
               {
                 path: '/s/:spaceId',
                 element: <SpaceLayout />,
-                children: viewRoutes(<SpaceListView />),
+                children: viewRoutes(<SpaceListView />, <SpaceBoardView />),
               },
               { path: '*', element: <Navigate to="/my-tasks" replace /> },
             ],

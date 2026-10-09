@@ -22,14 +22,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import type {
-  ProjectDetail,
-  Status,
-  Tag,
-  TaskListItem,
-  TaskStatusRef,
-  WorkspaceMember,
-} from '@kite/shared';
+import type { ProjectDetail, Status, Tag, TaskListItem, WorkspaceMember } from '@kite/shared';
 import {
   useCallback,
   useEffect,
@@ -43,7 +36,6 @@ import { useTranslation } from 'react-i18next';
 import {
   isTempTask,
   useCompleteTask,
-  useCreateTask,
   useDeleteTask,
   useMoveTask,
   useSetAssignees,
@@ -60,6 +52,7 @@ import { GroupHeader } from './GroupHeader';
 import { groupTasks, sortTasks, type TaskGroup } from './grouping';
 import { GRID_COLUMNS, isDone, ListContext, type ListActions } from './ListContext';
 import { placeInStatus } from './positions';
+import { statusRef, useCreateInStatus } from './useCreateInStatus';
 import { TaskRow } from './TaskRow';
 
 interface TaskTableProps {
@@ -78,12 +71,6 @@ interface TaskTableProps {
 }
 
 const GROUP_PREFIX = 'group:';
-const statusRef = (s: Status): TaskStatusRef => ({
-  id: s.id,
-  name: s.name,
-  category: s.category,
-  color: s.color,
-});
 
 function isEditable(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) return false;
@@ -140,9 +127,8 @@ export function TaskTable({
   const setAssigneesMutation = useSetAssignees();
   const setTagsMutation = useSetTags();
   const remove = useDeleteTask();
-  const create = useCreateTask(project?.id ?? '');
+  const createInStatus = useCreateInStatus(project, tasks, members);
   const { copied, copy } = useCopyLink();
-  const tempSeq = useRef(0);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [adding, setAdding] = useState<string | null>(initialAdding);
@@ -172,65 +158,11 @@ export function TaskTable({
   }
 
   function createIn(group: TaskGroup, title: string) {
-    if (!project || !statuses || !group.defaults) return;
+    if (!statuses || !group.defaults) return;
     const defaults = group.defaults;
     const status =
       statuses.find((s) => s.id === defaults.statusId) ?? firstOf('todo') ?? statuses[0];
-    if (!status) return;
-    const assignees = members
-      .filter((m) => defaults.assigneeIds?.includes(m.user.id))
-      .map(({ user: { id, name, initials, avatarColor } }) => ({
-        id,
-        name,
-        initials,
-        avatarColor,
-      }));
-    const now = new Date().toISOString();
-    tempSeq.current += 1;
-    const sprintId = view.sprintId;
-    create.mutate({
-      body: {
-        title,
-        statusId: status.id,
-        ...(defaults.priority ? { priority: defaults.priority } : {}),
-        ...(assignees.length ? { assigneeIds: assignees.map((a) => a.id) } : {}),
-        // Keep the new task inside the sprint the list is filtered to.
-        ...(sprintId ? { sprintId } : {}),
-        position: 'bottom',
-      },
-      optimistic: {
-        id: `temp-${String(tempSeq.current)}`,
-        key: `${project.key}-…`,
-        number: 0,
-        project: {
-          id: project.id,
-          spaceId: project.spaceId,
-          key: project.key,
-          name: project.name,
-          color: project.color,
-        },
-        status: statusRef(status),
-        title,
-        priority: defaults.priority ?? 'none',
-        startDate: null,
-        dueDate: null,
-        position: placeInStatus(
-          tasks.filter((x) => x.status.id === status.id),
-          '',
-          null,
-          null,
-        ).position,
-        sprintId,
-        completedAt: status.category === 'done' ? now : null,
-        createdAt: now,
-        updatedAt: now,
-        assignees,
-        tags: [],
-        subtaskProgress: { done: 0, total: 0 },
-        commentCount: 0,
-        attachmentCount: 0,
-      },
-    });
+    if (status) createInStatus(status, title, defaults);
   }
 
   const { params, update: updateParams } = view;
