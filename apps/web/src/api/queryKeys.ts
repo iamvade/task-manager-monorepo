@@ -19,4 +19,8 @@ export const queryKeys = {
   task: (ref: string) => ['tasks', 'detail', ref] as const,
   /** Drawer feed (history + comments, oldest first); under `tasks` so task writes refresh it. */
   taskActivity: (taskId: string) => ['tasks', 'activity', taskId] as const,
+  /** My Tasks (`GET /me/home`); under `tasks` so every task write refreshes it. */
+  home: (workspaceId: string) => ['tasks', 'home', workspaceId] as const,
+  /** "Show older activity" pages (`GET /me/activity`) after the home's first page. */
+  homeActivity: (workspaceId: string) => ['tasks', 'home', workspaceId, 'older'] as const,
 };

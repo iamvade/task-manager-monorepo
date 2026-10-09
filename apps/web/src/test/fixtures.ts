@@ -110,7 +110,8 @@ export const PROJECT = {
 export const unauthorized = () =>
   Response.json({ error: { code: 'UNAUTHORIZED', message: 'Sign in required' } }, { status: 401 });
 
-type Handler = (init?: RequestInit) => Response;
+/** A pending promise lets a test look at the optimistic state before the server answers. */
+type Handler = (init?: RequestInit) => Response | Promise<Response>;
 
 /** Stubs fetch with `"METHOD /api/v1/path"` handlers; unknown requests throw. */
 export function mockApi(handlers: Record<string, Handler>) {

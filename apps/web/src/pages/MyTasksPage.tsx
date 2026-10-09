@@ -1,8 +1,6 @@
-import { useTranslation } from 'react-i18next';
-import { PlaceholderPage } from './PlaceholderPage';
+import { MyTasksView } from '../features/my-tasks/MyTasksView';
 
 /** My Tasks home (phase 13). */
 export function MyTasksPage() {
-  const { t } = useTranslation();
-  return <PlaceholderPage title={t('shell.myTasks')} />;
+  return <MyTasksView />;
 }

@@ -6,6 +6,7 @@ import i18n from '../i18n';
 import { createQueryClient } from '../queryClient';
 import { routes } from '../router';
 import { ME, SIDEBAR, WORKSPACE_ID, mockApi, unauthorized } from '../test/fixtures';
+import { homeHandlers } from '../test/home';
 import { AuthProvider } from './AuthProvider';
 
 function renderAt(path: string) {
@@ -60,6 +61,7 @@ describe('auth flow', () => {
       'GET /api/v1/auth/me': unauthorized,
       'POST /api/v1/auth/login': () => Response.json(ME),
       [`GET /api/v1/workspaces/${WORKSPACE_ID}/sidebar`]: () => Response.json(SIDEBAR),
+      ...homeHandlers(),
     });
     const router = renderAt('/login?next=%2Fmy-tasks');
 
@@ -71,7 +73,8 @@ describe('auth flow', () => {
 
     // Retry until the page settles: the shell can re-render right after the redirect.
     await waitFor(() => {
-      expect(screen.getByRole('heading', { level: 1, name: 'Миний ажлууд' })).toBeInTheDocument();
+      // My Tasks greets by first name ("Өглөөний мэнд, Anu", by time of day).
+      expect(screen.getByRole('heading', { level: 1, name: /мэнд, Anu$/ })).toBeInTheDocument();
     });
     expect(router.state.location.pathname).toBe('/my-tasks');
     const loginCall = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST');

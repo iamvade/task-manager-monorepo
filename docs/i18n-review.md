@@ -91,7 +91,7 @@ Source: `design/{Board,TaskDetail,MyTasks,Calendar,CreateTask,EmptyProject,Empty
 | `time.hoursAgo_other` | {{count}} hours ago | {{count}} цагийн өмнө | TaskDetail — relative time ("2 hours ago") |
 | `time.yesterdayAt` | Yesterday, {{time}} | Өчигдөр, {{time}} | TaskDetail — relative time ("Yesterday, 4:12 PM"); time via calendar.format.time |
 
-## `myTasks` (39)
+## `myTasks` (41)
 
 | key | en | mn (draft) | where |
 |---|---|---|---|
@@ -126,6 +126,8 @@ Source: `design/{Board,TaskDetail,MyTasks,Calendar,CreateTask,EmptyProject,Empty
 | `feed.assigned` | &lt;b>{{actor}}&lt;/b> assigned you &lt;task>{{task}}&lt;/task> | &lt;b>{{actor}}&lt;/b> таныг &lt;task>{{task}}&lt;/task> ажлын хариуцагчаар томилсон | MyTasks — feed row |
 | `feed.dueChanged` | &lt;b>{{actor}}&lt;/b> changed the due date of &lt;task>{{task}}&lt;/task> to {{date}} | &lt;b>{{actor}}&lt;/b> &lt;task>{{task}}&lt;/task> ажлын дуусах огноог {{date}} болгосон | MyTasks — feed row |
 | `feed.completed` | &lt;b>{{actor}}&lt;/b> completed &lt;task>{{task}}&lt;/task> | &lt;b>{{actor}}&lt;/b> &lt;task>{{task}}&lt;/task> ажлыг дуусгасан | MyTasks — feed row |
+| `feed.updated` | &lt;b>{{actor}}&lt;/b> updated &lt;task>{{task}}&lt;/task> | &lt;b>{{actor}}&lt;/b> &lt;task>{{task}}&lt;/task> ажлыг шинэчилсэн | MyTasks — feed row for changes without their own line (derived) |
+| `feed.empty` | No recent activity | Сүүлийн үйл ажиллагаа алга | MyTasks — feed panel with no items (derived) |
 | `feed.meta` | {{time}} · {{project}} | {{time}} · {{project}} | MyTasks — feed row meta ("2h ago · App Redesign") |
 | `feed.unread` | Unread | Уншаагүй | MyTasks — unread dot aria-label |
 | `showOlder` | Show older activity | Өмнөх үйл ажиллагааг харуулах | MyTasks — feed pagination link |

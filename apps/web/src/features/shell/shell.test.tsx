@@ -8,6 +8,7 @@ import { createQueryClient } from '../../queryClient';
 import { routes } from '../../router';
 import { useUiStore } from '../../stores/ui';
 import { ME, PROJECT_ID, SIDEBAR, SPRINT_ID, WORKSPACE_ID, mockApi } from '../../test/fixtures';
+import { homeHandlers } from '../../test/home';
 import { listHandlers } from '../../test/tasks';
 
 function renderAt(path: string) {
@@ -27,6 +28,7 @@ function api(extra: Record<string, (init?: RequestInit) => Response> = {}) {
     'GET /api/v1/auth/me': () => Response.json(ME),
     [`GET /api/v1/workspaces/${WORKSPACE_ID}/sidebar`]: () => Response.json(SIDEBAR),
     ...listHandlers(),
+    ...homeHandlers(),
     ...extra,
   });
 }

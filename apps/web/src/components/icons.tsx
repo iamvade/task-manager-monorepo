@@ -215,3 +215,15 @@ export const DoneCircleIcon = make(
     <path d="m7.5 12.5 3 3 6-6.5" stroke="#FFFFFF" strokeWidth="2.5" />
   </>,
 );
+export const ClockIcon = make(
+  <>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7v5l3 2" />
+  </>,
+);
+export const WarningIcon = make(
+  <>
+    <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
+    <path d="M12 9v4M12 17h.01" />
+  </>,
+);

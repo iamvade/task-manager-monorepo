@@ -47,6 +47,7 @@
   --background-color-segment-track-sidebar: var(--segment-track-sidebar);
   --background-color-segment-active: var(--segment-active);
   --background-color-danger-soft: var(--danger-soft);
+  --background-color-danger-card: var(--danger-card-bg);
   --background-color-tint-todo: var(--tint-todo-bg);
   --background-color-tint-todo-header: var(--tint-todo-header);
   --background-color-tint-progress: var(--tint-progress-bg);
@@ -82,6 +83,7 @@
   --border-color-control: var(--border-control);
   --border-color-subtle: var(--border-subtle);
   --border-color-strong: var(--border-strong);
+  --border-color-danger-card: var(--danger-card-border);
 }
 
 @theme static {

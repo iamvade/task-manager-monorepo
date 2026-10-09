@@ -445,8 +445,10 @@
       "assigned": "<b>{{actor}}</b> assigned you <task>{{task}}</task>",
       "dueChanged": "<b>{{actor}}</b> changed the due date of <task>{{task}}</task> to {{date}}",
       "completed": "<b>{{actor}}</b> completed <task>{{task}}</task>",
+      "updated": "<b>{{actor}}</b> updated <task>{{task}}</task>",
       "meta": "{{time}} · {{project}}",
-      "unread": "Unread"
+      "unread": "Unread",
+      "empty": "No recent activity"
     },
     "showOlder": "Show older activity",
     "time": {

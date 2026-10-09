@@ -5,6 +5,7 @@ import { CountBadge } from '../../components/ui/CountBadge';
 import { IconButton } from '../../components/ui/IconButton';
 import { PriorityFlag } from '../../components/ui/PriorityFlag';
 import { StatusDot } from '../../components/ui/StatusDot';
+import { cn } from '../../lib/cn';
 import type { GroupMarker } from './grouping';
 
 interface GroupHeaderProps {
@@ -17,6 +18,12 @@ interface GroupHeaderProps {
   onAdd?: () => void;
   /** Id of the group body, for aria-controls. */
   bodyId: string;
+  /** My Tasks Overdue: red label and count. */
+  tone?: 'danger';
+  /** 12px muted note after the toggle (My Tasks section hints). */
+  hint?: string;
+  /** Bottom border under the header (My Tasks sections). */
+  divided?: boolean;
 }
 
 function Marker({ marker }: { marker: GroupMarker }) {
@@ -51,10 +58,13 @@ export function GroupHeader({
   onToggle,
   onAdd,
   bodyId,
+  tone,
+  hint,
+  divided,
 }: GroupHeaderProps) {
   const { t } = useTranslation();
   return (
-    <div className="flex h-10 items-center gap-2 px-2">
+    <div className={cn('flex h-10 items-center gap-2 px-2', divided && 'border-b border-default')}>
       <button
         type="button"
         aria-expanded={open}
@@ -68,9 +78,12 @@ export function GroupHeader({
           style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)' }}
         />
         <Marker marker={marker} />
-        <span className="text-[14px] font-semibold">{label}</span>
-        <CountBadge value={count} />
+        <span className={cn('text-[14px] font-semibold', tone === 'danger' && 'text-danger')}>
+          {label}
+        </span>
+        <CountBadge value={count} tone={tone ?? 'neutral'} />
       </button>
+      {hint && <span className="truncate text-[12px] text-muted">{hint}</span>}
       {onAdd && (
         <IconButton
           label={t('table.addToGroup', { group: label })}

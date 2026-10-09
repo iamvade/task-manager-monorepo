@@ -51,6 +51,9 @@
   --danger: #c42b1c;
   --danger-soft: #fdecec;
   --danger-soft-fg: #b42318;
+  /* My Tasks overdue stat card */
+  --danger-card-bg: #fff8f7;
+  --danger-card-border: #f3d3cf;
   --warning: #b45309;
   --success: #16a34a;
   --online: #16a34a;
@@ -135,6 +138,8 @@
   --danger: #f87171;
   --danger-soft: rgba(248, 113, 113, 0.12);
   --danger-soft-fg: #f87171;
+  --danger-card-bg: rgba(248, 113, 113, 0.06);
+  --danger-card-border: rgba(248, 113, 113, 0.24);
   --warning: #fbbf24;
   --success: #22c55e;
   --online: #22c55e;

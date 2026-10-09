@@ -6,12 +6,29 @@ import { dueTone, formatDate, formatRange, relativeDay, todayFor, type DueTone }
 const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 const MONTHS = ['m1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7', 'm8', 'm9', 'm10', 'm11', 'm12'] as const;
 
+/** Templates under `calendar.format` that show one day with its weekday. */
+type DayTemplate = 'weekdayShortDate' | 'weekdayLongDate' | 'weekdayLongDateFull';
+
 /** Date helpers bound to the UI language and today in the user's time zone. */
 export function useDates() {
   const { t, i18n } = useTranslation();
   const { me } = useAuth();
   const locale: Locale = i18n.language === 'en' ? 'en' : 'mn';
   const today = todayFor(me?.preferences.timezone);
+
+  const formatDay = (template: DayTemplate, date: string) => {
+    const [, m = 1, d = 1] = date.split('-').map(Number);
+    const weekday = WEEKDAYS[weekdayIndex(date)] ?? 'mon';
+    const month = MONTHS[m - 1] ?? 'm1';
+    return t(`calendar.format.${template}`, {
+      weekdayShort: t(`calendar.weekdays.short.${weekday}`),
+      weekdayLong: t(`calendar.weekdays.long.${weekday}`),
+      monthShort: t(`calendar.months.short.${month}`),
+      monthLong: t(`calendar.months.long.${month}`),
+      m,
+      d,
+    });
+  };
 
   return {
     locale,
@@ -27,14 +44,8 @@ export function useDates() {
     },
     dueTone: (date: string, done?: boolean): DueTone => dueTone(date, today, done),
     /** "Thu, Oct 8" / "10-р сарын 8, Пү" (picker hints). */
-    formatWeekday: (date: string) => {
-      const [, m = 1, d = 1] = date.split('-').map(Number);
-      return t('calendar.format.weekdayShortDate', {
-        weekdayShort: t(`calendar.weekdays.short.${WEEKDAYS[weekdayIndex(date)] ?? 'mon'}`),
-        monthShort: t(`calendar.months.short.${MONTHS[m - 1] ?? 'm1'}`),
-        m,
-        d,
-      });
-    },
+    formatWeekday: (date: string) => formatDay('weekdayShortDate', date),
+    /** A `calendar.format.*` template filled with every part of `date`. */
+    formatDay: (template: DayTemplate, date: string) => formatDay(template, date),
   };
 }

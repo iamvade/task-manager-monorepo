@@ -8,6 +8,7 @@ import { createQueryClient } from '../../queryClient';
 import { routes } from '../../router';
 import { useUiStore } from '../../stores/ui';
 import { ME, PROJECT_ID, SIDEBAR, WORKSPACE_ID, mockApi } from '../../test/fixtures';
+import { homeHandlers } from '../../test/home';
 import { at, listHandlers } from '../../test/tasks';
 
 const EN_ME = { ...ME, preferences: { ...ME.preferences, locale: 'en' } };
@@ -17,6 +18,7 @@ function renderList() {
     'GET /api/v1/auth/me': () => Response.json(EN_ME),
     [`GET /api/v1/workspaces/${WORKSPACE_ID}/sidebar`]: () => Response.json(SIDEBAR),
     ...listHandlers(),
+    ...homeHandlers(),
   });
   const router = createMemoryRouter(routes, {
     initialEntries: [`/p/${PROJECT_ID}/list?sprint=none`],

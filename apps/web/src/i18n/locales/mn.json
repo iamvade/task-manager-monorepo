@@ -445,8 +445,10 @@
       "assigned": "<b>{{actor}}</b> таныг <task>{{task}}</task> ажлын хариуцагчаар томилсон",
       "dueChanged": "<b>{{actor}}</b> <task>{{task}}</task> ажлын дуусах огноог {{date}} болгосон",
       "completed": "<b>{{actor}}</b> <task>{{task}}</task> ажлыг дуусгасан",
+      "updated": "<b>{{actor}}</b> <task>{{task}}</task> ажлыг шинэчилсэн",
       "meta": "{{time}} · {{project}}",
-      "unread": "Уншаагүй"
+      "unread": "Уншаагүй",
+      "empty": "Сүүлийн үйл ажиллагаа алга"
     },
     "showOlder": "Өмнөх үйл ажиллагааг харуулах",
     "time": {
