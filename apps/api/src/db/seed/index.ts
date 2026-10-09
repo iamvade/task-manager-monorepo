@@ -105,7 +105,13 @@ export async function runSeed(db: Db, options: SeedOptions): Promise<void> {
   );
 }
 
-function buildRows(clock: Clock, pick: (text: Text) => string, passwordHash: string, lang: Locale) {
+/** Every seed row, built in memory (exported for tests). */
+export function buildRows(
+  clock: Clock,
+  pick: (text: Text) => string,
+  passwordHash: string,
+  lang: Locale,
+) {
   const workspaceId = uuidv7();
   const accountsCreated = clock.at([7, 1, '09:00']);
 
@@ -427,7 +433,8 @@ function buildRows(clock: Clock, pick: (text: Text) => string, passwordHash: str
       filename: a.filename,
       mime: a.mime,
       size: a.size,
-      storageKey: `seed/${t.row.id}/${id}/${a.filename}`,
+      // Same key shape as uploads; no file exists, so downloads answer 404 FILE_MISSING.
+      storageKey: `${workspaceId}/${t.row.id}/${id}`,
       createdAt: clock.at(a.at),
     } satisfies Row<typeof schema.attachments>;
   });
@@ -457,14 +464,14 @@ function buildRows(clock: Clock, pick: (text: Text) => string, passwordHash: str
           attachments.find((x) => x.taskId === t.row.id && x.filename === e.filename),
           `attachment ${e.filename}`,
         );
-        return { attachmentId: a.id, filename: a.filename };
+        return { attachment: { id: a.id, filename: a.filename } };
       }
       case 'subtask.completed': {
         const s = must(
           subtasks.find((x) => x.taskId === t.row.id && x.title === e.subtask),
           `subtask ${e.subtask}`,
         );
-        return { subtaskId: s.id, title: s.title };
+        return { subtask: { id: s.id, title: s.title } };
       }
     }
   }

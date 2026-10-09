@@ -4,6 +4,7 @@ import { paletteKeySchema, prioritySchema } from '../enums.js';
 import { richTextDocSchema, richTextNodeSchema } from '../rich-text.js';
 import { NOTHING_TO_UPDATE, moveSchema, nonEmptyPatch, userRefSchema } from './common.js';
 import { projectSummarySchema, sprintSchema, statusSchema } from './project.js';
+import { subtaskSchema } from './subtask.js';
 import { tagSchema } from './tag.js';
 
 /**
@@ -89,18 +90,6 @@ export const taskListItemSchema = z
   })
   .meta({ id: 'TaskListItem' });
 export type TaskListItem = z.infer<typeof taskListItemSchema>;
-
-export const subtaskSchema = z
-  .object({
-    id: z.uuid(),
-    title: z.string(),
-    assignee: userRefSchema.nullable(),
-    dueDate: dateSchema.nullable(),
-    done: z.boolean(),
-    position: z.string(),
-  })
-  .meta({ id: 'Subtask' });
-export type Subtask = z.infer<typeof subtaskSchema>;
 
 export const attachmentSchema = z
   .object({

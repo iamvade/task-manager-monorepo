@@ -4,12 +4,20 @@ import {
   taskListItemSchema,
   type CreateTask,
   type StatusCategory,
+  type WorkspaceRole,
 } from '@kite/shared';
 import { asc, eq } from 'drizzle-orm';
 import { expect } from 'vitest';
 import { z } from 'zod';
 import { activity } from '../src/db/schema/index.js';
-import { apiClient, createSpace, createUser, createWorkspace, login } from './fixtures.js';
+import {
+  addMember,
+  apiClient,
+  createSpace,
+  createUser,
+  createWorkspace,
+  login,
+} from './fixtures.js';
 import type { createTestApp } from './helpers.js';
 
 type Ctx = Awaited<ReturnType<typeof createTestApp>>;
@@ -52,8 +60,16 @@ export async function taskWorld(ctx: Ctx, ownerName = 'Anu Bold') {
       .where(eq(activity.taskId, taskId))
       .orderBy(asc(activity.createdAt), asc(activity.id));
 
+  /** Another signed-in user: a workspace member with `role`, or an outsider with `null`. */
+  const person = async (role: WorkspaceRole | null = 'member', name = 'Sara Khan') => {
+    const user = await createUser(ctx.db, { name });
+    if (role) await addMember(ctx.db, ws.id, user.id, role);
+    return { user, api: apiClient(ctx.app, await login(ctx.app, user.email)) };
+  };
+
   return {
     owner,
+    person,
     ws,
     api,
     space,

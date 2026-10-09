@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { MAX_ATTACHMENT_BYTES } from '@kite/shared';
 import { z } from 'zod';
 
 const envSchema = z.object({
@@ -15,6 +16,10 @@ const envSchema = z.object({
   TRUST_PROXY: z.stringbool().default(false),
   /** OpenAPI spec + Swagger UI at /api/docs. Unset = on everywhere except production. */
   API_DOCS: z.stringbool().optional(),
+  /** Attachment files (local disk storage); relative paths resolve from the working directory. */
+  UPLOADS_DIR: z.string().min(1).default('uploads'),
+  /** Largest accepted attachment, bytes. */
+  MAX_UPLOAD_BYTES: z.coerce.number().int().positive().default(MAX_ATTACHMENT_BYTES),
 });
 
 export type Config = z.infer<typeof envSchema>;

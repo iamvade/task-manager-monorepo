@@ -27,6 +27,25 @@ export function richTextToPlain(node: RichTextNode): string {
   return inner.join(blocks.includes(node.type ?? '') ? '\n' : '');
 }
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * User ids of the mention nodes in a document, deduplicated, in document order. Nodes without a
+ * well-formed id are skipped; callers still check the ids belong to workspace members.
+ */
+export function extractMentionIds(node: RichTextNode | null | undefined): string[] {
+  const ids = new Set<string>();
+  const walk = (n: RichTextNode) => {
+    if (n.type === 'mention') {
+      const id = n.attrs?.id;
+      if (typeof id === 'string' && UUID.test(id)) ids.add(id.toLowerCase());
+    }
+    for (const child of n.content ?? []) walk(child);
+  };
+  if (node) walk(node);
+  return [...ids];
+}
+
 const MAX_DEPTH = 40;
 const MAX_JSON_LENGTH = 200_000;
 

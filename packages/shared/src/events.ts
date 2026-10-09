@@ -8,5 +8,10 @@ export const TASK_EVENT_TYPES = [
   'task.moved',
   'task.deleted',
   'task.restored',
+  'subtask.changed',
+  'comment.created',
+  'comment.updated',
+  'comment.deleted',
+  'attachment.changed',
 ] as const;
 export type TaskEventType = (typeof TASK_EVENT_TYPES)[number];

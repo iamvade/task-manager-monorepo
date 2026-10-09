@@ -35,6 +35,10 @@ const tags = [
   { name: 'Sprints', description: 'Project sprints' },
   { name: 'Templates', description: 'Fill an empty project from a template' },
   { name: 'Tasks', description: 'Tasks: lists, detail, edits, moves and the trash' },
+  { name: 'Subtasks', description: 'Checklist items of a task' },
+  { name: 'Comments', description: 'Comment threads with @mentions' },
+  { name: 'Attachments', description: 'Files attached to tasks' },
+  { name: 'Activity', description: 'Task activity feed and following' },
   { name: 'Search', description: 'Command palette search' },
 ];
 

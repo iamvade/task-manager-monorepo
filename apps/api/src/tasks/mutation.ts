@@ -9,6 +9,10 @@ import type { EventActivity, TaskEvent } from '../events/bus.js';
 
 type ProjectRow = typeof projects.$inferSelect;
 export type TaskRow = typeof tasks.$inferSelect;
+type TaskEventExtra = Pick<
+  TaskEvent,
+  'assigneeIds' | 'commentId' | 'mentionedUserIds' | 'subtaskId' | 'attachmentId'
+>;
 type ActivityInsert = typeof activity.$inferInsert & EventActivity & { taskId: string };
 
 export interface TaskMutation {
@@ -23,7 +27,9 @@ export interface TaskMutation {
   /** Records an activity row; all rows are inserted just before commit. */
   log<T extends TaskActivityType>(taskId: string, type: T, payload: ActivityPayload<T>): void;
   /** Queues a bus event, emitted after commit with the task's activity rows attached. */
-  emit(type: TaskEventType, taskId: string, extra?: Pick<TaskEvent, 'assigneeIds'>): void;
+  emit(type: TaskEventType, taskId: string, extra?: TaskEventExtra): void;
+  /** Bumps the task's `updated_at` to `now` (sub-resource changes). */
+  touch(taskId: string): Promise<void>;
 }
 
 /**
@@ -80,6 +86,9 @@ export async function mutateTasks<T>(
           payload,
           createdAt: now,
         });
+      },
+      async touch(taskId) {
+        await tx.update(tasks).set({ updatedAt: now }).where(eq(tasks.id, taskId));
       },
       emit(type, taskId, extra) {
         queued.push({

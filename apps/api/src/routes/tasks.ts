@@ -3,6 +3,7 @@ import {
   apiErrorSchema,
   completeTaskSchema,
   createTaskSchema,
+  extractMentionIds,
   moveTaskSchema,
   parseTaskKey,
   richTextToPlain,
@@ -33,7 +34,6 @@ import {
   projects,
   sprints,
   taskAssignees,
-  taskFollowers,
   taskTags,
   tasks,
   tags,
@@ -42,6 +42,7 @@ import {
 import { httpError } from '../errors.js';
 import { listStatuses } from '../projects/statuses.js';
 import { buildTaskDetail } from '../tasks/detail.js';
+import { follow, workspaceMemberIds } from '../tasks/followers.js';
 import { stableJson } from '../tasks/json.js';
 import { getTaskListItem, listProjectTasks, listSpaceTasks } from '../tasks/list.js';
 import { mutateTasks } from '../tasks/mutation.js';
@@ -151,7 +152,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Tasks'],
         summary: 'Create a task',
         description:
-          'Takes the next number of the project (`APP-143`). Defaults: the first To Do status, no priority, at the end of the status (`position: "top"` for the top). Assignees must be workspace members, tags workspace tags, status and sprint of this project (400 `INVALID_REFERENCE`). The creator and assignees follow the task.',
+          'Takes the next number of the project (`APP-143`). Defaults: the first To Do status, no priority, at the end of the status (`position: "top"` for the top). Assignees must be workspace members, tags workspace tags, status and sprint of this project (400 `INVALID_REFERENCE`). The creator, assignees and members @mentioned in the description follow the task.',
         params: z.object({ projectId: z.uuid() }),
         body: createTaskSchema,
         response: { 201: taskDetailSchema, 400: err, 401: err, 404: err },
@@ -217,13 +218,18 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
               .insert(taskTags)
               .values(tagRows.map((t) => ({ taskId: task.id, tagId: t.id })));
           }
-          const followerIds = new Set([user.id, ...assignees.map((a) => a.id)]);
-          await tx
-            .insert(taskFollowers)
-            .values([...followerIds].map((userId) => ({ taskId: task.id, userId })));
+          const mentioned = await workspaceMemberIds(
+            tx,
+            workspaceId,
+            extractMentionIds(description),
+          );
+          await follow(tx, task.id, [user.id, ...assignees.map((a) => a.id), ...mentioned]);
 
           m.log(task.id, 'task.created', { status: statusSnapshot(status) });
-          m.emit('task.created', task.id, { assigneeIds: assignees.map((a) => a.id) });
+          m.emit('task.created', task.id, {
+            assigneeIds: assignees.map((a) => a.id),
+            mentionedUserIds: mentioned,
+          });
           return task.id;
         },
       );
@@ -239,7 +245,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Tasks'],
         summary: 'Update a task',
         description:
-          'Title, description (TipTap JSON; its plain text is stored for search), status, priority, start/due date, sprint. Writes one activity row per changed field; unchanged values are ignored. A new status puts the task at the end of that status; entering a done status sets `completedAt`, leaving it clears it.',
+          'Title, description (TipTap JSON; its plain text is stored for search, newly @mentioned members follow the task), status, priority, start/due date, sprint. Writes one activity row per changed field; unchanged values are ignored. A new status puts the task at the end of that status; entering a done status sets `completedAt`, leaving it clears it.',
         params: taskParams,
         body: updateTaskSchema,
         response: { 200: taskDetailSchema, 400: err, 401: err, 404: err },
@@ -253,6 +259,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         const { tx } = m;
         const task = await m.lockTask(request.params.taskId);
         const patch: Partial<typeof tasks.$inferInsert> = {};
+        let mentioned: string[] = [];
 
         if (body.title !== undefined && body.title !== task.title) {
           patch.title = body.title;
@@ -265,6 +272,13 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           patch.description = body.description;
           patch.descriptionText = body.description ? richTextToPlain(body.description) : '';
           m.log(task.id, 'description.changed', {});
+          const before = new Set(extractMentionIds(task.description));
+          mentioned = await workspaceMemberIds(
+            tx,
+            m.project.workspaceId,
+            extractMentionIds(body.description).filter((id) => !before.has(id)),
+          );
+          await follow(tx, task.id, mentioned);
         }
         if (body.priority !== undefined && body.priority !== task.priority) {
           patch.priority = body.priority;
@@ -302,7 +316,11 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           .update(tasks)
           .set({ ...patch, updatedAt: m.now })
           .where(eq(tasks.id, task.id));
-        m.emit('task.updated', task.id);
+        m.emit(
+          'task.updated',
+          task.id,
+          mentioned.length > 0 ? { mentionedUserIds: mentioned } : {},
+        );
       });
       return buildTaskDetail(app.db, request.params.taskId);
     },
@@ -403,7 +421,11 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         if (added.length > 0) {
           const rows = added.map((u) => ({ taskId: task.id, userId: u.id }));
           await tx.insert(taskAssignees).values(rows);
-          await tx.insert(taskFollowers).values(rows).onConflictDoNothing();
+          await follow(
+            tx,
+            task.id,
+            added.map((u) => u.id),
+          );
         }
         for (const user of removed) m.log(task.id, 'assignee.removed', { user });
         for (const user of added) m.log(task.id, 'assignee.added', { user });

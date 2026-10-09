@@ -116,7 +116,8 @@ export const subtasks = pgTable(
     done: boolean('done').notNull().default(false),
     position: position('position').notNull(),
   },
-  (t) => [index('subtasks_task_id_position_idx').on(t.taskId, t.position)],
+  // Positions are allocated under the project lock, like task positions.
+  (t) => [uniqueIndex('subtasks_task_id_position_unique').on(t.taskId, t.position)],
 );
 
 /** Creator, assignees and commenters follow automatically. */

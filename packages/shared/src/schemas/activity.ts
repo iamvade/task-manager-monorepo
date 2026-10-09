@@ -20,9 +20,11 @@ export type StatusSnapshot = z.infer<typeof statusSnapshotSchema>;
 const userSnapshot = z.object({ id: z.uuid(), name: z.string() });
 const tagSnapshot = z.object({ id: z.uuid(), name: z.string(), color: paletteKeySchema });
 const sprintSnapshot = z.object({ id: z.uuid(), name: z.string() }).nullable();
+const subtaskSnapshot = z.object({ id: z.uuid(), title: z.string() });
+const attachmentSnapshot = z.object({ id: z.uuid(), filename: z.string() });
 const change = <T extends z.ZodType>(value: T) => z.object({ from: value, to: value });
 
-/** Payload of each task activity type written by the tasks API. */
+/** Payload of each activity type the API writes. */
 export const activityPayloadSchemas = {
   'task.created': z.object({
     status: statusSnapshotSchema.optional(),
@@ -39,6 +41,12 @@ export const activityPayloadSchemas = {
   'assignee.removed': z.object({ user: userSnapshot }),
   'tag.added': z.object({ tag: tagSnapshot }),
   'tag.removed': z.object({ tag: tagSnapshot }),
+  'subtask.added': z.object({ subtask: subtaskSnapshot }),
+  'subtask.completed': z.object({ subtask: subtaskSnapshot }),
+  'attachment.added': z.object({ attachment: attachmentSnapshot }),
+  'attachment.removed': z.object({ attachment: attachmentSnapshot }),
+  /** The comment itself is shown in the feed; this row only dates it and feeds notifications. */
+  'comment.added': z.object({ commentId: z.uuid() }),
   'task.deleted': z.object({}),
   'task.restored': z.object({}),
 } as const satisfies Partial<Record<ActivityType, z.ZodType>>;

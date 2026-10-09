@@ -18,10 +18,21 @@ export interface TaskEvent {
   activities: EventActivity[];
   /** `task.created` only: the initial assignees (no `assignee.added` rows are written). */
   assigneeIds?: string[];
+  /** `comment.*`: the comment. */
+  commentId?: string;
+  /**
+   * Workspace members newly @mentioned: every mention of a new comment, mentions added by a
+   * comment edit, or mentions added to the description (`task.updated`).
+   */
+  mentionedUserIds?: string[];
+  /** `subtask.changed`: the subtask. */
+  subtaskId?: string;
+  /** `attachment.changed`: the attachment. */
+  attachmentId?: string;
   at: Date;
 }
 
-/** Every event on the bus; later phases add comment/subtask/notification events. */
+/** Every event on the bus; later phases add notification events. */
 export type DomainEvent = TaskEvent;
 export type DomainEventType = DomainEvent['type'];
 

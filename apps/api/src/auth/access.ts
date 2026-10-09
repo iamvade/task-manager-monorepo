@@ -1,8 +1,17 @@
 import type { WorkspaceRole } from '@kite/shared';
 import { and, eq } from 'drizzle-orm';
 import type { FastifyRequest } from 'fastify';
-import { projects, spaces, tags, tasks, workspaceMembers } from '../db/schema/index.js';
-import { httpError } from '../errors.js';
+import {
+  attachments,
+  comments,
+  projects,
+  spaces,
+  subtasks,
+  tags,
+  tasks,
+  workspaceMembers,
+} from '../db/schema/index.js';
+import { HttpError, httpError } from '../errors.js';
 import { requireAuth } from './plugin.js';
 
 const ROLE_RANK: Record<WorkspaceRole, number> = { member: 0, admin: 1, owner: 2 };
@@ -138,6 +147,51 @@ export async function loadTaskAccess(
     throw httpError(404, 'NOT_FOUND', 'Task not found');
   }
   return { ...row, workspaceId: row.project.workspaceId };
+}
+
+/** A subtask of a live task the caller can see; 404 otherwise. */
+export async function loadSubtaskAccess(request: FastifyRequest, subtaskId: string) {
+  const [subtask] = await request.server.db
+    .select()
+    .from(subtasks)
+    .where(eq(subtasks.id, subtaskId))
+    .limit(1);
+  if (!subtask) throw httpError(404, 'NOT_FOUND', 'Subtask not found');
+  return { ...(await childTaskAccess(request, subtask.taskId, 'Subtask')), subtask };
+}
+
+/** A live comment on a live task the caller can see; 404 otherwise. */
+export async function loadCommentAccess(request: FastifyRequest, commentId: string) {
+  const [comment] = await request.server.db
+    .select()
+    .from(comments)
+    .where(eq(comments.id, commentId))
+    .limit(1);
+  if (!comment || comment.deletedAt) throw httpError(404, 'NOT_FOUND', 'Comment not found');
+  return { ...(await childTaskAccess(request, comment.taskId, 'Comment')), comment };
+}
+
+/** An attachment of a live task the caller can see; 404 otherwise. */
+export async function loadAttachmentAccess(request: FastifyRequest, attachmentId: string) {
+  const [attachment] = await request.server.db
+    .select()
+    .from(attachments)
+    .where(eq(attachments.id, attachmentId))
+    .limit(1);
+  if (!attachment) throw httpError(404, 'NOT_FOUND', 'Attachment not found');
+  return { ...(await childTaskAccess(request, attachment.taskId, 'Attachment')), attachment };
+}
+
+/** `loadTaskAccess` for a task's child row; the 404 names the child, not the task. */
+async function childTaskAccess(request: FastifyRequest, taskId: string, what: string) {
+  try {
+    return await loadTaskAccess(request, taskId);
+  } catch (err) {
+    if (err instanceof HttpError && err.statusCode === 404) {
+      throw httpError(404, 'NOT_FOUND', `${what} not found`);
+    }
+    throw err;
+  }
 }
 
 /**

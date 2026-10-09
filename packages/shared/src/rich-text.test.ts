@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { richTextDocSchema, richTextToPlain } from './rich-text.js';
+import { extractMentionIds, richTextDocSchema, richTextToPlain } from './rich-text.js';
 
 describe('richTextToPlain', () => {
   it('flattens blocks, lists and mentions', () => {
@@ -57,5 +57,45 @@ describe('richTextDocSchema', () => {
     expect(richTextDocSchema.safeParse({ type: 'doc', content: [deep] }).success).toBe(false);
     const huge = { type: 'doc', content: [{ type: 'text', text: 'x'.repeat(300_000) }] };
     expect(richTextDocSchema.safeParse(huge).success).toBe(false);
+  });
+});
+
+describe('extractMentionIds', () => {
+  const SARA = '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b';
+  const DORJ = '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5c';
+  const mention = (id: unknown, label = 'X') => ({ type: 'mention', attrs: { id, label } });
+  const p = (...content: object[]) => ({ type: 'paragraph', content });
+
+  it('finds mentions anywhere in the document, in order, without duplicates', () => {
+    const doc = {
+      type: 'doc',
+      content: [
+        p({ type: 'text', text: 'Hi ' }, mention(DORJ), { type: 'text', text: ' and ' }),
+        {
+          type: 'bulletList',
+          content: [{ type: 'listItem', content: [p(mention(SARA), mention(DORJ))] }],
+        },
+        p(mention(SARA.toUpperCase())),
+      ],
+    };
+    expect(extractMentionIds(doc)).toEqual([DORJ, SARA]);
+  });
+
+  it('skips mention nodes without a valid id and other nodes with ids', () => {
+    const doc = {
+      type: 'doc',
+      content: [
+        p(mention(undefined), mention(42), mention('not-a-uuid'), mention(`${SARA} `)),
+        p({ type: 'text', text: 'x', attrs: { id: DORJ } }),
+        { type: 'image', attrs: { id: DORJ } },
+      ],
+    };
+    expect(extractMentionIds(doc)).toEqual([]);
+  });
+
+  it('handles empty and missing documents', () => {
+    expect(extractMentionIds({ type: 'doc' })).toEqual([]);
+    expect(extractMentionIds(null)).toEqual([]);
+    expect(extractMentionIds(undefined)).toEqual([]);
   });
 });

@@ -11,7 +11,7 @@ import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { requireWorkspaceMember } from '../auth/access.js';
 import { projects, statuses, tasks, users, workspaceMembers } from '../db/schema/index.js';
-import { userRefColumns } from '../tasks/detail.js';
+import { userRefColumns } from '../tasks/user-ref.js';
 import { escapeLike } from '../tasks/list.js';
 
 const err = apiErrorSchema;
