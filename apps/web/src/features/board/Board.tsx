@@ -18,7 +18,6 @@ import type { ProjectDetail, TaskListItem, WorkspaceMember } from '@kite/shared'
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMoveTask } from '../../api/tasks';
-import { toast } from '../../stores/toast';
 import { useUiStore } from '../../stores/ui';
 import { groupTasks, sortTasks, type TaskGroup } from '../list/grouping';
 import { placeInStatus } from '../list/positions';
@@ -38,6 +37,7 @@ import {
 } from './boardDrag';
 import { PLACEHOLDER_ID } from './DropPlaceholder';
 import { TaskCard } from './TaskCard';
+import { reportError } from '../../lib/mutationErrors';
 
 interface BoardProps {
   scope: ListScope;
@@ -207,8 +207,8 @@ export function Board({ scope, boardKey, label, tasks, project, members }: Board
     move.mutate(
       { task, status: statusRef(status), ...placement },
       {
-        onError: () => {
-          toast({ message: t('board.moveFailed'), tone: 'danger' });
+        onError: (err) => {
+          reportError(err, t('board.moveFailed'));
         },
       },
     );

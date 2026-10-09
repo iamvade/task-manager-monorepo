@@ -51,6 +51,7 @@ import { TagPicker } from '../pickers/TagPicker';
 import { useShellLocation } from '../shell/useShellLocation';
 import { buildOptimisticTask } from './optimisticTask';
 import { useOpenTask } from './useOpenTask';
+import { reportError } from '../../lib/mutationErrors';
 
 const HEADING_ID = 'quick-create-heading';
 
@@ -235,9 +236,9 @@ function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
             onClose();
           }
         },
-        onError: () => {
+        onError: (err) => {
           setPending(false);
-          toast({ message: t('create.failed'), tone: 'danger' });
+          reportError(err, t('create.failed'));
         },
       },
     );

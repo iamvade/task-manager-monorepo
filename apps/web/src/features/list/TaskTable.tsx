@@ -55,6 +55,7 @@ import { GRID_COLUMNS, isDone, ListContext, type ListActions } from './ListConte
 import { placeInStatus } from './positions';
 import { statusRef, useCreateInStatus } from './useCreateInStatus';
 import { TaskRow } from './TaskRow';
+import { toast } from '../../stores/toast';
 
 interface TaskTableProps {
   scope: ListScope;
@@ -145,6 +146,22 @@ export function TaskTable({
           position: task.position,
         };
     complete.mutate({ task, done, optimistic });
+    if (done) {
+      toast({
+        message: t('common.completed', { key: task.key }),
+        action: {
+          label: t('common.undo'),
+          // Back to where it was: the same status and place.
+          onClick: () => {
+            complete.mutate({
+              task: { ...task, status: optimistic.status, position: optimistic.position },
+              done: false,
+              optimistic: { status: task.status, position: task.position },
+            });
+          },
+        },
+      });
+    }
   }
 
   /** Quick-create defaults for a group's header "+" (project list: the group's fields). */

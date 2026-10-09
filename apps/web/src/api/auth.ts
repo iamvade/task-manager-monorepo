@@ -30,6 +30,8 @@ export function useMe() {
 export function useLogin() {
   const queryClient = useQueryClient();
   return useMutation({
+    // The login form shows errors inline.
+    meta: { errorToast: false },
     mutationFn: (body: LoginRequest) => apiSend('/auth/login', meResponseSchema, 'POST', body),
     onSuccess: (me) => queryClient.setQueryData(meQueryKey, me),
   });
@@ -38,6 +40,8 @@ export function useLogin() {
 export function useLogout() {
   const queryClient = useQueryClient();
   return useMutation({
+    // Signing out always succeeds locally; no error toast.
+    meta: { errorToast: false },
     mutationFn: () => apiSend('/auth/logout', z.null(), 'POST'),
     // Even if the server call fails the local state should forget the user.
     onSettled: () => {
@@ -66,6 +70,8 @@ export function useInvite(token: string) {
 export function useAcceptInvite(token: string) {
   const queryClient = useQueryClient();
   return useMutation({
+    // The accept page shows errors inline.
+    meta: { errorToast: false },
     mutationFn: (body: AcceptInvite) =>
       apiSend(`/invites/${encodeURIComponent(token)}/accept`, meResponseSchema, 'POST', body),
     onSuccess: (me) => {

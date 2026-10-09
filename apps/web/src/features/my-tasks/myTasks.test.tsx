@@ -7,6 +7,7 @@ import { AuthProvider } from '../../auth/AuthProvider';
 import i18n from '../../i18n';
 import { createQueryClient } from '../../queryClient';
 import { routes } from '../../router';
+import { useToastStore } from '../../stores/toast';
 import { useUiStore } from '../../stores/ui';
 import { ME, SIDEBAR, WORKSPACE_ID, mockApi } from '../../test/fixtures';
 import { HOME, HOME_NOW, OLDER_FEED, OVERDUE, TODAY } from '../../test/home';
@@ -45,6 +46,7 @@ describe('My Tasks', () => {
   beforeEach(async () => {
     localStorage.clear();
     useUiStore.setState({ collapsedGroups: {}, lastWorkspaceId: null });
+    useToastStore.setState({ toasts: [] });
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(HOME_NOW);
     await i18n.changeLanguage('en');
@@ -183,6 +185,32 @@ describe('My Tasks', () => {
     const rows = within(section('Overdue')).getAllByRole('row');
     expect(rows).toHaveLength(2);
     expect(within(at(rows, 0)).getByRole('checkbox')).toBeChecked();
+  });
+
+  it('undoes a completion from the toast', async () => {
+    const { fetchMock } = renderHome({
+      [`POST /api/v1/tasks/${TODAY[0].id}/complete`]: (init) =>
+        Response.json(
+          makeTask(
+            completed,
+            (JSON.parse(init?.body as string) as { done: boolean }).done ? 'done' : 'todo',
+          ),
+        ),
+    });
+    await screen.findByRole('heading', { level: 1 });
+
+    fireEvent.click(checkbox(completed));
+    expect(await screen.findByText(`${TODAY[0].key} completed`)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+    await waitFor(() => {
+      expect(checkbox(completed)).not.toBeChecked();
+    });
+    const bodies = fetchMock.mock.calls
+      .filter(([, init]) => init?.method === 'POST')
+      .map(([, init]) => JSON.parse(init?.body as string) as unknown);
+    await waitFor(() => {
+      expect(bodies).toEqual([{ done: true }, { done: false }]);
+    });
   });
 
   it('rolls back when completing fails', async () => {

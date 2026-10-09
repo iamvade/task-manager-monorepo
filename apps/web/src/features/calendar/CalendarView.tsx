@@ -23,7 +23,6 @@ import {
 import { useAuth } from '../../auth/useAuth';
 import { ErrorState } from '../../components/ErrorState';
 import { useDates, WEEKDAYS } from '../../lib/useDates';
-import { toast } from '../../stores/toast';
 import { useUiStore } from '../../stores/ui';
 import { toTaskQuery, type ListScope } from '../views/taskQuery';
 import { useViewParams } from '../views/useViewParams';
@@ -41,6 +40,7 @@ import { Pill } from './CalendarPill';
 import { CalendarToolbar, type CalendarProject } from './CalendarToolbar';
 import { MonthDay, WeekDay } from './DayCell';
 import { UnscheduledCard, UnscheduledPanel } from './UnscheduledPanel';
+import { reportError } from '../../lib/mutationErrors';
 
 const NO_HIDDEN: readonly string[] = [];
 
@@ -208,8 +208,8 @@ function Calendar({ scope, scopeId, project, space }: CalendarProps) {
     update.mutate(
       { task, patch: { dueDate } },
       {
-        onError: () => {
-          toast({ message: t('calendar.moveFailed'), tone: 'danger' });
+        onError: (err) => {
+          reportError(err, t('calendar.moveFailed'));
         },
       },
     );

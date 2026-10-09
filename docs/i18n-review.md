@@ -486,6 +486,19 @@ Rows reuse the `myTasks.feed.*` sentences with the task key in `<task>` (the tit
 | `members.you` | (you) | (та) |
 | `members.changeRole` | Change role of {{name}} | Үүрэг өөрчлөх: {{name}} |
 
+## `errors` + toasts (phase 15, derived)
+
+| key | en | mn (draft) |
+|---|---|---|
+| `errors.NOT_FOUND` | This item no longer exists or you lost access to it. | Энэ зүйл устсан эсвэл танд хандах эрх алга. |
+| `errors.FORBIDDEN` | You don’t have permission to do that. | Танд үүнийг хийх эрх алга. |
+| `errors.RATE_LIMITED` | Too many attempts. Wait a minute and try again. | Хэт олон оролдлого. Нэг минут хүлээгээд дахин оролдоно уу. |
+| `errors.FILE_TOO_LARGE` | That file is too large (25 MB max). | Файл хэт том байна (дээд тал нь 25 MB). |
+| `errors.FILE_TYPE_BLOCKED` | That file type isn’t allowed. | Энэ төрлийн файл зөвшөөрөгдөхгүй. |
+| `errors.UNAUTHORIZED` | Your session ended. Sign in again. | Таны нэвтрэлт дууссан. Дахин нэвтэрнэ үү. |
+| `errors.network` | Can’t reach the server. Check your connection and try again. | Сервертэй холбогдож чадсангүй. Холболтоо шалгаад дахин оролдоно уу. |
+| `common.completed` | {{key}} completed | {{key}} дууслаа |
+
 ## Open questions
 
 1. **Unscheduled**: drafted "Огноогүй" (no date) rather than "Хуваарьгүй"; the hint uses "…хуваарьт оруулна уу". Pick one term.

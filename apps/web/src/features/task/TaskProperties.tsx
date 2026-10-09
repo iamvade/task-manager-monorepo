@@ -146,9 +146,6 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
             );
           }
         },
-        onError: () => {
-          toast({ message: t('common.genericError'), tone: 'danger' });
-        },
       },
     );
   }

@@ -74,6 +74,8 @@ export function useInvites(workspaceId: string | undefined, enabled = true) {
 export function useCreateInvite(workspaceId: string) {
   const queryClient = useQueryClient();
   return useMutation({
+    // The invite form shows errors inline.
+    meta: { errorToast: false },
     mutationFn: (body: CreateInvite) =>
       apiSend(`/workspaces/${workspaceId}/invites`, inviteSchema, 'POST', body),
     onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.invites(workspaceId) }),

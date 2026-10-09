@@ -55,6 +55,8 @@ export function useToggleFavorite(project: Pick<ProjectDetail, 'id' | 'workspace
 export function useApplyTemplate(project: Pick<ProjectDetail, 'id' | 'workspaceId'>) {
   const queryClient = useQueryClient();
   return useMutation({
+    // The template cards show errors inline.
+    meta: { errorToast: false },
     mutationFn: (templateId: TemplateId) =>
       apiSend(`/projects/${project.id}/from-template`, applyTemplateResponseSchema, 'POST', {
         templateId,

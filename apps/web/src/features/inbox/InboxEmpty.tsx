@@ -50,12 +50,12 @@ export function InboxEmpty({ tab, archivedCount }: { tab: InboxTab; archivedCoun
             {t('inbox.empty.viewArchived', { count: archivedCount })}
           </Link>
         )}
-        <p className="m-0 mt-4 flex flex-wrap items-center justify-center gap-1.5 text-[12px] text-muted">
+        <p className="m-0 mt-4 text-[12px] leading-6 text-muted">
           <Trans
             i18nKey="inbox.empty.tip"
             components={{
               kbd: (
-                <kbd className="rounded-[4px] border border-b-2 border-control bg-control px-1.5 font-sans text-[11px] leading-[18px] text-2" />
+                <kbd className="mx-0.5 inline-block rounded-[4px] border border-b-2 border-control bg-control px-1.5 font-sans text-[11px] leading-[18px] text-2" />
               ),
             }}
           />

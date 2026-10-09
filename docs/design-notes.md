@@ -266,6 +266,21 @@ Primitives in `apps/web/src/components/ui`, composites in feature folders. `Pale
 | `FieldChip` | `leading`, `label`, `kbd`, `active`, `onClick` | quick create |
 | `TemplateCard` | `icon`, `color`, `name`, `description`, `onClick` | empty project |
 
+## 4. Phase 15 polish — what doesn't match exactly
+
+Checked every screen in mn/en × light/dark at 1440px, plus 1024px and 820px content widths with an overflow probe (no element spills its box; long Mongolian labels truncate with a title or wrap). Remaining differences:
+
+- **Populated Inbox, Settings, toasts**: not designed. Inbox rows reuse the My Tasks feed row (task named by key + title); Settings uses the derived-UI rules (rows of label + hint / control, `SegmentedControl`, `Switch`, popover pickers).
+- **Inbox quote on hover**: the snippet's `--bg-sidebar` box and the row hover (`--bg-subtle`) are 1–2 steps apart, so the box nearly disappears on hover (same as the My Tasks feed in the design).
+- **Inbox tip**: the design lays "press G then I" out with `flex; gap: 6px`, which puts a gap before the Mongolian comma ("G ,"); rendered as inline text instead.
+- **Dark mode outside List**: only ListDark is drawn; other screens use the dark tokens as-is.
+- **Board toolbar under ~900px**: "+ New task" wraps to a second toolbar line (no overflow).
+- **My Tasks stat card (mn)**: "Өмнөх долоо хоногоос +9" wraps to two lines next to the week bars at ≤1100px.
+- **Time zone picker**: opens at the top of the list (search to find a zone) rather than scrolled to the current one.
+- **Sidebar badge sync**: updates instantly for my own inbox actions and on refetch; other people's actions arrive with realtime (phase 16).
+- **Undo**: task delete, task complete (List, drawer, My Tasks) and archive notification. "Mark all as read" has no undo (no mark-unread endpoint).
+- **Mongolian copy** for Inbox additions, Settings and error toasts is drafted (see `docs/i18n-review.md`).
+
 ## Appendix A — Visual reference
 
 ### A.1 Palette keys (light → dark; "—" = not drawn, derive)

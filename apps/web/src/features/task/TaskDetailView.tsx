@@ -21,6 +21,7 @@ import { TaskDescription } from './TaskDescription';
 import { TaskHeader } from './TaskHeader';
 import { TaskProperties } from './TaskProperties';
 import { TaskTitle } from './TaskTitle';
+import { reportError } from '../../lib/mutationErrors';
 
 interface TaskDetailViewProps {
   taskKey: string;
@@ -109,15 +110,14 @@ function LoadedTask({
           uploadFile(file, {
             onError: (err) => {
               const code = err instanceof ApiError ? err.code : '';
-              toast({
-                message:
-                  code === 'FILE_TOO_LARGE'
-                    ? t('drawer.fileTooLarge', { name: file.name })
-                    : code === 'FILE_TYPE_BLOCKED'
-                      ? t('drawer.fileBlocked', { name: file.name })
-                      : t('drawer.uploadFailed', { name: file.name }),
-                tone: 'danger',
-              });
+              reportError(
+                err,
+                code === 'FILE_TOO_LARGE'
+                  ? t('drawer.fileTooLarge', { name: file.name })
+                  : code === 'FILE_TYPE_BLOCKED'
+                    ? t('drawer.fileBlocked', { name: file.name })
+                    : t('drawer.uploadFailed', { name: file.name }),
+              );
             },
           });
         }

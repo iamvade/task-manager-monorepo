@@ -5,6 +5,7 @@ import { useUpdateTask } from '../../api/tasks';
 import { RichTextEditor } from '../../components/editor/RichTextEditor';
 import { CheckIcon } from '../../components/icons';
 import { useTaskView } from './TaskContext';
+import { markErrorHandled } from '../../lib/mutationErrors';
 
 const SAVE_DELAY = 800;
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
@@ -38,7 +39,9 @@ export function TaskDescription() {
         onSuccess: () => {
           setState('saved');
         },
-        onError: () => {
+        onError: (err) => {
+          // The editor shows "Couldn't save" itself.
+          markErrorHandled(err);
           pending.current ??= doc;
           setState('error');
         },

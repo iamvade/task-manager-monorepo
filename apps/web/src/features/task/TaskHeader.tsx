@@ -75,18 +75,14 @@ export function TaskHeader({ onMoveToProject }: TaskHeaderProps) {
             },
           });
         },
-        onError: () => {
-          toast({ message: t('common.genericError'), tone: 'danger' });
-        },
       },
     );
   }
 
   function onDelete() {
     const { key } = task;
-    const failed = () => {
-      toast({ message: t('common.genericError'), tone: 'danger' });
-    };
+    // The error toast comes from the mutation cache.
+    const failed = () => undefined;
     // Promises, not per-call callbacks: the drawer unmounts before the server answers.
     remove
       .mutateAsync(task)
@@ -123,21 +119,25 @@ export function TaskHeader({ onMoveToProject }: TaskHeaderProps) {
         onClick={() => {
           // Completing goes to the first Done status; reopening is decided by the server.
           const target = done ? undefined : project?.statuses.find((s) => s.category === 'done');
-          complete.mutate({
-            task,
-            done: !done,
-            optimistic: {
-              status: target
-                ? {
-                    id: target.id,
-                    name: target.name,
-                    category: target.category,
-                    color: target.color,
-                  }
-                : task.status,
-              position: task.position,
-            },
-          });
+          const status = target
+            ? { id: target.id, name: target.name, category: target.category, color: target.color }
+            : task.status;
+          complete.mutate({ task, done: !done, optimistic: { status, position: task.position } });
+          if (!done) {
+            toast({
+              message: t('common.completed', { key: task.key }),
+              action: {
+                label: t('common.undo'),
+                onClick: () => {
+                  complete.mutate({
+                    task: { ...task, status },
+                    done: false,
+                    optimistic: { status: task.status, position: task.position },
+                  });
+                },
+              },
+            });
+          }
         }}
         className="text-2"
       >

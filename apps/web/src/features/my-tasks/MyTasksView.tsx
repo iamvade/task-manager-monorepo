@@ -1,5 +1,5 @@
 import { addDays, type ActivityFeedItem, type Home, type MyTask } from '@kite/shared';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCompleteMyTask, useHome, useOlderActivity } from '../../api/home';
 import { SECTION_IDS, withRow, type KeptRow, type SectionId } from '../../api/homeCache';
@@ -90,11 +90,26 @@ function HomeBody({ workspaceId, home }: { workspaceId: string; home: Home }) {
       {
         onError: () => {
           setKept(({ [task.id]: _, ...rest }) => rest);
-          toast({ message: t('common.genericError'), tone: 'danger' });
         },
       },
     );
+    if (done) {
+      toast({
+        message: t('common.completed', { key: task.key }),
+        action: {
+          label: t('common.undo'),
+          // Through the latest render's toggle, which knows the kept (struck-through) row.
+          onClick: () => {
+            toggleRef.current(section)(row.task, false);
+          },
+        },
+      });
+    }
   };
+  const toggleRef = useRef(toggle);
+  useEffect(() => {
+    toggleRef.current = toggle;
+  });
 
   const add = (dueDate?: string) => () => {
     openCreate({ assigneeId: me?.user.id, ...(dueDate ? { dueDate } : {}) });

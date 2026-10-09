@@ -41,7 +41,7 @@ export function NotificationRow({
       <button
         type="button"
         onClick={onOpen}
-        className="flex min-w-0 flex-1 gap-2.5 border-0 bg-transparent py-2.5 pr-2 pl-6 text-left"
+        className="flex min-w-0 flex-1 gap-2.5 border-0 bg-transparent py-2.5 pr-2 pl-6 text-left focus-visible:-outline-offset-2"
       >
         <Avatar user={n.actor} size={24} title={null} />
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">

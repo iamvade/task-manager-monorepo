@@ -22,7 +22,8 @@
     "notFoundBody": "This page doesn't exist or you don't have access to it.",
     "goToMyTasks": "Go to My Tasks",
     "comingSoon": "This screen is being built and arrives in an upcoming phase.",
-    "undo": "Undo"
+    "undo": "Undo",
+    "completed": "{{key}} completed"
   },
   "language": {
     "label": "Language"
@@ -796,5 +797,14 @@
       "you": "(you)",
       "changeRole": "Change role of {{name}}"
     }
+  },
+  "errors": {
+    "NOT_FOUND": "This item no longer exists or you lost access to it.",
+    "FORBIDDEN": "You don’t have permission to do that.",
+    "RATE_LIMITED": "Too many attempts. Wait a minute and try again.",
+    "FILE_TOO_LARGE": "That file is too large (25 MB max).",
+    "FILE_TYPE_BLOCKED": "That file type isn’t allowed.",
+    "UNAUTHORIZED": "Your session ended. Sign in again.",
+    "network": "Can’t reach the server. Check your connection and try again."
   }
 }

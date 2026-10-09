@@ -9,8 +9,8 @@ import { PaperclipIcon } from '../../../components/icons';
 import { Avatar } from '../../../components/ui/Avatar';
 import { IconButton } from '../../../components/ui/IconButton';
 import { cn } from '../../../lib/cn';
-import { toast } from '../../../stores/toast';
 import { useTaskView } from '../TaskContext';
+import { reportError } from '../../../lib/mutationErrors';
 
 interface CommentComposerProps {
   /** Reply to this top-level comment (inline thread composer). */
@@ -40,8 +40,8 @@ export function CommentComposer({ parentId, autoFocus, onDone }: CommentComposer
     create.mutate(
       { taskId: task.id, body, parentId, author: me, tempId: `temp-${crypto.randomUUID()}` },
       {
-        onError: () => {
-          toast({ message: t('drawer.commentFailed'), tone: 'danger' });
+        onError: (err) => {
+          reportError(err, t('drawer.commentFailed'));
           if (editorRef.current?.isEmpty) {
             editorRef.current.commands.setContent(body);
             setEmpty(false);
