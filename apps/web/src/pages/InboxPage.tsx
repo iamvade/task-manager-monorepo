@@ -1,8 +1,6 @@
-import { useTranslation } from 'react-i18next';
-import { PlaceholderPage } from './PlaceholderPage';
+import { InboxView } from '../features/inbox/InboxView';
 
 /** Inbox (phase 15). */
 export function InboxPage() {
-  const { t } = useTranslation();
-  return <PlaceholderPage title={t('shell.inbox')} />;
+  return <InboxView />;
 }

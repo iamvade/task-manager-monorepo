@@ -44,7 +44,15 @@ export function SidebarRail() {
       <RailLink to="/my-tasks" label={t('shell.myTasks')}>
         <MyTasksIcon size={16} />
       </RailLink>
-      <RailLink to="/inbox" label={t('shell.inbox')}>
+      <RailLink
+        to="/inbox"
+        label={t('shell.inbox')}
+        badge={
+          sidebar.data && sidebar.data.inboxUnreadCount > 0
+            ? t('shell.unread', { count: sidebar.data.inboxUnreadCount })
+            : undefined
+        }
+      >
         <InboxIcon size={16} />
       </RailLink>
       <div className="my-1 h-px w-6 bg-[var(--border)]" />
@@ -71,10 +79,13 @@ export function SidebarRail() {
 function RailLink({
   to,
   label,
+  badge,
   children,
 }: {
   to: string;
   label: string;
+  /** Accessible text of an accent dot in the corner ("3 unread"). */
+  badge?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -83,12 +94,19 @@ function RailLink({
         <NavLink
           {...props}
           to={to}
-          aria-label={label}
+          aria-label={badge ? `${label}, ${badge}` : label}
           className={({ isActive }) =>
-            cn(railButton, isActive && 'bg-accent-soft text-accent-ink hover:bg-accent-soft')
+            cn(
+              railButton,
+              'relative',
+              isActive && 'bg-accent-soft text-accent-ink hover:bg-accent-soft',
+            )
           }
         >
           {children}
+          {badge && (
+            <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-accent shadow-[0_0_0_2px_var(--bg-sidebar)]" />
+          )}
         </NavLink>
       )}
     </Tooltip>

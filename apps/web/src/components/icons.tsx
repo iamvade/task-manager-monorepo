@@ -246,3 +246,22 @@ export const GripIcon = make(
 export const DragHintIcon = make(
   <path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20" />,
 );
+export const BellIcon = make(
+  <>
+    <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+    <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+  </>,
+);
+export const CheckCheckIcon = make(<path d="M18 6 7 17l-5-5M22 10l-7.5 7.5L13 16" />);
+export const ArchiveIcon = make(
+  <>
+    <rect x="2" y="3" width="20" height="5" rx="1" />
+    <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M10 12h4" />
+  </>,
+);
+export const UnarchiveIcon = make(
+  <>
+    <rect x="2" y="3" width="20" height="5" rx="1" />
+    <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M9.5 14.5 12 12l2.5 2.5M12 12v6" />
+  </>,
+);

@@ -132,5 +132,35 @@ export const notificationRoutes: FastifyPluginCallbackZod = (app, _opts, done) =
     },
   );
 
+  app.post(
+    '/me/notifications/:notificationId/unarchive',
+    {
+      preHandler: app.authenticate,
+      schema: {
+        tags: ['Inbox'],
+        summary: 'Move a notification back to the inbox',
+        description:
+          'Undoes an archive; it stays read. Idempotent. 404 for anyone else’s notification.',
+        params,
+        response: { 204: z.null(), 401: err, 404: err },
+      },
+    },
+    async (request, reply) => {
+      const { user } = requireAuth(request);
+      const [row] = await app.db
+        .update(notifications)
+        .set({ archivedAt: null })
+        .where(
+          and(
+            eq(notifications.id, request.params.notificationId),
+            eq(notifications.userId, user.id),
+          ),
+        )
+        .returning({ id: notifications.id });
+      if (!row) throw httpError(404, 'NOT_FOUND', 'Notification not found');
+      return reply.code(204).send(null);
+    },
+  );
+
   done();
 };

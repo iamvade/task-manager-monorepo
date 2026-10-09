@@ -315,6 +315,13 @@ describe('notifications', () => {
       expect(archived.items.map((n) => n.id)).toEqual([second?.id]);
       expect(archived.items[0]?.readAt).not.toBeNull();
 
+      // Unarchive (undo) and archive again: it comes back read.
+      await w.call(w.sara.api, 'POST', `/me/notifications/${second?.id}/unarchive`, undefined, 204);
+      const restored = await w.inbox(w.sara.api);
+      expect(restored.counts).toEqual({ unread: 3, archived: 0 });
+      expect(restored.items.find((n) => n.id === second?.id)?.readAt).not.toBeNull();
+      await w.call(w.sara.api, 'POST', `/me/notifications/${second?.id}/archive`, undefined, 204);
+
       const sidebar = sidebarResponseSchema.parse(
         (await w.sara.api('GET', `/workspaces/${w.ws.id}/sidebar`)).json(),
       );
@@ -353,7 +360,7 @@ describe('notifications', () => {
       const w = await world();
       await w.createTask({ title: 'T', assigneeIds: [w.sara.user.id] });
       const [n] = await w.rows(w.sara.user.id);
-      for (const action of ['read', 'archive']) {
+      for (const action of ['read', 'archive', 'unarchive']) {
         const res = await w.dorj.api('POST', `/me/notifications/${n?.id}/${action}`);
         expect(res.statusCode).toBe(404);
       }

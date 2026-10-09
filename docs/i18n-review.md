@@ -404,6 +404,20 @@ Not drawn in TaskDetail.dc.html but needed by the same UI: editing states, menus
 | `dnd.dropped` | {{title}} was dropped in {{status}}. | «{{title}}» шилжлээ: {{status}}. | Screen-reader drag announcement |
 | `dnd.cancelled` | Moving {{title}} was cancelled. | «{{title}}» шилжүүлэлтийг цуцаллаа. | Screen-reader drag announcement |
 
+## `inbox` additions (phase 15, derived)
+
+Rows reuse the `myTasks.feed.*` sentences with the task key in `<task>` (the title follows it).
+
+| key | en | mn (draft) | where |
+|---|---|---|---|
+| `unarchive` | Move to inbox | Ирсэн мэдэгдэл рүү буцаах | Row action on archived rows |
+| `archived` | {{key}} archived | {{key}} архивлагдлаа | Toast after archiving (with Undo) |
+| `showOlder` | Show older notifications | Өмнөх мэдэгдлүүдийг харах | List footer |
+| `emptyTab.mentions` | No one has mentioned you yet | Таныг одоогоор хэн ч дурдаагүй байна | Mentions tab, empty |
+| `emptyTab.assigned` | No new assignments | Шинээр оноосон ажил алга | Assigned tab, empty |
+| `emptyTab.archived` | No archived notifications | Архивласан мэдэгдэл алга | Archived tab, empty |
+| `common.undo` | Undo | Буцаах | Toast action |
+
 ## Open questions
 
 1. **Unscheduled**: drafted "Огноогүй" (no date) rather than "Хуваарьгүй"; the hint uses "…хуваарьт оруулна уу". Pick one term.

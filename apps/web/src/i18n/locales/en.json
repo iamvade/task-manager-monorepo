@@ -21,7 +21,8 @@
     "notFoundTitle": "Not found",
     "notFoundBody": "This page doesn't exist or you don't have access to it.",
     "goToMyTasks": "Go to My Tasks",
-    "comingSoon": "This screen is being built and arrives in an upcoming phase."
+    "comingSoon": "This screen is being built and arrives in an upcoming phase.",
+    "undo": "Undo"
   },
   "language": {
     "label": "Language"
@@ -649,7 +650,15 @@
       "tip": "Tip: press <kbd>G</kbd> then <kbd>I</kbd> to jump here from anywhere"
     },
     "markRead": "Mark as read",
-    "archive": "Archive"
+    "archive": "Archive",
+    "unarchive": "Move to inbox",
+    "archived": "{{key}} archived",
+    "showOlder": "Show older notifications",
+    "emptyTab": {
+      "mentions": "No one has mentioned you yet",
+      "assigned": "No new assignments",
+      "archived": "No archived notifications"
+    }
   },
   "palette": {
     "label": "Command palette",
