@@ -134,7 +134,39 @@
   },
   "filters": {
     "sprintIs": "Sprint is",
-    "removeFilter": "Remove filter"
+    "removeFilter": "Remove filter",
+    "fields": {
+      "status": "Status",
+      "assignee": "Assignee",
+      "priority": "Priority",
+      "tag": "Tags",
+      "sprint": "Sprint",
+      "due": "Due date"
+    },
+    "is": {
+      "status": "Status is",
+      "assignee": "Assignee is",
+      "priority": "Priority is",
+      "tag": "Tags include",
+      "sprint": "Sprint is",
+      "due": "Due"
+    },
+    "me": "Me",
+    "clearAll": "Clear all",
+    "back": "Back to filters",
+    "dueFrom": "From",
+    "dueTo": "To",
+    "duePresets": {
+      "overdue": "Overdue",
+      "today": "Due today",
+      "thisWeek": "This week",
+      "nextWeek": "Next week"
+    },
+    "fromDate": "from {{date}}",
+    "untilDate": "until {{date}}",
+    "noSprints": "No sprints yet",
+    "searchPeople": "Search people",
+    "searchTags": "Search tags"
   },
   "summary": {
     "tasks_one": "{{count}} task · {{done}} done",
@@ -152,7 +184,24 @@
     "addTask": "Add task",
     "markComplete": "Mark {{name}} complete",
     "moreActions": "More actions for {{name}}",
-    "addToGroup": "Add task to {{group}}"
+    "addToGroup": "Add task to {{group}}",
+    "markIncomplete": "Mark {{name}} not complete",
+    "addTaskPlaceholder": "Task name — Enter to add, Esc to cancel",
+    "newTaskTitle": "New task title",
+    "noAssignee": "No assignee",
+    "noMatches": "No tasks match these filters",
+    "assigneeMore": "{{name}} +{{count}}",
+    "subtasks": "{{done}} of {{total}} subtasks done",
+    "comments_one": "{{count}} comment",
+    "comments_other": "{{count}} comments",
+    "setAssignee": "Assignee of {{name}}",
+    "setDue": "Due date of {{name}}",
+    "setPriority": "Priority of {{name}}",
+    "setTags": "Tags of {{name}}",
+    "open": "Open",
+    "reopen": "Reopen",
+    "delete": "Delete",
+    "deleteConfirm": "Delete “{{name}}”? You can restore it later."
   },
   "status": {
     "todo": "To Do",
@@ -176,7 +225,14 @@
   "picker": {
     "navigate": "navigate",
     "select": "select",
-    "clear": "unassign"
+    "clear": "unassign",
+    "projectTeam": "Project team",
+    "others": "Others",
+    "noDue": "No due date",
+    "priorityLabel": "Priority",
+    "tagsLabel": "Tags",
+    "dueLabel": "Due date",
+    "assigneeLabel": "Assignees"
   },
   "board": {
     "sortManual": "Sort: Manual",
@@ -267,7 +323,9 @@
       "hoursAgo_one": "{{count}} hour ago",
       "hoursAgo_other": "{{count}} hours ago",
       "yesterdayAt": "Yesterday, {{time}}"
-    }
+    },
+    "loadError": "Couldn't load this task.",
+    "dialogLabel": "Task {{key}}"
   },
   "myTasks": {
     "allSpaces": "All spaces",

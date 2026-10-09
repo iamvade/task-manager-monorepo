@@ -7,6 +7,7 @@ import { useCurrentView } from '../views/useCurrentView';
 import { useViewParams } from '../views/useViewParams';
 import { FilterStrip } from './FilterStrip';
 import { ProjectHeader } from './ProjectHeader';
+import { TaskDrawer } from '../task/TaskDrawer';
 
 /** /p/:projectId/* — project top bar + filter strip around the routed view. */
 export function ProjectLayout() {
@@ -28,8 +29,9 @@ export function ProjectLayout() {
   return (
     <>
       <ProjectHeader project={project.data} view={view} />
-      <FilterStrip project={project.data} />
+      {project.data.taskCount > 0 && <FilterStrip project={project.data} />}
       <Outlet context={project.data} />
+      <TaskDrawer />
     </>
   );
 }

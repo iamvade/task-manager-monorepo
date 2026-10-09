@@ -100,6 +100,10 @@ describe('listing tasks', () => {
       'Checkout page — responsive layout',
       'Release notes 100%_done',
     ]);
+    expect(await t('?statusCategory=in_progress&statusCategory=done')).toEqual([
+      'Checkout page — responsive layout',
+      'Release notes 100%_done',
+    ]);
     expect(await t(`?assigneeId=${saraId}`)).toEqual([
       'Onboarding flow',
       'Checkout page — responsive layout',
@@ -142,7 +146,13 @@ describe('listing tasks', () => {
   });
 
   it('rejects malformed filters', async () => {
-    for (const query of ['?statusId=nope', '?priority=extreme', '?dueFrom=10/08', '?sort=title']) {
+    for (const query of [
+      '?statusId=nope',
+      '?statusCategory=blocked',
+      '?priority=extreme',
+      '?dueFrom=10/08',
+      '?sort=title',
+    ]) {
       expect(
         (await world.api('GET', `/projects/${world.project.id}/tasks${query}`)).statusCode,
       ).toBe(400);

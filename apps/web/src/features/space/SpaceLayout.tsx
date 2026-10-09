@@ -14,6 +14,8 @@ import { ShareButton } from '../views/ShareButton';
 import { useCurrentView } from '../views/useCurrentView';
 import { ViewTabs } from '../views/ViewTabs';
 import { ViewToolbar } from '../views/ViewToolbar';
+import { FilterStrip } from '../project/FilterStrip';
+import { TaskDrawer } from '../task/TaskDrawer';
 
 /** /s/:spaceId/* — "[P] Product › All projects" top bar (Calendar.dc.html) around the view. */
 export function SpaceLayout() {
@@ -57,7 +59,9 @@ export function SpaceLayout() {
         tabs={<ViewTabs basePath={`/s/${space.id}`} value={view} />}
         toolbar={<ViewToolbar />}
       />
+      <FilterStrip spaceId={space.id} />
       <Outlet context={space} />
+      <TaskDrawer />
     </>
   );
 }

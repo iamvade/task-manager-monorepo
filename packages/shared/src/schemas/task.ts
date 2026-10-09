@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { dateSchema } from '../dates.js';
-import { paletteKeySchema, prioritySchema } from '../enums.js';
+import { paletteKeySchema, prioritySchema, statusCategorySchema } from '../enums.js';
 import { richTextDocSchema, richTextNodeSchema } from '../rich-text.js';
 import { NOTHING_TO_UPDATE, moveSchema, nonEmptyPatch, userRefSchema } from './common.js';
 import { projectSummarySchema, sprintSchema, statusSchema } from './project.js';
@@ -26,6 +26,8 @@ export const UNASSIGNED = 'unassigned';
 /** Filters and sort of `GET /projects/:id/tasks` (and the space-level list). */
 export const taskListQuerySchema = z.object({
   statusId: queryArray(z.uuid()),
+  /** Status category; the space-level list filters by it since statuses are per project. */
+  statusCategory: queryArray(statusCategorySchema),
   assigneeId: queryArray(z.union([z.uuid(), z.literal(UNASSIGNED)])),
   tagId: queryArray(z.uuid()),
   priority: queryArray(prioritySchema),

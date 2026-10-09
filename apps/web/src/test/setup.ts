@@ -7,3 +7,8 @@ afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
 });
+
+// jsdom has no layout: keyboard navigation scrolls the selected row into view.
+Element.prototype.scrollIntoView = function scrollIntoView() {
+  // no-op
+};

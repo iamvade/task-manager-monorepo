@@ -85,7 +85,7 @@ export function ProjectHeader({ project, view }: { project: ProjectDetail; view:
         </>
       }
       tabs={<ViewTabs basePath={`/p/${project.id}`} value={view} />}
-      toolbar={<ViewToolbar />}
+      toolbar={<ViewToolbar project={project} empty={project.taskCount === 0} />}
     />
   );
 }

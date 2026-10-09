@@ -286,6 +286,33 @@ Source: `design/{Board,TaskDetail,MyTasks,Calendar,CreateTask,EmptyProject,Empty
 | `markRead` | Mark as read | Уншсан болгох | Inbox — row hover action (derived; populated list not designed) |
 | `archive` | Archive | Архивлах | Inbox — row hover action (derived; populated list not designed) |
 
+## `table` / `filters` / `picker` additions (phase 9, derived)
+
+| key | en | mn (draft) | where |
+|---|---|---|---|
+| `table.markIncomplete` | Mark {{name}} not complete | «{{name}}» ажлыг дуусаагүй болгох | List — checkbox aria-label on done rows |
+| `table.addTaskPlaceholder` | Task name — Enter to add, Esc to cancel | Ажлын нэр — Enter дарж нэмэх, Esc дарж болих | List — inline add input |
+| `table.newTaskTitle` | New task title | Шинэ ажлын нэр | List — inline add input aria-label |
+| `table.noAssignee` | No assignee | Хариуцагчгүй | List — Group: Assignee, tasks without one |
+| `table.noMatches` | No tasks match these filters | Шүүлтүүрт тохирох ажил алга | List — empty filtered result |
+| `table.assigneeMore` | {{name}} +{{count}} | {{name}} +{{count}} | List — assignee cell with several people |
+| `table.subtasks` | {{done}} of {{total}} subtasks done | {{total}} дэд ажлаас {{done}} дууссан | List — subtask counter (sr / title) |
+| `table.comments_*` | {{count}} comment(s) | {{count}} сэтгэгдэл | List — comment counter (sr) |
+| `table.setAssignee/setDue/setPriority/setTags` | Assignee of {{name}} … | «{{name}}» — хариуцагч … | List — cell picker buttons |
+| `table.open` / `reopen` / `delete` | Open / Reopen / Delete | Нээх / Дахин нээх / Устгах | List — row "…" menu |
+| `table.deleteConfirm` | Delete “{{name}}”? You can restore it later. | «{{name}}» ажлыг устгах уу? Дараа нь сэргээх боломжтой. | List — delete confirmation |
+| `filters.fields.*` | Status, Assignee, Priority, Tags, Sprint, Due date | Төлөв, Хариуцагч, Ач холбогдол, Шошго, Спринт, Дуусах огноо | Filter menu fields |
+| `filters.is.*` | Status is, Assignee is, Priority is, Tags include, Sprint is, Due | Төлөв:, Хариуцагч:, Ач холбогдол:, Шошго:, Спринт:, Дуусах огноо: | Filter chips (follows Main's "Спринт:") |
+| `filters.me` | Me | Би | Assignee filter |
+| `filters.clearAll` / `back` | Clear all / Back to filters | Бүгдийг арилгах / Шүүлтүүр рүү буцах | Filter menu |
+| `filters.dueFrom` / `dueTo` | From / To | Эхлэх / Хүртэл | Due range inputs |
+| `filters.duePresets.*` | Overdue, Due today, This week, Next week | Хоцорсон, Өнөөдөр дуусах, Энэ долоо хоног, Дараа долоо хоног | Due presets |
+| `filters.fromDate` / `untilDate` | from {{date}} / until {{date}} | {{date}}-аас хойш / {{date}} хүртэл | One-sided due chip (suffix after a date — check harmony) |
+| `filters.noSprints`, `searchPeople`, `searchTags` | No sprints yet, Search people, Search tags | Спринт алга, Хүн хайх, Шошго хайх | Filter menu |
+| `picker.projectTeam` / `others` | Project team / Others | Төслийн баг / Бусад | Assignee picker groups |
+| `picker.*Label` | Assignees, Due date, Priority, Tags | Хариуцагчид, Дуусах огноо, Ач холбогдол, Шошго | Picker listbox names |
+| `drawer.dialogLabel` / `loadError` | Task {{key}} / Couldn't load this task. | {{key}} ажил / Ажлыг ачаалж чадсангүй. | Drawer shell |
+
 ## Open questions
 
 1. **Unscheduled**: drafted "Огноогүй" (no date) rather than "Хуваарьгүй"; the hint uses "…хуваарьт оруулна уу". Pick one term.
@@ -298,5 +325,6 @@ Source: `design/{Board,TaskDetail,MyTasks,Calendar,CreateTask,EmptyProject,Empty
 8. **Dropzone**: "Drop files or browse" split so "browse" is a `<browse>` link (assumption).
 9. **"of {{count}} left"**: mn adds "ажлаас" to avoid a suffix on a number.
 10. **"Task title"** drafted as "Ажлын нэр" (same as the "Task name" column).
+11. **`filters.fromDate`** "{{date}}-аас хойш": the suffix follows a date ("10-р сарын 14-аас"); fine for "сарын N" forms, but review.
 
 Shell strings added in phase 8 that are not in any design (user menu theme labels, "Copy link", "Space options", error/not-found pages, picker hints) are drafted the same way; keys: `common.*` (retry, cancel, create, close, noResults, errorTitle, errorBody, reload, notFoundTitle, notFoundBody, goToMyTasks, comingSoon), `shell.{switchWorkspace, unread, openTasks, spaceName, createSpace, newBadge, accountMenu, theme*, loadError}`, `header.{unfavorite, shareHint, spaceOptions, copyLink, linkCopied, allProjects}`, `toolbar.{activeFilters, sortBy, groupBy, sortFields.*, groupFields.*}`, `priority.none`, `dates.{yesterday, overdue}`, `picker.*`.

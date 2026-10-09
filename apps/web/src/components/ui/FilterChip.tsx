@@ -13,7 +13,8 @@ interface FilterChipProps {
 export function FilterChip({ label, value, onRemove, removeLabel }: FilterChipProps) {
   return (
     <span className="flex h-[26px] items-center gap-1.5 rounded-[13px] border border-control pr-1 pl-2.5 text-[12px] text-2">
-      <span className="text-muted">{label}</span> {value}
+      <span className="text-muted">{label}</span>
+      <span className="max-w-[240px] truncate">{value}</span>
       <IconButton
         label={removeLabel}
         size={20}

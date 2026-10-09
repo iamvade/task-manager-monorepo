@@ -134,7 +134,39 @@
   },
   "filters": {
     "sprintIs": "Спринт:",
-    "removeFilter": "Шүүлтүүрийг арилгах"
+    "removeFilter": "Шүүлтүүрийг арилгах",
+    "fields": {
+      "status": "Төлөв",
+      "assignee": "Хариуцагч",
+      "priority": "Ач холбогдол",
+      "tag": "Шошго",
+      "sprint": "Спринт",
+      "due": "Дуусах огноо"
+    },
+    "is": {
+      "status": "Төлөв:",
+      "assignee": "Хариуцагч:",
+      "priority": "Ач холбогдол:",
+      "tag": "Шошго:",
+      "sprint": "Спринт:",
+      "due": "Дуусах огноо:"
+    },
+    "me": "Би",
+    "clearAll": "Бүгдийг арилгах",
+    "back": "Шүүлтүүр рүү буцах",
+    "dueFrom": "Эхлэх",
+    "dueTo": "Хүртэл",
+    "duePresets": {
+      "overdue": "Хоцорсон",
+      "today": "Өнөөдөр дуусах",
+      "thisWeek": "Энэ долоо хоног",
+      "nextWeek": "Дараа долоо хоног"
+    },
+    "fromDate": "{{date}}-аас хойш",
+    "untilDate": "{{date}} хүртэл",
+    "noSprints": "Спринт алга",
+    "searchPeople": "Хүн хайх",
+    "searchTags": "Шошго хайх"
   },
   "summary": {
     "tasks_one": "{{count}} ажил · {{done}} дууссан",
@@ -152,7 +184,24 @@
     "addTask": "Ажил нэмэх",
     "markComplete": "«{{name}}» ажлыг дууссан гэж тэмдэглэх",
     "moreActions": "«{{name}}» — нэмэлт үйлдэл",
-    "addToGroup": "«{{group}}» бүлэгт ажил нэмэх"
+    "addToGroup": "«{{group}}» бүлэгт ажил нэмэх",
+    "markIncomplete": "«{{name}}» ажлыг дуусаагүй болгох",
+    "addTaskPlaceholder": "Ажлын нэр — Enter дарж нэмэх, Esc дарж болих",
+    "newTaskTitle": "Шинэ ажлын нэр",
+    "noAssignee": "Хариуцагчгүй",
+    "noMatches": "Шүүлтүүрт тохирох ажил алга",
+    "assigneeMore": "{{name}} +{{count}}",
+    "subtasks": "{{total}} дэд ажлаас {{done}} дууссан",
+    "comments_one": "{{count}} сэтгэгдэл",
+    "comments_other": "{{count}} сэтгэгдэл",
+    "setAssignee": "«{{name}}» — хариуцагч",
+    "setDue": "«{{name}}» — дуусах огноо",
+    "setPriority": "«{{name}}» — ач холбогдол",
+    "setTags": "«{{name}}» — шошго",
+    "open": "Нээх",
+    "reopen": "Дахин нээх",
+    "delete": "Устгах",
+    "deleteConfirm": "«{{name}}» ажлыг устгах уу? Дараа нь сэргээх боломжтой."
   },
   "status": {
     "todo": "Хийх",
@@ -176,7 +225,14 @@
   "picker": {
     "navigate": "шилжих",
     "select": "сонгох",
-    "clear": "хасах"
+    "clear": "хасах",
+    "projectTeam": "Төслийн баг",
+    "others": "Бусад",
+    "noDue": "Дуусах огноогүй",
+    "priorityLabel": "Ач холбогдол",
+    "tagsLabel": "Шошго",
+    "dueLabel": "Дуусах огноо",
+    "assigneeLabel": "Хариуцагчид"
   },
   "board": {
     "sortManual": "Эрэмбэ: Гараар",
@@ -267,7 +323,9 @@
       "hoursAgo_one": "{{count}} цагийн өмнө",
       "hoursAgo_other": "{{count}} цагийн өмнө",
       "yesterdayAt": "Өчигдөр, {{time}}"
-    }
+    },
+    "loadError": "Ажлыг ачаалж чадсангүй.",
+    "dialogLabel": "{{key}} ажил"
   },
   "myTasks": {
     "allSpaces": "Бүх орон зай",

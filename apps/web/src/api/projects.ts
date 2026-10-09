@@ -1,4 +1,10 @@
-import { projectDetailSchema, sprintSchema, type ProjectDetail } from '@kite/shared';
+import {
+  applyTemplateResponseSchema,
+  projectDetailSchema,
+  sprintSchema,
+  type ProjectDetail,
+  type TemplateId,
+} from '@kite/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { ApiError, apiFetch, apiSend } from './client';
@@ -40,6 +46,25 @@ export function useToggleFavorite(project: Pick<ProjectDetail, 'id' | 'workspace
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: key });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.sidebar(project.workspaceId) });
+    },
+  });
+}
+
+/** Empty project → template tasks (`POST /projects/:id/from-template`). */
+export function useApplyTemplate(project: Pick<ProjectDetail, 'id' | 'workspaceId'>) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (templateId: TemplateId) =>
+      apiSend(`/projects/${project.id}/from-template`, applyTemplateResponseSchema, 'POST', {
+        templateId,
+      }),
+    onSuccess: ({ project: detail }) => {
+      queryClient.setQueryData(queryKeys.project(project.id), detail);
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.project(project.id) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.tasks });
       void queryClient.invalidateQueries({ queryKey: queryKeys.sidebar(project.workspaceId) });
     },
   });

@@ -7,15 +7,8 @@ import i18n from '../../i18n';
 import { createQueryClient } from '../../queryClient';
 import { routes } from '../../router';
 import { useUiStore } from '../../stores/ui';
-import {
-  ME,
-  PROJECT,
-  PROJECT_ID,
-  SIDEBAR,
-  SPRINT_ID,
-  WORKSPACE_ID,
-  mockApi,
-} from '../../test/fixtures';
+import { ME, PROJECT_ID, SIDEBAR, SPRINT_ID, WORKSPACE_ID, mockApi } from '../../test/fixtures';
+import { listHandlers } from '../../test/tasks';
 
 function renderAt(path: string) {
   const router = createMemoryRouter(routes, { initialEntries: [path] });
@@ -33,7 +26,7 @@ function api(extra: Record<string, (init?: RequestInit) => Response> = {}) {
   return mockApi({
     'GET /api/v1/auth/me': () => Response.json(ME),
     [`GET /api/v1/workspaces/${WORKSPACE_ID}/sidebar`]: () => Response.json(SIDEBAR),
-    [`GET /api/v1/projects/${PROJECT_ID}`]: () => Response.json(PROJECT),
+    ...listHandlers(),
     ...extra,
   });
 }
@@ -86,7 +79,7 @@ describe('app shell', () => {
     expect(crumb).toHaveTextContent('App Redesign');
     expect(screen.getByRole('img', { name: 'Төслийн 7 гишүүн' })).toHaveTextContent('+3');
     expect(await screen.findByText('10-р сарын 6 – 24')).toBeInTheDocument();
-    expect(screen.getByText('16 ажил · 4 дууссан')).toBeInTheDocument();
+    expect(screen.getByText('7 ажил · 1 дууссан')).toBeInTheDocument();
     expect(router.state.location.search).toBe(`?sprint=${SPRINT_ID}`);
 
     fireEvent.click(screen.getByRole('button', { name: 'Шүүлтүүрийг арилгах' }));
@@ -141,7 +134,7 @@ describe('app shell', () => {
     expect(screen.getByRole('navigation', { name: 'Breadcrumb' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Board' })).toBeInTheDocument();
     expect(await screen.findByText('Oct 6 – Oct 24')).toBeInTheDocument();
-    expect(screen.getByText('16 tasks · 4 done')).toBeInTheDocument();
+    expect(screen.getByText('7 tasks · 1 done')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sort: Due date' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Group: Status' })).toBeInTheDocument();
     await waitFor(() => {

@@ -128,6 +128,18 @@ Login, invite accept, Settings, ⌘K palette, shortcuts help, filter/sort/group 
 
 **Login / invite accept (derived, phase 3)**: page `--bg-subtle`; 56px header with 24px accent "K" tile + "Kite" (14/600) left and the МН/EN segmented switcher (default track `--surface-2`) right. Centered card 400px max, top offset `min(12vh, 112px)`, `--surface`, 1px `--border`, radius 14, padding 32, `--shadow-modal`. Title 20/28 600 −0.01em, subtitle 13px muted. Fields: label 13/500 `--text-2` above a 38px input (radius 8, `--border-control`, `--control` bg, focus ring 2px accent-ink offset 1 on the field); password fields have a 28px show/hide icon button. Primary button 40px full width. Form error banner: danger soft `#FDECEC/#B42318`, radius 8, 13/500, `role="alert"`.
 
+**List view (derived, phase 9)**:
+- Checkbox completion moves the row to the project's first Done status (user decision; the design keeps it in place). Reopen returns it to the status it had before Done.
+- Selected row (j/k, click): `--bg-subtle` + `inset 2px 0 0 var(--accent-ink)`; the row is the roving tab stop (focus outline offset −2px). `j`/`k` move, `Enter` opens `?task=`, `x` toggles complete, `Space` picks a row up for keyboard drag.
+- Inline add: the 36px "+ Add task" button turns into a same-height row with a 13px input (placeholder `table.addTaskPlaceholder`); Enter creates (keeps focus, clears), Esc / blur-when-empty closes. The group header "+" opens it (and expands the group). New tasks inherit the group (status / assignee / priority) and the sprint filter.
+- Cell pickers: assignee/due/priority/tags cells are 28px ghost buttons (radius 6, `--hover`), aligned −6px so content lines up with the column; empty cells show a faint icon on row hover/focus. Pickers follow CreateTask's popovers (264px, `--shadow-popover-lg`, selected option `accent-soft` + ✓).
+- Drag (project list, Group: Status): source row opacity .4; overlay = the row on `--surface` with `--shadow-drag`, radius 8. Dropping while sorted by due/priority/created switches the URL to `sort=manual`. Collapsed groups accept drops (end of group).
+- Filter menu: field list (Status, Assignee, Priority, Tags, Sprint, Due date) with accent-soft counts → per-field picker with a back row; Assignee offers Me / Unassigned (`assignee=me` stays literal in the URL). Due: Overdue / Due today / This week / Next week + From/To date inputs. Lists are comma-separated in the URL (`?status=a,b`). Chips: "{Field} is {values}" (mn "{Field}: …"), max 240px value.
+- Space list: groups = 4 status categories; each row starts with an 8px project dot + project name (12px muted); no drag, no inline add.
+- Group: Assignee/Priority show only non-empty groups (a task with two assignees appears in both); Group: None = one headerless list.
+- Empty project toolbar: Filter disabled (`--border-subtle` border, `--text-faint`), no Sort/Group, no filter strip. "Import from CSV" disabled with "Coming soon" tooltip; "Invite teammates" → `/settings?tab=members`; `C` = Create first task.
+- Task drawer (shell until phase 10): `?task=KEY`, 40% / min 520, scrim, focus trapped, Esc / scrim click closes; header `project › KEY`, open full page, close; read-only properties.
+
 ### 2.6 PROMPTS.md vs designs (resolved; PROMPTS updated)
 - Checkbox is native square 16px with `accent-color` (not round).
 - List tags: all chips, clipped by the cell; "+N" only on Board.

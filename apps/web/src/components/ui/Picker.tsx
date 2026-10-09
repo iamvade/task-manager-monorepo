@@ -158,7 +158,12 @@ export function Picker<T>({
                 }}
                 className={cn(
                   'flex h-8 cursor-pointer items-center gap-2 rounded-[6px] px-2 text-[13px]',
-                  isActive && 'bg-popover-hover',
+                  // CreateTask.dc.html: the selected option keeps accent-soft, even on hover.
+                  selected ? 'bg-accent-soft text-default' : isActive && 'bg-popover-hover',
+                  // Keyboard position when it sits on the selected (accent-soft) option.
+                  selected &&
+                    isActive &&
+                    'outline-1 -outline-offset-1 outline-[var(--border-strong)]',
                 )}
               >
                 <span className="flex min-w-0 flex-1 items-center gap-2">

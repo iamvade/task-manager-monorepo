@@ -93,6 +93,7 @@ const listColumns = {
 export function taskFilters(db: DbOrTx, query: TaskListQuery): SQL[] {
   const where: SQL[] = [isNull(tasks.deletedAt)];
   if (query.statusId?.length) where.push(inArray(tasks.statusId, query.statusId));
+  if (query.statusCategory?.length) where.push(inArray(statuses.category, query.statusCategory));
   if (query.priority?.length) where.push(inArray(tasks.priority, query.priority));
   if (query.sprintId) where.push(eq(tasks.sprintId, query.sprintId));
   if (query.dueFrom) where.push(gte(tasks.dueDate, query.dueFrom));

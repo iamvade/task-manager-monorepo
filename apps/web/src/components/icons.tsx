@@ -130,3 +130,22 @@ export const LinkIcon = make(
     <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
   </>,
 );
+export const SubtaskIcon = make(
+  <>
+    <path d="M6 3v12a3 3 0 0 0 3 3h9" />
+    <path d="m15 15 3 3-3 3" />
+  </>,
+);
+export const CommentIcon = make(
+  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />,
+);
+export const DownloadIcon = make(<path d="M12 4v12M7 11l5 5 5-5M4 20h16" />);
+export const RocketIcon = make(
+  <path d="M4.5 16.5c-1.5 1.3-2 5-2 5s3.7-.5 5-2c.7-.8.7-2.1-.1-2.9a2.2 2.2 0 0 0-2.9-.1zM12 15l-3-3a22 22 0 0 1 2-4A12.9 12.9 0 0 1 22 2c0 2.7-.8 7.5-6 11a22 22 0 0 1-4 2z" />,
+);
+export const CycleIcon = make(<path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5" />);
+export const BugIcon = make(
+  <path d="M8 2l1.9 1.9M16 2l-1.9 1.9M9 7.1V6a3 3 0 1 1 6 0v1.1M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6zM12 20v-9M6 13H2M22 13h-4" />,
+);
+export const CloseIcon = make(<path d="M18 6 6 18M6 6l12 12" />);
+export const ExpandIcon = make(<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />);

@@ -5,4 +5,13 @@ export const queryKeys = {
   members: (workspaceId: string) => ['workspaces', workspaceId, 'members'] as const,
   project: (projectId: string) => ['projects', projectId] as const,
   sprints: (projectId: string) => ['projects', projectId, 'sprints'] as const,
+  tags: (workspaceId: string) => ['workspaces', workspaceId, 'tags'] as const,
+  /** Prefix of every task query (lists + details): one invalidation refreshes them all. */
+  tasks: ['tasks'] as const,
+  taskLists: ['tasks', 'list'] as const,
+  projectTasks: (projectId: string, query: object) =>
+    ['tasks', 'list', 'project', projectId, query] as const,
+  spaceTasks: (spaceId: string, query: object) =>
+    ['tasks', 'list', 'space', spaceId, query] as const,
+  task: (ref: string) => ['tasks', 'detail', ref] as const,
 };

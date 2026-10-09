@@ -41,10 +41,10 @@ export function PriorityFlag({ priority, size = 14, showLabel }: PriorityFlagPro
   if (!showLabel) return flag;
   return (
     <span
-      className={`flex items-center gap-1.5 text-[13px] ${priority === 'none' ? 'text-muted' : 'text-2'}`}
+      className={`flex min-w-0 items-center gap-1.5 text-[13px] ${priority === 'none' ? 'text-muted' : 'text-2'}`}
     >
       {flag}
-      {t(`priority.${priority}`)}
+      <span className="truncate">{t(`priority.${priority}`)}</span>
     </span>
   );
 }

@@ -117,7 +117,8 @@ export function mockApi(handlers: Record<string, Handler>) {
   return vi.spyOn(globalThis, 'fetch').mockImplementation((input, init) => {
     const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
     const key = `${init?.method ?? 'GET'} ${url}`;
-    const handler = handlers[key];
+    // An exact "METHOD /path?query" handler wins; otherwise one for the path alone.
+    const handler = handlers[key] ?? handlers[key.split('?')[0] ?? key];
     if (!handler) throw new Error(`Unexpected request ${key}`);
     return Promise.resolve(handler(init));
   });
