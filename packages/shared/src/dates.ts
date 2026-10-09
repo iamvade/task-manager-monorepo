@@ -20,3 +20,23 @@ export function addDays(date: string, days: number): string {
   if (Number.isNaN(ms)) throw new Error(`Invalid date: ${date}`);
   return new Date(ms + days * 86_400_000).toISOString().slice(0, 10);
 }
+
+/** Day of the week of a `YYYY-MM-DD` date, Monday = 0 … Sunday = 6. */
+export function weekdayIndex(date: string): number {
+  const ms = Date.parse(`${date}T00:00:00Z`);
+  if (Number.isNaN(ms)) throw new Error(`Invalid date: ${date}`);
+  return (new Date(ms).getUTCDay() + 6) % 7;
+}
+
+/** The Monday of the Mon–Sun week containing `date`. */
+export function startOfWeek(date: string): string {
+  return addDays(date, -weekdayIndex(date));
+}
+
+/** Whole days from `from` to `to` (negative when `to` is earlier). */
+export function daysBetween(from: string, to: string): number {
+  const a = Date.parse(`${from}T00:00:00Z`);
+  const b = Date.parse(`${to}T00:00:00Z`);
+  if (Number.isNaN(a) || Number.isNaN(b)) throw new Error(`Invalid date: ${from} / ${to}`);
+  return Math.round((b - a) / 86_400_000);
+}

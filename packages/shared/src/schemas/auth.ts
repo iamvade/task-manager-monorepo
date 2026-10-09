@@ -78,6 +78,8 @@ export const updateMeSchema = z
     theme: themeSchema,
     accent: accentSchema,
     density: densitySchema,
+    /** Merged into the stored toggles. */
+    notificationPrefs: notificationPrefsSchema.partial().strict(),
   })
   .partial()
   .strict()

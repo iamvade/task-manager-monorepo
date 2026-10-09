@@ -1,15 +1,15 @@
-import { buildApp } from '../src/app.js';
+import { buildApp, type AppOptions } from '../src/app.js';
 import { loadConfig, type Config } from '../src/config.js';
 import { createDb } from '../src/db/client.js';
 
 /** Builds the app against the test database. Call `close()` in afterAll. */
-export async function createTestApp(overrides: Partial<Config> = {}) {
+export async function createTestApp(overrides: Partial<Config> = {}, options: AppOptions = {}) {
   const config = { ...loadConfig(), ...overrides };
   if (!config.TEST_DATABASE_URL) {
     throw new Error('TEST_DATABASE_URL must be set to run API tests.');
   }
   const { db, pool } = createDb(config.TEST_DATABASE_URL);
-  const app = await buildApp(config, db);
+  const app = await buildApp(config, db, options);
   await app.ready();
   return {
     app,

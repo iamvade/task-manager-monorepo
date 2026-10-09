@@ -19,3 +19,5 @@ export * from './events.js';
 export * from './schemas/activity.js';
 export * from './schemas/task.js';
 export * from './task-key.js';
+export * from './schemas/notification.js';
+export * from './schemas/home.js';

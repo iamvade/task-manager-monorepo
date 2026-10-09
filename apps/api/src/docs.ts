@@ -40,6 +40,8 @@ const tags = [
   { name: 'Attachments', description: 'Files attached to tasks' },
   { name: 'Activity', description: 'Task activity feed and following' },
   { name: 'Search', description: 'Command palette search' },
+  { name: 'Inbox', description: 'My notifications: list, read, archive' },
+  { name: 'My Tasks', description: 'My Tasks home: sections, stats and recent activity' },
 ];
 
 const REF = /"#\/components\/schemas\/([^"]+)"/g;

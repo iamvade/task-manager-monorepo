@@ -1,5 +1,5 @@
 import { apiErrorSchema, initialsFor, meResponseSchema, updateMeSchema } from '@kite/shared';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { buildMe } from '../auth/me.js';
 import { requireAuth } from '../auth/plugin.js';
@@ -13,17 +13,26 @@ export const meRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       schema: {
         tags: ['Me'],
         summary: 'Update profile and preferences',
-        description: 'Name, locale, time zone, theme, accent, density.',
+        description:
+          'Name, locale, time zone, theme, accent, density, notification toggles (`notificationPrefs` is merged: send only the types that change).',
         body: updateMeSchema,
         response: { 200: meResponseSchema, 400: apiErrorSchema, 401: apiErrorSchema },
       },
     },
     async (request) => {
       const { user } = requireAuth(request);
-      const changes = request.body;
+      const { notificationPrefs, ...changes } = request.body;
       const [updated] = await app.db
         .update(users)
-        .set({ ...changes, ...(changes.name ? { initials: initialsFor(changes.name) } : {}) })
+        .set({
+          ...changes,
+          ...(changes.name ? { initials: initialsFor(changes.name) } : {}),
+          ...(notificationPrefs
+            ? {
+                notificationPrefs: sql`${users.notificationPrefs} || ${JSON.stringify(notificationPrefs)}::jsonb`,
+              }
+            : {}),
+        })
         .where(eq(users.id, user.id))
         .returning();
       return buildMe(app.db, updated ?? user);

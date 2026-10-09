@@ -56,6 +56,10 @@ export const notifications = pgTable(
   },
   (t) => [
     index('notifications_user_id_read_at_idx').on(t.userId, t.readAt),
+    // Inbox pages (newest first, keyset).
+    index('notifications_user_id_created_at_idx').on(t.userId, t.createdAt, t.id),
+    // Collapse lookup in the notifier; also serves the task cascade.
+    index('notifications_task_id_user_id_type_idx').on(t.taskId, t.userId, t.type),
     index('notifications_activity_id_idx').on(t.activityId),
   ],
 );

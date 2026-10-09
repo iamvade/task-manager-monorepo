@@ -29,6 +29,13 @@
       "when": 1791514003826,
       "tag": "0003_subtask_position_unique",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791515348882,
+      "tag": "0004_notification_indexes",
+      "breakpoints": true
     }
   ]
 }
