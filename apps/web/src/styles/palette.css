@@ -1,0 +1,472 @@
+/*
+ * Palette keys (users.avatar_color, spaces.color, projects.color, tags.color) → exact light/dark
+ * values per family (docs/design-notes.md Appendix A.1). A `.pal-{family}-{key}` class sets
+ * --p-bg / --p-fg (and --p-dot for projects); `.pal-fill` / `.pal-dot` paint with them.
+ * Generated once from the design values; values not drawn in the designs are derived (Tailwind
+ * 100/800 light, 900/200 dark for avatars, 950/200 for space badges, 20% dot tint for projects).
+ */
+.pal-fill {
+  background-color: var(--p-bg);
+  color: var(--p-fg);
+}
+.pal-dot {
+  background-color: var(--p-dot);
+}
+
+/* avatar */
+.pal-avatar-indigo {
+  --p-bg: #e0e7ff;
+  --p-fg: #3730a3;
+}
+.pal-avatar-green {
+  --p-bg: #dcfce7;
+  --p-fg: #166534;
+}
+.pal-avatar-rose {
+  --p-bg: #ffe4e6;
+  --p-fg: #9f1239;
+}
+.pal-avatar-amber {
+  --p-bg: #fef3c7;
+  --p-fg: #92400e;
+}
+.pal-avatar-sky {
+  --p-bg: #e0f2fe;
+  --p-fg: #075985;
+}
+.pal-avatar-purple {
+  --p-bg: #f3e8ff;
+  --p-fg: #6b21a8;
+}
+.pal-avatar-teal {
+  --p-bg: #ccfbf1;
+  --p-fg: #115e59;
+}
+.pal-avatar-yellow {
+  --p-bg: #fef9c3;
+  --p-fg: #854d0e;
+}
+.pal-avatar-violet {
+  --p-bg: #ede9fe;
+  --p-fg: #5b21b6;
+}
+.pal-avatar-blue {
+  --p-bg: #dbeafe;
+  --p-fg: #1e40af;
+}
+.pal-avatar-orange {
+  --p-bg: #ffedd5;
+  --p-fg: #9a3412;
+}
+.pal-avatar-pink {
+  --p-bg: #fce7f3;
+  --p-fg: #9d174d;
+}
+.pal-avatar-neutral {
+  --p-bg: #f1f1f3;
+  --p-fg: #3f3f46;
+}
+
+/* space */
+.pal-space-violet {
+  --p-bg: #ede9fe;
+  --p-fg: #5b21b6;
+}
+.pal-space-green {
+  --p-bg: #dcfce7;
+  --p-fg: #166534;
+}
+.pal-space-rose {
+  --p-bg: #ffe4e6;
+  --p-fg: #9f1239;
+}
+.pal-space-sky {
+  --p-bg: #e0f2fe;
+  --p-fg: #075985;
+}
+.pal-space-indigo {
+  --p-bg: #e0e7ff;
+  --p-fg: #3730a3;
+}
+.pal-space-amber {
+  --p-bg: #fef3c7;
+  --p-fg: #92400e;
+}
+.pal-space-purple {
+  --p-bg: #f3e8ff;
+  --p-fg: #6b21a8;
+}
+.pal-space-teal {
+  --p-bg: #ccfbf1;
+  --p-fg: #115e59;
+}
+.pal-space-yellow {
+  --p-bg: #fef9c3;
+  --p-fg: #854d0e;
+}
+.pal-space-blue {
+  --p-bg: #dbeafe;
+  --p-fg: #1e40af;
+}
+.pal-space-orange {
+  --p-bg: #ffedd5;
+  --p-fg: #9a3412;
+}
+.pal-space-pink {
+  --p-bg: #fce7f3;
+  --p-fg: #9d174d;
+}
+.pal-space-neutral {
+  --p-bg: #f1f1f3;
+  --p-fg: #3f3f46;
+}
+
+/* project */
+.pal-project-violet {
+  --p-bg: #efebfd;
+  --p-fg: #4c3ba8;
+  --p-dot: #7c5ce0;
+}
+.pal-project-sky {
+  --p-bg: #e2f1fa;
+  --p-fg: #0b5a80;
+  --p-dot: #0284c7;
+}
+.pal-project-amber {
+  --p-bg: #fcefdb;
+  --p-fg: #8a4b08;
+  --p-dot: #d97706;
+}
+.pal-project-green {
+  --p-bg: #e3f4e8;
+  --p-fg: #166534;
+  --p-dot: #16a34a;
+}
+.pal-project-rose {
+  --p-bg: #fde7ec;
+  --p-fg: #9f1239;
+  --p-dot: #e11d48;
+}
+.pal-project-neutral {
+  --p-bg: #f1f1f3;
+  --p-fg: #3f3f46;
+  --p-dot: #a1a1aa;
+}
+.pal-project-indigo {
+  --p-bg: #e8ebfd;
+  --p-fg: #3730a3;
+  --p-dot: #4f46e5;
+}
+.pal-project-purple {
+  --p-bg: #f3e8ff;
+  --p-fg: #6b21a8;
+  --p-dot: #9333ea;
+}
+.pal-project-teal {
+  --p-bg: #e3f4f1;
+  --p-fg: #0f766e;
+  --p-dot: #0d9488;
+}
+.pal-project-yellow {
+  --p-bg: #fef6d7;
+  --p-fg: #854d0e;
+  --p-dot: #ca8a04;
+}
+.pal-project-blue {
+  --p-bg: #e8f1fd;
+  --p-fg: #1d4ed8;
+  --p-dot: #2563eb;
+}
+.pal-project-orange {
+  --p-bg: #fdf1e1;
+  --p-fg: #9a3412;
+  --p-dot: #ea580c;
+}
+.pal-project-pink {
+  --p-bg: #fcebf3;
+  --p-fg: #9d174d;
+  --p-dot: #db2777;
+}
+
+/* tag */
+.pal-tag-blue {
+  --p-bg: #e8f1fd;
+  --p-fg: #1d4ed8;
+}
+.pal-tag-violet {
+  --p-bg: #f1eefd;
+  --p-fg: #5b45b8;
+}
+.pal-tag-teal {
+  --p-bg: #e3f4f1;
+  --p-fg: #0f766e;
+}
+.pal-tag-orange {
+  --p-bg: #fdf1e1;
+  --p-fg: #9a3412;
+}
+.pal-tag-green {
+  --p-bg: #e6f4ea;
+  --p-fg: #166534;
+}
+.pal-tag-pink {
+  --p-bg: #fcebf3;
+  --p-fg: #9d174d;
+}
+.pal-tag-neutral {
+  --p-bg: #f1f1f3;
+  --p-fg: #3f3f46;
+}
+.pal-tag-indigo {
+  --p-bg: #eef0fd;
+  --p-fg: #3730a3;
+}
+.pal-tag-rose {
+  --p-bg: #fde8ec;
+  --p-fg: #9f1239;
+}
+.pal-tag-amber {
+  --p-bg: #fdf1e1;
+  --p-fg: #92400e;
+}
+.pal-tag-sky {
+  --p-bg: #e5f3fb;
+  --p-fg: #075985;
+}
+.pal-tag-purple {
+  --p-bg: #f5edfd;
+  --p-fg: #6b21a8;
+}
+.pal-tag-yellow {
+  --p-bg: #fdf7dc;
+  --p-fg: #854d0e;
+}
+
+/* avatar */
+:root[data-theme='dark'] .pal-avatar-indigo {
+  --p-bg: #312e81;
+  --p-fg: #c7d2fe;
+}
+:root[data-theme='dark'] .pal-avatar-green {
+  --p-bg: #14532d;
+  --p-fg: #bbf7d0;
+}
+:root[data-theme='dark'] .pal-avatar-rose {
+  --p-bg: #881337;
+  --p-fg: #fecdd3;
+}
+:root[data-theme='dark'] .pal-avatar-amber {
+  --p-bg: #78350f;
+  --p-fg: #fde68a;
+}
+:root[data-theme='dark'] .pal-avatar-sky {
+  --p-bg: #0c4a6e;
+  --p-fg: #bae6fd;
+}
+:root[data-theme='dark'] .pal-avatar-purple {
+  --p-bg: #581c87;
+  --p-fg: #e9d5ff;
+}
+:root[data-theme='dark'] .pal-avatar-teal {
+  --p-bg: #134e4a;
+  --p-fg: #99f6e4;
+}
+:root[data-theme='dark'] .pal-avatar-yellow {
+  --p-bg: #713f12;
+  --p-fg: #fef08a;
+}
+:root[data-theme='dark'] .pal-avatar-violet {
+  --p-bg: #4c1d95;
+  --p-fg: #ddd6fe;
+}
+:root[data-theme='dark'] .pal-avatar-blue {
+  --p-bg: #1e3a8a;
+  --p-fg: #bfdbfe;
+}
+:root[data-theme='dark'] .pal-avatar-orange {
+  --p-bg: #7c2d12;
+  --p-fg: #fed7aa;
+}
+:root[data-theme='dark'] .pal-avatar-pink {
+  --p-bg: #831843;
+  --p-fg: #fbcfe8;
+}
+:root[data-theme='dark'] .pal-avatar-neutral {
+  --p-bg: #3f3f46;
+  --p-fg: #e4e4e7;
+}
+
+/* space */
+:root[data-theme='dark'] .pal-space-violet {
+  --p-bg: #2e1065;
+  --p-fg: #ddd6fe;
+}
+:root[data-theme='dark'] .pal-space-green {
+  --p-bg: #14532d;
+  --p-fg: #bbf7d0;
+}
+:root[data-theme='dark'] .pal-space-rose {
+  --p-bg: #4c0519;
+  --p-fg: #fecdd3;
+}
+:root[data-theme='dark'] .pal-space-sky {
+  --p-bg: #082f49;
+  --p-fg: #bae6fd;
+}
+:root[data-theme='dark'] .pal-space-indigo {
+  --p-bg: #1e1b4b;
+  --p-fg: #c7d2fe;
+}
+:root[data-theme='dark'] .pal-space-amber {
+  --p-bg: #451a03;
+  --p-fg: #fde68a;
+}
+:root[data-theme='dark'] .pal-space-purple {
+  --p-bg: #3b0764;
+  --p-fg: #e9d5ff;
+}
+:root[data-theme='dark'] .pal-space-teal {
+  --p-bg: #042f2e;
+  --p-fg: #99f6e4;
+}
+:root[data-theme='dark'] .pal-space-yellow {
+  --p-bg: #422006;
+  --p-fg: #fef08a;
+}
+:root[data-theme='dark'] .pal-space-blue {
+  --p-bg: #172554;
+  --p-fg: #bfdbfe;
+}
+:root[data-theme='dark'] .pal-space-orange {
+  --p-bg: #431407;
+  --p-fg: #fed7aa;
+}
+:root[data-theme='dark'] .pal-space-pink {
+  --p-bg: #500724;
+  --p-fg: #fbcfe8;
+}
+:root[data-theme='dark'] .pal-space-neutral {
+  --p-bg: #27272a;
+  --p-fg: #d4d4d8;
+}
+
+/* project */
+:root[data-theme='dark'] .pal-project-violet {
+  --p-bg: rgba(124, 92, 224, 0.2);
+  --p-fg: #c4b5fd;
+  --p-dot: #a78bfa;
+}
+:root[data-theme='dark'] .pal-project-sky {
+  --p-bg: rgba(2, 132, 199, 0.2);
+  --p-fg: #7dd3fc;
+  --p-dot: #38bdf8;
+}
+:root[data-theme='dark'] .pal-project-amber {
+  --p-bg: rgba(217, 119, 6, 0.2);
+  --p-fg: #fcd34d;
+  --p-dot: #fbbf24;
+}
+:root[data-theme='dark'] .pal-project-green {
+  --p-bg: rgba(22, 163, 74, 0.2);
+  --p-fg: #86efac;
+  --p-dot: #4ade80;
+}
+:root[data-theme='dark'] .pal-project-rose {
+  --p-bg: rgba(225, 29, 72, 0.2);
+  --p-fg: #fda4af;
+  --p-dot: #fb7185;
+}
+:root[data-theme='dark'] .pal-project-neutral {
+  --p-bg: #232328;
+  --p-fg: #c9c9d1;
+  --p-dot: #71717a;
+}
+:root[data-theme='dark'] .pal-project-indigo {
+  --p-bg: rgba(79, 70, 229, 0.2);
+  --p-fg: #a5b4fc;
+  --p-dot: #818cf8;
+}
+:root[data-theme='dark'] .pal-project-purple {
+  --p-bg: rgba(147, 51, 234, 0.2);
+  --p-fg: #d8b4fe;
+  --p-dot: #c084fc;
+}
+:root[data-theme='dark'] .pal-project-teal {
+  --p-bg: rgba(13, 148, 136, 0.2);
+  --p-fg: #5eead4;
+  --p-dot: #2dd4bf;
+}
+:root[data-theme='dark'] .pal-project-yellow {
+  --p-bg: rgba(202, 138, 4, 0.2);
+  --p-fg: #fde047;
+  --p-dot: #facc15;
+}
+:root[data-theme='dark'] .pal-project-blue {
+  --p-bg: rgba(37, 99, 235, 0.2);
+  --p-fg: #93c5fd;
+  --p-dot: #60a5fa;
+}
+:root[data-theme='dark'] .pal-project-orange {
+  --p-bg: rgba(234, 88, 12, 0.2);
+  --p-fg: #fdba74;
+  --p-dot: #fb923c;
+}
+:root[data-theme='dark'] .pal-project-pink {
+  --p-bg: rgba(219, 39, 119, 0.2);
+  --p-fg: #f9a8d4;
+  --p-dot: #f472b6;
+}
+
+/* tag */
+:root[data-theme='dark'] .pal-tag-blue {
+  --p-bg: rgba(59, 130, 246, 0.16);
+  --p-fg: #93c5fd;
+}
+:root[data-theme='dark'] .pal-tag-violet {
+  --p-bg: rgba(139, 116, 240, 0.18);
+  --p-fg: #c4b5fd;
+}
+:root[data-theme='dark'] .pal-tag-teal {
+  --p-bg: rgba(20, 184, 166, 0.16);
+  --p-fg: #5eead4;
+}
+:root[data-theme='dark'] .pal-tag-orange {
+  --p-bg: rgba(249, 115, 22, 0.16);
+  --p-fg: #fdba74;
+}
+:root[data-theme='dark'] .pal-tag-green {
+  --p-bg: rgba(34, 197, 94, 0.16);
+  --p-fg: #86efac;
+}
+:root[data-theme='dark'] .pal-tag-pink {
+  --p-bg: rgba(236, 72, 153, 0.16);
+  --p-fg: #f9a8d4;
+}
+:root[data-theme='dark'] .pal-tag-neutral {
+  --p-bg: #232328;
+  --p-fg: #c9c9d1;
+}
+:root[data-theme='dark'] .pal-tag-indigo {
+  --p-bg: rgba(99, 102, 241, 0.16);
+  --p-fg: #a5b4fc;
+}
+:root[data-theme='dark'] .pal-tag-rose {
+  --p-bg: rgba(244, 63, 94, 0.16);
+  --p-fg: #fda4af;
+}
+:root[data-theme='dark'] .pal-tag-amber {
+  --p-bg: rgba(245, 158, 11, 0.16);
+  --p-fg: #fcd34d;
+}
+:root[data-theme='dark'] .pal-tag-sky {
+  --p-bg: rgba(14, 165, 233, 0.16);
+  --p-fg: #7dd3fc;
+}
+:root[data-theme='dark'] .pal-tag-purple {
+  --p-bg: rgba(168, 85, 247, 0.16);
+  --p-fg: #d8b4fe;
+}
+:root[data-theme='dark'] .pal-tag-yellow {
+  --p-bg: rgba(234, 179, 8, 0.16);
+  --p-fg: #fde047;
+}

@@ -1,0 +1,174 @@
+/*
+ * Design tokens (CLAUDE.md "Design tokens", docs/design-notes.md Appendix A). Light on :root;
+ * `data-theme="dark"` on <html> switches to the dark palette. `applyAppearance` (preferences.ts)
+ * resolves the user's `system` theme to light/dark and sets `--accent`, `--accent-ink-dark` and the
+ * two `--accent-soft-*` values from the user's accent (hex + 1A light / + 33 dark).
+ */
+:root {
+  color-scheme: light;
+
+  /* Accent (runtime) */
+  --accent: #6e56cf;
+  --accent-ink-dark: #b4a5ff;
+  --accent-soft-light: #6e56cf1a;
+  --accent-soft-dark: #6e56cf33;
+  --accent-ink: var(--accent);
+  --accent-soft: var(--accent-soft-light);
+
+  /* Surfaces */
+  --bg: #ffffff;
+  --bg-sidebar: #f7f7f8;
+  --bg-subtle: #fafafb;
+  --surface: #ffffff;
+  --control: #ffffff;
+  --control-sidebar: #ffffff;
+  --surface-2: #f4f4f5;
+  --hover: #f4f4f5;
+  --nav-hover: #ededf0;
+  --popover-hover: #f4f4f5;
+  --chip: #f1f1f3;
+  --chip-fg: #52525b;
+  --segment-track: #f4f4f5;
+  --segment-track-sidebar: #ededf0;
+  --segment-active: #ffffff;
+
+  /* Borders */
+  --border: #e6e6ea;
+  --border-control: #e6e6ea;
+  --border-subtle: #efeff2;
+  --border-strong: #d4d4d8;
+
+  /* Text */
+  --text: #18181b;
+  --text-body: #27272a;
+  --text-2: #3f3f46;
+  --text-3: #52525b;
+  --text-muted: #6b6b74;
+  --icon-muted: #71717a;
+  --text-faint: #a1a1aa;
+
+  /* Feedback */
+  --danger: #c42b1c;
+  --danger-soft: #fdecec;
+  --danger-soft-fg: #b42318;
+  --warning: #b45309;
+  --success: #16a34a;
+  --online: #16a34a;
+  --favorite: #ca8a04;
+
+  /* Status markers + tints */
+  --status-todo: #a1a1aa;
+  --status-progress: #d97706;
+  --status-review: var(--accent);
+  --status-done: #16a34a;
+  --tint-todo-bg: #f1f1f3;
+  --tint-todo-header: #ededf0;
+  --tint-todo-fg: #3f3f46;
+  --tint-progress-bg: #fdf0dc;
+  --tint-progress-fg: #92400e;
+  --tint-review-bg: var(--accent-soft);
+  --tint-review-fg: var(--accent-ink);
+  --tint-done-bg: #e3f4e8;
+  --tint-done-fg: #166534;
+
+  /* Priority flags */
+  --prio-urgent: #dc2626;
+  --prio-high: #ea580c;
+  --prio-medium: #ca8a04;
+  --prio-low: #a1a1aa;
+  --prio-none: #d4d4d8;
+
+  /* Due tones */
+  --due-overdue: #c42b1c;
+  --due-today: #b45309;
+  --due-soon: #3f3f46;
+  --due-later: #6b6b74;
+  --due-done: #a1a1aa;
+
+  /* Sidebar project dot when not active */
+  --project-dot-inactive: #c4c4cc;
+
+  /* Tooltip (not drawn; inverted surface) */
+  --tooltip-bg: #18181b;
+  --tooltip-fg: #ffffff;
+
+  /* Scrims */
+  --scrim-drawer: rgba(24, 24, 27, 0.28);
+  --scrim-modal: rgba(24, 24, 27, 0.32);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --accent-ink: var(--accent-ink-dark);
+  --accent-soft: var(--accent-soft-dark);
+
+  --bg: #111113;
+  --bg-sidebar: #161618;
+  --bg-subtle: #18181b;
+  --surface: #1f1f23;
+  --control: #18181b;
+  --control-sidebar: #1b1b1e;
+  --surface-2: #26262b;
+  --hover: #1f1f23;
+  --nav-hover: #1f1f23;
+  --popover-hover: #26262b;
+  --chip: #232328;
+  --chip-fg: #b4b4bc;
+  --segment-track: #26262b;
+  --segment-track-sidebar: #1f1f23;
+  --segment-active: #2e2e34;
+
+  --border: #26262b;
+  --border-control: #2a2a30;
+  --border-subtle: #1f1f23;
+  --border-strong: #3a3a42;
+
+  --text: #ededef;
+  --text-body: #c9c9d1;
+  --text-2: #c9c9d1;
+  --text-3: #b4b4bc;
+  --text-muted: #8e8e98;
+  --icon-muted: #8e8e98;
+  --text-faint: #5e5e68;
+
+  --danger: #f87171;
+  --danger-soft: rgba(248, 113, 113, 0.12);
+  --danger-soft-fg: #f87171;
+  --warning: #fbbf24;
+  --success: #22c55e;
+  --online: #22c55e;
+  --favorite: #facc15;
+
+  --status-todo: #71717a;
+  --status-progress: #f59e0b;
+  --status-review: var(--accent-ink);
+  --status-done: #22c55e;
+  --tint-todo-bg: #232328;
+  --tint-todo-header: #232328;
+  --tint-todo-fg: #c9c9d1;
+  --tint-progress-bg: rgba(245, 158, 11, 0.16);
+  --tint-progress-fg: #fbbf24;
+  --tint-done-bg: rgba(34, 197, 94, 0.16);
+  --tint-done-fg: #86efac;
+
+  --prio-urgent: #f87171;
+  --prio-high: #fb923c;
+  --prio-medium: #facc15;
+  --prio-low: #71717a;
+  --prio-none: #3a3a42;
+
+  --due-overdue: #f87171;
+  --due-today: #fbbf24;
+  --due-soon: #c9c9d1;
+  --due-later: #8e8e98;
+  --due-done: #5e5e68;
+
+  --project-dot-inactive: #4a4a52;
+
+  --tooltip-bg: #ededef;
+  --tooltip-fg: #18181b;
+
+  --scrim-drawer: rgba(0, 0, 0, 0.5);
+  --scrim-modal: rgba(0, 0, 0, 0.56);
+}

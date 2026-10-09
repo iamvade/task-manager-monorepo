@@ -19,7 +19,7 @@ The visual source of truth is the `design/` folder (exported from Claude Design)
 ## Stack
 
 - **Monorepo:** pnpm workspaces. `apps/web`, `apps/api`, `packages/shared`.
-- **Frontend (`apps/web`):** Vite, React 18, TypeScript (strict), React Router, TanStack Query (server state), Zustand (UI state only), Tailwind CSS v4 driven by CSS variables (design tokens), dnd-kit (drag and drop), TipTap (rich text + @mentions), date-fns, i18next (mn/en), lucide-react icons, cmdk (⌘K palette).
+- **Frontend (`apps/web`):** Vite, React 18, TypeScript (strict), React Router, TanStack Query (server state), Zustand (UI state only), Tailwind CSS v4 driven by CSS variables (design tokens), dnd-kit (drag and drop), TipTap (rich text + @mentions), date-fns, i18next (mn/en), lucide-react icons, cmdk (⌘K palette), @floating-ui/react (popover/picker/tooltip positioning).
 - **Backend (`apps/api`):** Node 20+, Fastify 5, TypeScript (strict), Drizzle ORM + drizzle-kit migrations, PostgreSQL 16, zod via `fastify-type-provider-zod`, argon2 password hashing, cookie sessions, `@fastify/websocket` for realtime, `@fastify/multipart` for uploads, `@fastify/rate-limit`, `@fastify/helmet`, `@fastify/cors`, `@fastify/swagger` + `@fastify/swagger-ui` (OpenAPI 3.1 generated from the zod route schemas, Swagger UI at `/api/docs`, off in production unless `API_DOCS=true`), pino logging.
 - **Shared (`packages/shared`):** zod schemas, DTO types, enums, event names — imported by both apps. Never duplicate a type across apps.
 - **Dev infra:** `docker-compose.yml` with Postgres 16. Local file storage in `apps/api/uploads` behind a `Storage` interface (S3 later).
@@ -118,6 +118,8 @@ Layout: sidebar 248px (min 220px), collapsible to a 56px icon rail. Top bar 56px
 | `--success` | #16A34A | #22C55E |
 
 "—" = not drawn in the designs; derive when needed.
+
+Implementation: raw values live in `apps/web/src/styles/tokens.css` (`:root` light, `:root[data-theme='dark']`); `index.css` maps them into Tailwind v4 property namespaces so classes read like the tokens: `bg-surface`, `bg-sidebar`, `bg-subtle`, `bg-hover`, `bg-chip`, `bg-accent-soft` · `text-default`, `text-2`, `text-3`, `text-muted`, `text-icon`, `text-faint`, `text-accent-ink`, `text-due-*` · `border-default`, `border-control`, `border-subtle`, `border-strong` · `shadow-popover` etc. Palette keys → `.pal-{avatar|space|project|tag}-{key}` + `.pal-fill` / `.pal-dot` (`styles/palette.css`). Base element styles sit in `@layer base` so utilities always win.
 
 Status markers (12px, 2px ring), rendered by category: To Do = ring #A1A1AA (dark #71717A); In Progress = ring + left-half fill #D97706 (dark #F59E0B); In Review = ring accent + 20% accent fill (dark: ring accent-ink, fill accent-soft); Done = solid #16A34A (dark #22C55E). Status tints (activity pills, board column headers): To Do #F1F1F3/#3F3F46 (board header #EDEDF0), In Progress #FDF0DC/#92400E, In Review accent-soft/accent, Done #E3F4E8/#166534.
 Priority flags: Urgent #DC2626 (dark #F87171), High #EA580C (#FB923C), Medium #CA8A04 (#FACC15) — filled; Low = outline #A1A1AA (#71717A).

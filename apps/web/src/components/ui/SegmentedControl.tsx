@@ -1,4 +1,5 @@
 import { useRef, type KeyboardEvent } from 'react';
+import { cn } from '../../lib/cn';
 
 export interface SegmentOption<T extends string> {
   value: T;
@@ -11,19 +12,29 @@ interface SegmentedControlProps<T extends string> {
   options: readonly SegmentOption<T>[];
   value: T;
   onChange: (value: T) => void;
-  /** Accessible name of the group. */
-  label: string;
+  /** Accessible name of the group (or use `labelledBy`). */
+  label?: string;
+  labelledBy?: string;
+  /** `sidebar` = #EDEDF0 track (Main language switcher); `default` = --surface-2. */
+  track?: 'sidebar' | 'default';
+  /** sm: 24px segments r5 on a r7 track (12/600); md: 28px r6 on r8 (13/500). */
+  size?: 'sm' | 'md';
+  className?: string;
 }
 
 /**
- * Radio-group segmented control (Main.dc.html language switcher): 2px-padded track radius 7,
- * 24px segments radius 5, selected = raised surface with `--shadow-segment`. Arrow keys move.
+ * Radio-group segmented control: 2px-padded track, selected = raised `--segment-active` with
+ * `--shadow-segment`. Arrow keys move and select (roving tabindex).
  */
 export function SegmentedControl<T extends string>({
   options,
   value,
   onChange,
   label,
+  labelledBy,
+  track = 'default',
+  size = 'sm',
+  className,
 }: SegmentedControlProps<T>) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -47,7 +58,13 @@ export function SegmentedControl<T extends string>({
     <div
       role="radiogroup"
       aria-label={label}
-      className="flex gap-0.5 rounded-[7px] bg-segment-track p-0.5"
+      aria-labelledby={labelledBy}
+      className={cn(
+        'flex gap-0.5 p-0.5',
+        size === 'sm' ? 'rounded-[7px]' : 'rounded-[8px]',
+        track === 'sidebar' ? 'bg-segment-track-sidebar' : 'bg-segment-track',
+        className,
+      )}
     >
       {options.map((option, index) => {
         const selected = option.value === value;
@@ -69,11 +86,15 @@ export function SegmentedControl<T extends string>({
             onKeyDown={(e) => {
               onKeyDown(e, index);
             }}
-            className={`h-6 rounded-[5px] border-0 px-2 text-[12px] font-semibold ${
+            className={cn(
+              'flex-1 border-0 whitespace-nowrap',
+              size === 'sm'
+                ? 'h-6 rounded-[5px] px-2 text-[12px] font-semibold'
+                : 'h-7 rounded-[6px] px-3 text-[13px] font-medium',
               selected
-                ? 'bg-segment-active text-text shadow-[var(--shadow-segment)]'
-                : 'bg-transparent text-text-muted'
-            }`}
+                ? 'bg-segment-active text-default shadow-segment'
+                : 'bg-transparent text-muted',
+            )}
           >
             {option.label}
           </button>

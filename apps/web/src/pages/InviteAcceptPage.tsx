@@ -83,7 +83,7 @@ export function InviteAcceptPage() {
   } else {
     body = (
       <div className="flex flex-col gap-4">
-        <p className="text-[13px] text-text-2">{t('invite.signInToJoin')}</p>
+        <p className="text-[13px] text-2">{t('invite.signInToJoin')}</p>
         {acceptError}
         <LoginForm
           fixedEmail={preview.email}
@@ -110,7 +110,7 @@ function SwitchAccount({ email }: { email: string }) {
   const logout = useLogout();
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-[13px] text-text-2">{t('invite.signedInAsOther', { email })}</p>
+      <p className="text-[13px] text-2">{t('invite.signedInAsOther', { email })}</p>
       <Button
         size="lg"
         className="w-full"

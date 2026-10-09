@@ -11,15 +11,18 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@floating-ui/react": "^0.27.20",
     "@kite/shared": "workspace:*",
     "@tanstack/react-query": "^5.104.1",
+    "date-fns": "^4.4.0",
     "i18next": "^26.4.2",
     "lucide-react": "^1.52.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-i18next": "^17.0.16",
     "react-router": "^7.18.4",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",

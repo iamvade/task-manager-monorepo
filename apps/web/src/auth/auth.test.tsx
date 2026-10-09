@@ -1,53 +1,12 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { RouterProvider, createMemoryRouter } from 'react-router';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import i18n from '../i18n';
 import { createQueryClient } from '../queryClient';
 import { routes } from '../router';
+import { ME, SIDEBAR, WORKSPACE_ID, mockApi, unauthorized } from '../test/fixtures';
 import { AuthProvider } from './AuthProvider';
-
-const ME = {
-  user: {
-    id: '01890000-0000-7000-8000-000000000001',
-    email: 'anu@kite.test',
-    name: 'Anu Bold',
-    initials: 'AB',
-    avatarColor: 'indigo',
-  },
-  preferences: {
-    locale: 'mn',
-    timezone: 'Asia/Ulaanbaatar',
-    theme: 'light',
-    accent: '#6E56CF',
-    density: 'comfortable',
-    notificationPrefs: { mention: true, assigned: true, comment: true, status: true },
-  },
-  workspaces: [
-    {
-      id: '01890000-0000-7000-8000-000000000002',
-      name: 'Kite Studio',
-      slug: 'kite-studio',
-      role: 'owner',
-      title: null,
-    },
-  ],
-};
-
-const unauthorized = () =>
-  Response.json({ error: { code: 'UNAUTHORIZED', message: 'Sign in required' } }, { status: 401 });
-
-type Handler = (init?: RequestInit) => Response;
-
-function mockApi(handlers: Record<string, Handler>) {
-  return vi.spyOn(globalThis, 'fetch').mockImplementation((input, init) => {
-    const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
-    const key = `${init?.method ?? 'GET'} ${url}`;
-    const handler = handlers[key];
-    if (!handler) throw new Error(`Unexpected request ${key}`);
-    return Promise.resolve(handler(init));
-  });
-}
 
 function renderAt(path: string) {
   const router = createMemoryRouter(routes, { initialEntries: [path] });
@@ -100,6 +59,7 @@ describe('auth flow', () => {
     const fetchMock = mockApi({
       'GET /api/v1/auth/me': unauthorized,
       'POST /api/v1/auth/login': () => Response.json(ME),
+      [`GET /api/v1/workspaces/${WORKSPACE_ID}/sidebar`]: () => Response.json(SIDEBAR),
     });
     const router = renderAt('/login?next=%2Fmy-tasks');
 
@@ -109,7 +69,9 @@ describe('auth flow', () => {
     fireEvent.change(screen.getByLabelText('Нууц үг'), { target: { value: 'password123' } });
     fireEvent.click(screen.getByRole('button', { name: 'Нэвтрэх' }));
 
-    expect(await screen.findByRole('heading', { name: 'Миний ажлууд' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Миний ажлууд' }),
+    ).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/my-tasks');
     const loginCall = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST');
     expect(JSON.parse(loginCall?.[1]?.body as string)).toEqual({

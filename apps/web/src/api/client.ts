@@ -12,6 +12,21 @@ export class ApiError extends Error {
   }
 }
 
+type QueryValue = string | number | boolean | null | undefined;
+
+/** `?a=1&b=x&b=y` from an object; null/undefined skipped, arrays repeat the key. */
+export function toQuery(params: Record<string, QueryValue | readonly QueryValue[]>): string {
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    const values = Array.isArray(value) ? value : [value];
+    for (const v of values as QueryValue[]) {
+      if (v !== null && v !== undefined) search.append(key, String(v));
+    }
+  }
+  const qs = search.toString();
+  return qs ? `?${qs}` : '';
+}
+
 /** Fetches `/api/v1{path}` and validates the JSON body with `schema`. */
 export async function apiFetch<S extends z.ZodType>(
   path: string,

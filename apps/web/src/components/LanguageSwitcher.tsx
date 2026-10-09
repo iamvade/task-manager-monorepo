@@ -11,9 +11,8 @@ const LANGUAGES: readonly SegmentOption<Locale>[] = [
   { value: 'en', label: 'EN', lang: 'en', title: 'English' },
 ];
 
-/** МН / EN switch. Signed in, the choice is saved to the profile; otherwise to this browser. */
-export function LanguageSwitcher() {
-  const { t, i18n } = useTranslation();
+function useLanguage() {
+  const { i18n } = useTranslation();
   const { me } = useAuth();
   const updateMe = useUpdateMe();
   const current: Locale = i18n.language === 'en' ? 'en' : 'mn';
@@ -24,13 +23,51 @@ export function LanguageSwitcher() {
     storeLanguage(locale);
     if (me) updateMe.mutate({ locale });
   }
+  return { current, change };
+}
+
+interface LanguageSwitcherProps {
+  /** segmented = МН / EN radio group; cycle = one 36×28 button that flips (sidebar rail). */
+  variant?: 'segmented' | 'cycle';
+  /** Segmented track: `sidebar` (#EDEDF0, Main footer) or `default` (login header). */
+  track?: 'sidebar' | 'default';
+  /** Id of a visible label; otherwise the group is named "Language". */
+  labelledBy?: string;
+}
+
+/** МН / EN switch. Signed in, the choice is saved to the profile; otherwise to this browser. */
+export function LanguageSwitcher({
+  variant = 'segmented',
+  track = 'default',
+  labelledBy,
+}: LanguageSwitcherProps) {
+  const { t } = useTranslation();
+  const { current, change } = useLanguage();
+
+  if (variant === 'cycle') {
+    const option = LANGUAGES.find((l) => l.value === current) ?? LANGUAGES[0];
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          change(current === 'mn' ? 'en' : 'mn');
+        }}
+        aria-label={`${t('language.label')}: ${option?.title ?? ''}`}
+        className="h-7 w-9 rounded-[6px] border border-control bg-control text-[11px] font-semibold text-2 hover:bg-hover"
+      >
+        {option?.label}
+      </button>
+    );
+  }
 
   return (
     <SegmentedControl
       options={LANGUAGES}
       value={current}
       onChange={change}
-      label={t('language.label')}
+      label={labelledBy ? undefined : t('language.label')}
+      labelledBy={labelledBy}
+      track={track}
     />
   );
 }

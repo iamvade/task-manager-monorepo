@@ -1,36 +1,39 @@
-import type { ButtonHTMLAttributes } from 'react';
+import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { cn } from '../../lib/cn';
+import { buttonVariants, type ButtonVariant as Variant } from './buttonStyles';
+import { Kbd } from './Kbd';
 
-type Variant = 'primary' | 'secondary' | 'ghost';
-type Size = 'md' | 'lg';
+type Size = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
+  /** sm 28px · md 32px (toolbar, Share) · lg 40px (CTAs). */
   size?: Size;
+  /** Leading icon (14px). */
+  icon?: ReactNode;
+  /** Trailing keyboard hint, e.g. "C". */
+  kbd?: string;
 }
 
 const base =
-  'inline-flex items-center justify-center gap-1.5 rounded-[8px] px-3 text-[13px] font-medium whitespace-nowrap disabled:opacity-60';
+  'inline-flex items-center justify-center gap-1.5 rounded-[8px] text-[13px] font-medium whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-60';
 
-const variants: Record<Variant, string> = {
-  primary: 'bg-accent text-white hover:brightness-110',
-  secondary: 'border border-border-control bg-control text-text hover:bg-hover',
-  ghost: 'bg-transparent text-text-2 hover:bg-hover',
-};
+const sizes: Record<Size, string> = { sm: 'h-7 px-2.5', md: 'h-8 px-3', lg: 'h-10 px-4' };
 
-const sizes: Record<Size, string> = { md: 'h-8', lg: 'h-10' };
-
-export function Button({
-  variant = 'secondary',
-  size = 'md',
-  type = 'button',
-  className = '',
-  ...props
-}: ButtonProps) {
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  { variant = 'secondary', size = 'md', type = 'button', icon, kbd, className, children, ...props },
+  ref,
+) {
   return (
     <button
+      ref={ref}
       type={type}
-      className={`${base} ${variants[variant]} ${sizes[size]} ${className}`}
+      className={cn(base, buttonVariants[variant], sizes[size], className)}
       {...props}
-    />
+    >
+      {icon}
+      {children}
+      {kbd && <Kbd variant={variant === 'primary' ? 'onAccent' : 'plain'}>{kbd}</Kbd>}
+    </button>
   );
-}
+});

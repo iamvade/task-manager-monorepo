@@ -10,13 +10,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const prefs = data?.preferences;
 
   useEffect(() => {
-    if (!prefs) {
+    // Signed out → defaults. While /auth/me is loading, keep what theme-init.js painted.
+    if (data === null) {
       applyAppearance('system', '#6E56CF');
       return;
     }
+    if (!prefs) return;
     applyAppearance(prefs.theme, prefs.accent);
     if (i18n.language !== prefs.locale) void i18n.changeLanguage(prefs.locale);
-  }, [prefs, i18n]);
+  }, [data, prefs, i18n]);
 
   return <AuthContext.Provider value={{ me: data, isError }}>{children}</AuthContext.Provider>;
 }

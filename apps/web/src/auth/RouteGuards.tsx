@@ -6,8 +6,8 @@ import { useAuth } from './useAuth';
 function FullPageStatus() {
   const { t } = useTranslation();
   return (
-    <main className="grid min-h-screen place-items-center bg-bg-subtle">
-      <p role="status" className="text-[13px] text-text-muted">
+    <main className="grid min-h-screen place-items-center bg-subtle">
+      <p role="status" className="text-[13px] text-muted">
         {t('common.loading')}
       </p>
     </main>

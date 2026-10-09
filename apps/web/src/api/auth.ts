@@ -9,8 +9,9 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { ApiError, apiFetch, apiSend } from './client';
+import { queryKeys } from './queryKeys';
 
-export const meQueryKey = ['me'] as const;
+export const meQueryKey = queryKeys.me;
 
 /** The signed-in user, or `null` when there is no session. */
 async function fetchMe(): Promise<MeResponse | null> {

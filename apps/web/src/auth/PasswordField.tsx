@@ -23,7 +23,7 @@ export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
             }}
             aria-label={visible ? t('auth.hidePassword') : t('auth.showPassword')}
             aria-pressed={visible}
-            className="flex size-7 shrink-0 items-center justify-center rounded-[6px] text-icon-muted hover:bg-hover"
+            className="flex size-7 shrink-0 items-center justify-center rounded-[6px] text-icon hover:bg-hover"
           >
             <Icon size={16} aria-hidden="true" />
           </button>

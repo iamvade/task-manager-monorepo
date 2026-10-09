@@ -9,13 +9,22 @@
   },
   "common": {
     "loading": "Loading…",
-    "genericError": "Something went wrong. Please try again."
+    "genericError": "Something went wrong. Please try again.",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "create": "Create",
+    "close": "Close",
+    "noResults": "No results",
+    "errorTitle": "Something went wrong",
+    "errorBody": "An unexpected error stopped this page. Reload to try again.",
+    "reload": "Reload page",
+    "notFoundTitle": "Not found",
+    "notFoundBody": "This page doesn't exist or you don't have access to it.",
+    "goToMyTasks": "Go to My Tasks",
+    "comingSoon": "This screen is being built and arrives in an upcoming phase."
   },
   "language": {
     "label": "Language"
-  },
-  "nav": {
-    "myTasks": "My Tasks"
   },
   "auth": {
     "signInTitle": "Sign in to Kite",
@@ -50,5 +59,438 @@
     "invalidTitle": "This invite isn't valid",
     "invalidBody": "The link has expired or was already used. Ask the person who invited you for a new one.",
     "goToSignIn": "Go to sign in"
+  },
+  "shell": {
+    "workspace": "Workspace",
+    "switchWorkspace": "Switch workspace",
+    "search": "Search",
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar",
+    "myTasks": "My Tasks",
+    "inbox": "Inbox",
+    "unread_one": "{{count}} unread",
+    "unread_other": "{{count}} unread",
+    "openTasks_one": "{{count}} open task",
+    "openTasks_other": "{{count}} open tasks",
+    "spaces": "Spaces",
+    "newSpace": "New space",
+    "spaceName": "Space name",
+    "createSpace": "Create space",
+    "language": "Language",
+    "invite": "Invite teammates",
+    "settings": "Settings",
+    "online": "Online",
+    "newBadge": "New",
+    "accountMenu": "Account menu",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
+    "loadError": "Couldn't load the sidebar."
+  },
+  "header": {
+    "breadcrumb": "Breadcrumb",
+    "favorite": "Add to favorites",
+    "unfavorite": "Remove from favorites",
+    "members_one": "{{count}} project member",
+    "members_other": "{{count}} project members",
+    "share": "Share",
+    "shareHint": "Everyone in {{workspace}} can open this page. Share the link with a teammate.",
+    "projectOptions": "Project options",
+    "spaceOptions": "Space options",
+    "copyLink": "Copy link",
+    "linkCopied": "Link copied",
+    "allProjects": "All projects"
+  },
+  "views": {
+    "view": "View",
+    "list": "List",
+    "board": "Board",
+    "calendar": "Calendar",
+    "viewTitle": "{{view}} view",
+    "notYet": "This view is next on the design list. Switch back to List to see the {{project}} tasks."
+  },
+  "toolbar": {
+    "filter": "Filter",
+    "activeFilters_one": "{{count}} active filter",
+    "activeFilters_other": "{{count}} active filters",
+    "sort": "Sort: {{field}}",
+    "group": "Group: {{field}}",
+    "sortBy": "Sort by",
+    "groupBy": "Group by",
+    "newTask": "New Task",
+    "sortFields": {
+      "due": "Due date",
+      "priority": "Priority",
+      "created": "Created",
+      "manual": "Manual"
+    },
+    "groupFields": {
+      "status": "Status",
+      "assignee": "Assignee",
+      "priority": "Priority",
+      "none": "None"
+    }
+  },
+  "filters": {
+    "sprintIs": "Sprint is",
+    "removeFilter": "Remove filter"
+  },
+  "summary": {
+    "tasks_one": "{{count}} task · {{done}} done",
+    "tasks_other": "{{count}} tasks · {{done}} done"
+  },
+  "table": {
+    "label": "{{project}} tasks",
+    "complete": "Complete",
+    "colName": "Task name",
+    "colAssignee": "Assignee",
+    "colDue": "Due date",
+    "colPriority": "Priority",
+    "colTags": "Tags",
+    "actions": "Actions",
+    "addTask": "Add task",
+    "markComplete": "Mark {{name}} complete",
+    "moreActions": "More actions for {{name}}",
+    "addToGroup": "Add task to {{group}}"
+  },
+  "status": {
+    "todo": "To Do",
+    "in_progress": "In Progress",
+    "review": "In Review",
+    "done": "Done"
+  },
+  "priority": {
+    "urgent": "Urgent",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low",
+    "none": "No priority"
+  },
+  "dates": {
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "yesterday": "Yesterday",
+    "overdue": "Overdue"
+  },
+  "picker": {
+    "navigate": "navigate",
+    "select": "select",
+    "clear": "unassign"
+  },
+  "board": {
+    "sortManual": "Sort: Manual",
+    "columnsStatus": "Columns: Status",
+    "columnLabel_one": "{{status}}, {{count}} task",
+    "columnLabel_other": "{{status}}, {{count}} tasks",
+    "addTaskTo": "Add task to {{status}}",
+    "columnOptions": "{{status}} column options",
+    "dropToMove": "Drop to move to {{status}}",
+    "completed": "Completed",
+    "priorityLabel": "{{priority}} priority",
+    "subtasksDone_one": "{{done}}/{{count}} subtask done",
+    "subtasksDone_other": "{{done}}/{{count}} subtasks done",
+    "dueOverdue": "{{date}} · Overdue",
+    "moreTags": "+{{count}}"
+  },
+  "drawer": {
+    "closeToList": "Close task and return to list",
+    "location": "Task location",
+    "markComplete": "Mark complete",
+    "copyLink": "Copy link to task",
+    "openFullPage": "Open as full page",
+    "moreActions": "More task actions",
+    "close": "Close",
+    "titleLabel": "Task title",
+    "createdMeta": "Created by {{name}} on {{date}} · Updated {{relative}}",
+    "status": "Status",
+    "assignees": "Assignees",
+    "addAssignee": "Add assignee",
+    "dueRelative": "{{relative}}, {{date}}",
+    "started": "Started {{date}}",
+    "addTag": "Add tag",
+    "description": "Description",
+    "toolbar": {
+      "label": "Formatting",
+      "text": "Text",
+      "bold": "Bold",
+      "italic": "Italic",
+      "strike": "Strikethrough",
+      "code": "Inline code",
+      "bulletList": "Bulleted list",
+      "orderedList": "Numbered list",
+      "link": "Link",
+      "mention": "Mention someone"
+    },
+    "subtasks": "Subtasks",
+    "newSubtask": "New subtask",
+    "addSubtask": "Add subtask",
+    "attachments": "Attachments",
+    "attach": "Attach",
+    "attachmentMeta": "{{size}} · {{name}}",
+    "size": {
+      "b": "{{value}} B",
+      "kb": "{{value}} KB",
+      "mb": "{{value}} MB"
+    },
+    "dropFiles": "Drop files or <browse>browse</browse>",
+    "activity": "Activity",
+    "activityFilter": "Activity filter",
+    "tabs": {
+      "all": "All",
+      "comments": "Comments",
+      "history": "History"
+    },
+    "history": {
+      "created": "<b>{{actor}}</b> created this task",
+      "prioritySet": "<b>{{actor}}</b> set priority to <b>{{to}}</b>",
+      "priorityChanged": "<b>{{actor}}</b> changed priority from {{from}} to <b>{{to}}</b>",
+      "statusChanged": "<b>{{actor}}</b> changed status from <from>{{from}}</from> to <to>{{to}}</to>",
+      "statusSet": "<b>{{actor}}</b> changed status to <to>{{to}}</to>",
+      "attached": "<b>{{actor}}</b> attached <b>{{filename}}</b>",
+      "subtaskCompleted": "<b>{{actor}}</b> completed subtask <b>{{title}}</b>"
+    },
+    "commentOptions": "Comment options",
+    "reply": "Reply",
+    "replies_one": "{{count}} reply",
+    "replies_other": "{{count}} replies",
+    "mentionSuggestions": "Mention suggestions",
+    "people": "People",
+    "writeComment": "Write a comment",
+    "attachFile": "Attach file",
+    "sendHint": "⌘ Enter to send",
+    "send": "Comment",
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo_one": "{{count}} minute ago",
+      "minutesAgo_other": "{{count}} minutes ago",
+      "hoursAgo_one": "{{count}} hour ago",
+      "hoursAgo_other": "{{count}} hours ago",
+      "yesterdayAt": "Yesterday, {{time}}"
+    }
+  },
+  "myTasks": {
+    "allSpaces": "All spaces",
+    "groupDueDate": "Group: Due date",
+    "greeting": {
+      "morning": "Good morning, {{name}}",
+      "afternoon": "Good afternoon, {{name}}",
+      "evening": "Good evening, {{name}}"
+    },
+    "stats": {
+      "dueToday": "Due today",
+      "dueTodayLeft_one": "of {{count}} left",
+      "dueTodayLeft_other": "of {{count}} left",
+      "urgent_one": "{{count}} urgent",
+      "urgent_other": "{{count}} urgent",
+      "completedThisWeek": "Completed this week",
+      "vsLastWeek": "{{delta}} vs last week",
+      "perDayLabel": "Completed per day: {{list}}",
+      "perDayItem": "{{day}} {{count}}",
+      "overdue": "Overdue",
+      "oldestLate_one": "oldest is {{count}} day late",
+      "oldestLate_other": "oldest is {{count}} days late"
+    },
+    "sections": {
+      "overdue": "Overdue",
+      "overdueHint": "Reschedule or close these first",
+      "thisWeek": "This Week",
+      "later": "Later",
+      "laterHint": "After this week",
+      "rangeHint": "{{start}} – {{end}}"
+    },
+    "recentActivity": "Recent activity",
+    "viewInbox": "View inbox",
+    "feed": {
+      "mentioned": "<b>{{actor}}</b> mentioned you in <task>{{task}}</task>",
+      "statusChanged": "<b>{{actor}}</b> moved <task>{{task}}</task> to {{status}}",
+      "commented": "<b>{{actor}}</b> commented on <task>{{task}}</task>",
+      "assigned": "<b>{{actor}}</b> assigned you <task>{{task}}</task>",
+      "dueChanged": "<b>{{actor}}</b> changed the due date of <task>{{task}}</task> to {{date}}",
+      "completed": "<b>{{actor}}</b> completed <task>{{task}}</task>",
+      "meta": "{{time}} · {{project}}",
+      "unread": "Unread"
+    },
+    "showOlder": "Show older activity",
+    "time": {
+      "minutesAgo_one": "{{count}}m ago",
+      "minutesAgo_other": "{{count}}m ago",
+      "hoursAgo_one": "{{count}}h ago",
+      "hoursAgo_other": "{{count}}h ago",
+      "yesterday": "Yesterday"
+    }
+  },
+  "calendar": {
+    "allProjects": "All projects",
+    "spaceOptions": "Space options",
+    "previousMonth": "Previous month",
+    "previousWeek": "Previous week",
+    "nextMonth": "Next month",
+    "nextWeek": "Next week",
+    "range": "Calendar range",
+    "month": "Month",
+    "week": "Week",
+    "showProjects": "Show projects",
+    "period": {
+      "month": "{{monthLong}} {{year}}",
+      "week": "{{monthShort}} {{startDay}} – {{endDay}}, {{year}}",
+      "weekCrossMonth": "{{startMonthShort}} {{startDay}} – {{endMonthShort}} {{endDay}}, {{year}}",
+      "weekCrossYear": "{{startMonthShort}} {{startDay}}, {{startYear}} – {{endMonthShort}} {{endDay}}, {{endYear}}"
+    },
+    "dayLabel_one": "{{date}}, {{count}} task",
+    "dayLabel_other": "{{date}}, {{count}} tasks",
+    "more_one": "+{{count}} more",
+    "more_other": "+{{count}} more",
+    "closePopover": "Close",
+    "pillTitle": "{{title}} — {{project}}",
+    "unscheduled": "Unscheduled",
+    "addUnscheduled": "Add unscheduled task",
+    "filterUnscheduled": "Filter unscheduled tasks",
+    "filterPlaceholder": "Filter tasks",
+    "dragHint": "Drag a task onto a date to schedule it",
+    "unscheduledCard": "{{title}}, {{project}}, {{priority}} priority. Draggable.",
+    "allScheduled": "Everything is scheduled.",
+    "weekdays": {
+      "short": {
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat",
+        "sun": "Sun"
+      },
+      "long": {
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday",
+        "sat": "Saturday",
+        "sun": "Sunday"
+      }
+    },
+    "months": {
+      "long": {
+        "m1": "January",
+        "m2": "February",
+        "m3": "March",
+        "m4": "April",
+        "m5": "May",
+        "m6": "June",
+        "m7": "July",
+        "m8": "August",
+        "m9": "September",
+        "m10": "October",
+        "m11": "November",
+        "m12": "December"
+      },
+      "short": {
+        "m1": "Jan",
+        "m2": "Feb",
+        "m3": "Mar",
+        "m4": "Apr",
+        "m5": "May",
+        "m6": "Jun",
+        "m7": "Jul",
+        "m8": "Aug",
+        "m9": "Sep",
+        "m10": "Oct",
+        "m11": "Nov",
+        "m12": "Dec"
+      }
+    },
+    "format": {
+      "dateShort": "{{monthShort}} {{d}}",
+      "dateShortYear": "{{monthShort}} {{d}}, {{year}}",
+      "weekdayShortDate": "{{weekdayShort}}, {{monthShort}} {{d}}",
+      "weekdayLongDate": "{{weekdayLong}}, {{monthShort}} {{d}}",
+      "weekdayLongDateFull": "{{weekdayLong}}, {{monthLong}} {{d}}",
+      "time": "h:mm a"
+    }
+  },
+  "create": {
+    "closeToList": "Close and return to list",
+    "heading": "New task",
+    "close": "Close (Esc)",
+    "escKey": "Esc",
+    "titlePlaceholder": "Task title",
+    "description": "Description",
+    "descriptionPlaceholder": "Add a description… Markdown and @mentions work here",
+    "searchPeople": "Search people",
+    "assignTo": "Assign to…",
+    "you": "You",
+    "unassigned": "Unassigned",
+    "keys": {
+      "navigate": "navigate",
+      "select": "select",
+      "unassign": "unassign"
+    },
+    "typeDate": "Type a date",
+    "typeDatePlaceholder": "Type a date, e.g. “next fri”",
+    "due": {
+      "thisWeekend": "This weekend",
+      "nextWeek": "Next week",
+      "inTwoWeeks": "In two weeks",
+      "none": "No due date"
+    },
+    "searchProjects": "Search projects",
+    "moveToProject": "Move to project…",
+    "project": "Project",
+    "moreFields": "More fields",
+    "createMore": "Create more",
+    "cancel": "Cancel",
+    "submit": "Create task",
+    "hints": {
+      "create": "Create",
+      "createAndOpen": "Create and open"
+    }
+  },
+  "emptyProject": {
+    "newBadge": "New",
+    "title": "{{project}} has no tasks yet",
+    "body": "Add the first piece of work to get things moving. Tasks show up here grouped by status, and teammates you invite can pick them up.",
+    "createFirst": "Create first task",
+    "importCsv": "Import from CSV",
+    "comingSoon": "Coming soon",
+    "orTemplate": "Or start from a template",
+    "templates": {
+      "productLaunch": {
+        "name": "Product launch",
+        "desc_one": "{{count}} task across planning, build and go-live",
+        "desc_other": "{{count}} tasks across planning, build and go-live"
+      },
+      "sprintPlanning": {
+        "name": "Sprint planning",
+        "desc_one": "{{count}} task for a two-week cycle",
+        "desc_other": "{{count}} tasks for a two-week cycle"
+      },
+      "bugTriage": {
+        "name": "Bug triage",
+        "desc_one": "{{count}} task plus priority and severity fields",
+        "desc_other": "{{count}} tasks plus priority and severity fields"
+      }
+    }
+  },
+  "inbox": {
+    "markAllRead": "Mark all as read",
+    "notificationSettings": "Notification settings",
+    "filter": "Inbox filter",
+    "tabs": {
+      "all": "All",
+      "mentions": "Mentions",
+      "assigned": "Assigned to me",
+      "archived": "Archived"
+    },
+    "empty": {
+      "title": "You’re all caught up",
+      "body": "Mentions, new assignments and comments on tasks you follow will land here. Notifications you’ve read are moved to Archived after 30 days.",
+      "goToMyTasks": "Go to My Tasks",
+      "viewArchived_one": "View {{count}} archived notification",
+      "viewArchived_other": "View {{count}} archived notifications",
+      "tip": "Tip: press <kbd>G</kbd> then <kbd>I</kbd> to jump here from anywhere"
+    },
+    "markRead": "Mark as read",
+    "archive": "Archive"
   }
 }

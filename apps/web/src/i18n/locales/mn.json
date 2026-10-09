@@ -9,13 +9,22 @@
   },
   "common": {
     "loading": "Ачаалж байна…",
-    "genericError": "Алдаа гарлаа. Дахин оролдоно уу."
+    "genericError": "Алдаа гарлаа. Дахин оролдоно уу.",
+    "retry": "Дахин оролдох",
+    "cancel": "Болих",
+    "create": "Үүсгэх",
+    "close": "Хаах",
+    "noResults": "Илэрц олдсонгүй",
+    "errorTitle": "Алдаа гарлаа",
+    "errorBody": "Гэнэтийн алдааны улмаас хуудас зогслоо. Дахин ачаалж үзнэ үү.",
+    "reload": "Хуудсыг дахин ачаалах",
+    "notFoundTitle": "Олдсонгүй",
+    "notFoundBody": "Энэ хуудас байхгүй эсвэл танд хандах эрх алга.",
+    "goToMyTasks": "Миний ажлууд руу очих",
+    "comingSoon": "Энэ дэлгэцийг хийж байна, удахгүй нэмэгдэнэ."
   },
   "language": {
     "label": "Хэл"
-  },
-  "nav": {
-    "myTasks": "Миний ажлууд"
   },
   "auth": {
     "signInTitle": "Kite-д нэвтрэх",
@@ -50,5 +59,438 @@
     "invalidTitle": "Урилга хүчингүй байна",
     "invalidBody": "Холбоосын хугацаа дууссан эсвэл аль хэдийн ашиглагдсан байна. Таныг урьсан хүнээс шинэ холбоос аваарай.",
     "goToSignIn": "Нэвтрэх хуудас руу"
+  },
+  "shell": {
+    "workspace": "Ажлын орчин",
+    "switchWorkspace": "Ажлын орчин солих",
+    "search": "Хайх",
+    "collapse": "Хажуу самбарыг хураах",
+    "expand": "Хажуу самбарыг дэлгэх",
+    "myTasks": "Миний ажлууд",
+    "inbox": "Мэдэгдэл",
+    "unread_one": "{{count}} уншаагүй",
+    "unread_other": "{{count}} уншаагүй",
+    "openTasks_one": "{{count}} нээлттэй ажил",
+    "openTasks_other": "{{count}} нээлттэй ажил",
+    "spaces": "Орон зай",
+    "newSpace": "Шинэ орон зай",
+    "spaceName": "Орон зайн нэр",
+    "createSpace": "Орон зай үүсгэх",
+    "language": "Хэл",
+    "invite": "Хамт олноо урих",
+    "settings": "Тохиргоо",
+    "online": "Онлайн",
+    "newBadge": "Шинэ",
+    "accountMenu": "Бүртгэлийн цэс",
+    "theme": "Загвар",
+    "themeLight": "Цайвар",
+    "themeDark": "Бараан",
+    "themeSystem": "Систем",
+    "loadError": "Хажуу самбарыг ачаалж чадсангүй."
+  },
+  "header": {
+    "breadcrumb": "Байршил",
+    "favorite": "Дуртайд нэмэх",
+    "unfavorite": "Дуртайгаас хасах",
+    "members_one": "Төслийн {{count}} гишүүн",
+    "members_other": "Төслийн {{count}} гишүүн",
+    "share": "Хуваалцах",
+    "shareHint": "«{{workspace}}» ажлын орчны бүх гишүүн энэ хуудсыг нээх боломжтой. Холбоосыг хамт олондоо илгээгээрэй.",
+    "projectOptions": "Төслийн сонголтууд",
+    "spaceOptions": "Орон зайн сонголтууд",
+    "copyLink": "Холбоос хуулах",
+    "linkCopied": "Холбоос хуулагдлаа",
+    "allProjects": "Бүх төсөл"
+  },
+  "views": {
+    "view": "Харагдац",
+    "list": "Жагсаалт",
+    "board": "Самбар",
+    "calendar": "Календарь",
+    "viewTitle": "{{view}} харагдац",
+    "notYet": "Энэ харагдацыг дараагийн ээлжинд зурна. Ажлуудыг харахын тулд Жагсаалт руу буцна уу."
+  },
+  "toolbar": {
+    "filter": "Шүүлтүүр",
+    "activeFilters_one": "{{count}} идэвхтэй шүүлтүүр",
+    "activeFilters_other": "{{count}} идэвхтэй шүүлтүүр",
+    "sort": "Эрэмбэ: {{field}}",
+    "group": "Бүлэглэх: {{field}}",
+    "sortBy": "Эрэмбэлэх",
+    "groupBy": "Бүлэглэх",
+    "newTask": "Шинэ ажил",
+    "sortFields": {
+      "due": "Дуусах огноо",
+      "priority": "Ач холбогдол",
+      "created": "Үүсгэсэн огноо",
+      "manual": "Гараар"
+    },
+    "groupFields": {
+      "status": "Төлөв",
+      "assignee": "Хариуцагч",
+      "priority": "Ач холбогдол",
+      "none": "Бүлэглэхгүй"
+    }
+  },
+  "filters": {
+    "sprintIs": "Спринт:",
+    "removeFilter": "Шүүлтүүрийг арилгах"
+  },
+  "summary": {
+    "tasks_one": "{{count}} ажил · {{done}} дууссан",
+    "tasks_other": "{{count}} ажил · {{done}} дууссан"
+  },
+  "table": {
+    "label": "{{project}} төслийн ажлууд",
+    "complete": "Дууссан",
+    "colName": "Ажлын нэр",
+    "colAssignee": "Хариуцагч",
+    "colDue": "Дуусах огноо",
+    "colPriority": "Ач холбогдол",
+    "colTags": "Шошго",
+    "actions": "Үйлдэл",
+    "addTask": "Ажил нэмэх",
+    "markComplete": "«{{name}}» ажлыг дууссан гэж тэмдэглэх",
+    "moreActions": "«{{name}}» — нэмэлт үйлдэл",
+    "addToGroup": "«{{group}}» бүлэгт ажил нэмэх"
+  },
+  "status": {
+    "todo": "Хийх",
+    "in_progress": "Хийгдэж буй",
+    "review": "Хянагдаж буй",
+    "done": "Дууссан"
+  },
+  "priority": {
+    "urgent": "Яаралтай",
+    "high": "Өндөр",
+    "medium": "Дунд",
+    "low": "Бага",
+    "none": "Ач холбогдолгүй"
+  },
+  "dates": {
+    "today": "Өнөөдөр",
+    "tomorrow": "Маргааш",
+    "yesterday": "Өчигдөр",
+    "overdue": "Хугацаа хэтэрсэн"
+  },
+  "picker": {
+    "navigate": "шилжих",
+    "select": "сонгох",
+    "clear": "хасах"
+  },
+  "board": {
+    "sortManual": "Эрэмбэ: Гараар",
+    "columnsStatus": "Багана: Төлөв",
+    "columnLabel_one": "{{status}}, {{count}} ажил",
+    "columnLabel_other": "{{status}}, {{count}} ажил",
+    "addTaskTo": "«{{status}}» баганад ажил нэмэх",
+    "columnOptions": "«{{status}}» баганын сонголтууд",
+    "dropToMove": "Энд тавьж «{{status}}» руу шилжүүлэх",
+    "completed": "Дууссан",
+    "priorityLabel": "Ач холбогдол: {{priority}}",
+    "subtasksDone_one": "Дэд ажил: {{done}}/{{count}} дууссан",
+    "subtasksDone_other": "Дэд ажил: {{done}}/{{count}} дууссан",
+    "dueOverdue": "{{date}} · Хугацаа хэтэрсэн",
+    "moreTags": "+{{count}}"
+  },
+  "drawer": {
+    "closeToList": "Ажлыг хаагаад жагсаалт руу буцах",
+    "location": "Ажлын байршил",
+    "markComplete": "Дууссан гэж тэмдэглэх",
+    "copyLink": "Ажлын холбоосыг хуулах",
+    "openFullPage": "Бүтэн хуудсаар нээх",
+    "moreActions": "Ажлын нэмэлт үйлдэл",
+    "close": "Хаах",
+    "titleLabel": "Ажлын нэр",
+    "createdMeta": "Үүсгэсэн: {{name}}, {{date}} · Шинэчилсэн: {{relative}}",
+    "status": "Төлөв",
+    "assignees": "Хариуцагчид",
+    "addAssignee": "Хариуцагч нэмэх",
+    "dueRelative": "{{relative}}, {{date}}",
+    "started": "Эхэлсэн: {{date}}",
+    "addTag": "Шошго нэмэх",
+    "description": "Тайлбар",
+    "toolbar": {
+      "label": "Форматлах",
+      "text": "Текст",
+      "bold": "Тод",
+      "italic": "Налуу",
+      "strike": "Дундуур зураас",
+      "code": "Мөр доторх код",
+      "bulletList": "Цэгтэй жагсаалт",
+      "orderedList": "Дугаартай жагсаалт",
+      "link": "Холбоос",
+      "mention": "Хэн нэгнийг дурдах"
+    },
+    "subtasks": "Дэд ажлууд",
+    "newSubtask": "Шинэ дэд ажил",
+    "addSubtask": "Дэд ажил нэмэх",
+    "attachments": "Хавсралтууд",
+    "attach": "Хавсаргах",
+    "attachmentMeta": "{{size}} · {{name}}",
+    "size": {
+      "b": "{{value}} B",
+      "kb": "{{value}} KB",
+      "mb": "{{value}} MB"
+    },
+    "dropFiles": "Файлаа энд чирч оруулах эсвэл <browse>сонгох</browse>",
+    "activity": "Үйл ажиллагаа",
+    "activityFilter": "Үйл ажиллагааны шүүлтүүр",
+    "tabs": {
+      "all": "Бүгд",
+      "comments": "Сэтгэгдэл",
+      "history": "Түүх"
+    },
+    "history": {
+      "created": "<b>{{actor}}</b> энэ ажлыг үүсгэсэн",
+      "prioritySet": "<b>{{actor}}</b> ач холбогдлыг <b>{{to}}</b> болгосон",
+      "priorityChanged": "<b>{{actor}}</b> ач холбогдлыг өөрчилсөн: {{from}} → <b>{{to}}</b>",
+      "statusChanged": "<b>{{actor}}</b> төлөвийг өөрчилсөн: <from>{{from}}</from> → <to>{{to}}</to>",
+      "statusSet": "<b>{{actor}}</b> төлөвийг <to>{{to}}</to> болгосон",
+      "attached": "<b>{{actor}}</b> <b>{{filename}}</b> файл хавсаргасан",
+      "subtaskCompleted": "<b>{{actor}}</b> «<b>{{title}}</b>» дэд ажлыг дуусгасан"
+    },
+    "commentOptions": "Сэтгэгдлийн сонголтууд",
+    "reply": "Хариулах",
+    "replies_one": "{{count}} хариулт",
+    "replies_other": "{{count}} хариулт",
+    "mentionSuggestions": "Дурдах хүний санал",
+    "people": "Хүмүүс",
+    "writeComment": "Сэтгэгдэл бичих",
+    "attachFile": "Файл хавсаргах",
+    "sendHint": "⌘ Enter дарж илгээнэ",
+    "send": "Илгээх",
+    "time": {
+      "justNow": "Дөнгөж сая",
+      "minutesAgo_one": "{{count}} минутын өмнө",
+      "minutesAgo_other": "{{count}} минутын өмнө",
+      "hoursAgo_one": "{{count}} цагийн өмнө",
+      "hoursAgo_other": "{{count}} цагийн өмнө",
+      "yesterdayAt": "Өчигдөр, {{time}}"
+    }
+  },
+  "myTasks": {
+    "allSpaces": "Бүх орон зай",
+    "groupDueDate": "Бүлэглэх: Дуусах огноо",
+    "greeting": {
+      "morning": "Өглөөний мэнд, {{name}}",
+      "afternoon": "Өдрийн мэнд, {{name}}",
+      "evening": "Оройн мэнд, {{name}}"
+    },
+    "stats": {
+      "dueToday": "Өнөөдөр дуусах",
+      "dueTodayLeft_one": "{{count}} ажлаас үлдсэн",
+      "dueTodayLeft_other": "{{count}} ажлаас үлдсэн",
+      "urgent_one": "{{count}} яаралтай",
+      "urgent_other": "{{count}} яаралтай",
+      "completedThisWeek": "Энэ долоо хоногт дууссан",
+      "vsLastWeek": "Өмнөх долоо хоногоос {{delta}}",
+      "perDayLabel": "Өдөр бүр дууссан: {{list}}",
+      "perDayItem": "{{day}}: {{count}}",
+      "overdue": "Хугацаа хэтэрсэн",
+      "oldestLate_one": "хамгийн удаан нь {{count}} хоног хоцорсон",
+      "oldestLate_other": "хамгийн удаан нь {{count}} хоног хоцорсон"
+    },
+    "sections": {
+      "overdue": "Хугацаа хэтэрсэн",
+      "overdueHint": "Эхлээд эдгээрийг хойшлуулах эсвэл хаана уу",
+      "thisWeek": "Энэ долоо хоног",
+      "later": "Дараа",
+      "laterHint": "Энэ долоо хоногоос хойш",
+      "rangeHint": "{{start}} – {{end}}"
+    },
+    "recentActivity": "Сүүлийн үйл ажиллагаа",
+    "viewInbox": "Мэдэгдэл харах",
+    "feed": {
+      "mentioned": "<b>{{actor}}</b> таныг <task>{{task}}</task> дээр дурдсан",
+      "statusChanged": "<b>{{actor}}</b> <task>{{task}}</task> ажлын төлөвийг «{{status}}» болгосон",
+      "commented": "<b>{{actor}}</b> <task>{{task}}</task> дээр сэтгэгдэл бичсэн",
+      "assigned": "<b>{{actor}}</b> таныг <task>{{task}}</task> ажлын хариуцагчаар томилсон",
+      "dueChanged": "<b>{{actor}}</b> <task>{{task}}</task> ажлын дуусах огноог {{date}} болгосон",
+      "completed": "<b>{{actor}}</b> <task>{{task}}</task> ажлыг дуусгасан",
+      "meta": "{{time}} · {{project}}",
+      "unread": "Уншаагүй"
+    },
+    "showOlder": "Өмнөх үйл ажиллагааг харуулах",
+    "time": {
+      "minutesAgo_one": "{{count}} мин өмнө",
+      "minutesAgo_other": "{{count}} мин өмнө",
+      "hoursAgo_one": "{{count}} цагийн өмнө",
+      "hoursAgo_other": "{{count}} цагийн өмнө",
+      "yesterday": "Өчигдөр"
+    }
+  },
+  "calendar": {
+    "allProjects": "Бүх төсөл",
+    "spaceOptions": "Орон зайн сонголтууд",
+    "previousMonth": "Өмнөх сар",
+    "previousWeek": "Өмнөх долоо хоног",
+    "nextMonth": "Дараагийн сар",
+    "nextWeek": "Дараагийн долоо хоног",
+    "range": "Календарийн хугацаа",
+    "month": "Сар",
+    "week": "Долоо хоног",
+    "showProjects": "Харуулах төслүүд",
+    "period": {
+      "month": "{{year}} оны {{m}}-р сар",
+      "week": "{{year}} оны {{m}}-р сарын {{startDay}} – {{endDay}}",
+      "weekCrossMonth": "{{year}} оны {{startM}}-р сарын {{startDay}} – {{endM}}-р сарын {{endDay}}",
+      "weekCrossYear": "{{startYear}} оны {{startM}}-р сарын {{startDay}} – {{endYear}} оны {{endM}}-р сарын {{endDay}}"
+    },
+    "dayLabel_one": "{{date}}, {{count}} ажил",
+    "dayLabel_other": "{{date}}, {{count}} ажил",
+    "more_one": "+{{count}} бусад",
+    "more_other": "+{{count}} бусад",
+    "closePopover": "Хаах",
+    "pillTitle": "{{title}} — {{project}}",
+    "unscheduled": "Огноогүй",
+    "addUnscheduled": "Огноогүй ажил нэмэх",
+    "filterUnscheduled": "Огноогүй ажлуудыг шүүх",
+    "filterPlaceholder": "Ажил шүүх",
+    "dragHint": "Ажлыг огноо руу чирж хуваарьт оруулна уу",
+    "unscheduledCard": "{{title}}, {{project}}, ач холбогдол: {{priority}}. Чирж болно.",
+    "allScheduled": "Бүх ажил огноотой байна.",
+    "weekdays": {
+      "short": {
+        "mon": "Да",
+        "tue": "Мя",
+        "wed": "Лх",
+        "thu": "Пү",
+        "fri": "Ба",
+        "sat": "Бя",
+        "sun": "Ня"
+      },
+      "long": {
+        "mon": "Даваа",
+        "tue": "Мягмар",
+        "wed": "Лхагва",
+        "thu": "Пүрэв",
+        "fri": "Баасан",
+        "sat": "Бямба",
+        "sun": "Ням"
+      }
+    },
+    "months": {
+      "long": {
+        "m1": "1-р сар",
+        "m2": "2-р сар",
+        "m3": "3-р сар",
+        "m4": "4-р сар",
+        "m5": "5-р сар",
+        "m6": "6-р сар",
+        "m7": "7-р сар",
+        "m8": "8-р сар",
+        "m9": "9-р сар",
+        "m10": "10-р сар",
+        "m11": "11-р сар",
+        "m12": "12-р сар"
+      },
+      "short": {
+        "m1": "1-р сар",
+        "m2": "2-р сар",
+        "m3": "3-р сар",
+        "m4": "4-р сар",
+        "m5": "5-р сар",
+        "m6": "6-р сар",
+        "m7": "7-р сар",
+        "m8": "8-р сар",
+        "m9": "9-р сар",
+        "m10": "10-р сар",
+        "m11": "11-р сар",
+        "m12": "12-р сар"
+      }
+    },
+    "format": {
+      "dateShort": "{{m}}-р сарын {{d}}",
+      "dateShortYear": "{{year}} оны {{m}}-р сарын {{d}}",
+      "weekdayShortDate": "{{m}}-р сарын {{d}}, {{weekdayShort}}",
+      "weekdayLongDate": "{{m}}-р сарын {{d}}, {{weekdayLong}}",
+      "weekdayLongDateFull": "{{m}}-р сарын {{d}}, {{weekdayLong}} гараг",
+      "time": "HH:mm"
+    }
+  },
+  "create": {
+    "closeToList": "Хаагаад жагсаалт руу буцах",
+    "heading": "Шинэ ажил",
+    "close": "Хаах (Esc)",
+    "escKey": "Esc",
+    "titlePlaceholder": "Ажлын нэр",
+    "description": "Тайлбар",
+    "descriptionPlaceholder": "Тайлбар нэмэх… Markdown болон @дурдалт ажиллана",
+    "searchPeople": "Хүн хайх",
+    "assignTo": "Хэнд оноох…",
+    "you": "Та",
+    "unassigned": "Хариуцагчгүй",
+    "keys": {
+      "navigate": "шилжих",
+      "select": "сонгох",
+      "unassign": "хасах"
+    },
+    "typeDate": "Огноо бичих",
+    "typeDatePlaceholder": "Огноо бичих, ж.нь «дараа баасан»",
+    "due": {
+      "thisWeekend": "Энэ амралтын өдөр",
+      "nextWeek": "Дараа долоо хоног",
+      "inTwoWeeks": "2 долоо хоногийн дараа",
+      "none": "Дуусах огноогүй"
+    },
+    "searchProjects": "Төсөл хайх",
+    "moveToProject": "Төсөл сонгох…",
+    "project": "Төсөл",
+    "moreFields": "Бусад талбар",
+    "createMore": "Дараалан үүсгэх",
+    "cancel": "Болих",
+    "submit": "Ажил үүсгэх",
+    "hints": {
+      "create": "Үүсгэх",
+      "createAndOpen": "Үүсгээд нээх"
+    }
+  },
+  "emptyProject": {
+    "newBadge": "Шинэ",
+    "title": "«{{project}}» төсөлд одоогоор ажил алга",
+    "body": "Эхний ажлаа нэмээд эхлүүлээрэй. Ажлууд энд төлөвөөрөө бүлэглэгдэж харагдах ба таны урьсан хамт олон тэдгээрийг авч хийх боломжтой.",
+    "createFirst": "Эхний ажлаа үүсгэх",
+    "importCsv": "CSV-ээс импортлох",
+    "comingSoon": "Тун удахгүй",
+    "orTemplate": "Эсвэл загвараас эхлэх",
+    "templates": {
+      "productLaunch": {
+        "name": "Бүтээгдэхүүн гаргах",
+        "desc_one": "Төлөвлөлт, хөгжүүлэлт, нээлтийн {{count}} ажил",
+        "desc_other": "Төлөвлөлт, хөгжүүлэлт, нээлтийн {{count}} ажил"
+      },
+      "sprintPlanning": {
+        "name": "Спринт төлөвлөлт",
+        "desc_one": "Хоёр долоо хоногийн мөчлөгт {{count}} ажил",
+        "desc_other": "Хоёр долоо хоногийн мөчлөгт {{count}} ажил"
+      },
+      "bugTriage": {
+        "name": "Алдаа ангилах",
+        "desc_one": "{{count}} ажил, ач холбогдол ба ноцтой байдлын талбартай",
+        "desc_other": "{{count}} ажил, ач холбогдол ба ноцтой байдлын талбартай"
+      }
+    }
+  },
+  "inbox": {
+    "markAllRead": "Бүгдийг уншсан болгох",
+    "notificationSettings": "Мэдэгдлийн тохиргоо",
+    "filter": "Мэдэгдлийн шүүлтүүр",
+    "tabs": {
+      "all": "Бүгд",
+      "mentions": "Дурдсан",
+      "assigned": "Надад оноосон",
+      "archived": "Архивласан"
+    },
+    "empty": {
+      "title": "Бүх мэдэгдлээ үзсэн байна",
+      "body": "Таныг дурдсан, танд шинээр оноосон болон таны дагадаг ажлын сэтгэгдлүүд энд ирнэ. Уншсан мэдэгдлүүд 30 хоногийн дараа Архивласан руу шилжинэ.",
+      "goToMyTasks": "Миний ажлууд руу очих",
+      "viewArchived_one": "Архивласан {{count}} мэдэгдэл харах",
+      "viewArchived_other": "Архивласан {{count}} мэдэгдэл харах",
+      "tip": "Зөвлөмж: хаанаас ч <kbd>G</kbd>, дараа нь <kbd>I</kbd> дарж энд шууд ирнэ"
+    },
+    "markRead": "Уншсан болгох",
+    "archive": "Архивлах"
   }
 }
