@@ -418,6 +418,74 @@ Rows reuse the `myTasks.feed.*` sentences with the task key in `<task>` (the tit
 | `emptyTab.archived` | No archived notifications | Архивласан мэдэгдэл алга | Archived tab, empty |
 | `common.undo` | Undo | Буцаах | Toast action |
 
+## `settings` (phase 15, derived — Settings is not designed)
+
+| key | en | mn (draft) |
+|---|---|---|
+| `tabsLabel` | Settings sections | Тохиргооны хэсгүүд |
+| `tabs.profile` | Profile | Профайл |
+| `tabs.preferences` | Preferences | Тохируулга |
+| `tabs.notifications` | Notifications | Мэдэгдэл |
+| `tabs.members` | Members | Гишүүд |
+| `profile.name` | Name | Нэр |
+| `profile.nameHint` | Shown on tasks, comments and mentions. | Ажил, сэтгэгдэл, дурдалт дээр харагдана. |
+| `profile.nameInvalid` | Enter your name | Нэрээ оруулна уу |
+| `profile.avatarColor` | Initials color | Нэрийн үсгийн өнгө |
+| `profile.avatarColorHint` | The background of your avatar. | Таны аватарын дэвсгэр өнгө. |
+| `profile.email` | Email | Имэйл |
+| `profile.emailHint` | Used to sign in. | Нэвтрэхэд ашиглана. |
+| `colors.indigo` | Indigo | Хөх ягаан |
+| `colors.green` | Green | Ногоон |
+| `colors.rose` | Rose | Сарнай |
+| `colors.amber` | Amber | Хув |
+| `colors.sky` | Sky | Тэнгэр цэнхэр |
+| `colors.purple` | Purple | Нил ягаан |
+| `colors.teal` | Teal | Оюу |
+| `colors.yellow` | Yellow | Шар |
+| `preferences.languageHint` | Language of the interface. | Интерфэйсийн хэл. |
+| `preferences.timezone` | Time zone | Цагийн бүс |
+| `preferences.timezoneHint` | Today, Tomorrow and Overdue follow this zone. | Өнөөдөр, Маргааш, Хугацаа хэтэрсэн нь энэ бүсээр тооцогдоно. |
+| `preferences.timezoneSearch` | Search time zones | Цагийн бүс хайх |
+| `preferences.themeHint` | System follows your device. | Систем нь таны төхөөрөмжийг дагана. |
+| `preferences.accent` | Accent color | Онцлох өнгө |
+| `preferences.accentHint` | Buttons, links and highlights. | Товч, холбоос, тодруулга. |
+| `preferences.density` | Density | Нягтрал |
+| `preferences.densityHint` | Row height in lists. | Жагсаалтын мөрийн өндөр. |
+| `preferences.comfortable` | Comfortable | Чөлөөтэй |
+| `preferences.compact` | Compact | Нягт |
+| `accents.violet` | Violet | Нил ягаан |
+| `accents.blue` | Blue | Цэнхэр |
+| `accents.teal` | Teal | Оюу |
+| `accents.graphite` | Graphite | Бараан саарал |
+| `notifications.intro` | Choose what lands in your Inbox. You’re never notified about your own actions. | Ирсэн мэдэгдэлд юу орохыг сонгоно уу. Өөрийн үйлдлийн талаар мэдэгдэл ирэхгүй. |
+| `notifications.mention` | Mentions | Дурдалт |
+| `notifications.mentionHint` | Someone @mentions you in a comment or description. | Хэн нэгэн таныг сэтгэгдэл эсвэл тайлбарт @дурдах үед. |
+| `notifications.assigned` | Assignments | Оноолт |
+| `notifications.assignedHint` | You’re added as an assignee. | Таныг хариуцагчаар нэмэх үед. |
+| `notifications.comment` | Comments | Сэтгэгдэл |
+| `notifications.commentHint` | New comments on tasks you follow. | Таны дагадаг ажилд шинэ сэтгэгдэл бичих үед. |
+| `notifications.status` | Status changes | Төлөвийн өөрчлөлт |
+| `notifications.statusHint` | A task you follow moves to another status. | Таны дагадаг ажлын төлөв өөрчлөгдөх үед. |
+| `roles.owner` | Owner | Эзэмшигч |
+| `roles.admin` | Admin | Админ |
+| `roles.member` | Member | Гишүүн |
+| `members.adminsOnly` | Only admins can invite people and change roles. | Зөвхөн админ хүн урьж, үүрэг өөрчилнө. |
+| `members.inviteHint` | They get a link that’s valid for 7 days. | 7 хоног хүчинтэй холбоос очно. |
+| `members.role` | Role | Үүрэг |
+| `members.send` | Send invite | Урилга илгээх |
+| `members.sent` | Invite sent to {{email}} | Урилга илгээлээ: {{email}} |
+| `members.alreadyMember` | {{email}} is already in the workspace | {{email}} аль хэдийн багт байна |
+| `members.invalidEmail` | Enter a valid email | Зөв имэйл оруулна уу |
+| `members.pending` | Pending invites | Хүлээгдэж буй урилга |
+| `members.expires` | expires {{date}} | дуусах: {{date}} |
+| `members.revoke` | Revoke | Цуцлах |
+| `members.revoked` | Invite to {{email}} revoked | Урилгыг цуцаллаа: {{email}} |
+| `members.list` | Members | Гишүүд |
+| `members.count_one` | {{count}} person | {{count}} хүн |
+| `members.count_other` | {{count}} people | {{count}} хүн |
+| `members.you` | (you) | (та) |
+| `members.changeRole` | Change role of {{name}} | Үүрэг өөрчлөх: {{name}} |
+
 ## Open questions
 
 1. **Unscheduled**: drafted "Огноогүй" (no date) rather than "Хуваарьгүй"; the hint uses "…хуваарьт оруулна уу". Pick one term.
@@ -433,3 +501,4 @@ Rows reuse the `myTasks.feed.*` sentences with the task key in `<task>` (the tit
 11. **`filters.fromDate`** "{{date}}-аас хойш": the suffix follows a date ("10-р сарын 14-аас"); fine for "сарын N" forms, but review.
 
 Shell strings added in phase 8 that are not in any design (user menu theme labels, "Copy link", "Space options", error/not-found pages, picker hints) are drafted the same way; keys: `common.*` (retry, cancel, create, close, noResults, errorTitle, errorBody, reload, notFoundTitle, notFoundBody, goToMyTasks, comingSoon), `shell.{switchWorkspace, unread, openTasks, spaceName, createSpace, newBadge, accountMenu, theme*, loadError}`, `header.{unfavorite, shareHint, spaceOptions, copyLink, linkCopied, allProjects}`, `toolbar.{activeFilters, sortBy, groupBy, sortFields.*, groupFields.*}`, `priority.none`, `dates.{yesterday, overdue}`, `picker.*`.
+12. **Settings terms**: "Тохируулга" (Preferences) vs "Тохиргоо" (Settings); "Онцлох өнгө" (Accent color); "Нягтрал" Чөлөөтэй/Нягт (Density); role names Эзэмшигч / Админ / Гишүүн.

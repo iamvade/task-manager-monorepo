@@ -715,5 +715,86 @@
       "clear": "Unassign / clear",
       "closePicker": "Close the picker"
     }
+  },
+  "settings": {
+    "tabsLabel": "Settings sections",
+    "tabs": {
+      "profile": "Profile",
+      "preferences": "Preferences",
+      "notifications": "Notifications",
+      "members": "Members"
+    },
+    "profile": {
+      "name": "Name",
+      "nameHint": "Shown on tasks, comments and mentions.",
+      "nameInvalid": "Enter your name",
+      "avatarColor": "Initials color",
+      "avatarColorHint": "The background of your avatar.",
+      "email": "Email",
+      "emailHint": "Used to sign in."
+    },
+    "colors": {
+      "indigo": "Indigo",
+      "green": "Green",
+      "rose": "Rose",
+      "amber": "Amber",
+      "sky": "Sky",
+      "purple": "Purple",
+      "teal": "Teal",
+      "yellow": "Yellow"
+    },
+    "preferences": {
+      "languageHint": "Language of the interface.",
+      "timezone": "Time zone",
+      "timezoneHint": "Today, Tomorrow and Overdue follow this zone.",
+      "timezoneSearch": "Search time zones",
+      "themeHint": "System follows your device.",
+      "accent": "Accent color",
+      "accentHint": "Buttons, links and highlights.",
+      "density": "Density",
+      "densityHint": "Row height in lists.",
+      "comfortable": "Comfortable",
+      "compact": "Compact"
+    },
+    "accents": {
+      "violet": "Violet",
+      "blue": "Blue",
+      "teal": "Teal",
+      "graphite": "Graphite"
+    },
+    "notifications": {
+      "intro": "Choose what lands in your Inbox. You’re never notified about your own actions.",
+      "mention": "Mentions",
+      "mentionHint": "Someone @mentions you in a comment or description.",
+      "assigned": "Assignments",
+      "assignedHint": "You’re added as an assignee.",
+      "comment": "Comments",
+      "commentHint": "New comments on tasks you follow.",
+      "status": "Status changes",
+      "statusHint": "A task you follow moves to another status."
+    },
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "member": "Member"
+    },
+    "members": {
+      "adminsOnly": "Only admins can invite people and change roles.",
+      "inviteHint": "They get a link that’s valid for 7 days.",
+      "role": "Role",
+      "send": "Send invite",
+      "sent": "Invite sent to {{email}}",
+      "alreadyMember": "{{email}} is already in the workspace",
+      "invalidEmail": "Enter a valid email",
+      "pending": "Pending invites",
+      "expires": "expires {{date}}",
+      "revoke": "Revoke",
+      "revoked": "Invite to {{email}} revoked",
+      "list": "Members",
+      "count_one": "{{count}} person",
+      "count_other": "{{count}} people",
+      "you": "(you)",
+      "changeRole": "Change role of {{name}}"
+    }
   }
 }

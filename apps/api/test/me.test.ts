@@ -27,6 +27,7 @@ describe('PATCH /me', () => {
     const cookie = await login(ctx.app, user.email);
     const res = await patch(cookie, {
       name: 'Temuulen Gan',
+      avatarColor: 'teal',
       locale: 'en',
       timezone: 'Europe/Berlin',
       theme: 'dark',
@@ -35,7 +36,7 @@ describe('PATCH /me', () => {
     });
     expect(res.statusCode).toBe(200);
     const me = meResponseSchema.parse(res.json());
-    expect(me.user).toMatchObject({ name: 'Temuulen Gan', initials: 'TG' });
+    expect(me.user).toMatchObject({ name: 'Temuulen Gan', initials: 'TG', avatarColor: 'teal' });
     expect(me.preferences).toMatchObject({
       locale: 'en',
       timezone: 'Europe/Berlin',
@@ -48,6 +49,7 @@ describe('PATCH /me', () => {
   it.each([
     [{ timezone: 'Mars/Olympus' }],
     [{ accent: '#123456' }],
+    [{ avatarColor: 'violet' }],
     [{ email: 'x@kite.test' }],
     [{}],
   ])('rejects %j', async (payload) => {

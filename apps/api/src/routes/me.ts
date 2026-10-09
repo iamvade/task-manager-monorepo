@@ -14,7 +14,7 @@ export const meRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Me'],
         summary: 'Update profile and preferences',
         description:
-          'Name, locale, time zone, theme, accent, density, notification toggles (`notificationPrefs` is merged: send only the types that change).',
+          'Name, avatar color, locale, time zone, theme, accent, density, notification toggles (`notificationPrefs` is merged: send only the types that change).',
         body: updateMeSchema,
         response: { 200: meResponseSchema, 400: apiErrorSchema, 401: apiErrorSchema },
       },

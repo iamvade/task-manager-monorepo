@@ -3,6 +3,7 @@ import {
   projectKeySuggestionQuerySchema,
   projectKeySuggestionSchema,
   sidebarResponseSchema,
+  updateMemberRoleSchema,
   workspaceMemberSchema,
   type SidebarProject,
 } from '@kite/shared';
@@ -19,7 +20,9 @@ import {
   statuses,
   taskAssignees,
   tasks,
+  workspaceMembers,
 } from '../db/schema/index.js';
+import { httpError } from '../errors.js';
 import { pickProjectKey } from '../projects/keys.js';
 import { listMembers } from '../projects/members.js';
 
@@ -136,6 +139,49 @@ export const workspaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     async (request) => {
       await requireWorkspaceMember(request, request.params.workspaceId);
       return listMembers(app.db, request.params.workspaceId);
+    },
+  );
+
+  app.patch(
+    '/workspaces/:workspaceId/members/:userId',
+    {
+      preHandler: app.authenticate,
+      schema: {
+        tags: ['Workspaces'],
+        summary: 'Change a member’s role',
+        description:
+          'Admin or owner. Switches another member between `admin` and `member`. 409 `OWNER_ROLE` for the owner (ownership can’t change here) and 409 `OWN_ROLE` for your own membership.',
+        params: params.extend({ userId: z.uuid() }),
+        body: updateMemberRoleSchema,
+        response: { 200: workspaceMemberSchema, 401: err, 403: err, 404: err, 409: err },
+      },
+    },
+    async (request) => {
+      const { workspaceId, userId } = request.params;
+      const caller = await requireWorkspaceMember(request, workspaceId, 'admin');
+      const [target] = await app.db
+        .select({ role: workspaceMembers.role })
+        .from(workspaceMembers)
+        .where(
+          and(eq(workspaceMembers.workspaceId, workspaceId), eq(workspaceMembers.userId, userId)),
+        )
+        .limit(1);
+      if (!target) throw httpError(404, 'NOT_FOUND', 'Member not found');
+      if (userId === caller.userId) {
+        throw httpError(409, 'OWN_ROLE', 'You can’t change your own role');
+      }
+      if (target.role === 'owner') {
+        throw httpError(409, 'OWNER_ROLE', 'The owner’s role can’t be changed');
+      }
+      await app.db
+        .update(workspaceMembers)
+        .set({ role: request.body.role })
+        .where(
+          and(eq(workspaceMembers.workspaceId, workspaceId), eq(workspaceMembers.userId, userId)),
+        );
+      const [member] = await listMembers(app.db, workspaceId, { userId });
+      if (!member) throw httpError(404, 'NOT_FOUND', 'Member not found');
+      return member;
     },
   );
 

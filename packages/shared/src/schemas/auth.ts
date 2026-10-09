@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import {
   accentSchema,
+  avatarColorSchema,
   densitySchema,
   localeSchema,
   notificationPrefsSchema,
@@ -73,6 +74,7 @@ export type MeResponse = z.infer<typeof meResponseSchema>;
 export const updateMeSchema = z
   .object({
     name: nameSchema,
+    avatarColor: avatarColorSchema,
     locale: localeSchema,
     timezone: timezoneSchema,
     theme: themeSchema,

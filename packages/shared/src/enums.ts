@@ -98,6 +98,8 @@ export const AVATAR_COLORS = [
   'teal',
   'yellow',
 ] as const satisfies readonly PaletteKey[];
+export const avatarColorSchema = z.enum(AVATAR_COLORS);
+export type AvatarColor = z.infer<typeof avatarColorSchema>;
 
 /** Categories of the four statuses every new project starts with, in board order. */
 export const DEFAULT_STATUS_CATEGORIES = [

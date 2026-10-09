@@ -10,7 +10,7 @@ import {
   meResponseSchema,
   type PaletteKey,
 } from '@kite/shared';
-import { and, eq, gt, isNull } from 'drizzle-orm';
+import { and, asc, eq, gt, isNull } from 'drizzle-orm';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { requireWorkspaceMember } from '../auth/access.js';
@@ -120,6 +120,72 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         role: role,
         expiresAt: invite.expiresAt.toISOString(),
       });
+    },
+  );
+
+  app.get(
+    '/workspaces/:workspaceId/invites',
+    {
+      preHandler: app.authenticate,
+      schema: {
+        tags: ['Invites'],
+        summary: 'List pending invites',
+        description: 'Admin or owner. Unaccepted, unexpired invites, oldest expiry first.',
+        params: z.object({ workspaceId: z.uuid() }),
+        response: { 200: z.array(inviteSchema), 401: err, 403: err, 404: err },
+      },
+    },
+    async (request) => {
+      const { workspaceId } = request.params;
+      await requireWorkspaceMember(request, workspaceId, 'admin');
+      const rows = await app.db
+        .select()
+        .from(invites)
+        .where(
+          and(
+            eq(invites.workspaceId, workspaceId),
+            isNull(invites.acceptedAt),
+            gt(invites.expiresAt, new Date()),
+          ),
+        )
+        .orderBy(asc(invites.expiresAt));
+      return rows.map((invite) => ({
+        id: invite.id,
+        email: invite.email,
+        // Owners are never invited; the column shares the workspace role enum.
+        role: invite.role === 'admin' ? ('admin' as const) : ('member' as const),
+        expiresAt: invite.expiresAt.toISOString(),
+      }));
+    },
+  );
+
+  app.delete(
+    '/workspaces/:workspaceId/invites/:inviteId',
+    {
+      preHandler: app.authenticate,
+      schema: {
+        tags: ['Invites'],
+        summary: 'Revoke a pending invite',
+        description: 'Admin or owner. The link stops working. 404 once accepted.',
+        params: z.object({ workspaceId: z.uuid(), inviteId: z.uuid() }),
+        response: { 204: z.null(), 401: err, 403: err, 404: err },
+      },
+    },
+    async (request, reply) => {
+      const { workspaceId, inviteId } = request.params;
+      await requireWorkspaceMember(request, workspaceId, 'admin');
+      const [row] = await app.db
+        .delete(invites)
+        .where(
+          and(
+            eq(invites.id, inviteId),
+            eq(invites.workspaceId, workspaceId),
+            isNull(invites.acceptedAt),
+          ),
+        )
+        .returning({ id: invites.id });
+      if (!row) throw httpError(404, 'NOT_FOUND', 'Invite not found');
+      return reply.code(204).send(null);
     },
   );
 

@@ -3,6 +3,7 @@ export const queryKeys = {
   me: ['me'] as const,
   sidebar: (workspaceId: string) => ['workspaces', workspaceId, 'sidebar'] as const,
   members: (workspaceId: string) => ['workspaces', workspaceId, 'members'] as const,
+  invites: (workspaceId: string) => ['workspaces', workspaceId, 'invites'] as const,
   project: (projectId: string) => ['projects', projectId] as const,
   sprints: (projectId: string) => ['projects', projectId, 'sprints'] as const,
   tags: (workspaceId: string) => ['workspaces', workspaceId, 'tags'] as const,

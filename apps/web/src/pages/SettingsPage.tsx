@@ -1,8 +1,6 @@
-import { useTranslation } from 'react-i18next';
-import { PlaceholderPage } from './PlaceholderPage';
+import { SettingsView } from '../features/settings/SettingsView';
 
 /** Settings (phase 15). */
 export function SettingsPage() {
-  const { t } = useTranslation();
-  return <PlaceholderPage title={t('shell.settings')} />;
+  return <SettingsView />;
 }

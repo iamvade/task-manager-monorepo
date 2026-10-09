@@ -98,6 +98,51 @@ describe('invites', () => {
     });
   });
 
+  describe('pending invites', () => {
+    const list = (workspaceId: string, cookie: string) =>
+      ctx.app.inject({
+        method: 'GET',
+        url: `/api/v1/workspaces/${workspaceId}/invites`,
+        headers: { cookie },
+      });
+    const revoke = (workspaceId: string, inviteId: string, cookie: string) =>
+      ctx.app.inject({
+        method: 'DELETE',
+        url: `/api/v1/workspaces/${workspaceId}/invites/${inviteId}`,
+        headers: { origin: ORIGIN, cookie },
+      });
+
+    it('lists pending invites and revokes one', async () => {
+      const { ws, cookie } = await workspaceWithOwner();
+      const created = inviteSchema.parse(
+        (await createInvite(ws.id, cookie, 'pending@kite.test', 'admin')).json(),
+      );
+      await seedInvite(ws.id, 'expired@kite.test', -1000);
+      const res = await list(ws.id, cookie);
+      expect(res.statusCode).toBe(200);
+      expect(inviteSchema.array().parse(res.json())).toEqual([created]);
+
+      expect((await revoke(ws.id, created.id, cookie)).statusCode).toBe(204);
+      expect(inviteSchema.array().parse((await list(ws.id, cookie)).json())).toEqual([]);
+      expect((await revoke(ws.id, created.id, cookie)).statusCode).toBe(404);
+    });
+
+    it('is for admins only, and hides other workspaces', async () => {
+      const { ws, cookie } = await workspaceWithOwner();
+      const { id } = inviteSchema.parse((await createInvite(ws.id, cookie, 'p@kite.test')).json());
+      const member = await createUser(ctx.db);
+      await addMember(ctx.db, ws.id, member.id, 'member');
+      const memberCookie = await login(ctx.app, member.email);
+      expect((await list(ws.id, memberCookie)).statusCode).toBe(403);
+      expect((await revoke(ws.id, id, memberCookie)).statusCode).toBe(403);
+
+      const other = await workspaceWithOwner();
+      expect((await list(ws.id, other.cookie)).statusCode).toBe(404);
+      // An invite id from another workspace, through the caller's own workspace.
+      expect((await revoke(other.ws.id, id, other.cookie)).statusCode).toBe(404);
+    });
+  });
+
   describe('accepting', () => {
     it('previews, creates the account, signs in and joins', async () => {
       const { ws } = await workspaceWithOwner();

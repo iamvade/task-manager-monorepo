@@ -14,6 +14,12 @@ export const workspaceMemberSchema = z
   .meta({ id: 'WorkspaceMember' });
 export type WorkspaceMember = z.infer<typeof workspaceMemberSchema>;
 
+/** `PATCH /workspaces/:id/members/:userId` — owners are made at workspace creation only. */
+export const updateMemberRoleSchema = z
+  .object({ role: z.enum(['admin', 'member']) })
+  .meta({ id: 'UpdateMemberRole' });
+export type UpdateMemberRole = z.infer<typeof updateMemberRoleSchema>;
+
 export const sidebarProjectSchema = z
   .object({
     id: z.uuid(),
