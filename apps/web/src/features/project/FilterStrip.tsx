@@ -8,6 +8,7 @@ import { FilterChip } from '../../components/ui/FilterChip';
 import { useDates } from '../../lib/useDates';
 import { useFilterOptions, type FilterOption } from '../views/filterOptions';
 import { toTaskQuery } from '../views/taskQuery';
+import { useCurrentView } from '../views/useCurrentView';
 import {
   activeFilterFields,
   NO_SPRINT,
@@ -34,13 +35,15 @@ export function FilterStrip({ project, spaceId }: FilterStripProps) {
   const { filters } = view;
   const options = useFilterOptions(project ?? null, project?.workspaceId ?? workspace?.id);
 
-  // Same query (and cache entry) as the list itself.
+  // Same query (and cache entry) as the list itself. The calendar shows chips only (its tasks
+  // are a date range, so a count would mislead).
+  const calendar = useCurrentView() === 'calendar';
   const meId = me?.user.id ?? '';
   const scope = project ? 'project' : 'space';
   const query = useMemo(() => toTaskQuery(filters, meId, scope), [filters, meId, scope]);
-  const projectTasks = useProjectTasks(project?.id, query);
-  const spaceTasks = useSpaceTasks(spaceId, query);
-  const tasks = (project ? projectTasks : spaceTasks).data;
+  const projectTasks = useProjectTasks(calendar ? undefined : project?.id, query);
+  const spaceTasks = useSpaceTasks(calendar ? undefined : spaceId, query);
+  const tasks = calendar ? undefined : (project ? projectTasks : spaceTasks).data;
 
   function value(field: FilterField): string {
     switch (field) {
@@ -72,6 +75,7 @@ export function FilterStrip({ project, spaceId }: FilterStripProps) {
 
   // Sprints are per project: the space list ignores the param, so no chip there.
   const fields = activeFilterFields(filters).filter((f) => project !== undefined || f !== 'sprint');
+  if (calendar && fields.length === 0) return null;
   return (
     <div className="flex flex-wrap items-center gap-2 px-6 pt-3">
       {fields.map((field) => {

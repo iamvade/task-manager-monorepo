@@ -161,6 +161,14 @@ Login, invite accept, Settings, ⌘K palette, shortcuts help, filter/sort/group 
 - Space board: columns are the 4 categories, each card starts with an 8px project dot + project name (12px muted); no drag and no inline add (statuses belong to each project), column menu only collapses.
 - Card assignee stacks ring in `--surface` (not `--bg`), max 3 + "+N". Card due tones: overdue 600 + "· Overdue", today 500, done muted, others `--text-3`.
 
+**Calendar (derived, phase 14)**:
+- Data: two queries with the URL filters — tasks due on the visible days (`dueFrom`/`dueTo` = grid range, intersected with a URL due filter) and open undated tasks (`hasDueDate=false&includeDone=false`, URL due filter ignored). The view renders their union, placed by each row's current `dueDate`, so the shared optimistic `useUpdateTask` moves a task between grid and panel with no calendar-specific cache code.
+- The project calendar does not auto-apply the active sprint filter (a `sprint` param carried over from List/Board still applies). The filter strip shows chips only (no "N tasks · M done") and nothing when no filter is on. Toolbar: Filter + New Task (no Sort/Group).
+- Month/Week and hidden projects persist in `kite.ui` (`calendarMode`, `calendarHidden[spaceId]`); the shown period resets to today on each visit. Toggled-off projects disappear from the grid **and** Unscheduled. Project chips only on the space calendar.
+- Month grid has 4–6 rows (whole Mon–Sun weeks); the last column/row drop their inner borders. Weekend cells `--calendar-weekend` (#FCFCFD; dark #141416, derived). The "+N more" popover covers its cell (−4px, width cell + 96, min 240).
+- Drag: pointer (4px) or keyboard (Space picks up; ←/→ a day, ↑/↓ a week in month view, → from a Sunday reaches Unscheduled and ← comes back; Space/Enter drops; Esc cancels). Lifted copy = the pill/card with `--shadow-drag`; source 50% + dashed accent. Only targets where the drop changes something light up; done tasks can't be dropped on Unscheduled. Failure rolls back with a "Couldn't reschedule the task" toast. Pills in the day popover open the task but don't drag.
+- Unscheduled: "+" opens quick create (current project + sprint on a project calendar, no due date); the filter matches titles; "No results" when the filter hides everything; cards open the drawer on click/Enter.
+
 ### 2.6 PROMPTS.md vs designs (resolved; PROMPTS updated)
 - Checkbox is native square 16px with `accent-color` (not round).
 - List tags: all chips, clipped by the cell; "+N" only on Board.

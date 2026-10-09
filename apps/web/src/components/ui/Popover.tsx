@@ -12,6 +12,7 @@ import {
   useFloatingNodeId,
   useInteractions,
   useRole,
+  type OffsetOptions,
   type Placement,
 } from '@floating-ui/react';
 import { useState, type ReactElement, type ReactNode } from 'react';
@@ -29,6 +30,8 @@ interface PopoverProps {
   /** Content, or a render function receiving `close`. */
   children: ReactNode | ((close: () => void) => ReactNode);
   placement?: Placement;
+  /** Distance from the trigger (floating-ui `offset`); default 4px. */
+  offset?: OffsetOptions;
   width?: number;
   /** sm = `--shadow-popover` (menus, listboxes); lg = `--shadow-popover-lg` (pickers). */
   elevation?: 'sm' | 'lg';
@@ -69,6 +72,7 @@ function PopoverPanel({
   trigger,
   children,
   placement = 'bottom-start',
+  offset: offsetOptions = 4,
   width,
   elevation = 'sm',
   role = 'dialog',
@@ -89,7 +93,7 @@ function PopoverPanel({
     open,
     onOpenChange: setOpen,
     placement,
-    middleware: [offset(4), flip({ padding: 8 }), shift({ padding: 8 })],
+    middleware: [offset(offsetOptions), flip({ padding: 8 }), shift({ padding: 8 })],
     whileElementsMounted: autoUpdate,
   });
   // Stable callback refs from floating-ui (plain functions, no `this`).

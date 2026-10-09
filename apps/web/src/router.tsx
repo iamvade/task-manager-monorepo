@@ -4,10 +4,10 @@ import { RedirectIfAuthed, RequireAuth } from './auth/RouteGuards';
 import { RouteError } from './components/ErrorState';
 import { ListView, SpaceListView } from './features/list/ListView';
 import { BoardView, SpaceBoardView } from './features/board/BoardView';
+import { CalendarView, SpaceCalendarView } from './features/calendar/CalendarView';
 import { ProjectLayout } from './features/project/ProjectLayout';
 import { AppShell } from './features/shell/AppShell';
 import { SpaceLayout } from './features/space/SpaceLayout';
-import { ViewPlaceholder } from './features/views/ViewPlaceholder';
 import { InboxPage } from './pages/InboxPage';
 import { InviteAcceptPage } from './pages/InviteAcceptPage';
 import { LoginPage } from './pages/LoginPage';
@@ -16,11 +16,15 @@ import { SettingsPage } from './pages/SettingsPage';
 import { TaskPage } from './pages/TaskPage';
 
 /** List / Board / Calendar children of the project and space routes. */
-const viewRoutes = (list: ReactElement, board: ReactElement): RouteObject[] => [
+const viewRoutes = (
+  list: ReactElement,
+  board: ReactElement,
+  calendar: ReactElement,
+): RouteObject[] => [
   { index: true, element: <Navigate to="list" replace /> },
   { path: 'list', element: list },
   { path: 'board', element: board },
-  { path: 'calendar', element: <ViewPlaceholder view="calendar" /> },
+  { path: 'calendar', element: calendar },
 ];
 
 export const routes: RouteObject[] = [
@@ -43,12 +47,12 @@ export const routes: RouteObject[] = [
               {
                 path: '/p/:projectId',
                 element: <ProjectLayout />,
-                children: viewRoutes(<ListView />, <BoardView />),
+                children: viewRoutes(<ListView />, <BoardView />, <CalendarView />),
               },
               {
                 path: '/s/:spaceId',
                 element: <SpaceLayout />,
-                children: viewRoutes(<SpaceListView />, <SpaceBoardView />),
+                children: viewRoutes(<SpaceListView />, <SpaceBoardView />, <SpaceCalendarView />),
               },
               { path: '*', element: <Navigate to="/my-tasks" replace /> },
             ],

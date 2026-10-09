@@ -107,7 +107,6 @@
     "list": "Жагсаалт",
     "board": "Самбар",
     "calendar": "Календарь",
-    "viewTitle": "{{view}} харагдац",
     "notYet": "Энэ харагдацыг дараагийн ээлжинд зурна. Ажлуудыг харахын тулд Жагсаалт руу буцна уу."
   },
   "toolbar": {
@@ -462,6 +461,8 @@
   "calendar": {
     "allProjects": "Бүх төсөл",
     "spaceOptions": "Орон зайн сонголтууд",
+    "label": "Календарь",
+    "today": "Өнөөдөр",
     "previousMonth": "Өмнөх сар",
     "previousWeek": "Өмнөх долоо хоног",
     "nextMonth": "Дараагийн сар",
@@ -546,6 +547,15 @@
       "weekdayLongDate": "{{m}}-р сарын {{d}}, {{weekdayLong}}",
       "weekdayLongDateFull": "{{m}}-р сарын {{d}}, {{weekdayLong}} гараг",
       "time": "HH:mm"
+    },
+    "moveFailed": "Ажлын огноог өөрчилж чадсангүй",
+    "dnd": {
+      "instructions": "Ажлыг авахын тулд Space дарна уу. Сумаар өөр өдөр рүү зөөж (Ням гарагаас баруун тийш — Огноогүй), Space дарж тавина, Esc дарж болино.",
+      "picked": "«{{title}}» ажлыг авлаа.",
+      "over": "«{{title}}» → {{target}}.",
+      "notOver": "«{{title}}» өдрийн гадна байна.",
+      "dropped": "«{{title}}» шилжлээ: {{target}}.",
+      "cancelled": "«{{title}}» шилжүүлэлтийг цуцаллаа."
     }
   },
   "create": {

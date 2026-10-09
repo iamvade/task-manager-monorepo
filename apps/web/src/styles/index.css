@@ -42,6 +42,7 @@
   --background-color-hover: var(--hover);
   --background-color-nav-hover: var(--nav-hover);
   --background-color-popover-hover: var(--popover-hover);
+  --background-color-calendar-weekend: var(--calendar-weekend);
   --background-color-chip: var(--chip);
   --background-color-segment-track: var(--segment-track);
   --background-color-segment-track-sidebar: var(--segment-track-sidebar);

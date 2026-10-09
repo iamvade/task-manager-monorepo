@@ -91,6 +91,9 @@
   /* Sidebar project dot when not active */
   --project-dot-inactive: #c4c4cc;
 
+  /* Calendar weekend cells (Calendar.dc.html) */
+  --calendar-weekend: #fcfcfd;
+
   /* Tooltip (not drawn; inverted surface) */
   --tooltip-bg: #18181b;
   --tooltip-fg: #ffffff;
@@ -170,6 +173,8 @@
   --due-done: #5e5e68;
 
   --project-dot-inactive: #4a4a52;
+
+  --calendar-weekend: #141416;
 
   --tooltip-bg: #ededef;
   --tooltip-fg: #18181b;

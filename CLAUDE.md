@@ -98,6 +98,7 @@ Layout: sidebar 248px (min 220px), collapsible to a 56px icon rail. Top bar 56px
 | `--surface` (cards, popovers, drawer, modal) | #FFFFFF | #1F1F23 |
 | `--control` (secondary buttons, inputs) | #FFFFFF | #18181B (sidebar search #1B1B1E) |
 | `--surface-2` (ghost hover, segmented track, inline code) | #F4F4F5 | #26262B |
+| `--calendar-weekend` (calendar weekend cells) | #FCFCFD | #141416 |
 | `--hover` (ghost buttons; sidebar nav uses #EDEDF0) | #F4F4F5 | #1F1F23 |
 | `--chip` (count badges, neutral chips, "+N") | #F1F1F3, fg #52525B | #232328, fg #B4B4BC |
 | `--border` (layout lines, cards) | #E6E6EA | #26262B |

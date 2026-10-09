@@ -107,7 +107,6 @@
     "list": "List",
     "board": "Board",
     "calendar": "Calendar",
-    "viewTitle": "{{view}} view",
     "notYet": "This view is next on the design list. Switch back to List to see the {{project}} tasks."
   },
   "toolbar": {
@@ -462,6 +461,8 @@
   "calendar": {
     "allProjects": "All projects",
     "spaceOptions": "Space options",
+    "label": "Calendar",
+    "today": "Today",
     "previousMonth": "Previous month",
     "previousWeek": "Previous week",
     "nextMonth": "Next month",
@@ -546,6 +547,15 @@
       "weekdayLongDate": "{{weekdayLong}}, {{monthShort}} {{d}}",
       "weekdayLongDateFull": "{{weekdayLong}}, {{monthLong}} {{d}}",
       "time": "h:mm a"
+    },
+    "moveFailed": "Couldn't reschedule the task",
+    "dnd": {
+      "instructions": "To pick up a task, press Space. Use the arrow keys to move it to another day (right from Sunday reaches Unscheduled), Space to drop it, or Escape to cancel.",
+      "picked": "Picked up {{title}}.",
+      "over": "{{title}} is over {{target}}.",
+      "notOver": "{{title}} is not over a day.",
+      "dropped": "{{title}} was dropped on {{target}}.",
+      "cancelled": "Moving {{title}} was cancelled."
     }
   },
   "create": {

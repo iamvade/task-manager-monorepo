@@ -71,6 +71,9 @@ export const InboxIcon = make(
 );
 export const PlusIcon = make(<path d="M12 5v14M5 12h14" />);
 export const ChevronRightIcon = make(<path d="m9 6 6 6-6 6" />, { strokeWidth: 2.5 });
+/** Previous / next period arrows (Calendar toolbar). */
+export const PrevIcon = make(<path d="m15 18-6-6 6-6" />);
+export const NextIcon = make(<path d="m9 18 6-6-6-6" />);
 export const GlobeIcon = make(
   <>
     <circle cx="12" cy="12" r="9" />
@@ -226,4 +229,20 @@ export const WarningIcon = make(
     <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
     <path d="M12 9v4M12 17h.01" />
   </>,
+);
+/** Six-dot drag handle (Calendar unscheduled cards). */
+export const GripIcon = make(
+  <>
+    <circle cx="9" cy="6" r="1.5" />
+    <circle cx="15" cy="6" r="1.5" />
+    <circle cx="9" cy="12" r="1.5" />
+    <circle cx="15" cy="12" r="1.5" />
+    <circle cx="9" cy="18" r="1.5" />
+    <circle cx="15" cy="18" r="1.5" />
+  </>,
+  { fill: true },
+);
+/** Four-way arrows ("Drag a task onto a date"). */
+export const DragHintIcon = make(
+  <path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20" />,
 );

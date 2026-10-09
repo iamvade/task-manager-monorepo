@@ -19,14 +19,15 @@ interface ViewToolbarProps {
 
 /**
  * Filter (count of active filters) · Sort · Group · divider · + New Task (Main.dc.html toolbar).
- * Filter, Sort and Group write the URL.
+ * Filter, Sort and Group write the URL. The calendar has no Sort/Group (Calendar.dc.html).
  */
 export function ViewToolbar({ project = null, empty = false }: ViewToolbarProps) {
   const { t } = useTranslation();
   const view = useViewParams();
   const workspace = useCurrentWorkspace();
   const openCreate = useUiStore((s) => s.openCreate);
-  const board = useCurrentView() === 'board';
+  const currentView = useCurrentView();
+  const board = currentView === 'board';
   const newTask = () => {
     openCreate(
       project
@@ -69,56 +70,60 @@ export function ViewToolbar({ project = null, empty = false }: ViewToolbarProps)
           </ToolbarButton>
         )}
       />
-      <Menu
-        label={t('toolbar.sortBy')}
-        items={SORT_FIELDS.map((field) => ({
-          id: field,
-          label: t(`toolbar.sortFields.${field}`),
-          checked: field === view.sort,
-          onSelect: () => {
-            view.update({ sort: field === view.defaultSort ? null : field });
-          },
-        }))}
-        trigger={(props) => (
-          <ToolbarButton {...props} icon={<SortIcon size={14} />}>
-            {t('toolbar.sort', { field: t(`toolbar.sortFields.${view.sort}`) })}
-          </ToolbarButton>
-        )}
-      />
-      {board ? (
-        <Menu
-          label={t('board.columnsBy')}
-          items={[
-            {
-              id: 'status',
-              label: t('toolbar.groupFields.status'),
-              checked: true,
-              onSelect: () => undefined,
-            },
-          ]}
-          trigger={(props) => (
-            <ToolbarButton {...props} icon={<ColumnsIcon size={14} />}>
-              {t('board.columnsStatus')}
-            </ToolbarButton>
+      {currentView !== 'calendar' && (
+        <>
+          <Menu
+            label={t('toolbar.sortBy')}
+            items={SORT_FIELDS.map((field) => ({
+              id: field,
+              label: t(`toolbar.sortFields.${field}`),
+              checked: field === view.sort,
+              onSelect: () => {
+                view.update({ sort: field === view.defaultSort ? null : field });
+              },
+            }))}
+            trigger={(props) => (
+              <ToolbarButton {...props} icon={<SortIcon size={14} />}>
+                {t('toolbar.sort', { field: t(`toolbar.sortFields.${view.sort}`) })}
+              </ToolbarButton>
+            )}
+          />
+          {board ? (
+            <Menu
+              label={t('board.columnsBy')}
+              items={[
+                {
+                  id: 'status',
+                  label: t('toolbar.groupFields.status'),
+                  checked: true,
+                  onSelect: () => undefined,
+                },
+              ]}
+              trigger={(props) => (
+                <ToolbarButton {...props} icon={<ColumnsIcon size={14} />}>
+                  {t('board.columnsStatus')}
+                </ToolbarButton>
+              )}
+            />
+          ) : (
+            <Menu
+              label={t('toolbar.groupBy')}
+              items={GROUP_FIELDS.map((field) => ({
+                id: field,
+                label: t(`toolbar.groupFields.${field}`),
+                checked: field === view.group,
+                onSelect: () => {
+                  view.update({ group: field === 'status' ? null : field });
+                },
+              }))}
+              trigger={(props) => (
+                <ToolbarButton {...props} icon={<GroupIcon size={14} />}>
+                  {t('toolbar.group', { field: t(`toolbar.groupFields.${view.group}`) })}
+                </ToolbarButton>
+              )}
+            />
           )}
-        />
-      ) : (
-        <Menu
-          label={t('toolbar.groupBy')}
-          items={GROUP_FIELDS.map((field) => ({
-            id: field,
-            label: t(`toolbar.groupFields.${field}`),
-            checked: field === view.group,
-            onSelect: () => {
-              view.update({ group: field === 'status' ? null : field });
-            },
-          }))}
-          trigger={(props) => (
-            <ToolbarButton {...props} icon={<GroupIcon size={14} />}>
-              {t('toolbar.group', { field: t(`toolbar.groupFields.${view.group}`) })}
-            </ToolbarButton>
-          )}
-        />
+        </>
       )}
       <div aria-hidden="true" className="mx-1 h-5 w-px bg-[var(--border-control)]" />
       <Button variant="primary" icon={<PlusIcon size={14} strokeWidth={2.5} />} onClick={newTask}>

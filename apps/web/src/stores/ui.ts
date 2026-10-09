@@ -2,6 +2,8 @@ import type { Priority, StatusCategory } from '@kite/shared';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+export type CalendarMode = 'month' | 'week';
+
 /** What the quick-create modal starts with (toolbar, `C`, a group's "+", ⌘K). */
 export interface CreateDefaults {
   projectId?: string;
@@ -31,6 +33,10 @@ interface UiState {
   createDefaults: CreateDefaults;
   /** Quick create's "Create more" switch (remembered). */
   createMore: boolean;
+  /** Calendar range (Month / Week), shared by every calendar. */
+  calendarMode: CalendarMode;
+  /** Projects toggled off on a space calendar, per space id. */
+  calendarHidden: Record<string, string[]>;
   paletteOpen: boolean;
   shortcutsOpen: boolean;
   toggleSidebar: () => void;
@@ -40,6 +46,8 @@ interface UiState {
   openCreate: (defaults?: CreateDefaults) => void;
   closeCreate: () => void;
   setCreateMore: (on: boolean) => void;
+  setCalendarMode: (mode: CalendarMode) => void;
+  toggleCalendarProject: (spaceId: string, projectId: string) => void;
   setPaletteOpen: (open: boolean) => void;
   setShortcutsOpen: (open: boolean) => void;
 }
@@ -55,6 +63,8 @@ export const useUiStore = create<UiState>()(
       createOpen: false,
       createDefaults: {},
       createMore: false,
+      calendarMode: 'month',
+      calendarHidden: {},
       paletteOpen: false,
       shortcutsOpen: false,
       toggleSidebar: () => {
@@ -89,6 +99,22 @@ export const useUiStore = create<UiState>()(
       setCreateMore: (on) => {
         set({ createMore: on });
       },
+      setCalendarMode: (mode) => {
+        set({ calendarMode: mode });
+      },
+      toggleCalendarProject: (spaceId, projectId) => {
+        set((s) => {
+          const hidden = s.calendarHidden[spaceId] ?? [];
+          return {
+            calendarHidden: {
+              ...s.calendarHidden,
+              [spaceId]: hidden.includes(projectId)
+                ? hidden.filter((id) => id !== projectId)
+                : [...hidden, projectId],
+            },
+          };
+        });
+      },
       setPaletteOpen: (open) => {
         set(open ? { paletteOpen: true, shortcutsOpen: false } : { paletteOpen: false });
       },
@@ -106,6 +132,8 @@ export const useUiStore = create<UiState>()(
         lastWorkspaceId: s.lastWorkspaceId,
         collapsedGroups: s.collapsedGroups,
         createMore: s.createMore,
+        calendarMode: s.calendarMode,
+        calendarHidden: s.calendarHidden,
       }),
     },
   ),

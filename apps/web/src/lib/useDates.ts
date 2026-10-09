@@ -3,11 +3,24 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/useAuth';
 import { dueTone, formatDate, formatRange, relativeDay, todayFor, type DueTone } from './dates';
 
-const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
-const MONTHS = ['m1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7', 'm8', 'm9', 'm10', 'm11', 'm12'] as const;
+export const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
+export const MONTHS = [
+  'm1',
+  'm2',
+  'm3',
+  'm4',
+  'm5',
+  'm6',
+  'm7',
+  'm8',
+  'm9',
+  'm10',
+  'm11',
+  'm12',
+] as const;
 
-/** Templates under `calendar.format` that show one day with its weekday. */
-type DayTemplate = 'weekdayShortDate' | 'weekdayLongDate' | 'weekdayLongDateFull';
+/** Templates under `calendar.format` that show one day (with its weekday, or "Oct 1"). */
+type DayTemplate = 'dateShort' | 'weekdayShortDate' | 'weekdayLongDate' | 'weekdayLongDateFull';
 
 /** Date helpers bound to the UI language and today in the user's time zone. */
 export function useDates() {

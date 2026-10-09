@@ -16,11 +16,13 @@ export function ProjectLayout() {
   const { hasFilterParams, update } = useViewParams();
   const activeSprintId = project.data?.activeSprint?.id;
 
-  // The active sprint filter applies by default (design shows it on); removing it writes
-  // `sprint=none` so it stays off.
+  // The active sprint filter applies by default on List/Board (design shows it on); removing it
+  // writes `sprint=none` so it stays off. The calendar shows every date (a carried-over filter
+  // still applies).
+  const calendar = view === 'calendar';
   useEffect(() => {
-    if (activeSprintId && !hasFilterParams) update({ sprint: activeSprintId }, true);
-  }, [activeSprintId, hasFilterParams, update]);
+    if (activeSprintId && !hasFilterParams && !calendar) update({ sprint: activeSprintId }, true);
+  }, [activeSprintId, hasFilterParams, calendar, update]);
 
   if (project.isPending) return <HeaderSkeleton />;
   if (project.isError) return <ErrorState error={project.error} />;
