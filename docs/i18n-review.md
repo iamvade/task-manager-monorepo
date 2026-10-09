@@ -313,6 +313,78 @@ Source: `design/{Board,TaskDetail,MyTasks,Calendar,CreateTask,EmptyProject,Empty
 | `picker.*Label` | Assignees, Due date, Priority, Tags | Хариуцагчид, Дуусах огноо, Ач холбогдол, Шошго | Picker listbox names |
 | `drawer.dialogLabel` / `loadError` | Task {{key}} / Couldn't load this task. | {{key}} ажил / Ажлыг ачаалж чадсангүй. | Drawer shell |
 
+## `drawer` additions (phase 10, derived)
+
+Not drawn in TaskDetail.dc.html but needed by the same UI: editing states, menus, toasts and the history lines for every activity type.
+
+| key | en | mn (draft) | where |
+|---|---|---|---|
+| `markIncomplete` | Mark incomplete | Дуусаагүй болгох | Drawer header — Mark complete on a done task |
+| `copyFailed` | Couldn't copy the link | Холбоосыг хуулж чадсангүй | Toast — clipboard refused |
+| `copyTitle` | {{title}} (copy) | {{title}} (хуулбар) | Duplicate — title of the copy |
+| `duplicate` | Duplicate | Хуулбарлах | Drawer … menu |
+| `duplicated` | Duplicated as {{key}} | Хуулбар үүслээ: {{key}} | Toast after Duplicate (action: Open) |
+| `deleted` | {{key}} deleted | {{key}} устгагдлаа | Toast after Delete (action: Undo) |
+| `undo` | Undo | Буцаах | Toast action |
+| `movedTo` | Moved to {{project}} as {{key}} | Шилжүүллээ: {{project}} · {{key}} | Toast after Move to project |
+| `notFound` | This task doesn't exist or was deleted. | Энэ ажил байхгүй эсвэл устгагдсан байна. | Drawer / full page — 404 |
+| `startDate` | Start date | Эхлэх огноо | Due row — start date button / picker label |
+| `starts` | Starts {{date}} | Эхлэх: {{date}} | Due row — future start date |
+| `sprint` | Sprint | Спринт | Property label |
+| `noSprint` | No sprint | Спринтгүй | Sprint property / picker option |
+| `project` | Project | Төсөл | Property label (opens Move to project) |
+| `descriptionPlaceholder` | Add a description… Markdown and @mentions work here | Тайлбар нэмэх… Markdown болон @дурдалт ажиллана | Empty description (copy from CreateTask) |
+| `saving` | Saving… | Хадгалж байна… | Description autosave note |
+| `saved` | Saved | Хадгалсан | Description autosave note |
+| `saveFailed` | Couldn't save | Хадгалж чадсангүй | Description autosave note (+ Try again) |
+| `linkPlaceholder` | Paste or type a link | Холбоос буулгах эсвэл бичих | Toolbar link popover input |
+| `linkApply` | Apply | Хэрэглэх | Toolbar link popover button |
+| `renameSubtask` | Subtask title | Дэд ажлын нэр | Subtask inline rename input |
+| `subtaskDue` | Subtask due date | Дэд ажлын дуусах огноо | Subtask due picker |
+| `subtaskAssignee` | Subtask assignee | Дэд ажлын хариуцагч | Subtask assignee picker |
+| `subtaskOptions` | Subtask options | Дэд ажлын сонголтууд | Subtask … menu |
+| `attachmentOptions` | Options for {{name}} | Сонголтууд: {{name}} | Attachment card … menu |
+| `download` | Download | Татах | Attachment … menu |
+| `uploading` | Uploading… | Хуулж байна… | Pending attachment card |
+| `dropToAttach` | Drop files to attach them to {{key}} | Файлаа энд тавьж хавсаргана уу ({{key}}) | Overlay while dragging files over the drawer |
+| `fileBlocked` | {{name}} can't be attached: this file type isn't allowed | {{name}}: энэ төрлийн файл хавсаргах боломжгүй | Toast — blocked file type |
+| `fileTooLarge` | {{name}} is larger than 25 MB | {{name}}: 25 MB-аас том байна | Toast — over 25 MB |
+| `uploadFailed` | Couldn't upload {{name}} | Хуулж чадсангүй: {{name}} | Toast — upload error |
+| `activityError` | Couldn't load the activity. | Үйл ажиллагааг ачаалж чадсангүй. | Activity — load error |
+| `noComments` | Nothing here yet | Одоогоор юу ч алга | Activity — empty tab |
+| `writeReply` | Write a reply | Хариулт бичих | Reply composer aria-label |
+| `commentPlaceholder` | Write a comment… @ to mention | Сэтгэгдэл бичих… @ дарж дурдана | Composer placeholder |
+| `replyPlaceholder` | Reply… @ to mention | Хариулах… @ дарж дурдана | Reply composer placeholder |
+| `commentFailed` | Couldn't post the comment | Сэтгэгдлийг илгээж чадсангүй | Toast — comment not posted (text restored) |
+| `editComment` | Edit | Засах | Comment … menu / edit editor label |
+| `saveComment` | Save | Хадгалах | Comment edit button |
+| `edited` | (edited) | (зассан) | Comment header after an edit |
+| `commentDeleted` | This comment was deleted | Энэ сэтгэгдэл устгагдсан | Tombstone of a deleted comment with replies |
+| `deleteCommentConfirm` | Delete this comment? | Энэ сэтгэгдлийг устгах уу? | Confirm before deleting a comment |
+| `hideReplies` | Hide replies | Хариултуудыг нуух | Thread toggle when expanded |
+| `toolbar.heading` | Heading | Гарчиг | Description toolbar Text ▾ menu |
+| `toolbar.subheading` | Subheading | Дэд гарчиг | Description toolbar Text ▾ menu |
+| `history.duplicated` | &lt;b>{{actor}}&lt;/b> duplicated this task from &lt;b>{{key}}&lt;/b> | &lt;b>{{actor}}&lt;/b> энэ ажлыг хуулбарласан (эх: &lt;b>{{key}}&lt;/b>) | History line |
+| `history.titleChanged` | &lt;b>{{actor}}&lt;/b> renamed this task to &lt;b>{{to}}&lt;/b> | &lt;b>{{actor}}&lt;/b> нэрийг өөрчилсөн: &lt;b>{{to}}&lt;/b> | History line |
+| `history.descriptionChanged` | &lt;b>{{actor}}&lt;/b> updated the description | &lt;b>{{actor}}&lt;/b> тайлбарыг шинэчилсэн | History line |
+| `history.dueSet` | &lt;b>{{actor}}&lt;/b> set the due date to &lt;b>{{to}}&lt;/b> | &lt;b>{{actor}}&lt;/b> дуусах огноог тохируулсан: &lt;b>{{to}}&lt;/b> | History line |
+| `history.dueChanged` | &lt;b>{{actor}}&lt;/b> changed the due date from {{from}} to &lt;b>{{to}}&lt;/b> | &lt;b>{{actor}}&lt;/b> дуусах огноог өөрчилсөн: {{from}} → &lt;b>{{to}}&lt;/b> | History line |
+| `history.dueCleared` | &lt;b>{{actor}}&lt;/b> removed the due date | &lt;b>{{actor}}&lt;/b> дуусах огноог арилгасан | History line |
+| `history.startSet` | &lt;b>{{actor}}&lt;/b> set the start date to &lt;b>{{to}}&lt;/b> | &lt;b>{{actor}}&lt;/b> эхлэх огноог тохируулсан: &lt;b>{{to}}&lt;/b> | History line |
+| `history.startChanged` | &lt;b>{{actor}}&lt;/b> changed the start date from {{from}} to &lt;b>{{to}}&lt;/b> | &lt;b>{{actor}}&lt;/b> эхлэх огноог өөрчилсөн: {{from}} → &lt;b>{{to}}&lt;/b> | History line |
+| `history.startCleared` | &lt;b>{{actor}}&lt;/b> removed the start date | &lt;b>{{actor}}&lt;/b> эхлэх огноог арилгасан | History line |
+| `history.sprintSet` | &lt;b>{{actor}}&lt;/b> moved this task to &lt;b>{{to}}&lt;/b> | &lt;b>{{actor}}&lt;/b> спринтэд оруулсан: &lt;b>{{to}}&lt;/b> | History line |
+| `history.sprintCleared` | &lt;b>{{actor}}&lt;/b> removed this task from &lt;b>{{from}}&lt;/b> | &lt;b>{{actor}}&lt;/b> спринтээс хассан: &lt;b>{{from}}&lt;/b> | History line |
+| `history.assigneeAdded` | &lt;b>{{actor}}&lt;/b> assigned &lt;b>{{name}}&lt;/b> | &lt;b>{{actor}}&lt;/b> хариуцагч нэмсэн: &lt;b>{{name}}&lt;/b> | History line |
+| `history.assigneeRemoved` | &lt;b>{{actor}}&lt;/b> unassigned &lt;b>{{name}}&lt;/b> | &lt;b>{{actor}}&lt;/b> хариуцагч хассан: &lt;b>{{name}}&lt;/b> | History line |
+| `history.tagAdded` | &lt;b>{{actor}}&lt;/b> added the tag &lt;b>{{name}}&lt;/b> | &lt;b>{{actor}}&lt;/b> шошго нэмсэн: &lt;b>{{name}}&lt;/b> | History line |
+| `history.tagRemoved` | &lt;b>{{actor}}&lt;/b> removed the tag &lt;b>{{name}}&lt;/b> | &lt;b>{{actor}}&lt;/b> шошго хассан: &lt;b>{{name}}&lt;/b> | History line |
+| `history.subtaskAdded` | &lt;b>{{actor}}&lt;/b> added subtask &lt;b>{{title}}&lt;/b> | &lt;b>{{actor}}&lt;/b> дэд ажил нэмсэн: &lt;b>{{title}}&lt;/b> | History line |
+| `history.attachmentRemoved` | &lt;b>{{actor}}&lt;/b> removed &lt;b>{{filename}}&lt;/b> | &lt;b>{{actor}}&lt;/b> хавсралт устгасан: &lt;b>{{filename}}&lt;/b> | History line |
+| `history.projectChanged` | &lt;b>{{actor}}&lt;/b> moved this task from &lt;b>{{from}}&lt;/b> to &lt;b>{{to}}&lt;/b> | &lt;b>{{actor}}&lt;/b> өөр төсөлд шилжүүлсэн: &lt;b>{{from}}&lt;/b> → &lt;b>{{to}}&lt;/b> | History line |
+| `history.deleted` | &lt;b>{{actor}}&lt;/b> deleted this task | &lt;b>{{actor}}&lt;/b> энэ ажлыг устгасан | History line |
+| `history.restored` | &lt;b>{{actor}}&lt;/b> restored this task | &lt;b>{{actor}}&lt;/b> энэ ажлыг сэргээсэн | History line |
+
 ## Open questions
 
 1. **Unscheduled**: drafted "Огноогүй" (no date) rather than "Хуваарьгүй"; the hint uses "…хуваарьт оруулна уу". Pick one term.

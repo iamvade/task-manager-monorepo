@@ -1,5 +1,5 @@
 import type { ActivityPayload, TaskActivityType, TaskEventType } from '@kite/shared';
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import { uuidv7 } from 'uuidv7';
 import type { Tx } from '../db/client.js';
@@ -22,6 +22,10 @@ export interface TaskMutation {
   actorId: string;
   /** The project, locked for the rest of the transaction. */
   project: ProjectRow;
+  /** Another project locked through `alsoLock` (moves between projects). */
+  locked(projectId: string): ProjectRow;
+  /** Files the task's activity rows and events of this mutation under another project. */
+  reassign(taskId: string, projectId: string): void;
   /** Re-reads and locks a task of this project; 404 when it's gone (or deleted, by default). */
   lockTask(taskId: string, opts?: { includeDeleted?: boolean }): Promise<TaskRow>;
   /** Records an activity row; all rows are inserted just before commit. */
@@ -40,19 +44,27 @@ export interface TaskMutation {
  */
 export async function mutateTasks<T>(
   app: FastifyInstance,
-  { projectId, actorId }: { projectId: string; actorId: string },
+  {
+    projectId,
+    actorId,
+    alsoLock = [],
+  }: { projectId: string; actorId: string; alsoLock?: readonly string[] },
   run: (m: TaskMutation) => Promise<T>,
 ): Promise<T> {
   const now = new Date();
   const rows: ActivityInsert[] = [];
   const queued: Omit<TaskEvent, 'activities'>[] = [];
+  const reassigned = new Map<string, string>();
 
   const result = await app.db.transaction(async (tx) => {
-    const [project] = await tx
+    // Several projects are locked in id order, so two opposite moves can't deadlock.
+    const lockedRows = await tx
       .select()
       .from(projects)
-      .where(eq(projects.id, projectId))
+      .where(inArray(projects.id, [...new Set([projectId, ...alsoLock])]))
+      .orderBy(asc(projects.id))
       .for('no key update');
+    const project = lockedRows.find((p) => p.id === projectId);
     if (!project) throw httpError(404, 'NOT_FOUND', 'Project not found');
 
     const m: TaskMutation = {
@@ -60,6 +72,14 @@ export async function mutateTasks<T>(
       now,
       actorId,
       project,
+      locked(id) {
+        const row = lockedRows.find((p) => p.id === id);
+        if (!row) throw httpError(404, 'NOT_FOUND', 'Project not found');
+        return row;
+      },
+      reassign(taskId, toProjectId) {
+        reassigned.set(taskId, toProjectId);
+      },
       async lockTask(taskId, { includeDeleted = false } = {}) {
         const [task] = await tx
           .select()
@@ -104,6 +124,7 @@ export async function mutateTasks<T>(
     };
 
     const value = await run(m);
+    for (const row of rows) row.projectId = reassigned.get(row.taskId) ?? row.projectId;
     if (rows.length > 0) await tx.insert(activity).values(rows);
     return value;
   });
@@ -111,6 +132,7 @@ export async function mutateTasks<T>(
   for (const event of queued) {
     app.events.emit({
       ...event,
+      projectId: reassigned.get(event.taskId) ?? event.projectId,
       activities: rows
         .filter((r) => r.taskId === event.taskId)
         .map(({ id, type, payload }) => ({ id, type, payload })),

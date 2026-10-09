@@ -1,5 +1,6 @@
 import {
   FloatingFocusManager,
+  FloatingNode,
   FloatingPortal,
   autoUpdate,
   flip,
@@ -8,12 +9,14 @@ import {
   useClick,
   useDismiss,
   useFloating,
+  useFloatingNodeId,
   useInteractions,
   useRole,
   type Placement,
 } from '@floating-ui/react';
 import { useState, type ReactElement, type ReactNode } from 'react';
 import { cn } from '../../lib/cn';
+import { WithFloatingTree } from './floatingTree';
 
 /** Props to spread on the trigger element (ref + click/aria handlers). */
 export type TriggerProps = Record<string, unknown> & { ref: (node: HTMLElement | null) => void };
@@ -42,7 +45,25 @@ interface PopoverProps {
  * radius 10, padding 4. Flips/shifts to stay on screen; Esc or an outside click closes it and
  * focus returns to the trigger.
  */
-export function Popover({
+export function Popover(props: PopoverProps) {
+  return (
+    <WithFloatingTree>
+      <PopoverPanel {...props} />
+    </WithFloatingTree>
+  );
+}
+
+/**
+ * Inside another floating element (the drawer) floating-ui treats a menu trigger as a submenu
+ * item (`role="menuitem"`); our menus are never nested, so the trigger stays a button.
+ */
+function referenceProps(props: Record<string, unknown>) {
+  if (props.role !== 'menuitem') return props;
+  const { role: _role, ...rest } = props;
+  return rest;
+}
+
+function PopoverPanel({
   open: openProp,
   onOpenChange,
   trigger,
@@ -62,7 +83,9 @@ export function Popover({
     onOpenChange?.(next);
   };
 
+  const nodeId = useFloatingNodeId();
   const { floatingStyles, context } = useFloating({
+    nodeId,
     open,
     onOpenChange: setOpen,
     placement,
@@ -83,26 +106,28 @@ export function Popover({
 
   return (
     <>
-      {trigger({ ref: setReference, ...getReferenceProps() }, open)}
-      {open && (
-        <FloatingPortal>
-          <FloatingFocusManager context={context} modal={false} initialFocus={initialFocus}>
-            <div
-              ref={setFloating}
-              aria-label={label}
-              style={{ ...floatingStyles, width }}
-              className={cn(
-                'z-50 box-border rounded-[10px] border border-default bg-surface p-1 text-default outline-none',
-                elevation === 'sm' ? 'shadow-popover' : 'shadow-popover-lg',
-                className,
-              )}
-              {...getFloatingProps()}
-            >
-              {typeof children === 'function' ? children(close) : children}
-            </div>
-          </FloatingFocusManager>
-        </FloatingPortal>
-      )}
+      {trigger({ ref: setReference, ...referenceProps(getReferenceProps()) }, open)}
+      <FloatingNode id={nodeId}>
+        {open && (
+          <FloatingPortal>
+            <FloatingFocusManager context={context} modal={false} initialFocus={initialFocus}>
+              <div
+                ref={setFloating}
+                aria-label={label}
+                style={{ ...floatingStyles, width }}
+                className={cn(
+                  'z-50 box-border rounded-[10px] border border-default bg-surface p-1 text-default outline-none',
+                  elevation === 'sm' ? 'shadow-popover' : 'shadow-popover-lg',
+                  className,
+                )}
+                {...getFloatingProps()}
+              >
+                {typeof children === 'function' ? children(close) : children}
+              </div>
+            </FloatingFocusManager>
+          </FloatingPortal>
+        )}
+      </FloatingNode>
     </>
   );
 }

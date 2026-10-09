@@ -265,14 +265,17 @@ describe('project list', () => {
   });
 
   it('opens the drawer when a row is clicked', async () => {
-    api((st) => ({ 'GET /api/v1/tasks/APP-131': () => Response.json(detail(at(st.tasks, 0))) }));
+    api((st) => ({
+      'GET /api/v1/tasks/APP-131': () => Response.json(detail(at(st.tasks, 0))),
+      [`GET /api/v1/tasks/${at(st.tasks, 0).id}/activity`]: () => Response.json([]),
+    }));
     const router = renderAt(LIST);
     await screen.findByRole('table');
     fireEvent.click(rowOf('Audit current navigation patterns'));
     const dialog = await screen.findByRole('dialog', { name: 'APP-131 ажил' });
-    expect(
-      await within(dialog).findByRole('heading', { name: 'Audit current navigation patterns' }),
-    ).toBeInTheDocument();
+    expect(await within(dialog).findByRole('textbox', { name: 'Ажлын нэр' })).toHaveValue(
+      'Audit current navigation patterns',
+    );
     fireEvent.click(within(dialog).getByRole('button', { name: 'Хаах' }));
     await waitFor(() => {
       expect(new URLSearchParams(router.state.location.search).has('task')).toBe(false);

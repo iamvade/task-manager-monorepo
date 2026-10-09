@@ -13,5 +13,8 @@ export const queryKeys = {
     ['tasks', 'list', 'project', projectId, query] as const,
   spaceTasks: (spaceId: string, query: object) =>
     ['tasks', 'list', 'space', spaceId, query] as const,
+  taskDetails: ['tasks', 'detail'] as const,
   task: (ref: string) => ['tasks', 'detail', ref] as const,
+  /** Drawer feed (history + comments, oldest first); under `tasks` so task writes refresh it. */
+  taskActivity: (taskId: string) => ['tasks', 'activity', taskId] as const,
 };

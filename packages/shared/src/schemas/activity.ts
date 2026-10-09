@@ -22,6 +22,10 @@ const tagSnapshot = z.object({ id: z.uuid(), name: z.string(), color: paletteKey
 const sprintSnapshot = z.object({ id: z.uuid(), name: z.string() }).nullable();
 const subtaskSnapshot = z.object({ id: z.uuid(), title: z.string() });
 const attachmentSnapshot = z.object({ id: z.uuid(), filename: z.string() });
+/** A task key snapshot (`APP-142`) for duplicate/move history. */
+const taskSnapshot = z.object({ id: z.uuid(), key: z.string() });
+/** Where a moved task was / went: the project and the task's key in it. */
+const projectSnapshot = z.object({ projectId: z.uuid(), name: z.string(), key: z.string() });
 const change = <T extends z.ZodType>(value: T) => z.object({ from: value, to: value });
 
 /** Payload of each activity type the API writes. */
@@ -29,6 +33,7 @@ export const activityPayloadSchemas = {
   'task.created': z.object({
     status: statusSnapshotSchema.optional(),
     templateId: templateIdSchema.optional(),
+    duplicateOf: taskSnapshot.optional(),
   }),
   'title.changed': change(z.string()),
   'description.changed': z.object({}),
@@ -47,6 +52,7 @@ export const activityPayloadSchemas = {
   'attachment.removed': z.object({ attachment: attachmentSnapshot }),
   /** The comment itself is shown in the feed; this row only dates it and feeds notifications. */
   'comment.added': z.object({ commentId: z.uuid() }),
+  'project.changed': change(projectSnapshot),
   'task.deleted': z.object({}),
   'task.restored': z.object({}),
 } as const satisfies Partial<Record<ActivityType, z.ZodType>>;

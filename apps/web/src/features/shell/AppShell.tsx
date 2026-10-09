@@ -1,9 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { Outlet } from 'react-router';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
+import { Toaster } from '../../components/ui/Toaster';
 import { useUiStore } from '../../stores/ui';
 import { Sidebar } from './Sidebar';
 import { SidebarRail } from './SidebarRail';
+import { TaskDrawer } from '../task/TaskDrawer';
 
 /** Signed-in layout: sidebar (or rail) + the routed page. */
 export function AppShell() {
@@ -37,6 +39,10 @@ export function AppShell() {
           <Outlet />
         </ErrorBoundary>
       </main>
+      <ErrorBoundary>
+        <TaskDrawer />
+      </ErrorBoundary>
+      <Toaster />
     </div>
   );
 }

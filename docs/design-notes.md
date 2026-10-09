@@ -140,6 +140,17 @@ Login, invite accept, Settings, ⌘K palette, shortcuts help, filter/sort/group 
 - Empty project toolbar: Filter disabled (`--border-subtle` border, `--text-faint`), no Sort/Group, no filter strip. "Import from CSV" disabled with "Coming soon" tooltip; "Invite teammates" → `/settings?tab=members`; `C` = Create first task.
 - Task drawer (shell until phase 10): `?task=KEY`, 40% / min 520, scrim, focus trapped, Esc / scrim click closes; header `project › KEY`, open full page, close; read-only properties.
 
+**Task drawer (derived, phase 10)**:
+- Mounted once in the app shell, so `?task=KEY` works over any page; `/t/KEY` renders the same `TaskDetailView` centered (max 760px) without the open-full-page and × buttons. Overlays form a floating-ui tree: Esc and outside clicks close only the topmost picker; toasts and @-suggestion popups (`data-overlay-keep`) never dismiss the drawer.
+- Header … menu: Duplicate (same project, right after the original, title "{title} (copy)", subtasks unchecked; toast with Open), Move to project… (opens the Project property's picker; new key, status by category, sprint cleared; toast), Delete (drawer closes, toast "APP-142 deleted · Undo" → restore). Mark complete reads "Mark incomplete" on done tasks.
+- Extra property rows below Tags: Sprint (name; range as tooltip; "No sprint") and Project (dot + name). Start date is its own muted ghost button after the due ("· Started Oct 4", future "· Starts …", "+ Start date" on hover when empty).
+- Description autosaves 800ms after typing and on blur/close; "Saving… / ✓ Saved / Couldn't save · Try again" sits right of the heading (12px muted). Esc leaves the editor; the second Esc closes the drawer. Text ▾ = Text / Heading (h3 16/24) / Subheading (h4). Link = small popover with a URL field.
+- Subtasks: click the title to rename; the due date (while open) and the 22px avatar are pickers (faint calendar / dashed avatar on row hover when empty); "…" on hover → Delete. Rows drag by pointer (4px) or Space on the focused row.
+- Attachments: images preview via `?inline=true` (`object-fit: cover`), falling back to the design's placeholder art; other files show a type badge (PDF danger-soft, others the neutral chip). Hover "…" → Download / Delete (uploader or admin). Uploading files show as dimmed pending cards. Dragging files over the drawer shows an accent dashed overlay.
+- Activity: one feed query, tabs filter client-side. Status lines use the short "changed status to <to>" form when the change starts from the status the feed last showed. Markers: grey (`--project-dot-inactive`), In Review accent, Done / completed subtask green, Urgent red. Replies are collapsed behind "N replies" and indent 34px; deleted comments with replies stay as an italic muted tombstone; edited comments show "(edited)".
+- Composer is sticky at the bottom of the scroll area (border-top `--border-subtle`); resting border `--border-control`, focused accent + ring. A sent comment appears at once (dimmed until saved) and scrolls into view.
+- Toasts (not designed): bottom center, inverted like the tooltip (`--tooltip-bg/fg`), radius 10, 13px, `--shadow-popover`, action in accent-ink-dark, × to dismiss, 5s.
+
 ### 2.6 PROMPTS.md vs designs (resolved; PROMPTS updated)
 - Checkbox is native square 16px with `accent-color` (not round).
 - List tags: all chips, clipped by the cell; "+N" only on Board.

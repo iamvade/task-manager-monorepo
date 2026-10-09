@@ -2,20 +2,23 @@ import {
   taskDetailSchema,
   taskListItemSchema,
   type CreateTask,
-  type Priority,
+  type TaskDetail,
   type TaskListItem,
   type UpdateTask,
 } from '@kite/shared';
-import {
-  keepPreviousData,
-  useMutation,
-  useQuery,
-  useQueryClient,
-  type QueryClient,
-} from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { ApiError, apiFetch, apiSend, toQuery } from './client';
 import { queryKeys } from './queryKeys';
+import {
+  TASK_MUTATION,
+  patchLists,
+  patchTask,
+  restoreLists,
+  restoreTask,
+  settle,
+  writeTask,
+} from './taskCache';
 
 /** Filters sent to the list endpoints (built by `toTaskQuery`); also part of the query key. */
 export type TaskListParams = Record<string, string | readonly string[] | undefined>;
@@ -51,75 +54,35 @@ export function useTask(ref: string | null | undefined) {
   });
 }
 
-type ListSnapshot = [readonly unknown[], TaskListItem[] | undefined][];
-
-/** Applies `update` to every cached task list; returns the previous lists for rollback. */
-async function patchLists(
-  queryClient: QueryClient,
-  update: (tasks: TaskListItem[], key: readonly unknown[]) => TaskListItem[],
-): Promise<ListSnapshot> {
-  await queryClient.cancelQueries({ queryKey: queryKeys.taskLists });
-  const snapshot = queryClient.getQueriesData<TaskListItem[]>({ queryKey: queryKeys.taskLists });
-  for (const [key, tasks] of snapshot) {
-    if (tasks) queryClient.setQueryData(key, update(tasks, key));
-  }
-  return snapshot;
-}
-
-function restore(queryClient: QueryClient, snapshot: ListSnapshot | undefined) {
-  for (const [key, tasks] of snapshot ?? []) queryClient.setQueryData(key, tasks);
-}
-
-const replaceTask = (tasks: TaskListItem[], id: string, next: TaskListItem) =>
-  tasks.map((t) => (t.id === id ? next : t));
-
-/** Server copy of a mutated task, written into every list that shows it. */
-function writeResult(queryClient: QueryClient, id: string, result: TaskListItem) {
-  const row = taskListItemSchema.parse(result);
-  for (const [key, tasks] of queryClient.getQueriesData<TaskListItem[]>({
-    queryKey: queryKeys.taskLists,
-  })) {
-    if (tasks) queryClient.setQueryData(key, replaceTask(tasks, id, row));
-  }
-}
-
-const TASK_MUTATION = ['tasks'] as const;
-
 /**
- * Refetches task lists/details, project counts and the sidebar badge once the last task
- * mutation in flight settles (earlier refetches would overwrite later optimistic edits).
- */
-function settle(queryClient: QueryClient) {
-  if (queryClient.isMutating({ mutationKey: TASK_MUTATION }) > 1) return;
-  void queryClient.invalidateQueries({ queryKey: queryKeys.tasks });
-  void queryClient.invalidateQueries({ queryKey: ['projects'] });
-  void queryClient.invalidateQueries({
-    predicate: (q) => q.queryKey[0] === 'workspaces' && q.queryKey[2] === 'sidebar',
-  });
-}
-
-/**
- * An optimistic edit of one task: `optimistic` patches the cached row right away; the
- * server's row replaces it on success; errors roll every list back.
+ * An optimistic edit of one task: `optimistic` patches every cached copy (list rows and the
+ * open detail) right away; the server's copy replaces it on success; errors roll it all back.
  */
 function useTaskMutation<V extends { task: TaskListItem }>(
   mutationFn: (vars: V) => Promise<TaskListItem | null>,
   optimistic: (task: TaskListItem, vars: V) => TaskListItem,
+  optimisticDetail?: (task: TaskDetail, vars: V) => TaskDetail,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: TASK_MUTATION,
     mutationFn,
     onMutate: async (vars) => ({
-      snapshot: await patchLists(queryClient, (tasks) =>
-        tasks.map((t) => (t.id === vars.task.id ? optimistic(t, vars) : t)),
+      snapshot: await patchTask(
+        queryClient,
+        vars.task.id,
+        (t) => optimistic(t, vars),
+        (d) => {
+          const next = { ...d, ...optimistic(d, vars) };
+          return optimisticDetail ? optimisticDetail(next, vars) : next;
+        },
       ),
     }),
     onError: (_err, _vars, context) => {
-      restore(queryClient, context?.snapshot);
+      restoreTask(queryClient, context?.snapshot);
     },
     onSuccess: (result, vars) => {
-      if (result) writeResult(queryClient, vars.task.id, result);
+      if (result) writeTask(queryClient, vars.task.id, taskListItemSchema.parse(result));
     },
     onSettled: () => {
       settle(queryClient);
@@ -174,18 +137,33 @@ export function useMoveTask() {
   );
 }
 
-type FieldPatch = Pick<UpdateTask, 'priority' | 'dueDate'>;
+export interface UpdateVars {
+  task: TaskListItem;
+  patch: UpdateTask;
+  /** The new status object when `patch.statusId` is set (for the optimistic rows). */
+  status?: TaskListItem['status'];
+}
 
-/** Priority / due date from the list cells: `PATCH /tasks/:id`. */
+/** Task fields (list cells, drawer): `PATCH /tasks/:id`. */
 export function useUpdateTask() {
   return useTaskMutation(
-    ({ task, patch }: { task: TaskListItem; patch: FieldPatch }) =>
-      apiSend(`/tasks/${task.id}`, taskDetailSchema, 'PATCH', patch),
-    (t, { patch }) => ({
-      ...t,
-      ...(patch.priority ? { priority: patch.priority satisfies Priority } : {}),
-      ...(patch.dueDate !== undefined ? { dueDate: patch.dueDate } : {}),
-    }),
+    ({ task, patch }: UpdateVars) => apiSend(`/tasks/${task.id}`, taskDetailSchema, 'PATCH', patch),
+    (t, { patch, status }) => {
+      const next: TaskListItem = { ...t, updatedAt: new Date().toISOString() };
+      if (patch.title !== undefined) next.title = patch.title;
+      if (patch.priority !== undefined) next.priority = patch.priority;
+      if (patch.dueDate !== undefined) next.dueDate = patch.dueDate;
+      if (patch.startDate !== undefined) next.startDate = patch.startDate;
+      if (patch.sprintId !== undefined) next.sprintId = patch.sprintId;
+      if (patch.statusId !== undefined && status) {
+        next.status = status;
+        const done = status.category === 'done';
+        next.completedAt = done ? (t.completedAt ?? new Date().toISOString()) : null;
+      }
+      return next;
+    },
+    (d, { patch }) =>
+      patch.description === undefined ? d : { ...d, description: patch.description },
   );
 }
 
@@ -224,7 +202,58 @@ export function useDeleteTask() {
       snapshot: await patchLists(queryClient, (tasks) => tasks.filter((t) => t.id !== task.id)),
     }),
     onError: (_err, _task, context) => {
-      restore(queryClient, context?.snapshot);
+      restoreLists(queryClient, context?.snapshot);
+    },
+    onSettled: () => {
+      settle(queryClient);
+    },
+  });
+}
+
+/** Undo of a delete: `POST /tasks/:id/restore` (back to its old status and position). */
+export function useRestoreTask() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: TASK_MUTATION,
+    mutationFn: (task: Pick<TaskListItem, 'id'>) =>
+      apiSend(`/tasks/${task.id}/restore`, taskDetailSchema, 'POST'),
+    onSettled: () => {
+      settle(queryClient);
+    },
+  });
+}
+
+/** Drawer "Duplicate": `POST /tasks/:id/duplicate` (same project, right after the original). */
+export function useDuplicateTask() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: TASK_MUTATION,
+    mutationFn: ({ task, title }: { task: Pick<TaskListItem, 'id'>; title: string }) =>
+      apiSend(`/tasks/${task.id}/duplicate`, taskDetailSchema, 'POST', { title }),
+    onSuccess: (copy) => {
+      queryClient.setQueryData(queryKeys.task(copy.key), copy);
+    },
+    onSettled: () => {
+      settle(queryClient);
+    },
+  });
+}
+
+/** Drawer "Move to project": the task gets a new key there; the old key stops resolving. */
+export function useMoveTaskToProject() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: TASK_MUTATION,
+    mutationFn: ({ task, projectId }: { task: Pick<TaskListItem, 'id'>; projectId: string }) =>
+      apiSend(`/tasks/${task.id}/move-to-project`, taskDetailSchema, 'POST', { projectId }),
+    onMutate: async ({ task }) => ({
+      snapshot: await patchLists(queryClient, (tasks) => tasks.filter((t) => t.id !== task.id)),
+    }),
+    onError: (_err, _vars, context) => {
+      restoreLists(queryClient, context?.snapshot);
+    },
+    onSuccess: (moved) => {
+      queryClient.setQueryData(queryKeys.task(moved.key), moved);
     },
     onSettled: () => {
       settle(queryClient);
@@ -252,10 +281,10 @@ export function useCreateTask(projectId: string) {
       ),
     }),
     onError: (_err, _vars, context) => {
-      restore(queryClient, context?.snapshot);
+      restoreLists(queryClient, context?.snapshot);
     },
     onSuccess: (created, { optimistic }) => {
-      writeResult(queryClient, optimistic.id, created);
+      writeTask(queryClient, optimistic.id, created);
     },
     onSettled: () => {
       settle(queryClient);

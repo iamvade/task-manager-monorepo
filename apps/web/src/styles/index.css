@@ -130,3 +130,92 @@
     appearance: none;
   }
 }
+
+/*
+ * Long-form rich text (TaskDetail.dc.html description + comments): 14/22 body text, blocks 10px
+ * apart, h4 14/600, 20px list indent, Geist Mono inline code, underlined links, mention chips.
+ */
+@layer components {
+  .rich-text {
+    font-size: 14px;
+    line-height: 22px;
+    color: var(--text-body);
+    overflow-wrap: anywhere;
+  }
+  .rich-text > * {
+    margin: 0;
+  }
+  .rich-text > * + * {
+    margin-top: 10px;
+  }
+  .rich-text h3 {
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .rich-text h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .rich-text > :is(h3, h4):not(:first-child) {
+    margin-top: 14px;
+  }
+  .rich-text :is(ul, ol) {
+    margin: 0;
+    padding-left: 20px;
+  }
+  .rich-text ul {
+    list-style: disc;
+  }
+  .rich-text ol {
+    list-style: decimal;
+  }
+  .rich-text li + li {
+    margin-top: 4px;
+  }
+  .rich-text li > p {
+    margin: 0;
+  }
+  .rich-text blockquote {
+    border-left: 2px solid var(--border-strong);
+    padding-left: 12px;
+    color: var(--text-3);
+  }
+  .rich-text hr {
+    border: 0;
+    border-top: 1px solid var(--border);
+  }
+  .rich-text code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: var(--surface-2);
+  }
+  .rich-text a {
+    color: var(--accent-ink);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .rich-text strong {
+    font-weight: 600;
+  }
+  .rich-text .mention {
+    padding: 1px 6px;
+    border-radius: 6px;
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .rich-text p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    color: var(--text-faint);
+    pointer-events: none;
+  }
+}

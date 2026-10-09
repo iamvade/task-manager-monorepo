@@ -149,3 +149,53 @@ export const BugIcon = make(
 );
 export const CloseIcon = make(<path d="M18 6 6 18M6 6l12 12" />);
 export const ExpandIcon = make(<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />);
+
+// TaskDetail.dc.html
+export const CheckIcon = make(<path d="m5 12.5 4.5 4.5L19 7.5" />, { strokeWidth: 2.25 });
+export const StatusIcon = make(
+  <>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" />
+  </>,
+);
+export const PersonIcon = make(
+  <>
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4 21a8 8 0 0 1 16 0" />
+  </>,
+);
+export const FlagIcon = make(
+  <>
+    <path d="M4 22V4" />
+    <path d="M4 4h12l-2 4 2 4H4" />
+  </>,
+);
+export const TagIcon = make(
+  <>
+    <path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z" />
+    <circle cx="7.5" cy="7.5" r="1.2" fill="currentColor" />
+  </>,
+);
+export const SprintIcon = make(<path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5" />);
+export const FolderIcon = make(
+  <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />,
+);
+export const PaperclipIcon = make(
+  <path d="m21.4 11.1-8.5 8.5a6 6 0 0 1-8.5-8.5l8.5-8.5a4 4 0 0 1 5.7 5.7l-8.5 8.5a2 2 0 0 1-2.8-2.8l7.8-7.8" />,
+);
+export const UploadIcon = make(<path d="M12 16V4M7 9l5-5 5 5M4 20h16" />);
+export const CodeIcon = make(<path d="m8 7-5 5 5 5M16 7l5 5-5 5" />);
+export const BulletListIcon = make(<path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01" />);
+export const NumberedListIcon = make(<path d="M10 6h11M10 12h11M10 18h11M4 4v4M3 18h3l-3 3h3" />);
+export const ChevronDownIcon = make(<path d="m6 9 6 6 6-6" />, { strokeWidth: 2.5 });
+export const CopyIcon = make(
+  <>
+    <rect x="9" y="9" width="12" height="12" rx="2" />
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+  </>,
+);
+export const TrashIcon = make(
+  <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />,
+);
+export const MoveIcon = make(<path d="M5 12h14M13 6l6 6-6 6" />);
+export const PencilIcon = make(<path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4" />);

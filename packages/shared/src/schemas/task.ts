@@ -174,6 +174,18 @@ export type SetTaskAssignees = z.infer<typeof setTaskAssigneesSchema>;
 export const setTaskTagsSchema = z.object({ tagIds: idList }).meta({ id: 'SetTaskTags' });
 export type SetTaskTags = z.infer<typeof setTaskTagsSchema>;
 
+/** Copy of a task in the same project; `title` defaults to the original's (the client localizes "(copy)"). */
+export const duplicateTaskSchema = z
+  .object({ title: taskTitleSchema.optional() })
+  .meta({ id: 'DuplicateTask' });
+export type DuplicateTask = z.infer<typeof duplicateTaskSchema>;
+
+/** Moves a task to another project of the same workspace (new key there). */
+export const moveTaskToProjectSchema = z
+  .object({ projectId: z.uuid() })
+  .meta({ id: 'MoveTaskToProject' });
+export type MoveTaskToProject = z.infer<typeof moveTaskToProjectSchema>;
+
 /** Without `done` the call toggles. */
 export const completeTaskSchema = z
   .object({ done: z.boolean().optional() })

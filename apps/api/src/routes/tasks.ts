@@ -3,8 +3,10 @@ import {
   apiErrorSchema,
   completeTaskSchema,
   createTaskSchema,
+  duplicateTaskSchema,
   extractMentionIds,
   moveTaskSchema,
+  moveTaskToProjectSchema,
   parseTaskKey,
   richTextToPlain,
   setTaskAssigneesSchema,
@@ -33,6 +35,7 @@ import {
   activity,
   projects,
   sprints,
+  subtasks,
   taskAssignees,
   taskTags,
   tasks,
@@ -601,6 +604,185 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         await m.tx.update(tasks).set({ deletedAt: null }).where(eq(tasks.id, task.id));
         m.log(task.id, 'task.restored', {});
         m.emit('task.restored', task.id);
+      });
+      return buildTaskDetail(app.db, request.params.taskId);
+    },
+  );
+
+  app.post(
+    '/tasks/:taskId/duplicate',
+    {
+      preHandler: app.authenticate,
+      schema: {
+        tags: ['Tasks'],
+        summary: 'Duplicate a task',
+        description:
+          'Copies the task into the same project under the next number, right after the original in its status: title (or `title` from the body), description, priority, start/due date, sprint, assignees, tags and subtasks (unchecked). Comments, attachments and followers are not copied. Logs `task.created` with `duplicateOf`; the caller, the assignees and members @mentioned in the description follow the copy.',
+        params: taskParams,
+        body: duplicateTaskSchema.nullish(),
+        response: { 201: taskDetailSchema, 400: err, 401: err, 404: err },
+      },
+    },
+    async (request, reply) => {
+      const scope = await target(request, request.params.taskId);
+
+      const copyId = await mutateTasks(app, scope, async (m) => {
+        const { tx } = m;
+        const source = await m.lockTask(request.params.taskId);
+        const status = await requireStatusIn(tx, source.projectId, source.statusId);
+        const column = await tx
+          .select({ id: tasks.id, position: tasks.position, deletedAt: tasks.deletedAt })
+          .from(tasks)
+          .where(eq(tasks.statusId, status.id));
+        const position = movePosition(
+          column.map((t) => ({ id: t.id, position: t.position, live: t.deletedAt === null })),
+          '',
+          { prevId: source.id, nextId: null },
+        );
+
+        const number = m.project.taskSeq + 1;
+        await tx.update(projects).set({ taskSeq: number }).where(eq(projects.id, m.project.id));
+        const copy = one(
+          await tx
+            .insert(tasks)
+            .values({
+              projectId: m.project.id,
+              number,
+              statusId: status.id,
+              sprintId: source.sprintId,
+              title: request.body?.title ?? source.title,
+              description: source.description,
+              descriptionText: source.descriptionText,
+              priority: source.priority,
+              startDate: source.startDate,
+              dueDate: source.dueDate,
+              position,
+              createdBy: scope.actorId,
+              completedAt: status.category === 'done' ? m.now : null,
+              createdAt: m.now,
+              updatedAt: m.now,
+            })
+            .returning({ id: tasks.id }),
+          'task',
+        );
+
+        const assigneeIds = (
+          await tx
+            .select({ userId: taskAssignees.userId })
+            .from(taskAssignees)
+            .where(eq(taskAssignees.taskId, source.id))
+        ).map((r) => r.userId);
+        if (assigneeIds.length > 0) {
+          await tx
+            .insert(taskAssignees)
+            .values(assigneeIds.map((userId) => ({ taskId: copy.id, userId })));
+        }
+        const tagIds = (
+          await tx
+            .select({ tagId: taskTags.tagId })
+            .from(taskTags)
+            .where(eq(taskTags.taskId, source.id))
+        ).map((r) => r.tagId);
+        if (tagIds.length > 0) {
+          await tx.insert(taskTags).values(tagIds.map((tagId) => ({ taskId: copy.id, tagId })));
+        }
+        const subtaskRows = await tx.select().from(subtasks).where(eq(subtasks.taskId, source.id));
+        if (subtaskRows.length > 0) {
+          await tx.insert(subtasks).values(
+            subtaskRows.map((s) => ({
+              taskId: copy.id,
+              title: s.title,
+              assigneeId: s.assigneeId,
+              dueDate: s.dueDate,
+              done: false,
+              position: s.position,
+            })),
+          );
+        }
+
+        const mentioned = await workspaceMemberIds(
+          tx,
+          m.project.workspaceId,
+          extractMentionIds(source.description),
+        );
+        await follow(tx, copy.id, [scope.actorId, ...assigneeIds, ...mentioned]);
+        m.log(copy.id, 'task.created', {
+          status: statusSnapshot(status),
+          duplicateOf: { id: source.id, key: `${m.project.key}-${source.number}` },
+        });
+        m.emit('task.created', copy.id, { assigneeIds, mentionedUserIds: mentioned });
+        return copy.id;
+      });
+      return reply.code(201).send(await buildTaskDetail(app.db, copyId));
+    },
+  );
+
+  app.post(
+    '/tasks/:taskId/move-to-project',
+    {
+      preHandler: app.authenticate,
+      schema: {
+        tags: ['Tasks'],
+        summary: 'Move a task to another project',
+        description:
+          'Into another project of the same workspace (400 `INVALID_REFERENCE` for another workspace, an archived project or the same project; 404 when the caller cannot see it). The task takes the next number there (new key; the old key stops resolving), the first status of the same category (else the first To Do) at its end, and loses its sprint. Assignees, tags, subtasks, comments, attachments, followers and history move with it. Logs `project.changed`.',
+        params: taskParams,
+        body: moveTaskToProjectSchema,
+        response: { 200: taskDetailSchema, 400: err, 401: err, 404: err },
+      },
+    },
+    async (request) => {
+      const scope = await target(request, request.params.taskId);
+      const dest = await loadProjectAccess(request, request.body.projectId);
+      const invalid = (message: string) => httpError(400, 'INVALID_REFERENCE', message);
+      if (dest.project.id === scope.projectId) {
+        throw invalid('The task is already in this project');
+      }
+
+      await mutateTasks(app, { ...scope, alsoLock: [dest.project.id] }, async (m) => {
+        const { tx } = m;
+        const task = await m.lockTask(request.params.taskId);
+        const to = m.locked(dest.project.id);
+        if (to.workspaceId !== m.project.workspaceId) {
+          throw invalid('The project is in another workspace');
+        }
+        if (to.archivedAt) throw invalid('The project is archived');
+
+        const from = await requireStatusIn(tx, task.projectId, task.statusId);
+        const targetStatuses = await listStatuses(tx, to.id);
+        const status =
+          targetStatuses.find((s) => s.category === from.category) ??
+          targetStatuses.find((s) => s.category === 'todo') ??
+          targetStatuses[0];
+        if (!status) throw new Error(`Project ${to.id} has no statuses`);
+
+        const number = to.taskSeq + 1;
+        await tx.update(projects).set({ taskSeq: number }).where(eq(projects.id, to.id));
+        const isDone = status.category === 'done';
+        await tx
+          .update(tasks)
+          .set({
+            projectId: to.id,
+            number,
+            statusId: status.id,
+            position: await endOfStatus(tx, status.id),
+            sprintId: null,
+            completedAt: isDone ? (task.completedAt ?? m.now) : null,
+            updatedAt: m.now,
+          })
+          .where(eq(tasks.id, task.id));
+        // History follows the task (feeds show the project it is in now).
+        await tx.update(activity).set({ projectId: to.id }).where(eq(activity.taskId, task.id));
+        m.reassign(task.id, to.id);
+        m.log(task.id, 'project.changed', {
+          from: {
+            projectId: m.project.id,
+            name: m.project.name,
+            key: `${m.project.key}-${task.number}`,
+          },
+          to: { projectId: to.id, name: to.name, key: `${to.key}-${number}` },
+        });
+        m.emit('task.updated', task.id);
       });
       return buildTaskDetail(app.db, request.params.taskId);
     },
