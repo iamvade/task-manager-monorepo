@@ -1,7 +1,7 @@
 import type { WorkspaceRole } from '@kite/shared';
 import { and, eq } from 'drizzle-orm';
 import type { FastifyRequest } from 'fastify';
-import { projects, spaces, tags, workspaceMembers } from '../db/schema/index.js';
+import { projects, spaces, tags, tasks, workspaceMembers } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
 import { requireAuth } from './plugin.js';
 
@@ -109,4 +109,75 @@ export async function loadTagAccess(
   const role = await roleIn(request, tag.workspaceId, 'Tag');
   checkRole(role, minRole);
   return { tag, role };
+}
+
+/**
+ * A task in a workspace the caller belongs to, with its project; 404 otherwise. Soft-deleted
+ * tasks are 404 too unless `includeDeleted`.
+ */
+export async function loadTaskAccess(
+  request: FastifyRequest,
+  taskId: string,
+  { includeDeleted = false } = {},
+) {
+  const { user } = requireAuth(request);
+  const [row] = await request.server.db
+    .select({ task: tasks, project: projects, role: workspaceMembers.role })
+    .from(tasks)
+    .innerJoin(projects, eq(projects.id, tasks.projectId))
+    .innerJoin(
+      workspaceMembers,
+      and(
+        eq(workspaceMembers.workspaceId, projects.workspaceId),
+        eq(workspaceMembers.userId, user.id),
+      ),
+    )
+    .where(eq(tasks.id, taskId))
+    .limit(1);
+  if (!row || (row.task.deletedAt && !includeDeleted)) {
+    throw httpError(404, 'NOT_FOUND', 'Task not found');
+  }
+  return { ...row, workspaceId: row.project.workspaceId };
+}
+
+/**
+ * The id of the task with key `projectKey-number` among the caller's workspaces (or only in
+ * `workspaceId`). Keys are unique per workspace, so a key found in several of the caller's
+ * workspaces is 409 `TASK_KEY_AMBIGUOUS`.
+ */
+export async function findTaskIdByKey(
+  request: FastifyRequest,
+  { key, number }: { key: string; number: number },
+  workspaceId?: string,
+): Promise<string> {
+  const { user } = requireAuth(request);
+  const rows = await request.server.db
+    .select({ id: tasks.id })
+    .from(tasks)
+    .innerJoin(projects, eq(projects.id, tasks.projectId))
+    .innerJoin(
+      workspaceMembers,
+      and(
+        eq(workspaceMembers.workspaceId, projects.workspaceId),
+        eq(workspaceMembers.userId, user.id),
+      ),
+    )
+    .where(
+      and(
+        eq(projects.key, key),
+        eq(tasks.number, number),
+        workspaceId ? eq(projects.workspaceId, workspaceId) : undefined,
+      ),
+    )
+    .limit(2);
+  const [first, second] = rows;
+  if (!first) throw httpError(404, 'NOT_FOUND', 'Task not found');
+  if (second) {
+    throw httpError(
+      409,
+      'TASK_KEY_AMBIGUOUS',
+      'This key exists in several of your workspaces; pass workspaceId',
+    );
+  }
+  return first.id;
 }

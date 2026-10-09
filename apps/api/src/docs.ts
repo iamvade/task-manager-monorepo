@@ -34,6 +34,8 @@ const tags = [
   { name: 'Statuses', description: 'Workflow statuses of a project' },
   { name: 'Sprints', description: 'Project sprints' },
   { name: 'Templates', description: 'Fill an empty project from a template' },
+  { name: 'Tasks', description: 'Tasks: lists, detail, edits, moves and the trash' },
+  { name: 'Search', description: 'Command palette search' },
 ];
 
 const REF = /"#\/components\/schemas\/([^"]+)"/g;

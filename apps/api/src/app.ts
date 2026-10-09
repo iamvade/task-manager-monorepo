@@ -13,16 +13,19 @@ import { docsEnabled, type Config } from './config.js';
 import type { Db } from './db/client.js';
 import { registerDocs } from './docs.js';
 import { registerErrorHandlers } from './errors.js';
+import { EventBus } from './events/bus.js';
 import { authRoutes } from './routes/auth.js';
 import { healthRoutes } from './routes/health.js';
 import { inviteRoutes } from './routes/invites.js';
 import { meRoutes } from './routes/me.js';
 import { projectMemberRoutes } from './routes/project-members.js';
 import { projectRoutes } from './routes/projects.js';
+import { searchRoutes } from './routes/search.js';
 import { spaceRoutes } from './routes/spaces.js';
 import { sprintRoutes } from './routes/sprints.js';
 import { statusRoutes } from './routes/statuses.js';
 import { tagRoutes } from './routes/tags.js';
+import { taskRoutes } from './routes/tasks.js';
 import { templateRoutes } from './routes/templates.js';
 import { workspaceRoutes } from './routes/workspaces.js';
 
@@ -30,6 +33,8 @@ declare module 'fastify' {
   interface FastifyInstance {
     config: Config;
     db: Db;
+    /** Domain events, emitted after commit. */
+    events: EventBus;
   }
 }
 
@@ -57,6 +62,7 @@ export async function buildApp(config: Config, db: Db) {
   app.setSerializerCompiler(serializerCompiler);
   app.decorate('config', config);
   app.decorate('db', db);
+  app.decorate('events', new EventBus(app.log));
   registerErrorHandlers(app);
 
   await app.register(helmet);
@@ -80,6 +86,8 @@ export async function buildApp(config: Config, db: Db) {
       await api.register(statusRoutes);
       await api.register(sprintRoutes);
       await api.register(templateRoutes);
+      await api.register(taskRoutes);
+      await api.register(searchRoutes);
     },
     { prefix: '/api/v1' },
   );

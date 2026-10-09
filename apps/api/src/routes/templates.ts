@@ -26,7 +26,7 @@ export const templateRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     async (request, reply) => {
       const { project } = await loadProjectAccess(request, request.params.projectId);
       const { user } = requireAuth(request);
-      const result = await applyTemplate(app.db, project.id, request.body.templateId, user);
+      const result = await applyTemplate(app, project.id, request.body.templateId, user);
       return reply.code(201).send(result);
     },
   );

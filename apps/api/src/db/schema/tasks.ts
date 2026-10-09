@@ -9,6 +9,7 @@ import {
   primaryKey,
   text,
   unique,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
 import { createdAt, id, position, timestamptz } from './columns.js';
@@ -51,6 +52,9 @@ export const tasks = pgTable(
   (t) => [
     unique('tasks_project_id_number_unique').on(t.projectId, t.number),
     index('tasks_project_id_status_id_position_idx').on(t.projectId, t.statusId, t.position),
+    // Positions are allocated under the project lock and never reused (deleted tasks keep theirs);
+    // this makes a broken invariant fail loudly instead of leaving two tasks tied.
+    uniqueIndex('tasks_status_id_position_unique').on(t.statusId, t.position),
     index('tasks_due_date_idx').on(t.dueDate),
     index('tasks_sprint_id_idx').on(t.sprintId),
     index('tasks_title_trgm_idx').using('gin', t.title.op('gin_trgm_ops')),

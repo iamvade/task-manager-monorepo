@@ -38,9 +38,16 @@ describe('OpenAPI docs', () => {
         '/api/v1/workspaces/{workspaceId}/sidebar',
         '/api/v1/projects/{projectId}',
         '/api/v1/projects/{projectId}/from-template',
+        '/api/v1/projects/{projectId}/tasks',
+        '/api/v1/spaces/{spaceId}/tasks',
+        '/api/v1/tasks/{taskRef}',
+        '/api/v1/tasks/{taskId}/move',
+        '/api/v1/workspaces/{workspaceId}/search',
       ]),
     );
     expect(spec.components.schemas).toHaveProperty('ProjectDetail');
+    expect(spec.components.schemas).toHaveProperty('TaskDetail');
+    expect(spec.components.schemas).toHaveProperty('RichTextNode');
     expect(spec.components.schemas).toHaveProperty('ApiError');
   });
 

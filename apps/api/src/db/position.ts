@@ -8,33 +8,51 @@ const invalidMove = (message: string) => httpError(400, 'INVALID_MOVE', message)
 export const positionAfter = (last: string | null | undefined) =>
   generateKeyBetween(last ?? null, null);
 
+/** Position key before `first` (`null` = empty list). */
+export const positionBefore = (first: string | null | undefined) =>
+  generateKeyBetween(null, first ?? null);
+
+export interface Positioned {
+  id: string;
+  position: string;
+  /** False for rows that hold a key but can't be neighbors (soft-deleted tasks). */
+  live?: boolean;
+}
+
 /**
- * New position for `movedId` between the neighbors named in `move`, which must belong to `scope`
- * (the items of the destination list). With no neighbors the item goes to the end.
+ * New position for `movedId` between the neighbors named in `move`, which must be live items of
+ * `scope` (every item of the destination list, including any that aren't live).
+ *
+ * The key goes right after `prevId` (or right before `nextId` when only that is given), between
+ * the neighbor and its actual successor in `scope`. So a client whose view hides some items
+ * (filters) still lands next to the neighbor it saw, and the key never equals an existing one.
+ * With no neighbors the item goes to the end.
  */
 export function movePosition(
-  scope: readonly { id: string; position: string }[],
+  scope: readonly Positioned[],
   movedId: string,
   { prevId, nextId }: Move,
 ): string {
-  const others = scope.filter((item) => item.id !== movedId);
-  const find = (id: string | null) => {
-    if (id === null) return null;
-    const item = others.find((o) => o.id === id);
-    if (!item) throw invalidMove('Neighbor is not in the target list');
-    return item.position;
+  const others = scope
+    .filter((item) => item.id !== movedId)
+    .sort((a, b) => (a.position < b.position ? -1 : a.position > b.position ? 1 : 0));
+  const indexOf = (id: string) => {
+    const i = others.findIndex((o) => o.id === id && o.live !== false);
+    if (i < 0) throw invalidMove('Neighbor is not in the target list');
+    return i;
   };
-  const prev = find(prevId);
-  const next = find(nextId);
-  if (prev === null && next === null) {
-    const last = others.reduce<string | null>(
-      (max, o) => (max === null || o.position > max ? o.position : max),
-      null,
-    );
-    return positionAfter(last);
+  const at = (i: number) => others[i]?.position ?? null;
+
+  if (prevId !== null) {
+    const prev = indexOf(prevId);
+    if (nextId !== null && indexOf(nextId) <= prev) {
+      throw invalidMove('Neighbors are out of order');
+    }
+    return generateKeyBetween(at(prev), at(prev + 1));
   }
-  if (prev !== null && next !== null && prev >= next) {
-    throw invalidMove('Neighbors are out of order');
+  if (nextId !== null) {
+    const next = indexOf(nextId);
+    return generateKeyBetween(at(next - 1), at(next));
   }
-  return generateKeyBetween(prev, next);
+  return positionAfter(at(others.length - 1));
 }

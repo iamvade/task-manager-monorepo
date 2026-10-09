@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 /** Structural subset of TipTap's `JSONContent`, used for task descriptions and comment bodies. */
 export interface RichTextMark {
   type: string;
@@ -24,3 +26,50 @@ export function richTextToPlain(node: RichTextNode): string {
   const blocks = ['doc', 'bulletList', 'orderedList'];
   return inner.join(blocks.includes(node.type ?? '') ? '\n' : '');
 }
+
+const MAX_DEPTH = 40;
+const MAX_JSON_LENGTH = 200_000;
+
+const richTextMarkSchema = z.object({
+  type: z.string(),
+  attrs: z.record(z.string(), z.unknown()).optional(),
+});
+
+/** A TipTap node (unknown keys are dropped). */
+export const richTextNodeSchema = z
+  .object({
+    type: z.string().optional(),
+    attrs: z.record(z.string(), z.unknown()).optional(),
+    get content() {
+      return z.array(richTextNodeSchema).optional();
+    },
+    marks: z.array(richTextMarkSchema).optional(),
+    text: z.string().optional(),
+  })
+  .meta({ id: 'RichTextNode' });
+
+function depthOf(value: unknown, depth = 0): number {
+  if (depth > MAX_DEPTH || value === null || typeof value !== 'object') return depth;
+  let max = depth;
+  for (const child of Object.values(value)) max = Math.max(max, depthOf(child, depth + 1));
+  return max;
+}
+
+/**
+ * Rich-text document in request bodies (task descriptions, comments). Size and nesting are
+ * checked before the recursive parse, so a hostile body can't exhaust the stack.
+ */
+export const richTextDocSchema = z.preprocess(
+  (value, ctx) => {
+    if (depthOf(value) > MAX_DEPTH) {
+      ctx.addIssue({ code: 'custom', message: 'Document is nested too deeply' });
+      return z.NEVER;
+    }
+    if (JSON.stringify(value).length > MAX_JSON_LENGTH) {
+      ctx.addIssue({ code: 'custom', message: 'Document is too large' });
+      return z.NEVER;
+    }
+    return value;
+  },
+  richTextNodeSchema.refine((node) => node.type === 'doc', 'Expected a `doc` node'),
+);

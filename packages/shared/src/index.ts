@@ -11,3 +11,7 @@ export * from './schemas/project.js';
 export * from './schemas/space.js';
 export * from './schemas/tag.js';
 export * from './schemas/workspace.js';
+export * from './events.js';
+export * from './schemas/activity.js';
+export * from './schemas/task.js';
+export * from './task-key.js';

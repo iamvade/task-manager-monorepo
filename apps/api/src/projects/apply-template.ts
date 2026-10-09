@@ -1,8 +1,9 @@
 import { addDays, todayInZone, type StatusCategory, type TemplateId } from '@kite/shared';
 import { and, eq, inArray, isNull, max, sql } from 'drizzle-orm';
 import { generateNKeysBetween } from 'fractional-indexing';
+import type { FastifyInstance } from 'fastify';
+import { uuidv7 } from 'uuidv7';
 import type { UserRow } from '../auth/plugin.js';
-import type { Db } from '../db/client.js';
 import { one } from '../db/rows.js';
 import {
   activity,
@@ -23,11 +24,12 @@ import { TEMPLATES, type Text } from './templates/index.js';
  * Titles use the caller's language; due dates count from today in the caller's time zone.
  */
 export async function applyTemplate(
-  db: Db,
+  app: FastifyInstance,
   projectId: string,
   templateId: TemplateId,
   user: UserRow,
 ) {
+  const db = app.db;
   const template = TEMPLATES[templateId];
   const pick = (text: Text) => text[user.locale === 'mn' ? 0 : 1];
   const today = todayInZone(user.timezone);
@@ -157,22 +159,33 @@ export async function applyTemplate(
     );
     if (tagRows.length > 0) await tx.insert(taskTags).values(tagRows);
 
-    await tx.insert(activity).values(
-      template.tasks.map((_, i) => ({
-        workspaceId: project.workspaceId,
-        projectId,
-        taskId: taskId(i),
-        actorId: user.id,
-        type: 'task.created' as const,
-        payload: { templateId },
-        createdAt: now,
-      })),
-    );
+    const activityRows = template.tasks.map((_, i) => ({
+      id: uuidv7(),
+      workspaceId: project.workspaceId,
+      projectId,
+      taskId: taskId(i),
+      actorId: user.id,
+      type: 'task.created' as const,
+      payload: { templateId },
+      createdAt: now,
+    }));
+    await tx.insert(activity).values(activityRows);
 
-    return { createdCount: created.length, project: updated ?? project };
+    return { createdCount: created.length, project: updated ?? project, activityRows };
   });
 
-  // TODO(realtime): emit task.created events here, after commit, once the WebSocket server exists.
+  for (const { id, type, payload, ...row } of result.activityRows) {
+    app.events.emit({
+      type: 'task.created',
+      workspaceId: row.workspaceId,
+      projectId: row.projectId,
+      taskId: row.taskId,
+      actorId: row.actorId,
+      activities: [{ id, type, payload }],
+      assigneeIds: [],
+      at: now,
+    });
+  }
   // Built outside the transaction: the detail runs its queries in parallel on the pool.
   return {
     createdCount: result.createdCount,

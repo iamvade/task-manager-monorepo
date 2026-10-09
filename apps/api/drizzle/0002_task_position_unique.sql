@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "tasks_status_id_position_unique" ON "tasks" USING btree ("status_id","position");
