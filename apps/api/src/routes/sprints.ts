@@ -69,6 +69,7 @@ export const sprintRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           'sprint',
         );
       });
+      app.reportCache.invalidate(project.workspaceId);
       return reply.code(201).send(toSprintDto(sprint));
     },
   );

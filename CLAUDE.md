@@ -149,10 +149,12 @@ Full light/dark tables for avatars, space badges, project colors and tags: `docs
 
 Tabs: Overview, Sprints, Workload, plus People (admins/owner) or My performance (members). Screen notes: `docs/design-notes.md` §1.10–1.18.
 
-**API**: `GET /api/v1/workspaces/:workspaceId/reports/overview | sprints | workload | people/:userId` (`me` alias), plus a `.csv` variant of each (UTF-8 with BOM). OpenAPI tag "Reports"; response schemas live in `packages/shared/src/schemas/reports.ts`.
-- **Query params**: `period=week|4w|quarter|custom` (default `4w`), `from`/`to` (dates, custom only, ≤ 366 days), `spaceId?`, `projectId?`. Sprints also takes `projectId` (required) and `sprintId?` (default: the current sprint, else the latest).
+**API**: `GET /api/v1/workspaces/:workspaceId/reports/overview | sprints | workload | people/:userId` (`me` alias), plus a `.csv` variant of each (UTF-8 with BOM, headers in the caller's locale). OpenAPI tag "Reports"; response schemas live in `packages/shared/src/schemas/reports.ts`, constants and the pure rules (`reportRange`, `workloadLoad`, `sprintPace`, `STALE_DAYS`, …) in `packages/shared/src/reports.ts`. Code: `apps/api/src/reports/` (one module per report, each exporting its SQL query builders).
+- **CSV contents**: `overview.csv` = every open task with days in status (the Aging table, unabridged); `sprints.csv` = the selected sprint's tasks with committed / added / done / times carried / Replan; `workload.csv` = one row per person (points per bucket, capacity, load); `people/:userId.csv` = the person's completed tasks in the period with cycle times ("Export my data" for `me`).
+- **Query params**: `period=week|4w|quarter|custom` (default `4w`), `from`/`to` (dates, custom only, ≤ 366 days), `spaceId?`, `projectId?`. Sprints also takes `projectId` (required) and `sprintId?` (default: the current sprint, else the latest started, else the newest).
 - **Response metadata**: every response has `generatedAt` and `scope`; period reports also return `range` and `previousRange`.
-- **Computation**: reports are computed live; no snapshot tables. The web refetches every 5 min and on focus, and "Updated N minutes ago" = `generatedAt`. Query keys sit under `['tasks', 'reports', …]` so task writes invalidate them.
+- **Computation**: reports are computed live in SQL (CTEs, `FILTER`, `percentile_cont`); no snapshot tables. Each API process caches a computed report for 5 min (`REPORTS_CACHE_TTL_MS`, 0 = off; `apps/api/src/reports/cache.ts`), keyed by report + query + the caller's time zone and today (+ the person); permissions are checked before the lookup. Any task event on the bus drops that workspace's entries, as do a member title/capacity change and a new sprint. "Updated N minutes ago" = `generatedAt` (when it was computed). The web refetches every 5 min and on focus. Query keys sit under `['tasks', 'reports', …]` so task writes invalidate them.
+- **Performance**: `pnpm db:perf` builds a 10k-task "Perf" workspace in the dev database (`--fresh` rebuilds, `--drop` removes it), times every endpoint uncached (target < 300 ms) and prints EXPLAIN ANALYZE for the slowest query. The R1 indexes cover the plans (`tasks_completed_at_idx`, `task_status_periods (task_id, entered_at)` / `(category, exited_at)`, `activity (task_id, created_at)` / `(workspace_id, type, created_at)`, `comments (author_id, created_at)`).
 - **Text**: sentences (insights, deltas, pace) are built on the client from numbers.
 
 **Permissions**:
@@ -173,7 +175,7 @@ Tabs: Overview, Sprints, Workload, plus People (admins/owner) or My performance 
 
 **Metric definitions**:
 - **Completed**: tasks whose `completed_at` falls in the period. **Points** = sum of `SIZE_POINTS[size]` (S 1 · M 3 · L 5 · XL 8). Unsized tasks count 0 points and are reported as "N unsized".
-- **Cycle time**: `completed_at` − `entered_at` of the task's first `in_progress` or `review` period. If neither exists, use `created_at`. Report the median, in days to 1 decimal.
+- **Cycle time**: `completed_at` − `entered_at` of the task's first `in_progress` or `review` period. If neither exists, use `created_at`. Report the median and the 85th percentile, in days to 1 decimal.
 - **On-time delivery**: among completed tasks that have a due date, the share with completion date (local) ≤ `due_date`. Shown as "% · N of M". Delta in percentage points.
 - **Overdue**: open tasks with `due_date` < today. A snapshot that ignores the period. "Oldest is N days late" = max(today − due).
 - **Throughput**: tasks completed per Monday–Sunday week over the last 12 weeks, regardless of the period.
@@ -181,7 +183,7 @@ Tabs: Overview, Sprints, Workload, plus People (admins/owner) or My performance 
   - The current week is flagged `partial`: hollow point, with the tooltip "This week is still in progress".
 - **Where work waits**: per category (To Do, In Progress, In Review), the median length in days of status periods that ended within the period.
   - The insight names the slowest category and its ratio to the next slowest.
-- **Days in status / Aging**: today − `entered_at` of the open status period. Open tasks only, sorted descending. **Stale** when > 5 days.
+- **Days in status / Aging**: today − `entered_at` of the open status period. Open tasks only, sorted descending. **Stale** when > 5 days (`STALE_DAYS`, per category, all 5). Overview returns the top 20 plus totals.
 - **Sprints** (always per project):
   - **Working days**: Mon–Fri between `start_date` and `end_date`, minus `workspace_holidays`. "Day N of M working days · K days left".
   - **Committed**: memberships open at sprint start (start date 00:00).
@@ -217,7 +219,7 @@ Tabs: Overview, Sprints, Workload, plus People (admins/owner) or My performance 
   - **Helping others**:
     - **Comments on others' tasks**: comments by the person on tasks they aren't assigned to.
     - **Subtasks done on others' tasks**: `subtask.completed` by the person on such tasks, plus the number of distinct tasks.
-    - **Mentions answered**: the person's @mentions in the period (comments and descriptions), "answered / total". Answered = the person comments on that task within 7 days after the mention. Median reply time = the delay to that comment, shown as "2h" / "2ц".
+    - **Mentions answered**: the person's @mentions in comments in the period (descriptions don't record when a mention was added, so they don't count), "answered / total". Answered = the person comments on that task within 7 days after the mention. Median reply time = the delay to that comment, shown as "2h" / "2ц".
     - **Worked with most**: the top 3 people by helping contributions in either direction (person on their tasks + them on the person's tasks). Shown as "N times".
 
 ## Routes (web)

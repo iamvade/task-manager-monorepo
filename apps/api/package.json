@@ -14,7 +14,8 @@
     "db:seed": "tsx src/scripts/seed.ts",
     "db:reset": "tsx src/scripts/reset.ts",
     "db:print": "tsx src/scripts/print-project.ts",
-    "db:waits": "tsx src/scripts/status-waits.ts"
+    "db:waits": "tsx src/scripts/status-waits.ts",
+    "db:perf": "tsx src/scripts/report-perf.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.2",

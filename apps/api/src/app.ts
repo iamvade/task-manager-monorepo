@@ -18,6 +18,7 @@ import { EventBus } from './events/bus.js';
 import { scheduleArchiveJob } from './notifications/archive-job.js';
 import { registerNotifier } from './notifications/notifier.js';
 import { registerRealtime } from './realtime/plugin.js';
+import { ReportCache } from './reports/cache.js';
 import { attachmentRoutes } from './routes/attachments.js';
 import { authRoutes } from './routes/auth.js';
 import { commentRoutes } from './routes/comments.js';
@@ -29,6 +30,7 @@ import { notificationRoutes } from './routes/notifications.js';
 import { projectMemberRoutes } from './routes/project-members.js';
 import { projectRoutes } from './routes/projects.js';
 import { realtimeRoutes } from './routes/realtime.js';
+import { reportRoutes } from './routes/reports.js';
 import { searchRoutes } from './routes/search.js';
 import { spaceRoutes } from './routes/spaces.js';
 import { sprintRoutes } from './routes/sprints.js';
@@ -52,6 +54,8 @@ declare module 'fastify' {
     storage: Storage;
     /** Current time; tests pin it. */
     clock: () => Date;
+    /** Computed reports, cleared per workspace by task events. */
+    reportCache: ReportCache;
   }
 }
 
@@ -89,6 +93,10 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
   app.decorate('events', new EventBus(app.log));
   app.decorate('storage', options.storage ?? new LocalDiskStorage(config.UPLOADS_DIR));
   app.decorate('clock', options.now ?? (() => new Date()));
+  app.decorate('reportCache', new ReportCache(config.REPORTS_CACHE_TTL_MS, () => app.clock()));
+  app.events.on('*', (event) => {
+    app.reportCache.invalidate(event.workspaceId);
+  });
   registerErrorHandlers(app);
 
   await app.register(helmet);
@@ -128,6 +136,7 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
       await api.register(searchRoutes);
       await api.register(notificationRoutes);
       await api.register(homeRoutes);
+      await api.register(reportRoutes);
       await api.register(realtimeRoutes);
     },
     { prefix: '/api/v1' },

@@ -180,6 +180,8 @@ export const workspaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         .where(
           and(eq(workspaceMembers.workspaceId, workspaceId), eq(workspaceMembers.userId, userId)),
         );
+      // Title and capacity show in Workload and People.
+      app.reportCache.invalidate(workspaceId);
       const [member] = await listMembers(app.db, workspaceId, { userId });
       if (!member) throw httpError(404, 'NOT_FOUND', 'Member not found');
       return member;

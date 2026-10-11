@@ -20,6 +20,8 @@ const envSchema = z.object({
   UPLOADS_DIR: z.string().min(1).default('uploads'),
   /** Largest accepted attachment, bytes. */
   MAX_UPLOAD_BYTES: z.coerce.number().int().positive().default(MAX_ATTACHMENT_BYTES),
+  /** How long computed reports are reused, ms; 0 turns the cache off. */
+  REPORTS_CACHE_TTL_MS: z.coerce.number().int().min(0).default(300_000),
 });
 
 export type Config = z.infer<typeof envSchema>;
