@@ -13,7 +13,8 @@
     "db:migrate": "tsx src/scripts/migrate.ts",
     "db:seed": "tsx src/scripts/seed.ts",
     "db:reset": "tsx src/scripts/reset.ts",
-    "db:print": "tsx src/scripts/print-project.ts"
+    "db:print": "tsx src/scripts/print-project.ts",
+    "db:waits": "tsx src/scripts/status-waits.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.2",

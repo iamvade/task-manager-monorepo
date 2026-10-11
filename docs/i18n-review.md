@@ -519,6 +519,9 @@ Shell strings added in phase 8 that are not in any design (user menu theme label
 ## Reports (pending, drafted when the screens are built)
 
 All Reports designs ship a full `STR.mn` table: take Mongolian copy from them as-is. Only these are missing from the designs and will be drafted here when Reports is built:
-- **Size** (TaskDetail has English only): "Size", "S/M/L/XL = N points · …" titles, "= N points · used in Workload and Throughput reports", unsized hint.
+- **Size** (TaskDetail has English only) — drafted in the report-data phase, keys `taskSize.*`: "Хэмжээ" (Size, from the Workload `STR.mn`), "{{count}} оноо", option titles "L = 5 оноо · Том · 3–4 өдөр" (Жижиг · хагас өдөр орчим / Дунд · 1–2 өдөр / Том · 3–4 өдөр / Маш том · долоо хоног орчим, хуваахыг бодоорой), hint "= 5 оноо · Ачаалал болон Гүйцэтгэлийн хурдны тайланд ашиглана", unsized "Хэмжээгүй · …". Also `table.colSize` / `table.setSize`, `create.size`, `toolbar.columns*` ("Багана", "Багана харуулах").
+- **Reviewer** (no design): `drawer.reviewer` "Хянагч", `drawer.noReviewer` "Хянагчгүй"; history lines `drawer.history.reviewerSet` "хянагч томилсон: …", `reviewerCleared`, `sizeSet/sizeChanged/sizeCleared`.
+- **Unnamed sprints**: `sprint.name` "{{number}}-р спринт" (from ReportsSprints `STR.mn`).
+- **Settings → Members**: `settings.members.jobTitle*` "Албан тушаал", `capacity*` "Багтаамж", unit "оноо / 2 д.х" (2 долоо хоног; review the abbreviation), hint about the Workload marker.
 - **Derived Reports strings**: bad-delta labels, burndown insight variants (on track / behind), waits insight variants ("about N times", "X days longer"), past-sprint burndown title, "N unsized", Custom period popover (From / To / Apply), required project picker on Sprints ("Choose a project"), "Capacity" setting in Settings, CSV column headers.
 13. **Seed job titles** in mn come from the People/Workload `STR` data (e.g. "Фронтенд хөгжүүлэгч", "Инженерийн ахлагч"); "QA" (Bayarmaa) is not in the designs, drafted as "Чанарын баталгаажуулалт" or kept as "QA".

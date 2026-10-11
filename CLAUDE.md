@@ -54,31 +54,32 @@ The visual source of truth is the `design/` folder (exported from Claude Design)
 
 - `users` — id, email (unique, citext), name, initials, avatar_color (palette key), password_hash, locale (`mn`|`en`), timezone, theme (`light`|`dark`|`system`), accent, density (`comfortable`|`compact`), notification_prefs (jsonb `{mention, assigned, comment, status}` booleans, default all true), created_at
 - `sessions` — id (random token hash), user_id, expires_at, created_at
-- `workspaces` — id, name, slug, capacity_points (int, default 15: per-person points for 2 weeks, Workload report), created_at
-- `workspace_members` — workspace_id, user_id, role (`owner`|`admin`|`member`), title (nullable job title shown as a role hint, e.g. "Eng lead"), joined_at
+- `workspaces` — id, name, slug, created_at
+- `workspace_members` — workspace_id, user_id, role (`owner`|`admin`|`member`), title (nullable job title, e.g. "Engineering lead": pickers, Workload, People), capacity_points (int, default 15: points this person can take on over the next 2 weeks, Workload capacity marker), joined_at. Admins edit title and capacity in Settings → Members.
+- `workspace_holidays` — workspace_id, date, name (PK workspace_id + date). Public holidays skipped when counting working days (sprint days, burndown). Seeded with the 2026 Mongolian public holidays (`apps/api/src/db/holidays.ts`; migration 0006 adds them to existing workspaces); admin editing comes later.
 - `invites` — id, workspace_id, email, token_hash, role, expires_at, accepted_at
 - `spaces` — id, workspace_id, name, initial, color (palette key), position
-- `projects` — id, workspace_id (denormalized from the space, so `key` can be unique per workspace; composite FK `(space_id, workspace_id)` → spaces keeps it consistent), space_id, name, key (e.g. `APP`, unique per workspace), color (palette key), task_seq (int), position, archived_at, created_at. Every workspace member can see and edit every project.
+- `projects` — id, workspace_id (denormalized from the space, so `key` can be unique per workspace; composite FK `(space_id, workspace_id)` → spaces keeps it consistent), space_id, name, key (e.g. `APP`, unique per workspace), color (palette key), task_seq (int), position, lead_id? (users, set null: the default reviewer), archived_at, created_at. Every workspace member can see and edit every project.
 - `project_members` — project_id, user_id (the project's team: header avatar stack, suggested assignees and @mentions; not an access boundary)
 - `favorites` — user_id, project_id
 - `statuses` — id, project_id, name (nullable: null = default status, the UI shows the translated name for its category), category (`todo`|`in_progress`|`review`|`done`), color (nullable: null = the category's color), position. New projects get 4 defaults (name null): To Do / In Progress / In Review / Done.
 - `sprints` — id, project_id, number (int, per-project sequence, unique with project_id → "Sprint 14"), name (nullable: null = "Sprint {number}" translated), start_date, end_date
-- `tasks` — id, project_id, number (unique per project → shown as `APP-142`), status_id, sprint_id?, title, description (jsonb, TipTap doc), description_text (for search), priority (`urgent`|`high`|`medium`|`low`|`none`), size? (`S`|`M`|`L`|`XL`; points 1/3/5/8 via `SIZE_POINTS` in `packages/shared`), start_date?, due_date?, position, created_by, completed_at?, created_at, updated_at, deleted_at?
+- `tasks` — id, project_id, number (unique per project → shown as `APP-142`), status_id, sprint_id?, title, description (jsonb, TipTap doc), description_text (for search), priority (`urgent`|`high`|`medium`|`low`|`none`), size? (`S`|`M`|`L`|`XL`; points 1/3/5/8 via `SIZE_POINTS` in `packages/shared`), reviewer_id? (users, set null: entering a review status without a reviewer sets the person picked in the UI, else the project lead), start_date?, due_date?, position, created_by, completed_at?, created_at, updated_at, deleted_at?
 - `task_assignees` — task_id, user_id
-- `task_status_periods` — id, task_id, status_id (set null on delete), category (snapshot), entered_at, exited_at?, entered_by, exited_by? — exactly one open row (exited_at null) per task; written in the same transaction as every status change (create, status change, duplicate, project move, template apply)
-- `sprint_memberships` — id, task_id, sprint_id, added_at, removed_at?, added_by, removed_by? — one open row per task in a sprint; written wherever `tasks.sprint_id` changes
+- `task_status_periods` — id, task_id, status_id (set null on delete), category (snapshot), entered_at, exited_at?, entered_by, exited_by? — exactly one open row (exited_at null) per task; written in the same transaction as every status change (create, status change, duplicate, project move, template apply), only through `apps/api/src/tasks/status.ts`
+- `sprint_memberships` — id, task_id, sprint_id, added_at, removed_at?, added_by, removed_by? — one open row per task in a sprint; written wherever `tasks.sprint_id` changes, only through `apps/api/src/tasks/sprint.ts`. Committed = open at sprint start. Deferred constraint triggers (migration 0006) reject a commit where a task's status or sprint has no matching open period/membership; migration 0006 also backfilled both from the activity log (`kite_backfill_status_periods()`, `kite_backfill_sprint_memberships()`, idempotent)
 - `tags` — id, workspace_id, name, color (palette key); `task_tags` — task_id, tag_id
 - `subtasks` — id, task_id, title, assignee_id?, due_date?, done, position
 - `comments` — id, task_id, author_id, parent_id? (replies), body (jsonb), body_text, created_at, edited_at, deleted_at
 - `attachments` — id, task_id, uploader_id, filename, mime, size, storage_key, created_at
 - `task_followers` — task_id, user_id (creator, assignees and commenters follow automatically)
-- `activity` — id, workspace_id, project_id, task_id, actor_id, type, payload (jsonb), created_at. Types: `task.created` (with `status`, and `duplicateOf` for copies), `status.changed`, `size.changed`, `sprint.changed` (also logged on create-into-sprint and project move), `priority.changed`, `assignee.added/removed`, `due.changed`, `attachment.added`, `subtask.completed`, `comment.added`, `project.changed` (move to another project: new key there; the old key stops resolving), etc.
+- `activity` — id, workspace_id, project_id, task_id, actor_id, type, payload (jsonb), created_at. Types: `task.created` (with `status`, and `duplicateOf` for copies), `status.changed`, `size.changed`, `reviewer.changed`, `sprint.changed` (also logged on create-into-sprint and project move; snapshots `{id, name, number}`), `priority.changed`, `assignee.added/removed`, `due.changed`, `attachment.added`, `subtask.completed`, `comment.added`, `project.changed` (move to another project: new key there; the old key stops resolving), etc.
 - `notifications` — id, user_id, type (`mention`|`assigned`|`comment`|`status`), task_id, actor_id, activity_id, read_at?, archived_at?, created_at
   Created by the notifier (`apps/api/src/notifications/`) from bus events: @mentions (comments, descriptions), new assignees, comments and status changes on followed tasks. Never for the actor or non-members. One per recipient per event: the highest type they have enabled in `notification_prefs` (mention > assigned > comment > status). An unread, unarchived one of the same type on the same task from the last 5 minutes is updated in place (latest actor/activity, `created_at` bumped). Snippets are read from the comment/description at query time. A daily in-process job archives notifications read more than 30 days ago.
 - Indexes: tasks(project_id, status_id, position), unique tasks(status_id, position), tasks(due_date), tasks(completed_at), task_status_periods(task_id, entered_at), activity(workspace_id, type, created_at), comments(author_id, created_at), task_assignees(user_id), notifications(user_id, read_at), pg_trgm GIN on tasks.title for search.
 - Colors (`users.avatar_color`, `spaces.color`, `projects.color`, `tags.color`) are palette keys such as `violet`, `blue`, `neutral`. The frontend maps each key to exact light/dark values from the designs (`docs/design-notes.md` Appendix A).
 - Online presence is ephemeral (kept in the WebSocket server's memory), not stored.
-- Seed (`apps/api/src/db/seed/data.ts`) mirrors the designs; dates shift so Oct 8 2026 = today. Eight people: the seven in Main plus Bayarmaa T. (QA, `yellow`) from TaskDetail/Calendar. Job titles from the Reports designs (Product manager, Mobile engineer, Product designer, Frontend engineer, UX researcher, Data analyst, Engineering lead, QA); Anu is owner, Bat admin, the rest members. App Redesign has Sprints 9–14 (14 = Oct 6–24) and the seed generates ~24 weeks of history (completed tasks, status periods, sprint memberships, comments) so every report has data. Where Calendar and My Tasks disagree about Anu's tasks, My Tasks wins (Calendar's past "AB" items are done, future ones reassigned).
+- Seed (`apps/api/src/db/seed/data.ts`) mirrors the designs; dates shift so Oct 8 2026 = today. Eight people: the seven in Main plus Bayarmaa T. (QA, `yellow`) from TaskDetail/Calendar. Job titles from the Reports designs (Product manager, Mobile engineer, Product designer, Frontend engineer, UX researcher, Data analyst, Engineering lead, QA); Anu is owner, Bat admin, the rest members; everyone's capacity is 15. App Redesign has Sprints 9–14 of 15 working days each, computed from today (Sprint 14 is current, today is its day 4; holidays skipped). `seed/history.ts` generates ~24 weeks of history (completed tasks, status periods, reviewers, sprint memberships with mid-sprint additions and carry-overs, comments with @mentions and replies, subtasks done by teammates) shaped to the Reports designs (weekly throughput, In Review the slowest stage, ~3 day cycle time, ~87% on time); generated history never touches Anu's tasks in the last two weeks (My Tasks) nor the shown Calendar month. Partner Portal has one completed task (Reports empty state "1 / 5"). `pnpm db:waits [KEY]` prints a project's median days per status. Where Calendar and My Tasks disagree about Anu's tasks, My Tasks wins (Calendar's past "AB" items are done, future ones reassigned).
 
 ## Design tokens (from the designs)
 
@@ -182,7 +183,7 @@ Tabs: Overview, Sprints, Workload, plus People (admins/owner) or My performance 
   - The insight names the slowest category and its ratio to the next slowest.
 - **Days in status / Aging**: today − `entered_at` of the open status period. Open tasks only, sorted descending. **Stale** when > 5 days.
 - **Sprints** (always per project):
-  - **Working days**: Mon–Fri between `start_date` and `end_date`. "Day N of M working days · K days left".
+  - **Working days**: Mon–Fri between `start_date` and `end_date`, minus `workspace_holidays`. "Day N of M working days · K days left".
   - **Committed**: memberships open at sprint start (start date 00:00).
   - **Added mid-sprint**: memberships added after the start. Scope = committed + added.
   - **Completed**: members done by min(end, today).
@@ -205,12 +206,12 @@ Tabs: Overview, Sprints, Workload, plus People (admins/owner) or My performance 
     - **Heavy** if points > capacity × 1.2 **or** overdue points ≥ 5.
     - **Light** if points ≤ capacity / 2.
     - **Balanced** otherwise.
-    - With capacity C = `workspaces.capacity_points` (default 15), Heavy means > 18 and Light ≤ 7.5, i.e. the designed > 18 / ≤ 7.
+    - Capacity C is the person's `workspace_members.capacity_points` (default 15): Heavy means > 18 and Light ≤ 7.5, i.e. the designed > 18 / ≤ 7. The capacity marker is drawn per row.
 - **People / My performance** (period-bound unless noted):
   - **Cards and trends**:
     - **Completed**, **On-time** and **Cycle time** as above, for tasks the person was assigned when they were completed.
     - **Overdue now** = their open overdue tasks.
-    - **Review turnaround**: the reviewer is whoever moves a task **out of** an In Review status. Turnaround = median length of those review periods. The count is the number of reviews.
+    - **Review turnaround**: a review period is credited to the task's `reviewer_id`, else to whoever moved the task **out of** In Review. Turnaround = median length of those review periods. The count is the number of reviews.
     - **Trends**: 12 weekly values (completed count; median cycle time). **Team median** = the median, over members with ≥ 1 completion in those 12 weeks, of each member's weekly average (completed), or the median cycle time of all team completions (cycle).
     - Deltas on this page are neutral: grey chip, arrow only.
   - **Helping others**:
@@ -227,6 +228,6 @@ Tabs: Overview, Sprints, Workload, plus People (admins/owner) or My performance 
 - `/p/:projectId/list` · `/board` · `/calendar` (task drawer opens via `?task=APP-142`)
 - `/s/:spaceId/list` · `/board` · `/calendar` (space-level views across all the space's projects; calendar has a project filter)
 - `/t/:taskKey` (task as full page)
-- `/settings` (profile, language, theme, accent, density, notifications, members; admins also edit workspace capacity)
+- `/settings` (profile, language, theme, accent, density, notifications, members; admins also edit members' job titles and capacity)
 - `/reports` → `/reports/overview` · `/reports/sprints` · `/reports/workload` · `/reports/people` (admins/owner) · `/reports/me` (members: "My performance"). Period, scope, sprint, person and sort live in the URL.
 - Global: ⌘K palette, `C` = new task modal, `G` then `I` = Inbox, `Esc` closes drawer/modal.

@@ -17,9 +17,9 @@ Extracted from `design/*.dc.html` in Phase 0 (2026-10-08). The designs are the v
 | Out of scope v1 | Import from CSV → button rendered disabled with "Coming soon" tooltip. |
 | Reports metrics (2026-10-11) | The metric definitions in CLAUDE.md "Reports" are the agreed drafts (no external R2 spec); revise there if they change. |
 | Reports: sprints | Sprints stay **per project**. The Sprints tab needs one project; the design's "Project: All" becomes a required project picker (the space filter narrows its list; default = first project in scope with sprints). Sprints get a per-project `number` ("Sprint 14"). |
-| Reports: reviewer | No reviewer field. The reviewer is the actor who moves a task **out of** an In Review status; review turnaround = length of that review period. |
-| Reports: capacity, working days | `workspaces.capacity_points` (default 15 points per person per 2 weeks), editable by admins in Settings. Working days are Mon–Fri, no holidays. |
-| Reports: defaults (not designed) | Insight boxes only where drawn (Where work waits, burndown). Sizes only S/M/L/XL = 1/3/5/8 (the Workload sample's 2-point tasks are not reproducible). Unsized tasks count 0 points, shown as "N unsized". A task with several assignees counts in full for each. Reports compute live; "Updated N ago" = server `generatedAt`, refetched every 5 min and on focus. Seed makes Bat an admin, so People (admins) and My performance (members) can both be shown. |
+| Reports: reviewer | `tasks.reviewer_id`: entering review without one sets the person picked in the UI, else the project lead (`projects.lead_id`). The drawer shows a Reviewer row (not drawn) while the task is in review. Review turnaround is credited to `reviewer_id`, else to whoever moved the task out of In Review. |
+| Reports: capacity, working days | Per person: `workspace_members.capacity_points` (default 15 points per 2 weeks), editable by admins in Settings → Members next to the job title. Working days are Mon–Fri minus `workspace_holidays` (2026 Mongolian public holidays seeded). |
+| Reports: defaults (not designed) | Insight boxes only where drawn (Where work waits, burndown). Sizes only S/M/L/XL = 1/3/5/8 (the Workload sample's 2-point tasks are not reproducible). Unsized tasks count 0 points, shown as "N unsized". A task with several assignees counts in full for each. Reports compute live; "Updated N ago" = server `generatedAt`, refetched every 5 min and on focus. Seed makes Bat an admin, so People (admins) and My performance (members) can both be shown. The List view's Size column (toolbar "Columns" menu) and the quick-create Size chip are not drawn; they reuse the Workload size chip and the CreateTask field chip. |
 
 ## 1. Screens
 
@@ -80,7 +80,7 @@ Body (padding 24, gap 24):
 **Data**: projects by space (+ color); members (title, me); first todo status; date presets from today in my TZ.
 
 ### 1.8 Empty project — `EmptyProject.dc.html`
-**On screen**: sidebar: new project active + "New" badge (white pill, accent text). Header: breadcrumb, single avatar, Share. Tabs; Filter disabled; + New Task. Center (max 560): illustration (ghost rows card, accent + bubble), h1 20/28 "Partner Portal has no tasks yet", body, actions: Create first task (primary 40px, kbd C), Import from CSV (secondary → disabled, "Coming soon"), Invite teammates (ghost). "Or start from a template": 3 cards (28px colored icon tile, name 13/600, desc 12px): Product launch "18 tasks across planning, build and go-live", Sprint planning "12 tasks for a two-week cycle", Bug triage "6 tasks plus priority and severity fields".
+**On screen**: sidebar: new project active + "New" badge (white pill, accent text). Header: breadcrumb, single avatar, Share. Tabs; Filter disabled; + New Task. Center (max 560): illustration (ghost rows card, accent + bubble), h1 20/28 "Partner Portal has no tasks yet", body, actions: Create first task (primary 40px, kbd C), Import from CSV (secondary → disabled, "Coming soon"), Invite teammates (ghost). "Or start from a template": 3 cards (28px colored icon tile, name 13/600, desc 12px): Product launch "18 tasks across planning, build and go-live", Sprint planning "12 tasks for a two-week cycle", Bug triage "6 tasks plus priority and severity fields". Seed: Partner Portal has one completed task (Reports needs it for "1 / 5"), so this screen shows for newly created projects, not for Partner Portal.
 **Interactive**: create (modal), apply template, invite.
 **Data**: project (name, members, task count 0, created_at); static templates.
 
@@ -114,7 +114,7 @@ Design "today" in every Reports file is **Fri Oct 9 2026** (seed today is Thu Oc
 
 ### 1.12 Reports · Sprints — `ReportsSprints.dc.html`
 - **Sprint selector** (toolbar): 32px outline button: ↻ icon, "**Sprint 14**" 600, "Oct 6 – Oct 24" muted, **"Current"** pill (18px, #E8F5EC/#166534, 11/600). Listbox 288px, radius 10, `--shadow-popover-lg`, options 34px radius 6 (name 600 min 72px · range muted · "Current" green · accent ✓; selected row accent-soft), newest first. Filters: "Space: Product", "Project: All" (→ required project picker, see Decisions).
-- **Banner**: h2 18/24 "Sprint 14 · Oct 6 – Oct 24" (mn "14-р спринт · 10-р сарын 6 – 24") + 13px muted "**Day 4 of 15 working days · 11 days left**" (past: "Completed sprint · 15 working days"); right: 240×6 bar (#EFEFF2 track, accent fill = elapsed working days). ⚠️ Oct 24 2026 is a Saturday; with Mon–Fri working days Sprint 14 has 14 → "Day 4 of 14 working days · 10 days left".
+- **Banner**: h2 18/24 "Sprint 14 · Oct 6 – Oct 24" (mn "14-р спринт · 10-р сарын 6 – 24") + 13px muted "**Day 4 of 15 working days · 11 days left**" (past: "Completed sprint · 15 working days"); right: 240×6 bar (#EFEFF2 track, accent fill = elapsed working days). The seed computes sprint dates in working days from today, so Sprint 14 always has 15 working days with today as day 4 (the drawn Oct 6–24 is a Saturday end with 14).
 - **Numbering**: "Sprint 14" / "14-р спринт"; short "S14" / "С14".
 - **Cards** (auto-fit ≥200, padding 14 16, gap 6; 10px radius-3 swatch + label; value 26/32 600; sub 12px muted):
   - **Committed** 42 (swatch committed colour) — current: "incl. 7 carried over"; past: "at sprint start".
@@ -180,7 +180,7 @@ New property row after Priority: 14px tag-ruler icon + "Size". Control: radiogro
 | Time in status (cycle time, waits, aging, burndown) | New `task_status_periods` (one open row per task), written with every status change; backfilled from `activity`. |
 | Sprint history (committed / added / carried) | New `sprint_memberships` (one open row per task), written wherever `tasks.sprint_id` changes; backfilled from `sprint.changed` + current `sprint_id`. |
 | "Sprint 14" | `sprints.number` (per-project sequence); `sprints.name` nullable (null → "Sprint {n}" / "{n}-р спринт"). |
-| Capacity marker (Workload) | `workspaces.capacity_points` int default 15. |
+| Capacity marker (Workload) | `workspace_members.capacity_points` int default 15 (per person). |
 
 ### 2.2 Derived (computed in queries, never stored)
 - **Sidebar**: My Tasks = my open tasks (not done, not deleted) in workspace; Inbox = unread, unarchived notifications.
