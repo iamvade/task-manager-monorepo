@@ -15,6 +15,11 @@ Extracted from `design/*.dc.html` in Phase 0 (2026-10-08). The designs are the v
 | Week chart (My Tasks) | Current week Mon–Sun. "+N vs last week" compares Mon→today with Mon→same weekday last week. |
 | In scope (not in original phases) | Notification settings (`users.notification_prefs`), space-level List/Board (`/s/:spaceId/list|board`), online presence dots (WS presence). |
 | Out of scope v1 | Import from CSV → button rendered disabled with "Coming soon" tooltip. |
+| Reports metrics (2026-10-11) | The metric definitions in CLAUDE.md "Reports" are the agreed drafts (no external R2 spec); revise there if they change. |
+| Reports: sprints | Sprints stay **per project**. The Sprints tab needs one project; the design's "Project: All" becomes a required project picker (the space filter narrows its list; default = first project in scope with sprints). Sprints get a per-project `number` ("Sprint 14"). |
+| Reports: reviewer | No reviewer field. The reviewer is the actor who moves a task **out of** an In Review status; review turnaround = length of that review period. |
+| Reports: capacity, working days | `workspaces.capacity_points` (default 15 points per person per 2 weeks), editable by admins in Settings. Working days are Mon–Fri, no holidays. |
+| Reports: defaults (not designed) | Insight boxes only where drawn (Where work waits, burndown). Sizes only S/M/L/XL = 1/3/5/8 (the Workload sample's 2-point tasks are not reproducible). Unsized tasks count 0 points, shown as "N unsized". A task with several assignees counts in full for each. Reports compute live; "Updated N ago" = server `generatedAt`, refetched every 5 min and on focus. Seed makes Bat an admin, so People (admins) and My performance (members) can both be shown. |
 
 ## 1. Screens
 
@@ -84,6 +89,83 @@ Body (padding 24, gap 24):
 **Interactive**: tabs, mark all read, notification settings, archived link, G-then-I chord.
 **Data**: notifications per tab, unread count, archived count. Populated list is not designed → reuse the My Tasks feed row (avatar, actor + verb + task, quote, time · project, unread dot) + hover actions (mark read, archive).
 
+### 1.10 Reports — shared frame (all `Reports*.dc.html`)
+Design "today" in every Reports file is **Fri Oct 9 2026** (seed today is Thu Oct 8, so seeded numbers shift one day).
+- **Sidebar**: new nav item **Reports** under Inbox (bar-chart icon `M3 3v18h18` + 3 bars); active = accent-soft bg, accent text, 600. Add to the rail too.
+- **Header row 1** (min 56px): h1 14/600 with the chart icon (#52525B) + "Reports"; right: **"Updated 5 minutes ago"** 12px `--text-muted` (= server `generatedAt`, relative, ticking). While loading the slot shows a 14px accent spinner + "Loading reports…" (`role=status`).
+- **Header row 2**: tabs (40px, 13/500, gap 4, padding 0 10, selected `--text` + `inset 0 -2px 0 accent`, others muted) **Overview / Sprints / Workload / People** (admins/owner) or **… / My performance** (members). Toolbar right (padding-bottom 8, gap 8): period segmented (track `--surface-2`, 28px buttons, 13/500, radius 6) **This week / Last 4 weeks (default) / This quarter / Custom**; outline filter buttons 32px "**Space:** All ▾", "**Project:** All ▾" (label muted); 1px×20 divider; ghost "⬇ Export CSV".
+  - Per tab: Overview = period + space + project + export. Sprints = sprint selector + space + project + export. Workload = space + project + export (no period). People / My performance = period + export (no scope filters; My performance's export reads "Export my data").
+- **Range line** (13px muted, first line of content): "Sep 12 – Oct 9 · compared with the previous 4 weeks (Aug 15 – Sep 11)" / mn "9-р сарын 12 – 10-р сарын 9 · өмнөх 4 долоо хоногтой (8-р сарын 15 – 9-р сарын 11) харьцуулав".
+- **Content**: padding 20 24 40, gap 24 (Workload 20). Panels: 1px `--border`, radius 12, padding 20 (stat cards 16, or 14 16 on Sprints/People/Mine). Panel heading 15/600 (People/Mine 14/600) + 13px muted subtitle (People/Mine 12px), gap 2.
+- **Charts** are hand-drawn (positioned spans + one SVG `viewBox 0 0 1000 H`, `preserveAspectRatio=none`, `vector-effect: non-scaling-stroke`, 2px round strokes). Gridlines 1px #F1F1F3, baseline #D4D4D8, tick labels 11px muted, 32px (28) y-label gutter. Points 8px with a 2px `--bg` ring. Hover = invisible equal-width columns; vertical 1px #D4D4D8 line + tooltip (surface, 1px border, radius 8, padding 8 10, 12px, `0 8px 24px rgba(24,24,27,.10)`, min-width 168, flips near the edges). Every figure has an aria-label summary sentence.
+- **Tables** (aging, carried): header 36px `--bg-subtle`, 12/500 muted, borders `--border-subtle`; rows 48px, `.trow` hover `--bg-subtle`, the whole row is a link to the task drawer; horizontal scroll under min-width 860.
+
+### 1.11 Reports · Overview — `Reports.dc.html`
+- **Stat cards** (grid auto-fit ≥220px, gap 12; label 13px #52525B with a 14px icon; value 28/32 600 + unit 13px; footer 12px muted):
+  - **Completed** (green check) "142" "· 386 points" + delta chip "↑ 12%" "vs previous period".
+  - **Median cycle time** (accent stopwatch) "3.2 days" + chip "↓ 0.6 days" "lower is better".
+  - **On-time delivery** (#0284C7 calendar-check) "87%" "124 of 142" + chip "↑ 4 pts" "vs previous period".
+  - **Overdue** danger card (border #F3D3CF, bg #FFF8F7; warning icon #C42B1C; value #C42B1C) "5 tasks", footer "Oldest is 6 days late" (#C42B1C 500). Current snapshot, not period-bound.
+  - Delta chip: 20px, padding 0 6, radius 6, 12/600, 12px arrow. Good = #E8F5EC/#166534 (green whenever the change is an improvement: up for completed/on-time, down for cycle time). Bad: not drawn → danger-soft #FDECEC/#B42318.
+- **Throughput** (flex 999 1 560): "Throughput" / "Tasks completed per week · last 12 weeks"; legend 16×2 lines: This period (accent), Previous period (#C4C4CC). 200px plot, y 0–40 step 10, 72px right margin holding end labels ("This period" 12/600 at the last accent point; "Previous period" 12px muted, 14px above the grey line's end). X labels = week starts (Monday) "Jul 20" / mn "7/20". **The last point is hollow** (white fill, 2px accent border) = the current, partial week; its tooltip adds **"This week is still in progress"** / "Энэ долоо хоног үргэлжилж байна". Tooltip title "Week of Oct 5" / "10/5-ны долоо хоног"; rows: dot + series + value (current bold). Hovered dot scales 1.35. In the sample the last 4 weeks sum to 142 (= Completed) and the previous series' last 4 to 127 (→ +12%).
+- **Where work waits** (flex 1 1 360): "Median days spent in each status"; rows (gap 16) for To Do / In Progress / In Review: 10px status marker, label 13px, value "4.6 days" 600; 12px bar on a #F4F4F5 track (radius 4) scaled to 5 days; colours To Do #8B8B94, In Progress #D97706, In Review accent. **Insight box** pinned to the bottom (margin-top auto; accent-soft bg, radius 8, padding 10 12, 13/20 #3F3F46, 14px accent info icon): "Tasks wait longest in review — 4.6 days on median, about twice as long as any other status." / "Хянагдаж буй ажлууд дунджаар 4.6 хоног хүлээж байна — бусад төлвөөс 2 дахин урт." Built client-side: the slowest category and its ratio to the next slowest. There is **no** insight under Throughput.
+- **Aging tasks** (full width, overflow hidden): "Aging tasks" / "Flagged when a task has been in its current status for more than 5 days" + "View all" (accent 13/500). Grid `minmax(0,1fr) 176 160 148 184`: Task (500, ellipsis) · Project (8px project dot + name 13px) · Assignee (24px avatar, 10px initials, short name) · Status (10px marker + name) · **Days in status** (right). Sorted by days desc. When > 5 days: **"Stale"** chip (22px, radius 6, #FEF3E2/#92400E, 12/600, warning icon) + days in #92400E 600; otherwise #3F3F46. Sample shows 6 rows incl. a To Do task.
+**Data**: period range + previous range; completed count/points (now and previous); cycle-time median (now/previous); on-time count/total (now/previous); overdue count + oldest days late; 12 weekly throughput counts + previous series; median days per non-done category; open tasks with their current status's entered-at, project, assignees.
+
+### 1.12 Reports · Sprints — `ReportsSprints.dc.html`
+- **Sprint selector** (toolbar): 32px outline button: ↻ icon, "**Sprint 14**" 600, "Oct 6 – Oct 24" muted, **"Current"** pill (18px, #E8F5EC/#166534, 11/600). Listbox 288px, radius 10, `--shadow-popover-lg`, options 34px radius 6 (name 600 min 72px · range muted · "Current" green · accent ✓; selected row accent-soft), newest first. Filters: "Space: Product", "Project: All" (→ required project picker, see Decisions).
+- **Banner**: h2 18/24 "Sprint 14 · Oct 6 – Oct 24" (mn "14-р спринт · 10-р сарын 6 – 24") + 13px muted "**Day 4 of 15 working days · 11 days left**" (past: "Completed sprint · 15 working days"); right: 240×6 bar (#EFEFF2 track, accent fill = elapsed working days). ⚠️ Oct 24 2026 is a Saturday; with Mon–Fri working days Sprint 14 has 14 → "Day 4 of 14 working days · 10 days left".
+- **Numbering**: "Sprint 14" / "14-р спринт"; short "S14" / "С14".
+- **Cards** (auto-fit ≥200, padding 14 16, gap 6; 10px radius-3 swatch + label; value 26/32 600; sub 12px muted):
+  - **Committed** 42 (swatch committed colour) — current: "incl. 7 carried over"; past: "at sprint start".
+  - **Completed** 11 — current: "24% of scope · slightly behind ideal"; past: "X% of total scope" (scope = committed + added).
+  - **Added mid-sprint** "+3" (swatch #D97706) — "Scope +7%" (added / committed).
+  - **Carried over** 7 (swatch #8B8B94) — current: warm card (bg #FFFBF5, border #F5DDB8, value #92400E) "from Sprint 13 · 3 carried 2+ times"; past: label **"Carried to next sprint"**, "into Sprint 15", plain card.
+- **Committed vs completed** (flex 1 1 480): "Last 6 sprints · number of tasks"; legend 10px swatches Committed / Added mid-sprint / Completed. y 0–50 step 10. Per sprint group: an 18px column stacking committed (bottom, radius 1 1 0 0) + added (top, radius 4 4 1 1, gap 2), and an 18px completed bar beside it (gap 4). Colours with the default accent: committed #9C8BE3, completed #5B45B8; other accents: accent+73 / accent; added #D97706. The current sprint's completed bar is hatched (`repeating-linear-gradient(135deg, c 0 3px, c99 3px 6px)`). Selected sprint's group bg accent-soft (radius 6 6 0 0); hovered #FAFAFB. X labels 11/15: "S14" (selected 600 `--text`) over "83%" / "in progress". Tooltip: "Sprint 13 Sep 14 – Oct 2", Committed / Added (+5) / Completed, "83% done".
+- **Burndown** (flex 1 1 480): "Current sprint burndown" / "Remaining tasks per day · Sprint 14" (counts tasks, not points). Legend: Remaining (accent line), Ideal (2px dashed #8B8B94), Projected (2px dotted accent), "+2" chip "Scope added". X = sprint start + each working day; labels only at a few dates. Lines: ideal `6 5` dash committed → 0; projected `2 5` dash from today to the end at the current pace, end label "≈ 12" (11/600 accent, right-aligned); remaining solid with dots up to today. **Today**: vertical 1px dashed #A1A1AA + "Today" 11/600 #52525B above the plot. Scope chips (16px, radius 4, #FEF3E2/#92400E, 10/600) above the remaining point of the day work was added. Tooltip: "Oct 9 · today" / "Sprint start · Oct 6", Remaining or Projected (N tasks), Ideal. Below: warning **insight box** (#FEF3E2, #B45309 warning icon): "At the current pace about 12 tasks will be left when the sprint ends. Consider trimming scope or unblocking tasks in review." Burndown for a past sprint (not designed): title "Sprint 13 burndown", full remaining line, no projection/today.
+- **Carried over from last sprint**: "7 tasks moved from Sprint 13 into Sprint 14 · flagged when carried 3 or more times". Grid `1fr 176 160 148 216`, last column "**Times carried**": 3 pips (8px, radius 2, gap 3; filled = times carried up to 3; #D97706 when flagged, #8B8B94 otherwise, empty #E6E6EA) + "N times" (min 72px). Carried ≥ 3 → **"Replan"** chip (Stale chip style) and count #92400E 600.
+**Data**: project's sprints (number, dates, current); selected sprint's working days, day index, days left; committed / carried-in (and how many 2+) / completed / added / carried-out + next sprint; last 6 sprints' committed/added/completed; per-working-day remaining + added; carried-in tasks with times carried.
+
+### 1.13 Reports · Workload — `ReportsWorkload.dc.html`
+- Intro: h2 18/24 "Team workload" + 13/20 #52525B team line (max 640): "7 people · 27 open tasks · 87 points in total · 12.4 points per person on average. The dashed line marks capacity for the next 2 weeks (15 points)." Right: "Sort by:" + segmented **Open size** (default) / **Overdue**.
+- Table (radius 12, min 900; grid `24 200 88 120 minmax(0,1fr) 128`, column-gap 16, padding 0 20). Header (`--bg-subtle`, padding 14 20 10): Person · Open tasks · Size · [legend: Overdue / Due this week / Later / No due date with 10px swatches + tick row 0 5 10 15 20 25] · Capacity.
+- Person row (button, min 56px, `aria-expanded`, aria-label "Dorj E., 5 tasks, 15 pts, Heavy"): chevron (rotates 90°) · 28px avatar + name 500 + **job title** 12px muted (from `workspace_members.title`, e.g. "Frontend engineer") · open count (tabular) · size "15 pts" 600 + "8 pts overdue" 12/16 #C42B1C 500 · stacked bar 14px (segments flex by points, gap 2, outer radius 4, inner 1): Overdue #C42B1C, Due this week (today → Sunday) #E39B2B, Later #8B8B94, No due date hatched (`repeating-linear-gradient(135deg,#F4F4F5 0 3px,#D4D4D8 3px 4px)` + 1px #C4C4CC); bar width = points / 25; segment titles "Overdue: 8 pts (2 tasks)". **Capacity marker**: 1px dashed #A1A1AA vertical line at 15 / 25 through every bar. · Capacity pill (22px, radius 11, 12/500, 6px dot).
+- **Heavy / Balanced / Light**: Heavy if open points > capacity + 3 **or** overdue points ≥ 5 (#FEF3E2/#92400E, dot #E39B2B); Light if points ≤ 7 (#E8F5EC/#166534, dot #16A34A); else Balanced (#F1F1F3/#3F3F46, dot #8B8B94). Pill title "Capacity for the next 2 weeks ≈ 15 points". With a configurable capacity C the thresholds become C + 20% and ≤ C/2 (15 → 18 / 7).
+- Expanded row (bg `--bg-subtle`, padding 0 20 16 60): inset card (border `--border-subtle`, radius 10, surface). Task rows 40px, grid `16 1fr 168 120 56`, gap 12, divider #F4F4F5: priority flag · "Title · Priority" (priority muted) · project dot + name · due label in the bucket tone (overdue #C42B1C 500, week #92400E 500, later #3F3F46, none muted) with an 8px bucket swatch ("Today", "Tomorrow", "Oct 20", "No due date") · size chip (20px pill `--chip`, 12/500, title "Size (points)"). Sorted by bucket, then due. Footer (padding 8 14): "3 pts over capacity" / "8 pts of room" 12px muted + **"+ Assign work"** (28px outline, 12/500) → quick create with that assignee.
+- Footnote (12/18 muted, info icon): "Size is the sum of story points on open tasks. The capacity marker is a rough per-person amount for the next 2 weeks (15 points) — it is there to help share work fairly, not to rate anyone."
+**Data**: capacity; members (avatar, title) with open tasks (title, priority, project, due, size) bucketed by due in my TZ; totals.
+
+### 1.14 Reports · People — `ReportsPeople.dc.html` (admins/owner)
+- **Person picker**: 52px button, radius 12, padding 0 12 0 8: 36px avatar (13/600) + name 16/22 600 + **job title** 12/16 muted + chevron. Listbox 280px (popover-lg), options 40px: 24px avatar, name 13/500, title 11/14 muted, accent ✓, selected accent-soft. Next to it: **"Visible to admins only"** chip (24px, radius 6, `--surface-2`, 12/500 #52525B, lock icon). Right: range "Sep 12 – Oct 9 · compared with the previous 4 weeks".
+- Note box (bg #F7F7F8, border `--border-subtle`, radius 8, speech icon): "Use these as a starting point for 1:1 conversations, not as a score."
+- **5 cards** (auto-fit ≥190) with **neutral deltas** (chip #F1F1F3/#3F3F46; arrow up, down (rotated 180°) or sideways (90°) when equal; never green/red):
+  - Completed "14 tasks · 38 pts", chip "↑ 3", "previous: 11 · 31 pts".
+  - On-time "79%", chip "↓ 6 pts", "previous: 85%".
+  - Median cycle time "3.8 days", chip "↑ 0.4", "previous: 3.4 days".
+  - Overdue now "2 tasks", "Oldest is 6 days late" (danger card styling) or "No overdue tasks" (plain).
+  - **Review turnaround** "1.6 days", chip, "9 reviews · previous: 2.1"; no reviews → "—", no chip, "No reviews this period".
+- **Trends** (grid auto-fit ≥360, gap 16): cards padding 16 20; title 14/600 + "Last 12 weeks"; legend (stacked, right): accent 14×2 series label + dashed #A1A1AA **"Team median"**. 96px plot (40px right margin), baseline #E6E6EA, team median = horizontal 1px dashed #A1A1AA, accent line, one 8px dot on the last (or hovered) point, last value label 12/600 at the right end; x labels only first/last week ("Jul 20" … "Oct 5"). Tooltip (padding 6 8, `0 8px 20px` → normalised to the chart tooltip shadow): "Week of Oct 5  **3 tasks**". Cards: **Completed per week** (series "Completed") and **Cycle time** (series "Median (days)").
+- **Helping others** ("Contributions on other people's tasks · last 4 weeks" — follows the period): 3 tiles (grid of 3, gap 12; padding 12, radius 10, `--bg-subtle`; 32px accent-soft icon tile; label 12/16 #52525B, value 20/26 600, sub 12/16 muted): **Comments on others' tasks** 9 "previous: 23" · **Subtasks done on others' tasks** 6 "across 4 tasks" · **Mentions answered** "11 / 12" "**Median reply time 2h**" (mn "Хариулах медиан хугацаа 2ц"). Side list (flex 1 1 240) **"Worked with most"**: up to 3 rows (24px avatar, name, "8 times").
+- **Current open tasks**: heading row 40px (14/600 + count badge + "See workload" accent link → Workload tab), bottom border; rows 44px, grid `28 1fr 176 136 120 96` (min 760): 10px status marker · title · project dot + name 12px · status 13px · due ("Oct 3 · overdue" #C42B1C 500, "Today" #B45309 500, else #52525B; "No due date") · flag + priority. Sorted by due.
+**Data**: members with titles; per person: period + previous completed (count, points), on-time %, cycle median, overdue now + oldest, review turnaround + count; 12 weekly completed counts and weekly cycle medians + team medians; helping counts; worked-with top 3; open tasks.
+
+### 1.15 Reports · My performance — `ReportsMine.dc.html` (members)
+Same blocks as People, for the caller, with "you" copy. Tab **"My performance"** / "Миний гүйцэтгэл" replaces People; the person picker becomes a header: 44px avatar + h2 20/28 period title (**"Your last 4 weeks"** / "Your week so far" / "Your quarter so far" / "Your chosen period") + 13px muted "Anu Bold · Product manager · Sep 12 – Oct 9"; right: privacy pill (26px, radius 13, `--surface-2`, lock) **"Visible only to you and workspace admins"**. Note box is accent-soft with an accent icon: "This is a look at how your work has been flowing. Use it to prepare for 1:1s or spot what you might want to change — it is not a score." Card copy: "Completed … before: 8 · 19 pts", Overdue "2 days late — set a new date?", **"Your review turnaround"** "11 reviews by you · before: 1.5", none → "Nothing overdue". Trend series "You" / "You (days)". Helping: "How you helped others" / "Your contributions on other people's tasks · last 4 weeks", Mentions "19 / 19" "All answered · median reply 1h", list "People you worked with most". Open tasks: "Your open tasks" + "Go to My Tasks" (due column 140px). Export: "Export my data".
+
+### 1.16 Reports · Empty — `ReportsEmpty.dc.html`
+Shown for a scope (here Project: Partner Portal) with **fewer than 5 completed tasks** (all time). Header: no "Updated", toolbar only the Project filter + disabled Export (`--text-faint`, not-allowed). Center column max 640, padding 56 24 48, gap 24:
+- Illustration 320×148 card (border, radius 14, padding 16 16 12 28): axes #E6E6EA, dashed guides #EFEFF2, one solid accent bar (18×22) + 4 dashed #D4D4D8 ghost bars, two 40×6 #F1F1F3 label pills, 36px clock badge (accent stopwatch) at top-right (−12px) with a 4px `--bg` ring.
+- h2 20/28 "Reports appear after your team completes a few tasks" + body 14/22 #52525B: "Partner Portal is new, so there isn't enough history to show trends yet. Once the team finishes 5 tasks, throughput, wait times and the other reports will show up here automatically."
+- **Progress card** (max 400, padding 14 16, radius 12): "Toward your first report" 13/500 + "**1** / 5"; 5 segments (6px, radius 3, gap 4; done accent, rest #EFEFF2; `role=progressbar` 0–5); hint "1 task completed so far · 4 more to go".
+- Actions: **Create a task** (primary 40px, + icon → quick create in the project), **Go to project** (secondary 40px), **See reports for all projects** (ghost → clears the project filter).
+- "What you'll see" (border-top `--border-subtle`, margin-top 16, padding-top 24): 3 preview cards (auto-fit ≥170, padding 12, radius 10, border `--border-subtle`, `--bg-subtle`; 28px accent-soft icon tile; title 13/600; desc 12/16 muted): Throughput · Where work waits · Aging tasks.
+
+### 1.17 Reports · Loading — `ReportsLoading.dc.html`
+Frame renders immediately: tabs live, period segmented visible but inert (inactive labels #A1A1AA), Export disabled, header status "Loading reports…" with a spinning accent arc. Content `aria-busy="true" aria-live="polite"` + sr-only "Loading reports…": a 420px (max 70%) 12px range bar; 4 card skeletons (border `--border-subtle`, faint real labels, 96×28 value, 12px footer bar); throughput placeholder as **12 bars** (heights 40–78%) over 4 faint gridlines, 4 x-label pills; waits placeholder (3 label/value pairs + bars 30/45/90%, 44px insight block); aging table (faint heading, 36px empty header, 5 rows of grid `1fr 176 160 148 120` bars incl. 24px avatar circles). Skeleton `.sk`: `linear-gradient(90deg,#F1F1F3 25%,#E7E7EB 37%,#F1F1F3 63%)` 400% wide, 1.4s ease-in-out shimmer; reduced motion → static #F1F1F3.
+
+### 1.18 Task detail · Size — `TaskDetail.dc.html` (updated)
+New property row after Priority: 14px tag-ruler icon + "Size". Control: radiogroup "Size" (track `--surface-2`, padding 2, gap 2, radius 8) with 4 buttons **S / M / L / XL** (min-width 36, 28px, padding 0 8, radius 6, 12/600; selected surface + `--shadow-segment`, others #52525B transparent), followed by a 12px muted hint **"= 5 points · used in Workload and Throughput reports"**. Button titles: "S = 1 point · Small · about half a day", "M = 3 points · Medium · 1–2 days", "L = 5 points · Large · 3–4 days", "XL = 8 points · Extra large · about a week, consider splitting". No mn strings in the design (draft them). Unsized (not drawn): no button selected, hint "No size · used in Workload and Throughput reports"; clicking the selected size clears it.
+
 ## 2. Gaps vs the data model
 
 ### 2.1 Schema changes (decided; CLAUDE.md updated)
@@ -94,6 +176,11 @@ Body (padding 24, gap 24):
 | Role hints (TaskDetail mentions, CreateTask assignee picker) | `workspace_members.title` nullable text. |
 | Notification settings (Inbox) | `users.notification_prefs jsonb` `{mention, assigned, comment, status}` booleans, default true; checked during fan-out; UI in `/settings`. |
 | Online dots, task viewers | Not stored. The WS server keeps presence in memory (`apps/api/src/realtime/hub.ts`); the web keeps it in `stores/realtime.ts`. |
+| Task size (TaskDetail, Workload, Completed points) | `tasks.size` nullable enum `S\|M\|L\|XL`; points via shared `SIZE_POINTS` {S:1, M:3, L:5, XL:8}; activity `size.changed {from,to}`. |
+| Time in status (cycle time, waits, aging, burndown) | New `task_status_periods` (one open row per task), written with every status change; backfilled from `activity`. |
+| Sprint history (committed / added / carried) | New `sprint_memberships` (one open row per task), written wherever `tasks.sprint_id` changes; backfilled from `sprint.changed` + current `sprint_id`. |
+| "Sprint 14" | `sprints.number` (per-project sequence); `sprints.name` nullable (null → "Sprint {n}" / "{n}-р спринт"). |
+| Capacity marker (Workload) | `workspaces.capacity_points` int default 15. |
 
 ### 2.2 Derived (computed in queries, never stored)
 - **Sidebar**: My Tasks = my open tasks (not done, not deleted) in workspace; Inbox = unread, unarchived notifications.
@@ -104,6 +191,7 @@ Body (padding 24, gap 24):
 - **Due tone** (user TZ): overdue (< today) · today · soon (tomorrow → Sunday of current Mon–Sun week; tomorrow always soon) · later · done.
 - **My Tasks**: sections overdue / today / this week (tomorrow–Sunday) / later (after Sunday, then no-due tasks last); stats due-today open/total/urgent, completed this week (my tasks with `completed_at` Mon–Sun) + delta, per-day counts, overdue count + oldest days late; feed unread = my notification for that `activity_id` unread.
 - **Inbox**: archived count. **Calendar**: unscheduled count, "+N more".
+- **Reports**: every metric is computed per request from tasks, `task_status_periods`, `sprint_memberships`, comments, subtasks and activity (definitions: CLAUDE.md "Reports"). Text built on the client from numbers: range line, deltas ("↑ 12%", "4 pts", "0.6 days"), the waits insight (slowest category; ratio to the next slowest → "about twice" (≥1.75), "about N times" (rounded, ≥2.5), else "X days longer"; hidden when fewer than 2 categories have data), the burndown insight (shown when projected remaining > 0; the second sentence names the slowest status), pace ("slightly behind ideal"), capacity foot notes, "N times", "Median reply time 2h".
 - **Activity lines + marker colors** from `activity.type` + payload. Payload snapshots display data so renames/deletes don't break history: `status.changed {from:{id,name,category}, to:{…}}`, `priority.changed {from,to}`, `due.changed {from,to}`, `assignee.added/removed {user:{id,name}}`, `attachment.added {attachmentId, filename}`, `subtask.completed {subtaskId, title}`, `comment.added {commentId}`. Full set (phase 5): `activityPayloadSchemas` in `packages/shared/src/schemas/activity.ts`.
 
 ### 2.3 UI state (not in DB)
@@ -266,6 +354,41 @@ Primitives in `apps/web/src/components/ui`, composites in feature folders. `Pale
 | `FieldChip` | `leading`, `label`, `kbd`, `active`, `onClick` | quick create |
 | `TemplateCard` | `icon`, `color`, `name`, `description`, `onClick` | empty project |
 
+### Reports (`features/reports/`; charts are hand-drawn SVG like `WeekBars`, no chart library)
+Reused: `PageHeader`, `NavItem`/`RailLink`, `UnderlineTabs`, `SegmentedControl`, `Popover` + `Picker`, `Avatar` (add sizes 36, 44), `ProjectDot`, `StatusDot` (add size 10), `PriorityFlag`, `CountBadge`, `Tooltip`, `EmptyState`, `Skeleton` (add shimmer), `useDates`, `useRelativeTime`, quick create, task drawer. `StatCard` moves from `features/my-tasks` to `components/ui`.
+
+| Component | Props | Used in |
+|---|---|---|
+| `StatCard` (extended) | + `unit?`, `delta?: ReactNode`, `tone?: 'default'\|'danger'\|'warm'`, `swatch?`, `valueSize?: 28\|26` | My Tasks, all Reports tabs |
+| `ReportsLayout` | — (header, tabs, toolbar slot, `<Outlet/>`, "Updated" / loading status) | /reports/* |
+| `PeriodControl` | `value: {period, from?, to?}`, `onChange`, `disabled?` (Custom opens a from/to popover) | Overview, People, Mine |
+| `ScopeFilters` | `spaceId`, `projectId`, `onChange`, `requireProject?` | Overview, Sprints, Workload |
+| `ExportButton` | `href`, `label`, `disabled?` | all tabs |
+| `DeltaChip` | `value: string`, `direction: 'up'\|'down'\|'flat'`, `tone: 'good'\|'bad'\|'neutral'` | stat cards |
+| `InsightBox` | `tone: 'accent'\|'warning'\|'neutral'`, `icon`, `children` | waits, burndown, People/Mine notes |
+| `WarnChip` | `label` (Stale / Replan) | aging, carried |
+| `ChartTooltip` | `x` (%), `align`, `children` | all charts |
+| `ThroughputChart` | `weeks: {weekStart, count, prevCount, partial}[]` | Overview |
+| `WaitBars` | `items: {category, medianDays}[]`, `max?` | Overview |
+| `ReportTaskTable` | `columns`, `rows`, `template` (grid), `label` | aging, carried |
+| `SprintPicker` | `sprints`, `value`, `onChange` | Sprints |
+| `SprintBanner` | `sprint`, `workingDays`, `dayIndex`, `daysLeft` | Sprints |
+| `SprintBarsChart` | `history`, `selectedId` | Sprints |
+| `BurndownChart` | `days`, `todayIndex`, `projectedEnd` | Sprints |
+| `CarryPips` | `count`, `flagged` | carried table |
+| `WorkloadTable` / `WorkloadRow` | `people`, `capacity`, `sort`, `open`, `onToggle`, `onAssign` | Workload |
+| `StackedLoadBar` | `buckets`, `scale`, `capacity` | Workload |
+| `CapacityPill` | `load: 'heavy'\|'balanced'\|'light'`, `title` | Workload |
+| `BucketLegend` | — | Workload |
+| `PersonPicker` | `members`, `value`, `onChange` | People |
+| `TrendCard` | `title`, `seriesLabel`, `weeks`, `values`, `reference`, `format`, `unit` | People, Mine |
+| `HelpTiles` / `WorkedWithList` | `helping` / `people` | People, Mine |
+| `OpenTaskList` | `tasks`, `link: {label, to}` | People, Mine |
+| `ReportsEmpty` | `completed`, `required`, `project` | any tab with < 5 completions |
+| `SegmentProgress` | `value`, `max`, `label` | ReportsEmpty |
+| `ReportsSkeleton` | `variant: 'overview'\|…` | loading |
+| `SizeProperty` | `taskId`, `size`, `onChange` | task drawer |
+
 ## 4. Phase 15 polish — what doesn't match exactly
 
 Checked every screen in mn/en × light/dark at 1440px, plus 1024px and 820px content widths with an overflow probe (no element spills its box; long Mongolian labels truncate with a title or wrap). Remaining differences:
@@ -304,11 +427,22 @@ Seed mapping: Research/Checkout=blue, UX/UI=violet, Design system=teal, Analytic
 - Accent ink (dark): #6E56CF→#B4A5FF, #2F6FEB→#93B4FF, #0F766E→#5EEAD4, #3F3F46→#D4D4D8. Soft: light accent+1A, dark accent+33.
 - Misc: online #16A34A → #22C55E; danger soft #FDECEC/#B42318; danger card border #F3D3CF bg #FFF8F7; history marker default #C4C4CC; week bars past accent+66, future #E6E6EA; calendar weekend #FCFCFD, other month #FAFAFB.
 
+### A.2b Reports (light → dark; dark from `ReportsDark.dc.html`)
+- Panels: light `--surface`/`--bg` #FFFFFF → dark **#161618** (not `--surface` #1F1F23) = new `--panel`. Table header `--bg-subtle` → #18181B; row dividers `--border-subtle` → **#222227**.
+- Chart: gridline #F1F1F3 → #222227; baseline #D4D4D8 → #3A3A42; previous series / reference #C4C4CC → #6B6B75; hover line #D4D4D8 → #3A3A42; main series accent → accent-ink; point ring `--bg` → panel #161618; neutral bar #8B8B94; warm bar #E39B2B; "No due date" hatch #F4F4F5/#D4D4D8 + border #C4C4CC (dark: derive).
+- Chart tooltip: surface, border #E6E6EA, radius 8, `0 8px 24px rgba(24,24,27,.10)` → #1F1F23, border #2E2E35, `0 8px 24px rgba(0,0,0,.4)` (= new `--shadow-tooltip`).
+- Wait bars: To Do #8B8B94 → #9A9AA4; In Progress #D97706 → #F59E0B; In Review accent → accent-ink; track #F4F4F5 → #232328. Dark In Review marker fill = accent-ink + 40.
+- Success-soft (good delta, Current pill, Light pill) #E8F5EC/#166534 → rgba(34,197,94,.16)/#86EFAC. Warning-soft (Stale, Replan, Heavy, scope chips, burndown insight) #FEF3E2/#92400E (insight icon #B45309) → rgba(251,191,36,.14)/#FCD34D. Warm card #FFFBF5 border #F5DDB8 value #92400E → derive. Danger card (dark) bg rgba(248,113,113,.07), border rgba(248,113,113,.28), value #F87171.
+- Sprint chart (default accent): committed #9C8BE3, completed #5B45B8; other accents: accent+73, accent; added #D97706.
+- Stat icons: completed #16A34A → #4ADE80; on-time #0284C7 → #7DD3FC; cycle accent → accent-ink; overdue #C42B1C → #F87171.
+- Dark segmented (Reports): track #1F1F23, active #2E2E35 with `0 1px 2px rgba(0,0,0,.3)` (tokens keep #2E2E34).
+- Skeleton shimmer #F1F1F3 / #E7E7EB (dark: derive from `--surface-2`).
+
 ### A.3 Sizes, radii, shadows, type
 - Heights: header 56, tabs 40, group header 40, table header 36, rows 44/36, subtask row 40, sidebar nav 32, project item 30, buttons 32 (CTA 40, small 28/30), picker search 38, option 32 (mention 34), chips 22–30.
 - Radii: 3 (kbd in chips) · 4 (kbd, 16px badges, code) · 5 (18px badges, lang segments) · 6 (tags, small icon buttons, options, pills) · 7 (lang track) · 8 (controls, nav, segmented tracks) · 10 (cards, popovers, editor) · 12 (panels) · 14 (modal) · full (pills, avatars).
-- Shadows: segment `0 1px 2px rgba(24,24,27,.08)` · popover `0 8px 24px rgba(24,24,27,.12)` · popover-lg `0 12px 32px rgba(24,24,27,.14)` · drawer `-12px 0 32px rgba(24,24,27,.10)` · modal `0 24px 64px rgba(24,24,27,.20), 0 2px 6px rgba(24,24,27,.06)` · drag `0 2px 4px rgba(24,24,27,.06), 0 16px 32px rgba(24,24,27,.14)` · ring-soft `0 0 0 3px accent-soft`. Scrims: drawer .28, modal .32 of #18181B.
-- Type: Geist 11/12/13/14(20) · long-form 14/22 #27272A · 18/24 · 20/28 · 22/30 · 24/32 · 28/32; headings 600, −0.01em at ≥20. Geist Mono 12 for keys/code.
+- Shadows: segment `0 1px 2px rgba(24,24,27,.08)` · popover `0 8px 24px rgba(24,24,27,.12)` · popover-lg `0 12px 32px rgba(24,24,27,.14)` · drawer `-12px 0 32px rgba(24,24,27,.10)` · modal `0 24px 64px rgba(24,24,27,.20), 0 2px 6px rgba(24,24,27,.06)` · drag `0 2px 4px rgba(24,24,27,.06), 0 16px 32px rgba(24,24,27,.14)` · ring-soft `0 0 0 3px accent-soft` · tooltip (Reports charts) `0 8px 24px rgba(24,24,27,.10)`, dark `0 8px 24px rgba(0,0,0,.4)`. Scrims: drawer .28, modal .32 of #18181B.
+- Type: Geist 10 (initials in 24px report avatars, scope chips) · 11/12/13/14(20) · 15/20 (Reports panel headings) · 16/22 (People picker name) · long-form 14/22 #27272A · 18/24 (calendar title, Reports section headings) · 20/26 (Reports help tiles) · 20/28 · 22/30 · 24/32 · 26/32 (secondary stat values) · 28/32; numbers in tables use `tabular-nums`; headings 600, −0.01em at ≥20. Geist Mono 12 for keys/code.
 
 ### A.4 Formats
 | Context | en | mn |
@@ -322,6 +456,10 @@ Seed mapping: Research/Checkout=blue, UX/UI=violet, Design system=teal, Analytic
 | Calendar | October 2026 · Oct 5 – 11, 2026 · "Oct 1" on the 1st | draft |
 | Relative | feed "2h ago"; drawer "2 hours ago", "Yesterday, 4:12 PM", then "Oct 1" | draft |
 | File size | 248 KB | 248 KB |
+| Reports week label | Jul 20 · tooltip "Week of Oct 5" | 7/20 · "10/5-ны долоо хоног" |
+| Reports range | Sep 12 – Oct 9 · compared with the previous 4 weeks (Aug 15 – Sep 11) | 9-р сарын 12 – 10-р сарын 9 · өмнөх 4 долоо хоногтой (…) харьцуулав |
+| Sprint name | Sprint 14 · short S14 | 14-р спринт · short С14 |
+| Durations | 3.2 days · reply 2h | 3.2 хоног · 2ц |
 
 Add the year when the date is outside the current year.
 

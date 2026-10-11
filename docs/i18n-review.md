@@ -515,3 +515,10 @@ Rows reuse the `myTasks.feed.*` sentences with the task key in `<task>` (the tit
 
 Shell strings added in phase 8 that are not in any design (user menu theme labels, "Copy link", "Space options", error/not-found pages, picker hints) are drafted the same way; keys: `common.*` (retry, cancel, create, close, noResults, errorTitle, errorBody, reload, notFoundTitle, notFoundBody, goToMyTasks, comingSoon), `shell.{switchWorkspace, unread, openTasks, spaceName, createSpace, newBadge, accountMenu, theme*, loadError}`, `header.{unfavorite, shareHint, spaceOptions, copyLink, linkCopied, allProjects}`, `toolbar.{activeFilters, sortBy, groupBy, sortFields.*, groupFields.*}`, `priority.none`, `dates.{yesterday, overdue}`, `picker.*`.
 12. **Settings terms**: "Тохируулга" (Preferences) vs "Тохиргоо" (Settings); "Онцлох өнгө" (Accent color); "Нягтрал" Чөлөөтэй/Нягт (Density); role names Эзэмшигч / Админ / Гишүүн.
+
+## Reports (pending, drafted when the screens are built)
+
+All Reports designs ship a full `STR.mn` table: take Mongolian copy from them as-is. Only these are missing from the designs and will be drafted here when Reports is built:
+- **Size** (TaskDetail has English only): "Size", "S/M/L/XL = N points · …" titles, "= N points · used in Workload and Throughput reports", unsized hint.
+- **Derived Reports strings**: bad-delta labels, burndown insight variants (on track / behind), waits insight variants ("about N times", "X days longer"), past-sprint burndown title, "N unsized", Custom period popover (From / To / Apply), required project picker on Sprints ("Choose a project"), "Capacity" setting in Settings, CSV column headers.
+13. **Seed job titles** in mn come from the People/Workload `STR` data (e.g. "Фронтенд хөгжүүлэгч", "Инженерийн ахлагч"); "QA" (Bayarmaa) is not in the designs, drafted as "Чанарын баталгаажуулалт" or kept as "QA".

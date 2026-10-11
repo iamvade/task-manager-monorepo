@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<title>Тайлан — Спринт</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#52525B;text-decoration:none}a:hover{color:#18181B}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit;color:inherit}
+.nav:hover{background:#EDEDF0}
+.ghost:hover{background:#F4F4F5}
+.opt:hover{background:#F4F4F5}
+.trow:hover{background:#FAFAFB}
+.ghost:focus-visible,.nav:focus-visible,.seg:focus-visible,.opt:focus-visible,.trow:focus-visible,input:focus-visible{outline:2px solid #6E56CF;outline-offset:1px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</helmet>
+
+<div lang="{{lang}}" style="display: flex; flex-wrap: wrap; min-height: 100vh; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 14px; line-height: 20px; color: #18181B; background: #FFFFFF; -webkit-font-smoothing: antialiased">
+
+  <!-- ============ SIDEBAR ============ -->
+  <nav aria-label="{{L.workspace}}" style="flex: 1 1 248px; max-width: 248px; min-width: 220px; box-sizing: border-box; background: #F7F7F8; border-right: 1px solid #E6E6EA; display: flex; flex-direction: column; gap: 16px; padding: 12px 8px">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 4px">
+      <button class="ghost" style="flex: 1; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; text-align: left">
+        <span style="width: 24px; height: 24px; border-radius: 6px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">K</span>
+        <span style="flex: 1; font-weight: 600; font-size: 14px">Kite Studio</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+      </button>
+      <button class="ghost" aria-label="{{L.collapse}}" style="width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 3v18"></path><path d="m16 15-3-3 3-3"></path></svg>
+      </button>
+    </div>
+    <div style="padding: 0 4px">
+      <label style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <span class="sr">{{L.search}}</span>
+        <input type="search" placeholder="{{L.search}}" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-size: 13px; padding: 0">
+        <kbd style="font-family: inherit; font-size: 11px; color: #6B6B74; border: 1px solid #E6E6EA; border-radius: 4px; padding: 0 4px; line-height: 16px">⌘K</kbd>
+      </label>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <a class="nav" href="MyTasks.dc.html" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12 2.5 2.5 4.5-5"></path></svg>
+        <span style="flex: 1; font-weight: 500">{{L.myTasks}}</span><span style="font-size: 12px; color: #6B6B74">7</span>
+      </a>
+      <a class="nav" href="EmptyInbox.dc.html" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+        <span style="flex: 1; font-weight: 500">{{L.inbox}}</span>
+        <span style="min-width: 20px; height: 18px; padding: 0 6px; box-sizing: border-box; border-radius: 9px; background: {{accent}}; color: #FFFFFF; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">3</span>
+      </a>
+      <a class="nav" href="Reports.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; background: {{accentSoft}}; color: {{accent}}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M8 17v-5M13 17V8M18 17v-9"></path></svg>
+        <span style="flex: 1; font-weight: 600">{{L.reports}}</span>
+      </a>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <div style="display: flex; align-items: center; justify-content: space-between; height: 28px; padding: 0 4px 0 12px">
+        <span style="font-size: 12px; font-weight: 500; color: #6B6B74">{{L.spaces}}</span>
+        <button class="ghost" aria-label="{{L.newSpace}}" style="width: 24px; height: 24px; border: 0; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B74" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+        </button>
+      </div>
+      <sc-for list="{{spaces}}" as="sp" hint-placeholder-count="3">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <button class="nav" onClick="{{sp.toggle}}" aria-expanded="{{sp.open}}" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px 0 8px; border: 0; border-radius: 8px; background: transparent; text-align: left">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{sp.chevStyle}}"><path d="m9 6 6 6-6 6"></path></svg>
+            <span style="width: 18px; height: 18px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; {{sp.badgeStyle}}">{{sp.initial}}</span>
+            <span style="flex: 1; font-weight: 500; color: #3F3F46">{{sp.name}}</span>
+          </button>
+          <sc-if value="{{sp.open}}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <sc-for list="{{sp.projects}}" as="p" hint-placeholder-count="3">
+                <a class="nav" href="{{p.href}}" style="display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px 0 34px; border-radius: 8px; color: #3F3F46">
+                  <span style="width: 6px; height: 6px; border-radius: 3px; background: #C4C4CC"></span>
+                  <span style="flex: 1; font-size: 13px">{{p.name}}</span>
+                </a>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+    <div style="margin-top: auto; display: flex; flex-direction: column; gap: 2px; border-top: 1px solid #E6E6EA; padding-top: 8px">
+      <div style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px 0 12px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3F3F46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path></svg>
+        <span id="lang-label" style="flex: 1; font-weight: 500; color: #3F3F46">{{L.language}}</span>
+        <div role="radiogroup" aria-labelledby="lang-label" style="display: flex; gap: 2px; padding: 2px; border-radius: 7px; background: #EDEDF0">
+          <sc-for list="{{langs}}" as="lg" hint-placeholder-count="2">
+            <button class="seg" role="radio" aria-checked="{{lg.active}}" onClick="{{lg.pick}}" lang="{{lg.code}}" title="{{lg.full}}" style="height: 24px; padding: 0 8px; border: 0; border-radius: 5px; font-size: 12px; font-weight: 600; {{lg.style}}">{{lg.short}}</button>
+          </sc-for>
+        </div>
+      </div>
+      <a class="nav" href="#" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6M22 11h-6"></path></svg>
+        <span style="font-weight: 500">{{L.invite}}</span>
+      </a>
+      <div style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px">
+        <span style="width: 24px; height: 24px; border-radius: 12px; background: #E0E7FF; color: #3730A3; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">{{me.initials}}</span>
+        <span style="flex: 1; font-size: 13px; font-weight: 500">{{me.full}}</span>
+        <span style="width: 8px; height: 8px; border-radius: 4px; background: #16A34A" aria-label="{{L.online}}"></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ MAIN ============ -->
+  <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+
+    <header style="display: flex; flex-direction: column; border-bottom: 1px solid #E6E6EA">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; min-height: 56px; padding: 8px 24px; box-sizing: border-box">
+        <h1 style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M8 17v-5M13 17V8M18 17v-9"></path></svg>
+          {{L.reports}}
+        </h1>
+        <span style="font-size: 12px; color: #6B6B74">{{L.updated}}</span>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px; padding: 0 24px">
+        <div role="tablist" aria-label="{{L.reports}}" style="display: flex; gap: 4px">
+          <sc-for list="{{tabs}}" as="tb" hint-placeholder-count="4">
+            <a role="tab" href="{{tb.href}}" aria-selected="{{tb.active}}" style="height: 40px; padding: 0 10px; display: flex; align-items: center; font-size: 13px; font-weight: 500; {{tb.style}}">{{tb.label}}</a>
+          </sc-for>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-bottom: 8px">
+
+          <!-- Sprint selector -->
+          <div style="position: relative">
+            <button class="ghost" onClick="{{toggleSel}}" aria-haspopup="listbox" aria-expanded="{{selOpen}}" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-size: 13px; color: #18181B">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"></path></svg>
+              <span style="font-weight: 600">{{sel.name}}</span>
+              <span style="color: #6B6B74">{{sel.range}}</span>
+              <sc-if value="{{sel.current}}" hint-placeholder-val="{{ true }}">
+                <span style="height: 18px; padding: 0 6px; border-radius: 9px; background: #E8F5EC; color: #166534; font-size: 11px; font-weight: 600; display: flex; align-items: center">{{L.currentBadge}}</span>
+              </sc-if>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+            </button>
+            <sc-if value="{{selOpen}}" hint-placeholder-val="{{ false }}">
+              <div role="listbox" aria-label="{{L.sprint}}" style="position: absolute; top: 38px; right: 0; z-index: 5; width: 288px; padding: 4px; background: #FFFFFF; border: 1px solid #E6E6EA; border-radius: 10px; box-shadow: 0 12px 32px rgba(24, 24, 27, 0.14); display: flex; flex-direction: column">
+                <sc-for list="{{sprintOptions}}" as="o" hint-placeholder-count="6">
+                  <button role="option" class="opt" aria-selected="{{o.selected}}" onClick="{{o.pick}}" style="display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 8px; border: 0; border-radius: 6px; text-align: left; font-size: 13px; {{o.rowStyle}}">
+                    <span style="font-weight: 600; min-width: 72px">{{o.name}}</span>
+                    <span style="flex: 1; color: #6B6B74">{{o.range}}</span>
+                    <sc-if value="{{o.current}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; font-weight: 600; color: #166534">{{L.currentBadge}}</span></sc-if>
+                    <sc-if value="{{o.selected}}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+
+          <button class="ghost" aria-haspopup="listbox" style="display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-size: 13px; color: #3F3F46">
+            <span style="color: #6B6B74">{{L.space}}</span> {{L.product}}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+          </button>
+          <button class="ghost" aria-haspopup="listbox" style="display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-size: 13px; color: #3F3F46">
+            <span style="color: #6B6B74">{{L.projectF}}</span> {{L.all}}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+          </button>
+          <div style="width: 1px; height: 20px; background: #E6E6EA; margin: 0 4px"></div>
+          <button class="ghost" style="display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; font-size: 13px; font-weight: 500; color: #3F3F46">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"></path></svg>
+            {{L.export}}
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div style="display: flex; flex-direction: column; gap: 24px; padding: 20px 24px 40px">
+
+      <!-- Sprint banner -->
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <h2 style="margin: 0; font-size: 18px; line-height: 24px; font-weight: 600">{{sel.name}} · {{sel.longRange}}</h2>
+          <span style="font-size: 13px; color: #6B6B74">{{sel.timeText}}</span>
+        </div>
+        <span style="flex: 1"></span>
+        <div aria-hidden="true" style="width: 240px; max-width: 100%; height: 6px; border-radius: 3px; background: #EFEFF2; display: flex; overflow: hidden">
+          <span style="height: 6px; border-radius: 3px; background: {{accent}}; {{sel.timeBar}}"></span>
+        </div>
+      </div>
+
+      <!-- ===== Stat cards ===== -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px">
+        <sc-for list="{{cards}}" as="c" hint-placeholder-count="4">
+          <div style="display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border: 1px solid #E6E6EA; border-radius: 12px; {{c.boxStyle}}">
+            <span style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #52525B">
+              <span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 3px; {{c.swatch}}"></span>{{c.label}}
+            </span>
+            <span style="font-size: 26px; line-height: 32px; font-weight: 600; {{c.valueStyle}}">{{c.value}}</span>
+            <span style="font-size: 12px; color: #6B6B74">{{c.sub}}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- ===== Charts row ===== -->
+      <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: stretch">
+
+        <!-- Committed vs completed -->
+        <section aria-labelledby="cc-h" style="flex: 1 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 16px; padding: 20px; border: 1px solid #E6E6EA; border-radius: 12px">
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <h2 id="cc-h" style="margin: 0; font-size: 15px; font-weight: 600">{{L.ccTitle}}</h2>
+              <span style="font-size: 13px; color: #6B6B74">{{L.ccSub}}</span>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; font-size: 12px; color: #52525B">
+              <span style="display: flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 3px; background: {{cCommitted}}"></span>{{L.committed}}</span>
+              <span style="display: flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 3px; background: {{cAdded}}"></span>{{L.added}}</span>
+              <span style="display: flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 3px; background: {{cCompleted}}"></span>{{L.completed}}</span>
+            </div>
+          </div>
+
+          <figure aria-label="{{ccSummary}}" style="margin: 0; display: flex; flex-direction: column; gap: 8px">
+            <div style="display: flex">
+              <div aria-hidden="true" style="position: relative; width: 28px; height: 200px; flex: none">
+                <sc-for list="{{barTicks}}" as="yt" hint-placeholder-count="6">
+                  <span style="position: absolute; right: 8px; font-size: 11px; line-height: 12px; color: #6B6B74; {{yt.labelStyle}}">{{yt.v}}</span>
+                </sc-for>
+              </div>
+              <div style="position: relative; flex: 1; min-width: 0; height: 200px" onMouseLeave="{{clearBarHover}}">
+                <sc-for list="{{barTicks}}" as="yt" hint-placeholder-count="6">
+                  <span aria-hidden="true" style="position: absolute; left: 0; right: 0; height: 1px; {{yt.lineStyle}}"></span>
+                </sc-for>
+                <div style="position: absolute; inset: 0; display: flex">
+                  <sc-for list="{{bars}}" as="b" hint-placeholder-count="6">
+                    <div onMouseEnter="{{b.enter}}" style="position: relative; flex: 1; height: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 4px; border-radius: 6px 6px 0 0; {{b.groupStyle}}">
+                      <div style="display: flex; flex-direction: column; gap: 2px; width: 18px">
+                        <span style="display: block; width: 18px; border-radius: 4px 4px 1px 1px; background: {{cAdded}}; {{b.addedStyle}}"></span>
+                        <span style="display: block; width: 18px; border-radius: 1px 1px 0 0; background: {{cCommitted}}; {{b.committedStyle}}"></span>
+                      </div>
+                      <span style="display: block; width: 18px; border-radius: 4px 4px 0 0; {{b.completedStyle}}"></span>
+                    </div>
+                  </sc-for>
+                </div>
+                <sc-if value="{{hasBarHover}}" hint-placeholder-val="{{ false }}">
+                  <div role="status" style="position: absolute; top: 4px; z-index: 2; min-width: 176px; padding: 8px 10px; background: #FFFFFF; border: 1px solid #E6E6EA; border-radius: 8px; box-shadow: 0 8px 24px rgba(24, 24, 27, 0.10); display: flex; flex-direction: column; gap: 4px; font-size: 12px; pointer-events: none; {{barTipStyle}}">
+                    <span style="font-weight: 600">{{barTip.name}} <span style="font-weight: 400; color: #6B6B74">{{barTip.range}}</span></span>
+                    <span style="display: flex; align-items: center; gap: 6px; color: #3F3F46"><span style="width: 8px; height: 8px; border-radius: 2px; background: {{cCommitted}}"></span><span style="flex: 1">{{L.committed}}</span><strong style="font-weight: 600">{{barTip.c}}</strong></span>
+                    <span style="display: flex; align-items: center; gap: 6px; color: #3F3F46"><span style="width: 8px; height: 8px; border-radius: 2px; background: {{cAdded}}"></span><span style="flex: 1">{{L.added}}</span><strong style="font-weight: 600">{{barTip.a}}</strong></span>
+                    <span style="display: flex; align-items: center; gap: 6px; color: #3F3F46"><span style="width: 8px; height: 8px; border-radius: 2px; background: {{cCompleted}}"></span><span style="flex: 1">{{L.completed}}</span><strong style="font-weight: 600">{{barTip.d}}</strong></span>
+                    <span style="color: #6B6B74">{{barTip.rate}}</span>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+            <div aria-hidden="true" style="display: flex; margin-left: 28px">
+              <sc-for list="{{bars}}" as="b" hint-placeholder-count="6">
+                <span style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0; font-size: 11px; line-height: 15px; color: #6B6B74; text-align: center">
+                  <span style="{{b.nameStyle}}">{{b.short}}</span>
+                  <span>{{b.rate}}</span>
+                </span>
+              </sc-for>
+            </div>
+          </figure>
+        </section>
+
+        <!-- Burndown -->
+        <section aria-labelledby="bd-h" style="flex: 1 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 16px; padding: 20px; border: 1px solid #E6E6EA; border-radius: 12px">
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <h2 id="bd-h" style="margin: 0; font-size: 15px; font-weight: 600">{{L.bdTitle}}</h2>
+              <span style="font-size: 13px; color: #6B6B74">{{L.bdSub}}</span>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; font-size: 12px; color: #52525B">
+              <span style="display: flex; align-items: center; gap: 6px"><span style="width: 16px; height: 2px; border-radius: 1px; background: {{accent}}"></span>{{L.remaining}}</span>
+              <span style="display: flex; align-items: center; gap: 6px"><span style="width: 16px; height: 0; border-top: 2px dashed #8B8B94"></span>{{L.ideal}}</span>
+              <span style="display: flex; align-items: center; gap: 6px"><span style="width: 16px; height: 0; border-top: 2px dotted {{accent}}"></span>{{L.projection}}</span>
+              <span style="display: flex; align-items: center; gap: 6px"><span style="height: 16px; padding: 0 4px; border-radius: 4px; background: #FEF3E2; color: #92400E; font-size: 10px; font-weight: 600; display: flex; align-items: center">+2</span>{{L.scopeAdded}}</span>
+            </div>
+          </div>
+
+          <figure aria-label="{{bdSummary}}" style="margin: 0; display: flex; flex-direction: column; gap: 8px">
+            <div style="display: flex">
+              <div aria-hidden="true" style="position: relative; width: 28px; height: 200px; flex: none">
+                <sc-for list="{{barTicks}}" as="yt" hint-placeholder-count="6">
+                  <span style="position: absolute; right: 8px; font-size: 11px; line-height: 12px; color: #6B6B74; {{yt.labelStyle}}">{{yt.v}}</span>
+                </sc-for>
+              </div>
+              <div style="position: relative; flex: 1; min-width: 0; height: 200px">
+                <sc-for list="{{barTicks}}" as="yt" hint-placeholder-count="6">
+                  <span aria-hidden="true" style="position: absolute; left: 0; right: 0; height: 1px; {{yt.lineStyle}}"></span>
+                </sc-for>
+                <span aria-hidden="true" style="position: absolute; top: -4px; bottom: 0; width: 0; border-left: 1px dashed #A1A1AA; {{todayLineStyle}}"></span>
+                <span aria-hidden="true" style="position: absolute; top: -20px; font-size: 11px; font-weight: 600; color: #52525B; transform: translateX(-50%); white-space: nowrap; {{todayLineStyle}}">{{L.today}}</span>
+                <svg aria-hidden="true" width="100%" height="200" viewBox="0 0 1000 200" preserveAspectRatio="none" style="position: absolute; inset: 0; overflow: visible">
+                  <path d="{{idealPath}}" fill="none" stroke="#8B8B94" stroke-width="2" stroke-dasharray="6 5" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+                  <path d="{{projPath}}" fill="none" stroke="{{accent}}" stroke-width="2" stroke-dasharray="2 5" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+                  <path d="{{actualPath}}" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+                </svg>
+                <sc-for list="{{bdDots}}" as="d" hint-placeholder-count="5">
+                  <span aria-hidden="true" style="position: absolute; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 4px; background: {{accent}}; box-shadow: 0 0 0 2px #FFFFFF; {{d.style}}"></span>
+                </sc-for>
+                <sc-for list="{{scopeMarks}}" as="m" hint-placeholder-count="2">
+                  <span aria-hidden="true" style="position: absolute; height: 16px; padding: 0 4px; border-radius: 4px; background: #FEF3E2; color: #92400E; font-size: 10px; font-weight: 600; display: flex; align-items: center; transform: translate(-50%, -26px); {{m.style}}">{{m.label}}</span>
+                </sc-for>
+                <span aria-hidden="true" style="position: absolute; right: 0; font-size: 11px; font-weight: 600; color: {{accent}}; transform: translateY(-130%); white-space: nowrap; {{projEndStyle}}">{{projEndLabel}}</span>
+                <sc-if value="{{hasBdHover}}" hint-placeholder-val="{{ false }}">
+                  <span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; width: 1px; background: #D4D4D8; {{bdHoverLine}}"></span>
+                </sc-if>
+                <div style="position: absolute; inset: 0; display: flex" onMouseLeave="{{clearBdHover}}">
+                  <sc-for list="{{bdCols}}" as="bc" hint-placeholder-count="16">
+                    <div onMouseEnter="{{bc.enter}}" style="flex: 1; height: 100%"></div>
+                  </sc-for>
+                </div>
+                <sc-if value="{{hasBdHover}}" hint-placeholder-val="{{ false }}">
+                  <div role="status" style="position: absolute; top: 8px; z-index: 2; min-width: 168px; padding: 8px 10px; background: #FFFFFF; border: 1px solid #E6E6EA; border-radius: 8px; box-shadow: 0 8px 24px rgba(24, 24, 27, 0.10); display: flex; flex-direction: column; gap: 4px; font-size: 12px; pointer-events: none; {{bdTipStyle}}">
+                    <span style="font-weight: 600">{{bdTip.date}}</span>
+                    <sc-if value="{{bdTip.hasActual}}" hint-placeholder-val="{{ true }}">
+                      <span style="display: flex; gap: 6px; color: #3F3F46"><span style="flex: 1">{{L.remaining}}</span><strong style="font-weight: 600">{{bdTip.actual}}</strong></span>
+                    </sc-if>
+                    <sc-if value="{{bdTip.hasProj}}" hint-placeholder-val="{{ false }}">
+                      <span style="display: flex; gap: 6px; color: #3F3F46"><span style="flex: 1">{{L.projection}}</span><strong style="font-weight: 600">{{bdTip.proj}}</strong></span>
+                    </sc-if>
+                    <span style="display: flex; gap: 6px; color: #52525B"><span style="flex: 1">{{L.ideal}}</span><span>{{bdTip.ideal}}</span></span>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+            <div aria-hidden="true" style="display: flex; margin-left: 28px">
+              <sc-for list="{{bdCols}}" as="bc" hint-placeholder-count="16">
+                <span style="flex: 1; text-align: center; font-size: 11px; color: #6B6B74; white-space: nowrap; overflow: visible">{{bc.label}}</span>
+              </sc-for>
+            </div>
+          </figure>
+
+          <p style="margin: 0; display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; border-radius: 8px; background: #FEF3E2; font-size: 13px; line-height: 20px; color: #3F3F46">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 3px"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path><path d="M12 9v4M12 17h.01"></path></svg>
+            <span>{{L.bdInsight}}</span>
+          </p>
+        </section>
+      </div>
+
+      <!-- ===== Carried over ===== -->
+      <section aria-labelledby="co-h" style="display: flex; flex-direction: column; border: 1px solid #E6E6EA; border-radius: 12px; overflow: hidden">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 16px 20px">
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <h2 id="co-h" style="margin: 0; font-size: 15px; font-weight: 600">{{L.coTitle}}</h2>
+            <span style="font-size: 13px; color: #6B6B74">{{L.coSub}}</span>
+          </div>
+        </div>
+        <div style="overflow-x: auto">
+          <div role="table" aria-labelledby="co-h" style="min-width: 860px">
+            <div role="row" style="display: grid; grid-template-columns: minmax(0, 1fr) 176px 160px 148px 216px; align-items: center; height: 36px; padding: 0 20px; border-top: 1px solid #EFEFF2; border-bottom: 1px solid #EFEFF2; background: #FAFAFB; font-size: 12px; font-weight: 500; color: #6B6B74">
+              <span role="columnheader">{{L.colTask}}</span>
+              <span role="columnheader">{{L.colProject}}</span>
+              <span role="columnheader">{{L.colAssignee}}</span>
+              <span role="columnheader">{{L.colStatus}}</span>
+              <span role="columnheader" style="text-align: right">{{L.colCarried}}</span>
+            </div>
+            <sc-for list="{{carried}}" as="r" hint-placeholder-count="7">
+              <a class="trow" role="row" href="TaskDetail.dc.html" style="display: grid; grid-template-columns: minmax(0, 1fr) 176px 160px 148px 216px; align-items: center; height: 48px; padding: 0 20px; border-bottom: 1px solid #EFEFF2; color: #18181B">
+                <span role="cell" style="min-width: 0; padding-right: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500">{{r.name}}</span>
+                <span role="cell" style="display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 13px; color: #3F3F46">
+                  <span style="flex: none; width: 8px; height: 8px; border-radius: 4px; {{r.projDot}}"></span>
+                  <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{r.project}}</span>
+                </span>
+                <span role="cell" style="display: flex; align-items: center; gap: 8px; min-width: 0">
+                  <span style="flex: none; width: 24px; height: 24px; border-radius: 12px; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{r.person.style}}">{{r.person.initials}}</span>
+                  <span style="font-size: 13px; color: #3F3F46; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{r.person.name}}</span>
+                </span>
+                <span role="cell" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #3F3F46">
+                  <span aria-hidden="true" style="flex: none; width: 10px; height: 10px; box-sizing: border-box; border-radius: 5px; {{r.statusDot}}"></span>{{r.status}}
+                </span>
+                <span role="cell" style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; font-size: 13px">
+                  <sc-if value="{{r.flagged}}" hint-placeholder-val="{{ false }}">
+                    <span style="display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 8px; border-radius: 6px; background: #FEF3E2; color: #92400E; font-size: 12px; font-weight: 600">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path><path d="M12 9v4M12 17h.01"></path></svg>
+                      {{L.replan}}
+                    </span>
+                  </sc-if>
+                  <span aria-hidden="true" style="display: flex; gap: 3px">
+                    <sc-for list="{{r.pips}}" as="pp" hint-placeholder-count="3">
+                      <span style="width: 8px; height: 8px; border-radius: 2px; {{pp.style}}"></span>
+                    </sc-for>
+                  </span>
+                  <span style="min-width: 72px; text-align: right; {{r.countStyle}}">{{r.countLabel}}</span>
+                </span>
+              </a>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"language":{"editor":"enum","default":"mn","options":["mn","en"]},"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"$preview":{"width":1440,"height":1260}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: undefined, sprint: 14, selOpen: false, barHover: null, bdHover: null, openSpaces: { product: true } };
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const lang = s.lang || this.props.language || 'mn';
+    const mn = lang === 'mn';
+    const pick = (pair) => (mn ? pair[0] : pair[1]);
+    const accent = this.props.accent ?? '#6E56CF';
+    const accentSoft = accent + '1A';
+    const isDefault = String(accent).toUpperCase() === '#6E56CF';
+    const cCompleted = isDefault ? '#5B45B8' : accent;
+    const cCommitted = isDefault ? '#9C8BE3' : accent + '73';
+    const cAdded = '#D97706';
+
+    const STR = {
+      mn: {
+        workspace: 'Ажлын орчин', search: 'Хайх', collapse: 'Хажуу самбарыг хураах',
+        myTasks: 'Миний ажлууд', inbox: 'Мэдэгдэл', reports: 'Тайлан', spaces: 'Орон зай', newSpace: 'Шинэ орон зай',
+        language: 'Хэл', invite: 'Хамт олноо урих', online: 'Онлайн',
+        updated: '5 минутын өмнө шинэчлэгдсэн', sprint: 'Спринт', currentBadge: 'Одоогийн',
+        space: 'Орон зай:', product: 'Бүтээгдэхүүн', projectF: 'Төсөл:', all: 'Бүгд', export: 'CSV татах',
+        committed: 'Төлөвлөсөн', completed: 'Дууссан', added: 'Дундаас нэмэгдсэн', carried: 'Шилжиж ирсэн', carriedOut: 'Дараагийн спринт рүү шилжсэн',
+        ccTitle: 'Төлөвлөсөн ба дууссан', ccSub: 'Сүүлийн 6 спринт · ажлын тоо',
+        bdTitle: 'Одоогийн спринтийн burndown', bdSub: 'Өдөр бүрийн үлдсэн ажил · 14-р спринт',
+        remaining: 'Үлдсэн', ideal: 'Хамгийн тохиромжтой', projection: 'Таамаг', scopeAdded: 'Хамрах хүрээ нэмэгдсэн', today: 'Өнөөдөр',
+        bdInsight: 'Одоогийн хурдаар спринтийн төгсгөлд ойролцоогоор 12 ажил үлдэнэ. Хамрах хүрээг багасгах эсвэл хянагдаж буй ажлыг түргэсгэхийг бодоорой.',
+        coTitle: 'Өмнөх спринтээс шилжсэн ажлууд', coSub: '13-р спринтээс 14-р спринт рүү шилжсэн 7 ажил · 3 ба түүнээс дээш удаа шилжсэнийг тэмдэглэв',
+        colTask: 'Ажил', colProject: 'Төсөл', colAssignee: 'Хариуцагч', colStatus: 'Төлөв', colCarried: 'Шилжсэн тоо',
+        replan: 'Дахин төлөвлөх', sprintsUnit: ' спринт', daysUnit: ' хоног', tasksUnit: ' ажил', rateSuffix: ' дууссан', inProgress: 'үргэлжилж байна'
+      },
+      en: {
+        workspace: 'Workspace', search: 'Search', collapse: 'Collapse sidebar',
+        myTasks: 'My Tasks', inbox: 'Inbox', reports: 'Reports', spaces: 'Spaces', newSpace: 'New space',
+        language: 'Language', invite: 'Invite teammates', online: 'Online',
+        updated: 'Updated 5 minutes ago', sprint: 'Sprint', currentBadge: 'Current',
+        space: 'Space:', product: 'Product', projectF: 'Project:', all: 'All', export: 'Export CSV',
+        committed: 'Committed', completed: 'Completed', added: 'Added mid-sprint', carried: 'Carried over', carriedOut: 'Carried to next sprint',
+        ccTitle: 'Committed vs completed', ccSub: 'Last 6 sprints · number of tasks',
+        bdTitle: 'Current sprint burndown', bdSub: 'Remaining tasks per day · Sprint 14',
+        remaining: 'Remaining', ideal: 'Ideal', projection: 'Projected', scopeAdded: 'Scope added', today: 'Today',
+        bdInsight: 'At the current pace about 12 tasks will be left when the sprint ends. Consider trimming scope or unblocking tasks in review.',
+        coTitle: 'Carried over from last sprint', coSub: '7 tasks moved from Sprint 13 into Sprint 14 · flagged when carried 3 or more times',
+        colTask: 'Task', colProject: 'Project', colAssignee: 'Assignee', colStatus: 'Status', colCarried: 'Times carried',
+        replan: 'Replan', sprintsUnit: ' sprints', daysUnit: ' days', tasksUnit: ' tasks', rateSuffix: ' done', inProgress: 'in progress'
+      }
+    };
+    const L = STR[lang] || STR.mn;
+
+    const langDefs = [{ code: 'mn', short: 'МН', full: 'Монгол' }, { code: 'en', short: 'EN', full: 'English' }];
+    const langs = langDefs.map((d) => ({
+      ...d, active: d.code === lang, pick: () => this.setState({ lang: d.code }),
+      style: d.code === lang ? 'background:#FFFFFF;color:#18181B;box-shadow:0 1px 2px rgba(24,24,27,0.08)' : 'background:transparent;color:#6B6B74'
+    }));
+    const me = { initials: mn ? 'АБ' : 'AB', full: mn ? 'Ану Болд' : 'Anu Bold' };
+
+    const tabs = [['overview', ['Тойм', 'Overview'], 'Reports.dc.html'], ['sprints', ['Спринт', 'Sprints'], '#'], ['workload', ['Ачаалал', 'Workload'], 'ReportsWorkload.dc.html'], ['people', ['Хүмүүс', 'People'], 'ReportsPeople.dc.html']].map(([id, lb, href]) => ({
+      label: pick(lb), href, active: id === 'sprints',
+      style: id === 'sprints' ? 'color:#18181B;box-shadow:inset 0 -2px 0 ' + accent : 'color:#6B6B74'
+    }));
+
+    // ---- Sprint data ----
+    const monthsEn = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const shortD = (m, d) => (mn ? m + '/' + d : monthsEn[m] + ' ' + d);
+    const longD = (m, d) => (mn ? m + '-р сарын ' + d : monthsEn[m] + ' ' + d);
+    const sprints = [
+      { n: 9, from: [6, 22], to: [7, 10], c: 34, d: 28, a: 4, co: 6 },
+      { n: 10, from: [7, 13], to: [7, 31], c: 36, d: 31, a: 6, co: 5 },
+      { n: 11, from: [8, 3], to: [8, 21], c: 38, d: 30, a: 7, co: 8 },
+      { n: 12, from: [8, 24], to: [9, 11], c: 35, d: 32, a: 3, co: 4 },
+      { n: 13, from: [9, 14], to: [10, 2], c: 40, d: 33, a: 5, co: 7 },
+      { n: 14, from: [10, 6], to: [10, 24], c: 42, d: 11, a: 3, co: 7, current: true }
+    ];
+    const nameOf = (sp) => (mn ? sp.n + '-р спринт' : 'Sprint ' + sp.n);
+    const rangeOf = (sp) => shortD(sp.from[0], sp.from[1]) + ' – ' + shortD(sp.to[0], sp.to[1]);
+    const longRangeOf = (sp) => mn
+      ? longD(sp.from[0], sp.from[1]) + ' – ' + (sp.from[0] === sp.to[0] ? sp.to[1] : longD(sp.to[0], sp.to[1]))
+      : longD(sp.from[0], sp.from[1]) + ' – ' + longD(sp.to[0], sp.to[1]);
+    const selN = s.sprint || 14;
+    const sp = sprints.find((x) => x.n === selN) || sprints[5];
+    const pct = (x) => Math.round(x * 100) + '%';
+
+    const sel = {
+      name: nameOf(sp), range: rangeOf(sp), longRange: longRangeOf(sp), current: !!sp.current,
+      timeText: sp.current
+        ? (mn ? '15 ажлын өдрийн 4 дэх өдөр · 11 өдөр үлдсэн' : 'Day 4 of 15 working days · 11 days left')
+        : (mn ? 'Дууссан спринт · 15 ажлын өдөр' : 'Completed sprint · 15 working days'),
+      timeBar: 'width:' + (sp.current ? (4 / 15 * 100).toFixed(1) : 100) + '%'
+    };
+    const prevN = sp.n - 1, nextN = sp.n + 1;
+    const scopeTotal = sp.c + sp.a;
+    const cards = [
+      { label: L.committed, value: String(sp.c), swatch: 'background:' + cCommitted, valueStyle: '', boxStyle: '',
+        sub: sp.current ? (mn ? 'Үүнээс 7 нь өмнөх спринтээс' : 'incl. 7 carried over') : (mn ? 'Спринтийн эхэнд' : 'at sprint start') },
+      { label: L.completed, value: String(sp.d), swatch: 'background:' + cCompleted, valueStyle: '', boxStyle: '',
+        sub: sp.current
+          ? (mn ? 'Нийтийн ' + pct(sp.d / scopeTotal) + ' · төлөвлөгөөт хурдаас бага зэрэг хоцорсон' : pct(sp.d / scopeTotal) + ' of scope · slightly behind ideal')
+          : (mn ? 'Нийт хамрах хүрээний ' + pct(sp.d / scopeTotal) : pct(sp.d / scopeTotal) + ' of total scope') },
+      { label: L.added, value: '+' + sp.a, swatch: 'background:' + cAdded, valueStyle: '', boxStyle: '',
+        sub: mn ? 'Хамрах хүрээ +' + pct(sp.a / sp.c) : 'Scope +' + pct(sp.a / sp.c) },
+      { label: sp.current ? L.carried : L.carriedOut, value: String(sp.co), swatch: 'background:#8B8B94',
+        valueStyle: sp.current ? 'color:#92400E' : '', boxStyle: sp.current ? 'background:#FFFBF5;border-color:#F5DDB8' : '',
+        sub: sp.current
+          ? (mn ? prevN + '-р спринтээс · 3 нь 2+ удаа шилжсэн' : 'from Sprint ' + prevN + ' · 3 carried 2+ times')
+          : (mn ? nextN + '-р спринт рүү' : 'into Sprint ' + nextN) }
+    ];
+
+    const sprintOptions = sprints.slice().reverse().map((x) => ({
+      name: nameOf(x), range: rangeOf(x), current: !!x.current, selected: x.n === sp.n,
+      rowStyle: x.n === sp.n ? 'background:' + accentSoft : 'background:transparent',
+      pick: () => this.setState({ sprint: x.n, selOpen: false })
+    }));
+
+    // ---- Bars ----
+    const yMax = 50, H = 200, k = H / yMax;
+    const barTicks = [0, 10, 20, 30, 40, 50].map((v) => ({
+      v, labelStyle: 'top:' + (H - v * k - 6) + 'px',
+      lineStyle: 'top:' + (H - v * k) + 'px;background:' + (v === 0 ? '#D4D4D8' : '#F1F1F3')
+    }));
+    const bh = s.barHover;
+    const bars = sprints.map((x, i) => {
+      const selected = x.n === sp.n;
+      return {
+        short: mn ? 'С' + x.n : 'S' + x.n,
+        rate: x.current ? L.inProgress : pct(x.d / (x.c + x.a)),
+        nameStyle: selected ? 'font-weight:600;color:#18181B' : '',
+        groupStyle: selected ? 'background:' + accentSoft : (bh === i ? 'background:#FAFAFB' : ''),
+        committedStyle: 'height:' + (x.c * k) + 'px',
+        addedStyle: 'height:' + (x.a * k) + 'px',
+        completedStyle: 'height:' + (x.d * k) + 'px;' + (x.current
+          ? 'background:repeating-linear-gradient(135deg,' + cCompleted + ' 0 3px,' + cCompleted + '99 3px 6px)'
+          : 'background:' + cCompleted),
+        enter: () => { if (this.state.barHover !== i) this.setState({ barHover: i }); }
+      };
+    });
+    const bx = bh === null || bh === undefined ? null : bh;
+    const barTip = bx === null ? { name: '', range: '', c: '', a: '', d: '', rate: '' } : {
+      name: nameOf(sprints[bx]), range: rangeOf(sprints[bx]),
+      c: String(sprints[bx].c), a: '+' + sprints[bx].a, d: String(sprints[bx].d),
+      rate: sprints[bx].current ? L.inProgress : (mn ? 'Нийтийн ' + pct(sprints[bx].d / (sprints[bx].c + sprints[bx].a)) + L.rateSuffix : pct(sprints[bx].d / (sprints[bx].c + sprints[bx].a)) + L.rateSuffix)
+    };
+    const bxPct = bx === null ? 0 : ((bx + 0.5) / sprints.length) * 100;
+    const barTipStyle = 'left:' + bxPct.toFixed(1) + '%;transform:translateX(' + (bx !== null && bx > 3 ? 'calc(-100% - 28px)' : '28px') + ')';
+    const ccSummary = sprints.map((x) => nameOf(x) + ': ' + L.committed + ' ' + x.c + ', ' + L.added + ' ' + x.a + ', ' + L.completed + ' ' + x.d).join('; ');
+
+    // ---- Burndown ----
+    const days = [[10, 6], [10, 6], [10, 7], [10, 8], [10, 9], [10, 12], [10, 13], [10, 14], [10, 15], [10, 16], [10, 19], [10, 20], [10, 21], [10, 22], [10, 23], [10, 24]];
+    const N = days.length; // 16 points: start + 15 working days
+    const actual = [42, 40, 37, 36, 34];
+    const todayI = actual.length - 1;
+    const rate = (actual[0] - actual[todayI]) / todayI;
+    const ideal = days.map((_, i) => 42 - (42 / (N - 1)) * i);
+    const proj = days.map((_, i) => (i < todayI ? null : Math.max(0, actual[todayI] - rate * (i - todayI))));
+    const xp = (i) => (i + 0.5) / N;
+    const yp = (v) => H - v * k;
+    const toPath = (arr) => arr.map((v, i) => (v === null ? null : [i, v])).filter(Boolean)
+      .map(([i, v], j) => (j ? 'L' : 'M') + (xp(i) * 1000).toFixed(1) + ' ' + yp(v).toFixed(1)).join(' ');
+    const bdDots = actual.map((v, i) => ({ style: 'left:' + (xp(i) * 100).toFixed(2) + '%;top:' + yp(v).toFixed(1) + 'px' }));
+    const scopeMarks = [[3, '+2'], [4, '+1']].map(([i, lb]) => ({ label: lb, style: 'left:' + (xp(i) * 100).toFixed(2) + '%;top:' + yp(actual[i]).toFixed(1) + 'px' }));
+    const labelAt = { 1: shortD(10, 6), 5: shortD(10, 12), 10: shortD(10, 19), 15: shortD(10, 24) };
+    const bdh = s.bdHover;
+    const bdCols = days.map((d, i) => ({
+      label: labelAt[i] || '',
+      enter: () => { if (this.state.bdHover !== i) this.setState({ bdHover: i }); }
+    }));
+    const hx = bdh === null || bdh === undefined ? null : bdh;
+    const bdTip = hx === null ? { date: '', actual: '', proj: '', ideal: '', hasActual: false, hasProj: false } : {
+      date: hx === 0 ? (mn ? 'Спринтийн эхлэл · ' : 'Sprint start · ') + shortD(10, 6) : longD(days[hx][0], days[hx][1]) + (hx === todayI ? (mn ? ' · өнөөдөр' : ' · today') : ''),
+      hasActual: hx <= todayI, actual: hx <= todayI ? actual[hx] + L.tasksUnit : '',
+      hasProj: hx > todayI, proj: hx > todayI ? Math.round(proj[hx]) + L.tasksUnit : '',
+      ideal: Math.round(ideal[hx]) + L.tasksUnit
+    };
+    const hxPct = hx === null ? 0 : xp(hx) * 100;
+    const bdSummary = mn
+      ? 'Спринт 42 ажлаар эхэлсэн, 4 дэх өдрийн байдлаар 34 ажил үлдсэн; хамгийн тохиромжтой шугамаар 31 байх ёстой. Таамгаар төгсгөлд 12 ажил үлдэнэ.'
+      : 'Sprint started with 42 tasks; on day 4, 34 remain versus 31 on the ideal line. Projected to finish with about 12 tasks left.';
+
+    // ---- Carried over ----
+    const statuses = {
+      todo: [['Хийх', 'To Do'], 'border:2px solid #A1A1AA'],
+      progress: [['Хийгдэж буй', 'In Progress'], 'border:2px solid #D97706;background:linear-gradient(90deg,#D97706 50%,transparent 50%)'],
+      review: [['Хянагдаж буй', 'In Review'], 'border:2px solid ' + accent + ';background:' + accent + '33']
+    };
+    const people = {
+      anu: [['Ану Б.', 'Anu B.'], ['АБ', 'AB'], 'background:#E0E7FF;color:#3730A3'],
+      sara: [['Сараа К.', 'Sara K.'], ['СК', 'SK'], 'background:#FFE4E6;color:#9F1239'],
+      dorj: [['Дорж Э.', 'Dorj E.'], ['ДЭ', 'DE'], 'background:#FEF3C7;color:#92400E'],
+      mia: [['Мишээл Л.', 'Mia L.'], ['МЛ', 'ML'], 'background:#E0F2FE;color:#075985'],
+      oyu: [['Оюука Н.', 'Oyuka N.'], ['ОН', 'ON'], 'background:#F3E8FF;color:#6B21A8']
+    };
+    const projects = {
+      ar: [['Апп шинэчлэл', 'App Redesign'], '#7C5CE0'],
+      co: [['Төлбөрийн хуудас v2', 'Checkout v2'], '#0284C7'],
+      q4: [['Q4 замын зураг', 'Q4 Roadmap'], '#D97706']
+    };
+    const carried = [
+      [['Төлбөрийн үйлчилгээ үзүүлэгчийн хяналт', 'Payment provider review'], 'co', 'dorj', 'review', 3],
+      [['Тохиргооны дэлгэцийн шилжүүлэлтийн төлөвлөгөө', 'Settings migration plan'], 'ar', 'dorj', 'todo', 2],
+      [['Хадгалсан сагсны судалгаа', 'Saved carts discovery'], 'co', 'oyu', 'progress', 2],
+      [['Бүтээгдэхүүний картын компонент v2', 'Product card component v2'], 'ar', 'sara', 'progress', 1],
+      [['Бараан горимын өнгөний токен', 'Dark mode color tokens'], 'ar', 'sara', 'todo', 1],
+      [['Үндсэн товчлууруудын хүртээмжийн шалгалт', 'Accessibility pass on primary buttons'], 'ar', 'mia', 'review', 1],
+      [['ТУЗ-д бэлдэх илтгэл', 'Board prep deck'], 'q4', 'anu', 'todo', 1]
+    ].map((r) => {
+      const p = people[r[2]];
+      const flagged = r[4] >= 3;
+      const pips = [0, 1, 2].map((j) => ({ style: j < r[4] ? 'background:' + (flagged ? '#D97706' : '#8B8B94') : 'background:#E6E6EA' }));
+      return {
+        name: pick(r[0]),
+        project: pick(projects[r[1]][0]), projDot: 'background:' + projects[r[1]][1],
+        person: { name: pick(p[0]), initials: pick(p[1]), style: p[2] },
+        status: pick(statuses[r[3]][0]), statusDot: statuses[r[3]][1],
+        flagged, pips,
+        countLabel: mn ? r[4] + ' удаа' : r[4] + (r[4] === 1 ? ' time' : ' times'),
+        countStyle: flagged ? 'color:#92400E;font-weight:600' : 'color:#3F3F46'
+      };
+    });
+
+    // ---- Sidebar spaces ----
+    const openSpaces = s.openSpaces || {};
+    const spaces = [
+      { id: 'product', name: ['Бүтээгдэхүүн', 'Product'], initial: ['Б', 'P'], badge: 'background:#EDE9FE;color:#5B21B6',
+        projects: [[['Апп шинэчлэл', 'App Redesign'], 'Main.dc.html'], [['Төлбөрийн хуудас v2', 'Checkout v2'], '#'], [['Q4 замын зураг', 'Q4 Roadmap'], '#']] },
+      { id: 'engineering', name: ['Инженерчлэл', 'Engineering'], initial: ['И', 'E'], badge: 'background:#DCFCE7;color:#166534',
+        projects: [[['Платформ шилжүүлэлт', 'Platform migration'], '#'], [['Мобайл хувилбар 4.2', 'Mobile release 4.2'], '#']] },
+      { id: 'design', name: ['Дизайн', 'Design'], initial: ['Д', 'D'], badge: 'background:#FFE4E6;color:#9F1239',
+        projects: [[['Дизайн систем', 'Design system'], '#'], [['Брэнд шинэчлэл', 'Brand refresh'], '#']] }
+    ].map((x) => {
+      const open = !!openSpaces[x.id];
+      return {
+        name: pick(x.name), initial: pick(x.initial), badgeStyle: x.badge, open,
+        chevStyle: 'transition:transform .15s;transform:rotate(' + (open ? 90 : 0) + 'deg)',
+        toggle: () => this.setState({ openSpaces: { ...(this.state.openSpaces || {}), [x.id]: !open } }),
+        projects: x.projects.map((p) => ({ name: pick(p[0]), href: p[1] }))
+      };
+    });
+
+    const projEnd = proj[N - 1];
+    return {
+      lang, L, langs, me, accent, accentSoft, tabs, spaces,
+      selOpen: !!s.selOpen, toggleSel: () => this.setState({ selOpen: !this.state.selOpen }),
+      sel, sprintOptions, cards,
+      cCommitted, cCompleted, cAdded,
+      barTicks, bars, ccSummary,
+      hasBarHover: bx !== null, barTip, barTipStyle,
+      clearBarHover: () => this.setState({ barHover: null }),
+      idealPath: toPath(ideal), actualPath: toPath(actual.concat(days.slice(actual.length).map(() => null))),
+      projPath: toPath(proj),
+      bdDots, scopeMarks, bdCols, bdSummary,
+      todayLineStyle: 'left:' + (xp(todayI) * 100).toFixed(2) + '%',
+      projEndLabel: '≈ ' + Math.round(projEnd), projEndStyle: 'top:' + yp(projEnd).toFixed(1) + 'px',
+      hasBdHover: hx !== null, bdTip,
+      bdHoverLine: 'left:' + hxPct.toFixed(2) + '%',
+      bdTipStyle: 'left:' + hxPct.toFixed(2) + '%;transform:translateX(' + (hx !== null && hx > 9 ? 'calc(-100% - 12px)' : '12px') + ')',
+      clearBdHover: () => this.setState({ bdHover: null })
+    };
+  }
+}
+</script>
+</body>
+</html>

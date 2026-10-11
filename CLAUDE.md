@@ -15,6 +15,14 @@ The visual source of truth is the `design/` folder (exported from Claude Design)
 | `design/CreateTask.dc.html` | **Quick create modal** with assignee/due/project pickers + keyboard hints |
 | `design/EmptyProject.dc.html` | Empty project state + **templates** |
 | `design/EmptyInbox.dc.html` | **Inbox** empty state + inbox tabs |
+| `design/Reports.dc.html` | **Reports · Overview** (stat cards, throughput, where work waits, aging tasks) |
+| `design/ReportsDark.dc.html` | Reports Overview in **dark mode** |
+| `design/ReportsSprints.dc.html` | **Reports · Sprints** (sprint selector, committed vs completed, burndown, carried over) |
+| `design/ReportsWorkload.dc.html` | **Reports · Workload** (per-person open size, due buckets, capacity) |
+| `design/ReportsPeople.dc.html` | **Reports · People** (admin view of one person) |
+| `design/ReportsMine.dc.html` | **Reports · My performance** (member's own view) |
+| `design/ReportsEmpty.dc.html` | Reports **empty** state (not enough history) |
+| `design/ReportsLoading.dc.html` | Reports **loading** skeletons |
 
 ## Stack
 
@@ -46,7 +54,7 @@ The visual source of truth is the `design/` folder (exported from Claude Design)
 
 - `users` — id, email (unique, citext), name, initials, avatar_color (palette key), password_hash, locale (`mn`|`en`), timezone, theme (`light`|`dark`|`system`), accent, density (`comfortable`|`compact`), notification_prefs (jsonb `{mention, assigned, comment, status}` booleans, default all true), created_at
 - `sessions` — id (random token hash), user_id, expires_at, created_at
-- `workspaces` — id, name, slug, created_at
+- `workspaces` — id, name, slug, capacity_points (int, default 15: per-person points for 2 weeks, Workload report), created_at
 - `workspace_members` — workspace_id, user_id, role (`owner`|`admin`|`member`), title (nullable job title shown as a role hint, e.g. "Eng lead"), joined_at
 - `invites` — id, workspace_id, email, token_hash, role, expires_at, accepted_at
 - `spaces` — id, workspace_id, name, initial, color (palette key), position
@@ -54,25 +62,27 @@ The visual source of truth is the `design/` folder (exported from Claude Design)
 - `project_members` — project_id, user_id (the project's team: header avatar stack, suggested assignees and @mentions; not an access boundary)
 - `favorites` — user_id, project_id
 - `statuses` — id, project_id, name (nullable: null = default status, the UI shows the translated name for its category), category (`todo`|`in_progress`|`review`|`done`), color (nullable: null = the category's color), position. New projects get 4 defaults (name null): To Do / In Progress / In Review / Done.
-- `sprints` — id, project_id, name, start_date, end_date
-- `tasks` — id, project_id, number (unique per project → shown as `APP-142`), status_id, sprint_id?, title, description (jsonb, TipTap doc), description_text (for search), priority (`urgent`|`high`|`medium`|`low`|`none`), start_date?, due_date?, position, created_by, completed_at?, created_at, updated_at, deleted_at?
+- `sprints` — id, project_id, number (int, per-project sequence, unique with project_id → "Sprint 14"), name (nullable: null = "Sprint {number}" translated), start_date, end_date
+- `tasks` — id, project_id, number (unique per project → shown as `APP-142`), status_id, sprint_id?, title, description (jsonb, TipTap doc), description_text (for search), priority (`urgent`|`high`|`medium`|`low`|`none`), size? (`S`|`M`|`L`|`XL`; points 1/3/5/8 via `SIZE_POINTS` in `packages/shared`), start_date?, due_date?, position, created_by, completed_at?, created_at, updated_at, deleted_at?
 - `task_assignees` — task_id, user_id
+- `task_status_periods` — id, task_id, status_id (set null on delete), category (snapshot), entered_at, exited_at?, entered_by, exited_by? — exactly one open row (exited_at null) per task; written in the same transaction as every status change (create, status change, duplicate, project move, template apply)
+- `sprint_memberships` — id, task_id, sprint_id, added_at, removed_at?, added_by, removed_by? — one open row per task in a sprint; written wherever `tasks.sprint_id` changes
 - `tags` — id, workspace_id, name, color (palette key); `task_tags` — task_id, tag_id
 - `subtasks` — id, task_id, title, assignee_id?, due_date?, done, position
 - `comments` — id, task_id, author_id, parent_id? (replies), body (jsonb), body_text, created_at, edited_at, deleted_at
 - `attachments` — id, task_id, uploader_id, filename, mime, size, storage_key, created_at
 - `task_followers` — task_id, user_id (creator, assignees and commenters follow automatically)
-- `activity` — id, workspace_id, project_id, task_id, actor_id, type, payload (jsonb), created_at. Types: `task.created` (with `duplicateOf` for copies), `status.changed`, `priority.changed`, `assignee.added/removed`, `due.changed`, `attachment.added`, `subtask.completed`, `comment.added`, `project.changed` (move to another project: new key there; the old key stops resolving), etc.
+- `activity` — id, workspace_id, project_id, task_id, actor_id, type, payload (jsonb), created_at. Types: `task.created` (with `status`, and `duplicateOf` for copies), `status.changed`, `size.changed`, `sprint.changed` (also logged on create-into-sprint and project move), `priority.changed`, `assignee.added/removed`, `due.changed`, `attachment.added`, `subtask.completed`, `comment.added`, `project.changed` (move to another project: new key there; the old key stops resolving), etc.
 - `notifications` — id, user_id, type (`mention`|`assigned`|`comment`|`status`), task_id, actor_id, activity_id, read_at?, archived_at?, created_at
   Created by the notifier (`apps/api/src/notifications/`) from bus events: @mentions (comments, descriptions), new assignees, comments and status changes on followed tasks. Never for the actor or non-members. One per recipient per event: the highest type they have enabled in `notification_prefs` (mention > assigned > comment > status). An unread, unarchived one of the same type on the same task from the last 5 minutes is updated in place (latest actor/activity, `created_at` bumped). Snippets are read from the comment/description at query time. A daily in-process job archives notifications read more than 30 days ago.
-- Indexes: tasks(project_id, status_id, position), unique tasks(status_id, position), tasks(due_date), task_assignees(user_id), notifications(user_id, read_at), pg_trgm GIN on tasks.title for search.
+- Indexes: tasks(project_id, status_id, position), unique tasks(status_id, position), tasks(due_date), tasks(completed_at), task_status_periods(task_id, entered_at), activity(workspace_id, type, created_at), comments(author_id, created_at), task_assignees(user_id), notifications(user_id, read_at), pg_trgm GIN on tasks.title for search.
 - Colors (`users.avatar_color`, `spaces.color`, `projects.color`, `tags.color`) are palette keys such as `violet`, `blue`, `neutral`. The frontend maps each key to exact light/dark values from the designs (`docs/design-notes.md` Appendix A).
 - Online presence is ephemeral (kept in the WebSocket server's memory), not stored.
-- Seed (`apps/api/src/db/seed/data.ts`) mirrors the designs; dates shift so Oct 8 2026 = today. Eight people: the seven in Main plus Bayarmaa T. (QA, `yellow`) from TaskDetail/Calendar. Where Calendar and My Tasks disagree about Anu's tasks, My Tasks wins (Calendar's past "AB" items are done, future ones reassigned).
+- Seed (`apps/api/src/db/seed/data.ts`) mirrors the designs; dates shift so Oct 8 2026 = today. Eight people: the seven in Main plus Bayarmaa T. (QA, `yellow`) from TaskDetail/Calendar. Job titles from the Reports designs (Product manager, Mobile engineer, Product designer, Frontend engineer, UX researcher, Data analyst, Engineering lead, QA); Anu is owner, Bat admin, the rest members. App Redesign has Sprints 9–14 (14 = Oct 6–24) and the seed generates ~24 weeks of history (completed tasks, status periods, sprint memberships, comments) so every report has data. Where Calendar and My Tasks disagree about Anu's tasks, My Tasks wins (Calendar's past "AB" items are done, future ones reassigned).
 
 ## Design tokens (from the designs)
 
-Font: **Geist** (Google Fonts), fallback `ui-sans-serif, system-ui, sans-serif`. **Geist Mono** 12px for task keys (`APP-142`) and inline code. Weights 400/500/600. Type scale: 11px (kbd, small badges), 12px (meta, chips, column headers, counts), 13px (secondary text, buttons, cells), 14px / 20px base, long-form text (descriptions, comments) 14px / 22px in `--text-body`, 18/24 (calendar period title), 20/28 (modal title, empty-state headings), 22/30 (drawer title), 24/32 (page heading), 28/32 (stat numbers). Headings 600; letter-spacing −0.01em at 20px and up.
+Font: **Geist** (Google Fonts), fallback `ui-sans-serif, system-ui, sans-serif`. **Geist Mono** 12px for task keys (`APP-142`) and inline code. Weights 400/500/600. Type scale: 10px (initials in 24px report avatars, scope chips), 11px (kbd, small badges, chart ticks), 12px (meta, chips, column headers, counts), 13px (secondary text, buttons, cells), 14px / 20px base, long-form text (descriptions, comments) 14px / 22px in `--text-body`, 15/20 (Reports panel headings), 16/22 (Reports person picker name), 18/24 (calendar period title, Reports section headings), 20/26 (Reports help-tile values), 20/28 (modal title, empty-state headings), 22/30 (drawer title), 24/32 (page heading), 26/32 (secondary stat values: Sprints/People/My performance), 28/32 (stat numbers). Numbers in report tables use `tabular-nums`. Headings 600; letter-spacing −0.01em at 20px and up.
 
 Spacing on a 4/8px grid. Borders 1px.
 
@@ -86,6 +96,7 @@ Shadows (only these):
 - `--shadow-modal` `0 24px 64px rgba(24,24,27,0.20), 0 2px 6px rgba(24,24,27,0.06)` — quick-create modal
 - `--shadow-drag` `0 2px 4px rgba(24,24,27,0.06), 0 16px 32px rgba(24,24,27,0.14)` — card being dragged
 - `--ring-soft` `0 0 0 3px var(--accent-soft)` — focused editor / comment composer
+- `--shadow-tooltip` `0 8px 24px rgba(24,24,27,0.10)` (dark `0 8px 24px rgba(0,0,0,0.4)`) — chart tooltips in Reports
 - Scrims: drawer `rgba(24,24,27,0.28)`, modal `rgba(24,24,27,0.32)`.
 
 Layout: sidebar 248px (min 220px), collapsible to a 56px icon rail. Top bar 56px + 40px view tabs. List rows 44px (comfortable) / 36px (compact). Task drawer 40% width, min 520px, from the right. Quick-create modal 600px wide, 112px from the top.
@@ -96,6 +107,7 @@ Layout: sidebar 248px (min 220px), collapsible to a 56px icon rail. Top bar 56px
 | `--bg-sidebar` | #F7F7F8 | #161618 |
 | `--bg-subtle` (row hover, table/calendar headers, popover footers) | #FAFAFB | #18181B |
 | `--surface` (cards, popovers, drawer, modal) | #FFFFFF | #1F1F23 |
+| `--panel` (Reports cards, charts, tables) | #FFFFFF | #161618 |
 | `--control` (secondary buttons, inputs) | #FFFFFF | #18181B (sidebar search #1B1B1E) |
 | `--surface-2` (ghost hover, segmented track, inline code) | #F4F4F5 | #26262B |
 | `--calendar-weekend` (calendar weekend cells) | #FCFCFD | #141416 |
@@ -103,7 +115,7 @@ Layout: sidebar 248px (min 220px), collapsible to a 56px icon rail. Top bar 56px
 | `--chip` (count badges, neutral chips, "+N") | #F1F1F3, fg #52525B | #232328, fg #B4B4BC |
 | `--border` (layout lines, cards) | #E6E6EA | #26262B |
 | `--border-control` (buttons, inputs, kbd, toolbar divider) | #E6E6EA | #2A2A30 |
-| `--border-subtle` (row dividers, panel edges) | #EFEFF2 | #1F1F23 |
+| `--border-subtle` (row dividers, panel edges) | #EFEFF2 | #1F1F23 (Reports table rows #222227) |
 | `--border-strong` (card hover, dashed add buttons) | #D4D4D8 | — |
 | `--text` | #18181B | #EDEDEF |
 | `--text-body` (long-form) | #27272A | — |
@@ -117,6 +129,9 @@ Layout: sidebar 248px (min 220px), collapsible to a 56px icon rail. Top bar 56px
 | `--danger` | #C42B1C (overdue text), #DC2626 (urgent) | #F87171 |
 | `--warning` | #B45309 (due today) | #FBBF24 |
 | `--success` | #16A34A | #22C55E |
+| `--success-soft` (good delta, Current, Light) | #E8F5EC / fg #166534 | rgba(34,197,94,0.16) / #86EFAC |
+| `--warning-soft` (Stale, Replan, Heavy, scope added, burndown insight) | #FEF3E2 / fg #92400E | rgba(251,191,36,0.14) / #FCD34D |
+| `--chart-grid` / `--chart-axis` / `--chart-prev` | #F1F1F3 / #D4D4D8 / #C4C4CC | #222227 / #3A3A42 / #6B6B75 |
 
 "—" = not drawn in the designs; derive when needed.
 
@@ -127,7 +142,82 @@ Priority flags: Urgent #DC2626 (dark #F87171), High #EA580C (#FB923C), Medium #C
 Due tones: overdue #C42B1C 500 (Board 600 + "· Overdue"), today #B45309 500, soon #3F3F46, later #6B6B74, done #A1A1AA; dark #F87171 / #FBBF24 / #C9C9D1 / #8E8E98 / #5E5E68.
 Tag chips (22px, radius 6, 12px/500): palette key → soft bg + dark fg, e.g. blue (Research) `#E8F1FD/#1D4ED8`, violet (UX/UI) `#F1EEFD/#5B45B8`, teal (Design system) `#E3F4F1/#0F766E`, neutral (Frontend/iOS/Android/Docs) `#F1F1F3/#3F3F46`, orange (Analytics) `#FDF1E1/#9A3412`, green (A11y) `#E6F4EA/#166534`, pink (Onboarding) `#FCEBF3/#9D174D`. Dark: tinted rgba bg + light fg, e.g. blue `rgba(59,130,246,0.16)/#93C5FD`, neutral `#232328/#C9C9D1`.
 Avatar colors (palette keys): indigo `#E0E7FF/#3730A3`, green `#DCFCE7/#166534`, rose `#FFE4E6/#9F1239`, amber `#FEF3C7/#92400E`, sky `#E0F2FE/#075985`, purple `#F3E8FF/#6B21A8`, teal `#CCFBF1/#115E59`, yellow `#FEF9C3/#854D0E`; dark e.g. indigo `#312E81/#C7D2FE`.
-Full light/dark tables for avatars, space badges, project colors and tags: `docs/design-notes.md` Appendix A.
+Full light/dark tables for avatars, space badges, project colors and tags: `docs/design-notes.md` Appendix A. Reports chart colors (wait bars, workload buckets, sprint bars, warm card): Appendix A.2b.
+
+## Reports
+
+Tabs: Overview, Sprints, Workload, plus People (admins/owner) or My performance (members). Screen notes: `docs/design-notes.md` §1.10–1.18.
+
+**API**: `GET /api/v1/workspaces/:workspaceId/reports/overview | sprints | workload | people/:userId` (`me` alias), plus a `.csv` variant of each (UTF-8 with BOM). OpenAPI tag "Reports"; response schemas live in `packages/shared/src/schemas/reports.ts`.
+- **Query params**: `period=week|4w|quarter|custom` (default `4w`), `from`/`to` (dates, custom only, ≤ 366 days), `spaceId?`, `projectId?`. Sprints also takes `projectId` (required) and `sprintId?` (default: the current sprint, else the latest).
+- **Response metadata**: every response has `generatedAt` and `scope`; period reports also return `range` and `previousRange`.
+- **Computation**: reports are computed live; no snapshot tables. The web refetches every 5 min and on focus, and "Updated N minutes ago" = `generatedAt`. Query keys sit under `['tasks', 'reports', …]` so task writes invalidate them.
+- **Text**: sentences (insights, deltas, pace) are built on the client from numbers.
+
+**Permissions**:
+- Every report requires workspace membership; non-members get 404.
+- Overview, Sprints and Workload are open to every member.
+- `people/:userId` (and its CSV) requires admin/owner unless `userId` is the caller. A member asking for someone else gets 403 `FORBIDDEN`; a user who isn't a member of the workspace gets 404.
+- The web shows the People tab only to admins/owner (picker defaults to self). Members get My performance, labelled "Visible only to you and workspace admins"; People is labelled "Visible to admins only".
+
+**Scope and periods** (all dates in the caller's timezone):
+- **Scope**: workspace, a space, or a project. Only non-deleted tasks of non-archived projects count.
+- **Periods**:
+  - `4w` = the 28 days ending today.
+  - `week` = Monday → today.
+  - `quarter` = the calendar quarter up to today.
+  - `custom` = `from`–`to`.
+- **Previous period**: the same-length window immediately before.
+- **Empty state**: shown when the scope has fewer than **5** completed tasks (all time). The page then shows "x / 5" progress.
+
+**Metric definitions**:
+- **Completed**: tasks whose `completed_at` falls in the period. **Points** = sum of `SIZE_POINTS[size]` (S 1 · M 3 · L 5 · XL 8). Unsized tasks count 0 points and are reported as "N unsized".
+- **Cycle time**: `completed_at` − `entered_at` of the task's first `in_progress` or `review` period. If neither exists, use `created_at`. Report the median, in days to 1 decimal.
+- **On-time delivery**: among completed tasks that have a due date, the share with completion date (local) ≤ `due_date`. Shown as "% · N of M". Delta in percentage points.
+- **Overdue**: open tasks with `due_date` < today. A snapshot that ignores the period. "Oldest is N days late" = max(today − due).
+- **Throughput**: tasks completed per Monday–Sunday week over the last 12 weeks, regardless of the period.
+  - Previous series = the 12 weeks before.
+  - The current week is flagged `partial`: hollow point, with the tooltip "This week is still in progress".
+- **Where work waits**: per category (To Do, In Progress, In Review), the median length in days of status periods that ended within the period.
+  - The insight names the slowest category and its ratio to the next slowest.
+- **Days in status / Aging**: today − `entered_at` of the open status period. Open tasks only, sorted descending. **Stale** when > 5 days.
+- **Sprints** (always per project):
+  - **Working days**: Mon–Fri between `start_date` and `end_date`. "Day N of M working days · K days left".
+  - **Committed**: memberships open at sprint start (start date 00:00).
+  - **Added mid-sprint**: memberships added after the start. Scope = committed + added.
+  - **Completed**: members done by min(end, today).
+  - **Burndown**: open members at the end of each working day.
+    - Ideal = committed → 0, linear over the working days.
+    - Projected = linear from today at (remaining at start − remaining today) / days elapsed.
+    - Scope-added chips show the tasks added per day.
+  - **Pace**: "slightly behind ideal" when remaining > ideal by at most 15 % of committed; "behind" beyond that; on track otherwise.
+  - **Carried over**: members of sprint N that were in sprint N−1 of the same project and not done at its end.
+    - **Times carried** = the number of earlier sprints the task left unfinished.
+    - **Replan** when ≥ 3.
+    - For a past sprint, the card shows "Carried to next sprint" instead.
+- **Workload**: a snapshot of open tasks per assignee (a task with several assignees counts fully for each). Lists workspace members, or with a scope filter the scoped projects' members plus anyone with open tasks there.
+  - **Buckets** by due date:
+    - Overdue (< today)
+    - Due this week (today → Sunday)
+    - Later
+    - No due date
+  - **Load**:
+    - **Heavy** if points > capacity × 1.2 **or** overdue points ≥ 5.
+    - **Light** if points ≤ capacity / 2.
+    - **Balanced** otherwise.
+    - With capacity C = `workspaces.capacity_points` (default 15), Heavy means > 18 and Light ≤ 7.5, i.e. the designed > 18 / ≤ 7.
+- **People / My performance** (period-bound unless noted):
+  - **Cards and trends**:
+    - **Completed**, **On-time** and **Cycle time** as above, for tasks the person was assigned when they were completed.
+    - **Overdue now** = their open overdue tasks.
+    - **Review turnaround**: the reviewer is whoever moves a task **out of** an In Review status. Turnaround = median length of those review periods. The count is the number of reviews.
+    - **Trends**: 12 weekly values (completed count; median cycle time). **Team median** = the median, over members with ≥ 1 completion in those 12 weeks, of each member's weekly average (completed), or the median cycle time of all team completions (cycle).
+    - Deltas on this page are neutral: grey chip, arrow only.
+  - **Helping others**:
+    - **Comments on others' tasks**: comments by the person on tasks they aren't assigned to.
+    - **Subtasks done on others' tasks**: `subtask.completed` by the person on such tasks, plus the number of distinct tasks.
+    - **Mentions answered**: the person's @mentions in the period (comments and descriptions), "answered / total". Answered = the person comments on that task within 7 days after the mention. Median reply time = the delay to that comment, shown as "2h" / "2ц".
+    - **Worked with most**: the top 3 people by helping contributions in either direction (person on their tasks + them on the person's tasks). Shown as "N times".
 
 ## Routes (web)
 
@@ -137,5 +227,6 @@ Full light/dark tables for avatars, space badges, project colors and tags: `docs
 - `/p/:projectId/list` · `/board` · `/calendar` (task drawer opens via `?task=APP-142`)
 - `/s/:spaceId/list` · `/board` · `/calendar` (space-level views across all the space's projects; calendar has a project filter)
 - `/t/:taskKey` (task as full page)
-- `/settings` (profile, language, theme, accent, density, notifications, members)
+- `/settings` (profile, language, theme, accent, density, notifications, members; admins also edit workspace capacity)
+- `/reports` → `/reports/overview` · `/reports/sprints` · `/reports/workload` · `/reports/people` (admins/owner) · `/reports/me` (members: "My performance"). Period, scope, sprint, person and sort live in the URL.
 - Global: ⌘K palette, `C` = new task modal, `G` then `I` = Inbox, `Esc` closes drawer/modal.

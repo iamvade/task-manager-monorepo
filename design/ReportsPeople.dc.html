@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<title>Тайлан — Хүмүүс</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#52525B;text-decoration:none}a:hover{color:#18181B}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit;color:inherit}
+.nav:hover{background:#EDEDF0}
+.ghost:hover{background:#F4F4F5}
+.opt:hover{background:#F4F4F5}
+.trow:hover{background:#FAFAFB}
+.ghost:focus-visible,.nav:focus-visible,.seg:focus-visible,.opt:focus-visible,.trow:focus-visible,input:focus-visible{outline:2px solid #6E56CF;outline-offset:1px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</helmet>
+
+<div lang="{{lang}}" style="display: flex; flex-wrap: wrap; min-height: 100vh; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 14px; line-height: 20px; color: #18181B; background: #FFFFFF; -webkit-font-smoothing: antialiased">
+
+  <!-- ============ SIDEBAR ============ -->
+  <nav aria-label="{{L.workspace}}" style="flex: 1 1 248px; max-width: 248px; min-width: 220px; box-sizing: border-box; background: #F7F7F8; border-right: 1px solid #E6E6EA; display: flex; flex-direction: column; gap: 16px; padding: 12px 8px">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 4px">
+      <button class="ghost" style="flex: 1; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; text-align: left">
+        <span style="width: 24px; height: 24px; border-radius: 6px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">K</span>
+        <span style="flex: 1; font-weight: 600; font-size: 14px">Kite Studio</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+      </button>
+      <button class="ghost" aria-label="{{L.collapse}}" style="width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 3v18"></path><path d="m16 15-3-3 3-3"></path></svg>
+      </button>
+    </div>
+    <div style="padding: 0 4px">
+      <label style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <span class="sr">{{L.search}}</span>
+        <input type="search" placeholder="{{L.search}}" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-size: 13px; padding: 0">
+        <kbd style="font-family: inherit; font-size: 11px; color: #6B6B74; border: 1px solid #E6E6EA; border-radius: 4px; padding: 0 4px; line-height: 16px">⌘K</kbd>
+      </label>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <a class="nav" href="MyTasks.dc.html" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12 2.5 2.5 4.5-5"></path></svg>
+        <span style="flex: 1; font-weight: 500">{{L.myTasks}}</span><span style="font-size: 12px; color: #6B6B74">7</span>
+      </a>
+      <a class="nav" href="EmptyInbox.dc.html" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+        <span style="flex: 1; font-weight: 500">{{L.inbox}}</span>
+        <span style="min-width: 20px; height: 18px; padding: 0 6px; box-sizing: border-box; border-radius: 9px; background: {{accent}}; color: #FFFFFF; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">3</span>
+      </a>
+      <a class="nav" href="Reports.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; background: {{accentSoft}}; color: {{accent}}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M8 17v-5M13 17V8M18 17v-9"></path></svg>
+        <span style="flex: 1; font-weight: 600">{{L.reports}}</span>
+      </a>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <div style="display: flex; align-items: center; justify-content: space-between; height: 28px; padding: 0 4px 0 12px">
+        <span style="font-size: 12px; font-weight: 500; color: #6B6B74">{{L.spaces}}</span>
+        <button class="ghost" aria-label="{{L.newSpace}}" style="width: 24px; height: 24px; border: 0; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B74" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+        </button>
+      </div>
+      <sc-for list="{{spaces}}" as="sp" hint-placeholder-count="3">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <button class="nav" onClick="{{sp.toggle}}" aria-expanded="{{sp.open}}" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px 0 8px; border: 0; border-radius: 8px; background: transparent; text-align: left">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{sp.chevStyle}}"><path d="m9 6 6 6-6 6"></path></svg>
+            <span style="width: 18px; height: 18px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; {{sp.badgeStyle}}">{{sp.initial}}</span>
+            <span style="flex: 1; font-weight: 500; color: #3F3F46">{{sp.name}}</span>
+          </button>
+          <sc-if value="{{sp.open}}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <sc-for list="{{sp.projects}}" as="p" hint-placeholder-count="3">
+                <a class="nav" href="{{p.href}}" style="display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px 0 34px; border-radius: 8px; color: #3F3F46">
+                  <span style="width: 6px; height: 6px; border-radius: 3px; background: #C4C4CC"></span>
+                  <span style="flex: 1; font-size: 13px">{{p.name}}</span>
+                </a>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+    <div style="margin-top: auto; display: flex; flex-direction: column; gap: 2px; border-top: 1px solid #E6E6EA; padding-top: 8px">
+      <div style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px 0 12px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3F3F46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path></svg>
+        <span id="lang-label" style="flex: 1; font-weight: 500; color: #3F3F46">{{L.language}}</span>
+        <div role="radiogroup" aria-labelledby="lang-label" style="display: flex; gap: 2px; padding: 2px; border-radius: 7px; background: #EDEDF0">
+          <sc-for list="{{langs}}" as="lg" hint-placeholder-count="2">
+            <button class="seg" role="radio" aria-checked="{{lg.active}}" onClick="{{lg.pick}}" lang="{{lg.code}}" title="{{lg.full}}" style="height: 24px; padding: 0 8px; border: 0; border-radius: 5px; font-size: 12px; font-weight: 600; {{lg.style}}">{{lg.short}}</button>
+          </sc-for>
+        </div>
+      </div>
+      <a class="nav" href="#" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6M22 11h-6"></path></svg>
+        <span style="font-weight: 500">{{L.invite}}</span>
+      </a>
+      <div style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px">
+        <span style="width: 24px; height: 24px; border-radius: 12px; background: #E0E7FF; color: #3730A3; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">{{me.initials}}</span>
+        <span style="flex: 1; font-size: 13px; font-weight: 500">{{me.full}}</span>
+        <span style="width: 8px; height: 8px; border-radius: 4px; background: #16A34A" aria-label="{{L.online}}"></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ MAIN ============ -->
+  <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+
+    <header style="display: flex; flex-direction: column; border-bottom: 1px solid #E6E6EA">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; min-height: 56px; padding: 8px 24px; box-sizing: border-box">
+        <h1 style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M8 17v-5M13 17V8M18 17v-9"></path></svg>
+          {{L.reports}}
+        </h1>
+        <span style="font-size: 12px; color: #6B6B74">{{L.updated}}</span>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px; padding: 0 24px">
+        <div role="tablist" aria-label="{{L.reports}}" style="display: flex; gap: 4px">
+          <sc-for list="{{tabs}}" as="tb" hint-placeholder-count="4">
+            <a role="tab" href="{{tb.href}}" aria-selected="{{tb.active}}" style="height: 40px; padding: 0 10px; display: flex; align-items: center; font-size: 13px; font-weight: 500; {{tb.style}}">{{tb.label}}</a>
+          </sc-for>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-bottom: 8px">
+          <div role="radiogroup" aria-label="{{L.period}}" style="display: flex; gap: 2px; padding: 2px; border-radius: 8px; background: #F4F4F5">
+            <sc-for list="{{periods}}" as="pd" hint-placeholder-count="4">
+              <button class="seg" role="radio" aria-checked="{{pd.active}}" onClick="{{pd.pick}}" style="height: 28px; padding: 0 10px; border: 0; border-radius: 6px; font-size: 13px; font-weight: 500; white-space: nowrap; {{pd.style}}">{{pd.label}}</button>
+            </sc-for>
+          </div>
+          <div style="width: 1px; height: 20px; background: #E6E6EA; margin: 0 4px"></div>
+          <button class="ghost" style="display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; font-size: 13px; font-weight: 500; color: #3F3F46">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"></path></svg>
+            {{L.export}}
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div style="display: flex; flex-direction: column; gap: 24px; padding: 20px 24px 40px">
+
+      <!-- Person picker + note -->
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
+          <div style="position: relative">
+            <button class="ghost" onClick="{{togglePicker}}" aria-haspopup="listbox" aria-expanded="{{pickerOpen}}" aria-label="{{L.pickPerson}}: {{person.name}}" style="display: flex; align-items: center; gap: 12px; height: 52px; padding: 0 12px 0 8px; border: 1px solid #E6E6EA; border-radius: 12px; background: #FFFFFF; text-align: left">
+              <span style="width: 36px; height: 36px; border-radius: 18px; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{person.avatar}}">{{person.initials}}</span>
+              <span style="display: flex; flex-direction: column">
+                <span style="font-size: 16px; line-height: 22px; font-weight: 600">{{person.name}}</span>
+                <span style="font-size: 12px; line-height: 16px; color: #6B6B74">{{person.role}}</span>
+              </span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-left: 8px"><path d="m6 9 6 6 6-6"></path></svg>
+            </button>
+            <sc-if value="{{pickerOpen}}" hint-placeholder-val="{{ false }}">
+              <div role="listbox" aria-label="{{L.pickPerson}}" style="position: absolute; top: 58px; left: 0; z-index: 5; width: 280px; padding: 4px; background: #FFFFFF; border: 1px solid #E6E6EA; border-radius: 10px; box-shadow: 0 12px 32px rgba(24, 24, 27, 0.14); display: flex; flex-direction: column">
+                <sc-for list="{{peopleOptions}}" as="o" hint-placeholder-count="7">
+                  <button role="option" class="opt" aria-selected="{{o.selected}}" onClick="{{o.pick}}" style="display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 8px; border: 0; border-radius: 6px; text-align: left; {{o.rowStyle}}">
+                    <span style="width: 24px; height: 24px; border-radius: 12px; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{o.avatar}}">{{o.initials}}</span>
+                    <span style="flex: 1; display: flex; flex-direction: column">
+                      <span style="font-size: 13px; font-weight: 500">{{o.name}}</span>
+                      <span style="font-size: 11px; line-height: 14px; color: #6B6B74">{{o.role}}</span>
+                    </span>
+                    <sc-if value="{{o.selected}}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+          <span style="display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border-radius: 6px; background: #F4F4F5; font-size: 12px; font-weight: 500; color: #52525B">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+            {{L.adminOnly}}
+          </span>
+          <span style="flex: 1"></span>
+          <span style="font-size: 13px; color: #6B6B74">{{rangeText}}</span>
+        </div>
+        <p style="margin: 0; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 8px; background: #F7F7F8; border: 1px solid #EFEFF2; font-size: 13px; line-height: 20px; color: #3F3F46">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          {{L.note}}
+        </p>
+      </div>
+
+      <!-- Stat cards -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px">
+        <sc-for list="{{cards}}" as="c" hint-placeholder-count="5">
+          <div style="display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border: 1px solid #E6E6EA; border-radius: 12px; {{c.boxStyle}}">
+            <span style="font-size: 13px; color: #52525B">{{c.label}}</span>
+            <span style="display: flex; align-items: baseline; gap: 6px">
+              <span style="font-size: 26px; line-height: 32px; font-weight: 600; {{c.valueStyle}}">{{c.value}}</span>
+              <span style="font-size: 13px; color: #52525B">{{c.unit}}</span>
+            </span>
+            <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 12px; color: #6B6B74">
+              <sc-if value="{{c.hasDelta}}" hint-placeholder-val="{{ true }}">
+                <span style="display: inline-flex; align-items: center; gap: 2px; height: 20px; padding: 0 6px; border-radius: 6px; background: #F1F1F3; color: #3F3F46; font-weight: 600">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{c.arrowStyle}}"><path d="M12 19V5M5 12l7-7 7 7"></path></svg>{{c.delta}}
+                </span>
+              </sc-if>
+              <span style="{{c.subStyle}}">{{c.sub}}</span>
+            </span>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- Trends -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px">
+        <sc-for list="{{trends}}" as="tr" hint-placeholder-count="2">
+          <section aria-label="{{tr.title}}" style="display: flex; flex-direction: column; gap: 12px; padding: 16px 20px; border: 1px solid #E6E6EA; border-radius: 12px">
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px">
+              <div style="display: flex; flex-direction: column; gap: 2px">
+                <h2 style="margin: 0; font-size: 14px; font-weight: 600">{{tr.title}}</h2>
+                <span style="font-size: 12px; color: #6B6B74">{{tr.sub}}</span>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-size: 12px; color: #52525B">
+                <span style="display: flex; align-items: center; gap: 6px"><span style="width: 14px; height: 2px; background: {{accent}}"></span>{{tr.seriesLabel}}</span>
+                <span style="display: flex; align-items: center; gap: 6px"><span style="width: 14px; height: 0; border-top: 2px dashed #A1A1AA"></span>{{L.teamMedian}}</span>
+              </div>
+            </div>
+            <figure aria-label="{{tr.summary}}" style="margin: 0; display: flex; flex-direction: column; gap: 6px">
+              <div style="position: relative; height: 96px; margin-right: 40px" onMouseLeave="{{tr.leave}}">
+                <span aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: #E6E6EA"></span>
+                <span aria-hidden="true" style="position: absolute; left: 0; right: 0; height: 0; border-top: 1px dashed #A1A1AA; {{tr.refStyle}}"></span>
+                <svg aria-hidden="true" width="100%" height="96" viewBox="0 0 1000 96" preserveAspectRatio="none" style="position: absolute; inset: 0; overflow: visible">
+                  <path d="{{tr.path}}" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+                </svg>
+                <span aria-hidden="true" style="position: absolute; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 4px; background: {{accent}}; box-shadow: 0 0 0 2px #FFFFFF; {{tr.dotStyle}}"></span>
+                <span aria-hidden="true" style="position: absolute; left: calc(100% + 8px); font-size: 12px; font-weight: 600; color: #18181B; transform: translateY(-50%); white-space: nowrap; {{tr.lastStyle}}">{{tr.lastLabel}}</span>
+                <div style="position: absolute; inset: 0; display: flex">
+                  <sc-for list="{{tr.cols}}" as="cl" hint-placeholder-count="12">
+                    <div onMouseEnter="{{cl.enter}}" style="flex: 1; height: 100%"></div>
+                  </sc-for>
+                </div>
+                <sc-if value="{{tr.hasTip}}" hint-placeholder-val="{{ false }}">
+                  <div role="status" style="position: absolute; top: -6px; z-index: 2; padding: 6px 8px; background: #FFFFFF; border: 1px solid #E6E6EA; border-radius: 8px; box-shadow: 0 8px 20px rgba(24, 24, 27, 0.10); font-size: 12px; white-space: nowrap; pointer-events: none; display: flex; gap: 8px; {{tr.tipStyle}}">
+                    <span style="color: #6B6B74">{{tr.tipWeek}}</span><strong style="font-weight: 600">{{tr.tipValue}}</strong>
+                  </div>
+                </sc-if>
+              </div>
+              <div aria-hidden="true" style="display: flex; justify-content: space-between; margin-right: 40px; font-size: 11px; color: #6B6B74">
+                <span>{{tr.firstX}}</span><span>{{tr.lastX}}</span>
+              </div>
+            </figure>
+          </section>
+        </sc-for>
+      </div>
+
+      <!-- Helping others -->
+      <section aria-labelledby="help-h" style="display: flex; flex-direction: column; gap: 16px; padding: 16px 20px; border: 1px solid #E6E6EA; border-radius: 12px">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <h2 id="help-h" style="margin: 0; font-size: 14px; font-weight: 600">{{L.helping}}</h2>
+          <span style="font-size: 12px; color: #6B6B74">{{L.helpingSub}}</span>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 24px">
+          <div style="flex: 2 1 480px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+            <sc-for list="{{help}}" as="h" hint-placeholder-count="3">
+              <div style="display: flex; gap: 12px; padding: 12px; border-radius: 10px; background: #FAFAFB">
+                <span aria-hidden="true" style="flex: none; width: 32px; height: 32px; border-radius: 8px; background: {{accentSoft}}; color: {{accent}}; display: flex; align-items: center; justify-content: center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{h.icon}}"></path></svg>
+                </span>
+                <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+                  <span style="font-size: 12px; line-height: 16px; color: #52525B">{{h.label}}</span>
+                  <span style="font-size: 20px; line-height: 26px; font-weight: 600">{{h.value}}</span>
+                  <span style="font-size: 12px; line-height: 16px; color: #6B6B74">{{h.sub}}</span>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="flex: 1 1 240px; display: flex; flex-direction: column; gap: 8px">
+            <span style="font-size: 12px; font-weight: 500; color: #6B6B74">{{L.helpedMost}}</span>
+            <sc-for list="{{helped}}" as="hp" hint-placeholder-count="3">
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 13px">
+                <span style="flex: none; width: 24px; height: 24px; border-radius: 12px; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{hp.avatar}}">{{hp.initials}}</span>
+                <span style="flex: 1; color: #3F3F46">{{hp.name}}</span>
+                <span style="color: #52525B">{{hp.count}}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <!-- Open tasks -->
+      <section aria-labelledby="open-h" style="display: flex; flex-direction: column">
+        <div style="display: flex; align-items: center; gap: 8px; height: 40px; border-bottom: 1px solid #E6E6EA">
+          <h2 id="open-h" style="margin: 0; font-size: 14px; font-weight: 600">{{L.openTasks}}</h2>
+          <span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 10px; background: #F1F1F3; color: #52525B; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center">{{openCount}}</span>
+          <span style="flex: 1"></span>
+          <a href="ReportsWorkload.dc.html" style="font-size: 13px; font-weight: 500; color: {{accent}}">{{L.seeWorkload}}</a>
+        </div>
+        <div style="overflow-x: auto">
+          <div style="min-width: 760px">
+            <sc-for list="{{openTasks}}" as="t" hint-placeholder-count="5">
+              <a class="trow" href="TaskDetail.dc.html" style="display: grid; grid-template-columns: 28px minmax(0, 1fr) 176px 136px 120px 96px; align-items: center; height: 44px; border-bottom: 1px solid #EFEFF2; color: #18181B">
+                <span aria-hidden="true" style="width: 10px; height: 10px; margin-left: 6px; box-sizing: border-box; border-radius: 5px; {{t.statusDot}}"></span>
+                <span style="min-width: 0; padding-right: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{t.name}}</span>
+                <span style="display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 12px; color: #52525B">
+                  <span style="flex: none; width: 8px; height: 8px; border-radius: 4px; {{t.projDot}}"></span>
+                  <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{t.project}}</span>
+                </span>
+                <span style="font-size: 13px; color: #3F3F46">{{t.status}}</span>
+                <span style="font-size: 13px; white-space: nowrap; {{t.dueStyle}}">{{t.due}}</span>
+                <span style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #3F3F46">
+                  <svg width="14" height="14" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{t.flagStyle}}"><path d="M4 22V4"></path><path d="M4 4h12l-2 4 2 4H4"></path></svg>
+                  {{t.priority}}
+                </span>
+              </a>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"language":{"editor":"enum","default":"mn","options":["mn","en"]},"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"$preview":{"width":1440,"height":1240}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: undefined, person: 'dorj', pickerOpen: false, period: '4w', hover: {}, openSpaces: { product: true } };
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const lang = s.lang || this.props.language || 'mn';
+    const mn = lang === 'mn';
+    const pick = (pair) => (mn ? pair[0] : pair[1]);
+    const accent = this.props.accent ?? '#6E56CF';
+    const accentSoft = accent + '1A';
+
+    const STR = {
+      mn: {
+        workspace: 'Ажлын орчин', search: 'Хайх', collapse: 'Хажуу самбарыг хураах',
+        myTasks: 'Миний ажлууд', inbox: 'Мэдэгдэл', reports: 'Тайлан', spaces: 'Орон зай', newSpace: 'Шинэ орон зай',
+        language: 'Хэл', invite: 'Хамт олноо урих', online: 'Онлайн',
+        updated: '5 минутын өмнө шинэчлэгдсэн', period: 'Хугацаа', export: 'CSV татах',
+        pickPerson: 'Гишүүн сонгох', adminOnly: 'Зөвхөн админд харагдана',
+        note: 'Эдгээрийг 1:1 ярианы эхлэл болгон ашиглаарай — оноо биш.',
+        completed: 'Дууссан', onTime: 'Хугацаандаа', cycle: 'Гүйцэтгэх хугацааны медиан', overdueNow: 'Одоо хугацаа хэтэрсэн', review: 'Хянах хугацаа',
+        prev: 'өмнөх', days: 'хоног', tasksUnit: 'ажил', pts: 'оноо',
+        reviewSub: 'хянагчаар', noReviews: 'Энэ хугацаанд хянаагүй', none: 'Хугацаа хэтэрсэн ажил алга',
+        trendDone: 'Долоо хоногт дууссан ажил', trendCycle: 'Гүйцэтгэх хугацаа', trendSub: 'Сүүлийн 12 долоо хоног',
+        seriesDone: 'Дууссан', seriesCycle: 'Медиан (хоног)', teamMedian: 'Багийн медиан',
+        helping: 'Бусдад туслах нь', helpingSub: 'Бусдын ажил дээр хийсэн хувь нэмэр · сүүлийн 4 долоо хоног',
+        hComments: 'Бусдын ажилд өгсөн сэтгэгдэл', hSubtasks: 'Бусдын ажлын дэд даалгавар', hMentions: 'Хариулсан дурдалт',
+        helpedMost: 'Хамгийн их хамтарсан', openTasks: 'Одоогийн нээлттэй ажлууд', seeWorkload: 'Ачааллыг харах',
+        today: 'Өнөөдөр', tomorrow: 'Маргааш', noDue: 'Огноогүй', weekOf: '-ны долоо хоног'
+      },
+      en: {
+        workspace: 'Workspace', search: 'Search', collapse: 'Collapse sidebar',
+        myTasks: 'My Tasks', inbox: 'Inbox', reports: 'Reports', spaces: 'Spaces', newSpace: 'New space',
+        language: 'Language', invite: 'Invite teammates', online: 'Online',
+        updated: 'Updated 5 minutes ago', period: 'Period', export: 'Export CSV',
+        pickPerson: 'Choose a person', adminOnly: 'Visible to admins only',
+        note: 'Use these as a starting point for 1:1 conversations, not as a score.',
+        completed: 'Completed', onTime: 'On-time', cycle: 'Median cycle time', overdueNow: 'Overdue now', review: 'Review turnaround',
+        prev: 'previous', days: 'days', tasksUnit: 'tasks', pts: 'pts',
+        reviewSub: 'as reviewer', noReviews: 'No reviews this period', none: 'No overdue tasks',
+        trendDone: 'Completed per week', trendCycle: 'Cycle time', trendSub: 'Last 12 weeks',
+        seriesDone: 'Completed', seriesCycle: 'Median (days)', teamMedian: 'Team median',
+        helping: 'Helping others', helpingSub: 'Contributions on other people’s tasks · last 4 weeks',
+        hComments: 'Comments on others’ tasks', hSubtasks: 'Subtasks done on others’ tasks', hMentions: 'Mentions answered',
+        helpedMost: 'Worked with most', openTasks: 'Current open tasks', seeWorkload: 'See workload',
+        today: 'Today', tomorrow: 'Tomorrow', noDue: 'No due date', weekOf: 'Week of '
+      }
+    };
+    const L = STR[lang] || STR.mn;
+
+    const langDefs = [{ code: 'mn', short: 'МН', full: 'Монгол' }, { code: 'en', short: 'EN', full: 'English' }];
+    const segOn = 'background:#FFFFFF;color:#18181B;box-shadow:0 1px 2px rgba(24,24,27,0.08)';
+    const segOff = 'background:transparent;color:#52525B';
+    const langs = langDefs.map((d) => ({ ...d, active: d.code === lang, pick: () => this.setState({ lang: d.code }), style: d.code === lang ? segOn : 'background:transparent;color:#6B6B74' }));
+    const me = { initials: mn ? 'АБ' : 'AB', full: mn ? 'Ану Болд' : 'Anu Bold' };
+
+    const tabs = [['overview', ['Тойм', 'Overview'], 'Reports.dc.html'], ['sprints', ['Спринт', 'Sprints'], 'ReportsSprints.dc.html'], ['workload', ['Ачаалал', 'Workload'], 'ReportsWorkload.dc.html'], ['people', ['Хүмүүс', 'People'], '#']].map(([id, lb, href]) => ({
+      label: pick(lb), href, active: id === 'people',
+      style: id === 'people' ? 'color:#18181B;box-shadow:inset 0 -2px 0 ' + accent : 'color:#6B6B74'
+    }));
+    const period = s.period || '4w';
+    const periods = [['week', ['Энэ долоо хоног', 'This week']], ['4w', ['Сүүлийн 4 долоо хоног', 'Last 4 weeks']], ['q', ['Энэ улирал', 'This quarter']], ['custom', ['Өөрөө сонгох', 'Custom']]].map(([id, lb]) => ({
+      label: pick(lb), active: period === id, pick: () => this.setState({ period: id }), style: period === id ? segOn : segOff
+    }));
+    const rangeText = mn ? '9-р сарын 12 – 10-р сарын 9 · өмнөх 4 долоо хоногтой харьцуулав' : 'Sep 12 – Oct 9 · compared with the previous 4 weeks';
+
+    // ---- People ----
+    const prio = {
+      urgent: [['Яаралтай', 'Urgent'], 'fill:#DC2626;stroke:#DC2626'],
+      high: [['Өндөр', 'High'], 'fill:#EA580C;stroke:#EA580C'],
+      medium: [['Дунд', 'Medium'], 'fill:#CA8A04;stroke:#CA8A04'],
+      low: [['Бага', 'Low'], 'fill:none;stroke:#A1A1AA']
+    };
+    const projects = {
+      ar: [['Апп шинэчлэл', 'App Redesign'], '#7C5CE0'],
+      co: [['Төлбөрийн хуудас v2', 'Checkout v2'], '#0284C7'],
+      q4: [['Q4 замын зураг', 'Q4 Roadmap'], '#D97706'],
+      mr: [['Мобайл хувилбар 4.2', 'Mobile release 4.2'], '#16A34A']
+    };
+    const statuses = {
+      todo: [['Хийх', 'To Do'], 'border:2px solid #A1A1AA'],
+      progress: [['Хийгдэж буй', 'In Progress'], 'border:2px solid #D97706;background:linear-gradient(90deg,#D97706 50%,transparent 50%)'],
+      review: [['Хянагдаж буй', 'In Review'], 'border:2px solid ' + accent + ';background:' + accent + '33']
+    };
+    const T = (n, pr, proj, st, due) => ({ n, pr, proj, st, due });
+    const team = {
+      anu: { name: ['Ану Б.', 'Anu B.'], ini: ['АБ', 'AB'], role: ['Бүтээгдэхүүний менежер', 'Product manager'], av: 'background:#E0E7FF;color:#3730A3',
+        m: [9, 21, 8, 19, 89, 86, 2.6, 2.9, 1.2, 1.5, 11, 40, 35, 2, 19, 19, '1ц', '3h'], helped: [['sara', 9], ['tem', 6], ['dorj', 4]], tasks: [
+          T(['Q4-ийн тэргүүлэх чиглэлийг батлах', 'Approve Q4 priorities'], 'urgent', 'q4', 'progress', [10, 7]),
+          T(['Хадгалсан сагсны PRD бичих', 'Write PRD: saved carts'], 'medium', 'co', 'progress', [10, 9]),
+          T(['Танилцуулах урсгалыг шинэчлэх (3 дэлгэц)', 'Redesign onboarding flow (3 screens)'], 'high', 'ar', 'progress', [10, 12]),
+          T(['ТУЗ-д бэлдэх илтгэл', 'Board prep deck'], 'medium', 'q4', 'todo', [10, 12]),
+          T(['Удирдлагатай Q4 замын зургийн хяналт', 'Q4 roadmap review with leadership'], 'medium', 'q4', 'todo', [11, 3])
+        ] },
+      tem: { name: ['Тэмүүлэн Г.', 'Temuulen G.'], ini: ['ТГ', 'TG'], role: ['Мобайл хөгжүүлэгч', 'Mobile engineer'], av: 'background:#DCFCE7;color:#166534',
+        m: [8, 26, 9, 28, 75, 78, 4.2, 3.9, 1.8, 1.7, 5, 14, 16, 3, 7, 8, '4ц', '4h'], helped: [['bat', 5], ['dorj', 3], ['sara', 2]], tasks: [
+          T(['Шинэ доод таб самбар хэрэгжүүлэх', 'Implement new bottom tab bar'], 'urgent', 'ar', 'progress', [10, 10]),
+          T(['Одоогийн навигацийн хэв маягийг шалгах', 'Audit current navigation patterns'], 'medium', 'ar', 'todo', [10, 14]),
+          T(['Сагсанд нэмэх үеийн чичиргээ', 'Haptics for add-to-cart'], 'low', 'ar', 'todo', null)
+        ] },
+      sara: { name: ['Сараа К.', 'Sara K.'], ini: ['СК', 'SK'], role: ['Дизайнер', 'Product designer'], av: 'background:#FFE4E6;color:#9F1239',
+        m: [12, 34, 13, 36, 83, 81, 3.1, 3.3, 2.4, 2.2, 6, 31, 27, 4, 14, 15, '2ц', '2h'], helped: [['dorj', 7], ['anu', 6], ['mia', 4]], tasks: [
+          T(['Танилцуулгын текстийг хянах', 'Review onboarding copy'], 'high', 'ar', 'review', [10, 6]),
+          T(['Бүтээгдэхүүний картын компонент v2', 'Product card component v2'], 'high', 'ar', 'progress', [10, 10]),
+          T(['Дүрс тэмдгийн багц шинэчлэх (48 дүрс)', 'Icon set refresh (48 icons)'], 'low', 'ar', 'review', [10, 13]),
+          T(['Бараан горимын өнгөний токен', 'Dark mode color tokens'], 'low', 'ar', 'todo', [10, 16]),
+          T(['Төлбөрийн хуудас v2 дизайны хяналт', 'Checkout v2 design review'], 'medium', 'co', 'todo', [10, 19]),
+          T(['Хайлтын үр дүнгийн хоосон төлөвүүд', 'Empty states for search results'], 'medium', 'ar', 'todo', [10, 23]),
+          T(['Бараан горимын QA', 'Dark mode QA pass'], 'low', 'ar', 'todo', null)
+        ] },
+      dorj: { name: ['Дорж Э.', 'Dorj E.'], ini: ['ДЭ', 'DE'], role: ['Фронтенд хөгжүүлэгч', 'Frontend engineer'], av: 'background:#FEF3C7;color:#92400E',
+        m: [14, 38, 11, 31, 79, 85, 3.8, 3.4, 1.6, 2.1, 9, 23, 18, 6, 11, 12, '2ц', '2h'], helped: [['sara', 8], ['bat', 5], ['tem', 4]], tasks: [
+          T(['Төлбөрийн үйлчилгээ үзүүлэгчийн хяналт', 'Payment provider review'], 'urgent', 'co', 'review', [10, 3]),
+          T(['Төлбөрийн хуудас — респонсив байрлал', 'Checkout page — responsive layout'], 'urgent', 'ar', 'review', [10, 8]),
+          T(['Промо кодын онцгой тохиолдлын засвар', 'Promo code edge-case fix'], 'high', 'co', 'progress', [10, 10]),
+          T(['Тохиргооны дэлгэцийн шилжүүлэлтийн төлөвлөгөө', 'Settings migration plan'], 'medium', 'ar', 'todo', [10, 20]),
+          T(['Гаргалтад бэлэн байдлын хяналт', 'Launch readiness review'], 'medium', 'co', 'todo', [10, 26])
+        ] },
+      mia: { name: ['Мишээл Л.', 'Mia L.'], ini: ['МЛ', 'ML'], role: ['UX судлаач', 'UX researcher'], av: 'background:#E0F2FE;color:#075985',
+        m: [7, 15, 6, 13, 86, 83, 2.9, 3.0, 1.9, 2.0, 4, 17, 15, 3, 8, 9, '3ц', '3h'], helped: [['sara', 6], ['anu', 3]], tasks: [
+          T(['Үндсэн товчлууруудын хүртээмжийн шалгалт', 'Accessibility pass on primary buttons'], 'high', 'ar', 'review', [10, 7]),
+          T(['Хэрэглээний тестийн скрипт', 'Usability test script'], 'low', 'ar', 'todo', [10, 22]),
+          T(['Хэрэглээний тестийн уулзалтууд', 'Usability sessions'], 'medium', 'ar', 'todo', [10, 28])
+        ] },
+      oyu: { name: ['Оюука Н.', 'Oyuka N.'], ini: ['ОН', 'ON'], role: ['Өгөгдлийн шинжээч', 'Data analyst'], av: 'background:#F3E8FF;color:#6B21A8',
+        m: [6, 14, 6, 12, 100, 92, 2.4, 2.6, 0, 0, 0, 12, 10, 1, 6, 6, '1ц', '1h'], helped: [['anu', 4], ['dorj', 2]], tasks: [
+          T(['Төлбөрийн хэсгийн аналитик эвентүүд', 'Analytics events for checkout'], 'medium', 'ar', 'progress', [10, 15]),
+          T(['Хадгалсан сагсны судалгаа', 'Saved carts discovery'], 'medium', 'co', 'progress', [10, 16])
+        ] },
+      bat: { name: ['Бат О.', 'Bat O.'], ini: ['БО', 'BO'], role: ['Инженерийн ахлагч', 'Engineering lead'], av: 'background:#CCFBF1;color:#115E59',
+        m: [10, 22, 9, 20, 90, 88, 2.2, 2.5, 0.9, 1.1, 15, 28, 30, 9, 12, 12, '1ц', '1h'], helped: [['dorj', 9], ['tem', 7], ['sara', 3]], tasks: [
+          T(['iOS Safari ба Android дээр QA', 'QA on iOS Safari and Android'], 'high', 'ar', 'todo', [10, 9]),
+          T(['Код хянах шалгах жагсаалт', 'Code review checklist'], 'low', 'mr', 'todo', null)
+        ] }
+    };
+    const ids = ['anu', 'tem', 'sara', 'dorj', 'mia', 'oyu', 'bat'];
+    const pid = team[s.person] ? s.person : 'dorj';
+    const P = team[pid];
+    const m = P.m;
+    const person = { name: pick(P.name), initials: pick(P.ini), role: pick(P.role), avatar: P.av };
+    const peopleOptions = ids.map((id) => ({
+      name: pick(team[id].name), initials: pick(team[id].ini), role: pick(team[id].role), avatar: team[id].av,
+      selected: id === pid, rowStyle: id === pid ? 'background:' + accentSoft : 'background:transparent',
+      pick: () => this.setState({ person: id, pickerOpen: false, hover: {} })
+    }));
+
+    // ---- Open tasks + overdue ----
+    const monthsEn = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const TODAY = 1009;
+    const dv = (d) => (d ? d[0] * 100 + d[1] : 99999);
+    const dateLabel = (d) => {
+      if (!d) return L.noDue;
+      if (dv(d) === TODAY) return L.today;
+      if (dv(d) === TODAY + 1) return L.tomorrow;
+      return mn ? d[0] + '-р сарын ' + d[1] : monthsEn[d[0]] + ' ' + d[1];
+    };
+    const overdueTasks = P.tasks.filter((t) => t.due && dv(t.due) < TODAY);
+    const oldestLate = overdueTasks.length ? Math.max.apply(null, overdueTasks.map((t) => (t.due[0] === 10 ? 9 - t.due[1] : 9 + 30 - t.due[1]))) : 0;
+    const openTasks = P.tasks.slice().sort((a, b) => dv(a.due) - dv(b.due)).map((t) => {
+      const late = t.due && dv(t.due) < TODAY;
+      const isToday = t.due && dv(t.due) === TODAY;
+      return {
+        name: pick(t.n), project: pick(projects[t.proj][0]), projDot: 'background:' + projects[t.proj][1],
+        status: pick(statuses[t.st][0]), statusDot: statuses[t.st][1],
+        due: dateLabel(t.due) + (late ? (mn ? ' · хэтэрсэн' : ' · overdue') : ''),
+        dueStyle: late ? 'color:#C42B1C;font-weight:500' : (isToday ? 'color:#B45309;font-weight:500' : 'color:#52525B'),
+        priority: pick(prio[t.pr][0]), flagStyle: prio[t.pr][1]
+      };
+    });
+
+    // ---- Cards (neutral deltas) ----
+    const arrow = (cur, prev) => cur === prev ? 'transform:rotate(90deg)' : (cur > prev ? '' : 'transform:rotate(180deg)');
+    const fmtDelta = (cur, prev, dec, unit) => {
+      const d = Math.abs(cur - prev);
+      return (dec ? d.toFixed(dec) : String(d)) + (unit || '');
+    };
+    const hasReviews = m[10] > 0;
+    const cards = [
+      { label: L.completed, value: String(m[0]), unit: L.tasksUnit + ' · ' + m[1] + ' ' + L.pts, hasDelta: true,
+        delta: fmtDelta(m[0], m[2]), arrowStyle: arrow(m[0], m[2]), sub: L.prev + ': ' + m[2] + ' · ' + m[3] + ' ' + L.pts, subStyle: '', valueStyle: '', boxStyle: '' },
+      { label: L.onTime, value: m[4] + '%', unit: '', hasDelta: true,
+        delta: fmtDelta(m[4], m[5], 0, mn ? ' пункт' : ' pts'), arrowStyle: arrow(m[4], m[5]), sub: L.prev + ': ' + m[5] + '%', subStyle: '', valueStyle: '', boxStyle: '' },
+      { label: L.cycle, value: m[6].toFixed(1), unit: L.days, hasDelta: true,
+        delta: fmtDelta(m[6], m[7], 1), arrowStyle: arrow(m[6], m[7]), sub: L.prev + ': ' + m[7].toFixed(1) + ' ' + L.days, subStyle: '', valueStyle: '', boxStyle: '' },
+      { label: L.overdueNow, value: String(overdueTasks.length), unit: L.tasksUnit, hasDelta: false, delta: '', arrowStyle: '',
+        sub: overdueTasks.length ? (mn ? 'Хамгийн удаан нь ' + oldestLate + ' хоног хоцорсон' : 'Oldest is ' + oldestLate + ' days late') : L.none,
+        subStyle: overdueTasks.length ? 'color:#C42B1C;font-weight:500' : '',
+        valueStyle: overdueTasks.length ? 'color:#C42B1C' : '',
+        boxStyle: overdueTasks.length ? 'background:#FFF8F7;border-color:#F3D3CF' : '' },
+      { label: L.review, value: hasReviews ? m[8].toFixed(1) : '—', unit: hasReviews ? L.days : '', hasDelta: hasReviews,
+        delta: hasReviews ? fmtDelta(m[8], m[9], 1) : '', arrowStyle: arrow(m[8], m[9]),
+        sub: hasReviews ? (mn ? m[10] + ' хяналт · өмнөх: ' + m[9].toFixed(1) : m[10] + ' reviews · previous: ' + m[9].toFixed(1)) : L.noReviews,
+        subStyle: '', valueStyle: '', boxStyle: '' }
+    ];
+
+    // ---- Trends ----
+    const weeks = [[7, 20], [7, 27], [8, 3], [8, 10], [8, 17], [8, 24], [8, 31], [9, 7], [9, 14], [9, 21], [9, 28], [10, 5]];
+    const wl = (w) => (mn ? w[0] + '/' + w[1] : monthsEn[w[0]] + ' ' + w[1]);
+    const baseDone = [2, 3, 3, 4, 2, 3, 4, 3, 3, 4, 4, 3];
+    const baseCycle = [3.1, 2.9, 3.4, 3.0, 3.2, 3.6, 3.3, 3.5, 3.9, 3.6, 4.1, 3.7];
+    const fDone = m[0] / 14, fCycle = m[6] / 3.8;
+    const doneSeries = baseDone.map((v) => Math.max(0, Math.round(v * fDone)));
+    const cycleSeries = baseCycle.map((v) => Math.round(v * fCycle * 10) / 10);
+    const hover = s.hover || {};
+    const mk = (key, title, seriesLabel, data, yMax, ref, fmt, unitTxt) => {
+      const H = 96, n = data.length;
+      const xp = (i) => (i + 0.5) / n;
+      const yp = (v) => H - (v / yMax) * H;
+      const hi = hover[key];
+      const has = hi !== undefined && hi !== null;
+      const last = data[n - 1];
+      return {
+        title, sub: L.trendSub, seriesLabel,
+        path: data.map((v, i) => (i ? 'L' : 'M') + (xp(i) * 1000).toFixed(1) + ' ' + yp(v).toFixed(1)).join(' '),
+        refStyle: 'top:' + yp(ref).toFixed(1) + 'px',
+        dotStyle: 'left:' + (xp(has ? hi : n - 1) * 100).toFixed(2) + '%;top:' + yp(has ? data[hi] : last).toFixed(1) + 'px',
+        lastLabel: fmt(last), lastStyle: 'top:' + yp(last).toFixed(1) + 'px',
+        firstX: wl(weeks[0]), lastX: wl(weeks[n - 1]),
+        cols: data.map((_, i) => ({ enter: () => { if ((this.state.hover || {})[key] !== i) this.setState({ hover: { ...(this.state.hover || {}), [key]: i } }); } })),
+        leave: () => this.setState({ hover: { ...(this.state.hover || {}), [key]: null } }),
+        hasTip: has,
+        tipWeek: has ? (mn ? wl(weeks[hi]) + L.weekOf : L.weekOf + wl(weeks[hi])) : '',
+        tipValue: has ? fmt(data[hi]) + ' ' + unitTxt : '',
+        tipStyle: has ? 'left:' + (xp(hi) * 100).toFixed(2) + '%;transform:translate(' + (hi > 8 ? 'calc(-100% - 10px)' : '10px') + ', -100%)' : '',
+        summary: title + ': ' + data.map((v, i) => wl(weeks[i]) + ' ' + fmt(v)).join(', ')
+      };
+    };
+    const trends = [
+      mk('done', L.trendDone, L.seriesDone, doneSeries, Math.max(6, Math.max.apply(null, doneSeries) + 1), 3, (v) => String(v), L.tasksUnit),
+      mk('cycle', L.trendCycle, L.seriesCycle, cycleSeries, 6, 3.2, (v) => v.toFixed(1), L.days)
+    ];
+
+    // ---- Helping others ----
+    const help = [
+      { label: L.hComments, value: String(m[11]), sub: L.prev + ': ' + m[12], icon: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z' },
+      { label: L.hSubtasks, value: String(m[13]), sub: mn ? m[13] > 0 ? 'бусдын ' + Math.min(m[13], 4) + ' ажил дээр' : '—' : (m[13] > 0 ? 'across ' + Math.min(m[13], 4) + ' tasks' : '—'), icon: 'M6 3v12a3 3 0 0 0 3 3h9M15 15l3 3-3 3' },
+      { label: L.hMentions, value: m[14] + ' / ' + m[15], sub: mn ? 'Хариулах медиан хугацаа ' + m[16] : 'Median reply time ' + m[17], icon: 'M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z' }
+    ];
+    const helped = P.helped.map(([id, n]) => ({
+      name: pick(team[id].name), initials: pick(team[id].ini), avatar: team[id].av,
+      count: mn ? n + ' удаа' : n + (n === 1 ? ' time' : ' times')
+    }));
+
+    // ---- Sidebar ----
+    const openSpaces = s.openSpaces || {};
+    const spaces = [
+      { id: 'product', name: ['Бүтээгдэхүүн', 'Product'], initial: ['Б', 'P'], badge: 'background:#EDE9FE;color:#5B21B6',
+        projects: [[['Апп шинэчлэл', 'App Redesign'], 'Main.dc.html'], [['Төлбөрийн хуудас v2', 'Checkout v2'], '#'], [['Q4 замын зураг', 'Q4 Roadmap'], '#']] },
+      { id: 'engineering', name: ['Инженерчлэл', 'Engineering'], initial: ['И', 'E'], badge: 'background:#DCFCE7;color:#166534',
+        projects: [[['Платформ шилжүүлэлт', 'Platform migration'], '#'], [['Мобайл хувилбар 4.2', 'Mobile release 4.2'], '#']] },
+      { id: 'design', name: ['Дизайн', 'Design'], initial: ['Д', 'D'], badge: 'background:#FFE4E6;color:#9F1239',
+        projects: [[['Дизайн систем', 'Design system'], '#'], [['Брэнд шинэчлэл', 'Brand refresh'], '#']] }
+    ].map((x) => {
+      const open = !!openSpaces[x.id];
+      return {
+        name: pick(x.name), initial: pick(x.initial), badgeStyle: x.badge, open,
+        chevStyle: 'transition:transform .15s;transform:rotate(' + (open ? 90 : 0) + 'deg)',
+        toggle: () => this.setState({ openSpaces: { ...(this.state.openSpaces || {}), [x.id]: !open } }),
+        projects: x.projects.map((p) => ({ name: pick(p[0]), href: p[1] }))
+      };
+    });
+
+    return {
+      lang, L, langs, me, accent, accentSoft, tabs, periods, rangeText, spaces,
+      pickerOpen: !!s.pickerOpen, togglePicker: () => this.setState({ pickerOpen: !this.state.pickerOpen }),
+      person, peopleOptions, cards, trends, help, helped,
+      openTasks, openCount: String(openTasks.length)
+    };
+  }
+}
+</script>
+</body>
+</html>
