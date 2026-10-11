@@ -50,6 +50,7 @@ const detail = (task: TaskListItem) => ({
   description: null,
   descriptionText: '',
   sprint: null,
+  reviewer: null,
   creator: task.assignees[0] ?? ME.user,
   subtasks: [],
   attachments: [],
@@ -78,6 +79,7 @@ describe('project list', () => {
     useUiStore.setState({
       collapsedGroups: {},
       lastWorkspaceId: null,
+      listColumns: { size: false },
       createOpen: false,
       paletteOpen: false,
       shortcutsOpen: false,
@@ -264,6 +266,22 @@ describe('project list', () => {
       expect(new URLSearchParams(router.state.location.search).get('task')).toBe('APP-131');
     });
     expect(await screen.findByRole('dialog', { name: 'APP-131 ажил' })).toBeInTheDocument();
+  });
+
+  it('shows the optional Size column from the Columns menu', async () => {
+    api();
+    renderAt(LIST);
+    await screen.findByRole('table', { name: 'App Redesign төслийн ажлууд' });
+    expect(screen.queryByRole('columnheader', { name: 'Хэмжээ' })).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Багана' }));
+    fireEvent.click(await screen.findByRole('menuitemradio', { name: 'Хэмжээ' }));
+    expect(await screen.findByRole('columnheader', { name: 'Хэмжээ' })).toBeInTheDocument();
+    const row = rowOf('Audit current navigation patterns');
+    expect(
+      within(row).getByRole('button', { name: '«Audit current navigation patterns» — хэмжээ' }),
+    ).toBeInTheDocument();
+    expect(useUiStore.getState().listColumns.size).toBe(true);
   });
 
   it('opens the drawer when a row is clicked', async () => {

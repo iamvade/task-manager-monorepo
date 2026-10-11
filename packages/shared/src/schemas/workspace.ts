@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { paletteKeySchema, workspaceRoleSchema } from '../enums.js';
-import { userRefSchema } from './common.js';
+import { NOTHING_TO_UPDATE, nonEmptyPatch, userRefSchema } from './common.js';
 
 /** A workspace member with their role and job title (pickers, member lists, settings). */
 export const workspaceMemberSchema = z
@@ -9,16 +9,35 @@ export const workspaceMemberSchema = z
     role: workspaceRoleSchema,
     /** Job title shown as a role hint, e.g. "Eng lead". */
     title: z.string().nullable(),
+    /** Points this person can take on over the next 2 weeks (Workload capacity marker). */
+    capacityPoints: z.number().int(),
     joinedAt: z.iso.datetime(),
   })
   .meta({ id: 'WorkspaceMember' });
 export type WorkspaceMember = z.infer<typeof workspaceMemberSchema>;
 
-/** `PATCH /workspaces/:id/members/:userId` — owners are made at workspace creation only. */
-export const updateMemberRoleSchema = z
-  .object({ role: z.enum(['admin', 'member']) })
-  .meta({ id: 'UpdateMemberRole' });
-export type UpdateMemberRole = z.infer<typeof updateMemberRoleSchema>;
+export const MAX_CAPACITY_POINTS = 100;
+
+/**
+ * `PATCH /workspaces/:id/members/:userId` (admins). Owners are made at workspace creation only, so
+ * `role` is admin or member; a blank `title` clears it.
+ */
+export const updateMemberSchema = z
+  .object({
+    role: z.enum(['admin', 'member']),
+    title: z
+      .string()
+      .trim()
+      .max(60)
+      .nullable()
+      .transform((t) => (t === '' ? null : t)),
+    capacityPoints: z.number().int().min(0).max(MAX_CAPACITY_POINTS),
+  })
+  .partial()
+  .strict()
+  .refine(nonEmptyPatch, NOTHING_TO_UPDATE)
+  .meta({ id: 'UpdateMember' });
+export type UpdateMember = z.input<typeof updateMemberSchema>;
 
 export const sidebarProjectSchema = z
   .object({

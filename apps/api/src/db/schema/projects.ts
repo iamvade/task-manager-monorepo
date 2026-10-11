@@ -49,6 +49,8 @@ export const projects = pgTable(
     /** Last issued task number; tasks take `task_seq + 1`. */
     taskSeq: integer('task_seq').notNull().default(0),
     position: position('position').notNull(),
+    /** Default reviewer for tasks entering review. */
+    leadId: uuid('lead_id').references(() => users.id, { onDelete: 'set null' }),
     archivedAt: timestamptz('archived_at'),
     createdAt: createdAt(),
   },
@@ -117,9 +119,12 @@ export const sprints = pgTable(
     projectId: uuid('project_id')
       .notNull()
       .references(() => projects.id, { onDelete: 'cascade' }),
-    name: text('name').notNull(),
+    /** Per-project sequence ("Sprint 14"), allocated under the project lock. */
+    number: integer('number').notNull(),
+    /** Null = "Sprint {number}", translated. */
+    name: text('name'),
     startDate: date('start_date', { mode: 'string' }).notNull(),
     endDate: date('end_date', { mode: 'string' }).notNull(),
   },
-  (t) => [index('sprints_project_id_idx').on(t.projectId)],
+  (t) => [unique('sprints_project_id_number_unique').on(t.projectId, t.number)],
 );

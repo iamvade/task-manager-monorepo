@@ -4,7 +4,6 @@ import type { DbOrTx } from '../db/client.js';
 import { positionAfter, positionBefore } from '../db/position.js';
 import { sprints, statuses, tags, tasks, users, workspaceMembers } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
-import type { TaskMutation, TaskRow } from './mutation.js';
 
 type StatusRow = typeof statuses.$inferSelect;
 
@@ -15,6 +14,12 @@ export const statusSnapshot = (s: StatusRow): StatusSnapshot => ({
   id: s.id,
   name: s.name,
   category: s.category,
+});
+
+export const sprintSnapshot = (s: Pick<typeof sprints.$inferSelect, 'id' | 'name' | 'number'>) => ({
+  id: s.id,
+  name: s.name,
+  number: s.number,
 });
 
 export async function requireStatusIn(db: DbOrTx, projectId: string, statusId: string) {
@@ -36,7 +41,12 @@ export async function requireSprintIn(db: DbOrTx, projectId: string, sprintId: s
 }
 
 /** Users by id, all of whom must be members of the workspace; by name. */
-export async function requireMembers(db: DbOrTx, workspaceId: string, ids: readonly string[]) {
+export async function requireMembers(
+  db: DbOrTx,
+  workspaceId: string,
+  ids: readonly string[],
+  what = 'Assignee',
+) {
   const unique = [...new Set(ids)];
   if (unique.length === 0) return [];
   const rows = await db
@@ -45,7 +55,7 @@ export async function requireMembers(db: DbOrTx, workspaceId: string, ids: reado
     .innerJoin(users, eq(users.id, workspaceMembers.userId))
     .where(and(eq(workspaceMembers.workspaceId, workspaceId), inArray(users.id, unique)))
     .orderBy(users.name);
-  if (rows.length !== unique.length) throw invalidReference('Assignee');
+  if (rows.length !== unique.length) throw invalidReference(what);
   return rows;
 }
 
@@ -80,27 +90,4 @@ export async function startOfStatus(db: DbOrTx, statusId: string) {
     .from(tasks)
     .where(eq(tasks.statusId, statusId));
   return positionBefore(row?.first);
-}
-
-/**
- * Moves `task` from status `from` to `to` (end of the new status unless `position` is given) and
- * logs `status.changed`. `completed_at` is set on entering a done status, cleared on leaving
- * one and kept between two done statuses.
- */
-export async function changeStatus(
-  m: TaskMutation,
-  task: TaskRow,
-  from: StatusRow,
-  to: StatusRow,
-  position?: string,
-) {
-  m.log(task.id, 'status.changed', { from: statusSnapshot(from), to: statusSnapshot(to) });
-  const wasDone = from.category === 'done';
-  const isDone = to.category === 'done';
-  return {
-    statusId: to.id,
-    position: position ?? (await endOfStatus(m.tx, to.id)),
-    completedAt: isDone ? (wasDone ? (task.completedAt ?? m.now) : m.now) : null,
-    updatedAt: m.now,
-  };
 }

@@ -11,6 +11,8 @@ import {
   FolderIcon,
   PersonIcon,
   PlusIcon,
+  ReviewerIcon,
+  SizeIcon,
   SprintIcon,
   StatusIcon,
   TagIcon,
@@ -32,6 +34,8 @@ import { ProjectPicker } from '../pickers/ProjectPicker';
 import { SprintPicker } from '../pickers/SprintPicker';
 import { StatusPicker } from '../pickers/StatusPicker';
 import { TagPicker } from '../pickers/TagPicker';
+import { sprintLabel } from '../../lib/sprint';
+import { SizeControl } from './SizeProperty';
 import { useTaskView } from './TaskContext';
 
 /** One row of the 112px-label grid (36px, 14px icon + label in `--text-muted`). */
@@ -95,8 +99,8 @@ interface TaskPropertiesProps {
 
 /**
  * Properties grid (TaskDetail.dc.html): Status (outlined, listbox), Assignees (pill chips +
- * dashed add), Due date ("Today, Oct 8 · Started Oct 4"), Priority, Tags, Sprint, Project
- * (moves the task). Every change is optimistic in the drawer and the view behind it.
+ * dashed add), Reviewer (while in review), Due date ("Today, Oct 8 · Started Oct 4"),
+ * Priority, Size, Tags, Sprint, Project (moves the task). Every change is optimistic in the drawer and the view behind it.
  */
 export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesProps) {
   const { t } = useTranslation();
@@ -114,6 +118,10 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
   const statusName = (s: { name: string | null; category: StatusCategory }) =>
     s.name ?? t(`status.${s.category}`);
   const sprint = sprints.find((s) => s.id === task.sprintId) ?? task.sprint;
+  const inReview = task.status.category === 'review';
+  const reviewer =
+    members.find((m) => m.user.id === task.reviewerId)?.user ??
+    (task.reviewer?.id === task.reviewerId ? task.reviewer : null);
 
   function dueLabel(date: string) {
     const rel = relativeDay(date, dates.today);
@@ -219,6 +227,42 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
         />
       </PropertyRow>
 
+      {inReview && (
+        <PropertyRow icon={<ReviewerIcon size={14} />} label={t('drawer.reviewer')}>
+          <AssigneePicker
+            single
+            label={t('drawer.reviewer')}
+            noneLabel={t('drawer.noReviewer')}
+            value={reviewer ? [reviewer] : []}
+            members={members}
+            teamIds={teamIds}
+            onChange={([next]) => {
+              const reviewerId = next?.id ?? null;
+              if (reviewerId !== task.reviewerId) {
+                update.mutate({ task, patch: { reviewerId }, reviewer: next ?? null });
+              }
+            }}
+            trigger={(props, open) => (
+              <FieldButton
+                props={props}
+                open={open}
+                label={t('drawer.reviewer')}
+                className={cn(!reviewer && 'font-normal text-faint')}
+              >
+                {reviewer ? (
+                  <>
+                    <Avatar user={reviewer} size={20} title={null} />
+                    <span className="truncate">{shortName(reviewer.name)}</span>
+                  </>
+                ) : (
+                  t('drawer.noReviewer')
+                )}
+              </FieldButton>
+            )}
+          />
+        </PropertyRow>
+      )}
+
       <PropertyRow icon={<CalendarIcon size={14} />} label={t('table.colDue')}>
         <DuePicker
           label={t('table.colDue')}
@@ -284,6 +328,16 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
         />
       </PropertyRow>
 
+      <PropertyRow icon={<SizeIcon size={14} />} label={t('taskSize.label')}>
+        <SizeControl
+          className="flex flex-wrap items-center gap-2.5 pl-2.5"
+          value={task.size}
+          onChange={(size) => {
+            if (size !== task.size) update.mutate({ task, patch: { size } });
+          }}
+        />
+      </PropertyRow>
+
       <PropertyRow icon={<TagIcon size={14} />} label={t('table.colTags')}>
         <div className="flex flex-wrap items-center gap-1 pl-2.5">
           {task.tags.map((tag) => (
@@ -334,7 +388,7 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
                   className="truncate"
                   title={dates.formatRange(sprint.startDate, sprint.endDate)}
                 >
-                  {sprint.name}
+                  {sprintLabel(t, sprint)}
                 </span>
               ) : (
                 t('drawer.noSprint')

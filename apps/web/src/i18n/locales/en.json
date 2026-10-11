@@ -132,7 +132,10 @@
       "assignee": "Assignee",
       "priority": "Priority",
       "none": "None"
-    }
+    },
+    "columns": "Columns",
+    "columnsMenu": "Show columns",
+    "columnSize": "Size"
   },
   "filters": {
     "sprintIs": "Sprint is",
@@ -181,6 +184,7 @@
     "colAssignee": "Assignee",
     "colDue": "Due date",
     "colPriority": "Priority",
+    "colSize": "Size",
     "colTags": "Tags",
     "actions": "Actions",
     "addTask": "Add task",
@@ -199,6 +203,7 @@
     "setAssignee": "Assignee of {{name}}",
     "setDue": "Due date of {{name}}",
     "setPriority": "Priority of {{name}}",
+    "setSize": "Size of {{name}}",
     "setTags": "Tags of {{name}}",
     "open": "Open",
     "reopen": "Reopen",
@@ -217,6 +222,25 @@
     "medium": "Medium",
     "low": "Low",
     "none": "No priority"
+  },
+  "taskSize": {
+    "label": "Size",
+    "none": "No size",
+    "points_one": "{{count}} point",
+    "points_other": "{{count}} points",
+    "option": "{{size}} = {{points}} · {{description}}",
+    "hint": "= {{points}} · used in Workload and Throughput reports",
+    "hintNone": "No size · used in Workload and Throughput reports",
+    "description": {
+      "S": "Small · about half a day",
+      "M": "Medium · 1–2 days",
+      "L": "Large · 3–4 days",
+      "XL": "Extra large · about a week, consider splitting"
+    },
+    "chipTitle": "Size (points)"
+  },
+  "sprint": {
+    "name": "Sprint {{number}}"
   },
   "dates": {
     "today": "Today",
@@ -319,6 +343,11 @@
       "created": "<b>{{actor}}</b> created this task",
       "prioritySet": "<b>{{actor}}</b> set priority to <b>{{to}}</b>",
       "priorityChanged": "<b>{{actor}}</b> changed priority from {{from}} to <b>{{to}}</b>",
+      "sizeSet": "<b>{{actor}}</b> set the size to <b>{{to}}</b>",
+      "sizeChanged": "<b>{{actor}}</b> changed the size from {{from}} to <b>{{to}}</b>",
+      "sizeCleared": "<b>{{actor}}</b> removed the size",
+      "reviewerSet": "<b>{{actor}}</b> set <b>{{name}}</b> as reviewer",
+      "reviewerCleared": "<b>{{actor}}</b> removed the reviewer",
       "statusChanged": "<b>{{actor}}</b> changed status from <from>{{from}}</from> to <to>{{to}}</to>",
       "statusSet": "<b>{{actor}}</b> changed status to <to>{{to}}</to>",
       "attached": "<b>{{actor}}</b> attached <b>{{filename}}</b>",
@@ -377,6 +406,8 @@
     "starts": "Starts {{date}}",
     "sprint": "Sprint",
     "noSprint": "No sprint",
+    "reviewer": "Reviewer",
+    "noReviewer": "No reviewer",
     "project": "Project",
     "descriptionPlaceholder": "Add a description… Markdown and @mentions work here",
     "saving": "Saving…",
@@ -601,6 +632,7 @@
     "assignee": "Assignee",
     "dueDate": "Due date",
     "priority": "Priority",
+    "size": "Size",
     "status": "Status",
     "tags": "Tags",
     "noTags": "No tags",
@@ -797,7 +829,15 @@
       "count_one": "{{count}} person",
       "count_other": "{{count}} people",
       "you": "(you)",
-      "changeRole": "Change role of {{name}}"
+      "changeRole": "Change role of {{name}}",
+      "jobTitle": "Job title",
+      "jobTitleOf": "Job title of {{name}}",
+      "jobTitlePlaceholder": "Add a title",
+      "capacity": "Capacity",
+      "capacityOf": "Capacity of {{name}} (points per 2 weeks)",
+      "capacityUnit": "pts / 2 wks",
+      "capacityHint": "Points each person can take on over the next 2 weeks. Workload shows it as the dashed capacity marker.",
+      "saved": "Saved"
     }
   },
   "errors": {

@@ -180,6 +180,21 @@ export const TagIcon = make(
   </>,
 );
 export const SprintIcon = make(<path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5" />);
+/** TaskDetail.dc.html Size row (ruler). */
+export const SizeIcon = make(
+  <>
+    <path d="M21.3 15.3 8.7 2.7a1 1 0 0 0-1.4 0L2.7 7.3a1 1 0 0 0 0 1.4l12.6 12.6a1 1 0 0 0 1.4 0l4.6-4.6a1 1 0 0 0 0-1.4z" />
+    <path d="m7.5 10.5 2-2M10.5 13.5l2-2M13.5 16.5l2-2" />
+  </>,
+);
+/** Reviewer row (not drawn in the designs; Lucide user-check). */
+export const ReviewerIcon = make(
+  <>
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="m16 11 2 2 4-4" />
+  </>,
+);
 export const FolderIcon = make(
   <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />,
 );

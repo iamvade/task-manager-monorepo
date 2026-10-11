@@ -85,7 +85,8 @@ describe('POST /projects/:id/from-template', () => {
     const events = await ctx.db.select().from(activity).where(inArray(activity.taskId, ids));
     expect(events).toHaveLength(18);
     expect(events.every((e) => e.type === 'task.created' && e.actorId === owner.id)).toBe(true);
-    expect(events[0]?.payload).toEqual({ templateId: 'product-launch' });
+    expect(events[0]?.payload).toMatchObject({ templateId: 'product-launch' });
+    expect(events[0]?.payload).toHaveProperty('status.category');
     const followers = await ctx.db
       .select()
       .from(taskFollowers)

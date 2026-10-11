@@ -20,6 +20,7 @@ export async function listMembers(
       email: users.email,
       role: workspaceMembers.role,
       title: workspaceMembers.title,
+      capacityPoints: workspaceMembers.capacityPoints,
       joinedAt: workspaceMembers.joinedAt,
     })
     .from(workspaceMembers)
@@ -35,10 +36,11 @@ export async function listMembers(
       )
     : base;
   const rows = await query.where(and(...conditions)).orderBy(asc(users.name));
-  return rows.map(({ role, title, joinedAt, ...user }) => ({
+  return rows.map(({ role, title, capacityPoints, joinedAt, ...user }) => ({
     user,
     role,
     title,
+    capacityPoints,
     joinedAt: joinedAt.toISOString(),
   }));
 }

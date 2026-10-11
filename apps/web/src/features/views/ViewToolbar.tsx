@@ -18,7 +18,8 @@ interface ViewToolbarProps {
 }
 
 /**
- * Filter (count of active filters) · Sort · Group · divider · + New Task (Main.dc.html toolbar).
+ * Filter (count of active filters) · Sort · Group · Columns (optional List columns, not in the
+ * designs) · divider · + New Task (Main.dc.html toolbar).
  * Filter, Sort and Group write the URL. The calendar has no Sort/Group (Calendar.dc.html).
  */
 export function ViewToolbar({ project = null, empty = false }: ViewToolbarProps) {
@@ -28,6 +29,8 @@ export function ViewToolbar({ project = null, empty = false }: ViewToolbarProps)
   const openCreate = useUiStore((s) => s.openCreate);
   const currentView = useCurrentView();
   const board = currentView === 'board';
+  const listColumns = useUiStore((s) => s.listColumns);
+  const setListColumn = useUiStore((s) => s.setListColumn);
   const newTask = () => {
     openCreate(
       project
@@ -119,6 +122,26 @@ export function ViewToolbar({ project = null, empty = false }: ViewToolbarProps)
               trigger={(props) => (
                 <ToolbarButton {...props} icon={<GroupIcon size={14} />}>
                   {t('toolbar.group', { field: t(`toolbar.groupFields.${view.group}`) })}
+                </ToolbarButton>
+              )}
+            />
+          )}
+          {!board && (
+            <Menu
+              label={t('toolbar.columnsMenu')}
+              items={[
+                {
+                  id: 'size',
+                  label: t('toolbar.columnSize'),
+                  checked: listColumns.size,
+                  onSelect: () => {
+                    setListColumn('size', !listColumns.size);
+                  },
+                },
+              ]}
+              trigger={(props) => (
+                <ToolbarButton {...props} icon={<ColumnsIcon size={14} />}>
+                  {t('toolbar.columns')}
                 </ToolbarButton>
               )}
             />

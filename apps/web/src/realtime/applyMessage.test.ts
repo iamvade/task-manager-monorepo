@@ -95,6 +95,23 @@ describe('createMessageHandler', () => {
     expect(s.stale(s.projectList)).toBe(false);
   });
 
+  it('patches the size from task.updated at once, then refetches', () => {
+    const s = setup();
+    const task = at(s.tasks, 0);
+    s.handler.handle({
+      type: 'task.updated',
+      ...base(task),
+      changes: ['size.changed'],
+      size: 'L',
+    });
+    const row = s.queryClient
+      .getQueryData<TaskListItem[]>(s.spaceList)
+      ?.find((t) => t.id === task.id);
+    expect(row?.size).toBe('L');
+    vi.advanceTimersByTime(COALESCE_MS);
+    expect(s.stale(s.projectList)).toBe(true);
+  });
+
   it('leaves task caches alone while a task mutation of mine is in flight', () => {
     const s = setup();
     const task = at(s.tasks, 0);

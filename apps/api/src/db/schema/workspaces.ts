@@ -1,4 +1,4 @@
-import { index, pgTable, primaryKey, text, uuid } from 'drizzle-orm/pg-core';
+import { date, index, integer, pgTable, primaryKey, text, uuid } from 'drizzle-orm/pg-core';
 import { citext, createdAt, id, timestamptz } from './columns.js';
 import { workspaceRoleEnum } from './enums.js';
 import { users } from './users.js';
@@ -22,6 +22,8 @@ export const workspaceMembers = pgTable(
     role: workspaceRoleEnum('role').notNull().default('member'),
     /** Job title shown as a role hint, e.g. "Eng lead". */
     title: text('title'),
+    /** Points this person can take on over the next 2 weeks (Workload capacity marker). */
+    capacityPoints: integer('capacity_points').notNull().default(15),
     joinedAt: timestamptz('joined_at').notNull().defaultNow(),
   },
   (t) => [
@@ -44,4 +46,17 @@ export const invites = pgTable(
     acceptedAt: timestamptz('accepted_at'),
   },
   (t) => [index('invites_workspace_id_idx').on(t.workspaceId)],
+);
+
+/** Public holidays skipped when counting working days (sprint days, burndown). */
+export const workspaceHolidays = pgTable(
+  'workspace_holidays',
+  {
+    workspaceId: uuid('workspace_id')
+      .notNull()
+      .references(() => workspaces.id, { onDelete: 'cascade' }),
+    date: date('date', { mode: 'string' }).notNull(),
+    name: text('name').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.workspaceId, t.date] })],
 );

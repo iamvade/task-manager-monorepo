@@ -1,4 +1,11 @@
-import { addDays, todayInZone, type StatusCategory, type TemplateId } from '@kite/shared';
+import {
+  addDays,
+  todayInZone,
+  type ActivityPayload,
+  type StatusCategory,
+  type TaskActivityType,
+  type TemplateId,
+} from '@kite/shared';
 import { and, eq, inArray, isNull, max, sql } from 'drizzle-orm';
 import { generateNKeysBetween } from 'fractional-indexing';
 import type { FastifyInstance } from 'fastify';
@@ -15,6 +22,9 @@ import {
   tasks,
 } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
+import { statusSnapshot } from '../tasks/refs.js';
+import { openSprintMemberships } from '../tasks/sprint.js';
+import { openStatusPeriods, projectLead } from '../tasks/status.js';
 import { buildProjectDetail } from './detail.js';
 import { listStatuses } from './statuses.js';
 import { TEMPLATES, type Text } from './templates/index.js';
@@ -84,12 +94,17 @@ export async function applyTemplate(
       tagIdByName = new Map(rows.map((r) => [r.name, r.id]));
     }
 
+    const [lastSprint] = await tx
+      .select({ number: max(sprints.number) })
+      .from(sprints)
+      .where(eq(sprints.projectId, projectId));
     const sprint = template.sprint
       ? one(
           await tx
             .insert(sprints)
             .values({
               projectId,
+              number: (lastSprint?.number ?? 0) + 1,
               name: pick(template.sprint.name),
               startDate: today,
               endDate: addDays(today, template.sprint.days - 1),
@@ -116,6 +131,9 @@ export async function applyTemplate(
       positionsByStatus.set(status.id, generateNKeysBetween(last, null, n));
     }
 
+    const lead = planned.some((p) => p.status.category === 'review')
+      ? await projectLead(tx, project)
+      : null;
     const created = await tx
       .insert(tasks)
       .values(
@@ -126,6 +144,7 @@ export async function applyTemplate(
           sprintId: sprint?.id ?? null,
           title: pick(def.title),
           priority: def.priority,
+          reviewerId: status.category === 'review' ? (lead?.id ?? null) : null,
           dueDate: def.dueInDays === undefined ? null : addDays(today, def.dueInDays),
           position: positionsByStatus.get(status.id)?.shift() ?? '',
           createdBy: user.id,
@@ -159,29 +178,69 @@ export async function applyTemplate(
     );
     if (tagRows.length > 0) await tx.insert(taskTags).values(tagRows);
 
-    const activityRows = template.tasks.map((_, i) => ({
+    await openStatusPeriods(
+      tx,
+      planned.map(({ status }, i) => ({ taskId: taskId(i), status, at: now, actorId: user.id })),
+    );
+    if (sprint) {
+      await openSprintMemberships(
+        tx,
+        planned.map((_, i) => ({
+          taskId: taskId(i),
+          sprintId: sprint.id,
+          at: now,
+          actorId: user.id,
+        })),
+      );
+    }
+
+    const row = (i: number, type: TaskActivityType, payload: Record<string, unknown>) => ({
       id: uuidv7(),
       workspaceId: project.workspaceId,
       projectId,
       taskId: taskId(i),
       actorId: user.id,
-      type: 'task.created' as const,
-      payload: { templateId },
+      type,
+      payload,
       createdAt: now,
-    }));
+    });
+    const activityRows = planned.flatMap(({ status }, i) => [
+      row(i, 'task.created', {
+        status: statusSnapshot(status),
+        templateId,
+      } satisfies ActivityPayload<'task.created'>),
+      ...(sprint
+        ? [
+            row(i, 'sprint.changed', {
+              from: null,
+              to: { id: sprint.id, name: sprint.name, number: sprint.number },
+            } satisfies ActivityPayload<'sprint.changed'>),
+          ]
+        : []),
+      ...(lead && status.category === 'review'
+        ? [
+            row(i, 'reviewer.changed', {
+              from: null,
+              to: lead,
+            } satisfies ActivityPayload<'reviewer.changed'>),
+          ]
+        : []),
+    ]);
     await tx.insert(activity).values(activityRows);
 
     return { createdCount: created.length, project: updated ?? project, activityRows };
   });
 
-  for (const { id, type, payload, ...row } of result.activityRows) {
+  const byTask = new Map<string, typeof result.activityRows>();
+  for (const r of result.activityRows) byTask.set(r.taskId, [...(byTask.get(r.taskId) ?? []), r]);
+  for (const [taskId, rows] of byTask) {
     app.events.emit({
       type: 'task.created',
-      workspaceId: row.workspaceId,
-      projectId: row.projectId,
-      taskId: row.taskId,
-      actorId: row.actorId,
-      activities: [{ id, type, payload }],
+      workspaceId: rows[0]?.workspaceId ?? '',
+      projectId,
+      taskId,
+      actorId: user.id,
+      activities: rows.map(({ id, type, payload }) => ({ id, type, payload })),
       assigneeIds: [],
       at: now,
     });

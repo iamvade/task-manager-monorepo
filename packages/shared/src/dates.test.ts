@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { addDays, daysBetween, startOfWeek, todayInZone, weekdayIndex } from './dates.js';
+import {
+  addDays,
+  addWorkingDays,
+  daysBetween,
+  isWorkingDay,
+  startOfWeek,
+  todayInZone,
+  weekdayIndex,
+  workingDaysBetween,
+} from './dates.js';
 
 describe('todayInZone', () => {
   it('uses the zone, not UTC', () => {
@@ -38,5 +47,29 @@ describe('daysBetween', () => {
     expect(daysBetween('2026-10-06', '2026-10-08')).toBe(2);
     expect(daysBetween('2026-10-08', '2026-10-06')).toBe(-2);
     expect(daysBetween('2026-12-31', '2027-01-01')).toBe(1);
+  });
+});
+
+describe('working days', () => {
+  const holidays = new Set(['2026-10-07']);
+
+  it('skips weekends and holidays', () => {
+    expect(isWorkingDay('2026-10-10')).toBe(false); // Saturday
+    expect(isWorkingDay('2026-10-07', holidays)).toBe(false);
+    expect(isWorkingDay('2026-10-07')).toBe(true);
+  });
+
+  it('adds working days in both directions', () => {
+    expect(addWorkingDays('2026-10-09', 1)).toBe('2026-10-12'); // Fri → Mon
+    expect(addWorkingDays('2026-10-12', -1)).toBe('2026-10-09');
+    expect(addWorkingDays('2026-10-06', 1, holidays)).toBe('2026-10-08');
+    expect(addWorkingDays('2026-10-10', 0)).toBe('2026-10-12');
+    expect(addWorkingDays('2026-10-06', 14)).toBe('2026-10-26');
+  });
+
+  it('counts working days inclusively', () => {
+    expect(workingDaysBetween('2026-10-06', '2026-10-24')).toBe(14);
+    expect(workingDaysBetween('2026-10-06', '2026-10-24', holidays)).toBe(13);
+    expect(workingDaysBetween('2026-10-09', '2026-10-08')).toBe(0);
   });
 });

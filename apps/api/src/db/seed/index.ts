@@ -9,7 +9,7 @@ import {
   type StatusCategory,
 } from '@kite/shared';
 import argon2 from 'argon2';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { generateNKeysBetween } from 'fractional-indexing';
 import { uuidv7 } from 'uuidv7';
 import type { Db } from '../client.js';
@@ -95,6 +95,10 @@ export async function runSeed(db: Db, options: SeedOptions): Promise<void> {
     await tx.insert(schema.attachments).values(rows.attachments);
     await tx.insert(schema.activity).values(rows.activity);
     await tx.insert(schema.notifications).values(rows.notifications);
+    // TEMP (phase c builds these rows explicitly): derive periods/memberships from the activity.
+    await tx.execute(
+      sql`select kite_backfill_status_periods(), kite_backfill_sprint_memberships()`,
+    );
   });
 
   console.log(
@@ -216,6 +220,7 @@ export function buildRows(
   const sprint = {
     id: uuidv7(),
     projectId: project(SPRINT.project).row.id,
+    number: 14,
     name: formatRange(clock.day(SPRINT.start), clock.day(SPRINT.end), lang),
     startDate: clock.day(SPRINT.start),
     endDate: clock.day(SPRINT.end),

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { dateSchema } from '../dates.js';
-import { paletteKeySchema, prioritySchema, statusCategorySchema } from '../enums.js';
+import { paletteKeySchema, prioritySchema, sizeSchema, statusCategorySchema } from '../enums.js';
 import { richTextDocSchema, richTextNodeSchema } from '../rich-text.js';
 import { NOTHING_TO_UPDATE, moveSchema, nonEmptyPatch, userRefSchema } from './common.js';
 import { projectSummarySchema, sprintSchema, statusSchema } from './project.js';
@@ -74,11 +74,15 @@ export const taskListItemSchema = z
     status: taskStatusRefSchema,
     title: z.string(),
     priority: prioritySchema,
+    /** Story points via SIZE_POINTS; null = unsized. */
+    size: sizeSchema.nullable(),
     startDate: dateSchema.nullable(),
     dueDate: dateSchema.nullable(),
     /** Fractional index within the status. */
     position: z.string(),
     sprintId: z.uuid().nullable(),
+    /** Set when the task enters review (the picked person, else the project lead). */
+    reviewerId: z.uuid().nullable(),
     completedAt: z.iso.datetime().nullable(),
     createdAt: z.iso.datetime(),
     updatedAt: z.iso.datetime(),
@@ -112,6 +116,7 @@ export const taskDetailSchema = taskListItemSchema
     description: richTextNodeSchema.nullable(),
     descriptionText: z.string(),
     sprint: sprintSchema.nullable(),
+    reviewer: userRefSchema.nullable(),
     creator: userRefSchema,
     /** By position. */
     subtasks: z.array(subtaskSchema),
@@ -135,6 +140,7 @@ export const createTaskSchema = z
     description: richTextDocSchema.nullable().optional(),
     statusId: z.uuid().optional(),
     priority: prioritySchema.optional(),
+    size: sizeSchema.nullable().optional(),
     assigneeIds: idList.optional(),
     tagIds: idList.optional(),
     startDate: dateSchema.nullable().optional(),
@@ -152,9 +158,15 @@ export const updateTaskSchema = z
     description: richTextDocSchema.nullable(),
     statusId: z.uuid(),
     priority: prioritySchema,
+    size: sizeSchema.nullable(),
     startDate: dateSchema.nullable(),
     dueDate: dateSchema.nullable(),
     sprintId: z.uuid().nullable(),
+    /**
+     * A workspace member, or null. Sent with a `statusId` that enters review, it is the reviewer
+     * picked for the move (the project lead otherwise); on its own it replaces the reviewer.
+     */
+    reviewerId: z.uuid().nullable(),
   })
   .partial()
   .strict()

@@ -44,6 +44,7 @@ describe('listing tasks', () => {
         .insert(sprints)
         .values({
           projectId: project.id,
+          number: 1,
           name: 'S',
           startDate: '2026-10-06',
           endDate: '2026-10-24',

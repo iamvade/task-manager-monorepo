@@ -3,6 +3,7 @@ import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Picker } from '../../components/ui/Picker';
 import { Popover, type TriggerProps } from '../../components/ui/Popover';
+import { sprintLabel } from '../../lib/sprint';
 import { useDates } from '../../lib/useDates';
 
 interface SprintPickerProps {
@@ -27,7 +28,7 @@ export function SprintPicker({ value, sprints, onChange, trigger, label }: Sprin
           items={items}
           value={value ?? NONE}
           getKey={(i) => i.id}
-          getLabel={(i) => i.sprint?.name ?? t('drawer.noSprint')}
+          getLabel={(i) => (i.sprint ? sprintLabel(t, i.sprint) : t('drawer.noSprint'))}
           label={label}
           onSelect={(i) => {
             onChange(i.sprint?.id ?? null);
@@ -38,7 +39,9 @@ export function SprintPicker({ value, sprints, onChange, trigger, label }: Sprin
           onClose={close}
           renderItem={(i) => (
             <>
-              <span className="flex-1 truncate">{i.sprint?.name ?? t('drawer.noSprint')}</span>
+              <span className="flex-1 truncate">
+                {i.sprint ? sprintLabel(t, i.sprint) : t('drawer.noSprint')}
+              </span>
               {i.sprint && (
                 <span className="text-[12px] text-muted">
                   {dates.formatRange(i.sprint.startDate, i.sprint.endDate)}

@@ -11,6 +11,7 @@ import { useSprints } from '../../api/projects';
 import { useTags } from '../../api/tags';
 import { useWorkspaceMembers } from '../../api/workspaces';
 import { useAuth } from '../../auth/useAuth';
+import { sprintLabel } from '../../lib/sprint';
 import { Avatar } from '../../components/ui/Avatar';
 import { PriorityFlag } from '../../components/ui/PriorityFlag';
 import { StatusDot } from '../../components/ui/StatusDot';
@@ -117,7 +118,7 @@ export function useFilterOptions(
         label: dates.formatRange(s.startDate, s.endDate),
         content: (
           <>
-            <span className="truncate">{s.name}</span>
+            <span className="truncate">{sprintLabel(t, s)}</span>
             <span className="ml-auto flex-none text-[12px] text-muted">
               {dates.formatRange(s.startDate, s.endDate)}
             </span>

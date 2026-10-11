@@ -33,6 +33,7 @@ const detail = (task: TaskListItem) => ({
   description: null,
   descriptionText: '',
   sprint: null,
+  reviewer: null,
   creator: ME.user,
   subtasks: [],
   attachments: [],
@@ -240,6 +241,21 @@ describe('quick create', () => {
       expect(created).toEqual([
         { title: 'Review copy', statusId: statusOf('review').id, position: 'bottom' },
       ]);
+    });
+  });
+
+  it('sets a size under More fields', async () => {
+    const { created } = api();
+    renderAt(LIST);
+    const { dialog, title } = await openModal();
+    fireEvent.click(within(dialog).getByRole('button', { name: 'More fields' }));
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'Size: No size' }));
+    fireEvent.click(await screen.findByRole('option', { name: /^L/ }));
+    expect(await within(dialog).findByRole('button', { name: 'Size: L' })).toBeInTheDocument();
+    fireEvent.change(title, { target: { value: 'Sized task' } });
+    fireEvent.click(within(dialog).getByRole('button', { name: /Create task/ }));
+    await waitFor(() => {
+      expect(created).toEqual([expect.objectContaining({ title: 'Sized task', size: 'L' })]);
     });
   });
 });

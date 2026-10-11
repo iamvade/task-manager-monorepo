@@ -3,7 +3,7 @@ import {
   sidebarResponseSchema,
   workspaceMemberSchema,
   type CreateInvite,
-  type UpdateMemberRole,
+  type UpdateMember,
   type WorkspaceMember,
 } from '@kite/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -38,20 +38,28 @@ export function useWorkspaceMembers(workspaceId: string | undefined) {
   });
 }
 
-/** Admin/owner: switch another member between admin and member. */
-export function useUpdateMemberRole(workspaceId: string) {
+/** Admin/owner: a member's role, job title or capacity (`PATCH`, optimistic). */
+export function useUpdateMember(workspaceId: string) {
   const queryClient = useQueryClient();
   const key = queryKeys.members(workspaceId);
   return useMutation({
-    mutationFn: ({ userId, role }: UpdateMemberRole & { userId: string }) =>
-      apiSend(`/workspaces/${workspaceId}/members/${userId}`, workspaceMemberSchema, 'PATCH', {
-        role,
-      }),
-    onMutate: async ({ userId, role }) => {
+    mutationFn: ({ userId, ...patch }: UpdateMember & { userId: string }) =>
+      apiSend(
+        `/workspaces/${workspaceId}/members/${userId}`,
+        workspaceMemberSchema,
+        'PATCH',
+        patch,
+      ),
+    onMutate: async ({ userId, ...patch }) => {
       await queryClient.cancelQueries({ queryKey: key });
       const previous = queryClient.getQueryData<WorkspaceMember[]>(key);
+      const trimmed = patch.title?.trim();
+      const title =
+        patch.title === undefined
+          ? {}
+          : { title: trimmed === undefined || trimmed === '' ? null : trimmed };
       queryClient.setQueryData<WorkspaceMember[]>(key, (members) =>
-        members?.map((m) => (m.user.id === userId ? { ...m, role } : m)),
+        members?.map((m) => (m.user.id === userId ? { ...m, ...patch, ...title } : m)),
       );
       return { previous };
     },

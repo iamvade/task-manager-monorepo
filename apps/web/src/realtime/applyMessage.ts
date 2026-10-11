@@ -171,6 +171,21 @@ function patchNow(queryClient: QueryClient, m: RealtimeTaskMessage) {
     case 'comment.created':
       patchRows(queryClient, m.taskId, (t) => ({ ...t, commentCount: t.commentCount + 1 }), true);
       return;
+    case 'task.updated':
+      // Size and reviewer travel with the message; the refetch fills in the reviewer's name.
+      if (m.size !== undefined || m.reviewerId !== undefined) {
+        patchRows(
+          queryClient,
+          m.taskId,
+          (t) => ({
+            ...t,
+            ...(m.size !== undefined && { size: m.size }),
+            ...(m.reviewerId !== undefined && { reviewerId: m.reviewerId }),
+          }),
+          true,
+        );
+      }
+      return;
     default:
       return;
   }

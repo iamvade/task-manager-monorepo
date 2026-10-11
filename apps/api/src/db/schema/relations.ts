@@ -4,7 +4,8 @@ import { attachments, comments } from './comments.js';
 import { favorites, projectMembers, projects, spaces, sprints, statuses } from './projects.js';
 import { subtasks, tags, taskAssignees, taskFollowers, taskTags, tasks } from './tasks.js';
 import { sessions, users } from './users.js';
-import { invites, workspaceMembers, workspaces } from './workspaces.js';
+import { invites, workspaceHolidays, workspaceMembers, workspaces } from './workspaces.js';
+import { sprintMemberships, taskStatusPeriods } from './history.js';
 
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
@@ -23,6 +24,14 @@ export const workspacesRelations = relations(workspaces, ({ many }) => ({
   spaces: many(spaces),
   projects: many(projects),
   tags: many(tags),
+  holidays: many(workspaceHolidays),
+}));
+
+export const workspaceHolidaysRelations = relations(workspaceHolidays, ({ one }) => ({
+  workspace: one(workspaces, {
+    fields: [workspaceHolidays.workspaceId],
+    references: [workspaces.id],
+  }),
 }));
 
 export const workspaceMembersRelations = relations(workspaceMembers, ({ one }) => ({
@@ -45,6 +54,7 @@ export const spacesRelations = relations(spaces, ({ one, many }) => ({
 export const projectsRelations = relations(projects, ({ one, many }) => ({
   workspace: one(workspaces, { fields: [projects.workspaceId], references: [workspaces.id] }),
   space: one(spaces, { fields: [projects.spaceId], references: [spaces.id] }),
+  lead: one(users, { fields: [projects.leadId], references: [users.id] }),
   members: many(projectMembers),
   favorites: many(favorites),
   statuses: many(statuses),
@@ -70,6 +80,7 @@ export const statusesRelations = relations(statuses, ({ one, many }) => ({
 export const sprintsRelations = relations(sprints, ({ one, many }) => ({
   project: one(projects, { fields: [sprints.projectId], references: [projects.id] }),
   tasks: many(tasks),
+  memberships: many(sprintMemberships),
 }));
 
 export const tasksRelations = relations(tasks, ({ one, many }) => ({
@@ -77,6 +88,9 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
   status: one(statuses, { fields: [tasks.statusId], references: [statuses.id] }),
   sprint: one(sprints, { fields: [tasks.sprintId], references: [sprints.id] }),
   creator: one(users, { fields: [tasks.createdBy], references: [users.id] }),
+  reviewer: one(users, { fields: [tasks.reviewerId], references: [users.id] }),
+  statusPeriods: many(taskStatusPeriods),
+  sprintMemberships: many(sprintMemberships),
   assignees: many(taskAssignees),
   tags: many(taskTags),
   subtasks: many(subtasks),
@@ -146,4 +160,14 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
     relationName: 'notificationActor',
   }),
   activity: one(activity, { fields: [notifications.activityId], references: [activity.id] }),
+}));
+
+export const taskStatusPeriodsRelations = relations(taskStatusPeriods, ({ one }) => ({
+  task: one(tasks, { fields: [taskStatusPeriods.taskId], references: [tasks.id] }),
+  status: one(statuses, { fields: [taskStatusPeriods.statusId], references: [statuses.id] }),
+}));
+
+export const sprintMembershipsRelations = relations(sprintMemberships, ({ one }) => ({
+  task: one(tasks, { fields: [sprintMemberships.taskId], references: [tasks.id] }),
+  sprint: one(sprints, { fields: [sprintMemberships.sprintId], references: [sprints.id] }),
 }));

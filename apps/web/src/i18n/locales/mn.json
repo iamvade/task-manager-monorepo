@@ -132,7 +132,10 @@
       "assignee": "Хариуцагч",
       "priority": "Ач холбогдол",
       "none": "Бүлэглэхгүй"
-    }
+    },
+    "columns": "Багана",
+    "columnsMenu": "Багана харуулах",
+    "columnSize": "Хэмжээ"
   },
   "filters": {
     "sprintIs": "Спринт:",
@@ -181,6 +184,7 @@
     "colAssignee": "Хариуцагч",
     "colDue": "Дуусах огноо",
     "colPriority": "Ач холбогдол",
+    "colSize": "Хэмжээ",
     "colTags": "Шошго",
     "actions": "Үйлдэл",
     "addTask": "Ажил нэмэх",
@@ -199,6 +203,7 @@
     "setAssignee": "«{{name}}» — хариуцагч",
     "setDue": "«{{name}}» — дуусах огноо",
     "setPriority": "«{{name}}» — ач холбогдол",
+    "setSize": "«{{name}}» — хэмжээ",
     "setTags": "«{{name}}» — шошго",
     "open": "Нээх",
     "reopen": "Дахин нээх",
@@ -217,6 +222,25 @@
     "medium": "Дунд",
     "low": "Бага",
     "none": "Ач холбогдолгүй"
+  },
+  "taskSize": {
+    "label": "Хэмжээ",
+    "none": "Хэмжээгүй",
+    "points_one": "{{count}} оноо",
+    "points_other": "{{count}} оноо",
+    "option": "{{size}} = {{points}} · {{description}}",
+    "hint": "= {{points}} · Ачаалал болон Гүйцэтгэлийн хурдны тайланд ашиглана",
+    "hintNone": "Хэмжээгүй · Ачаалал болон Гүйцэтгэлийн хурдны тайланд ашиглана",
+    "description": {
+      "S": "Жижиг · хагас өдөр орчим",
+      "M": "Дунд · 1–2 өдөр",
+      "L": "Том · 3–4 өдөр",
+      "XL": "Маш том · долоо хоног орчим, хуваахыг бодоорой"
+    },
+    "chipTitle": "Хэмжээ (оноо)"
+  },
+  "sprint": {
+    "name": "{{number}}-р спринт"
   },
   "dates": {
     "today": "Өнөөдөр",
@@ -319,6 +343,11 @@
       "created": "<b>{{actor}}</b> энэ ажлыг үүсгэсэн",
       "prioritySet": "<b>{{actor}}</b> ач холбогдлыг <b>{{to}}</b> болгосон",
       "priorityChanged": "<b>{{actor}}</b> ач холбогдлыг өөрчилсөн: {{from}} → <b>{{to}}</b>",
+      "sizeSet": "<b>{{actor}}</b> хэмжээг <b>{{to}}</b> болгосон",
+      "sizeChanged": "<b>{{actor}}</b> хэмжээг өөрчилсөн: {{from}} → <b>{{to}}</b>",
+      "sizeCleared": "<b>{{actor}}</b> хэмжээг арилгасан",
+      "reviewerSet": "<b>{{actor}}</b> хянагч томилсон: <b>{{name}}</b>",
+      "reviewerCleared": "<b>{{actor}}</b> хянагчийг хассан",
       "statusChanged": "<b>{{actor}}</b> төлөвийг өөрчилсөн: <from>{{from}}</from> → <to>{{to}}</to>",
       "statusSet": "<b>{{actor}}</b> төлөвийг <to>{{to}}</to> болгосон",
       "attached": "<b>{{actor}}</b> <b>{{filename}}</b> файл хавсаргасан",
@@ -377,6 +406,8 @@
     "starts": "Эхлэх: {{date}}",
     "sprint": "Спринт",
     "noSprint": "Спринтгүй",
+    "reviewer": "Хянагч",
+    "noReviewer": "Хянагчгүй",
     "project": "Төсөл",
     "descriptionPlaceholder": "Тайлбар нэмэх… Markdown болон @дурдалт ажиллана",
     "saving": "Хадгалж байна…",
@@ -601,6 +632,7 @@
     "assignee": "Хариуцагч",
     "dueDate": "Дуусах огноо",
     "priority": "Ач холбогдол",
+    "size": "Хэмжээ",
     "status": "Төлөв",
     "tags": "Шошго",
     "noTags": "Шошгогүй",
@@ -797,7 +829,15 @@
       "count_one": "{{count}} хүн",
       "count_other": "{{count}} хүн",
       "you": "(та)",
-      "changeRole": "Үүрэг өөрчлөх: {{name}}"
+      "changeRole": "Үүрэг өөрчлөх: {{name}}",
+      "jobTitle": "Албан тушаал",
+      "jobTitleOf": "{{name}} — албан тушаал",
+      "jobTitlePlaceholder": "Албан тушаал нэмэх",
+      "capacity": "Багтаамж",
+      "capacityOf": "{{name}} — багтаамж (2 долоо хоногийн оноо)",
+      "capacityUnit": "оноо / 2 д.х",
+      "capacityHint": "Хүн бүрийн ойрын 2 долоо хоногт авч чадах оноо. Ачааллын тайланд тасархай шугамаар харагдана.",
+      "saved": "Хадгаллаа"
     }
   },
   "errors": {

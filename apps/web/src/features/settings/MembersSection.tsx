@@ -1,4 +1,10 @@
-import { emailSchema, type WorkspaceMember, type WorkspaceRole } from '@kite/shared';
+import {
+  MAX_CAPACITY_POINTS,
+  emailSchema,
+  type UpdateMember,
+  type WorkspaceMember,
+  type WorkspaceRole,
+} from '@kite/shared';
 import { useId, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ApiError } from '../../api/client';
@@ -6,7 +12,7 @@ import {
   useCreateInvite,
   useInvites,
   useRevokeInvite,
-  useUpdateMemberRole,
+  useUpdateMember,
   useWorkspaceMembers,
 } from '../../api/workspaces';
 import { useAuth } from '../../auth/useAuth';
@@ -182,7 +188,7 @@ function MemberList({ workspaceId, canEdit }: { workspaceId: string; canEdit: bo
   const { t } = useTranslation();
   const { me } = useAuth();
   const members = useWorkspaceMembers(workspaceId);
-  const updateRole = useUpdateMemberRole(workspaceId);
+  const update = useUpdateMember(workspaceId);
 
   return (
     <SettingsSection
@@ -204,9 +210,10 @@ function MemberList({ workspaceId, canEdit }: { workspaceId: string; canEdit: bo
               key={member.user.id}
               member={member}
               isMe={member.user.id === me?.user.id}
-              editable={canEdit && member.role !== 'owner' && member.user.id !== me?.user.id}
-              onRole={(role) => {
-                updateRole.mutate({ userId: member.user.id, role });
+              canEdit={canEdit}
+              roleEditable={canEdit && member.role !== 'owner' && member.user.id !== me?.user.id}
+              onUpdate={(patch) => {
+                update.mutate({ userId: member.user.id, ...patch });
               }}
             />
           ))}
@@ -219,13 +226,16 @@ function MemberList({ workspaceId, canEdit }: { workspaceId: string; canEdit: bo
 function MemberRow({
   member,
   isMe,
-  editable,
-  onRole,
+  canEdit,
+  roleEditable,
+  onUpdate,
 }: {
   member: WorkspaceMember;
   isMe: boolean;
-  editable: boolean;
-  onRole: (role: InviteRole) => void;
+  /** Admins edit job titles and capacity of everyone, themselves included. */
+  canEdit: boolean;
+  roleEditable: boolean;
+  onUpdate: (patch: UpdateMember) => void;
 }) {
   const { t } = useTranslation();
   const roleLabel = t(`settings.roles.${member.role}`);
@@ -239,11 +249,40 @@ function MemberRow({
           {isMe && <span className="font-normal text-muted"> {t('settings.members.you')}</span>}
           {online && <span className="sr-only"> · {t('shell.online')}</span>}
         </span>
-        <span className="truncate text-[12px] text-muted">
-          {member.title ? `${member.title} · ${member.user.email}` : member.user.email}
-        </span>
+        {canEdit ? (
+          <span className="flex min-w-0 items-center gap-1 text-[12px] text-muted">
+            <TitleInput
+              value={member.title}
+              label={t('settings.members.jobTitleOf', { name: member.user.name })}
+              onSave={(title) => {
+                onUpdate({ title });
+              }}
+            />
+            <span className="truncate">· {member.user.email}</span>
+          </span>
+        ) : (
+          <span className="truncate text-[12px] text-muted">
+            {member.title ? `${member.title} · ${member.user.email}` : member.user.email}
+          </span>
+        )}
       </div>
-      {editable ? (
+      {canEdit ? (
+        <CapacityInput
+          value={member.capacityPoints}
+          label={t('settings.members.capacityOf', { name: member.user.name })}
+          onSave={(capacityPoints) => {
+            onUpdate({ capacityPoints });
+          }}
+        />
+      ) : (
+        <span
+          className="flex-none text-[12px] text-muted tabular-nums"
+          title={t('settings.members.capacityHint')}
+        >
+          {member.capacityPoints} {t('settings.members.capacityUnit')}
+        </span>
+      )}
+      {roleEditable ? (
         <Menu
           label={t('settings.members.changeRole', { name: member.user.name })}
           placement="bottom-end"
@@ -253,7 +292,7 @@ function MemberRow({
             label: t(`settings.roles.${role}`),
             checked: member.role === role,
             onSelect: () => {
-              if (role !== member.role) onRole(role);
+              if (role !== member.role) onUpdate({ role });
             },
           }))}
           trigger={(props) => (
@@ -272,5 +311,99 @@ function MemberRow({
         <span className="flex-none px-2 text-[13px] text-muted">{roleLabel}</span>
       )}
     </li>
+  );
+}
+
+/** Inline job title (saved on blur or Enter; Esc reverts; blank clears). */
+function TitleInput({
+  value,
+  label,
+  onSave,
+}: {
+  value: string | null;
+  label: string;
+  onSave: (title: string | null) => void;
+}) {
+  const { t } = useTranslation();
+  const [draft, setDraft] = useState<string | null>(null);
+  const shown = draft ?? value ?? '';
+  const placeholder = t('settings.members.jobTitlePlaceholder');
+  const save = () => {
+    if (draft === null) return;
+    const next = draft.trim() || null;
+    setDraft(null);
+    if (next !== value) onSave(next);
+  };
+  return (
+    <input
+      type="text"
+      value={shown}
+      maxLength={60}
+      aria-label={label}
+      placeholder={placeholder}
+      onChange={(e) => {
+        setDraft(e.target.value);
+      }}
+      onBlur={save}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') e.currentTarget.blur();
+        if (e.key === 'Escape') {
+          e.stopPropagation();
+          setDraft(null);
+        }
+      }}
+      size={Math.max(shown.length, placeholder.length, 4)}
+      className="-mx-1 h-5 max-w-[200px] min-w-0 rounded-[4px] border-0 bg-transparent px-1 text-[12px] text-muted outline-none placeholder:text-faint hover:bg-hover focus-visible:bg-control focus-visible:text-default focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent-ink"
+    />
+  );
+}
+
+/** Capacity points for the next 2 weeks (0–100), saved on blur or Enter; Esc reverts. */
+function CapacityInput({
+  value,
+  label,
+  onSave,
+}: {
+  value: number;
+  label: string;
+  onSave: (points: number) => void;
+}) {
+  const { t } = useTranslation();
+  const [draft, setDraft] = useState<string | null>(null);
+  const save = () => {
+    if (draft === null) return;
+    const points = Number(draft);
+    setDraft(null);
+    const valid = draft !== '' && Number.isInteger(points) && points >= 0;
+    if (valid && points <= MAX_CAPACITY_POINTS && points !== value) onSave(points);
+  };
+  return (
+    <span
+      className="flex flex-none items-center gap-1.5 text-[12px] text-muted"
+      title={t('settings.members.capacityHint')}
+    >
+      <input
+        type="number"
+        inputMode="numeric"
+        min={0}
+        max={MAX_CAPACITY_POINTS}
+        step={1}
+        value={draft ?? String(value)}
+        aria-label={label}
+        onChange={(e) => {
+          setDraft(e.target.value);
+        }}
+        onBlur={save}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') e.currentTarget.blur();
+          if (e.key === 'Escape') {
+            e.stopPropagation();
+            setDraft(null);
+          }
+        }}
+        className="box-border h-7 w-14 rounded-[8px] border border-control bg-control px-2 text-right text-[13px] text-default tabular-nums outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent-ink"
+      />
+      <span aria-hidden="true">{t('settings.members.capacityUnit')}</span>
+    </span>
   );
 }

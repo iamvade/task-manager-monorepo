@@ -2,6 +2,7 @@ import { shortName, type HistoryEntry, type StatusSnapshot } from '@kite/shared'
 import type { TFunction } from 'i18next';
 import type { ReactElement } from 'react';
 import { StatusPill } from '../../../components/ui/StatusPill';
+import { sprintLabel } from '../../../lib/sprint';
 
 /** i18n key (under `drawer.history`) + values of one history sentence. */
 export interface HistoryLine {
@@ -21,6 +22,11 @@ export type HistoryKey =
   | 'statusSet'
   | 'prioritySet'
   | 'priorityChanged'
+  | 'sizeSet'
+  | 'sizeChanged'
+  | 'sizeCleared'
+  | 'reviewerSet'
+  | 'reviewerCleared'
   | 'dueSet'
   | 'dueChanged'
   | 'dueCleared'
@@ -96,14 +102,27 @@ export function historyLine(
             values: v({ from: t(`priority.${from}`), to: t(`priority.${to}`) }),
           };
     }
+    case 'size.changed': {
+      const { from, to } = entry.payload;
+      if (!to) return { key: 'sizeCleared', values: v() };
+      return from
+        ? { key: 'sizeChanged', values: v({ from, to }) }
+        : { key: 'sizeSet', values: v({ to }) };
+    }
+    case 'reviewer.changed': {
+      const { to } = entry.payload;
+      return to
+        ? { key: 'reviewerSet', values: v({ name: shortName(to.name) }) }
+        : { key: 'reviewerCleared', values: v() };
+    }
     case 'due.changed':
       return dateChange('due', entry.payload);
     case 'start.changed':
       return dateChange('start', entry.payload);
     case 'sprint.changed': {
       const { from, to } = entry.payload;
-      if (to) return { key: 'sprintSet', values: v({ to: to.name }) };
-      return from ? { key: 'sprintCleared', values: v({ from: from.name }) } : null;
+      if (to) return { key: 'sprintSet', values: v({ to: sprintLabel(t, to) }) };
+      return from ? { key: 'sprintCleared', values: v({ from: sprintLabel(t, from) }) } : null;
     }
     case 'assignee.added':
       return { key: 'assigneeAdded', values: v({ name: shortName(entry.payload.user.name) }) };

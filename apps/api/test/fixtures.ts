@@ -1,4 +1,5 @@
 import { apiErrorSchema, type WorkspaceRole } from '@kite/shared';
+import { eq } from 'drizzle-orm';
 import type { FastifyInstance, InjectOptions, LightMyRequestResponse } from 'fastify';
 import { uuidv7 } from 'uuidv7';
 import { hashPassword } from '../src/auth/password.js';
@@ -6,7 +7,16 @@ import { SESSION_COOKIE } from '../src/auth/sessions.js';
 import { loadConfig } from '../src/config.js';
 import type { Db } from '../src/db/client.js';
 import { one } from '../src/db/rows.js';
-import { projects, spaces, users, workspaceMembers, workspaces } from '../src/db/schema/index.js';
+import {
+  projects,
+  spaces,
+  statuses,
+  tasks,
+  users,
+  workspaceMembers,
+  workspaces,
+} from '../src/db/schema/index.js';
+import { openStatusPeriods } from '../src/tasks/status.js';
 
 // Fixtures use unique emails/slugs so tests can share the database without truncating it.
 
@@ -82,6 +92,21 @@ export async function createProject(db: Db, workspaceId: string) {
       })
       .returning(),
   );
+}
+
+/**
+ * Inserts a task row directly (bypassing the API) together with its first status period, which
+ * the deferred status-period trigger requires at commit.
+ */
+export async function insertTask(db: Db, values: typeof tasks.$inferInsert) {
+  return db.transaction(async (tx) => {
+    const task = one(await tx.insert(tasks).values(values).returning());
+    const status = one(await tx.select().from(statuses).where(eq(statuses.id, task.statusId)));
+    await openStatusPeriods(tx, [
+      { taskId: task.id, status, at: task.createdAt, actorId: task.createdBy },
+    ]);
+    return task;
+  });
 }
 
 export function sessionCookie(res: LightMyRequestResponse) {

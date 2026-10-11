@@ -40,3 +40,40 @@ export function daysBetween(from: string, to: string): number {
   if (Number.isNaN(a) || Number.isNaN(b)) throw new Error(`Invalid date: ${from} / ${to}`);
   return Math.round((b - a) / 86_400_000);
 }
+
+/** Mon–Fri and not one of `holidays` (`YYYY-MM-DD` strings). */
+export function isWorkingDay(date: string, holidays: ReadonlySet<string> = new Set()): boolean {
+  return weekdayIndex(date) < 5 && !holidays.has(date);
+}
+
+/**
+ * The working day `n` working days after `date` (before it when `n` is negative). With `n = 0`,
+ * `date` itself if it is a working day, else the next one.
+ */
+export function addWorkingDays(
+  date: string,
+  n: number,
+  holidays: ReadonlySet<string> = new Set(),
+): string {
+  const step = n < 0 ? -1 : 1;
+  let day = date;
+  while (!isWorkingDay(day, holidays)) day = addDays(day, step);
+  for (let left = Math.abs(n); left > 0;) {
+    day = addDays(day, step);
+    if (isWorkingDay(day, holidays)) left--;
+  }
+  return day;
+}
+
+/** Working days from `from` to `to`, both included (0 when `to` is earlier). */
+export function workingDaysBetween(
+  from: string,
+  to: string,
+  holidays: ReadonlySet<string> = new Set(),
+): number {
+  let count = 0;
+  for (let day = from; day <= to; day = addDays(day, 1)) {
+    if (isWorkingDay(day, holidays)) count++;
+  }
+  return count;
+}

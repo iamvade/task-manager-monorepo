@@ -51,7 +51,6 @@ import { getTaskListItem, listProjectTasks, listSpaceTasks } from '../tasks/list
 import { mutateTasks } from '../tasks/mutation.js';
 import { clientIdOf } from '../realtime/client-id.js';
 import {
-  changeStatus,
   endOfStatus,
   requireMembers,
   requireSprintIn,
@@ -60,6 +59,13 @@ import {
   startOfStatus,
   statusSnapshot,
 } from '../tasks/refs.js';
+import { setSprint, startInSprint } from '../tasks/sprint.js';
+import {
+  changeStatus,
+  openStatusPeriods,
+  projectLead,
+  switchStatusAcrossProjects,
+} from '../tasks/status.js';
 
 const err = apiErrorSchema;
 const taskParams = z.object({ taskId: z.uuid() });
@@ -178,7 +184,10 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
             ? await requireStatusIn(tx, project.id, body.statusId)
             : (statusRows.find((s) => s.category === 'todo') ?? statusRows[0]);
           if (!status) throw new Error(`Project ${project.id} has no statuses`);
-          if (body.sprintId) await requireSprintIn(tx, project.id, body.sprintId);
+          const sprint = body.sprintId
+            ? await requireSprintIn(tx, project.id, body.sprintId)
+            : null;
+          const reviewer = status.category === 'review' ? await projectLead(tx, m.project) : null;
           const assignees = await requireMembers(tx, workspaceId, body.assigneeIds ?? []);
           const tagRows = await requireTags(tx, workspaceId, body.tagIds ?? []);
 
@@ -198,6 +207,8 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
                 description,
                 descriptionText: description ? richTextToPlain(description) : '',
                 priority: body.priority ?? 'none',
+                size: body.size ?? null,
+                reviewerId: reviewer?.id ?? null,
                 startDate: body.startDate ?? null,
                 dueDate: body.dueDate ?? null,
                 position:
@@ -230,6 +241,9 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           await follow(tx, task.id, [user.id, ...assignees.map((a) => a.id), ...mentioned]);
 
           m.log(task.id, 'task.created', { status: statusSnapshot(status) });
+          await openStatusPeriods(tx, [{ taskId: task.id, status, at: m.now, actorId: user.id }]);
+          if (sprint) await startInSprint(m, task.id, sprint);
+          if (reviewer) m.log(task.id, 'reviewer.changed', { from: null, to: reviewer });
           m.emit('task.created', task.id, {
             assigneeIds: assignees.map((a) => a.id),
             mentionedUserIds: mentioned,
@@ -249,7 +263,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Tasks'],
         summary: 'Update a task',
         description:
-          'Title, description (TipTap JSON; its plain text is stored for search, newly @mentioned members follow the task), status, priority, start/due date, sprint. Writes one activity row per changed field; unchanged values are ignored. A new status puts the task at the end of that status; entering a done status sets `completedAt`, leaving it clears it.',
+          'Title, description (TipTap JSON; its plain text is stored for search, newly @mentioned members follow the task), status, priority, size, start/due date, sprint, reviewer. Writes one activity row per changed field; unchanged values are ignored. A new status puts the task at the end of that status; entering a done status sets `completedAt`, leaving it clears it. Entering a review status without a reviewer sets one: `reviewerId` from the same body, else the project lead (`reviewerId: null` keeps it empty). The reviewer must be a workspace member (400 `INVALID_REFERENCE`).',
         params: taskParams,
         body: updateTaskSchema,
         response: { 200: taskDetailSchema, 400: err, 401: err, 404: err },
@@ -288,6 +302,24 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           patch.priority = body.priority;
           m.log(task.id, 'priority.changed', { from: task.priority, to: body.priority });
         }
+        if (body.size !== undefined && body.size !== task.size) {
+          patch.size = body.size;
+          m.log(task.id, 'size.changed', { from: task.size, to: body.size });
+        }
+        let reviewerId = task.reviewerId;
+        if (body.reviewerId !== undefined && body.reviewerId !== task.reviewerId) {
+          const [to] = body.reviewerId
+            ? await requireMembers(tx, m.project.workspaceId, [body.reviewerId], 'Reviewer')
+            : [];
+          const [from] = task.reviewerId
+            ? await tx
+                .select({ id: users.id, name: users.name })
+                .from(users)
+                .where(eq(users.id, task.reviewerId))
+            : [];
+          reviewerId = patch.reviewerId = to?.id ?? null;
+          m.log(task.id, 'reviewer.changed', { from: from ?? null, to: to ?? null });
+        }
         if (body.startDate !== undefined && body.startDate !== task.startDate) {
           patch.startDate = body.startDate;
           m.log(task.id, 'start.changed', { from: task.startDate, to: body.startDate });
@@ -300,19 +332,18 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           const to = body.sprintId
             ? await requireSprintIn(tx, task.projectId, body.sprintId)
             : null;
-          const [from] = task.sprintId
-            ? await tx.select().from(sprints).where(eq(sprints.id, task.sprintId))
-            : [];
-          patch.sprintId = body.sprintId;
-          m.log(task.id, 'sprint.changed', {
-            from: from ? { id: from.id, name: from.name } : null,
-            to: to ? { id: to.id, name: to.name } : null,
-          });
+          Object.assign(patch, await setSprint(m, task, to));
         }
         if (body.statusId !== undefined && body.statusId !== task.statusId) {
           const to = await requireStatusIn(tx, task.projectId, body.statusId);
           const from = await requireStatusIn(tx, task.projectId, task.statusId);
-          Object.assign(patch, await changeStatus(m, task, from, to));
+          Object.assign(
+            patch,
+            await changeStatus(m, { ...task, reviewerId }, from, to, {
+              // An explicit `reviewerId: null` keeps the task without a reviewer.
+              ...(body.reviewerId === null ? { reviewer: null } : {}),
+            }),
+          );
         }
 
         if (Object.keys(patch).length === 0) return;
@@ -369,7 +400,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
                 task,
                 await requireStatusIn(tx, task.projectId, task.statusId),
                 to,
-                position,
+                { position },
               );
         await tx.update(tasks).set(patch).where(eq(tasks.id, task.id));
         m.emit('task.moved', task.id, { move: { statusId: to.id, position } });
@@ -618,7 +649,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Tasks'],
         summary: 'Duplicate a task',
         description:
-          'Copies the task into the same project under the next number, right after the original in its status: title (or `title` from the body), description, priority, start/due date, sprint, assignees, tags and subtasks (unchecked). Comments, attachments and followers are not copied. Logs `task.created` with `duplicateOf`; the caller, the assignees and members @mentioned in the description follow the copy.',
+          'Copies the task into the same project under the next number, right after the original in its status: title (or `title` from the body), description, priority, size, start/due date, sprint, assignees, tags and subtasks (unchecked). The reviewer is not copied (a copy in review gets the project lead). Comments, attachments and followers are not copied. Logs `task.created` with `duplicateOf`; the caller, the assignees and members @mentioned in the description follow the copy.',
         params: taskParams,
         body: duplicateTaskSchema.nullish(),
         response: { 201: taskDetailSchema, 400: err, 401: err, 404: err },
@@ -641,6 +672,10 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           { prevId: source.id, nextId: null },
         );
 
+        const sprint = source.sprintId
+          ? one(await tx.select().from(sprints).where(eq(sprints.id, source.sprintId)), 'sprint')
+          : null;
+        const reviewer = status.category === 'review' ? await projectLead(tx, m.project) : null;
         const number = m.project.taskSeq + 1;
         await tx.update(projects).set({ taskSeq: number }).where(eq(projects.id, m.project.id));
         const copy = one(
@@ -655,6 +690,8 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
               description: source.description,
               descriptionText: source.descriptionText,
               priority: source.priority,
+              size: source.size,
+              reviewerId: reviewer?.id ?? null,
               startDate: source.startDate,
               dueDate: source.dueDate,
               position,
@@ -711,6 +748,11 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           status: statusSnapshot(status),
           duplicateOf: { id: source.id, key: `${m.project.key}-${source.number}` },
         });
+        await openStatusPeriods(tx, [
+          { taskId: copy.id, status, at: m.now, actorId: scope.actorId },
+        ]);
+        if (sprint) await startInSprint(m, copy.id, sprint);
+        if (reviewer) m.log(copy.id, 'reviewer.changed', { from: null, to: reviewer });
         m.emit('task.created', copy.id, { assigneeIds, mentionedUserIds: mentioned });
         return copy.id;
       });
@@ -726,7 +768,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Tasks'],
         summary: 'Move a task to another project',
         description:
-          'Into another project of the same workspace (400 `INVALID_REFERENCE` for another workspace, an archived project or the same project; 404 when the caller cannot see it). The task takes the next number there (new key; the old key stops resolving), the first status of the same category (else the first To Do) at its end, and loses its sprint. Assignees, tags, subtasks, comments, attachments, followers and history move with it. Logs `project.changed`.',
+          'Into another project of the same workspace (400 `INVALID_REFERENCE` for another workspace, an archived project or the same project; 404 when the caller cannot see it). The task takes the next number there (new key; the old key stops resolving), the first status of the same category (else the first To Do) at its end, and loses its sprint (`sprint.changed`). Assignees, tags, subtasks, comments, attachments, followers, history and the reviewer move with it. Logs `project.changed`.',
         params: taskParams,
         body: moveTaskToProjectSchema,
         response: { 200: taskDetailSchema, 400: err, 401: err, 404: err },
@@ -760,14 +802,16 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         const number = to.taskSeq + 1;
         await tx.update(projects).set({ taskSeq: number }).where(eq(projects.id, to.id));
         const isDone = status.category === 'done';
+        await switchStatusAcrossProjects(m, task, status);
+        const sprintPatch = await setSprint(m, task, null);
         await tx
           .update(tasks)
           .set({
+            ...sprintPatch,
             projectId: to.id,
             number,
             statusId: status.id,
             position: await endOfStatus(tx, status.id),
-            sprintId: null,
             completedAt: isDone ? (task.completedAt ?? m.now) : null,
             updatedAt: m.now,
           })
