@@ -49,6 +49,7 @@ import { follow, workspaceMemberIds } from '../tasks/followers.js';
 import { stableJson } from '../tasks/json.js';
 import { getTaskListItem, listProjectTasks, listSpaceTasks } from '../tasks/list.js';
 import { mutateTasks } from '../tasks/mutation.js';
+import { clientIdOf } from '../realtime/client-id.js';
 import {
   changeStatus,
   endOfStatus,
@@ -72,7 +73,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
   async function target(request: FastifyRequest, taskId: string, includeDeleted = false) {
     const access = await loadTaskAccess(request, taskId, { includeDeleted });
     const { user } = requireAuth(request);
-    return { projectId: access.project.id, actorId: user.id };
+    return { projectId: access.project.id, actorId: user.id, clientId: clientIdOf(request) };
   }
 
   const listItem = async (taskId: string) => {
@@ -168,7 +169,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
 
       const taskId = await mutateTasks(
         app,
-        { projectId: project.id, actorId: user.id },
+        { projectId: project.id, actorId: user.id, clientId: clientIdOf(request) },
         async (m) => {
           const { tx } = m;
           const workspaceId = m.project.workspaceId;
@@ -371,7 +372,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
                 position,
               );
         await tx.update(tasks).set(patch).where(eq(tasks.id, task.id));
-        m.emit('task.moved', task.id);
+        m.emit('task.moved', task.id, { move: { statusId: to.id, position } });
       });
       return listItem(request.params.taskId);
     },

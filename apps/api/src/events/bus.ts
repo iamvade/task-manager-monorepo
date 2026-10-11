@@ -29,6 +29,10 @@ export interface TaskEvent {
   subtaskId?: string;
   /** `attachment.changed`: the attachment. */
   attachmentId?: string;
+  /** `task.moved`: where the task landed. */
+  move?: { statusId: string; position: string };
+  /** The browser tab that made the change (`X-Kite-Client`); realtime skips echoing to it. */
+  clientId?: string;
   at: Date;
 }
 

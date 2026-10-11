@@ -17,6 +17,7 @@ import { getComment, listComments, parseCommentBody } from '../tasks/comments.js
 import { follow, workspaceMemberIds } from '../tasks/followers.js';
 import { stableJson } from '../tasks/json.js';
 import { mutateTasks, type TaskMutation } from '../tasks/mutation.js';
+import { clientIdOf } from '../realtime/client-id.js';
 
 const err = apiErrorSchema;
 const taskParams = z.object({ taskId: z.uuid() });
@@ -74,49 +75,53 @@ export const commentRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       const { body, parentId } = request.body;
       const { text, mentionIds } = parseCommentBody(body);
 
-      const id = await mutateTasks(app, { projectId: project.id, actorId: user.id }, async (m) => {
-        await m.lockTask(task.id);
-        let rootId: string | null = null;
-        if (parentId) {
-          const [parent] = await m.tx
-            .select()
-            .from(comments)
-            .where(
-              and(
-                eq(comments.id, parentId),
-                eq(comments.taskId, task.id),
-                isNull(comments.deletedAt),
-              ),
-            );
-          if (!parent) {
-            throw httpError(400, 'INVALID_PARENT', 'Parent comment is not on this task');
+      const id = await mutateTasks(
+        app,
+        { projectId: project.id, actorId: user.id, clientId: clientIdOf(request) },
+        async (m) => {
+          await m.lockTask(task.id);
+          let rootId: string | null = null;
+          if (parentId) {
+            const [parent] = await m.tx
+              .select()
+              .from(comments)
+              .where(
+                and(
+                  eq(comments.id, parentId),
+                  eq(comments.taskId, task.id),
+                  isNull(comments.deletedAt),
+                ),
+              );
+            if (!parent) {
+              throw httpError(400, 'INVALID_PARENT', 'Parent comment is not on this task');
+            }
+            rootId = parent.parentId ?? parent.id;
           }
-          rootId = parent.parentId ?? parent.id;
-        }
-        const mentioned = await workspaceMemberIds(m.tx, m.project.workspaceId, mentionIds);
-        const comment = one(
-          await m.tx
-            .insert(comments)
-            .values({
-              taskId: task.id,
-              authorId: user.id,
-              parentId: rootId,
-              body,
-              bodyText: text,
-              createdAt: m.now,
-            })
-            .returning({ id: comments.id }),
-          'comment',
-        );
-        await follow(m.tx, task.id, [user.id, ...mentioned]);
-        m.log(task.id, 'comment.added', { commentId: comment.id });
-        await m.touch(task.id);
-        m.emit('comment.created', task.id, {
-          commentId: comment.id,
-          mentionedUserIds: mentioned,
-        });
-        return comment.id;
-      });
+          const mentioned = await workspaceMemberIds(m.tx, m.project.workspaceId, mentionIds);
+          const comment = one(
+            await m.tx
+              .insert(comments)
+              .values({
+                taskId: task.id,
+                authorId: user.id,
+                parentId: rootId,
+                body,
+                bodyText: text,
+                createdAt: m.now,
+              })
+              .returning({ id: comments.id }),
+            'comment',
+          );
+          await follow(m.tx, task.id, [user.id, ...mentioned]);
+          m.log(task.id, 'comment.added', { commentId: comment.id });
+          await m.touch(task.id);
+          m.emit('comment.created', task.id, {
+            commentId: comment.id,
+            mentionedUserIds: mentioned,
+          });
+          return comment.id;
+        },
+      );
       return reply.code(201).send(await getComment(app.db, id));
     },
   );
@@ -147,26 +152,30 @@ export const commentRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       const { body } = request.body;
       const { text, mentionIds } = parseCommentBody(body);
 
-      await mutateTasks(app, { projectId: project.id, actorId: user.id }, async (m) => {
-        const comment = await lockComment(m, found.taskId, found.id);
-        if (stableJson(comment.body) === stableJson(body)) return;
+      await mutateTasks(
+        app,
+        { projectId: project.id, actorId: user.id, clientId: clientIdOf(request) },
+        async (m) => {
+          const comment = await lockComment(m, found.taskId, found.id);
+          if (stableJson(comment.body) === stableJson(body)) return;
 
-        const before = new Set(extractMentionIds(comment.body));
-        const added = await workspaceMemberIds(
-          m.tx,
-          m.project.workspaceId,
-          mentionIds.filter((id) => !before.has(id)),
-        );
-        await m.tx
-          .update(comments)
-          .set({ body, bodyText: text, editedAt: m.now })
-          .where(eq(comments.id, comment.id));
-        await follow(m.tx, comment.taskId, added);
-        m.emit('comment.updated', comment.taskId, {
-          commentId: comment.id,
-          mentionedUserIds: added,
-        });
-      });
+          const before = new Set(extractMentionIds(comment.body));
+          const added = await workspaceMemberIds(
+            m.tx,
+            m.project.workspaceId,
+            mentionIds.filter((id) => !before.has(id)),
+          );
+          await m.tx
+            .update(comments)
+            .set({ body, bodyText: text, editedAt: m.now })
+            .where(eq(comments.id, comment.id));
+          await follow(m.tx, comment.taskId, added);
+          m.emit('comment.updated', comment.taskId, {
+            commentId: comment.id,
+            mentionedUserIds: added,
+          });
+        },
+      );
       return getComment(app.db, found.id);
     },
   );
@@ -195,11 +204,15 @@ export const commentRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         throw httpError(403, 'FORBIDDEN', 'You can only delete your own comments');
       }
 
-      await mutateTasks(app, { projectId: project.id, actorId: user.id }, async (m) => {
-        const comment = await lockComment(m, found.taskId, found.id);
-        await m.tx.update(comments).set({ deletedAt: m.now }).where(eq(comments.id, comment.id));
-        m.emit('comment.deleted', comment.taskId, { commentId: comment.id });
-      });
+      await mutateTasks(
+        app,
+        { projectId: project.id, actorId: user.id, clientId: clientIdOf(request) },
+        async (m) => {
+          const comment = await lockComment(m, found.taskId, found.id);
+          await m.tx.update(comments).set({ deletedAt: m.now }).where(eq(comments.id, comment.id));
+          m.emit('comment.deleted', comment.taskId, { commentId: comment.id });
+        },
+      );
       return reply.code(204).send(null);
     },
   );

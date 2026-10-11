@@ -10,8 +10,8 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
-    // Same-origin /api in dev so session cookies just work.
-    proxy: { '/api': { target: apiTarget, changeOrigin: false } },
+    // Same-origin /api in dev so session cookies just work (`ws`: the realtime socket too).
+    proxy: { '/api': { target: apiTarget, changeOrigin: false, ws: true } },
   },
   test: {
     environment: 'jsdom',

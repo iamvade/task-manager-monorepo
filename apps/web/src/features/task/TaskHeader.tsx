@@ -17,6 +17,7 @@ import { IconButton } from '../../components/ui/IconButton';
 import { Menu } from '../../components/ui/Menu';
 import { toast } from '../../stores/toast';
 import { useTaskView } from './TaskContext';
+import { TaskViewers } from './TaskViewers';
 
 interface TaskHeaderProps {
   /** Opens the Project property's picker (move to another project). */
@@ -24,8 +25,9 @@ interface TaskHeaderProps {
 }
 
 /**
- * Sticky 56px drawer header (TaskDetail.dc.html): `project › KEY` breadcrumb, Mark complete,
- * copy link, open as full page, … (duplicate, move, delete), divider, close.
+ * Sticky 56px drawer header (TaskDetail.dc.html): `project › KEY` breadcrumb, who else is
+ * viewing (realtime presence, not designed), Mark complete, copy link, open as full page, …
+ * (duplicate, move, delete), divider, close.
  */
 export function TaskHeader({ onMoveToProject }: TaskHeaderProps) {
   const { t } = useTranslation();
@@ -112,8 +114,11 @@ export function TaskHeader({ onMoveToProject }: TaskHeaderProps) {
           {task.project.name}
         </Link>
         <ChevronRightIcon size={12} strokeWidth={2} className="flex-none text-faint" />
-        <span className="font-mono text-[12px] text-muted">{task.key}</span>
+        <span className="flex-none font-mono text-[12px] whitespace-nowrap text-muted">
+          {task.key}
+        </span>
       </nav>
+      <TaskViewers taskId={task.id} />
       <Button
         icon={<CheckIcon size={14} />}
         onClick={() => {

@@ -6,10 +6,13 @@ import { useAuth } from '../../auth/useAuth';
 import { Avatar } from '../../components/ui/Avatar';
 import { Popover } from '../../components/ui/Popover';
 import { SegmentedControl } from '../../components/ui/SegmentedControl';
+import { cn } from '../../lib/cn';
+import { useRealtimeStore } from '../../stores/realtime';
 import { useTheme } from './useTheme';
 
 /**
- * Sidebar footer: my avatar, full name and online dot (Main.dc.html). Not designed: clicking
+ * Sidebar footer: my avatar, full name and online dot (Main.dc.html; faint while the realtime
+ * connection is down). Not designed: clicking
  * opens an account menu with the theme switch and sign out (Settings comes in phase 15).
  */
 export function SidebarUser() {
@@ -18,6 +21,7 @@ export function SidebarUser() {
   const { setTheme } = useTheme();
   const logout = useLogout();
   const navigate = useNavigate();
+  const connected = useRealtimeStore((s) => s.status === 'open');
   if (!me) return null;
 
   return (
@@ -36,8 +40,11 @@ export function SidebarUser() {
           <span className="flex-1 truncate text-[13px] font-medium">{me.user.name}</span>
           <span
             role="img"
-            aria-label={t('shell.online')}
-            className="size-2 flex-none rounded-full bg-online"
+            aria-label={connected ? t('shell.online') : t('shell.reconnecting')}
+            className={cn(
+              'size-2 flex-none rounded-full',
+              connected ? 'bg-online' : 'bg-[color:var(--text-faint)]',
+            )}
           />
         </button>
       )}

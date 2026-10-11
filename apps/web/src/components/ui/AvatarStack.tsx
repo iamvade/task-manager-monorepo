@@ -11,23 +11,39 @@ interface AvatarStackProps {
   label: string;
   /** Ring color: the page background, or `surface` on cards. */
   ring?: 'bg' | 'surface';
+  /** Users to mark online (presence dot); their hover title gets `onlineLabel`. */
+  onlineIds?: ReadonlySet<string>;
+  onlineLabel?: string;
 }
 
 /** Overlapping avatars (−6px) with a "+N" chip, each ringed in the page background. */
-export function AvatarStack({ users, max = 4, size = 26, label, ring = 'bg' }: AvatarStackProps) {
+export function AvatarStack({
+  users,
+  max = 4,
+  size = 26,
+  label,
+  ring = 'bg',
+  onlineIds,
+  onlineLabel,
+}: AvatarStackProps) {
   const shown = users.slice(0, max);
   const extra = users.length - shown.length;
   return (
     <div role="img" aria-label={label} className="flex items-center">
-      {shown.map((user, i) => (
-        <Avatar
-          key={user.id}
-          user={user}
-          size={size}
-          ring={ring === 'surface' ? 'surface' : true}
-          className={i > 0 ? '-ml-1.5' : ''}
-        />
-      ))}
+      {shown.map((user, i) => {
+        const online = onlineIds?.has(user.id) ?? false;
+        return (
+          <Avatar
+            key={user.id}
+            user={user}
+            size={size}
+            ring={ring === 'surface' ? 'surface' : true}
+            online={online}
+            title={online && onlineLabel ? `${user.name} · ${onlineLabel}` : undefined}
+            className={i > 0 ? '-ml-1.5' : ''}
+          />
+        );
+      })}
       {extra > 0 && (
         <span
           className={cn(

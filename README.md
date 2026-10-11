@@ -54,6 +54,19 @@ Use the web dev server URL (`:5173`), not the API directly (`:3000`): mutations 
 
 Docs are on by default everywhere except `NODE_ENV=production`. Set `API_DOCS=true` or `false` in `apps/api/.env` to override.
 
+## Realtime
+
+Each browser tab opens one WebSocket, `GET /api/v1/ws?client=<tab id>`. The socket is authenticated by the session cookie, and its `Origin` must be `WEB_ORIGIN`. The tab subscribes to its workspace. After every committed change the API pushes a small typed message, defined by `realtimeServerMessageSchema` in `packages/shared`. A message carries only ids, the actor and the minimal changed data, and the web app patches or refetches the affected TanStack Query caches. The tab sends the same id as `X-Kite-Client` on its requests, so it never receives its own changes back. Presence (who is online, who is viewing which task) is kept only in the API's memory.
+
+Flow: the event bus (after commit) → `toRealtime` → `Broadcaster.publish` → `RealtimeHub` delivers to this instance's sockets (`apps/api/src/realtime/`).
+
+**Several API instances.** Today `LocalBroadcaster` delivers in-process, which is only correct for a single instance. To scale out, implement the `Broadcaster` interface (`publish`, `subscribe`, `close`) over a shared channel and pass it to the hub in `realtime/plugin.ts`. Nothing else changes:
+
+- **Postgres `LISTEN/NOTIFY`** needs no new infrastructure. `publish` runs `SELECT pg_notify('kite_realtime', <envelope JSON>)`. Each instance holds one dedicated `pg.Client` (not a pool connection) that runs `LISTEN kite_realtime` and hands every notification to its subscribers. Payloads must stay under 8000 bytes, which is fine because messages are ids only. Reconnect the listener and refetch-on-reconnect covers the gap.
+- **Redis pub/sub** (`ioredis`): `publish` sends to a `kite:realtime` channel, and a separate subscriber connection feeds the hub. Pick this if Redis is already around or the message volume grows.
+- **Presence** has to become shared too. One option is to publish presence deltas over the same channel and have each instance merge them. The other is to keep per-user connection counts in Redis (`HINCRBY` plus TTL heartbeats, so a crashed instance's users expire) and build the `ready` snapshot from there.
+- The load balancer must allow WebSocket upgrades and an idle timeout above the 25 s heartbeat. Sticky sessions are not required.
+
 ## Scripts (run from the repo root)
 
 | Script             | Does                                                         |

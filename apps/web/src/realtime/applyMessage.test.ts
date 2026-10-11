@@ -1,0 +1,127 @@
+import type { RealtimeTaskMessage, TaskListItem } from '@kite/shared';
+import { QueryClient } from '@tanstack/react-query';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { queryKeys } from '../api/queryKeys';
+import { TASK_MUTATION } from '../api/taskCache';
+import { PROJECT_ID, SIDEBAR, SPACE_ID, WORKSPACE_ID } from '../test/fixtures';
+import { PROJECT_WITH_STATUSES, at, makeTasks, statusOf } from '../test/tasks';
+import { COALESCE_MS, createMessageHandler } from './applyMessage';
+
+const OTHER_SPACE = '01890000-0000-7000-8000-000000000011';
+const SARA = '01890000-0000-7000-8000-000000000099';
+
+function setup() {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } });
+  const tasks = makeTasks();
+  const projectList = queryKeys.projectTasks(PROJECT_ID, {});
+  const spaceList = queryKeys.spaceTasks(SPACE_ID, {});
+  const otherSpace = queryKeys.spaceTasks(OTHER_SPACE, {});
+  for (const key of [projectList, spaceList, otherSpace]) queryClient.setQueryData(key, tasks);
+  queryClient.setQueryData(queryKeys.project(PROJECT_ID), PROJECT_WITH_STATUSES);
+  queryClient.setQueryData(queryKeys.sidebar(WORKSPACE_ID), SIDEBAR);
+  queryClient.setQueryData(queryKeys.home(WORKSPACE_ID), {});
+  queryClient.setQueryData(queryKeys.notificationsOf(WORKSPACE_ID), {});
+  const handler = createMessageHandler(queryClient);
+  const stale = (key: readonly unknown[]) => queryClient.getQueryState(key)?.isInvalidated;
+  return { queryClient, tasks, handler, projectList, spaceList, otherSpace, stale };
+}
+
+const base = (task: TaskListItem) => ({
+  workspaceId: WORKSPACE_ID,
+  projectId: PROJECT_ID,
+  taskId: task.id,
+  actorId: SARA,
+  at: '2026-10-08T03:00:00.000Z',
+});
+
+describe('createMessageHandler', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("moves a card at once, then refetches its project's lists and space", () => {
+    const s = setup();
+    const task = at(s.tasks, 0);
+    const done = statusOf('done');
+    const message: RealtimeTaskMessage = {
+      type: 'task.moved',
+      ...base(task),
+      statusId: done.id,
+      position: 'zz',
+    };
+    s.handler.handle(message);
+    const row = s.queryClient
+      .getQueryData<TaskListItem[]>(s.projectList)
+      ?.find((t) => t.id === task.id);
+    expect(row?.status.id).toBe(done.id);
+    expect(row?.position).toBe('zz');
+    expect(s.stale(s.projectList)).toBe(false);
+
+    vi.advanceTimersByTime(COALESCE_MS);
+    expect(s.stale(s.projectList)).toBe(true);
+    expect(s.stale(s.spaceList)).toBe(true);
+    expect(s.stale(s.otherSpace)).toBe(false);
+    expect(s.stale(queryKeys.project(PROJECT_ID))).toBe(true);
+    expect(s.stale(queryKeys.home(WORKSPACE_ID))).toBe(true);
+  });
+
+  it('removes a deleted task from lists right away', () => {
+    const s = setup();
+    const task = at(s.tasks, 1);
+    s.handler.handle({ type: 'task.deleted', ...base(task) });
+    expect(
+      s.queryClient.getQueryData<TaskListItem[]>(s.projectList)?.some((t) => t.id === task.id),
+    ).toBe(false);
+  });
+
+  it('bumps the comment count and refetches only the feed and home', () => {
+    const s = setup();
+    const task = at(s.tasks, 0);
+    s.queryClient.setQueryData(queryKeys.taskActivity(task.id), []);
+    s.handler.handle({
+      type: 'comment.created',
+      ...base(task),
+      commentId: '01890000-0000-7000-8000-00000000c001',
+    });
+    const row = s.queryClient
+      .getQueryData<TaskListItem[]>(s.projectList)
+      ?.find((t) => t.id === task.id);
+    expect(row?.commentCount).toBe(task.commentCount + 1);
+    vi.advanceTimersByTime(COALESCE_MS);
+    expect(s.stale(queryKeys.taskActivity(task.id))).toBe(true);
+    expect(s.stale(s.projectList)).toBe(false);
+  });
+
+  it('leaves task caches alone while a task mutation of mine is in flight', () => {
+    const s = setup();
+    const task = at(s.tasks, 0);
+    vi.spyOn(s.queryClient, 'isMutating').mockImplementation((filters) =>
+      filters?.mutationKey === TASK_MUTATION ? 1 : 0,
+    );
+    s.handler.handle({ type: 'task.deleted', ...base(task) });
+    vi.advanceTimersByTime(COALESCE_MS);
+    expect(s.queryClient.getQueryData<TaskListItem[]>(s.projectList)).toHaveLength(s.tasks.length);
+    expect(s.stale(s.projectList)).toBe(false);
+    // The sidebar count isn't a task cache.
+    expect(s.stale(queryKeys.sidebar(WORKSPACE_ID))).toBe(true);
+  });
+
+  it('refreshes the inbox and badge on a new notification', () => {
+    const s = setup();
+    s.handler.handle({
+      type: 'notification.created',
+      workspaceId: WORKSPACE_ID,
+      taskId: at(s.tasks, 0).id,
+      actorId: SARA,
+      notificationId: '01890000-0000-7000-8000-00000000a001',
+      notificationType: 'mention',
+    });
+    vi.advanceTimersByTime(COALESCE_MS);
+    expect(s.stale(queryKeys.notificationsOf(WORKSPACE_ID))).toBe(true);
+    expect(s.stale(queryKeys.sidebar(WORKSPACE_ID))).toBe(true);
+    expect(s.stale(s.projectList)).toBe(false);
+  });
+});

@@ -18,6 +18,7 @@ import { httpError } from '../errors.js';
 import { StorageNotFoundError } from '../storage/storage.js';
 import { getAttachment } from '../tasks/attachments.js';
 import { mutateTasks } from '../tasks/mutation.js';
+import { clientIdOf } from '../realtime/client-id.js';
 
 const err = apiErrorSchema;
 const attachmentParams = z.object({ attachmentId: z.uuid() });
@@ -79,22 +80,26 @@ export const attachmentRoutes: FastifyPluginCallbackZod = (app, _opts, done) => 
       }
 
       try {
-        await mutateTasks(app, { projectId: project.id, actorId: user.id }, async (m) => {
-          await m.lockTask(task.id);
-          await m.tx.insert(attachments).values({
-            id,
-            taskId: task.id,
-            uploaderId: user.id,
-            filename,
-            mime,
-            size,
-            storageKey: key,
-            createdAt: m.now,
-          });
-          m.log(task.id, 'attachment.added', { attachment: { id, filename } });
-          await m.touch(task.id);
-          m.emit('attachment.changed', task.id, { attachmentId: id });
-        });
+        await mutateTasks(
+          app,
+          { projectId: project.id, actorId: user.id, clientId: clientIdOf(request) },
+          async (m) => {
+            await m.lockTask(task.id);
+            await m.tx.insert(attachments).values({
+              id,
+              taskId: task.id,
+              uploaderId: user.id,
+              filename,
+              mime,
+              size,
+              storageKey: key,
+              createdAt: m.now,
+            });
+            m.log(task.id, 'attachment.added', { attachment: { id, filename } });
+            await m.touch(task.id);
+            m.emit('attachment.changed', task.id, { attachmentId: id });
+          },
+        );
       } catch (error) {
         await discard(key);
         throw error;
@@ -170,19 +175,23 @@ export const attachmentRoutes: FastifyPluginCallbackZod = (app, _opts, done) => 
         throw httpError(403, 'FORBIDDEN', 'You can only delete your own attachments');
       }
 
-      await mutateTasks(app, { projectId: project.id, actorId: user.id }, async (m) => {
-        await m.lockTask(found.taskId);
-        const [removed] = await m.tx
-          .delete(attachments)
-          .where(and(eq(attachments.id, found.id), eq(attachments.taskId, found.taskId)))
-          .returning();
-        if (!removed) throw httpError(404, 'NOT_FOUND', 'Attachment not found');
-        m.log(removed.taskId, 'attachment.removed', {
-          attachment: { id: removed.id, filename: removed.filename },
-        });
-        await m.touch(removed.taskId);
-        m.emit('attachment.changed', removed.taskId, { attachmentId: removed.id });
-      });
+      await mutateTasks(
+        app,
+        { projectId: project.id, actorId: user.id, clientId: clientIdOf(request) },
+        async (m) => {
+          await m.lockTask(found.taskId);
+          const [removed] = await m.tx
+            .delete(attachments)
+            .where(and(eq(attachments.id, found.id), eq(attachments.taskId, found.taskId)))
+            .returning();
+          if (!removed) throw httpError(404, 'NOT_FOUND', 'Attachment not found');
+          m.log(removed.taskId, 'attachment.removed', {
+            attachment: { id: removed.id, filename: removed.filename },
+          });
+          await m.touch(removed.taskId);
+          m.emit('attachment.changed', removed.taskId, { attachmentId: removed.id });
+        },
+      );
       await discard(found.storageKey);
       return reply.code(204).send(null);
     },

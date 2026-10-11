@@ -17,6 +17,7 @@ import { registerErrorHandlers } from './errors.js';
 import { EventBus } from './events/bus.js';
 import { scheduleArchiveJob } from './notifications/archive-job.js';
 import { registerNotifier } from './notifications/notifier.js';
+import { registerRealtime } from './realtime/plugin.js';
 import { attachmentRoutes } from './routes/attachments.js';
 import { authRoutes } from './routes/auth.js';
 import { commentRoutes } from './routes/comments.js';
@@ -27,6 +28,7 @@ import { meRoutes } from './routes/me.js';
 import { notificationRoutes } from './routes/notifications.js';
 import { projectMemberRoutes } from './routes/project-members.js';
 import { projectRoutes } from './routes/projects.js';
+import { realtimeRoutes } from './routes/realtime.js';
 import { searchRoutes } from './routes/search.js';
 import { spaceRoutes } from './routes/spaces.js';
 import { sprintRoutes } from './routes/sprints.js';
@@ -99,6 +101,7 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
     limits: { fileSize: config.MAX_UPLOAD_BYTES, files: 1, fields: 10, parts: 11 },
   });
   registerAuth(app);
+  await registerRealtime(app);
   registerNotifier(app);
   scheduleArchiveJob(app);
   if (docsEnabled(config)) await registerDocs(app);
@@ -125,6 +128,7 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
       await api.register(searchRoutes);
       await api.register(notificationRoutes);
       await api.register(homeRoutes);
+      await api.register(realtimeRoutes);
     },
     { prefix: '/api/v1' },
   );

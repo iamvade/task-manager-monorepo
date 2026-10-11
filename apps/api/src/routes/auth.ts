@@ -1,4 +1,5 @@
 import {
+  REALTIME_CLOSE_UNAUTHORIZED,
   apiErrorSchema,
   loginRequestSchema,
   meResponseSchema,
@@ -79,6 +80,7 @@ export const authRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     async (request, reply) => {
       const { sessionId } = requireAuth(request);
       await app.db.delete(sessions).where(eq(sessions.id, sessionId));
+      app.realtime.hub.closeSession(sessionId, REALTIME_CLOSE_UNAUTHORIZED);
       clearSessionCookie(reply, app.config);
       return reply.code(204).send(null);
     },

@@ -82,6 +82,7 @@
     "invite": "Invite teammates",
     "settings": "Settings",
     "online": "Online",
+    "reconnecting": "Reconnecting…",
     "newBadge": "New",
     "accountMenu": "Account menu",
     "theme": "Theme",
@@ -405,7 +406,8 @@
     "edited": "(edited)",
     "commentDeleted": "This comment was deleted",
     "deleteCommentConfirm": "Delete this comment?",
-    "hideReplies": "Hide replies"
+    "hideReplies": "Hide replies",
+    "viewers": "Also viewing: {{names}}"
   },
   "myTasks": {
     "allSpaces": "All spaces",

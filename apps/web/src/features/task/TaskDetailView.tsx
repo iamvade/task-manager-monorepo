@@ -22,6 +22,7 @@ import { TaskHeader } from './TaskHeader';
 import { TaskProperties } from './TaskProperties';
 import { TaskTitle } from './TaskTitle';
 import { reportError } from '../../lib/mutationErrors';
+import { useViewingTask } from '../../realtime/context';
 
 interface TaskDetailViewProps {
   taskKey: string;
@@ -54,6 +55,7 @@ export function TaskDetailView({ taskKey, layout, onClose }: TaskDetailViewProps
   const { t } = useTranslation();
   const query = useTask(taskKey);
   const task = query.data;
+  useViewingTask(task?.id);
 
   if (!task) {
     return (

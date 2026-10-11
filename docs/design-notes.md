@@ -93,7 +93,7 @@ Body (padding 24, gap 24):
 | Bilingual default status names | `statuses.name` nullable → translated by category. |
 | Role hints (TaskDetail mentions, CreateTask assignee picker) | `workspace_members.title` nullable text. |
 | Notification settings (Inbox) | `users.notification_prefs jsonb` `{mention, assigned, comment, status}` booleans, default true; checked during fan-out; UI in `/settings`. |
-| Online dots | Not stored. WS server keeps presence in memory (Phase 16); until then only my own dot. |
+| Online dots, task viewers | Not stored. The WS server keeps presence in memory (`apps/api/src/realtime/hub.ts`); the web keeps it in `stores/realtime.ts`. |
 
 ### 2.2 Derived (computed in queries, never stored)
 - **Sidebar**: My Tasks = my open tasks (not done, not deleted) in workspace; Inbox = unread, unarchived notifications.
@@ -184,8 +184,8 @@ Primitives in `apps/web/src/components/ui`, composites in feature folders. `Pale
 ### Identity & metadata
 | Component | Props | Used in |
 |---|---|---|
-| `Avatar` | `user: UserLite`, `size?: 20\|22\|24\|26\|28`, `ring?: boolean` (2px bg border for stacks), `title?` | everywhere |
-| `AvatarStack` | `users`, `max?`, `size?: 24\|26`, `label` (aria, "7 project members") — renders "+N" chip | top bar, Board cards, List cell |
+| `Avatar` | `user: UserLite`, `size?: 20\|22\|24\|26\|28`, `ring?: boolean` (2px bg border for stacks), `title?`, `online?` (presence dot) | everywhere |
+| `AvatarStack` | `users`, `max?`, `size?: 24\|26`, `label` (aria, "7 project members"), `onlineIds?`, `onlineLabel?` — renders "+N" chip | top bar, Board cards, List cell, drawer viewers |
 | `SpaceBadge` | `initial`, `color: PaletteKey`, `size?: 16\|18\|22` (square, radius 4/5/6) | sidebar, breadcrumb, My Tasks rows |
 | `WorkspaceTile` | `name`, `size?: 24\|28` (accent bg, white initial) | sidebar, rail |
 | `ProjectDot` | `color: PaletteKey \| 'accent' \| 'inactive'`, `size?: 6\|8` | sidebar, chips, pills, pickers |
@@ -277,7 +277,11 @@ Checked every screen in mn/en × light/dark at 1440px, plus 1024px and 820px con
 - **Board toolbar under ~900px**: "+ New task" wraps to a second toolbar line (no overflow).
 - **My Tasks stat card (mn)**: "Өмнөх долоо хоногоос +9" wraps to two lines next to the week bars at ≤1100px.
 - **Time zone picker**: opens at the top of the list (search to find a zone) rather than scrolled to the current one.
-- **Sidebar badge sync**: updates instantly for my own inbox actions and on refetch; other people's actions arrive with realtime (phase 16).
+- **Sidebar badge sync**: updates instantly for my own inbox actions; new notifications arrive over realtime. Reading/archiving in another tab of mine syncs on refetch only (no event for it).
+- **Realtime visuals (not designed, phase 16)**:
+  - *Online dot on avatars*: 8px (6px under 24px avatars) `--online`, bottom-right at −2px, 2px ring in the avatar's ring color (`--bg`, or `--surface` on cards/drawer), drawn above the next avatar of a stack. Shown in the project header stack, the drawer viewers and Settings → Members. The sidebar row keeps its designed dot, which turns `--text-faint` while disconnected.
+  - *"Reconnecting…" pill*: shown after 2s disconnected, top center of the page area. 28px, radius full, `--surface` bg, 1px `--border`, `--shadow-popover`, 12px `--text-muted`, 12px spinning loader (static under reduced motion). en "Reconnecting…" / mn "Дахин холбогдож байна…".
+  - *Drawer viewers*: other people with the same task open, a 24px stack (max 3, surface ring, online dots) between the breadcrumb and Mark complete; hover/aria "Also viewing: Sara K." / "Мөн харж байна: Sara K.". Hidden when nobody else is there.
 - **Undo**: task delete, task complete (List, drawer, My Tasks) and archive notification. "Mark all as read" has no undo (no mark-unread endpoint).
 - **Mongolian copy** for Inbox additions, Settings and error toasts is drafted (see `docs/i18n-review.md`).
 

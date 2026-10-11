@@ -6,6 +6,7 @@ import { AvatarStack } from '../../components/ui/AvatarStack';
 import { IconButton } from '../../components/ui/IconButton';
 import { Menu } from '../../components/ui/Menu';
 import { cn } from '../../lib/cn';
+import { useOnlineIds } from '../../stores/realtime';
 import { useCopyLink } from '../../lib/useCopyLink';
 import { Breadcrumb } from '../views/Breadcrumb';
 import { PageHeader } from '../views/PageHeader';
@@ -17,6 +18,7 @@ import { ViewToolbar } from '../views/ViewToolbar';
 /** Project top bar: breadcrumb, favorite, members, Share, options; view tabs + toolbar. */
 export function ProjectHeader({ project, view }: { project: ProjectDetail; view: View }) {
   const { t } = useTranslation();
+  const online = useOnlineIds();
   const favorite = useToggleFavorite(project);
   const { copied, copy } = useCopyLink();
   const favoriteLabel = project.isFavorite ? t('header.unfavorite') : t('header.favorite');
@@ -47,8 +49,13 @@ export function ProjectHeader({ project, view }: { project: ProjectDetail; view:
         <>
           {project.members.length > 0 && (
             <AvatarStack
-              users={project.members.map((m) => m.user)}
+              // Who's online first, so they aren't hidden in "+N".
+              users={project.members
+                .map((m) => m.user)
+                .sort((a, b) => Number(online.has(b.id)) - Number(online.has(a.id)))}
               label={t('header.members', { count: project.members.length })}
+              onlineIds={online}
+              onlineLabel={t('shell.online')}
             />
           )}
           <ShareButton />

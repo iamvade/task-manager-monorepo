@@ -15,6 +15,7 @@ import { one } from '../db/rows.js';
 import { subtasks } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
 import { mutateTasks, type TaskMutation } from '../tasks/mutation.js';
+import { clientIdOf } from '../realtime/client-id.js';
 import { requireMembers } from '../tasks/refs.js';
 import { endOfSubtasks, getSubtask, listSubtasks, startOfSubtasks } from '../tasks/subtasks.js';
 
@@ -84,29 +85,33 @@ export const subtaskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       const { user } = requireAuth(request);
       const body = request.body;
 
-      const id = await mutateTasks(app, { projectId: project.id, actorId: user.id }, async (m) => {
-        await m.lockTask(task.id);
-        const subtask = one(
-          await m.tx
-            .insert(subtasks)
-            .values({
-              taskId: task.id,
-              title: body.title,
-              assigneeId: await assigneeId(m, body.assigneeId),
-              dueDate: body.dueDate ?? null,
-              position:
-                body.position === 'top'
-                  ? await startOfSubtasks(m.tx, task.id)
-                  : await endOfSubtasks(m.tx, task.id),
-            })
-            .returning(),
-          'subtask',
-        );
-        m.log(task.id, 'subtask.added', { subtask: { id: subtask.id, title: subtask.title } });
-        await m.touch(task.id);
-        m.emit('subtask.changed', task.id, { subtaskId: subtask.id });
-        return subtask.id;
-      });
+      const id = await mutateTasks(
+        app,
+        { projectId: project.id, actorId: user.id, clientId: clientIdOf(request) },
+        async (m) => {
+          await m.lockTask(task.id);
+          const subtask = one(
+            await m.tx
+              .insert(subtasks)
+              .values({
+                taskId: task.id,
+                title: body.title,
+                assigneeId: await assigneeId(m, body.assigneeId),
+                dueDate: body.dueDate ?? null,
+                position:
+                  body.position === 'top'
+                    ? await startOfSubtasks(m.tx, task.id)
+                    : await endOfSubtasks(m.tx, task.id),
+              })
+              .returning(),
+            'subtask',
+          );
+          m.log(task.id, 'subtask.added', { subtask: { id: subtask.id, title: subtask.title } });
+          await m.touch(task.id);
+          m.emit('subtask.changed', task.id, { subtaskId: subtask.id });
+          return subtask.id;
+        },
+      );
       return reply.code(201).send(await dto(id));
     },
   );
@@ -133,30 +138,34 @@ export const subtaskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       const { user } = requireAuth(request);
       const body = request.body;
 
-      await mutateTasks(app, { projectId: project.id, actorId: user.id }, async (m) => {
-        const subtask = await lockSubtask(m, found.taskId, found.id);
-        const patch: Partial<typeof subtasks.$inferInsert> = {};
-        if (body.title !== undefined && body.title !== subtask.title) patch.title = body.title;
-        if (body.assigneeId !== undefined && body.assigneeId !== subtask.assigneeId) {
-          patch.assigneeId = await assigneeId(m, body.assigneeId);
-        }
-        if (body.dueDate !== undefined && body.dueDate !== subtask.dueDate) {
-          patch.dueDate = body.dueDate;
-        }
-        if (body.done !== undefined && body.done !== subtask.done) {
-          patch.done = body.done;
-          if (body.done) {
-            m.log(subtask.taskId, 'subtask.completed', {
-              subtask: { id: subtask.id, title: patch.title ?? subtask.title },
-            });
+      await mutateTasks(
+        app,
+        { projectId: project.id, actorId: user.id, clientId: clientIdOf(request) },
+        async (m) => {
+          const subtask = await lockSubtask(m, found.taskId, found.id);
+          const patch: Partial<typeof subtasks.$inferInsert> = {};
+          if (body.title !== undefined && body.title !== subtask.title) patch.title = body.title;
+          if (body.assigneeId !== undefined && body.assigneeId !== subtask.assigneeId) {
+            patch.assigneeId = await assigneeId(m, body.assigneeId);
           }
-        }
-        if (Object.keys(patch).length === 0) return;
+          if (body.dueDate !== undefined && body.dueDate !== subtask.dueDate) {
+            patch.dueDate = body.dueDate;
+          }
+          if (body.done !== undefined && body.done !== subtask.done) {
+            patch.done = body.done;
+            if (body.done) {
+              m.log(subtask.taskId, 'subtask.completed', {
+                subtask: { id: subtask.id, title: patch.title ?? subtask.title },
+              });
+            }
+          }
+          if (Object.keys(patch).length === 0) return;
 
-        await m.tx.update(subtasks).set(patch).where(eq(subtasks.id, subtask.id));
-        await m.touch(subtask.taskId);
-        m.emit('subtask.changed', subtask.taskId, { subtaskId: subtask.id });
-      });
+          await m.tx.update(subtasks).set(patch).where(eq(subtasks.id, subtask.id));
+          await m.touch(subtask.taskId);
+          m.emit('subtask.changed', subtask.taskId, { subtaskId: subtask.id });
+        },
+      );
       return dto(found.id);
     },
   );
@@ -182,18 +191,22 @@ export const subtaskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       );
       const { user } = requireAuth(request);
 
-      await mutateTasks(app, { projectId: project.id, actorId: user.id }, async (m) => {
-        const subtask = await lockSubtask(m, found.taskId, found.id);
-        const siblings = await m.tx
-          .select({ id: subtasks.id, position: subtasks.position })
-          .from(subtasks)
-          .where(eq(subtasks.taskId, subtask.taskId));
-        const position = movePosition(siblings, subtask.id, request.body);
-        if (position === subtask.position) return;
-        await m.tx.update(subtasks).set({ position }).where(eq(subtasks.id, subtask.id));
-        await m.touch(subtask.taskId);
-        m.emit('subtask.changed', subtask.taskId, { subtaskId: subtask.id });
-      });
+      await mutateTasks(
+        app,
+        { projectId: project.id, actorId: user.id, clientId: clientIdOf(request) },
+        async (m) => {
+          const subtask = await lockSubtask(m, found.taskId, found.id);
+          const siblings = await m.tx
+            .select({ id: subtasks.id, position: subtasks.position })
+            .from(subtasks)
+            .where(eq(subtasks.taskId, subtask.taskId));
+          const position = movePosition(siblings, subtask.id, request.body);
+          if (position === subtask.position) return;
+          await m.tx.update(subtasks).set({ position }).where(eq(subtasks.id, subtask.id));
+          await m.touch(subtask.taskId);
+          m.emit('subtask.changed', subtask.taskId, { subtaskId: subtask.id });
+        },
+      );
       return dto(found.id);
     },
   );
@@ -217,12 +230,16 @@ export const subtaskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       );
       const { user } = requireAuth(request);
 
-      await mutateTasks(app, { projectId: project.id, actorId: user.id }, async (m) => {
-        const subtask = await lockSubtask(m, found.taskId, found.id);
-        await m.tx.delete(subtasks).where(eq(subtasks.id, subtask.id));
-        await m.touch(subtask.taskId);
-        m.emit('subtask.changed', subtask.taskId, { subtaskId: subtask.id });
-      });
+      await mutateTasks(
+        app,
+        { projectId: project.id, actorId: user.id, clientId: clientIdOf(request) },
+        async (m) => {
+          const subtask = await lockSubtask(m, found.taskId, found.id);
+          await m.tx.delete(subtasks).where(eq(subtasks.id, subtask.id));
+          await m.touch(subtask.taskId);
+          m.emit('subtask.changed', subtask.taskId, { subtaskId: subtask.id });
+        },
+      );
       return reply.code(204).send(null);
     },
   );

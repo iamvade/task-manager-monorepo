@@ -2,6 +2,7 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup, configure } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
 import '../i18n';
+import { FakeWebSocket } from './fakeSocket';
 
 // Files run in parallel; under load a first render can take longer than the 1s default.
 configure({ asyncUtilTimeout: 3000 });
@@ -9,7 +10,11 @@ configure({ asyncUtilTimeout: 3000 });
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  FakeWebSocket.reset();
 });
+
+// The realtime socket never reaches a server in tests.
+globalThis.WebSocket = FakeWebSocket as unknown as typeof WebSocket;
 
 // jsdom has no layout: keyboard navigation scrolls the selected row into view.
 Element.prototype.scrollIntoView = function scrollIntoView() {

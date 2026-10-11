@@ -1,0 +1,233 @@
+import type {
+  ProjectDetail,
+  RealtimeServerMessage,
+  RealtimeTaskMessage,
+  SidebarResponse,
+  TaskDetail,
+  TaskListItem,
+  TaskStatusRef,
+} from '@kite/shared';
+import type { Query, QueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../api/queryKeys';
+import { TASK_MUTATION } from '../api/taskCache';
+
+/** Changes arriving this close together share one round of refetches. */
+export const COALESCE_MS = 150;
+
+type Patch = (task: TaskListItem) => TaskListItem;
+
+/** What a batch of messages made stale. */
+interface Pending {
+  workspaceId: string;
+  projects: Set<string>;
+  tasks: Set<string>;
+  activity: Set<string>;
+  home: boolean;
+  sidebar: boolean;
+  inbox: boolean;
+}
+
+/**
+ * Applies teammates' changes (realtime messages) to the query cache: cheap patches right away
+ * (a card moving column, a deleted row disappearing, a comment count), then a coalesced refetch
+ * of whatever the change can affect. Only active queries refetch; the rest just turn stale.
+ *
+ * While a task mutation of this tab is in flight, task caches are left alone: its `settle()`
+ * refetches everything once it lands, and an earlier refetch would overwrite its optimistic edit.
+ */
+export function createMessageHandler(queryClient: QueryClient) {
+  let pending: Pending | null = null;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  const busy = () => queryClient.isMutating({ mutationKey: TASK_MUTATION }) > 0;
+
+  const mark = (workspaceId: string, edit: (p: Pending) => void) => {
+    if (pending?.workspaceId !== workspaceId) {
+      flush();
+      pending = {
+        workspaceId,
+        projects: new Set(),
+        tasks: new Set(),
+        activity: new Set(),
+        home: false,
+        sidebar: false,
+        inbox: false,
+      };
+    }
+    edit(pending);
+    clearTimeout(timer);
+    timer = setTimeout(flush, COALESCE_MS);
+  };
+
+  function flush() {
+    clearTimeout(timer);
+    const p = pending;
+    pending = null;
+    if (!p) return;
+    const ws = p.workspaceId;
+    if (p.inbox) void queryClient.invalidateQueries({ queryKey: queryKeys.notificationsOf(ws) });
+    if (p.sidebar) void queryClient.invalidateQueries({ queryKey: queryKeys.sidebar(ws) });
+    if (busy()) return;
+    if (p.projects.size > 0) {
+      const spaces = spacesOf(queryClient, ws, p.projects);
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.taskLists,
+        predicate: (q) => {
+          const [, , scope, id] = q.queryKey;
+          if (typeof id !== 'string') return false;
+          if (scope === 'project') return p.projects.has(id);
+          return scope === 'space' && (spaces === null || spaces.has(id));
+        },
+      });
+      for (const id of p.projects) {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.project(id), exact: true });
+      }
+    }
+    if (p.tasks.size > 0) {
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.taskDetails,
+        predicate: (q: Query) => {
+          const data = q.state.data as TaskDetail | undefined;
+          return data !== undefined && p.tasks.has(data.id);
+        },
+      });
+    }
+    for (const id of p.activity) {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.taskActivity(id) });
+    }
+    if (p.home) void queryClient.invalidateQueries({ queryKey: queryKeys.home(ws) });
+  }
+
+  function onTask(m: RealtimeTaskMessage) {
+    const quiet = busy();
+    if (!quiet) patchNow(queryClient, m);
+    mark(m.workspaceId, (p) => {
+      p.home = true;
+      p.activity.add(m.taskId);
+      if (m.type === 'comment.created') return;
+      p.projects.add(m.projectId);
+      if (m.type === 'task.updated' && m.fromProjectId) p.projects.add(m.fromProjectId);
+      p.tasks.add(m.taskId);
+      // My Tasks count in the sidebar.
+      if (m.type !== 'comment.changed' && m.type !== 'subtask.changed') p.sidebar = true;
+    });
+  }
+
+  return {
+    handle(message: RealtimeServerMessage) {
+      switch (message.type) {
+        case 'task.created':
+        case 'task.updated':
+        case 'task.moved':
+        case 'task.deleted':
+        case 'comment.created':
+        case 'comment.changed':
+        case 'subtask.changed':
+          onTask(message);
+          return;
+        case 'notification.created':
+          mark(message.workspaceId, (p) => {
+            p.inbox = true;
+            p.sidebar = true;
+          });
+          return;
+        default:
+          return;
+      }
+    },
+    /** Applies whatever is still waiting (tests, teardown). */
+    flush,
+    dispose() {
+      clearTimeout(timer);
+      pending = null;
+    },
+  };
+}
+
+/** Immediate cache edits that need no server data. */
+function patchNow(queryClient: QueryClient, m: RealtimeTaskMessage) {
+  switch (m.type) {
+    case 'task.moved': {
+      const status = statusRef(queryClient, m.projectId, m.statusId);
+      patchRows(queryClient, m.taskId, (t) => ({
+        ...t,
+        position: m.position,
+        ...(status && { status }),
+      }));
+      return;
+    }
+    case 'task.deleted':
+      for (const [key, tasks] of queryClient.getQueriesData<TaskListItem[]>({
+        queryKey: queryKeys.taskLists,
+      })) {
+        if (tasks?.some((t) => t.id === m.taskId)) {
+          queryClient.setQueryData(
+            key,
+            tasks.filter((t) => t.id !== m.taskId),
+          );
+        }
+      }
+      return;
+    case 'comment.created':
+      patchRows(queryClient, m.taskId, (t) => ({ ...t, commentCount: t.commentCount + 1 }), true);
+      return;
+    default:
+      return;
+  }
+}
+
+/** Patches the task's list rows (and its open detail with `detail`). */
+function patchRows(queryClient: QueryClient, taskId: string, patch: Patch, detail = false) {
+  for (const [key, tasks] of queryClient.getQueriesData<TaskListItem[]>({
+    queryKey: queryKeys.taskLists,
+  })) {
+    if (tasks?.some((t) => t.id === taskId)) {
+      queryClient.setQueryData(
+        key,
+        tasks.map((t) => (t.id === taskId ? patch(t) : t)),
+      );
+    }
+  }
+  if (!detail) return;
+  for (const [key, task] of queryClient.getQueriesData<TaskDetail>({
+    queryKey: queryKeys.taskDetails,
+  })) {
+    if (task?.id === taskId) queryClient.setQueryData(key, { ...task, ...patch(task) });
+  }
+}
+
+/** The status a task moved to, from the project (or any cached row already in it). */
+function statusRef(
+  queryClient: QueryClient,
+  projectId: string,
+  statusId: string,
+): TaskStatusRef | undefined {
+  const project = queryClient.getQueryData<ProjectDetail>(queryKeys.project(projectId));
+  const s = project?.statuses.find((x) => x.id === statusId);
+  if (s) return { id: s.id, name: s.name, category: s.category, color: s.color };
+  for (const [, tasks] of queryClient.getQueriesData<TaskListItem[]>({
+    queryKey: queryKeys.taskLists,
+  })) {
+    const row = tasks?.find((t) => t.status.id === statusId);
+    if (row) return row.status;
+  }
+  return undefined;
+}
+
+/** Spaces holding these projects (from the sidebar); null when unknown, i.e. every space. */
+function spacesOf(
+  queryClient: QueryClient,
+  workspaceId: string,
+  projectIds: ReadonlySet<string>,
+): Set<string> | null {
+  const sidebar = queryClient.getQueryData<SidebarResponse>(queryKeys.sidebar(workspaceId));
+  if (!sidebar) return null;
+  const spaces = new Set<string>();
+  for (const id of projectIds) {
+    const space = sidebar.spaces.find((s) => s.projects.some((p) => p.id === id));
+    // An archived project or one created a moment ago isn't in the sidebar yet.
+    if (!space) return null;
+    spaces.add(space.id);
+  }
+  return spaces;
+}

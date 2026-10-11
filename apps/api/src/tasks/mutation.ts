@@ -11,7 +11,7 @@ type ProjectRow = typeof projects.$inferSelect;
 export type TaskRow = typeof tasks.$inferSelect;
 type TaskEventExtra = Pick<
   TaskEvent,
-  'assigneeIds' | 'commentId' | 'mentionedUserIds' | 'subtaskId' | 'attachmentId'
+  'assigneeIds' | 'commentId' | 'mentionedUserIds' | 'subtaskId' | 'attachmentId' | 'move'
 >;
 type ActivityInsert = typeof activity.$inferInsert & EventActivity & { taskId: string };
 
@@ -47,8 +47,9 @@ export async function mutateTasks<T>(
   {
     projectId,
     actorId,
+    clientId,
     alsoLock = [],
-  }: { projectId: string; actorId: string; alsoLock?: readonly string[] },
+  }: { projectId: string; actorId: string; clientId?: string; alsoLock?: readonly string[] },
   run: (m: TaskMutation) => Promise<T>,
 ): Promise<T> {
   const now = new Date();
@@ -117,6 +118,7 @@ export async function mutateTasks<T>(
           projectId,
           taskId,
           actorId,
+          clientId,
           at: now,
           ...extra,
         });

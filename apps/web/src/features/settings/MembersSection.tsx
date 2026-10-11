@@ -18,6 +18,7 @@ import { SegmentedControl } from '../../components/ui/SegmentedControl';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { cn } from '../../lib/cn';
 import { useDates } from '../../lib/useDates';
+import { useOnlineIds } from '../../stores/realtime';
 import { toast } from '../../stores/toast';
 import { SettingsSection, settingsInput } from './SettingsRow';
 
@@ -228,13 +229,15 @@ function MemberRow({
 }) {
   const { t } = useTranslation();
   const roleLabel = t(`settings.roles.${member.role}`);
+  const online = useOnlineIds().has(member.user.id);
   return (
     <li className="flex items-center gap-3 border-t border-subtle py-2.5">
-      <Avatar user={member.user} size={28} title={null} />
+      <Avatar user={member.user} size={28} title={null} online={online} />
       <div className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-[13px] font-medium text-default">
           {member.user.name}
           {isMe && <span className="font-normal text-muted"> {t('settings.members.you')}</span>}
+          {online && <span className="sr-only"> · {t('shell.online')}</span>}
         </span>
         <span className="truncate text-[12px] text-muted">
           {member.title ? `${member.title} · ${member.user.email}` : member.user.email}

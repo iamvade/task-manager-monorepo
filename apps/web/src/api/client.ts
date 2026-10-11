@@ -1,5 +1,6 @@
-import { apiErrorSchema } from '@kite/shared';
+import { REALTIME_CLIENT_HEADER, apiErrorSchema } from '@kite/shared';
 import type { z } from 'zod';
+import { CLIENT_ID } from '../realtime/clientId';
 
 export class ApiError extends Error {
   constructor(
@@ -35,6 +36,7 @@ export async function apiFetch<S extends z.ZodType>(
 ): Promise<z.infer<S>> {
   const headers = new Headers(init?.headers);
   headers.set('Accept', 'application/json');
+  headers.set(REALTIME_CLIENT_HEADER, CLIENT_ID);
   const res = await fetch(`/api/v1${path}`, { credentials: 'include', ...init, headers });
   const body: unknown = res.status === 204 ? null : await res.json().catch(() => null);
   if (!res.ok) {

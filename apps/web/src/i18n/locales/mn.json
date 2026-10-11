@@ -82,6 +82,7 @@
     "invite": "Хамт олноо урих",
     "settings": "Тохиргоо",
     "online": "Онлайн",
+    "reconnecting": "Дахин холбогдож байна…",
     "newBadge": "Шинэ",
     "accountMenu": "Бүртгэлийн цэс",
     "theme": "Загвар",
@@ -405,7 +406,8 @@
     "edited": "(зассан)",
     "commentDeleted": "Энэ сэтгэгдэл устгагдсан",
     "deleteCommentConfirm": "Энэ сэтгэгдлийг устгах уу?",
-    "hideReplies": "Хариултуудыг нуух"
+    "hideReplies": "Хариултуудыг нуух",
+    "viewers": "Мөн харж байна: {{names}}"
   },
   "myTasks": {
     "allSpaces": "Бүх орон зай",
