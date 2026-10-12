@@ -9,7 +9,7 @@ import { routes } from '../../router';
 import { useUiStore } from '../../stores/ui';
 import { ME, PROJECT_ID, SIDEBAR, SPRINT_ID, WORKSPACE_ID, mockApi } from '../../test/fixtures';
 import { homeHandlers } from '../../test/home';
-import { listHandlers } from '../../test/tasks';
+import { PROJECT_WITH_STATUSES, listHandlers } from '../../test/tasks';
 
 function renderAt(path: string) {
   const router = createMemoryRouter(routes, { initialEntries: [path] });
@@ -32,6 +32,9 @@ function api(extra: Record<string, (init?: RequestInit) => Response> = {}) {
     ...extra,
   });
 }
+
+const body = (init?: RequestInit): unknown =>
+  typeof init?.body === 'string' ? JSON.parse(init.body) : null;
 
 const sidebarNav = () => screen.getByRole('navigation', { name: 'Ажлын орчин' });
 
@@ -159,5 +162,93 @@ describe('app shell', () => {
     await waitFor(() => {
       expect(document.documentElement.dataset.theme).toBe('dark');
     });
+  });
+  it('creates a project from the space row and opens it', async () => {
+    const posted: unknown[] = [];
+    api({
+      [`POST /api/v1/workspaces/${WORKSPACE_ID}/projects`]: (init) => {
+        posted.push(body(init));
+        return Response.json(PROJECT_WITH_STATUSES, { status: 201 });
+      },
+    });
+    const router = renderAt('/my-tasks');
+
+    const nav = await waitFor(sidebarNav);
+    fireEvent.click(await within(nav).findByRole('button', { name: 'Product: шинэ төсөл' }));
+    const form = await screen.findByRole('dialog', { name: 'Product: шинэ төсөл' });
+    const create = within(form).getByRole('button', { name: 'Төсөл үүсгэх' });
+    expect(create).toBeDisabled();
+    fireEvent.change(within(form).getByLabelText('Төслийн нэр'), {
+      target: { value: '  App Redesign ' },
+    });
+    fireEvent.click(create);
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe(`/p/${PROJECT_ID}/list`);
+    });
+    expect(posted).toEqual([{ spaceId: SIDEBAR.spaces[0]?.id, name: 'App Redesign' }]);
+    expect(screen.queryByRole('dialog', { name: 'Product: шинэ төсөл' })).toBeNull();
+  });
+
+  it('keeps the new-project form open with an error when creating fails', async () => {
+    api({
+      [`POST /api/v1/workspaces/${WORKSPACE_ID}/projects`]: () =>
+        Response.json({ error: { code: 'INTERNAL', message: 'boom' } }, { status: 500 }),
+    });
+    renderAt('/my-tasks');
+
+    const nav = await waitFor(sidebarNav);
+    fireEvent.click(await within(nav).findByRole('button', { name: 'Engineering: шинэ төсөл' }));
+    const form = await screen.findByRole('dialog', { name: 'Engineering: шинэ төсөл' });
+    fireEvent.change(within(form).getByLabelText('Төслийн нэр'), { target: { value: 'Infra' } });
+    fireEvent.click(within(form).getByRole('button', { name: 'Төсөл үүсгэх' }));
+    expect(await within(form).findByRole('alert')).toHaveTextContent(
+      'Алдаа гарлаа. Дахин оролдоно уу.',
+    );
+  });
+
+  it('creates a sprint from the project options menu', async () => {
+    const posted: unknown[] = [];
+    api({
+      [`POST /api/v1/projects/${PROJECT_ID}/sprints`]: (init) => {
+        posted.push(body(init));
+        return Response.json(
+          {
+            ...PROJECT_WITH_STATUSES.activeSprint,
+            id: '01890000-0000-7000-8000-000000000031',
+            number: 2,
+          },
+          { status: 201 },
+        );
+      },
+    });
+    renderAt(`/p/${PROJECT_ID}/list`);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Төслийн сонголтууд' }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Шинэ спринт' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Шинэ спринт' });
+    const start = within(dialog).getByLabelText('Эхлэх');
+    const end = within(dialog).getByLabelText('Дуусах');
+    // After Sprint 1 (Oct 6 – Oct 24: 14 working days).
+    expect(start).toHaveValue('2026-10-26');
+    expect(end).toHaveValue('2026-11-12');
+    expect(within(dialog).getByLabelText('Нэр (заавал биш)')).toHaveAttribute(
+      'placeholder',
+      '2-р спринт',
+    );
+
+    const create = within(dialog).getByRole('button', { name: 'Спринт үүсгэх' });
+    fireEvent.change(end, { target: { value: '2026-10-20' } });
+    expect(within(dialog).getByRole('alert')).toHaveTextContent(
+      'Дуусах огноо эхлэх огнооноос өмнө байж болохгүй',
+    );
+    expect(create).toBeDisabled();
+
+    fireEvent.change(end, { target: { value: '2026-11-06' } });
+    fireEvent.click(create);
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: 'Шинэ спринт' })).toBeNull();
+    });
+    expect(posted).toEqual([{ startDate: '2026-10-26', endDate: '2026-11-06' }]);
   });
 });

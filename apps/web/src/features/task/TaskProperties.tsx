@@ -373,6 +373,7 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
           label={t('drawer.sprint')}
           value={task.sprintId}
           sprints={sprints}
+          project={project}
           onChange={(sprintId) => {
             if (sprintId !== task.sprintId) update.mutate({ task, patch: { sprintId } });
           }}
