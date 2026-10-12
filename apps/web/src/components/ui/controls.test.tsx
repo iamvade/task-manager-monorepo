@@ -1,9 +1,11 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { Picker } from './Picker';
 import { SegmentedControl } from './SegmentedControl';
 import { StatusDot } from './StatusDot';
+import { UnderlineTabs } from './UnderlineTabs';
 
 const PEOPLE = [
   { id: 'a', name: 'Anu B.' },
@@ -104,5 +106,38 @@ describe('StatusDot', () => {
     const dot = screen.getByRole('img', { name: 'In Progress' });
     expect(dot.style.background).toContain('linear-gradient');
     expect(dot.style.borderWidth).toBe('2px');
+  });
+});
+
+describe('UnderlineTabs', () => {
+  const ITEMS = ['list', 'board', 'calendar'].map((v) => ({ value: v, label: v, to: `/${v}` }));
+
+  function Tabs() {
+    const value = useLocation().pathname.slice(1);
+    return <UnderlineTabs items={ITEMS} value={value} label="Views" />;
+  }
+
+  it('keeps only the selected tab tabbable and moves with arrows, Home and End', () => {
+    render(
+      <MemoryRouter initialEntries={['/board']}>
+        <Routes>
+          <Route path="*" element={<Tabs />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    const tab = (name: string) => screen.getByRole('tab', { name });
+    expect(tab('board')).toHaveAttribute('tabindex', '0');
+    expect(tab('list')).toHaveAttribute('tabindex', '-1');
+
+    fireEvent.keyDown(tab('board'), { key: 'ArrowRight' });
+    expect(tab('calendar')).toHaveAttribute('aria-selected', 'true');
+    expect(tab('calendar')).toHaveFocus();
+    fireEvent.keyDown(tab('calendar'), { key: 'ArrowRight' });
+    expect(tab('list')).toHaveAttribute('aria-selected', 'true');
+    fireEvent.keyDown(tab('list'), { key: 'End' });
+    expect(tab('calendar')).toHaveAttribute('aria-selected', 'true');
+    fireEvent.keyDown(tab('calendar'), { key: 'Home' });
+    expect(tab('list')).toHaveFocus();
+    expect(tab('list')).toHaveAttribute('tabindex', '0');
   });
 });

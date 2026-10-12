@@ -315,3 +315,13 @@ export const TrendIcon = make(<path d="M3 3v18h18M7 14l4-4 3 3 5-6" />);
 export const WaitIcon = make(<path d="M12 6v6l4 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />);
 /** Partial ring (Reports loading status). */
 export const SpinnerIcon = make(<path d="M21 12a9 9 0 1 1-6.2-8.6" />, { strokeWidth: 2.5 });
+export const ArrowRightIcon = make(<path d="M5 12h14M12 5l7 7-7 7" />, { strokeWidth: 2.5 });
+export const LockIcon = make(
+  <>
+    <rect x="5" y="11" width="14" height="10" rx="2" />
+    <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+  </>,
+);
+export const MentionIcon = make(
+  <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" />,
+);

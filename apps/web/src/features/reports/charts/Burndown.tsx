@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChartFrame } from './ChartFrame';
+import { ChartFrame, type ChartTable } from './ChartFrame';
 import { ChartTooltip, HoverColumns, HoverLine, TooltipRow } from './ChartTooltip';
 import { columnCenter, linePath, niceTicks } from './scale';
 
@@ -22,6 +22,8 @@ interface BurndownProps {
   /** Index of today, or null for a finished sprint. */
   todayIndex: number | null;
   ariaLabel: string;
+  /** The values as a visually hidden table. */
+  table?: ChartTable;
   labels: { remaining: string; ideal: string; projection: string; today: string };
   /** "≈ 12 left" at the end of the projection. */
   projectedEndLabel?: string;
@@ -40,6 +42,7 @@ export function Burndown({
   points,
   todayIndex,
   ariaLabel,
+  table,
   labels,
   projectedEndLabel,
   formatCount,
@@ -64,6 +67,7 @@ export function Burndown({
       ticks={ticks}
       xLabels={points.map((p) => p.label)}
       ariaLabel={ariaLabel}
+      table={table}
       height={height}
       gutter={28}
     >

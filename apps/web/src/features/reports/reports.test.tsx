@@ -4,7 +4,7 @@ import i18n from '../../i18n';
 import { useUiStore } from '../../stores/ui';
 import { ME, PROJECT_ID, WORKSPACE_ID } from '../../test/fixtures';
 import { MEMBER_ME, REPORTS_API, renderReports, requested } from '../../test/renderReports';
-import { REPORTS_NOW, overview } from '../../test/reports';
+import { REPORTS_NOW, overview, personReport } from '../../test/reports';
 import { at } from '../../test/tasks';
 
 const OVERVIEW = `${REPORTS_API}/overview`;
@@ -161,7 +161,10 @@ describe('Reports', () => {
   });
 
   it('sends members from People to My performance, and admins the other way', async () => {
-    const member = renderReports('/reports/people', { me: MEMBER_ME });
+    const member = renderReports('/reports/people', {
+      me: MEMBER_ME,
+      extra: { [`${REPORTS_API}/people/me`]: () => Response.json(personReport()) },
+    });
     await waitFor(() => {
       expect(member.router.state.location.pathname).toBe('/reports/me');
     });
@@ -171,7 +174,9 @@ describe('Reports', () => {
   });
 
   it('sends owners from My performance to People', async () => {
-    const owner = renderReports('/reports/me');
+    const owner = renderReports('/reports/me', {
+      extra: { [`${REPORTS_API}/people/me`]: () => Response.json(personReport()) },
+    });
     await waitFor(() => {
       expect(owner.router.state.location.pathname).toBe('/reports/people');
     });

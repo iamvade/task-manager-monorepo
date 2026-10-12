@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { at } from '../../../test/tasks';
 import { Burndown } from './Burndown';
 import { LineTrend } from './LineTrend';
+import { ReferenceTrend } from './ReferenceTrend';
 import { StackedBar } from './StackedBar';
 
 describe('LineTrend', () => {
@@ -90,5 +91,56 @@ describe('Burndown', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Remaining8 tasks');
     fireEvent.mouseEnter(at(columns, 4));
     expect(screen.getByRole('status')).toHaveTextContent('Projection4 tasks');
+  });
+});
+
+describe('ReferenceTrend', () => {
+  const values = [2, 3, null, 4, 3];
+  const points = values.map((value, i) => ({
+    label: `W${String(i)}`,
+    title: `Week ${String(i)}`,
+    value,
+    partial: i === values.length - 1,
+  }));
+
+  function setup() {
+    return render(
+      <ReferenceTrend
+        points={points}
+        reference={3}
+        max={6}
+        formatValue={String}
+        formatTooltip={(v) => `${String(v)} tasks`}
+        partialNote="This week is still in progress"
+        ariaLabel="Completed per week"
+        table={{
+          caption: 'Completed per week',
+          columns: ['Week', 'Completed'],
+          rows: points.map((p) => [p.title, p.value ?? '—']),
+        }}
+      />,
+    );
+  }
+
+  it('breaks the line at a week without a value and draws the reference', () => {
+    const { container } = setup();
+    expect(screen.getByRole('figure', { name: 'Completed per week' })).toBeInTheDocument();
+    const d = container.querySelector('path')?.getAttribute('d') ?? '';
+    expect(d.match(/M/g)).toHaveLength(2);
+    expect(container.querySelector('[data-reference]')).toHaveStyle({ top: '48px' });
+    // First and last week only.
+    expect(screen.getByText('W0')).toBeInTheDocument();
+    expect(screen.getByText('W4')).toBeInTheDocument();
+    expect(screen.queryByText('W2')).toBeNull();
+  });
+
+  it('reads out as a table and shows a compact tooltip', () => {
+    const { container } = setup();
+    const table = screen.getByRole('table', { name: 'Completed per week' });
+    expect(table).toHaveTextContent('Week 2—');
+    const columns = [...container.querySelectorAll('.h-full.flex-1')];
+    fireEvent.mouseEnter(at(columns, 4));
+    const tip = screen.getByRole('status');
+    expect(tip).toHaveTextContent('Week 43 tasksThis week is still in progress');
   });
 });

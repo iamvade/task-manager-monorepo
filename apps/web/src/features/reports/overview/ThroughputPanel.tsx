@@ -39,6 +39,19 @@ export function ThroughputPanel({ throughput }: { throughput: OverviewReport['th
       </div>
       <LineTrend
         ariaLabel={summary}
+        table={{
+          caption: t('reports.throughput.title'),
+          columns: [
+            t('reports.chartTable.week'),
+            t('reports.throughput.thisPeriod'),
+            t('reports.throughput.prevPeriod'),
+          ],
+          rows: weeks.map((w, i) => [
+            t('reports.throughput.weekOf', { date: weekLabel(w.weekStart, locale) }),
+            w.count,
+            previous[i]?.count ?? '—',
+          ]),
+        }}
         seriesLabel={t('reports.throughput.thisPeriod')}
         prevLabel={t('reports.throughput.prevPeriod')}
         partialNote={t('reports.throughput.partialWeek')}

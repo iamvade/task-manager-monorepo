@@ -1,10 +1,13 @@
 import type { ReactNode } from 'react';
+import { cn } from '../../../lib/cn';
 import { tooltipPlacement } from './scale';
 
 interface ChartTooltipProps {
   /** Hovered column and the column count: the tooltip flips near the edges. */
   index: number;
   count: number;
+  /** People / My performance trends: one row, padding 6 8, no min width, 6px above the plot. */
+  compact?: boolean;
   children: ReactNode;
 }
 
@@ -12,11 +15,16 @@ interface ChartTooltipProps {
  * Chart hover card (Reports.dc.html): surface, 1px border, radius 8, padding 8 10, 12px text,
  * `--shadow-tooltip`, min-width 168, 8px from the top of the plot; flips near the edges.
  */
-export function ChartTooltip({ index, count, children }: ChartTooltipProps) {
+export function ChartTooltip({ index, count, compact, children }: ChartTooltipProps) {
   return (
     <div
       role="status"
-      className="pointer-events-none absolute top-2 z-[2] flex min-w-[168px] flex-col gap-1 rounded-[8px] border border-tooltip bg-surface px-2.5 py-2 text-[12px] shadow-tooltip"
+      className={cn(
+        'pointer-events-none absolute z-[2] flex rounded-[8px] border border-tooltip bg-surface text-[12px] shadow-tooltip',
+        compact
+          ? 'bottom-[calc(100%+6px)] gap-2 px-2 py-1.5 whitespace-nowrap'
+          : 'top-2 min-w-[168px] flex-col gap-1 px-2.5 py-2',
+      )}
       style={tooltipPlacement(index, count)}
     >
       {children}

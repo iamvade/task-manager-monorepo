@@ -2,6 +2,7 @@ import type {
   AgingTask,
   CarriedTask,
   OverviewReport,
+  PersonReport,
   SprintDetail,
   SprintsReport,
   WorkloadPerson,
@@ -283,5 +284,76 @@ export function workloadReport(extra: Partial<WorkloadReport> = {}): WorkloadRep
     ],
     totals: { openTasks: 6, points: 27 },
     ...extra,
+  };
+}
+
+/** Dorj's People report (ReportsPeople.dc.html numbers): 12 weeks of trends, 2 open tasks. */
+export function personReport(extra: Partial<PersonReport> = {}): PersonReport {
+  const done = [2, 3, 3, 4, 2, 3, 4, 3, 3, 4, 4, 3];
+  const cycle = [3.1, 2.9, 3.4, 3.0, 3.2, null, 3.3, 3.5, 3.9, 3.6, 4.1, 3.7];
+  return {
+    generatedAt: '2026-10-08T02:55:00.000Z',
+    today: '2026-10-08',
+    timezone: 'Asia/Ulaanbaatar',
+    scope: { workspaceId: WORKSPACE_ID, spaceId: null, projectId: null },
+    history: { completed: 900, required: 5 },
+    range: { from: '2026-09-11', to: '2026-10-08' },
+    previousRange: { from: '2026-08-14', to: '2026-09-10' },
+    person: { user: DORJ, title: 'Frontend engineer', role: 'member' },
+    completed: {
+      current: { count: 14, points: 38, unsized: 0 },
+      previous: { count: 11, points: 31, unsized: 0 },
+    },
+    onTime: { current: { onTime: 11, total: 14 }, previous: { onTime: 11, total: 13 } },
+    cycleTime: {
+      current: { median: 3.8, p85: 6, count: 14 },
+      previous: { median: 3.4, p85: 5, count: 11 },
+    },
+    overdue: { count: 2, oldestDaysLate: 6 },
+    reviews: {
+      current: { medianDays: 1.6, count: 9 },
+      previous: { medianDays: 2.1, count: 7 },
+    },
+    trends: {
+      weeks: weeks('2026-07-20', done, true).map((w, i) => ({
+        weekStart: w.weekStart,
+        completed: w.count,
+        cycleMedian: cycle[i] ?? null,
+        partial: w.partial,
+      })),
+      teamCompletedMedian: 3,
+      teamCycleMedian: 3.2,
+    },
+    helping: {
+      comments: { current: 9, previous: 23 },
+      subtasks: { count: 6, tasks: 4 },
+      mentions: { answered: 11, total: 12, medianReplyHours: 2 },
+      workedWith: [
+        { user: SARA, count: 8 },
+        { user: BAT, count: 5 },
+      ],
+    },
+    openTasks: [
+      { ...reportTask(1), dueDate: '2026-10-03', priority: 'urgent' },
+      { ...reportTask(2), dueDate: null, priority: 'low' },
+    ],
+    ...extra,
+  };
+}
+
+function reportTask(n: number) {
+  return {
+    id: `01890000-0000-7000-8000-0000000009${String(50 + n)}`,
+    key: `CHK-${String(n)}`,
+    title: `Open task ${String(n)}`,
+    size: 'M' as const,
+    status: {
+      id: '01890000-0000-7000-8000-000000000040',
+      name: null,
+      category: 'review' as const,
+      color: null,
+    },
+    project: PROJECT_REF,
+    assignees: [DORJ],
   };
 }

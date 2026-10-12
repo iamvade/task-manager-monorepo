@@ -108,6 +108,23 @@ export function BurndownPanel({ sprint, replanHref }: BurndownPanelProps) {
         points={points}
         todayIndex={todayIndex}
         ariaLabel={summary}
+        table={{
+          caption: sprint.state === 'current' ? t(`${k}.title`) : t(`${k}.titleOther`, { name }),
+          columns: [
+            t('reports.chartTable.day'),
+            t(`${k}.remaining`),
+            t(`${k}.ideal`),
+            ...(sprint.state === 'current' ? [t(`${k}.projection`)] : []),
+          ],
+          rows: sprint.burndown.map((p, i) => [
+            points[i]?.title ?? formatDate(p.date),
+            p.remaining ?? '—',
+            Math.round(p.ideal * 10) / 10,
+            ...(sprint.state === 'current'
+              ? [projected[i] == null ? '—' : Math.round((projected[i] ?? 0) * 10) / 10]
+              : []),
+          ]),
+        }}
         labels={{
           remaining: t(`${k}.remaining`),
           ideal: t(`${k}.ideal`),

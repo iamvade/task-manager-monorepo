@@ -1,5 +1,6 @@
 import {
   overviewReportSchema,
+  personReportSchema,
   sprintsReportSchema,
   taskListItemSchema,
   workloadReportSchema,
@@ -43,7 +44,8 @@ export interface WorkloadQuery {
   projectId?: string;
 }
 
-type ReportName = 'overview' | 'sprints' | 'workload' | 'people/me';
+/** `people/me` or `people/<userId>` for the People / My performance report. */
+type ReportName = 'overview' | 'sprints' | 'workload' | `people/${string}`;
 
 /** Query string of a report request; custom dates only for the custom period. */
 export function reportQueryString(query: OverviewQuery | ReportFilters): string {
@@ -106,6 +108,25 @@ export function useWorkloadReport(workspaceId: string | undefined, query: Worklo
       apiFetch(
         `/workspaces/${workspaceId ?? ''}/reports/workload${toQuery({ ...query })}`,
         workloadReportSchema,
+      ),
+    enabled: Boolean(workspaceId),
+    ...reportQueryOptions,
+  });
+}
+
+/** People (`personId` = a member's id) or My performance (`'me'`): period filters only. */
+export function usePersonReport(
+  workspaceId: string | undefined,
+  personId: string,
+  filters: ReportFilters,
+) {
+  const query = { period: filters.period, from: filters.from, to: filters.to };
+  return useQuery({
+    queryKey: queryKeys.report(workspaceId ?? '', `people/${personId}`, query),
+    queryFn: () =>
+      apiFetch(
+        `/workspaces/${workspaceId ?? ''}/reports/people/${personId}${reportQueryString(query)}`,
+        personReportSchema,
       ),
     enabled: Boolean(workspaceId),
     ...reportQueryOptions,

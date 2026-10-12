@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { ArrowDownIcon, ArrowUpIcon } from '../../../components/icons';
+import { ArrowDownIcon, ArrowRightIcon, ArrowUpIcon } from '../../../components/icons';
 import { cn } from '../../../lib/cn';
 import type { DeltaDirection, DeltaTone } from '../delta';
 
@@ -9,7 +9,10 @@ const TONES: Record<DeltaTone, string> = {
   neutral: 'bg-chip text-chip',
 };
 
-/** "↑ 12%" chip (Reports.dc.html): 20px, radius 6, 12/600, 12px arrow; green when it improved. */
+/**
+ * "↑ 12%" chip (Reports.dc.html): 20px, radius 6, 12/600, 12px arrow; green when it improved.
+ * Neutral chips (People / My performance) point sideways when nothing changed.
+ */
 export function DeltaChip({
   value,
   direction,
@@ -20,7 +23,14 @@ export function DeltaChip({
   tone: DeltaTone;
 }) {
   const { t } = useTranslation();
-  const Arrow = direction === 'up' ? ArrowUpIcon : direction === 'down' ? ArrowDownIcon : null;
+  const Arrow =
+    direction === 'up'
+      ? ArrowUpIcon
+      : direction === 'down'
+        ? ArrowDownIcon
+        : tone === 'neutral'
+          ? ArrowRightIcon
+          : null;
   return (
     <span
       className={cn(

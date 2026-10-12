@@ -1,6 +1,14 @@
 import type { ReactNode } from 'react';
 import { cn } from '../../../lib/cn';
 
+/** The figure's numbers as a visually hidden table (screen readers, design-notes 1.10). */
+export interface ChartTable {
+  caption: string;
+  columns: readonly string[];
+  /** One row per x position: its label first, then a value per remaining column. */
+  rows: readonly (readonly ReactNode[])[];
+}
+
 interface ChartFrameProps {
   /** Y tick values, 0 first; the last one is the top of the plot. */
   ticks: readonly number[];
@@ -8,6 +16,8 @@ interface ChartFrameProps {
   xLabels: readonly ReactNode[];
   /** Accessible summary sentence of the whole figure. */
   ariaLabel: string;
+  /** The data behind the figure, read out as a table. */
+  table?: ChartTable;
   height?: number;
   /** Y label gutter: 32 (Overview) or 28 (Sprints). */
   gutter?: 32 | 28;
@@ -27,6 +37,7 @@ export function ChartFrame({
   ticks,
   xLabels,
   ariaLabel,
+  table,
   height = 200,
   gutter = 32,
   endMargin = 0,
@@ -76,6 +87,35 @@ export function ChartFrame({
           </span>
         ))}
       </div>
+      {table && <ChartDataTable table={table} />}
     </figure>
+  );
+}
+
+/** `sr-only` table of a chart's values, row headers = x labels. */
+export function ChartDataTable({ table }: { table: ChartTable }) {
+  return (
+    <table className="sr-only">
+      <caption>{table.caption}</caption>
+      <thead>
+        <tr>
+          {table.columns.map((c, i) => (
+            <th key={i} scope="col">
+              {c}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {table.rows.map(([head, ...cells], r) => (
+          <tr key={r}>
+            <th scope="row">{head}</th>
+            {cells.map((c, i) => (
+              <td key={i}>{c}</td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }

@@ -93,7 +93,20 @@ export function SprintBarsPanel({ sprint }: { sprint: SprintDetail }) {
           <Swatch color={SPRINT_COLORS.completed} label={labels.completed} />
         </div>
       </div>
-      <SprintBars groups={groups} ariaLabel={summary} />
+      <SprintBars
+        groups={groups}
+        ariaLabel={summary}
+        table={{
+          caption: t(`${k}.chart.title`),
+          columns: [
+            t('reports.chartTable.sprint'),
+            labels.committed,
+            labels.added,
+            labels.completed,
+          ],
+          rows: sprint.recent.map((r) => [sprintLabel(t, r), r.committed, r.added, r.completed]),
+        }}
+      />
     </Panel>
   );
 }

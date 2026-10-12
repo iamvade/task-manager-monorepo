@@ -30,8 +30,8 @@ The visual source of truth is the `design/` folder (exported from Claude Design)
 - **Frontend (`apps/web`):** Vite, React 18, TypeScript (strict), React Router, TanStack Query (server state), Zustand (UI state only), Tailwind CSS v4 driven by CSS variables (design tokens), dnd-kit (drag and drop), TipTap (rich text + @mentions), date-fns, i18next (mn/en), lucide-react icons, cmdk (⌘K palette), @floating-ui/react (popover/picker/tooltip positioning).
 - **Backend (`apps/api`):** Node 20+, Fastify 5, TypeScript (strict), Drizzle ORM + drizzle-kit migrations, PostgreSQL 16, zod via `fastify-type-provider-zod`, argon2 password hashing, cookie sessions, `@fastify/websocket` for realtime, `@fastify/multipart` for uploads, `@fastify/rate-limit`, `@fastify/helmet`, `@fastify/cors`, `@fastify/swagger` + `@fastify/swagger-ui` (OpenAPI 3.1 generated from the zod route schemas, Swagger UI at `/api/docs`, off in production unless `API_DOCS=true`), pino logging.
 - **Shared (`packages/shared`):** zod schemas, DTO types, enums, event names — imported by both apps. Never duplicate a type across apps.
-- **Dev infra:** `docker-compose.yml` with Postgres 16. Local file storage in `apps/api/uploads` behind a `Storage` interface (S3 later).
-- **Testing:** Vitest everywhere; API integration tests with `app.inject()` against a real test database; Playwright for a few end-to-end flows.
+- **Dev infra:** `docker-compose.yml` with Postgres 16 (databases `kite`, `kite_test`, `kite_e2e`). Local file storage in `apps/api/uploads` behind a `Storage` interface (S3 later).
+- **Testing:** Vitest everywhere; API integration tests with `app.inject()` against a real test database; Playwright for a few end-to-end flows (`apps/web/e2e/`, `pnpm e2e`: its own API on :3100 and Vite on :5273 over `kite_e2e`, reset and seeded in English by `pnpm --filter @kite/api db:e2e` before each run; signs in as Anu (owner) and Dorj (member)).
 
 ## Conventions
 
@@ -47,7 +47,7 @@ The visual source of truth is the `design/` folder (exported from Claude Design)
 - Frontend: all server data through TanStack Query hooks in `src/api/`. Mutations are optimistic for checkbox toggles, drag moves, and status/priority changes, with rollback on error.
 - All UI strings through i18next (`mn.json`, `en.json`). Mongolian is the default. Take Mongolian copy from the `STR.mn` tables in the design files. Mongolian dates look like `10-р сарын 14`; English like `Oct 14`.
 - Default timezone `Asia/Ulaanbaatar` (per-user override). "Today", "Tomorrow", "Overdue" are computed in the user's timezone.
-- Accessibility: keep the aria-labels, focus-visible outlines (2px accent, 1px offset; accent-ink in dark) and keyboard support shown in the designs.
+- Accessibility: keep the aria-labels, focus-visible outlines (2px accent, 1px offset; accent-ink in dark) and keyboard support shown in the designs. Route tabs (`UnderlineTabs`) follow the ARIA tabs pattern: only the selected tab is tabbable, ←/→/Home/End move and open.
 - Commit after each completed phase with a clear message.
 
 ## Data model (PostgreSQL)
@@ -156,6 +156,7 @@ Tabs: Overview, Sprints, Workload, plus People (admins/owner) or My performance 
 - **Computation**: reports are computed live in SQL (CTEs, `FILTER`, `percentile_cont`); no snapshot tables. Each API process caches a computed report for 5 min (`REPORTS_CACHE_TTL_MS`, 0 = off; `apps/api/src/reports/cache.ts`), keyed by report + query + the caller's time zone and today (+ the person); permissions are checked before the lookup. Any task event on the bus drops that workspace's entries, as do a member title/capacity change and a new sprint. "Updated N minutes ago" = `generatedAt` (when it was computed). The web refetches every 5 min and on focus. Query keys sit under `['tasks', 'reports', …]` so task writes invalidate them; teammates' task events over the WebSocket refresh them throttled to once per 10 s (`REPORTS_THROTTLE_MS`, `apps/web/src/realtime/applyMessage.ts`).
 - **Performance**: `pnpm db:perf` builds a 10k-task "Perf" workspace in the dev database (`--fresh` rebuilds, `--drop` removes it), times every endpoint uncached (target < 300 ms) and prints EXPLAIN ANALYZE for the slowest query. The R1 indexes cover the plans (`tasks_completed_at_idx`, `task_status_periods (task_id, entered_at)` / `(category, exited_at)`, `activity (task_id, created_at)` / `(workspace_id, type, created_at)`, `comments (author_id, created_at)`).
 - **Text**: sentences (insights, deltas, pace) are built on the client from numbers.
+- **Web**: `apps/web/src/features/reports/`, one folder per tab (`overview/`, `sprints/`, `workload/`, `people/`; People and My performance are one `PersonTab` with `variant: 'people' | 'me'`, wording that differs lives under `reports.person.people|mine`). Charts are hand-drawn SVG in `charts/` (no chart library); every figure has an `aria-label` summary sentence and a visually hidden data table (`ChartFrame`'s `table`, `ChartDataTable`). Hooks: `src/api/reports.ts` (`usePersonReport(ws, userId | 'me', filters)`).
 
 **Permissions**:
 - Every report requires workspace membership; non-members get 404.
@@ -215,7 +216,7 @@ Tabs: Overview, Sprints, Workload, plus People (admins/owner) or My performance 
     - **Overdue now** = their open overdue tasks.
     - **Review turnaround**: a review period is credited to the task's `reviewer_id`, else to whoever moved the task **out of** In Review. Turnaround = median length of those review periods. The count is the number of reviews.
     - **Trends**: 12 weekly values (completed count; median cycle time). **Team median** = the median, over members with ≥ 1 completion in those 12 weeks, of each member's weekly average (completed), or the median cycle time of all team completions (cycle).
-    - Deltas on this page are neutral: grey chip, arrow only.
+    - Deltas on this page are neutral: grey chip, arrow only (sideways when unchanged). Cards compare with the previous period only; the team median appears only as the dashed reference line in the two trend charts. No overall good/bad coloring of a person: only **Overdue now** with overdue tasks uses the danger card.
   - **Helping others**:
     - **Comments on others' tasks**: comments by the person on tasks they aren't assigned to.
     - **Subtasks done on others' tasks**: `subtask.completed` by the person on such tasks, plus the number of distinct tasks.

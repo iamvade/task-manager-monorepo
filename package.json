@@ -14,6 +14,7 @@
     "format:check": "prettier --check .",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
+    "e2e": "pnpm --filter @kite/web test:e2e",
     "db:generate": "pnpm --filter @kite/api db:generate",
     "db:migrate": "pnpm --filter @kite/api db:migrate",
     "db:seed": "pnpm --filter @kite/api db:seed",

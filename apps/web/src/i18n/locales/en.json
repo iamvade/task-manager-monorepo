@@ -1136,9 +1136,118 @@
       "emptyTitle": "No one to show",
       "emptyBody": "No one in this scope has open tasks or belongs to its projects."
     },
-    "placeholder": {
-      "title": "Coming soon",
-      "body": "This report is on its way. Overview already shows your team’s throughput, wait times and aging tasks."
+    "person": {
+      "pickPerson": "Choose a person",
+      "range4w": "{{range}} · compared with the previous 4 weeks",
+      "rangeDays_one": "{{range}} · compared with the previous {{count}} day",
+      "rangeDays_other": "{{range}} · compared with the previous {{count}} days",
+      "cards": {
+        "onTime": "On-time",
+        "cycle": "Median cycle time",
+        "overdueNow": "Overdue now",
+        "pts_one": "{{count}} pt",
+        "pts_other": "{{count}} pts",
+        "noDueDates": "No due dates this period"
+      },
+      "trends": {
+        "completed": "Completed per week",
+        "cycle": "Cycle time",
+        "sub": "Last 12 weeks",
+        "teamMedian": "Team median",
+        "summaryCompleted": "Completed per week over the last 12 weeks: {{values}}.",
+        "summaryCycle": "Median cycle time in days per week over the last 12 weeks: {{values}}.",
+        "teamCompleted": "Team median {{value}} a week.",
+        "teamCycle": "Team median {{value}} days.",
+        "noValue": "none"
+      },
+      "helping": {
+        "periods": {
+          "week": "this week",
+          "4w": "last 4 weeks",
+          "quarter": "this quarter"
+        },
+        "subtasks": "Subtasks done on others’ tasks",
+        "across_one": "across {{count}} task",
+        "across_other": "across {{count}} tasks",
+        "mentions": "Mentions answered",
+        "medianReply": "Median reply time {{time}}",
+        "notAnswered": "None answered yet",
+        "noMentions": "No mentions this period",
+        "hours": "{{count}}h",
+        "underHour": "<1h",
+        "times_one": "{{count}} time",
+        "times_other": "{{count}} times",
+        "noOne": "No one yet"
+      },
+      "open": {
+        "overdue": "{{date}} · overdue",
+        "noDue": "No due date",
+        "empty": "No open tasks",
+        "cols": {
+          "task": "Task",
+          "project": "Project",
+          "status": "Status",
+          "due": "Due",
+          "priority": "Priority"
+        }
+      },
+      "people": {
+        "adminOnly": "Visible to admins only",
+        "note": "Use these as a starting point for 1:1 conversations, not as a score.",
+        "completed": "Completed",
+        "review": "Review turnaround",
+        "prev": "previous: {{value}}",
+        "lateSub_one": "Oldest is {{count}} day late",
+        "lateSub_other": "Oldest is {{count}} days late",
+        "noOverdue": "No overdue tasks",
+        "reviews_one": "{{count}} review as reviewer · previous: {{previous}}",
+        "reviews_other": "{{count}} reviews as reviewer · previous: {{previous}}",
+        "noReviews": "No reviews this period",
+        "trendCompleted": "Completed per week",
+        "seriesCompleted": "Completed",
+        "seriesCycle": "Median (days)",
+        "helping": "Helping others",
+        "helpingSub": "Contributions on other people’s tasks · {{period}}",
+        "workedWith": "Worked with most",
+        "openTasks": "Current open tasks",
+        "openLink": "See workload",
+        "comments": "Comments on others’ tasks"
+      },
+      "mine": {
+        "titles": {
+          "week": "Your week so far",
+          "4w": "Your last 4 weeks",
+          "quarter": "Your quarter so far",
+          "custom": "Your chosen period"
+        },
+        "privacy": "Visible only to you and workspace admins",
+        "note": "This is a look at how your work has been flowing. Use it to prepare for 1:1s or spot what you might want to change — it is not a score.",
+        "export": "Export my data",
+        "completed": "Completed",
+        "review": "Your review turnaround",
+        "prev": "before: {{value}}",
+        "lateSub_one": "{{count}} day late — set a new date?",
+        "lateSub_other": "{{count}} days late — set a new date?",
+        "noOverdue": "Nothing overdue",
+        "reviews_one": "{{count}} review by you · before: {{previous}}",
+        "reviews_other": "{{count}} reviews by you · before: {{previous}}",
+        "noReviews": "No reviews this period",
+        "trendCompleted": "Completed per week",
+        "seriesCompleted": "You",
+        "seriesCycle": "You (days)",
+        "helping": "How you helped others",
+        "helpingSub": "Your contributions on other people’s tasks · {{period}}",
+        "allAnswered": "All answered · median reply {{time}}",
+        "workedWith": "People you worked with most",
+        "openTasks": "Your open tasks",
+        "openLink": "Go to My Tasks",
+        "comments": "Comments on others’ tasks"
+      }
+    },
+    "chartTable": {
+      "week": "Week",
+      "sprint": "Sprint",
+      "day": "Day"
     }
   }
 }

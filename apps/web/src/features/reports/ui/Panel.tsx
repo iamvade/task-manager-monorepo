@@ -24,14 +24,29 @@ export function Panel({
   );
 }
 
-/** 15/600 heading + 13px muted subtitle, 2px apart. */
-export function PanelHeading({ id, title, sub }: { id: string; title: string; sub?: ReactNode }) {
+/** 15/600 heading + 13px muted subtitle, 2px apart (People / My performance: 14/600 + 12px). */
+export function PanelHeading({
+  id,
+  title,
+  sub,
+  size = 15,
+}: {
+  id: string;
+  title: string;
+  sub?: ReactNode;
+  size?: 15 | 14;
+}) {
   return (
     <div className="flex min-w-0 flex-col gap-0.5">
-      <h2 id={id} className="m-0 text-[15px] leading-5 font-semibold">
+      <h2
+        id={id}
+        className={cn('m-0 leading-5 font-semibold', size === 15 ? 'text-[15px]' : 'text-[14px]')}
+      >
         {title}
       </h2>
-      {sub && <span className="text-[13px] text-muted">{sub}</span>}
+      {sub && (
+        <span className={cn('text-muted', size === 15 ? 'text-[13px]' : 'text-[12px]')}>{sub}</span>
+      )}
     </div>
   );
 }

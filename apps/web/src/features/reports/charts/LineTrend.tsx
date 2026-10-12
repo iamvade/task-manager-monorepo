@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChartFrame } from './ChartFrame';
+import { ChartFrame, type ChartTable } from './ChartFrame';
 import { ChartTooltip, HoverColumns, HoverLine, TooltipRow } from './ChartTooltip';
 import { columnCenter, linePath, niceTicks } from './scale';
 
@@ -23,6 +23,8 @@ interface LineTrendProps {
   partialNote?: string;
   /** Accessible summary of the figure. */
   ariaLabel: string;
+  /** The values as a visually hidden table. */
+  table?: ChartTable;
   height?: number;
   /** Series names at the right end of the lines (Throughput). */
   endLabels?: boolean;
@@ -44,6 +46,7 @@ export function LineTrend({
   prevLabel,
   partialNote,
   ariaLabel,
+  table,
   height = 200,
   endLabels = true,
   formatValue = String,
@@ -80,6 +83,7 @@ export function LineTrend({
       ticks={ticks}
       xLabels={points.map((p) => p.label)}
       ariaLabel={ariaLabel}
+      table={table}
       height={height}
       endMargin={endLabels ? END_MARGIN : 0}
     >

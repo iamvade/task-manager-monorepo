@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { cn } from '../../../lib/cn';
-import { ChartFrame } from './ChartFrame';
+import { ChartFrame, type ChartTable } from './ChartFrame';
 import { ChartTooltip, HoverColumns } from './ChartTooltip';
 import { niceTicks } from './scale';
 import { SPRINT_COLORS } from './sprintColors';
@@ -24,6 +24,8 @@ export interface SprintBarGroup {
 interface SprintBarsProps {
   groups: readonly SprintBarGroup[];
   ariaLabel: string;
+  /** The values as a visually hidden table. */
+  table?: ChartTable;
   height?: number;
 }
 
@@ -35,7 +37,7 @@ const HATCH = `repeating-linear-gradient(135deg, ${COMPLETED} 0 3px, color-mix(i
  * committed (bottom) and added mid-sprint (top, 2px apart) next to an 18px completed bar; the
  * selected sprint's group is tinted accent-soft, the hovered one bg-subtle; 28px gutter.
  */
-export function SprintBars({ groups, ariaLabel, height = 200 }: SprintBarsProps) {
+export function SprintBars({ groups, ariaLabel, table, height = 200 }: SprintBarsProps) {
   const [hover, setHover] = useState<number | null>(null);
   const ticks = niceTicks(
     Math.max(1, ...groups.map((g) => Math.max(g.committed + g.added, g.completed))),
@@ -49,6 +51,7 @@ export function SprintBars({ groups, ariaLabel, height = 200 }: SprintBarsProps)
     <ChartFrame
       ticks={ticks}
       ariaLabel={ariaLabel}
+      table={table}
       height={height}
       gutter={28}
       xLabels={groups.map((g) => (

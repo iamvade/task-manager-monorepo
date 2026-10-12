@@ -1,6 +1,6 @@
 # Kite Tasks
 
-Team task manager (spaces → projects → tasks) with List, Board and Calendar views. Mongolian (default) and English UI. See `CLAUDE.md` for the full spec and `docs/design-notes.md` for the design reference.
+Team task manager (spaces → projects → tasks) with List, Board and Calendar views and team Reports. Mongolian (default) and English UI. See `CLAUDE.md` for the full spec and `docs/design-notes.md` for the design reference.
 
 ## Layout
 
@@ -24,7 +24,7 @@ Team task manager (spaces → projects → tasks) with List, Board and Calendar 
 cp .env.example .env                    # docker compose: POSTGRES_PORT
 cp apps/api/.env.example apps/api/.env  # API config; set a real COOKIE_SECRET
 
-# 2. Postgres 16 (creates databases `kite` and `kite_test`)
+# 2. Postgres 16 (creates databases `kite`, `kite_test` and `kite_e2e`)
 docker compose up -d
 
 # 3. Dependencies
@@ -54,6 +54,30 @@ Use the web dev server URL (`:5173`), not the API directly (`:3000`): mutations 
 
 Docs are on by default everywhere except `NODE_ENV=production`. Set `API_DOCS=true` or `false` in `apps/api/.env` to override.
 
+## Reports
+
+`/reports` has four tabs. Every member of the workspace sees **Overview**, **Sprints** and **Workload**. Admins and owners also get **People**, which shows any member's report. Members get **My performance**, which shows only their own report. Opening the other role's tab redirects to the right one.
+
+| Tab                     | What                                                                                                               | Filters                |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------ | ---------------------- |
+| Overview                | Completed, cycle time, on-time, overdue; 12-week throughput; where work waits; aging tasks                         | period, space, project |
+| Sprints                 | One project's sprint: committed / added / completed / carried over, last 6 sprints, burndown                       | sprint, space, project |
+| Workload                | Open points per person by due bucket, against each person's capacity; reassign in place                            | space, project         |
+| People / My performance | One person's cards against the previous period, 12-week trends against the team median, helping others, open tasks | period                 |
+
+- **API.** `GET /api/v1/workspaces/:id/reports/overview | sprints | workload | people/:userId`. `people/me` is an alias for the caller. Each report also has a `.csv` variant ("Export CSV" / "Export my data"), UTF-8 with a BOM and headers in the caller's language. The OpenAPI tag is "Reports".
+- **People access.** Only admins and owners can open `people/:userId` for someone else. A member asking for another person gets 403.
+- **Freshness.**
+  - Reports are computed live in SQL.
+  - Each API process caches a computed report for 5 minutes (`REPORTS_CACHE_TTL_MS`, 0 turns it off). Any task change in the workspace drops that workspace's cached reports.
+  - The web page refetches every 5 minutes, on window focus, and at most every 10 seconds when teammates change tasks.
+- **Empty state.** A scope with fewer than 5 completed tasks shows "Reports appear after your team completes a few tasks" instead of charts.
+- **Tools.**
+  - `pnpm db:waits [KEY]` prints a project's median days per status.
+  - `pnpm db:perf` builds a 10k-task workspace and times every endpoint uncached.
+
+The metric definitions are in `CLAUDE.md` under "Reports".
+
 ## Realtime
 
 Each browser tab opens one WebSocket, `GET /api/v1/ws?client=<tab id>`. The socket is authenticated by the session cookie, and its `Origin` must be `WEB_ORIGIN`. The tab subscribes to its workspace. After every committed change the API pushes a small typed message, defined by `realtimeServerMessageSchema` in `packages/shared`. A message carries only ids, the actor and the minimal changed data, and the web app patches or refetches the affected TanStack Query caches. The tab sends the same id as `X-Kite-Client` on its requests, so it never receives its own changes back. Presence (who is online, who is viewing which task) is kept only in the API's memory.
@@ -77,6 +101,7 @@ Flow: the event bus (after commit) → `toRealtime` → `Broadcaster.publish` �
 | `pnpm lint`        | ESLint over the repo                                         |
 | `pnpm format`      | Prettier write                                               |
 | `pnpm test`        | Vitest in every package (API tests need `docker compose up`) |
+| `pnpm e2e`         | Playwright end-to-end tests (see below)                      |
 | `pnpm db:generate` | Generate a migration from `apps/api/src/db/schema`           |
 | `pnpm db:migrate`  | Apply migrations                                             |
 | `pnpm db:seed`     | Insert the sample data from the designs                      |
@@ -91,3 +116,18 @@ Flow: the event bus (after commit) → `toRealtime` → `Broadcaster.publish` �
 - `SEED_TODAY=2026-10-08`: pin "today" for an exact match with the mockups (weekday-based views such as My Tasks' _This Week_ only match on a Thursday).
 
 API tests run against `TEST_DATABASE_URL` (the `kite_test` database); migrations are applied to it automatically before the suite.
+
+### End-to-end tests
+
+`pnpm e2e` runs Playwright (`apps/web/e2e/`, config `apps/web/playwright.config.ts`) against its own servers, so a running `pnpm dev` is left alone:
+
+- The API runs on port 3100. Before it starts, `pnpm --filter @kite/api db:e2e` creates the `kite_e2e` database if it is missing, then resets it and seeds it with the English sample data.
+- The web app runs on port 5273 and proxies `/api` to that API.
+- The database URL is `E2E_DATABASE_URL`, or else the `DATABASE_URL` from `apps/api/.env` with the database name changed to `kite_e2e`. `db:e2e` refuses to touch any database whose name doesn't end in `_e2e`.
+
+Install the browser once with `pnpm --filter @kite/web exec playwright install chromium`. The specs sign in through the login form as Anu (owner) and Dorj (member). They cover:
+
+- Reassigning a Heavy person's task on Workload, then checking both bars.
+- A member's access to Workload and the People → My performance redirect.
+- The People person picker.
+- Partner Portal's not-enough-history state.

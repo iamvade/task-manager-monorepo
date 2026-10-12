@@ -22,6 +22,7 @@ Extracted from `design/*.dc.html` in Phase 0 (2026-10-08). The designs are the v
 | Reports: defaults (not designed) | Insight boxes only where drawn (Where work waits, burndown). Sizes only S/M/L/XL = 1/3/5/8 (the Workload sample's 2-point tasks are not reproducible). Unsized tasks count 0 points, shown as "N unsized". A task with several assignees counts in full for each. Reports compute live; "Updated N ago" = server `generatedAt`, refetched every 5 min and on focus. Seed makes Bat an admin, so People (admins) and My performance (members) can both be shown. The List view's Size column (toolbar "Columns" menu) and the quick-create Size chip are not drawn; they reuse the Workload size chip and the CreateTask field chip. |
 | Reports: Overview UI (2026-10-12) | Workload is open to every member (tab shown to all); People ↔ My performance redirect by role. Aging shows 6 rows; "View all" expands in place (`?aging=all` → API `agingLimit=all`). The throughput "insight" is the figure's aria-label summary (none is drawn). Custom period = From/To popover under the segmented control (not drawn). No Sparkline (no design uses one). Empty state names the scope (project, else space, else workspace); "Go to project" only for a project. Mongolian "N-аас/-оос" suffixes come from `mnFrom()`. |
 | Reports: Sprints & Workload UI (2026-10-12) | Neither tab uses the "< 5 completed" gate (they aren't about history); Sprints shows "No sprints in {project} yet" / "No projects to report on", Workload "No one to show". Sprints: the project filter has no "All" row and shows the API's default project until one is picked; picking a sprint writes `?project=&sprint=`, changing the scope clears `sprint`. Future sprint banner: "Starts {date} · N working days". **Replan** (not drawn; only the chip is): a 28px outline button in the empty right slot of the Carried-over header plus an accent link at the end of the burndown insight, current/future sprints only → `/p/:id/list?sprint=…&status=<open status ids>`; tasks move out through the drawer's Sprint picker. Workload: one bar scale for all rows = max(25, the largest open size or capacity × 1.2, rounded up to 5), ticks every 5 (every 10 above 40); the capacity marker is drawn per row at that person's capacity; when capacities differ the team line and footnote drop "(15 points)". Sort lives in `?sort=overdue`; expanded rows are local. Each expanded task row ends with a 24px person icon button ("Reassign APP-142") opening the assignee picker (toggle, like everywhere); bars move optimistically and roll back on error. "+ Assign work" opens quick create with that assignee (and the filtered project). Unsized tasks show "—" in the size chip. Sprint cards are their own component (gap 6, padding 14 16), not StatCard. |
+| Reports: People & My performance UI (2026-10-12) | Workload stays open to members; the e2e test checks People → My performance instead. Stat cards compare with the previous period only (as drawn); the team median is the dashed line in the two trends. "as reviewer" goes in the review card's line ("9 reviews as reviewer · previous: 2.1"). Both tabs use the `< 5 completed` gate. The partial current week keeps the solid dot and adds "This week is still in progress" to the tooltip; a week without a cycle time breaks the line (an isolated week is a 6px point). Not drawn: "No mentions this period", "None answered yet", "No one yet", "No open tasks", "No due dates this period"; reply time "<1h" under an hour and days from 24h. The open-tasks due column is 168px, not 120/140, because "10-р сарын 10 · хэтэрсэн" needs it. Helping tiles auto-fit (≥150px) instead of a fixed 3-column grid so long Mongolian labels wrap inside. The person picker lists every workspace member (40px two-line options, `Picker tall`); the URL carries the person (`/reports/people/:userId`), and no id means the caller. Charts: every figure has an sr-only data table besides its summary sentence. Route tabs use roving tabindex with ←/→/Home/End. |
 
 ## 1. Screens
 
@@ -370,8 +371,8 @@ Reused: `PageHeader`, `NavItem`/`RailLink`, `UnderlineTabs`, `SegmentedControl`,
 | `InsightBox` | `tone: 'accent'\|'warning'\|'neutral'`, `icon`, `children` | waits, burndown, People/Mine notes |
 | `WarnChip` | `label` (Stale / Replan) | aging, carried |
 | `ChartTooltip` | `x` (%), `align`, `children` | all charts |
-| `ChartFrame` | `ticks`, `xLabels`, `ariaLabel`, `gutter`, `endMargin` (gridlines, y gutter, x labels) | every chart |
-| `LineTrend` | `points: {label, title, value, prev?, partial?}[]`, `seriesLabel`, `prevLabel?`, `partialNote?` | Overview throughput (People/Mine trends in R5) |
+| `ChartFrame` | `ticks`, `xLabels`, `ariaLabel`, `table?` (sr-only data table), `gutter`, `endMargin` (gridlines, y gutter, x labels) | every chart |
+| `LineTrend` | `points: {label, title, value, prev?, partial?}[]`, `seriesLabel`, `prevLabel?`, `partialNote?`, `table?` | Overview throughput |
 | `BarByCategory` | `items: {key, label, marker, value, valueLabel, color}[]`, `max?` | Overview waits |
 | `StackedBar` | `segments: {key, value, fill \| 'hatch', title}[]`, `scale`, `marker?` | Workload |
 | `Burndown` | `points: {label, title, remaining, ideal, projected, added}[]`, `todayIndex` | Sprints |
@@ -385,10 +386,10 @@ Reused: `PageHeader`, `NavItem`/`RailLink`, `UnderlineTabs`, `SegmentedControl`,
 | `StackedLoadBar` | `buckets`, `scale`, `capacity` | Workload |
 | `CapacityPill` | `load: 'heavy'\|'balanced'\|'light'`, `title` | Workload |
 | `BucketLegend` | — | Workload |
-| `PersonPicker` | `members`, `value`, `onChange` | People |
-| `TrendCard` | `title`, `seriesLabel`, `weeks`, `values`, `reference`, `format`, `unit` | People, Mine |
-| `HelpTiles` / `WorkedWithList` | `helping` / `people` | People, Mine |
-| `OpenTaskList` | `tasks`, `link: {label, to}` | People, Mine |
+| `PersonPickerRow` / `MineHeader` | `person`, `compared` / `person`, `period`, `range` | People / Mine |
+| `TrendCards` → `ReferenceTrend` | `trends`, `variant` → `points`, `reference`, `max`, `formatValue`, `formatTooltip`, `table` | People, Mine |
+| `HelpingPanel` | `helping`, `variant`, `period`, `range` | People, Mine |
+| `OpenTasksList` | `tasks`, `variant` | People, Mine |
 | `ReportsEmpty` | `completed`, `required`, `project` | any tab with < 5 completions |
 | `SegmentProgress` | `value`, `max`, `label` | ReportsEmpty |
 | `ReportsSkeleton` | `variant: 'overview'\|…` | loading |
