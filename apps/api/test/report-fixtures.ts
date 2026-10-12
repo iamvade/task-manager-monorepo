@@ -1,7 +1,7 @@
 import type { RichTextNode, Size, StatusCategory } from '@kite/shared';
-import { eq, sql } from 'drizzle-orm';
-import { uuidv7 } from 'uuidv7';
+import { desc, eq, sql } from 'drizzle-orm';
 import type { Db } from '../src/db/client.js';
+import { positionAfter } from '../src/db/position.js';
 import { one } from '../src/db/rows.js';
 import {
   activity,
@@ -63,20 +63,29 @@ export async function timelineTask(db: Db, input: TimelineTask) {
         .returning({ taskSeq: projects.taskSeq }),
     );
     const openSprint = input.sprints?.find((s) => !s.removed);
+    // A real fractional key at the end of the status (the project row update above holds the
+    // lock), so later API creates and moves can place tasks after it.
+    const statusId = statusOf(last[0]).id;
+    const [tail] = await tx
+      .select({ position: tasks.position })
+      .from(tasks)
+      .where(eq(tasks.statusId, statusId))
+      .orderBy(desc(tasks.position))
+      .limit(1);
     const task = one(
       await tx
         .insert(tasks)
         .values({
           projectId: input.projectId,
           number: taskSeq,
-          statusId: statusOf(last[0]).id,
+          statusId,
           sprintId: openSprint?.sprintId ?? null,
           title: input.title ?? `Task ${taskSeq}`,
           priority: 'medium',
           size: input.size ?? null,
           reviewerId: input.reviewerId ?? null,
           dueDate: input.dueDate ?? null,
-          position: `a${uuidv7()}`,
+          position: positionAfter(tail?.position),
           createdBy: input.createdBy,
           completedAt: last[0] === 'done' ? at(last[1]) : null,
           createdAt: at(first[1]),
