@@ -8,6 +8,8 @@ export const healthRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     {
       // Generous enough for load balancers and uptime checks; each call queries the database.
       config: { rateLimit: { max: 120, timeWindow: '1 minute' } },
+      // Container healthchecks poll this every few seconds; only problems are worth a log line.
+      logLevel: 'warn',
       schema: {
         tags: ['Health'],
         summary: 'Health check',
