@@ -40,6 +40,8 @@ const reportsRoutes = () => import('./features/reports/ReportsRoutes');
 export const routes: RouteObject[] = [
   {
     errorElement: <RouteError />,
+    // Shown while the first page's chunk loads (lazy routes); the page paints right after.
+    HydrateFallback: () => null,
     children: [
       {
         element: <RedirectIfAuthed />,
