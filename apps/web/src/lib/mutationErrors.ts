@@ -19,6 +19,7 @@ const KNOWN_CODES = [
   'RATE_LIMITED',
   'FILE_TOO_LARGE',
   'FILE_TYPE_BLOCKED',
+  'STORAGE_QUOTA_EXCEEDED',
 ];
 
 /** The toast text for a failed request: by API error code, offline, or the generic line. */

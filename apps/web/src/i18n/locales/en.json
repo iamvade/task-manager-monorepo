@@ -56,6 +56,7 @@
     "join": "Join workspace",
     "joining": "Joining…",
     "signInToJoin": "You already have an account with this email. Sign in to join.",
+    "accountExists": "An account with this email already exists. Sign in to join.",
     "signedInAsOther": "You're signed in as {{email}}. Sign in with the invited email to join.",
     "switchAccount": "Use another account",
     "invalidTitle": "This invite isn't valid",
@@ -847,6 +848,7 @@
     "RATE_LIMITED": "Too many attempts. Wait a minute and try again.",
     "FILE_TOO_LARGE": "That file is too large (25 MB max).",
     "FILE_TYPE_BLOCKED": "That file type isn’t allowed.",
+    "STORAGE_QUOTA_EXCEEDED": "This workspace is out of file storage. Delete old attachments to free space.",
     "UNAUTHORIZED": "Your session ended. Sign in again.",
     "network": "Can’t reach the server. Check your connection and try again."
   },

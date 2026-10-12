@@ -7,7 +7,8 @@ services:
       POSTGRES_PASSWORD: kite
       POSTGRES_DB: kite
     ports:
-      - '${POSTGRES_PORT:-5432}:5432'
+      # Local only: the dev credentials are not secret.
+      - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./docker/initdb:/docker-entrypoint-initdb.d:ro

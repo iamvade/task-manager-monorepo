@@ -118,7 +118,9 @@ function LoadedTask({
                   ? t('drawer.fileTooLarge', { name: file.name })
                   : code === 'FILE_TYPE_BLOCKED'
                     ? t('drawer.fileBlocked', { name: file.name })
-                    : t('drawer.uploadFailed', { name: file.name }),
+                    : code === 'STORAGE_QUOTA_EXCEEDED'
+                      ? t('errors.STORAGE_QUOTA_EXCEEDED')
+                      : t('drawer.uploadFailed', { name: file.name }),
               );
             },
           });

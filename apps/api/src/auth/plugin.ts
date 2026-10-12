@@ -4,6 +4,7 @@ import { sessions, users } from '../db/schema/index.js';
 import { errorBody, httpError } from '../errors.js';
 import {
   SESSION_COOKIE,
+  SESSION_MAX_AGE_MS,
   SESSION_REFRESH_MS,
   SESSION_TTL_MS,
   clearSessionCookie,
@@ -34,7 +35,8 @@ const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 /**
  * Looks up the session cookie without failing the request. Pushes the expiry forward (and
- * re-sends the cookie) when the last refresh was more than a day ago.
+ * re-sends the cookie) when the last refresh was more than a day ago, but never past
+ * `SESSION_MAX_AGE_MS` after sign-in.
  */
 export async function resolveSession(
   request: FastifyRequest,
@@ -46,18 +48,24 @@ export async function resolveSession(
 
   const { db, config } = request.server;
   const sessionId = hashToken(token);
+  const now = new Date();
   const [row] = await db
     .select({ user: users, expiresAt: sessions.expiresAt })
     .from(sessions)
     .innerJoin(users, eq(users.id, sessions.userId))
-    .where(and(eq(sessions.id, sessionId), gt(sessions.expiresAt, new Date())))
+    .where(
+      and(
+        eq(sessions.id, sessionId),
+        gt(sessions.expiresAt, now),
+        gt(sessions.createdAt, new Date(now.getTime() - SESSION_MAX_AGE_MS)),
+      ),
+    )
     .limit(1);
   if (!row) {
     clearSessionCookie(reply, config);
     return null;
   }
 
-  const now = new Date();
   if (row.expiresAt.getTime() - now.getTime() < SESSION_TTL_MS - SESSION_REFRESH_MS) {
     await db
       .update(sessions)

@@ -1,18 +1,19 @@
 import { sql } from 'drizzle-orm';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
-import { healthResponseSchema } from '@kite/shared';
+import { apiErrorSchema, healthResponseSchema } from '@kite/shared';
 
 export const healthRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
   app.get(
     '/health',
     {
-      config: { rateLimit: false },
+      // Generous enough for load balancers and uptime checks; each call queries the database.
+      config: { rateLimit: { max: 120, timeWindow: '1 minute' } },
       schema: {
         tags: ['Health'],
         summary: 'Health check',
         description: 'Reports API and database status; 503 when the database is down.',
         security: [],
-        response: { 200: healthResponseSchema, 503: healthResponseSchema },
+        response: { 200: healthResponseSchema, 429: apiErrorSchema, 503: healthResponseSchema },
       },
     },
     async (request, reply) => {

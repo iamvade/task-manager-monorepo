@@ -22,7 +22,7 @@ Team task manager (spaces → projects → tasks) with List, Board and Calendar 
 ```sh
 # 1. Environment files
 cp .env.example .env                    # docker compose: POSTGRES_PORT
-cp apps/api/.env.example apps/api/.env  # API config; set a real COOKIE_SECRET
+cp apps/api/.env.example apps/api/.env  # API config
 
 # 2. Postgres 16 (creates databases `kite`, `kite_test` and `kite_e2e`)
 docker compose up -d

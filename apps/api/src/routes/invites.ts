@@ -20,6 +20,7 @@ import { resolveSession } from '../auth/plugin.js';
 import { createSession, setSessionCookie } from '../auth/sessions.js';
 import { hashToken, newToken } from '../auth/tokens.js';
 import type { DbOrTx } from '../db/client.js';
+import { isUniqueViolation } from '../db/errors.js';
 import { one } from '../db/rows.js';
 import { invites, users, workspaceMembers, workspaces } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
@@ -228,11 +229,11 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Invites'],
         summary: 'Accept an invite',
         description:
-          'New accounts send `name` and `password`; an existing account must be signed in as the invited email.',
+          'New accounts send `name` and `password`; an existing account must be signed in as the invited email (401 `LOGIN_REQUIRED`). 409 `ACCOUNT_EXISTS` when the account was created meanwhile (another invite accepted at the same time): sign in, then accept.',
         security: [{}, { cookieAuth: [] }],
         params: tokenParams,
         body: acceptInviteSchema,
-        response: { 200: meResponseSchema, 400: err, 401: err, 404: err },
+        response: { 200: meResponseSchema, 400: err, 401: err, 404: err, 409: err },
       },
     },
     async (request, reply) => {
@@ -242,7 +243,7 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
 
       const result = await app.db.transaction(async (tx) => {
         const row = await findPendingInvite(tx, request.params.token, true);
-        if (!row) throw invalidInvite();
+        if (!row || row.invite.role === 'owner') throw invalidInvite();
         const { invite } = row;
 
         const [existing] = await tx
@@ -268,7 +269,16 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
             avatarColor: avatarColorFor(invite.email),
             passwordHash: await hashPassword(password),
           };
-          user = one(await tx.insert(users).values(values).returning(), 'user');
+          try {
+            user = one(await tx.insert(users).values(values).returning(), 'user');
+          } catch (e) {
+            if (!isUniqueViolation(e)) throw e;
+            throw httpError(
+              409,
+              'ACCOUNT_EXISTS',
+              'An account with this email exists. Sign in to accept.',
+            );
+          }
           newSessionToken = await createSession(tx, user.id);
         }
 

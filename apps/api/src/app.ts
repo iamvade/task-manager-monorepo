@@ -3,7 +3,7 @@ import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import multipart from '@fastify/multipart';
 import rateLimit from '@fastify/rate-limit';
-import Fastify, { type FastifyServerOptions } from 'fastify';
+import Fastify from 'fastify';
 import {
   serializerCompiler,
   validatorCompiler,
@@ -15,6 +15,7 @@ import type { Db } from './db/client.js';
 import { registerDocs } from './docs.js';
 import { registerErrorHandlers } from './errors.js';
 import { EventBus } from './events/bus.js';
+import { loggerOptions } from './logging.js';
 import { scheduleArchiveJob } from './notifications/archive-job.js';
 import { registerNotifier } from './notifications/notifier.js';
 import { registerRealtime } from './realtime/plugin.js';
@@ -59,31 +60,23 @@ declare module 'fastify' {
   }
 }
 
-function loggerOptions(config: Config): FastifyServerOptions['logger'] {
-  if (config.NODE_ENV === 'test') return false;
-  if (config.NODE_ENV === 'development') {
-    return {
-      level: config.LOG_LEVEL,
-      transport: {
-        target: 'pino-pretty',
-        options: { translateTime: 'HH:MM:ss', ignore: 'pid,hostname' },
-      },
-    };
-  }
-  return { level: config.LOG_LEVEL };
-}
-
 export interface AppOptions {
   /** Defaults to local disk under `UPLOADS_DIR`. */
   storage?: Storage;
   /** Defaults to the system clock. */
   now?: () => Date;
+  /** Send logs here (tests read them back); otherwise per `NODE_ENV`. */
+  logStream?: NodeJS.WritableStream;
 }
 
 export async function buildApp(config: Config, db: Db, options: AppOptions = {}) {
   const app = Fastify({
-    logger: loggerOptions(config),
-    trustProxy: config.TRUST_PROXY,
+    logger: loggerOptions(config, options.logStream),
+    // A hop count trusts that many proxies nearest to us (proxy-addr semantics).
+    trustProxy:
+      typeof config.TRUST_PROXY === 'number'
+        ? (_address: string, hop: number) => hop < (config.TRUST_PROXY as number)
+        : config.TRUST_PROXY,
   }).withTypeProvider<ZodTypeProvider>();
 
   app.setValidatorCompiler(validatorCompiler);
@@ -102,7 +95,8 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
   await app.register(helmet);
   await app.register(cors, { origin: config.WEB_ORIGIN, credentials: true });
   await app.register(rateLimit, { max: 300, timeWindow: '1 minute' });
-  await app.register(cookie, { secret: config.COOKIE_SECRET });
+  // Session cookies are random tokens checked against the database, so no signing secret.
+  await app.register(cookie);
   // Size limits are checked by the upload route (413 with our error body), not thrown here.
   await app.register(multipart, {
     throwFileSizeLimit: false,

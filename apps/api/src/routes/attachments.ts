@@ -1,5 +1,5 @@
 import { apiErrorSchema, attachmentSchema } from '@kite/shared';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { Readable } from 'node:stream';
 import { uuidv7 } from 'uuidv7';
@@ -13,7 +13,7 @@ import {
 } from '../attachments/validate.js';
 import { loadAttachmentAccess, loadTaskAccess, roleAtLeast } from '../auth/access.js';
 import { requireAuth } from '../auth/plugin.js';
-import { attachments } from '../db/schema/index.js';
+import { attachments, projects, tasks } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
 import { StorageNotFoundError } from '../storage/storage.js';
 import { getAttachment } from '../tasks/attachments.js';
@@ -26,6 +26,20 @@ const attachmentParams = z.object({ attachmentId: z.uuid() });
 export const attachmentRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
   const maxBytes = app.config.MAX_UPLOAD_BYTES;
   const maxLabel = `${Math.floor(maxBytes / (1024 * 1024))} MB`;
+
+  const quota = app.config.MAX_WORKSPACE_STORAGE_BYTES;
+  const quotaFull = () =>
+    httpError(413, 'STORAGE_QUOTA_EXCEEDED', 'This workspace has no storage left for files');
+  /** Bytes of attachments stored by a workspace (deleted tasks' files included: still on disk). */
+  const storedBytes = async (workspaceId: string) => {
+    const [row] = await app.db
+      .select({ bytes: sql<string>`coalesce(sum(${attachments.size}), 0)` })
+      .from(attachments)
+      .innerJoin(tasks, eq(tasks.id, attachments.taskId))
+      .innerJoin(projects, eq(projects.id, tasks.projectId))
+      .where(eq(projects.workspaceId, workspaceId));
+    return Number(row?.bytes ?? 0);
+  };
 
   /** Best-effort blob cleanup; a leftover file is only wasted space. */
   const discard = (key: string) =>
@@ -41,7 +55,7 @@ export const attachmentRoutes: FastifyPluginCallbackZod = (app, _opts, done) => 
       schema: {
         tags: ['Attachments'],
         summary: 'Upload an attachment',
-        description: `\`multipart/form-data\` with one file part (field \`file\`). At most ${maxLabel} (413 \`FILE_TOO_LARGE\`). Executables are refused by extension, declared type or content (415 \`FILE_TYPE_BLOCKED\`). No file part: 400 \`FILE_REQUIRED\`. Logs \`attachment.added\`.`,
+        description: `\`multipart/form-data\` with one file part (field \`file\`). At most ${maxLabel} (413 \`FILE_TOO_LARGE\`). Executables are refused by extension, declared type or content (415 \`FILE_TYPE_BLOCKED\`). 413 \`STORAGE_QUOTA_EXCEEDED\` when the workspace's files would exceed its storage quota. No file part: 400 \`FILE_REQUIRED\`. Logs \`attachment.added\`.`,
         consumes: ['multipart/form-data'],
         params: z.object({ taskId: z.uuid() }),
         response: { 201: attachmentSchema, 400: err, 401: err, 404: err, 413: err, 415: err },
@@ -53,6 +67,8 @@ export const attachmentRoutes: FastifyPluginCallbackZod = (app, _opts, done) => 
       if (!request.isMultipart()) {
         throw httpError(415, 'UNSUPPORTED_MEDIA_TYPE', 'Send the file as multipart/form-data');
       }
+      const used = await storedBytes(project.workspaceId);
+      if (used >= quota) throw quotaFull();
       const part = await request.file({ limits: { fileSize: maxBytes, files: 1 } });
       if (!part) throw httpError(400, 'FILE_REQUIRED', 'No file in the request');
 
@@ -77,6 +93,10 @@ export const attachmentRoutes: FastifyPluginCallbackZod = (app, _opts, done) => 
       if (part.file.truncated) {
         await discard(key);
         throw httpError(413, 'FILE_TOO_LARGE', `Files can be at most ${maxLabel}`);
+      }
+      if (used + size > quota) {
+        await discard(key);
+        throw quotaFull();
       }
 
       try {

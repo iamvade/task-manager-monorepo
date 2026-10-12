@@ -58,6 +58,73 @@ describe('richTextDocSchema', () => {
     const huge = { type: 'doc', content: [{ type: 'text', text: 'x'.repeat(300_000) }] };
     expect(richTextDocSchema.safeParse(huge).success).toBe(false);
   });
+
+  const withLink = (href: unknown) => ({
+    type: 'doc',
+    content: [
+      {
+        type: 'paragraph',
+        content: [{ type: 'text', text: 'link', marks: [{ type: 'link', attrs: { href } }] }],
+      },
+    ],
+  });
+
+  it('accepts everything the editor makes', () => {
+    const doc = {
+      type: 'doc',
+      content: [
+        { type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text: 'Title' }] },
+        {
+          type: 'bulletList',
+          content: [
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    { type: 'text', text: 'a', marks: [{ type: 'bold' }, { type: 'italic' }] },
+                    { type: 'text', text: 'b', marks: [{ type: 'strike' }, { type: 'code' }] },
+                    { type: 'hardBreak' },
+                    { type: 'mention', attrs: { id: 'x', label: 'Sara' } },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        { type: 'orderedList', content: [] },
+        { type: 'blockquote', content: [] },
+        { type: 'horizontalRule' },
+      ],
+    };
+    expect(richTextDocSchema.safeParse(doc).success).toBe(true);
+    for (const href of ['https://kite.mn', 'http://x.test/a?b', 'mailto:anu@kite.test']) {
+      expect(richTextDocSchema.safeParse(withLink(href)).success, href).toBe(true);
+    }
+  });
+
+  it('refuses unknown nodes and marks, and links that are not http(s) or mailto', () => {
+    const node = (type: string) => ({ type: 'doc', content: [{ type }] });
+    expect(richTextDocSchema.safeParse(node('iframe')).success).toBe(false);
+    expect(richTextDocSchema.safeParse(node('image')).success).toBe(false);
+    const mark = {
+      type: 'doc',
+      content: [{ type: 'text', text: 'x', marks: [{ type: 'textStyle' }] }],
+    };
+    expect(richTextDocSchema.safeParse(mark).success).toBe(false);
+    for (const href of [
+      'javascript:alert(1)',
+      ' JavaScript:alert(1)',
+      'data:text/html,<script>',
+      'vbscript:x',
+      '//evil.example',
+      undefined,
+      42,
+    ]) {
+      expect(richTextDocSchema.safeParse(withLink(href)).success, String(href)).toBe(false);
+    }
+  });
 });
 
 describe('extractMentionIds', () => {
