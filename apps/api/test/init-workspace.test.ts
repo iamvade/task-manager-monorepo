@@ -36,10 +36,16 @@ describe('first-run workspace setup', () => {
     });
 
   it('creates the owner, the workspace and its holidays, and the owner can sign in', async () => {
-    const data = input({ locale: 'en', timezone: 'Europe/Berlin' });
+    // The test database is shared and kept between runs, so the name (and slug) must be unique.
+    const suffix = unique();
+    const data = input({
+      workspaceName: `Kite Studio ${suffix}`,
+      locale: 'en',
+      timezone: 'Europe/Berlin',
+    });
     const { user, workspace } = await ctx.db.transaction((tx) => createOwnerWorkspace(tx, data));
 
-    expect(workspace.slug).toBe('kite-studio');
+    expect(workspace.slug).toBe(`kite-studio-${suffix}`);
     const [row] = await ctx.db.select().from(users).where(eq(users.id, user.id));
     expect(row).toMatchObject({
       email: data.email,
