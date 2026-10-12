@@ -470,10 +470,12 @@ Rows reuse the `myTasks.feed.*` sentences with the task key in `<task>` (the tit
 | `roles.admin` | Admin | Админ |
 | `roles.member` | Member | Гишүүн |
 | `members.adminsOnly` | Only admins can invite people and change roles. | Зөвхөн админ хүн урьж, үүрэг өөрчилнө. |
-| `members.inviteHint` | They get a link that’s valid for 7 days. | 7 хоног хүчинтэй холбоос очно. |
+| `members.inviteHint` | Creates a link to share with them. It’s valid for 7 days. | Хуваалцах холбоос үүснэ. 7 хоног хүчинтэй. |
 | `members.role` | Role | Үүрэг |
-| `members.send` | Send invite | Урилга илгээх |
-| `members.sent` | Invite sent to {{email}} | Урилга илгээлээ: {{email}} |
+| `members.send` | Create invite | Урилга үүсгэх |
+| `members.sent` | Invite created for {{email}} | Урилга үүслээ: {{email}} |
+| `members.linkFor` | Invite link for {{email}} | Урилгын холбоос: {{email}} |
+| `members.linkOnce` | Send it to them yourself, e.g. in chat. It’s shown only once: invite again for a new link. | Холбоосыг өөрөө, жишээ нь чатаар илгээнэ үү. Зөвхөн нэг удаа харагдана: шинэ холбоос авахын тулд дахин урина уу. |
 | `members.alreadyMember` | {{email}} is already in the workspace | {{email}} аль хэдийн багт байна |
 | `members.invalidEmail` | Enter a valid email | Зөв имэйл оруулна уу |
 | `members.pending` | Pending invites | Хүлээгдэж буй урилга |

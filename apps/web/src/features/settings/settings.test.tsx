@@ -132,7 +132,10 @@ describe('Settings', () => {
   it('lets admins invite, revoke and change roles of others', async () => {
     const { fetchMock } = renderSettings('/settings?tab=members', {
       [`POST /api/v1/workspaces/${WORKSPACE_ID}/invites`]: () =>
-        Response.json({ ...INVITE, email: 'new@kite.test' }, { status: 201 }),
+        Response.json(
+          { ...INVITE, email: 'new@kite.test', link: 'https://kite.test/invite/abc123' },
+          { status: 201 },
+        ),
       [`DELETE /api/v1/workspaces/${WORKSPACE_ID}/invites/${INVITE.id}`]: () =>
         new Response(null, { status: 204 }),
       [`PATCH /api/v1/workspaces/${WORKSPACE_ID}/members/${DORJ.user.id}`]: () =>
@@ -148,9 +151,14 @@ describe('Settings', () => {
     });
 
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'New@Kite.test' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Send invite' }));
-    expect(await screen.findByText('Invite sent to new@kite.test')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Create invite' }));
+    expect(await screen.findByText('Invite created for new@kite.test')).toBeInTheDocument();
     expect(bodies(fetchMock, 'POST')).toEqual([{ email: 'new@kite.test', role: 'member' }]);
+    // No email goes out: the admin gets the link to pass on.
+    expect(screen.getByLabelText('Invite link for new@kite.test')).toHaveValue(
+      'https://kite.test/invite/abc123',
+    );
+    expect(screen.getByRole('button', { name: 'Copy link' })).toBeInTheDocument();
 
     const pending = screen.getByRole('region', { name: 'Pending invites' });
     fireEvent.click(within(pending).getByRole('button', { name: 'Revoke' }));
@@ -162,7 +170,7 @@ describe('Settings', () => {
     expect(await screen.findByText('Dorj E.')).toBeInTheDocument();
     expect(screen.getByText('Only admins can invite people and change roles.')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Change role/ })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Send invite' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Create invite' })).toBeNull();
     // Job title and capacity are read-only.
     expect(screen.queryByRole('spinbutton')).toBeNull();
     expect(screen.queryByRole('textbox', { name: /Job title/ })).toBeNull();

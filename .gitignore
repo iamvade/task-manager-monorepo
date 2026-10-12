@@ -5,8 +5,10 @@ coverage/
 .env
 .env.*
 !.env.example
+!.env.prod.example
 apps/api/uploads/
 playwright-report/
 test-results/
 .DS_Store
 apps/web/e2e/.auth/
+backups/

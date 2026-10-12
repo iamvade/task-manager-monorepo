@@ -91,6 +91,10 @@ Flow: the event bus (after commit) → `toRealtime` → `Broadcaster.publish` �
 - **Presence** has to become shared too. One option is to publish presence deltas over the same channel and have each instance merge them. The other is to keep per-user connection counts in Redis (`HINCRBY` plus TTL heartbeats, so a crashed instance's users expire) and build the `ready` snapshot from there.
 - The load balancer must allow WebSocket upgrades and an idle timeout above the 25 s heartbeat. Sticky sessions are not required.
 
+## Production
+
+Docker Compose on one server: Caddy (automatic HTTPS, serves the SPA and proxies `/api` and the WebSocket), the API, Postgres 16 and a nightly `pg_dump` backup. Attachments on a volume or in an S3-compatible bucket (`STORAGE_DRIVER=s3`). The first workspace and owner come from `init.js` instead of the demo seed. Step-by-step setup, updates and restores: [`docs/DEPLOY.md`](docs/DEPLOY.md).
+
 ## Scripts (run from the repo root)
 
 | Script             | Does                                                         |
@@ -104,6 +108,7 @@ Flow: the event bus (after commit) → `toRealtime` → `Broadcaster.publish` �
 | `pnpm e2e`         | Playwright end-to-end tests (see below)                      |
 | `pnpm db:generate` | Generate a migration from `apps/api/src/db/schema`           |
 | `pnpm db:migrate`  | Apply migrations                                             |
+| `pnpm db:init`     | Create the first workspace + owner on an empty database      |
 | `pnpm db:seed`     | Insert the sample data from the designs                      |
 | `pnpm db:reset`    | Drop everything, migrate, seed (refuses in production)       |
 | `pnpm db:print`    | Print a project's tasks by status (`pnpm db:print CHK`)      |

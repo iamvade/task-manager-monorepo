@@ -110,6 +110,15 @@ export const inviteSchema = z
   .meta({ id: 'Invite' });
 export type Invite = z.infer<typeof inviteSchema>;
 
+/**
+ * `POST /workspaces/:id/invites`: the only response with the accept link (only the token's hash is
+ * stored). There is no email delivery; the admin passes the link on.
+ */
+export const createdInviteSchema = inviteSchema
+  .extend({ link: z.url() })
+  .meta({ id: 'CreatedInvite' });
+export type CreatedInvite = z.infer<typeof createdInviteSchema>;
+
 /** `GET /invites/:token` — what the accept page shows before the user commits. */
 export const invitePreviewSchema = z
   .object({

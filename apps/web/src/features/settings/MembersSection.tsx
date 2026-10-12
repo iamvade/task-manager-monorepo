@@ -23,6 +23,7 @@ import { Menu } from '../../components/ui/Menu';
 import { SegmentedControl } from '../../components/ui/SegmentedControl';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { cn } from '../../lib/cn';
+import { useCopyLink } from '../../lib/useCopyLink';
 import { useDates } from '../../lib/useDates';
 import { useOnlineIds } from '../../stores/realtime';
 import { toast } from '../../stores/toast';
@@ -62,6 +63,8 @@ function InviteForm({ workspaceId }: { workspaceId: string }) {
   const [email, setEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<InviteRole>('member');
   const [error, setError] = useState<string | null>(null);
+  /** The link from the last invite: there is no email delivery, so the admin passes it on. */
+  const [created, setCreated] = useState<{ email: string; link: string } | null>(null);
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -76,6 +79,7 @@ function InviteForm({ workspaceId }: { workspaceId: string }) {
       {
         onSuccess: (invite) => {
           setEmail('');
+          setCreated({ email: invite.email, link: invite.link });
           toast({ message: t('settings.members.sent', { email: invite.email }) });
         },
         onError: (err) => {
@@ -111,6 +115,7 @@ function InviteForm({ workspaceId }: { workspaceId: string }) {
             onChange={(e) => {
               setEmail(e.target.value);
               setError(null);
+              setCreated(null);
             }}
             className={cn(settingsInput, 'flex-[1_1_220px]', error && 'border-danger')}
           />
@@ -137,7 +142,41 @@ function InviteForm({ workspaceId }: { workspaceId: string }) {
           </p>
         )}
       </form>
+      {created && <InviteLink {...created} />}
     </SettingsSection>
+  );
+}
+
+function InviteLink({ email, link }: { email: string; link: string }) {
+  const { t } = useTranslation();
+  const linkId = useId();
+  const { copied, copy } = useCopyLink();
+  return (
+    <div className="mt-3 flex flex-col gap-2 rounded-[8px] bg-subtle px-3 py-2.5">
+      <label htmlFor={linkId} className="text-[13px] text-2">
+        {t('settings.members.linkFor', { email })}
+      </label>
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          id={linkId}
+          type="text"
+          readOnly
+          value={link}
+          onFocus={(e) => {
+            e.currentTarget.select();
+          }}
+          className={cn(settingsInput, 'flex-[1_1_220px] font-mono text-[12px]')}
+        />
+        <Button
+          onClick={() => {
+            void copy(link);
+          }}
+        >
+          {copied ? t('header.linkCopied') : t('header.copyLink')}
+        </Button>
+      </div>
+      <p className="m-0 text-[12px] text-muted">{t('settings.members.linkOnce')}</p>
+    </div>
   );
 }
 
