@@ -56,7 +56,7 @@ export function MyTaskRow({ task, section, onToggle }: MyTaskRowProps) {
           to={{ search: `?task=${task.key}` }}
           className={cn(
             'truncate text-[14px] no-underline',
-            task.done ? 'text-faint line-through' : 'text-default hover:text-default',
+            task.done ? 'text-muted line-through' : 'text-default hover:text-default',
           )}
         >
           {task.title}

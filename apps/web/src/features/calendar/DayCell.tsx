@@ -33,7 +33,7 @@ function DayNumber({ day, size }: { day: CalendarDay; size: 24 | 26 }) {
         size === 24
           ? 'h-6 min-w-6 text-[12px] font-medium'
           : 'h-[26px] min-w-[26px] text-[14px] font-semibold',
-        today ? 'bg-accent font-semibold text-white' : day.inPeriod ? 'text-2' : 'text-faint',
+        today ? 'bg-accent font-semibold text-white' : day.inPeriod ? 'text-2' : 'text-muted',
       )}
     >
       {d === 1 ? dates.formatDay('dateShort', day.date) : d}

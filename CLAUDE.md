@@ -48,7 +48,7 @@ The visual source of truth is the `design/` folder (exported from Claude Design)
 - Frontend: all server data through TanStack Query hooks in `src/api/`. Mutations are optimistic for checkbox toggles, drag moves, and status/priority changes, with rollback on error.
 - All UI strings through i18next (`mn.json`, `en.json`). Mongolian is the default. Take Mongolian copy from the `STR.mn` tables in the design files. Mongolian dates look like `10-р сарын 14`; English like `Oct 14`.
 - Default timezone `Asia/Ulaanbaatar` (per-user override). "Today", "Tomorrow", "Overdue" are computed in the user's timezone.
-- Accessibility: keep the aria-labels, focus-visible outlines (2px accent, 1px offset; accent-ink in dark) and keyboard support shown in the designs. Route tabs (`UnderlineTabs`) follow the ARIA tabs pattern: only the selected tab is tabbable, ←/→/Home/End move and open.
+- Accessibility: keep the aria-labels, focus-visible outlines (2px accent, 1px offset; accent-ink in dark) and keyboard support shown in the designs. `apps/web/e2e/a11y.spec.ts` runs axe (WCAG 2.1 A/AA) on every screen and overlay in light and dark; it must stay at zero violations. Text never uses `--text-faint` (2.6:1): de-emphasized text (out-of-month calendar days, done task titles) uses `--text-muted`; done calendar pills are struck through at full color (not 65% opacity). Non-task content inside `role="table"` sits in a row/cell (`FullRow` in `TaskTable.tsx`). Route tabs (`UnderlineTabs`) follow the ARIA tabs pattern: only the selected tab is tabbable, ←/→/Home/End move and open.
 - Commit after each completed phase with a clear message.
 
 ## Data model (PostgreSQL)
@@ -126,7 +126,7 @@ Layout: sidebar 248px (min 220px), collapsible to a 56px icon rail. Top bar 56px
 | `--text-muted` | #6B6B74 (text) / #71717A (icons) | #8E8E98 |
 | `--text-faint` | #A1A1AA | #5E5E68 |
 | `--accent` | #6E56CF (user can pick #2F6FEB, #0F766E, #3F3F46) | same |
-| `--accent-ink` (accent as text, ring, outline) | = accent | #B4A5FF / #93B4FF / #5EEAD4 / #D4D4D8 for the 4 accents |
+| `--accent-ink` (accent as text, ring, outline) | #6C55CC / #2A63D2 / #0F756D / #3F3F46 (the accent nudged darker for 4.5:1 on accent-soft over the sidebar) | #B4A5FF / #93B4FF / #5EEAD4 / #D4D4D8 for the 4 accents |
 | `--accent-soft` | accent at 10% (`accent + 1A`) | accent at 20% (`accent + 33`) |
 | `--danger` | #C42B1C (overdue text), #DC2626 (urgent) | #F87171 |
 | `--warning` | #B45309 (due today) | #FBBF24 |
@@ -141,7 +141,7 @@ Implementation: raw values live in `apps/web/src/styles/tokens.css` (`:root` lig
 
 Status markers (12px, 2px ring), rendered by category: To Do = ring #A1A1AA (dark #71717A); In Progress = ring + left-half fill #D97706 (dark #F59E0B); In Review = ring accent + 20% accent fill (dark: ring accent-ink, fill accent-soft); Done = solid #16A34A (dark #22C55E). Status tints (activity pills, board column headers): To Do #F1F1F3/#3F3F46 (board header #EDEDF0), In Progress #FDF0DC/#92400E, In Review accent-soft/accent, Done #E3F4E8/#166534.
 Priority flags: Urgent #DC2626 (dark #F87171), High #EA580C (#FB923C), Medium #CA8A04 (#FACC15) — filled; Low = outline #A1A1AA (#71717A).
-Due tones: overdue #C42B1C 500 (Board 600 + "· Overdue"), today #B45309 500, soon #3F3F46, later #6B6B74, done #A1A1AA; dark #F87171 / #FBBF24 / #C9C9D1 / #8E8E98 / #5E5E68.
+Due tones: overdue #C42B1C 500 (Board 600 + "· Overdue"), today #B45309 500, soon #3F3F46, later #6B6B74, done #6B6B74; dark #F87171 / #FBBF24 / #C9C9D1 / #8E8E98 / #8E8E98. (Done was drawn #A1A1AA / #5E5E68; muted for WCAG AA.)
 Tag chips (22px, radius 6, 12px/500): palette key → soft bg + dark fg, e.g. blue (Research) `#E8F1FD/#1D4ED8`, violet (UX/UI) `#F1EEFD/#5B45B8`, teal (Design system) `#E3F4F1/#0F766E`, neutral (Frontend/iOS/Android/Docs) `#F1F1F3/#3F3F46`, orange (Analytics) `#FDF1E1/#9A3412`, green (A11y) `#E6F4EA/#166534`, pink (Onboarding) `#FCEBF3/#9D174D`. Dark: tinted rgba bg + light fg, e.g. blue `rgba(59,130,246,0.16)/#93C5FD`, neutral `#232328/#C9C9D1`.
 Avatar colors (palette keys): indigo `#E0E7FF/#3730A3`, green `#DCFCE7/#166534`, rose `#FFE4E6/#9F1239`, amber `#FEF3C7/#92400E`, sky `#E0F2FE/#075985`, purple `#F3E8FF/#6B21A8`, teal `#CCFBF1/#115E59`, yellow `#FEF9C3/#854D0E`; dark e.g. indigo `#312E81/#C7D2FE`.
 Full light/dark tables for avatars, space badges, project colors and tags: `docs/design-notes.md` Appendix A. Reports chart colors (wait bars, workload buckets, sprint bars, warm card): Appendix A.2b.

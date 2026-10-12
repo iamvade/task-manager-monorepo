@@ -1,18 +1,21 @@
 /*
  * Design tokens (CLAUDE.md "Design tokens", docs/design-notes.md Appendix A). Light on :root;
  * `data-theme="dark"` on <html> switches to the dark palette. `applyAppearance` (preferences.ts)
- * resolves the user's `system` theme to light/dark and sets `--accent`, `--accent-ink-dark` and the
- * two `--accent-soft-*` values from the user's accent (hex + 1A light / + 33 dark).
+ * resolves the user's `system` theme to light/dark and sets `--accent`, `--accent-ink-light`,
+ * `--accent-ink-dark` and the two `--accent-soft-*` values from the user's accent (hex + 1A light /
+ * + 33 dark). The light ink is the accent nudged darker where needed for 4.5:1 on accent-soft over
+ * the sidebar (e.g. #6E56CF → #6C55CC).
  */
 :root {
   color-scheme: light;
 
   /* Accent (runtime) */
   --accent: #6e56cf;
+  --accent-ink-light: #6c55cc;
   --accent-ink-dark: #b4a5ff;
   --accent-soft-light: #6e56cf1a;
   --accent-soft-dark: #6e56cf33;
-  --accent-ink: var(--accent);
+  --accent-ink: var(--accent-ink-light);
   --accent-soft: var(--accent-soft-light);
 
   /* Surfaces */
@@ -86,7 +89,7 @@
   --due-today: #b45309;
   --due-soon: #3f3f46;
   --due-later: #6b6b74;
-  --due-done: #a1a1aa;
+  --due-done: #6b6b74; /* drawn #A1A1AA; muted for WCAG AA */
 
   /* Sidebar project dot when not active */
   --project-dot-inactive: #c4c4cc;
@@ -221,7 +224,7 @@
   --due-today: #fbbf24;
   --due-soon: #c9c9d1;
   --due-later: #8e8e98;
-  --due-done: #5e5e68;
+  --due-done: #8e8e98; /* drawn #5E5E68; muted for WCAG AA */
 
   --project-dot-inactive: #4a4a52;
 

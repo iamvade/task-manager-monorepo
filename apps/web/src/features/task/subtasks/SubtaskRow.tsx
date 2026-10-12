@@ -59,6 +59,9 @@ export function SubtaskRow({ subtask }: { subtask: Subtask }) {
     <div
       ref={setNodeRef}
       {...attributes}
+      // dnd-kit makes it role="button", but it holds its own controls (checkbox, title, pickers):
+      // a focusable group keeps keyboard sorting without nesting interactive roles.
+      role="group"
       aria-label={subtask.title}
       onPointerDown={(e) => {
         if (e.currentTarget.contains(e.target as Node)) onPointerDown?.(e);

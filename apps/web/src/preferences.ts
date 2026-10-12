@@ -4,6 +4,17 @@ const LANGUAGE_KEY = 'kite.language';
 /** Read by the inline script in index.html to paint the right theme before React starts. */
 const APPEARANCE_KEY = 'kite.appearance';
 
+/**
+ * Accent ink (accent used as text/outline) on light backgrounds: the accent, nudged darker where
+ * it would miss 4.5:1 on accent-soft over the sidebar background (axe, WCAG AA).
+ */
+const ACCENT_INK_LIGHT: Record<Accent, string> = {
+  '#6E56CF': '#6C55CC',
+  '#2F6FEB': '#2A63D2',
+  '#0F766E': '#0F756D',
+  '#3F3F46': '#3F3F46',
+};
+
 /** Accent ink (accent used as text/outline) on dark backgrounds, per accent. */
 const ACCENT_INK_DARK: Record<Accent, string> = {
   '#6E56CF': '#B4A5FF',
@@ -38,6 +49,7 @@ let stopFollowingSystem: (() => void) | undefined;
 export function applyAppearance(theme: Theme, accent: Accent): void {
   const root = document.documentElement;
   root.style.setProperty('--accent', accent);
+  root.style.setProperty('--accent-ink-light', ACCENT_INK_LIGHT[accent]);
   root.style.setProperty('--accent-ink-dark', ACCENT_INK_DARK[accent]);
   // accent at 10% (light) / 20% (dark), as hex alpha like the designs (`accent + '1A'`).
   root.style.setProperty('--accent-soft-light', `${accent}1A`);

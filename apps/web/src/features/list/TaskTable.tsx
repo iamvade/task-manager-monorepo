@@ -31,6 +31,7 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
+  type ReactNode,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -417,12 +418,16 @@ export function TaskTable({
           </div>
 
           {showNoMatches && (
-            <p className="m-0 px-2 py-8 text-center text-[13px] text-muted">
-              {t('table.noMatches')}
-            </p>
+            <FullRow>
+              <p className="m-0 px-2 py-8 text-center text-[13px] text-muted">
+                {t('table.noMatches')}
+              </p>
+            </FullRow>
           )}
 
           <DndContext
+            // Its live region and instructions can't sit inside role="table".
+            accessibility={{ container: document.body }}
             sensors={sensors}
             collisionDetection={collisionDetection}
             onDragStart={onDragStart}
@@ -472,6 +477,20 @@ export function TaskTable({
         </div>
       </div>
     </ListContext.Provider>
+  );
+}
+
+/**
+ * Non-task content inside the table (group header, add row, "no matches"): a row with one cell,
+ * as the table role requires. Flex columns keep the layout of the content as before.
+ */
+function FullRow({ children }: { children: ReactNode }) {
+  return (
+    <div role="row" className="flex flex-col">
+      <div role="cell" className="flex flex-col">
+        {children}
+      </div>
+    </div>
   );
 }
 
@@ -528,15 +547,17 @@ function GroupSection({
       className="flex flex-col pt-4"
     >
       {!headless && (
-        <GroupHeader
-          label={label}
-          count={group.tasks.length}
-          marker={group.marker}
-          open={open}
-          onToggle={onToggle}
-          onAdd={onCreate}
-          bodyId={bodyId}
-        />
+        <FullRow>
+          <GroupHeader
+            label={label}
+            count={group.tasks.length}
+            marker={group.marker}
+            open={open}
+            onToggle={onToggle}
+            onAdd={onCreate}
+            bodyId={bodyId}
+          />
+        </FullRow>
       )}
       {open && (
         <div id={bodyId} className="flex flex-col border-t border-subtle">
@@ -558,12 +579,14 @@ function GroupSection({
             ))}
           </SortableContext>
           {canAdd && (
-            <AddTaskRow
-              active={adding}
-              onStart={onStartAdd}
-              onCancel={onCancelAdd}
-              onSubmit={onSubmitAdd}
-            />
+            <FullRow>
+              <AddTaskRow
+                active={adding}
+                onStart={onStartAdd}
+                onCancel={onCancelAdd}
+                onSubmit={onSubmitAdd}
+              />
+            </FullRow>
           )}
         </div>
       )}
