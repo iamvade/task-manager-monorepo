@@ -34,12 +34,16 @@ export async function buildTaskDetail(db: Db, taskId: string): Promise<TaskDetai
     listFollowers(db, taskId),
   ]);
   if (!item || !row) throw httpError(404, 'NOT_FOUND', 'Task not found');
+  const [reviewer] = item.reviewerId
+    ? await db.select(userRefColumns).from(users).where(eq(users.id, item.reviewerId))
+    : [];
 
   return {
     ...item,
     description: row.description,
     descriptionText: row.descriptionText,
     sprint: row.sprint ? toSprintDto(row.sprint) : null,
+    reviewer: reviewer ?? null,
     creator: row.creator,
     subtasks: subtaskRows,
     attachments: attachmentRows,

@@ -9,9 +9,16 @@ import {
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { one } from '../src/db/rows.js';
 import { notifications, projects, taskAssignees, tasks } from '../src/db/schema/index.js';
-import { addMember, apiClient, createUser, createWorkspace, errorCode, login } from './fixtures.js';
+import {
+  addMember,
+  apiClient,
+  createUser,
+  createWorkspace,
+  errorCode,
+  insertTask,
+  login,
+} from './fixtures.js';
 import { createTestApp } from './helpers.js';
 
 describe('spaces, projects and the sidebar', () => {
@@ -45,19 +52,14 @@ describe('spaces, projects and the sidebar', () => {
     const status = project.statuses[statusIndex];
     if (!status) throw new Error('missing status');
     const [creator] = project.members;
-    return one(
-      await ctx.db
-        .insert(tasks)
-        .values({
-          projectId: project.id,
-          number,
-          statusId: status.id,
-          title: `Task ${number}`,
-          position: `a${number}`,
-          createdBy: creator?.user.id ?? '',
-        })
-        .returning(),
-    );
+    return insertTask(ctx.db, {
+      projectId: project.id,
+      number,
+      statusId: status.id,
+      title: `Task ${number}`,
+      position: `a${number}`,
+      createdBy: creator?.user.id ?? '',
+    });
   }
 
   it('creates a project with a unique key, default statuses and the creator as member', async () => {

@@ -4,8 +4,9 @@ import { afterEach, vi } from 'vitest';
 import '../i18n';
 import { FakeWebSocket } from './fakeSocket';
 
-// Files run in parallel; under load a first render can take longer than the 1s default.
-configure({ asyncUtilTimeout: 3000 });
+// Files run in parallel, and routes load lazily (the page's chunk is imported on first visit):
+// under load a first render can take a few seconds. Only failing waits take this long.
+configure({ asyncUtilTimeout: 6000 });
 
 afterEach(() => {
   cleanup();

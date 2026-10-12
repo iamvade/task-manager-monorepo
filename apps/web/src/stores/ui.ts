@@ -18,6 +18,10 @@ export interface CreateDefaults {
   sprintId?: string;
 }
 
+export interface ListColumns {
+  size: boolean;
+}
+
 interface UiState {
   sidebarCollapsed: boolean;
   /** Expanded spaces in the sidebar tree; missing = collapsed. */
@@ -37,6 +41,8 @@ interface UiState {
   calendarMode: CalendarMode;
   /** Projects toggled off on a space calendar, per space id. */
   calendarHidden: Record<string, string[]>;
+  /** Optional List columns the user turned on (shared by every list). */
+  listColumns: ListColumns;
   paletteOpen: boolean;
   shortcutsOpen: boolean;
   toggleSidebar: () => void;
@@ -48,6 +54,7 @@ interface UiState {
   setCreateMore: (on: boolean) => void;
   setCalendarMode: (mode: CalendarMode) => void;
   toggleCalendarProject: (spaceId: string, projectId: string) => void;
+  setListColumn: (column: keyof ListColumns, on: boolean) => void;
   setPaletteOpen: (open: boolean) => void;
   setShortcutsOpen: (open: boolean) => void;
 }
@@ -65,6 +72,7 @@ export const useUiStore = create<UiState>()(
       createMore: false,
       calendarMode: 'month',
       calendarHidden: {},
+      listColumns: { size: false },
       paletteOpen: false,
       shortcutsOpen: false,
       toggleSidebar: () => {
@@ -115,6 +123,9 @@ export const useUiStore = create<UiState>()(
           };
         });
       },
+      setListColumn: (column, on) => {
+        set((s) => ({ listColumns: { ...s.listColumns, [column]: on } }));
+      },
       setPaletteOpen: (open) => {
         set(open ? { paletteOpen: true, shortcutsOpen: false } : { paletteOpen: false });
       },
@@ -134,6 +145,7 @@ export const useUiStore = create<UiState>()(
         createMore: s.createMore,
         calendarMode: s.calendarMode,
         calendarHidden: s.calendarHidden,
+        listColumns: s.listColumns,
       }),
     },
   ),

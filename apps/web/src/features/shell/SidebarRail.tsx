@@ -1,7 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import { Link, NavLink } from 'react-router';
 import { useCurrentWorkspace, useSidebar } from '../../api/workspaces';
-import { InboxIcon, MyTasksIcon, PanelOpenIcon, SearchIcon } from '../../components/icons';
+import {
+  InboxIcon,
+  MyTasksIcon,
+  PanelOpenIcon,
+  ReportsIcon,
+  SearchIcon,
+} from '../../components/icons';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import { IconButton } from '../../components/ui/IconButton';
 import { SpaceBadge } from '../../components/ui/SpaceBadge';
@@ -54,6 +60,9 @@ export function SidebarRail() {
         }
       >
         <InboxIcon size={16} />
+      </RailLink>
+      <RailLink to="/reports" label={t('shell.reports')}>
+        <ReportsIcon size={16} />
       </RailLink>
       <div className="my-1 h-px w-6 bg-[var(--border)]" />
       {sidebar.data?.spaces.map((space) => (

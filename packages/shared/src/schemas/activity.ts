@@ -3,6 +3,7 @@ import { dateSchema } from '../dates.js';
 import {
   paletteKeySchema,
   prioritySchema,
+  sizeSchema,
   statusCategorySchema,
   templateIdSchema,
   type ActivityType,
@@ -19,7 +20,10 @@ export type StatusSnapshot = z.infer<typeof statusSnapshotSchema>;
 
 const userSnapshot = z.object({ id: z.uuid(), name: z.string() });
 const tagSnapshot = z.object({ id: z.uuid(), name: z.string(), color: paletteKeySchema });
-const sprintSnapshot = z.object({ id: z.uuid(), name: z.string() }).nullable();
+/** `name: null` = "Sprint {number}" (rows written before sprints had numbers carry a name only). */
+const sprintSnapshot = z
+  .object({ id: z.uuid(), name: z.string().nullable(), number: z.number().int().optional() })
+  .nullable();
 const subtaskSnapshot = z.object({ id: z.uuid(), title: z.string() });
 const attachmentSnapshot = z.object({ id: z.uuid(), filename: z.string() });
 /** A task key snapshot (`APP-142`) for duplicate/move history. */
@@ -39,6 +43,8 @@ export const activityPayloadSchemas = {
   'description.changed': z.object({}),
   'status.changed': change(statusSnapshotSchema),
   'priority.changed': change(prioritySchema),
+  'size.changed': change(sizeSchema.nullable()),
+  'reviewer.changed': change(userSnapshot.nullable()),
   'due.changed': change(dateSchema.nullable()),
   'start.changed': change(dateSchema.nullable()),
   'sprint.changed': change(sprintSnapshot),

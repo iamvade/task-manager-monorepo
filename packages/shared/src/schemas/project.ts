@@ -35,7 +35,10 @@ export const sprintSchema = z
   .object({
     id: z.uuid(),
     projectId: z.uuid(),
-    name: z.string(),
+    /** Per-project sequence ("Sprint 14"). */
+    number: z.number().int(),
+    /** Null = "Sprint {number}", translated. */
+    name: z.string().nullable(),
     startDate: dateSchema,
     endDate: dateSchema,
   })
@@ -54,6 +57,8 @@ export const projectDetailSchema = projectSummarySchema
     position: z.string(),
     createdAt: z.iso.datetime(),
     isFavorite: z.boolean(),
+    /** Default reviewer for tasks entering review. */
+    leadId: z.uuid().nullable(),
     /** By position. */
     statuses: z.array(statusSchema),
     /** The project's team, by name. */
@@ -82,7 +87,13 @@ export const createProjectSchema = z
 export type CreateProject = z.infer<typeof createProjectSchema>;
 
 export const updateProjectSchema = z
-  .object({ name: projectNameSchema, key: projectKeySchema, color: paletteKeySchema })
+  .object({
+    name: projectNameSchema,
+    key: projectKeySchema,
+    color: paletteKeySchema,
+    /** A workspace member, or null. */
+    leadId: z.uuid().nullable(),
+  })
   .partial()
   .strict()
   .refine(nonEmptyPatch, NOTHING_TO_UPDATE)
@@ -109,7 +120,12 @@ export const applyTemplateResponseSchema = z
 export type ApplyTemplateResponse = z.infer<typeof applyTemplateResponseSchema>;
 
 export const createSprintSchema = z
-  .object({ name: z.string().trim().min(1).max(80), startDate: dateSchema, endDate: dateSchema })
+  .object({
+    /** Without a name the sprint shows as "Sprint {number}". */
+    name: z.string().trim().min(1).max(80).optional(),
+    startDate: dateSchema,
+    endDate: dateSchema,
+  })
   .refine((s) => s.endDate >= s.startDate, {
     message: 'The end date must not be before the start date',
     path: ['endDate'],

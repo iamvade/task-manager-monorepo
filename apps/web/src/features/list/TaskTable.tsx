@@ -31,6 +31,7 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
+  type ReactNode,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -51,7 +52,7 @@ import { useViewParams } from '../views/useViewParams';
 import { AddTaskRow } from './AddTaskRow';
 import { GroupHeader } from './GroupHeader';
 import { groupTasks, sortTasks, type TaskGroup } from './grouping';
-import { GRID_COLUMNS, isDone, ListContext, type ListActions } from './ListContext';
+import { gridColumns, isDone, ListContext, type ListActions } from './ListContext';
 import { placeInStatus } from './positions';
 import { statusRef, useCreateInStatus } from './useCreateInStatus';
 import { TaskRow } from './TaskRow';
@@ -114,6 +115,7 @@ export function TaskTable({
   const complete = useCompleteTask();
   const move = useMoveTask();
   const update = useUpdateTask();
+  const showSize = useUiStore((s) => s.listColumns.size);
   const setAssigneesMutation = useSetAssignees();
   const setTagsMutation = useSetTags();
   const remove = useDeleteTask();
@@ -230,6 +232,10 @@ export function TaskTable({
     setPriority: (task, priority) => {
       if (priority !== task.priority) update.mutate({ task, patch: { priority } });
     },
+    setSize: (task, size) => {
+      if (size !== task.size) update.mutate({ task, patch: { size } });
+    },
+    showSize,
     setTags: (task, next) => {
       setTagsMutation.mutate({ task, tags: next });
     },
@@ -385,12 +391,16 @@ export function TaskTable({
         {copied ? t('header.linkCopied') : ''}
       </span>
       <div className="overflow-x-auto px-6 pt-2 pb-8">
-        <div role="table" aria-label={label} className="min-w-[960px]">
+        <div
+          role="table"
+          aria-label={label}
+          className={showSize ? 'min-w-[1032px]' : 'min-w-[960px]'}
+        >
           <div role="rowgroup">
             <div
               role="row"
               className="box-border grid h-9 items-center border-b border-default px-2 text-[12px] font-medium text-muted"
-              style={{ gridTemplateColumns: GRID_COLUMNS }}
+              style={{ gridTemplateColumns: gridColumns(showSize) }}
             >
               <span role="columnheader">
                 <span className="sr-only">{t('table.complete')}</span>
@@ -399,6 +409,7 @@ export function TaskTable({
               <span role="columnheader">{t('table.colAssignee')}</span>
               <span role="columnheader">{t('table.colDue')}</span>
               <span role="columnheader">{t('table.colPriority')}</span>
+              {showSize && <span role="columnheader">{t('table.colSize')}</span>}
               <span role="columnheader">{t('table.colTags')}</span>
               <span role="columnheader">
                 <span className="sr-only">{t('table.actions')}</span>
@@ -407,12 +418,16 @@ export function TaskTable({
           </div>
 
           {showNoMatches && (
-            <p className="m-0 px-2 py-8 text-center text-[13px] text-muted">
-              {t('table.noMatches')}
-            </p>
+            <FullRow>
+              <p className="m-0 px-2 py-8 text-center text-[13px] text-muted">
+                {t('table.noMatches')}
+              </p>
+            </FullRow>
           )}
 
           <DndContext
+            // Its live region and instructions can't sit inside role="table".
+            accessibility={{ container: document.body }}
             sensors={sensors}
             collisionDetection={collisionDetection}
             onDragStart={onDragStart}
@@ -462,6 +477,20 @@ export function TaskTable({
         </div>
       </div>
     </ListContext.Provider>
+  );
+}
+
+/**
+ * Non-task content inside the table (group header, add row, "no matches"): a row with one cell,
+ * as the table role requires. Flex columns keep the layout of the content as before.
+ */
+function FullRow({ children }: { children: ReactNode }) {
+  return (
+    <div role="row" className="flex flex-col">
+      <div role="cell" className="flex flex-col">
+        {children}
+      </div>
+    </div>
   );
 }
 
@@ -518,15 +547,17 @@ function GroupSection({
       className="flex flex-col pt-4"
     >
       {!headless && (
-        <GroupHeader
-          label={label}
-          count={group.tasks.length}
-          marker={group.marker}
-          open={open}
-          onToggle={onToggle}
-          onAdd={onCreate}
-          bodyId={bodyId}
-        />
+        <FullRow>
+          <GroupHeader
+            label={label}
+            count={group.tasks.length}
+            marker={group.marker}
+            open={open}
+            onToggle={onToggle}
+            onAdd={onCreate}
+            bodyId={bodyId}
+          />
+        </FullRow>
       )}
       {open && (
         <div id={bodyId} className="flex flex-col border-t border-subtle">
@@ -548,12 +579,14 @@ function GroupSection({
             ))}
           </SortableContext>
           {canAdd && (
-            <AddTaskRow
-              active={adding}
-              onStart={onStartAdd}
-              onCancel={onCancelAdd}
-              onSubmit={onSubmitAdd}
-            />
+            <FullRow>
+              <AddTaskRow
+                active={adding}
+                onStart={onStartAdd}
+                onCancel={onCancelAdd}
+                onSubmit={onSubmitAdd}
+              />
+            </FullRow>
           )}
         </div>
       )}

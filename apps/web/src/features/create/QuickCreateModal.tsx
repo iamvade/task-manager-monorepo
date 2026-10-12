@@ -3,6 +3,7 @@ import type {
   Priority,
   RichTextNode,
   SidebarSpace,
+  Size,
   Status,
   StatusCategory,
   Tag,
@@ -27,6 +28,7 @@ import {
   ChevronRightIcon,
   CloseIcon,
   MoreIcon,
+  SizeIcon,
   TagIcon,
 } from '../../components/icons';
 import { Avatar } from '../../components/ui/Avatar';
@@ -46,6 +48,7 @@ import { AssigneePicker } from '../pickers/AssigneePicker';
 import { DuePicker } from '../pickers/DuePicker';
 import { PriorityPicker } from '../pickers/PriorityPicker';
 import { ProjectPicker } from '../pickers/ProjectPicker';
+import { SizePicker } from '../pickers/SizePicker';
 import { StatusPicker } from '../pickers/StatusPicker';
 import { TagPicker } from '../pickers/TagPicker';
 import { useShellLocation } from '../shell/useShellLocation';
@@ -139,6 +142,7 @@ function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
   const [assigneeId, setAssigneeId] = useState<string | null>(defaults.assigneeId ?? null);
   const [dueDate, setDueDate] = useState<string | null>(defaults.dueDate ?? null);
   const [priority, setPriority] = useState<Priority>(defaults.priority ?? 'none');
+  const [size, setSize] = useState<Size | null>(null);
   const [statusChoice, setStatusChoice] = useState<{ id?: string; category?: StatusCategory }>({
     id: defaults.statusId,
     category: defaults.statusCategory,
@@ -192,6 +196,7 @@ function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
       ...(assignees.length ? { assigneeIds: assignees.map((a) => a.id) } : {}),
       ...(dueDate ? { dueDate } : {}),
       ...(priority !== 'none' ? { priority } : {}),
+      ...(size ? { size } : {}),
       ...(selectedTags.length ? { tagIds: selectedTags.map((tag) => tag.id) } : {}),
       ...(sprintId ? { sprintId } : {}),
     };
@@ -202,7 +207,7 @@ function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
     const optimistic = buildOptimisticTask(
       detail,
       status,
-      { title: trimmed, priority, assignees, tags: selectedTags, dueDate, sprintId },
+      { title: trimmed, priority, size, assignees, tags: selectedTags, dueDate, sprintId },
       known,
     );
 
@@ -433,6 +438,21 @@ function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
                   leading={<PriorityFlag priority={priority} />}
                   label={t(`priority.${priority}`)}
                   muted={priority === 'none'}
+                />
+              )}
+            />
+            <SizePicker
+              value={size}
+              onChange={setSize}
+              label={t('create.size')}
+              trigger={(props, isOpen) => (
+                <FieldChip
+                  {...props}
+                  active={isOpen}
+                  aria-label={`${t('create.size')}: ${size ?? t('taskSize.none')}`}
+                  leading={<SizeIcon size={14} />}
+                  label={size ? `${t('create.size')} ${size}` : t('create.size')}
+                  muted={size === null}
                 />
               )}
             />

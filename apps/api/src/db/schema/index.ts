@@ -6,4 +6,5 @@ export * from './projects.js';
 export * from './tasks.js';
 export * from './comments.js';
 export * from './activity.js';
+export * from './history.js';
 export * from './relations.js';

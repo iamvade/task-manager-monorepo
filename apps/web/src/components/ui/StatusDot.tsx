@@ -19,7 +19,7 @@ const STYLES: Record<StatusCategory, CSSProperties> = {
 
 interface StatusDotProps {
   category: StatusCategory;
-  size?: 8 | 12;
+  size?: 8 | 10 | 12;
   /** Accessible name; omit when the status name is shown next to it. */
   label?: string;
 }
@@ -31,7 +31,7 @@ export function StatusDot({ category, size = 12, label }: StatusDotProps) {
       aria-label={label}
       aria-hidden={label ? undefined : true}
       className="box-border inline-block flex-none rounded-full border-solid"
-      style={{ width: size, height: size, borderWidth: size === 12 ? 2 : 1.5, ...STYLES[category] }}
+      style={{ width: size, height: size, borderWidth: size === 8 ? 1.5 : 2, ...STYLES[category] }}
     />
   );
 }

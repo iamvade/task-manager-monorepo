@@ -21,7 +21,13 @@ const meAs = (role: WorkspaceRole) => ({
 const SARA = { ...at(PROJECT.members, 1), role: 'admin' };
 const DORJ = at(PROJECT.members, 3);
 const MEMBERS = [
-  { user: { ...ME.user }, role: 'owner', title: null, joinedAt: '2026-01-01T00:00:00.000Z' },
+  {
+    user: { ...ME.user },
+    role: 'owner',
+    title: null,
+    capacityPoints: 15,
+    joinedAt: '2026-01-01T00:00:00.000Z',
+  },
   SARA,
   DORJ,
 ];
@@ -157,5 +163,35 @@ describe('Settings', () => {
     expect(screen.getByText('Only admins can invite people and change roles.')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Change role/ })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Send invite' })).toBeNull();
+    // Job title and capacity are read-only.
+    expect(screen.queryByRole('spinbutton')).toBeNull();
+    expect(screen.queryByRole('textbox', { name: /Job title/ })).toBeNull();
+    expect(screen.getAllByText('15 pts / 2 wks').length).toBeGreaterThan(0);
+  });
+
+  it('lets admins set job titles and capacity inline', async () => {
+    const { fetchMock } = renderSettings('/settings?tab=members', {
+      [`PATCH /api/v1/workspaces/${WORKSPACE_ID}/members/${DORJ.user.id}`]: (init) =>
+        Response.json({ ...DORJ, ...(JSON.parse(init?.body as string) as object) }),
+    });
+    const title = await screen.findByRole('textbox', { name: 'Job title of Dorj E.' });
+    fireEvent.change(title, { target: { value: ' Frontend engineer ' } });
+    fireEvent.keyDown(title, { key: 'Enter' });
+    fireEvent.blur(title);
+    const capacity = screen.getByRole('spinbutton', {
+      name: 'Capacity of Dorj E. (points per 2 weeks)',
+    });
+    expect(capacity).toHaveValue(15);
+    fireEvent.change(capacity, { target: { value: '12' } });
+    fireEvent.blur(capacity);
+    // Out of range: not sent.
+    fireEvent.change(capacity, { target: { value: '500' } });
+    fireEvent.blur(capacity);
+    await waitFor(() => {
+      expect(bodies(fetchMock, 'PATCH')).toEqual([
+        { title: 'Frontend engineer' },
+        { capacityPoints: 12 },
+      ]);
+    });
   });
 });

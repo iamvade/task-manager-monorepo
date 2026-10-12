@@ -47,7 +47,13 @@ export function InviteAcceptPage() {
 
   const preview = invite.data;
   const signedInAsInvitee = me?.user.email.toLowerCase() === preview.email.toLowerCase();
-  const acceptError = accept.error ? <FormError>{t('common.genericError')}</FormError> : null;
+  const accountCreatedMeanwhile =
+    accept.error instanceof ApiError && accept.error.code === 'ACCOUNT_EXISTS';
+  const acceptError = accept.error ? (
+    <FormError>
+      {accountCreatedMeanwhile ? t('invite.accountExists') : t('common.genericError')}
+    </FormError>
+  ) : null;
 
   let body;
   if (!preview.accountExists) {
@@ -57,7 +63,18 @@ export function InviteAcceptPage() {
         pending={accept.isPending}
         error={acceptError}
         onSubmit={(name, password) => {
-          accept.mutate({ name, password }, { onSuccess: onJoined });
+          accept.mutate(
+            { name, password },
+            {
+              onSuccess: onJoined,
+              // Another invite created the account meanwhile: switch to signing in.
+              onError: (error) => {
+                if (error instanceof ApiError && error.code === 'ACCOUNT_EXISTS') {
+                  void invite.refetch();
+                }
+              },
+            },
+          );
         }}
       />
     );

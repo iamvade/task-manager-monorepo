@@ -10,8 +10,11 @@ export interface SegmentOption<T extends string> {
 
 interface SegmentedControlProps<T extends string> {
   options: readonly SegmentOption<T>[];
-  value: T;
+  /** `null` = nothing selected (e.g. an unsized task). */
+  value: T | null;
   onChange: (value: T) => void;
+  /** Called when the selected segment is clicked again; without it that click is a no-op. */
+  onClear?: () => void;
   /** Accessible name of the group (or use `labelledBy`). */
   label?: string;
   labelledBy?: string;
@@ -19,9 +22,12 @@ interface SegmentedControlProps<T extends string> {
   track?: 'sidebar' | 'default';
   /**
    * sm: 24px segments r5 on a r7 track (12/600); md: 28px r6 on r8 (13/500); tabs: 26px r6 on
-   * r8 (12/500, TaskDetail activity filter).
+   * r8 (12/500, TaskDetail activity filter); chip: 28px r6 on r8, min-width 36 (12/600, the
+   * TaskDetail Size control); toolbar: 28px r6 on r8, content width (13/500, the Reports period).
    */
-  size?: 'sm' | 'md' | 'tabs';
+  size?: 'sm' | 'md' | 'tabs' | 'chip' | 'toolbar';
+  /** Inert while loading (ReportsLoading.dc.html): unselected labels faint. */
+  disabled?: boolean;
   /** `tablist` for filters that switch a panel (TaskDetail activity tabs). */
   role?: 'radiogroup' | 'tablist';
   className?: string;
@@ -35,11 +41,13 @@ export function SegmentedControl<T extends string>({
   options,
   value,
   onChange,
+  onClear,
   label,
   labelledBy,
   track = 'default',
   size = 'sm',
   role = 'radiogroup',
+  disabled,
   className,
 }: SegmentedControlProps<T>) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -65,6 +73,7 @@ export function SegmentedControl<T extends string>({
       role={role}
       aria-label={label}
       aria-labelledby={labelledBy}
+      aria-disabled={disabled ? true : undefined}
       className={cn(
         'flex gap-0.5 p-0.5',
         size === 'sm' ? 'rounded-[7px]' : 'rounded-[8px]',
@@ -74,6 +83,8 @@ export function SegmentedControl<T extends string>({
     >
       {options.map((option, index) => {
         const selected = option.value === value;
+        // With nothing selected the first segment takes the tab stop.
+        const tabStop = selected || (value === null && index === 0);
         return (
           <button
             key={option.value}
@@ -84,11 +95,13 @@ export function SegmentedControl<T extends string>({
             role={role === 'tablist' ? 'tab' : 'radio'}
             aria-checked={role === 'tablist' ? undefined : selected}
             aria-selected={role === 'tablist' ? selected : undefined}
-            tabIndex={selected ? 0 : -1}
+            tabIndex={tabStop ? 0 : -1}
+            disabled={disabled}
             lang={option.lang}
             title={option.title}
             onClick={() => {
-              onChange(option.value);
+              if (selected) onClear?.();
+              else onChange(option.value);
             }}
             onKeyDown={(e) => {
               onKeyDown(e, index);
@@ -98,9 +111,19 @@ export function SegmentedControl<T extends string>({
               size === 'sm' && 'h-6 rounded-[5px] px-2 text-[12px] font-semibold',
               size === 'md' && 'h-7 rounded-[6px] px-3 text-[13px] font-medium',
               size === 'tabs' && 'h-[26px] flex-none rounded-[6px] px-2.5 text-[12px] font-medium',
+              size === 'chip' &&
+                'h-7 min-w-9 flex-none rounded-[6px] px-2 text-[12px] font-semibold',
+              size === 'toolbar' && 'h-7 flex-none rounded-[6px] px-2.5 text-[13px] font-medium',
               selected
                 ? 'bg-segment-active text-default shadow-segment'
-                : cn('bg-transparent', size === 'tabs' ? 'text-3' : 'text-muted'),
+                : cn(
+                    'bg-transparent',
+                    disabled
+                      ? 'text-faint'
+                      : size === 'tabs' || size === 'chip' || size === 'toolbar'
+                        ? 'text-3'
+                        : 'text-muted',
+                  ),
             )}
           >
             {option.label}

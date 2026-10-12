@@ -1,4 +1,12 @@
-import type { Priority, ProjectDetail, Status, Tag, TaskListItem, UserRef } from '@kite/shared';
+import type {
+  Priority,
+  ProjectDetail,
+  Size,
+  Status,
+  Tag,
+  TaskListItem,
+  UserRef,
+} from '@kite/shared';
 import { placeInStatus } from '../list/positions';
 
 export const statusRef = (s: Status): TaskListItem['status'] => ({
@@ -11,6 +19,7 @@ export const statusRef = (s: Status): TaskListItem['status'] => ({
 interface OptimisticFields {
   title: string;
   priority?: Priority;
+  size?: Size | null;
   assignees?: UserRef[];
   tags?: Tag[];
   dueDate?: string | null;
@@ -46,6 +55,7 @@ export function buildOptimisticTask(
     status: statusRef(status),
     title: fields.title,
     priority: fields.priority ?? 'none',
+    size: fields.size ?? null,
     startDate: null,
     dueDate: fields.dueDate ?? null,
     position: placeInStatus(
@@ -55,6 +65,7 @@ export function buildOptimisticTask(
       null,
     ).position,
     sprintId: fields.sprintId ?? null,
+    reviewerId: null,
     completedAt: status.category === 'done' ? now : null,
     createdAt: now,
     updatedAt: now,

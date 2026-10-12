@@ -105,10 +105,13 @@ describe('app shell', () => {
       expect(router.state.location.pathname).toBe(`/p/${PROJECT_ID}/board`);
     });
     expect(router.state.location.search).toBe('?sprint=none');
-    expect(within(tabs).getByRole('tab', { name: 'Самбар' })).toHaveAttribute(
-      'aria-selected',
-      'true',
-    );
+    // Routes load lazily: the tabs re-render once the board's chunk is in.
+    await waitFor(() => {
+      expect(within(tabs).getByRole('tab', { name: 'Самбар' })).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
+    });
   });
 
   it('collapses to the rail and remembers it', async () => {

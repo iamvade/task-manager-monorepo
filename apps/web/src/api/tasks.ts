@@ -142,6 +142,8 @@ export interface UpdateVars {
   patch: UpdateTask;
   /** The new status object when `patch.statusId` is set (for the optimistic rows). */
   status?: TaskListItem['status'];
+  /** The person when `patch.reviewerId` is set (for the optimistic drawer). */
+  reviewer?: TaskDetail['reviewer'];
 }
 
 /** Task fields (list cells, drawer): `PATCH /tasks/:id`. */
@@ -152,6 +154,8 @@ export function useUpdateTask() {
       const next: TaskListItem = { ...t, updatedAt: new Date().toISOString() };
       if (patch.title !== undefined) next.title = patch.title;
       if (patch.priority !== undefined) next.priority = patch.priority;
+      if (patch.size !== undefined) next.size = patch.size;
+      if (patch.reviewerId !== undefined) next.reviewerId = patch.reviewerId;
       if (patch.dueDate !== undefined) next.dueDate = patch.dueDate;
       if (patch.startDate !== undefined) next.startDate = patch.startDate;
       if (patch.sprintId !== undefined) next.sprintId = patch.sprintId;
@@ -162,8 +166,10 @@ export function useUpdateTask() {
       }
       return next;
     },
-    (d, { patch }) =>
-      patch.description === undefined ? d : { ...d, description: patch.description },
+    (d, { patch, reviewer }) => {
+      const next = patch.description === undefined ? d : { ...d, description: patch.description };
+      return patch.reviewerId === undefined ? next : { ...next, reviewer: reviewer ?? null };
+    },
   );
 }
 

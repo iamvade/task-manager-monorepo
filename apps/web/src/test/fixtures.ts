@@ -70,6 +70,7 @@ const member = (n: number, name: string, initials: string, avatarColor: string) 
   },
   role: 'member',
   title: null,
+  capacityPoints: 15,
   joinedAt: '2026-01-01T00:00:00.000Z',
 });
 
@@ -85,6 +86,7 @@ export const PROJECT = {
   position: 'a0',
   createdAt: '2026-01-01T00:00:00.000Z',
   isFavorite: false,
+  leadId: null,
   statuses: [],
   members: [
     member(1, 'Anu Bold', 'AB', 'indigo'),
@@ -98,6 +100,7 @@ export const PROJECT = {
   activeSprint: {
     id: SPRINT_ID,
     projectId: PROJECT_ID,
+    number: 1,
     name: 'Sprint 1',
     startDate: '2026-10-06',
     endDate: '2026-10-24',

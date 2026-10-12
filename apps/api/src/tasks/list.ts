@@ -61,10 +61,12 @@ const listColumns = {
     number: tasks.number,
     title: tasks.title,
     priority: tasks.priority,
+    size: tasks.size,
     startDate: tasks.startDate,
     dueDate: tasks.dueDate,
     position: tasks.position,
     sprintId: tasks.sprintId,
+    reviewerId: tasks.reviewerId,
     completedAt: tasks.completedAt,
     createdAt: tasks.createdAt,
     updatedAt: tasks.updatedAt,
@@ -186,23 +188,31 @@ export const toTaskListItem = (row: ListRow): TaskListItem => ({
   attachmentCount: row.attachmentCount,
 });
 
-/** `GET /projects/:id/tasks`. */
-export async function listProjectTasks(db: DbOrTx, projectId: string, query: TaskListQuery) {
+/** The project list query, unexecuted (`pnpm db:perf` EXPLAINs it). */
+export function projectTaskListQuery(db: DbOrTx, projectId: string, query: TaskListQuery) {
   const where = [eq(tasks.projectId, projectId), ...taskFilters(db, query)];
-  const rows = await selectTaskList(db, where, taskOrder(query, false));
-  return rows.map(toTaskListItem);
+  return selectTaskList(db, where, taskOrder(query, false));
 }
 
-/** `GET /spaces/:id/tasks`: every non-archived project of the space. */
-export async function listSpaceTasks(db: DbOrTx, spaceId: string, query: SpaceTaskListQuery) {
+/** The space list query, unexecuted: every non-archived project of the space. */
+export function spaceTaskListQuery(db: DbOrTx, spaceId: string, query: SpaceTaskListQuery) {
   const where = [
     eq(projects.spaceId, spaceId),
     isNull(projects.archivedAt),
     ...(query.projectId?.length ? [inArray(tasks.projectId, query.projectId)] : []),
     ...taskFilters(db, query),
   ];
-  const rows = await selectTaskList(db, where, taskOrder(query, true));
-  return rows.map(toTaskListItem);
+  return selectTaskList(db, where, taskOrder(query, true));
+}
+
+/** `GET /projects/:id/tasks`. */
+export async function listProjectTasks(db: DbOrTx, projectId: string, query: TaskListQuery) {
+  return (await projectTaskListQuery(db, projectId, query)).map(toTaskListItem);
+}
+
+/** `GET /spaces/:id/tasks`. */
+export async function listSpaceTasks(db: DbOrTx, spaceId: string, query: SpaceTaskListQuery) {
+  return (await spaceTaskListQuery(db, spaceId, query)).map(toTaskListItem);
 }
 
 /** One task as a list item, deleted or not (move/complete responses, the detail base). */

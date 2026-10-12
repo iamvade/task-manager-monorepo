@@ -42,6 +42,10 @@ const tags = [
   { name: 'Search', description: 'Command palette search' },
   { name: 'Inbox', description: 'My notifications: list, read, archive' },
   { name: 'My Tasks', description: 'My Tasks home: sections, stats and recent activity' },
+  {
+    name: 'Reports',
+    description: 'Overview, Sprints, Workload and People reports, with CSV exports',
+  },
   { name: 'Realtime', description: 'WebSocket: live changes and presence' },
 ];
 

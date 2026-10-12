@@ -1,18 +1,21 @@
 /*
  * Design tokens (CLAUDE.md "Design tokens", docs/design-notes.md Appendix A). Light on :root;
  * `data-theme="dark"` on <html> switches to the dark palette. `applyAppearance` (preferences.ts)
- * resolves the user's `system` theme to light/dark and sets `--accent`, `--accent-ink-dark` and the
- * two `--accent-soft-*` values from the user's accent (hex + 1A light / + 33 dark).
+ * resolves the user's `system` theme to light/dark and sets `--accent`, `--accent-ink-light`,
+ * `--accent-ink-dark` and the two `--accent-soft-*` values from the user's accent (hex + 1A light /
+ * + 33 dark). The light ink is the accent nudged darker where needed for 4.5:1 on accent-soft over
+ * the sidebar (e.g. #6E56CF → #6C55CC).
  */
 :root {
   color-scheme: light;
 
   /* Accent (runtime) */
   --accent: #6e56cf;
+  --accent-ink-light: #6c55cc;
   --accent-ink-dark: #b4a5ff;
   --accent-soft-light: #6e56cf1a;
   --accent-soft-dark: #6e56cf33;
-  --accent-ink: var(--accent);
+  --accent-ink: var(--accent-ink-light);
   --accent-soft: var(--accent-soft-light);
 
   /* Surfaces */
@@ -86,7 +89,7 @@
   --due-today: #b45309;
   --due-soon: #3f3f46;
   --due-later: #6b6b74;
-  --due-done: #a1a1aa;
+  --due-done: #6b6b74; /* drawn #A1A1AA; muted for WCAG AA */
 
   /* Sidebar project dot when not active */
   --project-dot-inactive: #c4c4cc;
@@ -101,6 +104,57 @@
   /* Scrims */
   --scrim-drawer: rgba(24, 24, 27, 0.28);
   --scrim-modal: rgba(24, 24, 27, 0.32);
+
+  /* Reports (Reports.dc.html; dark from ReportsDark.dc.html, design-notes A.2b) */
+  --panel: #ffffff;
+  --table-row-border: #efeff2;
+  --chart-grid: #f1f1f3;
+  --chart-axis: #d4d4d8;
+  --chart-prev: #c4c4cc;
+  --chart-point-ring: #ffffff;
+  --wait-todo: #8b8b94;
+  --wait-progress: #d97706;
+  --wait-review: var(--accent);
+  --wait-track: #f4f4f5;
+  --success-soft: #e8f5ec;
+  --success-soft-fg: #166534;
+  --warning-soft: #fef3e2;
+  --warning-soft-fg: #92400e;
+  --warning-icon: #b45309;
+  --stat-completed: #16a34a;
+  --stat-ontime: #0284c7;
+  --tooltip-border: #e6e6ea;
+  --tooltip-shadow: 0 8px 24px rgba(24, 24, 27, 0.1);
+  --skeleton: #f1f1f3;
+  --skeleton-hi: #e7e7eb;
+  --empty-bar-dash: #d4d4d8;
+  --progress-track: #efeff2;
+  --chart-ideal: #8b8b94;
+  --capacity-line: #a1a1aa;
+  --bucket-overdue: #c42b1c;
+  --bucket-week: #e39b2b;
+  --bucket-later: #8b8b94;
+  --bucket-none-a: #f4f4f5;
+  --bucket-none-b: #d4d4d8;
+  --bucket-none-border: #c4c4cc;
+  /* Sprints (ReportsSprints.dc.html): committed / completed follow the accent (applyAppearance
+     sets the -light/-dark pairs; defaults = the default accent's #9C8BE3 / #5B45B8). */
+  --sprint-committed-light: #9c8be3;
+  --sprint-completed-light: #5b45b8;
+  --sprint-committed-dark: #b4a5ff73;
+  --sprint-completed-dark: #b4a5ff;
+  --sprint-committed: var(--sprint-committed-light);
+  --sprint-completed: var(--sprint-completed-light);
+  --sprint-added: #d97706;
+  --sprint-carried: #8b8b94;
+  --pip-empty: #e6e6ea;
+  --warm-card-bg: #fffbf5;
+  --warm-card-border: #f5ddb8;
+  --warm-card-fg: #92400e;
+  /* Workload capacity pill dots (Heavy / Balanced / Light). */
+  --load-heavy-dot: #e39b2b;
+  --load-balanced-dot: #8b8b94;
+  --load-light-dot: #16a34a;
 }
 
 :root[data-theme='dark'] {
@@ -141,8 +195,8 @@
   --danger: #f87171;
   --danger-soft: rgba(248, 113, 113, 0.12);
   --danger-soft-fg: #f87171;
-  --danger-card-bg: rgba(248, 113, 113, 0.06);
-  --danger-card-border: rgba(248, 113, 113, 0.24);
+  --danger-card-bg: rgba(248, 113, 113, 0.07);
+  --danger-card-border: rgba(248, 113, 113, 0.28);
   --warning: #fbbf24;
   --success: #22c55e;
   --online: #22c55e;
@@ -170,7 +224,7 @@
   --due-today: #fbbf24;
   --due-soon: #c9c9d1;
   --due-later: #8e8e98;
-  --due-done: #5e5e68;
+  --due-done: #8e8e98; /* drawn #5E5E68; muted for WCAG AA */
 
   --project-dot-inactive: #4a4a52;
 
@@ -181,4 +235,47 @@
 
   --scrim-drawer: rgba(0, 0, 0, 0.5);
   --scrim-modal: rgba(0, 0, 0, 0.56);
+
+  --panel: #161618;
+  --table-row-border: #222227;
+  --chart-grid: #222227;
+  --chart-axis: #3a3a42;
+  --chart-prev: #6b6b75;
+  --chart-point-ring: #161618;
+  --wait-todo: #9a9aa4;
+  --wait-progress: #f59e0b;
+  --wait-review: var(--accent-ink);
+  --wait-track: #232328;
+  --success-soft: rgba(34, 197, 94, 0.16);
+  --success-soft-fg: #86efac;
+  --warning-soft: rgba(251, 191, 36, 0.14);
+  --warning-soft-fg: #fcd34d;
+  --warning-icon: #fbbf24;
+  --stat-completed: #4ade80;
+  --stat-ontime: #7dd3fc;
+  --tooltip-border: #2e2e35;
+  --tooltip-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --skeleton: #1f1f23;
+  --skeleton-hi: #26262b;
+  --empty-bar-dash: #3a3a42;
+  --progress-track: #26262b;
+  --chart-ideal: #9a9aa4;
+  --capacity-line: #6b6b75;
+  --bucket-overdue: #f87171;
+  --bucket-week: #e8a33d;
+  --bucket-later: #9a9aa4;
+  --bucket-none-a: #232328;
+  --bucket-none-b: #3a3a42;
+  --bucket-none-border: #4a4a52;
+  --sprint-committed: var(--sprint-committed-dark);
+  --sprint-completed: var(--sprint-completed-dark);
+  --sprint-added: #f59e0b;
+  --sprint-carried: #9a9aa4;
+  --pip-empty: #2a2a30;
+  --warm-card-bg: rgba(251, 191, 36, 0.06);
+  --warm-card-border: rgba(251, 191, 36, 0.24);
+  --warm-card-fg: #fcd34d;
+  --load-heavy-dot: #e8a33d;
+  --load-balanced-dot: #9a9aa4;
+  --load-light-dot: #22c55e;
 }

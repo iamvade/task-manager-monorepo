@@ -21,6 +21,7 @@ import { httpError } from '../errors.js';
 import { buildProjectDetail } from '../projects/detail.js';
 import { pickProjectKey } from '../projects/keys.js';
 import { insertDefaultStatuses } from '../projects/statuses.js';
+import { requireMembers } from '../tasks/refs.js';
 
 const err = apiErrorSchema;
 const projectParams = z.object({ projectId: z.uuid() });
@@ -134,7 +135,8 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       schema: {
         tags: ['Projects'],
         summary: 'Update a project',
-        description: 'Name, key or color. 409 `PROJECT_KEY_TAKEN` when the key is in use.',
+        description:
+          'Name, key, color or lead (the default reviewer; a workspace member, else 400 `INVALID_REFERENCE`). 409 `PROJECT_KEY_TAKEN` when the key is in use.',
         params: projectParams,
         body: updateProjectSchema,
         response: { 200: projectDetailSchema, 400: err, 401: err, 404: err, 409: err },
@@ -142,6 +144,9 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     },
     async (request) => {
       const { project } = await loadProjectAccess(request, request.params.projectId);
+      if (request.body.leadId) {
+        await requireMembers(app.db, project.workspaceId, [request.body.leadId], 'Lead');
+      }
       try {
         const [updated] = await app.db
           .update(projects)

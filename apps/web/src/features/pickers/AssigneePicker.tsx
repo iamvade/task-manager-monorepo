@@ -20,6 +20,8 @@ interface AssigneePickerProps {
    * the list.
    */
   single?: boolean;
+  /** Label of the empty row in single mode ("Unassigned" by default). */
+  noneLabel?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
@@ -47,12 +49,14 @@ export function AssigneePicker({
   trigger,
   label,
   single = false,
+  noneLabel,
   open,
   onOpenChange,
 }: AssigneePickerProps) {
   const { t } = useTranslation();
   const { me } = useAuth();
   const meId = me?.user.id;
+  const none = noneLabel ?? t('create.unassigned');
 
   const sorted = useMemo(() => {
     const rank = (m: WorkspaceMember) => (m.user.id === meId ? 0 : teamIds?.has(m.user.id) ? 1 : 2);
@@ -92,7 +96,7 @@ export function AssigneePicker({
           value={single && selected.length === 0 ? NONE : selected}
           multiple={!single}
           getKey={(m) => m?.user.id ?? NONE}
-          getLabel={(m) => m?.user.name ?? t('create.unassigned')}
+          getLabel={(m) => m?.user.name ?? none}
           label={t('picker.assigneeLabel')}
           search={{ placeholder: t('create.assignTo') }}
           groupBy={
@@ -126,7 +130,7 @@ export function AssigneePicker({
                 >
                   –
                 </span>
-                <span className="flex-1 truncate text-muted">{t('create.unassigned')}</span>
+                <span className="flex-1 truncate text-muted">{none}</span>
               </>
             )
           }

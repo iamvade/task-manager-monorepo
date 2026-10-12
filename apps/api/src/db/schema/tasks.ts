@@ -13,7 +13,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { createdAt, id, position, timestamptz } from './columns.js';
-import { priorityEnum } from './enums.js';
+import { priorityEnum, taskSizeEnum } from './enums.js';
 import { projects, sprints, statuses } from './projects.js';
 import { users } from './users.js';
 import { workspaces } from './workspaces.js';
@@ -37,6 +37,10 @@ export const tasks = pgTable(
     /** Plain text of `description`, for search. */
     descriptionText: text('description_text').notNull().default(''),
     priority: priorityEnum('priority').notNull().default('none'),
+    /** Story points via SIZE_POINTS; null = unsized. */
+    size: taskSizeEnum('size'),
+    /** Set when the task enters review: the person picked, else the project lead. */
+    reviewerId: uuid('reviewer_id').references(() => users.id, { onDelete: 'set null' }),
     startDate: date('start_date', { mode: 'string' }),
     dueDate: date('due_date', { mode: 'string' }),
     position: position('position').notNull(),
@@ -57,6 +61,7 @@ export const tasks = pgTable(
     uniqueIndex('tasks_status_id_position_unique').on(t.statusId, t.position),
     index('tasks_due_date_idx').on(t.dueDate),
     index('tasks_sprint_id_idx').on(t.sprintId),
+    index('tasks_completed_at_idx').on(t.completedAt),
     index('tasks_title_trgm_idx').using('gin', t.title.op('gin_trgm_ops')),
   ],
 );

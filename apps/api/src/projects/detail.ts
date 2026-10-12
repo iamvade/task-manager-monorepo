@@ -13,6 +13,7 @@ type SprintRow = typeof sprints.$inferSelect;
 export const toSprintDto = (s: SprintRow) => ({
   id: s.id,
   projectId: s.projectId,
+  number: s.number,
   name: s.name,
   startDate: s.startDate,
   endDate: s.endDate,
@@ -80,6 +81,7 @@ export async function buildProjectDetail(
     position: project.position,
     createdAt: project.createdAt.toISOString(),
     isFavorite: favorite.length > 0,
+    leadId: project.leadId,
     statuses: statusRows.map(toStatusDto),
     members,
     activeSprint: sprint ? toSprintDto(sprint) : null,

@@ -3,7 +3,7 @@ import {
   projectKeySuggestionQuerySchema,
   projectKeySuggestionSchema,
   sidebarResponseSchema,
-  updateMemberRoleSchema,
+  updateMemberSchema,
   workspaceMemberSchema,
   type SidebarProject,
 } from '@kite/shared';
@@ -148,12 +148,12 @@ export const workspaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       preHandler: app.authenticate,
       schema: {
         tags: ['Workspaces'],
-        summary: 'Change a member’s role',
+        summary: 'Update a member',
         description:
-          'Admin or owner. Switches another member between `admin` and `member`. 409 `OWNER_ROLE` for the owner (ownership can’t change here) and 409 `OWN_ROLE` for your own membership.',
+          'Admin or owner. Role (another member between `admin` and `member`), job title (blank clears it) and capacity points for the next 2 weeks (Workload). Role changes answer 409 `OWNER_ROLE` for the owner (ownership can’t change here) and 409 `OWN_ROLE` for your own membership; title and capacity can be set for anyone, yourself included.',
         params: params.extend({ userId: z.uuid() }),
-        body: updateMemberRoleSchema,
-        response: { 200: workspaceMemberSchema, 401: err, 403: err, 404: err, 409: err },
+        body: updateMemberSchema,
+        response: { 200: workspaceMemberSchema, 400: err, 401: err, 403: err, 404: err, 409: err },
       },
     },
     async (request) => {
@@ -167,18 +167,21 @@ export const workspaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         )
         .limit(1);
       if (!target) throw httpError(404, 'NOT_FOUND', 'Member not found');
-      if (userId === caller.userId) {
+      const { role, title, capacityPoints } = request.body;
+      if (role !== undefined && userId === caller.userId) {
         throw httpError(409, 'OWN_ROLE', 'You can’t change your own role');
       }
-      if (target.role === 'owner') {
+      if (role !== undefined && target.role === 'owner') {
         throw httpError(409, 'OWNER_ROLE', 'The owner’s role can’t be changed');
       }
       await app.db
         .update(workspaceMembers)
-        .set({ role: request.body.role })
+        .set({ role, title, capacityPoints })
         .where(
           and(eq(workspaceMembers.workspaceId, workspaceId), eq(workspaceMembers.userId, userId)),
         );
+      // Title and capacity show in Workload and People.
+      app.reportCache.invalidate(workspaceId);
       const [member] = await listMembers(app.db, workspaceId, { userId });
       if (!member) throw httpError(404, 'NOT_FOUND', 'Member not found');
       return member;

@@ -1,6 +1,9 @@
 import {
   DEFAULT_STATUS_CATEGORIES,
+  addDays,
+  addWorkingDays,
   richTextToPlain,
+  startOfWeek,
   shortName,
   type ActivityType,
   type Locale,
@@ -14,16 +17,21 @@ import { generateNKeysBetween } from 'fractional-indexing';
 import { uuidv7 } from 'uuidv7';
 import type { Db } from '../client.js';
 import * as schema from '../schema/index.js';
+import { MN_PUBLIC_HOLIDAYS_2026 } from '../holidays.js';
 import {
+  ADDED_MID_SPRINT,
   ATTACHMENTS,
+  CARRIED_OVER,
   DESCRIPTIONS,
   EVENTS,
   ME,
   PASSWORD,
   PEOPLE,
   PROJECTS,
+  REVIEWERS,
   SPACES,
-  SPRINT,
+  SPRINTS,
+  STATUS_SINCE,
   TAGS,
   TASKS,
   WORKSPACE,
@@ -34,7 +42,8 @@ import {
   type TaskDef,
   type Text,
 } from './data.js';
-import { createClock, type Clock, type MonthDay } from './dates.js';
+import { createClock, type Clock } from './dates.js';
+import { buildHistory, planSprints, ubAt } from './history.js';
 
 export interface SeedOptions {
   /** Language for user content that the designs have in both languages. */
@@ -50,6 +59,18 @@ const entries = <K extends string, V>(record: Record<K, V>) => Object.entries(re
 
 /** Fractional-index keys for `n` items in order. */
 const positions = (n: number) => generateNKeysBetween(null, null, n);
+
+const DAY_MS = 86_400_000;
+const HOUR_MS = 3_600_000;
+/**
+ * Projects with generated history (history.ts; their generated keys aren't drawn in the
+ * designs): the first ones over all 24 weeks (they're created before it), the newer ones since
+ * they were created.
+ */
+const HISTORY_PROJECTS: readonly ProjectRef[] = ['app', 'platform', 'mobile', 'bugs', 'ds'];
+const NEWER_HISTORY_PROJECTS: readonly ProjectRef[] = ['checkout', 'q4'];
+/** App Redesign history takes APP-1…120; the drawn tasks start at APP-121. */
+const APP_HISTORY_CAP = 120;
 
 function must<T>(value: T | undefined, what: string): T {
   if (value === undefined) throw new Error(`Seed data error: unknown ${what}`);
@@ -74,26 +95,44 @@ export async function runSeed(db: Db, options: SeedOptions): Promise<void> {
   const passwordHash = await argon2.hash(PASSWORD);
   const rows = buildRows(clock, pick, passwordHash, options.lang);
 
+  // One transaction: the deferred status-period / sprint-membership checks run at commit.
   await db.transaction(async (tx) => {
+    const insert = async <T extends Parameters<typeof tx.insert>[0]>(
+      table: T,
+      values: T['$inferInsert'][],
+    ) => {
+      for (let i = 0; i < values.length; i += 1000) {
+        await tx.insert(table).values(values.slice(i, i + 1000));
+      }
+    };
     await tx.insert(schema.users).values(rows.users);
     await tx.insert(schema.workspaces).values(rows.workspace);
     await tx.insert(schema.workspaceMembers).values(rows.members);
+    await tx.insert(schema.workspaceHolidays).values(rows.holidays);
     await tx.insert(schema.spaces).values(rows.spaces);
     await tx.insert(schema.projects).values(rows.projects);
     await tx.insert(schema.projectMembers).values(rows.projectMembers);
     await tx.insert(schema.statuses).values(rows.statuses);
     await tx.insert(schema.sprints).values(rows.sprints);
     await tx.insert(schema.tags).values(rows.tags);
-    await tx.insert(schema.tasks).values(rows.tasks);
-    await tx.insert(schema.taskAssignees).values(rows.assignees);
+    await insert(schema.tasks, rows.tasks);
+    await insert(schema.taskStatusPeriods, rows.periods);
+    await insert(schema.sprintMemberships, rows.memberships);
+    await insert(schema.taskAssignees, rows.assignees);
     await tx.insert(schema.taskTags).values(rows.taskTags);
-    await tx.insert(schema.taskFollowers).values(rows.followers);
-    await tx.insert(schema.subtasks).values(rows.subtasks);
+    await insert(schema.taskFollowers, rows.followers);
+    await insert(schema.subtasks, rows.subtasks);
     // Parents first: replies reference them.
-    await tx.insert(schema.comments).values(rows.comments.filter((c) => !c.parentId));
-    await tx.insert(schema.comments).values(rows.comments.filter((c) => c.parentId));
+    await insert(
+      schema.comments,
+      rows.comments.filter((c) => !c.parentId),
+    );
+    await insert(
+      schema.comments,
+      rows.comments.filter((c) => c.parentId),
+    );
     await tx.insert(schema.attachments).values(rows.attachments);
-    await tx.insert(schema.activity).values(rows.activity);
+    await insert(schema.activity, rows.activity);
     await tx.insert(schema.notifications).values(rows.notifications);
   });
 
@@ -101,6 +140,7 @@ export async function runSeed(db: Db, options: SeedOptions): Promise<void> {
     `Seeded "${WORKSPACE.name}" (${options.lang}, today ${clock.today}): ` +
       `${rows.users.length} users, ${rows.projects.length} projects, ${rows.tasks.length} tasks, ` +
       `${rows.comments.length} comments, ${rows.activity.length} activity, ` +
+      `${rows.periods.length} status periods, ${rows.sprints.length} sprints, ` +
       `${rows.notifications.length} notifications. Log in as ${PEOPLE[ME].email} / ${PASSWORD}.`,
   );
 }
@@ -113,7 +153,13 @@ export function buildRows(
   lang: Locale,
 ) {
   const workspaceId = uuidv7();
-  const accountsCreated = clock.at([7, 1, '09:00']);
+  const holidays = MN_PUBLIC_HOLIDAYS_2026.map((h) => ({ workspaceId, ...h }));
+  const holidayDates = new Set(holidays.map((h) => h.date));
+  // History covers the last 24 weeks; accounts and the projects with history predate it.
+  const historyStart = ubAt(addDays(startOfWeek(clock.today), -23 * 7), 0);
+  const accountsCreated = new Date(
+    Math.min(clock.at([7, 1, '09:00']).getTime(), historyStart.getTime() - 30 * DAY_MS),
+  );
 
   // People ------------------------------------------------------------------------------------
   const users = entries(PEOPLE).map(([ref, p]) => ({
@@ -141,6 +187,7 @@ export function buildRows(
     userId: user(ref).id,
     role: p.role,
     title: p.title,
+    capacityPoints: p.capacity,
     joinedAt: accountsCreated,
   }));
 
@@ -180,7 +227,9 @@ export function buildRows(
         color: pr.color,
         taskSeq: 0,
         position: must(positions(siblings)[index], 'project position'),
-        createdAt: clock.at(pr.createdAt),
+        createdAt: HISTORY_PROJECTS.includes(ref)
+          ? new Date(historyStart.getTime() - 21 * DAY_MS)
+          : clock.at(pr.createdAt),
       } satisfies Row<typeof schema.projects>,
     };
   });
@@ -213,13 +262,28 @@ export function buildRows(
     category: row.category,
   });
 
-  const sprint = {
+  // App Redesign Sprints 9–14 (unnamed: "Sprint 14"); today is day 4 of the current one.
+  const sprintWindows = planSprints(clock.today, holidayDates, SPRINTS).map((w) => ({
+    ...w,
     id: uuidv7(),
-    projectId: project(SPRINT.project).row.id,
-    name: formatRange(clock.day(SPRINT.start), clock.day(SPRINT.end), lang),
-    startDate: clock.day(SPRINT.start),
-    endDate: clock.day(SPRINT.end),
-  } satisfies Row<typeof schema.sprints>;
+  }));
+  const sprints = sprintWindows.map(
+    (w) =>
+      ({
+        id: w.id,
+        projectId: project(SPRINTS.project).row.id,
+        number: w.number,
+        name: null,
+        startDate: w.start,
+        endDate: w.end,
+      }) satisfies Row<typeof schema.sprints>,
+  );
+  const sprintWindow = (n: number) =>
+    must(
+      sprintWindows.find((w) => w.number === n),
+      `sprint ${String(n)}`,
+    );
+  const currentSprint = sprintWindow(SPRINTS.current);
 
   const tags = entries(TAGS).map(([ref, t]) => ({
     ref,
@@ -258,12 +322,27 @@ export function buildRows(
     const index = columnIndex.get(column) ?? 0;
     columnIndex.set(column, index + 1);
 
-    // App Redesign numbers grow by about two a day from Sep 21 (APP-121); other projects' tasks
-    // date from Sep 25. Both precede every due and completion date in the data.
-    const createdAt = clock.at(
+    // App Redesign numbers grow by about two a day from Sep 21 (APP-121); other projects' done
+    // tasks date from Sep 25 and their open ones from Oct 2 (Reports aging). All precede every
+    // due and completion date in the data.
+    let createdAt = clock.at(
       def.createdAt ??
-        (def.number ? [9, 21 + Math.floor((def.number - 121) / 2), '10:00'] : [9, 25, '10:00']),
+        (def.number
+          ? [9, 21 + Math.floor((def.number - 121) / 2), '10:00']
+          : def.completedAt
+            ? [9, 25, '10:00']
+            : [10, 2, '10:00']),
     );
+    // Sprint 14 tasks committed at planning existed before it; carried-over ones before the
+    // first sprint that left them unfinished.
+    if (def.sprint && !ADDED_MID_SPRINT[def.ref]) {
+      const carried = CARRIED_OVER[def.ref] ?? 0;
+      const planning = sprintWindow(SPRINTS.current - carried).planningAt;
+      if (createdAt >= planning) {
+        createdAt = new Date(planning.getTime() - (carried ? 2 * DAY_MS : HOUR_MS));
+      }
+    }
+    const reviewer = REVIEWERS[def.ref] ?? (def.status === 'review' ? p.def.lead : undefined);
     const description = DESCRIPTIONS[def.ref]?.(mention) ?? null;
     return {
       def,
@@ -272,11 +351,13 @@ export function buildRows(
         projectId: p.row.id,
         number,
         statusId: status(def.project, def.status).id,
-        sprintId: def.sprint ? sprint.id : null,
+        sprintId: def.sprint ? currentSprint.id : null,
         title: pick(def.title),
         description,
         descriptionText: description ? richTextToPlain(description) : '',
         priority: def.priority,
+        size: def.size ?? null,
+        reviewerId: reviewer ? user(reviewer).id : null,
         startDate: def.start ? clock.day(def.start) : null,
         dueDate: def.due ? clock.day(def.due) : null,
         position: must(columnKeys.get(column)?.[index], 'task position'),
@@ -377,20 +458,115 @@ export function buildRows(
     });
   };
 
+  // Status periods. Every task starts in To Do. Tasks with drawn status history (EVENTS) follow
+  // it; the others moved on at the drawn "days in status" (STATUS_SINCE) or at generated times,
+  // kept 2.5+ days back so My Tasks' recent activity stays as designed.
+  const periods: Row<typeof schema.taskStatusPeriods>[] = [];
+  const recentLimit = clock.now.getTime() - 2.5 * DAY_MS;
   for (const t of tasks) {
-    log(t.def.ref, t.row.createdBy, 'task.created', t.row.createdAt, {});
-    if (t.row.completedAt) {
-      log(
-        t.def.ref,
-        user(must(t.def.assignees[0], 'completer')).id,
-        'status.changed',
-        t.row.completedAt,
-        {
-          from: statusSnapshot(status(t.def.project, 'in_progress')),
-          to: statusSnapshot(status(t.def.project, 'done')),
-        },
-      );
+    const { def, row } = t;
+    const created = row.createdAt.getTime();
+    const mover = user(def.assignees[0] ?? def.createdBy ?? project(def.project).def.lead).id;
+    const reviewerRef = REVIEWERS[def.ref];
+    const reviewerId = reviewerRef ? user(reviewerRef).id : null;
+    log(def.ref, row.createdBy, 'task.created', row.createdAt, {
+      status: statusSnapshot(status(def.project, 'todo')),
+    });
+
+    interface Step {
+      category: StatusCategory;
+      at: number;
+      by: string;
     }
+    const steps: Step[] = [{ category: 'todo', at: created, by: row.createdBy }];
+    const drawn = EVENTS.filter((e) => e.task === def.ref && e.type === 'status.changed');
+    if (drawn.length > 0) {
+      // Logged by the EVENTS loop below.
+      for (const e of drawn) {
+        if (e.type === 'status.changed') {
+          steps.push({ category: e.to, at: clock.at(e.at).getTime(), by: user(e.actor).id });
+        }
+      }
+    } else if (row.completedAt) {
+      const span = row.completedAt.getTime() - created;
+      steps.push({ category: 'in_progress', at: created + span * 0.35, by: mover });
+      if (reviewerId) steps.push({ category: 'review', at: created + span * 0.75, by: mover });
+      steps.push({ category: 'done', at: row.completedAt.getTime(), by: reviewerId ?? mover });
+    } else if (def.status !== 'todo' || STATUS_SINCE[def.ref]) {
+      const pinned = STATUS_SINCE[def.ref];
+      const low = created + HOUR_MS;
+      const high = created < recentLimit ? recentLimit : clock.now.getTime() - HOUR_MS;
+      const since = pinned
+        ? clock.at(pinned).getTime()
+        : low + stableFraction(def.ref) * Math.max(0, high - low);
+      // Review came from In Progress; a pinned To Do went back from it.
+      if (def.status === 'review' || def.status === 'todo') {
+        steps.push({ category: 'in_progress', at: created + (since - created) * 0.5, by: mover });
+      }
+      steps.push({ category: def.status, at: since, by: mover });
+    }
+    if (steps.at(-1)?.category !== def.status) {
+      throw new Error(`Seed data error: ${def.ref} history doesn't end in ${def.status}`);
+    }
+    steps.forEach((step, i) => {
+      const next = steps[i + 1];
+      const previous = steps[i - 1];
+      if (i > 0 && step.at <= (previous?.at ?? 0)) {
+        throw new Error(`Seed data error: ${def.ref} status history is out of order`);
+      }
+      periods.push({
+        taskId: row.id,
+        statusId: status(def.project, step.category).id,
+        category: step.category,
+        enteredAt: new Date(step.at),
+        exitedAt: next ? new Date(next.at) : null,
+        enteredBy: step.by,
+        exitedBy: next?.by ?? null,
+      });
+      if (previous && drawn.length === 0) {
+        log(def.ref, step.by, 'status.changed', new Date(step.at), {
+          from: statusSnapshot(status(def.project, previous.category)),
+          to: statusSnapshot(status(def.project, step.category)),
+        });
+      }
+    });
+  }
+
+  // Sprint 14 scope: committed at planning (carried-over tasks through the earlier sprints that
+  // left them unfinished), a few added mid-sprint (ReportsSprints.dc.html).
+  const memberships: Row<typeof schema.sprintMemberships>[] = [];
+  const planner = user(project(SPRINTS.project).def.lead).id;
+  for (const t of tasks.filter((x) => x.def.sprint)) {
+    const carried = CARRIED_OVER[t.def.ref] ?? 0;
+    const addedDay = ADDED_MID_SPRINT[t.def.ref];
+    const chain = Array.from({ length: carried + 1 }, (_, i) =>
+      sprintWindow(SPRINTS.current - carried + i),
+    );
+    let from: { id: string; name: null; number: number } | null = null;
+    chain.forEach((w, i) => {
+      const next = chain[i + 1];
+      let addedAt = w.planningAt;
+      if (!next && addedDay) {
+        const day = addWorkingDays(w.start, addedDay - 1, holidayDates);
+        addedAt = new Date(
+          Math.max(
+            Math.min(ubAt(day, 11 * 60).getTime(), clock.now.getTime() - 15 * 60_000),
+            t.row.createdAt.getTime() + 60_000,
+          ),
+        );
+      }
+      memberships.push({
+        taskId: t.row.id,
+        sprintId: w.id,
+        addedAt,
+        removedAt: next ? next.planningAt : null,
+        addedBy: planner,
+        removedBy: next ? planner : null,
+      });
+      const to = { id: w.id, name: null, number: w.number };
+      log(t.def.ref, planner, 'sprint.changed', addedAt, { from, to });
+      from = to;
+    });
   }
 
   const comments: (Row<typeof schema.comments> & { id: string })[] = [];
@@ -476,7 +652,74 @@ export function buildRows(
     }
   }
 
+  // Generated history (history.ts): ~24 weeks of completed tasks for Reports.
+  const appHistoryFrom = sprintWindow(SPRINTS.first).planningAt;
+  const history = buildHistory({
+    clock,
+    holidays: holidayDates,
+    workspaceId,
+    pick,
+    userId: (ref) => user(ref).id,
+    userName: (ref) => user(ref).name,
+    mention,
+    projects: [...HISTORY_PROJECTS, ...NEWER_HISTORY_PROJECTS].map((ref) => ({
+      ref,
+      id: project(ref).row.id,
+      members: project(ref).def.members,
+      product: project(ref).def.space === 'product',
+      cap: ref === 'app' ? APP_HISTORY_CAP : Number.POSITIVE_INFINITY,
+      // App Redesign history spreads over its sprints (from Sprint 9 planning).
+      ...(NEWER_HISTORY_PROJECTS.includes(ref) && {
+        from: new Date(project(ref).row.createdAt.getTime() + 2 * DAY_MS),
+      }),
+      ...(ref === 'app' && {
+        from: appHistoryFrom,
+        perWeek: Math.ceil(
+          APP_HISTORY_CAP /
+            ((clock.at([10, 1, '00:00']).getTime() - appHistoryFrom.getTime()) / (7 * DAY_MS)),
+        ),
+      }),
+      status: (category) => status(ref, category),
+    })),
+    sprints: sprintWindows.filter((w) => w.number < SPRINTS.current),
+    sprintProject: SPRINTS.project,
+    sprintOwner: project(SPRINTS.project).def.lead,
+    existingCompletions: tasks.flatMap((t) => (t.row.completedAt ? [t.row.completedAt] : [])),
+    me: ME,
+    // My Tasks (this week and last week) and the shown Calendar month stay as designed.
+    meCutoff: ubAt(addDays(startOfWeek(clock.today), -7), 0),
+    productCutoff: clock.at([10, 1, '00:00']),
+  });
+  // History takes the lowest numbers (APP-1…120; the drawn App Redesign keys start at 121) and
+  // sits after the drawn tasks in each Done column, newest first.
+  for (const ref of [...HISTORY_PROJECTS, ...NEWER_HISTORY_PROJECTS]) {
+    const p = project(ref);
+    const own = history.tasks
+      .filter((h) => h.projectRef === ref)
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    if (ref === 'app' && own.length > APP_HISTORY_CAP) throw new Error('Too much APP history');
+    own.forEach((h, i) => {
+      h.number = i + 1;
+    });
+    if (ref !== 'app') {
+      for (const t of tasks) if (t.def.project === ref) t.row.number += own.length;
+    }
+    p.row.taskSeq = Math.max(
+      own.length,
+      ...tasks.filter((t) => t.def.project === ref).map((t) => t.row.number),
+    );
+    const doneKeys = columnKeys.get(`${ref}/done`) ?? [];
+    const newestFirst = [...own].reverse();
+    const keys = generateNKeysBetween(doneKeys.at(-1) ?? null, null, newestFirst.length);
+    newestFirst.forEach((h, i) => {
+      h.position = must(keys[i], 'history position');
+    });
+  }
+
   return {
+    holidays,
+    periods: [...periods, ...history.periods],
+    memberships: [...memberships, ...history.memberships],
     users: users.map((u) => u.row),
     workspace: {
       id: workspaceId,
@@ -489,16 +732,16 @@ export function buildRows(
     projects: projects.map((p) => p.row),
     projectMembers,
     statuses,
-    sprints: [sprint],
+    sprints,
     tags: tags.map((t) => t.row),
-    tasks: tasks.map((t) => t.row),
-    assignees,
+    tasks: [...tasks.map((t) => t.row), ...history.tasks.map(({ projectRef: _, ...row }) => row)],
+    assignees: [...assignees, ...history.assignees],
     taskTags,
-    followers,
-    subtasks,
-    comments,
+    followers: [...followers, ...history.followers],
+    subtasks: [...subtasks, ...history.subtasks],
+    comments: [...comments, ...history.comments],
     attachments,
-    activity,
+    activity: [...activity, ...history.activity],
     notifications,
   };
 }
@@ -507,28 +750,12 @@ function commentNode(part: CommentPart, mention: (ref: PersonRef) => RichTextNod
   return typeof part === 'string' ? { type: 'text', text: part } : mention(part.mention);
 }
 
-const MONTHS_EN = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-];
-
-/** "Oct 6 – Oct 24" / "10-р сарын 6 – 24", as in the sprint filter chip. */
-function formatRange(start: string, end: string, lang: Locale): string {
-  const parse = (iso: string): MonthDay => [Number(iso.slice(5, 7)), Number(iso.slice(8, 10))];
-  const [m1, d1] = parse(start);
-  const [m2, d2] = parse(end);
-  if (lang === 'mn') {
-    return m1 === m2 ? `${m1}-р сарын ${d1} – ${d2}` : `${m1}-р сарын ${d1} – ${m2}-р сарын ${d2}`;
+/** A stable 0–1 value per key (generated times that don't change between runs). */
+function stableFraction(key: string): number {
+  let hash = 2_166_136_261;
+  for (const ch of key) {
+    hash ^= ch.charCodeAt(0);
+    hash = Math.imul(hash, 16_777_619);
   }
-  return `${MONTHS_EN[m1 - 1]} ${d1} – ${MONTHS_EN[m2 - 1]} ${d2}`;
+  return ((hash >>> 0) % 10_000) / 10_000;
 }

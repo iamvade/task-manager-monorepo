@@ -2,6 +2,12 @@
 // Applies the last theme + accent before first paint (no light flash in dark mode).
 // Mirrors applyAppearance() in src/preferences.ts, which writes `kite.appearance`.
 (function () {
+  var inkLight = {
+    '#6E56CF': '#6C55CC',
+    '#2F6FEB': '#2A63D2',
+    '#0F766E': '#0F756D',
+    '#3F3F46': '#3F3F46',
+  };
   var inkDark = {
     '#6E56CF': '#B4A5FF',
     '#2F6FEB': '#93B4FF',
@@ -19,6 +25,7 @@
     root.dataset.theme = theme === 'dark' ? 'dark' : 'light';
     if (inkDark[saved.accent]) {
       root.style.setProperty('--accent', saved.accent);
+      root.style.setProperty('--accent-ink-light', inkLight[saved.accent]);
       root.style.setProperty('--accent-ink-dark', inkDark[saved.accent]);
       root.style.setProperty('--accent-soft-light', saved.accent + '1A');
       root.style.setProperty('--accent-soft-dark', saved.accent + '33');

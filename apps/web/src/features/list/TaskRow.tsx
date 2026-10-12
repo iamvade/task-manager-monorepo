@@ -8,6 +8,7 @@ import {
   CommentIcon,
   MoreIcon,
   PlusIcon,
+  SizeIcon,
   SubtaskIcon,
   UserPlusIcon,
 } from '../../components/icons';
@@ -25,7 +26,9 @@ import { AssigneePicker } from '../pickers/AssigneePicker';
 import { DuePicker } from '../pickers/DuePicker';
 import { PriorityPicker } from '../pickers/PriorityPicker';
 import { TagPicker } from '../pickers/TagPicker';
-import { GRID_COLUMNS, isDone, useListActions } from './ListContext';
+import { SizePicker } from '../pickers/SizePicker';
+import { useSizeTitle } from '../task/sizeTitle';
+import { gridColumns, isDone, useListActions } from './ListContext';
 
 interface TaskRowProps {
   task: TaskListItem;
@@ -73,6 +76,19 @@ function CellButton({
     >
       {children}
     </button>
+  );
+}
+
+/** Size pill (20px, `--chip`, 12/500, like the Workload size chip) with the points title. */
+function SizeChip({ size }: { size: NonNullable<TaskListItem['size']> }) {
+  const title = useSizeTitle();
+  return (
+    <span
+      title={title(size)}
+      className="inline-flex h-5 flex-none items-center rounded-full bg-chip px-2 text-[12px] font-medium text-chip"
+    >
+      {size}
+    </span>
   );
 }
 
@@ -127,7 +143,7 @@ export function TaskRow({
           'cursor-grabbing rounded-[8px] border-transparent bg-surface shadow-drag',
         temp && 'opacity-60',
       )}
-      style={{ ...rowProps?.style, gridTemplateColumns: GRID_COLUMNS, height }}
+      style={{ ...rowProps?.style, gridTemplateColumns: gridColumns(actions.showSize), height }}
     >
       <div role="cell" className="flex items-center justify-center">
         <Checkbox
@@ -273,6 +289,35 @@ export function TaskRow({
           />
         )}
       </div>
+
+      {actions.showSize && (
+        <div role="cell" className="flex min-w-0 items-center pr-2">
+          {inert ? (
+            task.size && <SizeChip size={task.size} />
+          ) : (
+            <SizePicker
+              value={task.size}
+              label={t('table.setSize', { name: task.title })}
+              onChange={(size) => {
+                actions.setSize(task, size);
+              }}
+              trigger={(props, open) => (
+                <CellButton
+                  label={t('table.setSize', { name: task.title })}
+                  props={props}
+                  open={open}
+                >
+                  {task.size ? (
+                    <SizeChip size={task.size} />
+                  ) : (
+                    <EmptyHint icon={<SizeIcon size={14} />} />
+                  )}
+                </CellButton>
+              )}
+            />
+          )}
+        </div>
+      )}
 
       <div role="cell" className="flex min-w-0 items-center overflow-hidden">
         {inert ? (

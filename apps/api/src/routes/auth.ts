@@ -3,11 +3,11 @@ import {
   apiErrorSchema,
   loginRequestSchema,
   meResponseSchema,
-  type LoginRequest,
 } from '@kite/shared';
 import { eq } from 'drizzle-orm';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
+import { LoginThrottle } from '../auth/login-throttle.js';
 import { buildMe } from '../auth/me.js';
 import { verifyPassword } from '../auth/password.js';
 import { requireAuth } from '../auth/plugin.js';
@@ -23,12 +23,8 @@ import { httpError } from '../errors.js';
 const errorResponses = { 401: apiErrorSchema, 429: apiErrorSchema };
 
 export const authRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
-  // Per-email limit on top of the per-IP route limit, so one account can't be brute-forced from many IPs.
-  const emailLimit = app.createRateLimit({
-    max: 5,
-    timeWindow: '15 minutes',
-    keyGenerator: (request) => `login:${(request.body as LoginRequest).email}`,
-  });
+  // Failed attempts per email (+ IP), on top of the per-IP route limit.
+  const throttle = new LoginThrottle();
 
   app.post(
     '/auth/login',
@@ -38,26 +34,27 @@ export const authRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Auth'],
         summary: 'Sign in',
         description:
-          'Sets the `kite_session` cookie. Rate-limited per IP and per email; wrong email or password answers 401 `INVALID_CREDENTIALS` either way.',
+          'Sets the `kite_session` cookie. Rate-limited per IP (10/min) and by failed attempts (5 per email and IP, 50 per email, per 15 min; a success clears them): 429 `RATE_LIMITED`. Wrong email or password answers 401 `INVALID_CREDENTIALS` either way.',
         security: [],
         body: loginRequestSchema,
         response: { 200: meResponseSchema, ...errorResponses },
       },
     },
     async (request, reply) => {
-      // `isAllowed` only means "skipped (allow list)"; `isExceeded` is the actual verdict.
-      const limit = await emailLimit(request);
-      if (!limit.isAllowed && limit.isExceeded) {
-        reply.header('retry-after', limit.ttlInSeconds);
+      const { email, password } = request.body;
+      const wait = throttle.retryAfter(email, request.ip);
+      if (wait > 0) {
+        reply.header('retry-after', wait);
         throw httpError(429, 'RATE_LIMITED', 'Too many sign-in attempts. Try again later.');
       }
 
-      const { email, password } = request.body;
       const [user] = await app.db.select().from(users).where(eq(users.email, email)).limit(1);
       const ok = await verifyPassword(user?.passwordHash, password);
       if (!user || !ok) {
+        throttle.fail(email, request.ip);
         throw httpError(401, 'INVALID_CREDENTIALS', 'Invalid email or password');
       }
+      throttle.succeed(email, request.ip);
 
       await deleteExpiredSessions(app.db, user.id);
       const token = await createSession(app.db, user.id);

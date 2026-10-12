@@ -10,6 +10,14 @@ export const PRIORITIES = ['urgent', 'high', 'medium', 'low', 'none'] as const;
 export const prioritySchema = z.enum(PRIORITIES);
 export type Priority = z.infer<typeof prioritySchema>;
 
+/** Task size (story points via SIZE_POINTS); null = unsized. */
+export const SIZES = ['S', 'M', 'L', 'XL'] as const;
+export const sizeSchema = z.enum(SIZES);
+export type Size = z.infer<typeof sizeSchema>;
+
+/** Points per size, used by Workload, Throughput and Completed points. Unsized tasks count 0. */
+export const SIZE_POINTS: Readonly<Record<Size, number>> = { S: 1, M: 3, L: 5, XL: 8 };
+
 export const STATUS_CATEGORIES = ['todo', 'in_progress', 'review', 'done'] as const;
 export const statusCategorySchema = z.enum(STATUS_CATEGORIES);
 export type StatusCategory = z.infer<typeof statusCategorySchema>;
@@ -63,6 +71,8 @@ export const ACTIVITY_TYPES = [
   'description.changed',
   'status.changed',
   'priority.changed',
+  'size.changed',
+  'reviewer.changed',
   'assignee.added',
   'assignee.removed',
   'due.changed',

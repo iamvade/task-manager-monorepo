@@ -36,6 +36,20 @@
       "when": 1791515348882,
       "tag": "0004_notification_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791738702928,
+      "tag": "0005_report_data",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791738906116,
+      "tag": "0006_report_backfill",
+      "breakpoints": true
     }
   ]
 }

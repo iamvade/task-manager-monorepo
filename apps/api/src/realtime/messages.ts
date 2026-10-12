@@ -1,4 +1,4 @@
-import type { RealtimeTaskMessage } from '@kite/shared';
+import { activityPayloadSchemas, type RealtimeTaskMessage, type Size } from '@kite/shared';
 import type { TaskEvent } from '../events/bus.js';
 
 /**
@@ -24,7 +24,13 @@ export function toRealtime(event: TaskEvent): RealtimeTaskMessage | null {
     case 'task.updated':
     case 'attachment.changed': {
       const fromProjectId = movedFrom(event);
-      return { type: 'task.updated', ...base, changes, ...(fromProjectId && { fromProjectId }) };
+      return {
+        type: 'task.updated',
+        ...base,
+        changes,
+        ...(fromProjectId && { fromProjectId }),
+        ...changedFields(event),
+      };
     }
     case 'task.moved':
       return event.move
@@ -61,4 +67,19 @@ function movedFrom(event: TaskEvent): string | undefined {
     return from.projectId;
   }
   return undefined;
+}
+
+/** New size and reviewer values carried by `task.updated`, so lists can patch without a refetch. */
+function changedFields(event: TaskEvent): { size?: Size | null; reviewerId?: string | null } {
+  const fields: { size?: Size | null; reviewerId?: string | null } = {};
+  for (const a of event.activities) {
+    if (a.type === 'size.changed') {
+      const parsed = activityPayloadSchemas['size.changed'].safeParse(a.payload);
+      if (parsed.success) fields.size = parsed.data.to;
+    } else if (a.type === 'reviewer.changed') {
+      const parsed = activityPayloadSchemas['reviewer.changed'].safeParse(a.payload);
+      if (parsed.success) fields.reviewerId = parsed.data.to?.id ?? null;
+    }
+  }
+  return fields;
 }

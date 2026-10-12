@@ -39,7 +39,8 @@ function who(task: TaskListItem) {
 
 /**
  * A task on the calendar (Calendar.dc.html) in its project's colors: 6px dot + title, ellipsis;
- * done → strike-through at 65%. Links to the drawer.
+ * done → strike-through (full color: 65% opacity, as drawn, misses WCAG AA contrast). Links to
+ * the drawer.
  */
 export const Pill = forwardRef<HTMLElement, PillProps>(function Pill(
   { task, variant, href, state = 'idle', className, ...props },
@@ -52,7 +53,7 @@ export const Pill = forwardRef<HTMLElement, PillProps>(function Pill(
       className={cn(
         variant === 'week' ? 'text-[12px] leading-4 font-medium' : 'min-w-0 truncate',
         variant === 'popover' && 'flex-1',
-        done && 'line-through opacity-65',
+        done && 'line-through',
       )}
     >
       {task.title}

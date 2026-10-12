@@ -19,7 +19,8 @@ interface PickerProps<T> {
   onClose?: () => void;
   multiple?: boolean;
   search?: { placeholder: string; filter?: (item: T, query: string) => boolean };
-  groupBy?: (item: T) => string;
+  /** Group header text; `undefined` = no group (e.g. an "All" option above the groups). */
+  groupBy?: (item: T) => string | undefined;
   emptyText?: string;
   /** Accessible name of the listbox. */
   label: string;
@@ -31,6 +32,8 @@ interface PickerProps<T> {
    */
   query?: string;
   onQueryChange?: (query: string) => void;
+  /** 40px options with a two-line item (Reports person picker: name + job title). */
+  tall?: boolean;
 }
 
 /**
@@ -55,6 +58,7 @@ export function Picker<T>({
   footerHints,
   query: queryProp,
   onQueryChange,
+  tall,
 }: PickerProps<T>) {
   const { t } = useTranslation();
   const id = useId();
@@ -171,7 +175,8 @@ export function Picker<T>({
                   pick(item);
                 }}
                 className={cn(
-                  'flex h-8 cursor-pointer items-center gap-2 rounded-[6px] px-2 text-[13px]',
+                  'flex cursor-pointer items-center rounded-[6px] px-2 text-[13px]',
+                  tall ? 'h-10 gap-2.5' : 'h-8 gap-2',
                   // CreateTask.dc.html: the selected option keeps accent-soft, even on hover.
                   selected ? 'bg-accent-soft text-default' : isActive && 'bg-popover-hover',
                   // Keyboard position when it sits on the selected (accent-soft) option.
@@ -180,7 +185,9 @@ export function Picker<T>({
                     'outline-1 -outline-offset-1 outline-[var(--border-strong)]',
                 )}
               >
-                <span className="flex min-w-0 flex-1 items-center gap-2">
+                <span
+                  className={cn('flex min-w-0 flex-1 items-center', tall ? 'gap-2.5' : 'gap-2')}
+                >
                   {renderItem ? (
                     renderItem(item, { selected, active: isActive })
                   ) : (

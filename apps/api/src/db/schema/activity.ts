@@ -32,6 +32,7 @@ export const activity = pgTable(
   (t) => [
     index('activity_task_id_created_at_idx').on(t.taskId, t.createdAt),
     index('activity_workspace_id_created_at_idx').on(t.workspaceId, t.createdAt),
+    index('activity_workspace_id_type_created_at_idx').on(t.workspaceId, t.type, t.createdAt),
   ],
 );
 

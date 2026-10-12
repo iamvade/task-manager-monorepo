@@ -64,7 +64,7 @@ describe('auth', () => {
 
       const cookie = sessionCookie(res);
       expect(cookie).toMatchObject({ httpOnly: true, sameSite: 'Lax', path: '/' });
-      expect(cookie?.secure).toBeFalsy(); // Secure only in production
+      expect(cookie?.secure).toBeFalsy(); // Secure only when WEB_ORIGIN is https
       expect(cookie?.value).toMatch(/^[A-Za-z0-9_-]{43}$/);
 
       const stored = await ctx.db.select().from(sessions).where(eq(sessions.userId, user.id));
@@ -92,14 +92,44 @@ describe('auth', () => {
       expect(errorCode(res)).toBe('VALIDATION_ERROR');
     });
 
-    it('limits attempts per email across IPs', async () => {
+    it('blocks an email after 5 failures from the same IP', async () => {
       const user = await createUser(ctx.db);
+      const ip = randomIp();
       for (let i = 0; i < 5; i++) {
-        expect((await postLogin(user.email, 'wrong')).statusCode).toBe(401);
+        expect((await postLogin(user.email, 'wrong', ip)).statusCode).toBe(401);
       }
-      const blocked = await postLogin(user.email, PASSWORD);
+      const blocked = await postLogin(user.email, PASSWORD, ip);
       expect(blocked.statusCode).toBe(429);
       expect(errorCode(blocked)).toBe('RATE_LIMITED');
+      expect(Number(blocked.headers['retry-after'])).toBeGreaterThan(0);
+    });
+
+    it('does not let failures elsewhere lock the owner out, and only counts failures', async () => {
+      const user = await createUser(ctx.db);
+      // Someone hammers the email from other IPs...
+      for (let i = 0; i < 10; i++) {
+        expect((await postLogin(user.email, 'wrong')).statusCode).toBe(401);
+      }
+      // ...the owner still signs in from theirs, repeatedly (successes don't count).
+      const home = randomIp();
+      for (let i = 0; i < 6; i++) {
+        expect((await postLogin(user.email, PASSWORD, home)).statusCode).toBe(200);
+      }
+      // A success clears that IP's failures for the email (separate IP: 10/min per IP applies).
+      const ip = randomIp();
+      for (let i = 0; i < 4; i++) await postLogin(user.email, 'wrong', ip);
+      expect((await postLogin(user.email, PASSWORD, ip)).statusCode).toBe(200);
+      for (let i = 0; i < 4; i++) {
+        expect((await postLogin(user.email, 'wrong', ip)).statusCode).toBe(401);
+      }
+    });
+
+    it('blocks an email after 50 failures from anywhere', async () => {
+      const user = await createUser(ctx.db);
+      for (let i = 0; i < 50; i++) {
+        expect((await postLogin(user.email, 'wrong')).statusCode).toBe(401);
+      }
+      expect((await postLogin(user.email, PASSWORD)).statusCode).toBe(429);
     });
 
     it('limits attempts per IP across emails', async () => {

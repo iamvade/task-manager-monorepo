@@ -153,8 +153,7 @@ describe('structural API access control', () => {
       ([method, path]) =>
         !(method === 'DELETE' && (path.startsWith('/spaces') || path.startsWith('/tags'))) &&
         !path.endsWith('/archive') &&
-        !path.endsWith('/unarchive') &&
-        !path.endsWith('/from-template'),
+        !path.endsWith('/unarchive'),
     );
     for (const [method, path, body] of everyday) {
       const res = await member(method, path, body);

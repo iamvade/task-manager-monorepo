@@ -26,6 +26,7 @@ describe('updating tasks', () => {
         .insert(sprints)
         .values({
           projectId: project.id,
+          number: 1,
           name: 'Oct 6 – Oct 24',
           startDate: '2026-10-06',
           endDate: '2026-10-24',
@@ -73,7 +74,10 @@ describe('updating tasks', () => {
       'priority.changed': { from: 'high', to: 'urgent' },
       'start.changed': { from: null, to: '2026-10-01' },
       'due.changed': { from: '2026-10-14', to: null },
-      'sprint.changed': { from: null, to: { id: sprint.id, name: 'Oct 6 – Oct 24' } },
+      'sprint.changed': {
+        from: null,
+        to: { id: sprint.id, name: 'Oct 6 – Oct 24', number: 1 },
+      },
       'status.changed': {
         from: { id: status('todo').id, name: null, category: 'todo' },
         to: { id: status('in_progress').id, name: null, category: 'in_progress' },
@@ -230,6 +234,7 @@ describe('updating tasks', () => {
         .insert(sprints)
         .values({
           projectId: project.id,
+          number: 1,
           name: 'S',
           startDate: '2026-10-01',
           endDate: '2026-10-10',

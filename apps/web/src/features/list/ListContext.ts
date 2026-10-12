@@ -1,4 +1,4 @@
-import type { Priority, Tag, TaskListItem, UserRef, WorkspaceMember } from '@kite/shared';
+import type { Priority, Size, Tag, TaskListItem, UserRef, WorkspaceMember } from '@kite/shared';
 import { createContext, useContext } from 'react';
 
 /** Data and actions every row of one List needs (provided by TaskTable). */
@@ -17,6 +17,9 @@ export interface ListActions {
   setAssignees: (task: TaskListItem, users: UserRef[]) => void;
   setDue: (task: TaskListItem, date: string | null) => void;
   setPriority: (task: TaskListItem, priority: Priority) => void;
+  setSize: (task: TaskListItem, size: Size | null) => void;
+  /** The optional Size column (toolbar Columns menu). */
+  showSize: boolean;
   setTags: (task: TaskListItem, tags: Tag[]) => void;
 }
 
@@ -30,5 +33,9 @@ export function useListActions(): ListActions {
 
 export const isDone = (task: Pick<TaskListItem, 'status'>) => task.status.category === 'done';
 
-/** Main.dc.html grid: checkbox · name · assignee · due · priority · tags · more. */
-export const GRID_COLUMNS = '40px minmax(0, 1fr) 152px 120px 112px 224px 40px';
+/**
+ * Main.dc.html grid: checkbox · name · assignee · due · priority · [size] · tags · more. Size is
+ * optional (not in the designs) and sits next to priority.
+ */
+export const gridColumns = (showSize: boolean) =>
+  `40px minmax(0, 1fr) 152px 120px 112px ${showSize ? '72px ' : ''}224px 40px`;

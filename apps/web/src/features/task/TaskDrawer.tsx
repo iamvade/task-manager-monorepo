@@ -1,8 +1,12 @@
-import { useCallback } from 'react';
+import { Suspense, lazy, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMatch, useSearchParams } from 'react-router';
 import { Drawer } from '../../components/ui/Drawer';
-import { TaskDetailView } from './TaskDetailView';
+import { loadTaskDetailView } from './loadTaskDetailView';
+
+const TaskDetailView = lazy(() =>
+  loadTaskDetailView().then((m) => ({ default: m.TaskDetailView })),
+);
 
 /**
  * Task drawer opened by `?task=APP-142` over any page (TaskDetail.dc.html): 40% wide (min
@@ -26,7 +30,9 @@ export function TaskDrawer() {
   if (!key || onTaskPage) return null;
   return (
     <Drawer open onClose={close} label={t('drawer.dialogLabel', { key })}>
-      <TaskDetailView key={key} taskKey={key} layout="drawer" onClose={close} />
+      <Suspense fallback={null}>
+        <TaskDetailView key={key} taskKey={key} layout="drawer" onClose={close} />
+      </Suspense>
     </Drawer>
   );
 }

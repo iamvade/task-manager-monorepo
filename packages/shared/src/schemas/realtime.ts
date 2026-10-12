@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { activityTypeSchema, notificationTypeSchema } from '../enums.js';
+import { activityTypeSchema, notificationTypeSchema, sizeSchema } from '../enums.js';
 
 /**
  * Realtime protocol of `GET /api/v1/ws`. The server pushes small typed messages after every
@@ -35,6 +35,10 @@ export const realtimeTaskMessageSchema = z.discriminatedUnion('type', [
     changes: z.array(activityTypeSchema),
     /** Set when the task moved to another project (`projectId` is the destination). */
     fromProjectId: z.uuid().optional(),
+    /** The new size, when `changes` has `size.changed`. */
+    size: sizeSchema.nullable().optional(),
+    /** The new reviewer, when `changes` has `reviewer.changed`. */
+    reviewerId: z.uuid().nullable().optional(),
   }),
   z.object({
     type: z.literal('task.moved'),

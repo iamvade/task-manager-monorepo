@@ -49,6 +49,49 @@ export function extractMentionIds(node: RichTextNode | null | undefined): string
 const MAX_DEPTH = 40;
 const MAX_JSON_LENGTH = 200_000;
 
+/**
+ * What the web editor (StarterKit + mention, `apps/web/src/components/editor/extensions.ts`) can
+ * produce. Anything else is refused, so stored documents stay safe for any renderer (exports,
+ * emails), not only TipTap.
+ */
+const NODE_TYPES = new Set([
+  'doc',
+  'paragraph',
+  'text',
+  'heading',
+  'bulletList',
+  'orderedList',
+  'listItem',
+  'blockquote',
+  'codeBlock',
+  'hardBreak',
+  'horizontalRule',
+  'mention',
+]);
+const MARK_TYPES = new Set(['bold', 'italic', 'strike', 'code', 'underline', 'link']);
+const SAFE_HREF = /^(https?:\/\/|mailto:)/i;
+
+/** The first reason `value` isn't an allowed document, or null. */
+function contentProblem(value: unknown): string | null {
+  if (value === null || typeof value !== 'object') return null;
+  const node = value as RichTextNode;
+  if (node.type !== undefined && !NODE_TYPES.has(node.type)) {
+    return `Unsupported node type "${node.type}"`;
+  }
+  for (const mark of Array.isArray(node.marks) ? node.marks : []) {
+    if (!MARK_TYPES.has(mark.type)) return `Unsupported mark type "${mark.type}"`;
+    const href = mark.attrs?.href;
+    if (mark.type === 'link' && (typeof href !== 'string' || !SAFE_HREF.test(href.trim()))) {
+      return 'Links must be http(s) or mailto';
+    }
+  }
+  for (const child of Array.isArray(node.content) ? node.content : []) {
+    const problem = contentProblem(child);
+    if (problem) return problem;
+  }
+  return null;
+}
+
 const richTextMarkSchema = z.object({
   type: z.string(),
   attrs: z.record(z.string(), z.unknown()).optional(),
@@ -76,7 +119,8 @@ function depthOf(value: unknown, depth = 0): number {
 
 /**
  * Rich-text document in request bodies (task descriptions, comments). Size and nesting are
- * checked before the recursive parse, so a hostile body can't exhaust the stack.
+ * checked before the recursive parse, so a hostile body can't exhaust the stack; node and mark
+ * types are limited to what the editor makes, and links to http(s)/mailto.
  */
 export const richTextDocSchema = z.preprocess(
   (value, ctx) => {
@@ -86,6 +130,11 @@ export const richTextDocSchema = z.preprocess(
     }
     if (JSON.stringify(value).length > MAX_JSON_LENGTH) {
       ctx.addIssue({ code: 'custom', message: 'Document is too large' });
+      return z.NEVER;
+    }
+    const problem = contentProblem(value);
+    if (problem) {
+      ctx.addIssue({ code: 'custom', message: problem });
       return z.NEVER;
     }
     return value;

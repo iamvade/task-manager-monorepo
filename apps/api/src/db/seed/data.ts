@@ -4,13 +4,15 @@
  *
  * Sources: Main (16 App Redesign tasks, mn names), Board (multiple assignees, extra tags, subtask
  * counts, column order), TaskDetail (APP-142), MyTasks (Anu's tasks + feed), Calendar (Product
- * space dates, unscheduled tasks), CreateTask (project colors, role hints).
+ * space dates, unscheduled tasks), CreateTask (project colors, role hints), Reports (job titles,
+ * sizes, days in status, reviewers, sprint carry-overs; the generated history lives in history.ts).
  */
 import type {
   ActivityType,
   PaletteKey,
   Priority,
   RichTextNode,
+  Size,
   StatusCategory,
   WorkspaceRole,
 } from '@kite/shared';
@@ -30,8 +32,10 @@ export interface PersonDef {
   email: string;
   avatarColor: PaletteKey;
   role: WorkspaceRole;
-  /** Role hint shown in pickers ("Eng lead"). */
+  /** Job title (Reports, pickers). */
   title: string | null;
+  /** Points per 2 weeks (Workload capacity marker). */
+  capacity: number;
 }
 
 export const PEOPLE = {
@@ -41,7 +45,8 @@ export const PEOPLE = {
     email: 'anu@kite.test',
     avatarColor: 'indigo',
     role: 'owner',
-    title: null,
+    title: 'Product manager',
+    capacity: 15,
   },
   tem: {
     name: ['Тэмүүлэн Г.', 'Temuulen G.'],
@@ -49,7 +54,8 @@ export const PEOPLE = {
     email: 'temuulen@kite.test',
     avatarColor: 'green',
     role: 'member',
-    title: 'Mobile',
+    title: 'Mobile engineer',
+    capacity: 15,
   },
   sara: {
     name: ['Сараа К.', 'Sara K.'],
@@ -57,7 +63,8 @@ export const PEOPLE = {
     email: 'sara@kite.test',
     avatarColor: 'rose',
     role: 'member',
-    title: 'Design',
+    title: 'Product designer',
+    capacity: 15,
   },
   dorj: {
     name: ['Дорж Э.', 'Dorj E.'],
@@ -65,7 +72,8 @@ export const PEOPLE = {
     email: 'dorj@kite.test',
     avatarColor: 'amber',
     role: 'member',
-    title: 'Frontend',
+    title: 'Frontend engineer',
+    capacity: 15,
   },
   mia: {
     name: ['Мишээл Л.', 'Mia L.'],
@@ -73,7 +81,8 @@ export const PEOPLE = {
     email: 'mia@kite.test',
     avatarColor: 'sky',
     role: 'member',
-    title: null,
+    title: 'UX researcher',
+    capacity: 15,
   },
   oyu: {
     name: ['Оюука Н.', 'Oyuka N.'],
@@ -81,15 +90,17 @@ export const PEOPLE = {
     email: 'oyuka@kite.test',
     avatarColor: 'purple',
     role: 'member',
-    title: null,
+    title: 'Data analyst',
+    capacity: 15,
   },
   bat: {
     name: 'Bat O.',
     initials: 'BO',
     email: 'bat@kite.test',
     avatarColor: 'teal',
-    role: 'member',
-    title: 'Eng lead',
+    role: 'admin',
+    title: 'Engineering lead',
+    capacity: 15,
   },
   bay: {
     name: 'Bayarmaa T.',
@@ -98,6 +109,7 @@ export const PEOPLE = {
     avatarColor: 'yellow',
     role: 'member',
     title: 'QA',
+    capacity: 15,
   },
 } as const satisfies Record<string, PersonDef>;
 export type PersonRef = keyof typeof PEOPLE;
@@ -159,13 +171,14 @@ export const PROJECTS = {
     lead: 'anu',
     createdAt: [9, 14, '10:00'],
   },
-  // Empty project with the "New" badge (created in the last 7 days).
+  // New project ("New" badge: created in the last 7 days) with one completed task, so Reports
+  // shows its "not enough history" state (ReportsEmpty.dc.html: 1 / 5).
   partner: {
     space: 'product',
-    name: 'Partner Portal',
+    name: ['Түнш портал', 'Partner Portal'],
     key: 'PRT',
     color: 'neutral',
-    members: ['anu'],
+    members: ['anu', 'bat'],
     lead: 'anu',
     createdAt: [10, 7, '15:00'],
   },
@@ -217,11 +230,11 @@ export const PROJECTS = {
 } as const satisfies Record<string, ProjectDef>;
 export type ProjectRef = keyof typeof PROJECTS;
 
-export const SPRINT = { project: 'app', start: [10, 6], end: [10, 24] } as const satisfies {
-  project: ProjectRef;
-  start: MonthDay;
-  end: MonthDay;
-};
+/**
+ * App Redesign runs Sprints 9–14 of 15 working days each; Sprint 14 is current and today is its
+ * day 4 (ReportsSprints.dc.html). Dates are computed from today in working days (history.ts).
+ */
+export const SPRINTS = { project: 'app', first: 9, current: 14, days: 15, dayToday: 4 } as const;
 
 // ---------------------------------------------------------------------------------------- tags
 
@@ -273,6 +286,8 @@ export interface TaskDef {
   title: Text;
   status: StatusCategory;
   priority: Priority;
+  /** Story points (Workload, Completed points); see TASK_SIZES. */
+  size?: Size;
   assignees: readonly PersonRef[];
   tags?: readonly TagRef[];
   start?: MonthDay;
@@ -710,7 +725,8 @@ const APP_SPRINT: AppTaskDef[] = [
     assignees: ['sara'],
     tags: ['ui'],
     due: [10, 3],
-    completedAt: [10, 3, '12:00'],
+    // Inside Sprint 14 (its burndown counts it).
+    completedAt: [10, 6, '12:00'],
   },
 ];
 
@@ -777,10 +793,12 @@ const CHECKOUT: TaskDef[] = [
     ref: 'payment-provider',
     project: 'checkout',
     title: 'Payment provider review',
-    status: 'in_progress',
-    priority: 'medium',
+    createdAt: [9, 24, '10:00'],
+    // Reports: the oldest overdue task (6 days late), 9 days in review.
+    status: 'review',
+    priority: 'urgent',
     assignees: ['dorj'],
-    due: [9, 30],
+    due: [10, 2],
   },
   {
     ref: 'saved-carts-discovery',
@@ -922,6 +940,8 @@ const Q4: TaskDef[] = [
     priority: 'high',
     assignees: ['mia'],
     due: [10, 12],
+    // Reports aging: 4 days in To Do.
+    createdAt: [10, 4, '10:00'],
   },
   {
     ref: 'mid-quarter',
@@ -1167,13 +1187,127 @@ const ELSEWHERE: TaskDef[] = [
   },
 ];
 
+const PARTNER: TaskDef[] = [
+  {
+    ref: 'partner-requirements',
+    project: 'partner',
+    title: ['Түнш порталын шаардлагыг цуглуулах', 'Collect partner portal requirements'],
+    status: 'done',
+    priority: 'medium',
+    assignees: ['bat'],
+    // Bat's own task, so it stays out of Anu's recent activity.
+    createdBy: 'bat',
+    createdAt: [10, 7, '15:20'],
+    completedAt: [10, 7, '18:10'],
+  },
+];
+
+/**
+ * Sizes of the current tasks (Workload, ReportsWorkload.dc.html). The design's 2-point tasks map
+ * to S or M so each person keeps the drawn load: Sara and Dorj Heavy, Anu, Temuulen and
+ * Bayarmaa Balanced, Mia, Oyuka and Bat Light. Unlisted tasks are unsized.
+ */
+const TASK_SIZES: Record<string, Size> = {
+  'audit-nav': 'M',
+  'color-tokens': 'M',
+  'settings-migration': 'M',
+  'usability-script': 'S',
+  'empty-states': 'M',
+  'tab-bar': 'XL',
+  'product-card': 'L',
+  'onboarding-flow': 'L',
+  'analytics-events': 'M',
+  'a11y-buttons': 'S',
+  'checkout-responsive': 'L',
+  'icon-set': 'L',
+  kickoff: 'S',
+  teardown: 'M',
+  stakeholders: 'M',
+  moodboard: 'S',
+  'onboarding-copy': 'S',
+  'usability-sessions': 'M',
+  skeletons: 'M',
+  haptics: 'S',
+  'payment-provider': 'M',
+  'saved-carts-discovery': 'M',
+  'prd-saved-carts': 'S',
+  'promo-qa': 'M',
+  'checkout-design-review': 'M',
+  'launch-readiness': 'M',
+  'q4-okrs': 'M',
+  'roadmap-workshop': 'S',
+  'approve-q4': 'S',
+  'sprint-review': 'S',
+  'board-deck': 'S',
+  'mid-quarter': 'S',
+  'sprint-retro': 'S',
+  'android-regression': 'L',
+  'release-notes': 'S',
+  'store-screenshots': 'S',
+  'storage-bucket': 'L',
+  'pg-upgrade': 'M',
+  'migration-runbook': 'M',
+  'cutover-window': 'S',
+  'weekly-triage': 'S',
+  'cart-badge': 'M',
+  'promo-spaces': 'S',
+  'button-tokens': 'M',
+  'token-naming': 'S',
+  'icon-grid': 'S',
+  'brand-references': 'S',
+  'partner-requirements': 'M',
+};
+
 export const TASKS: readonly TaskDef[] = [
   ...APP_SPRINT.map((t) => ({ ...t, project: 'app' as const, sprint: true })),
   ...APP_OTHER.map((t) => ({ ...t, project: 'app' as const })),
   ...CHECKOUT,
   ...Q4,
   ...ELSEWHERE,
-];
+  ...PARTNER,
+].map((t) => (TASK_SIZES[t.ref] ? { ...t, size: TASK_SIZES[t.ref] } : t));
+
+/**
+ * When open tasks entered their current status (Reports "Days in status": the aging list and its
+ * Stale chips). Other tasks get a generated time.
+ */
+export const STATUS_SINCE: Record<string, Stamp> = {
+  // Carried-over tasks nobody started this time went back to To Do at Sprint 14 planning.
+  'settings-migration': [10, 2, '16:00'],
+  'color-tokens': [10, 2, '16:05'],
+  'payment-provider': [9, 29, '16:40'],
+  'product-card': [10, 1, '10:20'],
+  'a11y-buttons': [10, 2, '15:05'],
+  'saved-carts-discovery': [10, 3, '11:30'],
+  'tab-bar': [10, 5, '09:50'],
+};
+
+/** Reviewers of the tasks in (or through) review. */
+export const REVIEWERS: Record<string, PersonRef> = {
+  'payment-provider': 'bat',
+  'a11y-buttons': 'sara',
+  'checkout-responsive': 'bat',
+  'icon-set': 'anu',
+  'final-review-card': 'sara',
+  stakeholders: 'sara',
+  teardown: 'anu',
+};
+
+/**
+ * Sprint 14 scope (ReportsSprints.dc.html): tasks carried over from earlier sprints (how many
+ * sprints left them unfinished; 3+ = Replan) and tasks added after the start (working day).
+ */
+export const CARRIED_OVER: Record<string, number> = {
+  'settings-migration': 2,
+  'color-tokens': 1,
+  'product-card': 3,
+  'a11y-buttons': 1,
+};
+export const ADDED_MID_SPRINT: Record<string, number> = {
+  'usability-script': 3,
+  'empty-states': 3,
+  'audit-nav': 4,
+};
 
 // ------------------------------------------------------------------------------ activity events
 

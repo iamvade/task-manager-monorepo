@@ -17,9 +17,13 @@ Extracted from `design/*.dc.html` in Phase 0 (2026-10-08). The designs are the v
 | Out of scope v1 | Import from CSV → button rendered disabled with "Coming soon" tooltip. |
 | Reports metrics (2026-10-11) | The metric definitions in CLAUDE.md "Reports" are the agreed drafts (no external R2 spec); revise there if they change. |
 | Reports: sprints | Sprints stay **per project**. The Sprints tab needs one project; the design's "Project: All" becomes a required project picker (the space filter narrows its list; default = first project in scope with sprints). Sprints get a per-project `number` ("Sprint 14"). |
-| Reports: reviewer | No reviewer field. The reviewer is the actor who moves a task **out of** an In Review status; review turnaround = length of that review period. |
-| Reports: capacity, working days | `workspaces.capacity_points` (default 15 points per person per 2 weeks), editable by admins in Settings. Working days are Mon–Fri, no holidays. |
-| Reports: defaults (not designed) | Insight boxes only where drawn (Where work waits, burndown). Sizes only S/M/L/XL = 1/3/5/8 (the Workload sample's 2-point tasks are not reproducible). Unsized tasks count 0 points, shown as "N unsized". A task with several assignees counts in full for each. Reports compute live; "Updated N ago" = server `generatedAt`, refetched every 5 min and on focus. Seed makes Bat an admin, so People (admins) and My performance (members) can both be shown. |
+| Reports: reviewer | `tasks.reviewer_id`: entering review without one sets the person picked in the UI, else the project lead (`projects.lead_id`). The drawer shows a Reviewer row (not drawn) while the task is in review. Review turnaround is credited to `reviewer_id`, else to whoever moved the task out of In Review. |
+| Reports: capacity, working days | Per person: `workspace_members.capacity_points` (default 15 points per 2 weeks), editable by admins in Settings → Members next to the job title. Working days are Mon–Fri minus `workspace_holidays` (2026 Mongolian public holidays seeded). |
+| Reports: defaults (not designed) | Insight boxes only where drawn (Where work waits, burndown). Sizes only S/M/L/XL = 1/3/5/8 (the Workload sample's 2-point tasks are not reproducible). Unsized tasks count 0 points, shown as "N unsized". A task with several assignees counts in full for each. Reports compute live; "Updated N ago" = server `generatedAt`, refetched every 5 min and on focus. Seed makes Bat an admin, so People (admins) and My performance (members) can both be shown. The List view's Size column (toolbar "Columns" menu) and the quick-create Size chip are not drawn; they reuse the Workload size chip and the CreateTask field chip. |
+| Reports: Overview UI (2026-10-12) | Workload is open to every member (tab shown to all); People ↔ My performance redirect by role. Aging shows 6 rows; "View all" expands in place (`?aging=all` → API `agingLimit=all`). The throughput "insight" is the figure's aria-label summary (none is drawn). Custom period = From/To popover under the segmented control (not drawn). No Sparkline (no design uses one). Empty state names the scope (project, else space, else workspace); "Go to project" only for a project. Mongolian "N-аас/-оос" suffixes come from `mnFrom()`. |
+| Reports: Sprints & Workload UI (2026-10-12) | Neither tab uses the "< 5 completed" gate (they aren't about history); Sprints shows "No sprints in {project} yet" / "No projects to report on", Workload "No one to show". Sprints: the project filter has no "All" row and shows the API's default project until one is picked; picking a sprint writes `?project=&sprint=`, changing the scope clears `sprint`. Future sprint banner: "Starts {date} · N working days". **Replan** (not drawn; only the chip is): a 28px outline button in the empty right slot of the Carried-over header plus an accent link at the end of the burndown insight, current/future sprints only → `/p/:id/list?sprint=…&status=<open status ids>`; tasks move out through the drawer's Sprint picker. Workload: one bar scale for all rows = max(25, the largest open size or capacity × 1.2, rounded up to 5), ticks every 5 (every 10 above 40); the capacity marker is drawn per row at that person's capacity; when capacities differ the team line and footnote drop "(15 points)". Sort lives in `?sort=overdue`; expanded rows are local. Each expanded task row ends with a 24px person icon button ("Reassign APP-142") opening the assignee picker (toggle, like everywhere); bars move optimistically and roll back on error. "+ Assign work" opens quick create with that assignee (and the filtered project). Unsized tasks show "—" in the size chip. Sprint cards are their own component (gap 6, padding 14 16), not StatCard. |
+| Reports: People & My performance UI (2026-10-12) | Workload stays open to members; the e2e test checks People → My performance instead. Stat cards compare with the previous period only (as drawn); the team median is the dashed line in the two trends. "as reviewer" goes in the review card's line ("9 reviews as reviewer · previous: 2.1"). Both tabs use the `< 5 completed` gate. The partial current week keeps the solid dot and adds "This week is still in progress" to the tooltip; a week without a cycle time breaks the line (an isolated week is a 6px point). Not drawn: "No mentions this period", "None answered yet", "No one yet", "No open tasks", "No due dates this period"; reply time "<1h" under an hour and days from 24h. The open-tasks due column is 168px, not 120/140, because "10-р сарын 10 · хэтэрсэн" needs it. Helping tiles auto-fit (≥150px) instead of a fixed 3-column grid so long Mongolian labels wrap inside. The person picker lists every workspace member (40px two-line options, `Picker tall`); the URL carries the person (`/reports/people/:userId`), and no id means the caller. Charts: every figure has an sr-only data table besides its summary sentence. Route tabs use roving tabindex with ←/→/Home/End. |
+| Accessibility contrast (2026-10-12) | axe (WCAG AA) flagged three drawn colors; changed with sign-off: accent ink in light mode is the accent nudged darker (#6E56CF → #6C55CC, #2F6FEB → #2A63D2, #0F766E → #0F756D) so accent text on accent-soft over the sidebar reaches 4.5:1; done due dates use the muted tone (#6B6B74 / dark #8E8E98, drawn #A1A1AA / #5E5E68); out-of-month calendar day numbers and done My Tasks titles use `--text-muted` instead of `--text-faint`; done calendar pills keep the strike-through at full color instead of 65% opacity. |
 
 ## 1. Screens
 
@@ -80,7 +84,7 @@ Body (padding 24, gap 24):
 **Data**: projects by space (+ color); members (title, me); first todo status; date presets from today in my TZ.
 
 ### 1.8 Empty project — `EmptyProject.dc.html`
-**On screen**: sidebar: new project active + "New" badge (white pill, accent text). Header: breadcrumb, single avatar, Share. Tabs; Filter disabled; + New Task. Center (max 560): illustration (ghost rows card, accent + bubble), h1 20/28 "Partner Portal has no tasks yet", body, actions: Create first task (primary 40px, kbd C), Import from CSV (secondary → disabled, "Coming soon"), Invite teammates (ghost). "Or start from a template": 3 cards (28px colored icon tile, name 13/600, desc 12px): Product launch "18 tasks across planning, build and go-live", Sprint planning "12 tasks for a two-week cycle", Bug triage "6 tasks plus priority and severity fields".
+**On screen**: sidebar: new project active + "New" badge (white pill, accent text). Header: breadcrumb, single avatar, Share. Tabs; Filter disabled; + New Task. Center (max 560): illustration (ghost rows card, accent + bubble), h1 20/28 "Partner Portal has no tasks yet", body, actions: Create first task (primary 40px, kbd C), Import from CSV (secondary → disabled, "Coming soon"), Invite teammates (ghost). "Or start from a template": 3 cards (28px colored icon tile, name 13/600, desc 12px): Product launch "18 tasks across planning, build and go-live", Sprint planning "12 tasks for a two-week cycle", Bug triage "6 tasks plus priority and severity fields". Seed: Partner Portal has one completed task (Reports needs it for "1 / 5"), so this screen shows for newly created projects, not for Partner Portal.
 **Interactive**: create (modal), apply template, invite.
 **Data**: project (name, members, task count 0, created_at); static templates.
 
@@ -114,7 +118,7 @@ Design "today" in every Reports file is **Fri Oct 9 2026** (seed today is Thu Oc
 
 ### 1.12 Reports · Sprints — `ReportsSprints.dc.html`
 - **Sprint selector** (toolbar): 32px outline button: ↻ icon, "**Sprint 14**" 600, "Oct 6 – Oct 24" muted, **"Current"** pill (18px, #E8F5EC/#166534, 11/600). Listbox 288px, radius 10, `--shadow-popover-lg`, options 34px radius 6 (name 600 min 72px · range muted · "Current" green · accent ✓; selected row accent-soft), newest first. Filters: "Space: Product", "Project: All" (→ required project picker, see Decisions).
-- **Banner**: h2 18/24 "Sprint 14 · Oct 6 – Oct 24" (mn "14-р спринт · 10-р сарын 6 – 24") + 13px muted "**Day 4 of 15 working days · 11 days left**" (past: "Completed sprint · 15 working days"); right: 240×6 bar (#EFEFF2 track, accent fill = elapsed working days). ⚠️ Oct 24 2026 is a Saturday; with Mon–Fri working days Sprint 14 has 14 → "Day 4 of 14 working days · 10 days left".
+- **Banner**: h2 18/24 "Sprint 14 · Oct 6 – Oct 24" (mn "14-р спринт · 10-р сарын 6 – 24") + 13px muted "**Day 4 of 15 working days · 11 days left**" (past: "Completed sprint · 15 working days"); right: 240×6 bar (#EFEFF2 track, accent fill = elapsed working days). The seed computes sprint dates in working days from today, so Sprint 14 always has 15 working days with today as day 4 (the drawn Oct 6–24 is a Saturday end with 14).
 - **Numbering**: "Sprint 14" / "14-р спринт"; short "S14" / "С14".
 - **Cards** (auto-fit ≥200, padding 14 16, gap 6; 10px radius-3 swatch + label; value 26/32 600; sub 12px muted):
   - **Committed** 42 (swatch committed colour) — current: "incl. 7 carried over"; past: "at sprint start".
@@ -180,7 +184,7 @@ New property row after Priority: 14px tag-ruler icon + "Size". Control: radiogro
 | Time in status (cycle time, waits, aging, burndown) | New `task_status_periods` (one open row per task), written with every status change; backfilled from `activity`. |
 | Sprint history (committed / added / carried) | New `sprint_memberships` (one open row per task), written wherever `tasks.sprint_id` changes; backfilled from `sprint.changed` + current `sprint_id`. |
 | "Sprint 14" | `sprints.number` (per-project sequence); `sprints.name` nullable (null → "Sprint {n}" / "{n}-р спринт"). |
-| Capacity marker (Workload) | `workspaces.capacity_points` int default 15. |
+| Capacity marker (Workload) | `workspace_members.capacity_points` int default 15 (per person). |
 
 ### 2.2 Derived (computed in queries, never stored)
 - **Sidebar**: My Tasks = my open tasks (not done, not deleted) in workspace; Inbox = unread, unarchived notifications.
@@ -191,7 +195,7 @@ New property row after Priority: 14px tag-ruler icon + "Size". Control: radiogro
 - **Due tone** (user TZ): overdue (< today) · today · soon (tomorrow → Sunday of current Mon–Sun week; tomorrow always soon) · later · done.
 - **My Tasks**: sections overdue / today / this week (tomorrow–Sunday) / later (after Sunday, then no-due tasks last); stats due-today open/total/urgent, completed this week (my tasks with `completed_at` Mon–Sun) + delta, per-day counts, overdue count + oldest days late; feed unread = my notification for that `activity_id` unread.
 - **Inbox**: archived count. **Calendar**: unscheduled count, "+N more".
-- **Reports**: every metric is computed per request from tasks, `task_status_periods`, `sprint_memberships`, comments, subtasks and activity (definitions: CLAUDE.md "Reports"). Text built on the client from numbers: range line, deltas ("↑ 12%", "4 pts", "0.6 days"), the waits insight (slowest category; ratio to the next slowest → "about twice" (≥1.75), "about N times" (rounded, ≥2.5), else "X days longer"; hidden when fewer than 2 categories have data), the burndown insight (shown when projected remaining > 0; the second sentence names the slowest status), pace ("slightly behind ideal"), capacity foot notes, "N times", "Median reply time 2h".
+- **Reports**: every metric is computed per request from tasks, `task_status_periods`, `sprint_memberships`, comments, subtasks and activity (definitions: CLAUDE.md "Reports"); the API caches each computed report for 5 minutes per process and drops a workspace's reports on any of its task events, so `generatedAt` ("Updated N minutes ago") is at most 5 minutes old. Text built on the client from numbers: range line, deltas ("↑ 12%", "4 pts", "0.6 days"), the waits insight (slowest category; ratio to the next slowest → "about twice" (≥1.75), "about N times" (rounded, ≥2.5), else "X days longer"; hidden when fewer than 2 categories have data), the burndown insight (shown when projected remaining > 0; the second sentence names the slowest status), pace ("slightly behind ideal"), capacity foot notes, "N times", "Median reply time 2h".
 - **Activity lines + marker colors** from `activity.type` + payload. Payload snapshots display data so renames/deletes don't break history: `status.changed {from:{id,name,category}, to:{…}}`, `priority.changed {from,to}`, `due.changed {from,to}`, `assignee.added/removed {user:{id,name}}`, `attachment.added {attachmentId, filename}`, `subtask.completed {subtaskId, title}`, `comment.added {commentId}`. Full set (phase 5): `activityPayloadSchemas` in `packages/shared/src/schemas/activity.ts`.
 
 ### 2.3 UI state (not in DB)
@@ -359,7 +363,7 @@ Reused: `PageHeader`, `NavItem`/`RailLink`, `UnderlineTabs`, `SegmentedControl`,
 
 | Component | Props | Used in |
 |---|---|---|
-| `StatCard` (extended) | + `unit?`, `delta?: ReactNode`, `tone?: 'default'\|'danger'\|'warm'`, `swatch?`, `valueSize?: 28\|26` | My Tasks, all Reports tabs |
+| `StatCard` (`components/ui`) | `icon`, `label`, `value`, `unit?` (13px), `sub?` (12px), `aside?`, `footer?`, `tone?: 'default'\|'danger'`, `valueSize?: 28\|26` | My Tasks, all Reports tabs |
 | `ReportsLayout` | — (header, tabs, toolbar slot, `<Outlet/>`, "Updated" / loading status) | /reports/* |
 | `PeriodControl` | `value: {period, from?, to?}`, `onChange`, `disabled?` (Custom opens a from/to popover) | Overview, People, Mine |
 | `ScopeFilters` | `spaceId`, `projectId`, `onChange`, `requireProject?` | Overview, Sprints, Workload |
@@ -368,8 +372,11 @@ Reused: `PageHeader`, `NavItem`/`RailLink`, `UnderlineTabs`, `SegmentedControl`,
 | `InsightBox` | `tone: 'accent'\|'warning'\|'neutral'`, `icon`, `children` | waits, burndown, People/Mine notes |
 | `WarnChip` | `label` (Stale / Replan) | aging, carried |
 | `ChartTooltip` | `x` (%), `align`, `children` | all charts |
-| `ThroughputChart` | `weeks: {weekStart, count, prevCount, partial}[]` | Overview |
-| `WaitBars` | `items: {category, medianDays}[]`, `max?` | Overview |
+| `ChartFrame` | `ticks`, `xLabels`, `ariaLabel`, `table?` (sr-only data table), `gutter`, `endMargin` (gridlines, y gutter, x labels) | every chart |
+| `LineTrend` | `points: {label, title, value, prev?, partial?}[]`, `seriesLabel`, `prevLabel?`, `partialNote?`, `table?` | Overview throughput |
+| `BarByCategory` | `items: {key, label, marker, value, valueLabel, color}[]`, `max?` | Overview waits |
+| `StackedBar` | `segments: {key, value, fill \| 'hatch', title}[]`, `scale`, `marker?` | Workload |
+| `Burndown` | `points: {label, title, remaining, ideal, projected, added}[]`, `todayIndex` | Sprints |
 | `ReportTaskTable` | `columns`, `rows`, `template` (grid), `label` | aging, carried |
 | `SprintPicker` | `sprints`, `value`, `onChange` | Sprints |
 | `SprintBanner` | `sprint`, `workingDays`, `dayIndex`, `daysLeft` | Sprints |
@@ -380,10 +387,10 @@ Reused: `PageHeader`, `NavItem`/`RailLink`, `UnderlineTabs`, `SegmentedControl`,
 | `StackedLoadBar` | `buckets`, `scale`, `capacity` | Workload |
 | `CapacityPill` | `load: 'heavy'\|'balanced'\|'light'`, `title` | Workload |
 | `BucketLegend` | — | Workload |
-| `PersonPicker` | `members`, `value`, `onChange` | People |
-| `TrendCard` | `title`, `seriesLabel`, `weeks`, `values`, `reference`, `format`, `unit` | People, Mine |
-| `HelpTiles` / `WorkedWithList` | `helping` / `people` | People, Mine |
-| `OpenTaskList` | `tasks`, `link: {label, to}` | People, Mine |
+| `PersonPickerRow` / `MineHeader` | `person`, `compared` / `person`, `period`, `range` | People / Mine |
+| `TrendCards` → `ReferenceTrend` | `trends`, `variant` → `points`, `reference`, `max`, `formatValue`, `formatTooltip`, `table` | People, Mine |
+| `HelpingPanel` | `helping`, `variant`, `period`, `range` | People, Mine |
+| `OpenTasksList` | `tasks`, `variant` | People, Mine |
 | `ReportsEmpty` | `completed`, `required`, `project` | any tab with < 5 completions |
 | `SegmentProgress` | `value`, `max`, `label` | ReportsEmpty |
 | `ReportsSkeleton` | `variant: 'overview'\|…` | loading |
@@ -433,7 +440,7 @@ Seed mapping: Research/Checkout=blue, UX/UI=violet, Design system=teal, Analytic
 - Chart tooltip: surface, border #E6E6EA, radius 8, `0 8px 24px rgba(24,24,27,.10)` → #1F1F23, border #2E2E35, `0 8px 24px rgba(0,0,0,.4)` (= new `--shadow-tooltip`).
 - Wait bars: To Do #8B8B94 → #9A9AA4; In Progress #D97706 → #F59E0B; In Review accent → accent-ink; track #F4F4F5 → #232328. Dark In Review marker fill = accent-ink + 40.
 - Success-soft (good delta, Current pill, Light pill) #E8F5EC/#166534 → rgba(34,197,94,.16)/#86EFAC. Warning-soft (Stale, Replan, Heavy, scope chips, burndown insight) #FEF3E2/#92400E (insight icon #B45309) → rgba(251,191,36,.14)/#FCD34D. Warm card #FFFBF5 border #F5DDB8 value #92400E → derive. Danger card (dark) bg rgba(248,113,113,.07), border rgba(248,113,113,.28), value #F87171.
-- Sprint chart (default accent): committed #9C8BE3, completed #5B45B8; other accents: accent+73, accent; added #D97706.
+- Sprint chart (default accent): committed #9C8BE3, completed #5B45B8; other accents: accent+73, accent; added #D97706 (dark, derived: committed accent-ink+73, completed accent-ink, added #F59E0B). Carried swatch / unflagged pips #8B8B94 (dark #9A9AA4), empty pip #E6E6EA (dark #2A2A30). Warm card #FFFBF5 / #F5DDB8 / #92400E → dark (derived) rgba(251,191,36,.06) / rgba(251,191,36,.24) / #FCD34D. Workload pill dots Heavy #E39B2B, Balanced #8B8B94, Light #16A34A → dark #E8A33D / #9A9AA4 / #22C55E.
 - Stat icons: completed #16A34A → #4ADE80; on-time #0284C7 → #7DD3FC; cycle accent → accent-ink; overdue #C42B1C → #F87171.
 - Dark segmented (Reports): track #1F1F23, active #2E2E35 with `0 1px 2px rgba(0,0,0,.3)` (tokens keep #2E2E34).
 - Skeleton shimmer #F1F1F3 / #E7E7EB (dark: derive from `--surface-2`).

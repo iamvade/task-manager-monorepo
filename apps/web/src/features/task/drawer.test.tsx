@@ -49,6 +49,7 @@ function toDetail(task: TaskListItem, extra: Partial<TaskDetail> = {}): TaskDeta
     description: null,
     descriptionText: '',
     sprint: null,
+    reviewer: null,
     creator: ref(at(PROJECT.members, 0).user),
     subtasks: [],
     attachments: [],
@@ -139,6 +140,56 @@ describe('task drawer', () => {
       expect(patches).toEqual([{ title: 'Checkout v2' }]);
     });
     expect(await within(group('In Review')).findByText('Checkout v2')).toBeInTheDocument();
+  });
+
+  it('sets the size from the S/M/L/XL control and clears it on a second click', async () => {
+    const { state, task } = setup();
+    const patches: unknown[] = [];
+    api(state, (s) => ({
+      [`PATCH /api/v1/tasks/${task.id}`]: (init) => {
+        const patch = body(init) as { size: TaskDetail['size'] };
+        patches.push(patch);
+        s.detail = { ...s.detail, size: patch.size };
+        return Response.json(s.detail);
+      },
+    }));
+    renderAt(`${LIST}&task=APP-135`);
+
+    const sizes = await within(await drawer()).findByRole('radiogroup', { name: 'Size' });
+    expect(within(sizes).getAllByRole('radio', { checked: false })).toHaveLength(4);
+    expect(screen.getByText('No size · used in Workload and Throughput reports')).toBeVisible();
+    const large = within(sizes).getByRole('radio', { name: 'L' });
+    expect(large).toHaveAttribute('title', 'L = 5 points · Large · 3–4 days');
+
+    fireEvent.click(large);
+    await waitFor(() => {
+      expect(large).toHaveAttribute('aria-checked', 'true');
+    });
+    expect(screen.getByText('= 5 points · used in Workload and Throughput reports')).toBeVisible();
+    fireEvent.click(large);
+    await waitFor(() => {
+      expect(patches).toEqual([{ size: 'L' }, { size: null }]);
+    });
+  });
+
+  it('shows the reviewer only while the task is in review', async () => {
+    const { state } = setup({ reviewerId: BAT.id, reviewer: ref(BAT) });
+    api(state);
+    renderAt(`${LIST}&task=APP-135`);
+    const dialog = await drawer();
+    expect(await within(dialog).findByRole('button', { name: 'Reviewer' })).toHaveTextContent(
+      'Bat O.',
+    );
+  });
+
+  it('hides the reviewer outside review', async () => {
+    const tasks = makeTasks();
+    const task = at(tasks, 0);
+    api({ tasks, detail: toDetail(task), feed: [] });
+    renderAt(`${LIST}&task=${task.key}`);
+    await screen.findByRole('dialog', { name: `Task ${task.key}` });
+    await screen.findByRole('radiogroup', { name: 'Size' });
+    expect(screen.queryByRole('button', { name: 'Reviewer' })).toBeNull();
   });
 
   it('changes the status from the listbox and moves the row to its group', async () => {

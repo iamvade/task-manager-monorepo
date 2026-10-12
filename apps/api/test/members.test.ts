@@ -75,4 +75,57 @@ describe('PATCH /workspaces/:id/members/:userId', () => {
     expect((await setRole(w.ws.id, w.member.id, other.ownerCookie, 'admin')).statusCode).toBe(404);
     expect((await setRole(w.ws.id, other.member.id, w.ownerCookie, 'admin')).statusCode).toBe(404);
   });
+
+  const patch = (workspaceId: string, userId: string, cookie: string, payload: object) =>
+    ctx.app.inject({
+      method: 'PATCH',
+      url: `/api/v1/workspaces/${workspaceId}/members/${userId}`,
+      headers: { origin: ORIGIN, cookie },
+      payload,
+    });
+
+  it('lets admins set job titles and capacity, the owner’s and their own included', async () => {
+    const w = await world();
+    const res = await patch(w.ws.id, w.member.id, w.adminCookie, {
+      title: '  Frontend engineer ',
+      capacityPoints: 10,
+    });
+    expect(res.statusCode, res.body).toBe(200);
+    expect(workspaceMemberSchema.parse(res.json())).toMatchObject({
+      title: 'Frontend engineer',
+      capacityPoints: 10,
+      role: 'member',
+    });
+    for (const target of [w.owner.id, w.admin.id]) {
+      const ok = await patch(w.ws.id, target, w.adminCookie, { title: 'Lead', capacityPoints: 12 });
+      expect(ok.statusCode, ok.body).toBe(200);
+    }
+    const cleared = await patch(w.ws.id, w.member.id, w.adminCookie, { title: '  ' });
+    expect(workspaceMemberSchema.parse(cleared.json())).toMatchObject({
+      title: null,
+      capacityPoints: 10,
+    });
+  });
+
+  it('defaults capacity to 15 and validates it', async () => {
+    const w = await world();
+    const list = await ctx.app.inject({
+      method: 'GET',
+      url: `/api/v1/workspaces/${w.ws.id}/members`,
+      headers: { cookie: w.memberCookie },
+    });
+    const members = workspaceMemberSchema.array().parse(list.json());
+    expect(members.every((m) => m.capacityPoints === 15)).toBe(true);
+
+    for (const payload of [
+      { capacityPoints: -1 },
+      { capacityPoints: 101 },
+      { capacityPoints: 2.5 },
+      {},
+    ]) {
+      expect((await patch(w.ws.id, w.member.id, w.adminCookie, payload)).statusCode).toBe(400);
+    }
+    const forbidden = await patch(w.ws.id, w.member.id, w.memberCookie, { title: 'Boss' });
+    expect(forbidden.statusCode).toBe(403);
+  });
 });

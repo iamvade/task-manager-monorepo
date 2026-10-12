@@ -43,6 +43,7 @@ function api(state: { tasks: TaskListItem[] }) {
         description: null,
         descriptionText: '',
         sprint: null,
+        reviewer: null,
         creator: task.assignees[0] ?? ME.user,
         subtasks: [],
         attachments: [],
