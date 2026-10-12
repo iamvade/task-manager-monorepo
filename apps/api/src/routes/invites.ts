@@ -1,6 +1,4 @@
-import { createHash } from 'node:crypto';
 import {
-  AVATAR_COLORS,
   acceptInviteSchema,
   apiErrorSchema,
   createInviteSchema,
@@ -8,12 +6,12 @@ import {
   invitePreviewSchema,
   inviteSchema,
   meResponseSchema,
-  type PaletteKey,
 } from '@kite/shared';
 import { and, asc, eq, gt, isNull } from 'drizzle-orm';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { requireWorkspaceMember } from '../auth/access.js';
+import { avatarColorFor } from '../auth/avatar.js';
 import { buildMe } from '../auth/me.js';
 import { hashPassword } from '../auth/password.js';
 import { resolveSession } from '../auth/plugin.js';
@@ -31,12 +29,6 @@ const err = apiErrorSchema;
 
 const invalidInvite = () =>
   httpError(404, 'INVITE_INVALID', 'This invite link is invalid or has expired');
-
-/** Stable per email, so the same person gets the same color if they're invited again. */
-function avatarColorFor(email: string): PaletteKey {
-  const n = createHash('sha256').update(email).digest().readUInt32BE(0);
-  return AVATAR_COLORS[n % AVATAR_COLORS.length] ?? 'indigo';
-}
 
 /** A pending (unaccepted, unexpired) invite by raw token, optionally row-locked. */
 async function findPendingInvite(db: DbOrTx, token: string, lock = false) {
