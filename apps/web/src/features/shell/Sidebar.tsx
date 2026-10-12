@@ -93,7 +93,7 @@ export function Sidebar() {
             />
           )}
         </div>
-        <SpaceList query={sidebar} />
+        <SpaceList query={sidebar} workspaceId={workspace?.id} />
       </div>
 
       <div className="mt-auto flex flex-col gap-0.5 border-t border-default pt-2">
@@ -137,7 +137,13 @@ function FooterLink({
   );
 }
 
-function SpaceList({ query }: { query: ReturnType<typeof useSidebar> }) {
+function SpaceList({
+  query,
+  workspaceId,
+}: {
+  query: ReturnType<typeof useSidebar>;
+  workspaceId: string | undefined;
+}) {
   const { t } = useTranslation();
   const { projectId, spaceId } = useShellLocation();
   const openSpaces = useUiStore((s) => s.openSpaces);
@@ -179,6 +185,7 @@ function SpaceList({ query }: { query: ReturnType<typeof useSidebar> }) {
       {query.data.spaces.map((space) => (
         <SpaceTreeItem
           key={space.id}
+          workspaceId={workspaceId}
           space={space}
           open={openSpaces[space.id] ?? space.id === activeSpaceId}
           onToggle={(open) => {

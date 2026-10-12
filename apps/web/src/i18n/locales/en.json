@@ -80,6 +80,9 @@
     "newSpace": "New space",
     "spaceName": "Space name",
     "createSpace": "Create space",
+    "newProjectIn": "New project in {{space}}",
+    "projectName": "Project name",
+    "createProject": "Create project",
     "language": "Language",
     "invite": "Invite teammates",
     "settings": "Settings",
@@ -242,7 +245,13 @@
     "chipTitle": "Size (points)"
   },
   "sprint": {
-    "name": "Sprint {{number}}"
+    "name": "Sprint {{number}}",
+    "new": "New sprint",
+    "nameLabel": "Name (optional)",
+    "start": "Start",
+    "end": "End",
+    "create": "Create sprint",
+    "invalidRange": "The end date can't be before the start date"
   },
   "dates": {
     "today": "Today",

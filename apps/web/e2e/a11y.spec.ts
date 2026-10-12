@@ -141,6 +141,24 @@ for (const scheme of ['light', 'dark'] as const) {
         await expectAccessible(page, `Shortcuts (${scheme})`);
         await page.keyboard.press('Escape');
       });
+
+      await test.step('new sprint', async () => {
+        await page.getByRole('button', { name: 'Project options' }).click();
+        await page.getByRole('menuitem', { name: 'New sprint' }).click();
+        await expect(page.getByRole('dialog', { name: 'New sprint' })).toBeVisible();
+        await expectAccessible(page, `New sprint (${scheme})`);
+        await page.keyboard.press('Escape');
+        await expect(page.getByRole('dialog', { name: 'New sprint' })).toBeHidden();
+      });
+
+      await test.step('new project', async () => {
+        const add = page.getByRole('button', { name: /^New project in / }).first();
+        const name = (await add.getAttribute('aria-label')) ?? '';
+        await add.click();
+        await expect(page.getByRole('dialog', { name })).toBeVisible();
+        await expectAccessible(page, `New project (${scheme})`);
+        await page.keyboard.press('Escape');
+      });
     });
   });
 }

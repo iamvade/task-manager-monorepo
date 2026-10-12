@@ -1,7 +1,8 @@
 import type { ProjectDetail } from '@kite/shared';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useToggleFavorite } from '../../api/projects';
-import { MoreIcon, StarIcon } from '../../components/icons';
+import { MoreIcon, SprintIcon, StarIcon } from '../../components/icons';
 import { AvatarStack } from '../../components/ui/AvatarStack';
 import { IconButton } from '../../components/ui/IconButton';
 import { Menu } from '../../components/ui/Menu';
@@ -14,6 +15,7 @@ import { ShareButton } from '../views/ShareButton';
 import { ViewTabs } from '../views/ViewTabs';
 import type { View } from '../views/views';
 import { ViewToolbar } from '../views/ViewToolbar';
+import { NewSprintDialog } from './NewSprintDialog';
 
 /** Project top bar: breadcrumb, favorite, members, Share, options; view tabs + toolbar. */
 export function ProjectHeader({ project, view }: { project: ProjectDetail; view: View }) {
@@ -21,6 +23,7 @@ export function ProjectHeader({ project, view }: { project: ProjectDetail; view:
   const online = useOnlineIds();
   const favorite = useToggleFavorite(project);
   const { copied, copy } = useCopyLink();
+  const [newSprintOpen, setNewSprintOpen] = useState(false);
   const favoriteLabel = project.isFavorite ? t('header.unfavorite') : t('header.favorite');
 
   return (
@@ -79,6 +82,15 @@ export function ProjectHeader({ project, view }: { project: ProjectDetail; view:
                 label: t('header.copyLink'),
                 onSelect: () => void copy(),
               },
+              { type: 'separator', id: 'sep' },
+              {
+                id: 'newSprint',
+                label: t('sprint.new'),
+                icon: <SprintIcon size={14} />,
+                onSelect: () => {
+                  setNewSprintOpen(true);
+                },
+              },
             ]}
             trigger={(props) => (
               <IconButton
@@ -88,6 +100,13 @@ export function ProjectHeader({ project, view }: { project: ProjectDetail; view:
                 icon={<MoreIcon size={16} />}
               />
             )}
+          />
+          <NewSprintDialog
+            project={project}
+            open={newSprintOpen}
+            onClose={() => {
+              setNewSprintOpen(false);
+            }}
           />
         </>
       }

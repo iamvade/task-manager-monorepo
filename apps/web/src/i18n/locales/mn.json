@@ -80,6 +80,9 @@
     "newSpace": "Шинэ орон зай",
     "spaceName": "Орон зайн нэр",
     "createSpace": "Орон зай үүсгэх",
+    "newProjectIn": "{{space}}: шинэ төсөл",
+    "projectName": "Төслийн нэр",
+    "createProject": "Төсөл үүсгэх",
     "language": "Хэл",
     "invite": "Хамт олноо урих",
     "settings": "Тохиргоо",
@@ -242,7 +245,13 @@
     "chipTitle": "Хэмжээ (оноо)"
   },
   "sprint": {
-    "name": "{{number}}-р спринт"
+    "name": "{{number}}-р спринт",
+    "new": "Шинэ спринт",
+    "nameLabel": "Нэр (заавал биш)",
+    "start": "Эхлэх",
+    "end": "Дуусах",
+    "create": "Спринт үүсгэх",
+    "invalidRange": "Дуусах огноо эхлэх огнооноос өмнө байж болохгүй"
   },
   "dates": {
     "today": "Өнөөдөр",

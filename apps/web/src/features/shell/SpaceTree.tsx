@@ -6,10 +6,13 @@ import { ChevronRightIcon } from '../../components/icons';
 import { ProjectDot } from '../../components/ui/ProjectDot';
 import { SpaceBadge } from '../../components/ui/SpaceBadge';
 import { cn } from '../../lib/cn';
+import { NewProjectButton } from './NewProjectButton';
 
 const NEW_PROJECT_MS = 7 * 86_400_000;
 
 interface SpaceTreeItemProps {
+  /** Shows the hover "+" (new project) once the workspace is known. */
+  workspaceId: string | undefined;
   space: SidebarSpace;
   open: boolean;
   onToggle: (open: boolean) => void;
@@ -24,6 +27,7 @@ interface SpaceTreeItemProps {
  * the active space row is accent-soft with an accent 600 name and projects show color dots).
  */
 export function SpaceTreeItem({
+  workspaceId,
   space,
   open,
   onToggle,
@@ -34,7 +38,7 @@ export function SpaceTreeItem({
     <div className="flex flex-col gap-0.5">
       <div
         className={cn(
-          'flex h-8 items-center rounded-[8px]',
+          'group flex h-8 items-center rounded-[8px]',
           active ? 'bg-accent-soft' : 'hover:bg-nav-hover',
         )}
       >
@@ -71,6 +75,7 @@ export function SpaceTreeItem({
             {space.name}
           </span>
         </Link>
+        {workspaceId && <NewProjectButton workspaceId={workspaceId} space={space} />}
       </div>
       {open && (
         <div className="flex flex-col gap-0.5">

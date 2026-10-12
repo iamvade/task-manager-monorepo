@@ -3,6 +3,7 @@ import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ReportFilters } from '../../api/reports';
 import { Button } from '../../components/ui/Button';
+import { DateField } from '../../components/ui/DateField';
 import { Popover } from '../../components/ui/Popover';
 import { SegmentedControl } from '../../components/ui/SegmentedControl';
 import { useDates } from '../../lib/useDates';
@@ -98,34 +99,5 @@ export function PeriodControl({ value, onChange, disabled }: PeriodControlProps)
         </form>
       )}
     </Popover>
-  );
-}
-
-function DateField({
-  id,
-  label,
-  value,
-  onChange,
-}: {
-  id: string;
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <div className="flex min-w-0 flex-1 flex-col gap-1">
-      <label htmlFor={id} className="text-[12px] font-medium text-muted">
-        {label}
-      </label>
-      <input
-        id={id}
-        type="date"
-        value={value}
-        onChange={(e) => {
-          onChange(e.target.value);
-        }}
-        className="box-border h-8 w-full min-w-0 rounded-[8px] border border-control bg-control px-2 text-[13px]"
-      />
-    </div>
   );
 }

@@ -172,6 +172,51 @@ describe('task drawer', () => {
     });
   });
 
+  it('creates a sprint from the sprint picker and puts the task in it', async () => {
+    const { state, task } = setup();
+    const created: unknown[] = [];
+    const patches: unknown[] = [];
+    const sprint = {
+      id: '01890000-0000-7000-8000-000000000031',
+      projectId: PROJECT_ID,
+      number: 2,
+      name: 'Polish',
+      startDate: '2026-10-26',
+      endDate: '2026-11-12',
+    };
+    api(state, (s) => ({
+      [`POST /api/v1/projects/${PROJECT_ID}/sprints`]: (init) => {
+        created.push(body(init));
+        return Response.json(sprint, { status: 201 });
+      },
+      [`PATCH /api/v1/tasks/${task.id}`]: (init) => {
+        const patch = body(init) as { sprintId: string };
+        patches.push(patch);
+        s.detail = { ...s.detail, sprintId: patch.sprintId, sprint };
+        return Response.json(s.detail);
+      },
+    }));
+    renderAt(`${LIST}&task=APP-135`);
+
+    fireEvent.click(await within(await drawer()).findByRole('button', { name: 'Sprint' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'New sprint' }));
+    const form = await screen.findByRole('dialog', { name: 'New sprint' });
+    // Follows Sprint 1 (Oct 6 – Oct 24: 14 working days).
+    expect(within(form).getByLabelText('Start')).toHaveValue('2026-10-26');
+    expect(within(form).getByLabelText('End')).toHaveValue('2026-11-12');
+    const name = within(form).getByLabelText('Name (optional)');
+    expect(name).toHaveFocus();
+    expect(name).toHaveAttribute('placeholder', 'Sprint 2');
+
+    fireEvent.change(name, { target: { value: ' Polish ' } });
+    fireEvent.click(within(form).getByRole('button', { name: 'Create sprint' }));
+    await waitFor(() => {
+      expect(patches).toEqual([{ sprintId: sprint.id }]);
+    });
+    expect(created).toEqual([{ name: 'Polish', startDate: '2026-10-26', endDate: '2026-11-12' }]);
+    expect(screen.queryByRole('dialog', { name: 'New sprint' })).toBeNull();
+  });
+
   it('shows the reviewer only while the task is in review', async () => {
     const { state } = setup({ reviewerId: BAT.id, reviewer: ref(BAT) });
     api(state);
