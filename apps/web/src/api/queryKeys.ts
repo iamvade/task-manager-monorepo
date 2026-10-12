@@ -24,6 +24,11 @@ export const queryKeys = {
   home: (workspaceId: string) => ['tasks', 'home', workspaceId] as const,
   /** "Show older activity" pages (`GET /me/activity`) after the home's first page. */
   homeActivity: (workspaceId: string) => ['tasks', 'home', workspaceId, 'older'] as const,
+  /** Prefix of every report; under `tasks` so task writes refresh them. */
+  reports: ['tasks', 'reports'] as const,
+  reportsOf: (workspaceId: string) => ['tasks', 'reports', workspaceId] as const,
+  report: (workspaceId: string, report: string, query: object) =>
+    ['tasks', 'reports', workspaceId, report, query] as const,
   /** Prefix of every inbox tab of a workspace. */
   notificationsOf: (workspaceId: string) => ['notifications', workspaceId] as const,
   notifications: (workspaceId: string, tab: string) => ['notifications', workspaceId, tab] as const,

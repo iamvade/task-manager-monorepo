@@ -1,5 +1,6 @@
 import {
   apiErrorSchema,
+  overviewReportQuerySchema,
   overviewReportSchema,
   personReportQuerySchema,
   personReportSchema,
@@ -65,9 +66,9 @@ export const reportRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       schema: {
         tags: ['Reports'],
         summary: 'Reports · Overview',
-        description: `Completed, cycle time, on-time delivery (each vs the previous period), overdue now, 12-week throughput, where work waits and aging tasks, for the workspace, a space or a project. Dates in the caller’s time zone. Cached up to 5 minutes (\`generatedAt\`). ${MEMBERS}`,
+        description: `Completed, cycle time, on-time delivery (each vs the previous period), overdue now, 12-week throughput, where work waits and aging tasks, for the workspace, a space or a project. Dates in the caller’s time zone. Returns the 20 longest-waiting open tasks unless \`agingLimit\` asks for more (\`all\` = every open task). Cached up to 5 minutes (\`generatedAt\`). ${MEMBERS}`,
         params,
-        querystring: reportQuerySchema,
+        querystring: overviewReportQuerySchema,
         response: { 200: overviewReportSchema, ...errors },
       },
     },

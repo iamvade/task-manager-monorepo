@@ -187,6 +187,26 @@ describe('GET /workspaces/:id/reports/overview', () => {
     expect(r.previousRange).toEqual({ from: '2026-10-09', to: '2026-10-11' });
   });
 
+  it('returns 20 aging tasks unless agingLimit asks for another number or all', async () => {
+    const w = await taskWorld(ctx);
+    for (let i = 0; i < 22; i++) {
+      await timelineTask(ctx.db, {
+        projectId: w.project.id,
+        createdBy: w.owner.id,
+        timeline: [['todo', `2026-10-01T${String(i).padStart(2, '0')}:00:00Z`]],
+      });
+    }
+    const base = await overview(w);
+    expect(base.aging.total).toBe(22);
+    expect(base.aging.tasks).toHaveLength(20);
+    expect((await overview(w, '?agingLimit=all')).aging.tasks).toHaveLength(22);
+    expect((await overview(w, '?agingLimit=3')).aging.tasks).toHaveLength(3);
+    for (const bad of ['0', '501', 'many']) {
+      const res = await w.api('GET', `/workspaces/${w.ws.id}/reports/overview?agingLimit=${bad}`);
+      expect(res.statusCode, bad).toBe(400);
+    }
+  });
+
   it('rejects a custom period without dates', async () => {
     const w = await taskWorld(ctx);
     const res = await w.api('GET', `/workspaces/${w.ws.id}/reports/overview?period=custom`);

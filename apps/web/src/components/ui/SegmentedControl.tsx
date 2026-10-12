@@ -23,9 +23,11 @@ interface SegmentedControlProps<T extends string> {
   /**
    * sm: 24px segments r5 on a r7 track (12/600); md: 28px r6 on r8 (13/500); tabs: 26px r6 on
    * r8 (12/500, TaskDetail activity filter); chip: 28px r6 on r8, min-width 36 (12/600, the
-   * TaskDetail Size control).
+   * TaskDetail Size control); toolbar: 28px r6 on r8, content width (13/500, the Reports period).
    */
-  size?: 'sm' | 'md' | 'tabs' | 'chip';
+  size?: 'sm' | 'md' | 'tabs' | 'chip' | 'toolbar';
+  /** Inert while loading (ReportsLoading.dc.html): unselected labels faint. */
+  disabled?: boolean;
   /** `tablist` for filters that switch a panel (TaskDetail activity tabs). */
   role?: 'radiogroup' | 'tablist';
   className?: string;
@@ -45,6 +47,7 @@ export function SegmentedControl<T extends string>({
   track = 'default',
   size = 'sm',
   role = 'radiogroup',
+  disabled,
   className,
 }: SegmentedControlProps<T>) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -70,6 +73,7 @@ export function SegmentedControl<T extends string>({
       role={role}
       aria-label={label}
       aria-labelledby={labelledBy}
+      aria-disabled={disabled ? true : undefined}
       className={cn(
         'flex gap-0.5 p-0.5',
         size === 'sm' ? 'rounded-[7px]' : 'rounded-[8px]',
@@ -92,6 +96,7 @@ export function SegmentedControl<T extends string>({
             aria-checked={role === 'tablist' ? undefined : selected}
             aria-selected={role === 'tablist' ? selected : undefined}
             tabIndex={tabStop ? 0 : -1}
+            disabled={disabled}
             lang={option.lang}
             title={option.title}
             onClick={() => {
@@ -108,11 +113,16 @@ export function SegmentedControl<T extends string>({
               size === 'tabs' && 'h-[26px] flex-none rounded-[6px] px-2.5 text-[12px] font-medium',
               size === 'chip' &&
                 'h-7 min-w-9 flex-none rounded-[6px] px-2 text-[12px] font-semibold',
+              size === 'toolbar' && 'h-7 flex-none rounded-[6px] px-2.5 text-[13px] font-medium',
               selected
                 ? 'bg-segment-active text-default shadow-segment'
                 : cn(
                     'bg-transparent',
-                    size === 'tabs' || size === 'chip' ? 'text-3' : 'text-muted',
+                    disabled
+                      ? 'text-faint'
+                      : size === 'tabs' || size === 'chip' || size === 'toolbar'
+                        ? 'text-3'
+                        : 'text-muted',
                   ),
             )}
           >

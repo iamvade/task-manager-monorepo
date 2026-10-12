@@ -14,6 +14,9 @@ import { TASK_MUTATION } from '../api/taskCache';
 /** Changes arriving this close together share one round of refetches. */
 export const COALESCE_MS = 150;
 
+/** Reports are costly to recompute: teammates' changes refresh them at most this often. */
+export const REPORTS_THROTTLE_MS = 10_000;
+
 type Patch = (task: TaskListItem) => TaskListItem;
 
 /** What a batch of messages made stale. */
@@ -40,6 +43,29 @@ export function createMessageHandler(queryClient: QueryClient) {
   let timer: ReturnType<typeof setTimeout> | undefined;
 
   const busy = () => queryClient.isMutating({ mutationKey: TASK_MUTATION }) > 0;
+
+  /**
+   * Report refetches per workspace, throttled: the first change refreshes right away, later
+   * ones within REPORTS_THROTTLE_MS share one trailing refresh at the end of the window.
+   */
+  const reports = new Map<string, { last: number; timer?: ReturnType<typeof setTimeout> }>();
+  const refreshReports = (workspaceId: string) => {
+    let state = reports.get(workspaceId);
+    if (!state) {
+      state = { last: -Infinity };
+      reports.set(workspaceId, state);
+    }
+    if (state.timer !== undefined) return;
+    const s = state;
+    const run = () => {
+      s.timer = undefined;
+      s.last = Date.now();
+      void queryClient.invalidateQueries({ queryKey: queryKeys.reportsOf(workspaceId) });
+    };
+    const wait = s.last + REPORTS_THROTTLE_MS - Date.now();
+    if (wait <= 0) run();
+    else s.timer = setTimeout(run, wait);
+  };
 
   const mark = (workspaceId: string, edit: (p: Pending) => void) => {
     if (pending?.workspaceId !== workspaceId) {
@@ -101,6 +127,7 @@ export function createMessageHandler(queryClient: QueryClient) {
   function onTask(m: RealtimeTaskMessage) {
     const quiet = busy();
     if (!quiet) patchNow(queryClient, m);
+    refreshReports(m.workspaceId);
     mark(m.workspaceId, (p) => {
       p.home = true;
       p.activity.add(m.taskId);
@@ -140,6 +167,8 @@ export function createMessageHandler(queryClient: QueryClient) {
     dispose() {
       clearTimeout(timer);
       pending = null;
+      for (const state of reports.values()) clearTimeout(state.timer);
+      reports.clear();
     },
   };
 }

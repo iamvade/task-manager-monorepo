@@ -101,6 +101,39 @@
   /* Scrims */
   --scrim-drawer: rgba(24, 24, 27, 0.28);
   --scrim-modal: rgba(24, 24, 27, 0.32);
+
+  /* Reports (Reports.dc.html; dark from ReportsDark.dc.html, design-notes A.2b) */
+  --panel: #ffffff;
+  --table-row-border: #efeff2;
+  --chart-grid: #f1f1f3;
+  --chart-axis: #d4d4d8;
+  --chart-prev: #c4c4cc;
+  --chart-point-ring: #ffffff;
+  --wait-todo: #8b8b94;
+  --wait-progress: #d97706;
+  --wait-review: var(--accent);
+  --wait-track: #f4f4f5;
+  --success-soft: #e8f5ec;
+  --success-soft-fg: #166534;
+  --warning-soft: #fef3e2;
+  --warning-soft-fg: #92400e;
+  --warning-icon: #b45309;
+  --stat-completed: #16a34a;
+  --stat-ontime: #0284c7;
+  --tooltip-border: #e6e6ea;
+  --tooltip-shadow: 0 8px 24px rgba(24, 24, 27, 0.1);
+  --skeleton: #f1f1f3;
+  --skeleton-hi: #e7e7eb;
+  --empty-bar-dash: #d4d4d8;
+  --progress-track: #efeff2;
+  --chart-ideal: #8b8b94;
+  --capacity-line: #a1a1aa;
+  --bucket-overdue: #c42b1c;
+  --bucket-week: #e39b2b;
+  --bucket-later: #8b8b94;
+  --bucket-none-a: #f4f4f5;
+  --bucket-none-b: #d4d4d8;
+  --bucket-none-border: #c4c4cc;
 }
 
 :root[data-theme='dark'] {
@@ -141,8 +174,8 @@
   --danger: #f87171;
   --danger-soft: rgba(248, 113, 113, 0.12);
   --danger-soft-fg: #f87171;
-  --danger-card-bg: rgba(248, 113, 113, 0.06);
-  --danger-card-border: rgba(248, 113, 113, 0.24);
+  --danger-card-bg: rgba(248, 113, 113, 0.07);
+  --danger-card-border: rgba(248, 113, 113, 0.28);
   --warning: #fbbf24;
   --success: #22c55e;
   --online: #22c55e;
@@ -181,4 +214,36 @@
 
   --scrim-drawer: rgba(0, 0, 0, 0.5);
   --scrim-modal: rgba(0, 0, 0, 0.56);
+
+  --panel: #161618;
+  --table-row-border: #222227;
+  --chart-grid: #222227;
+  --chart-axis: #3a3a42;
+  --chart-prev: #6b6b75;
+  --chart-point-ring: #161618;
+  --wait-todo: #9a9aa4;
+  --wait-progress: #f59e0b;
+  --wait-review: var(--accent-ink);
+  --wait-track: #232328;
+  --success-soft: rgba(34, 197, 94, 0.16);
+  --success-soft-fg: #86efac;
+  --warning-soft: rgba(251, 191, 36, 0.14);
+  --warning-soft-fg: #fcd34d;
+  --warning-icon: #fbbf24;
+  --stat-completed: #4ade80;
+  --stat-ontime: #7dd3fc;
+  --tooltip-border: #2e2e35;
+  --tooltip-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --skeleton: #1f1f23;
+  --skeleton-hi: #26262b;
+  --empty-bar-dash: #3a3a42;
+  --progress-track: #26262b;
+  --chart-ideal: #9a9aa4;
+  --capacity-line: #6b6b75;
+  --bucket-overdue: #f87171;
+  --bucket-week: #e8a33d;
+  --bucket-later: #9a9aa4;
+  --bucket-none-a: #232328;
+  --bucket-none-b: #3a3a42;
+  --bucket-none-border: #4a4a52;
 }

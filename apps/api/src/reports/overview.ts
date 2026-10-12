@@ -1,4 +1,5 @@
 import {
+  AGING_DEFAULT_LIMIT,
   STALE_DAYS,
   THROUGHPUT_WEEKS,
   addDays,
@@ -6,6 +7,7 @@ import {
   startOfWeek,
   type AgingTask,
   type OverviewReport,
+  type OverviewReportQuery,
   type ReportQuery,
 } from '@kite/shared';
 import { sql, type SQL } from 'drizzle-orm';
@@ -23,8 +25,6 @@ import {
   sizePoints,
 } from './sql.js';
 import { reportTaskColumns, reportTaskJoins, toReportTask, type ReportTaskRow } from './tasks.js';
-
-export const AGING_LIMIT = 20;
 
 /** Days-in-status threshold of an open period's category, per STALE_DAYS. */
 const staleThreshold = (category: string) =>
@@ -199,24 +199,29 @@ export async function loadAgingTasks(db: DbOrTx, ctx: ReportContext, limit: numb
 }
 
 /** Every query of the Overview, by name (the perf script EXPLAINs them). */
-export function overviewQueries(ctx: ReportContext, b: PeriodBounds) {
+export function overviewQueries(
+  ctx: ReportContext,
+  b: PeriodBounds,
+  agingLimit: number | null = AGING_DEFAULT_LIMIT,
+) {
   return {
     completed: completedStatsQuery(ctx, b),
     overdue: overdueQuery(ctx),
     throughput: throughputQuery(ctx),
     waits: waitsQuery(ctx, b),
     agingCounts: agingCountsQuery(ctx),
-    agingTasks: agingTasksQuery(ctx, AGING_LIMIT),
+    agingTasks: agingTasksQuery(ctx, agingLimit),
   };
 }
 
 export async function buildOverview(
   db: DbOrTx,
   ctx: ReportContext,
-  query: ReportQuery,
+  query: OverviewReportQuery,
 ): Promise<Omit<OverviewReport, 'generatedAt'>> {
   const b = periodBounds(ctx, query);
-  const q = overviewQueries(ctx, b);
+  const limit = query.agingLimit ?? AGING_DEFAULT_LIMIT;
+  const q = overviewQueries(ctx, b, limit === 'all' ? null : limit);
   const [history, stats, overdue, weeks, waits, agingCounts, agingTasks] = await Promise.all([
     loadHistory(db, ctx),
     rows<CompletedStatsRow>(db, q.completed),

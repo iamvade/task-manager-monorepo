@@ -8,6 +8,7 @@ import {
   InboxIcon,
   MyTasksIcon,
   PanelCloseIcon,
+  ReportsIcon,
   SettingsIcon,
   UserPlusIcon,
 } from '../../components/icons';
@@ -79,6 +80,7 @@ export function Sidebar() {
             ) : null
           }
         />
+        <NavItem to="/reports" icon={<ReportsIcon size={16} />} label={t('shell.reports')} />
       </div>
 
       <div className="flex flex-col gap-0.5">

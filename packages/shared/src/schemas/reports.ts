@@ -43,6 +43,22 @@ export const reportQuerySchema = z
   .superRefine(checkCustomPeriod);
 export type ReportQuery = z.infer<typeof reportQuerySchema>;
 
+/** Most aging tasks the Overview returns by default; `agingLimit` overrides it. */
+export const AGING_DEFAULT_LIMIT = 20;
+export const AGING_MAX_LIMIT = 500;
+
+export const overviewReportQuerySchema = z
+  .object({
+    ...periodFields,
+    ...scopeFields,
+    /** Aging rows to return: 1–500 (default 20), or `all` ("View all"). */
+    agingLimit: z
+      .union([z.literal('all'), z.coerce.number().int().min(1).max(AGING_MAX_LIMIT)])
+      .optional(),
+  })
+  .superRefine(checkCustomPeriod);
+export type OverviewReportQuery = z.infer<typeof overviewReportQuerySchema>;
+
 export const workloadReportQuerySchema = z.object(scopeFields);
 export type WorkloadReportQuery = z.infer<typeof workloadReportQuerySchema>;
 

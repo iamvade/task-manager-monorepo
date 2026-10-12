@@ -30,6 +30,9 @@
   --color-prio-low: var(--prio-low);
   --color-prio-none: var(--prio-none);
   --color-project-dot-inactive: var(--project-dot-inactive);
+  --color-stat-completed: var(--stat-completed);
+  --color-stat-ontime: var(--stat-ontime);
+  --color-warning-icon: var(--warning-icon);
 
   /* Backgrounds */
   --background-color-default: var(--bg);
@@ -49,6 +52,12 @@
   --background-color-segment-active: var(--segment-active);
   --background-color-danger-soft: var(--danger-soft);
   --background-color-danger-card: var(--danger-card-bg);
+  --background-color-panel: var(--panel);
+  --background-color-success-soft: var(--success-soft);
+  --background-color-warning-soft: var(--warning-soft);
+  --background-color-wait-track: var(--wait-track);
+  --background-color-skeleton: var(--skeleton);
+  --background-color-progress-track: var(--progress-track);
   --background-color-tint-todo: var(--tint-todo-bg);
   --background-color-tint-todo-header: var(--tint-todo-header);
   --background-color-tint-progress: var(--tint-progress-bg);
@@ -69,6 +78,8 @@
   --text-color-chip: var(--chip-fg);
   --text-color-tooltip: var(--tooltip-fg);
   --text-color-danger-soft: var(--danger-soft-fg);
+  --text-color-success-soft: var(--success-soft-fg);
+  --text-color-warning-soft: var(--warning-soft-fg);
   --text-color-tint-todo: var(--tint-todo-fg);
   --text-color-tint-progress: var(--tint-progress-fg);
   --text-color-tint-review: var(--tint-review-fg);
@@ -85,6 +96,8 @@
   --border-color-subtle: var(--border-subtle);
   --border-color-strong: var(--border-strong);
   --border-color-danger-card: var(--danger-card-border);
+  --border-color-table-row: var(--table-row-border);
+  --border-color-tooltip: var(--tooltip-border);
 }
 
 @theme static {
@@ -95,6 +108,7 @@
   --shadow-modal: 0 24px 64px rgba(24, 24, 27, 0.2), 0 2px 6px rgba(24, 24, 27, 0.06);
   --shadow-drag: 0 2px 4px rgba(24, 24, 27, 0.06), 0 16px 32px rgba(24, 24, 27, 0.14);
   --shadow-ring-soft: 0 0 0 3px var(--accent-soft);
+  --shadow-tooltip: var(--tooltip-shadow);
 }
 
 /* In the base layer so Tailwind utilities (text-*, outline-*) win over these defaults. */
@@ -220,5 +234,35 @@
     height: 0;
     color: var(--text-faint);
     pointer-events: none;
+  }
+}
+
+/* Reports loading skeleton (ReportsLoading.dc.html `.sk`): a 1.4s shimmer; static under reduced motion. */
+@layer components {
+  .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--skeleton) 25%,
+      var(--skeleton-hi) 37%,
+      var(--skeleton) 63%
+    );
+    background-size: 400% 100%;
+    animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  }
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer {
+    animation: none;
+    background: var(--skeleton);
   }
 }

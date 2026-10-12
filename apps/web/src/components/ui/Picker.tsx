@@ -19,7 +19,8 @@ interface PickerProps<T> {
   onClose?: () => void;
   multiple?: boolean;
   search?: { placeholder: string; filter?: (item: T, query: string) => boolean };
-  groupBy?: (item: T) => string;
+  /** Group header text; `undefined` = no group (e.g. an "All" option above the groups). */
+  groupBy?: (item: T) => string | undefined;
   emptyText?: string;
   /** Accessible name of the listbox. */
   label: string;

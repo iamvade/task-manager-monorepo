@@ -20,6 +20,7 @@ Extracted from `design/*.dc.html` in Phase 0 (2026-10-08). The designs are the v
 | Reports: reviewer | `tasks.reviewer_id`: entering review without one sets the person picked in the UI, else the project lead (`projects.lead_id`). The drawer shows a Reviewer row (not drawn) while the task is in review. Review turnaround is credited to `reviewer_id`, else to whoever moved the task out of In Review. |
 | Reports: capacity, working days | Per person: `workspace_members.capacity_points` (default 15 points per 2 weeks), editable by admins in Settings → Members next to the job title. Working days are Mon–Fri minus `workspace_holidays` (2026 Mongolian public holidays seeded). |
 | Reports: defaults (not designed) | Insight boxes only where drawn (Where work waits, burndown). Sizes only S/M/L/XL = 1/3/5/8 (the Workload sample's 2-point tasks are not reproducible). Unsized tasks count 0 points, shown as "N unsized". A task with several assignees counts in full for each. Reports compute live; "Updated N ago" = server `generatedAt`, refetched every 5 min and on focus. Seed makes Bat an admin, so People (admins) and My performance (members) can both be shown. The List view's Size column (toolbar "Columns" menu) and the quick-create Size chip are not drawn; they reuse the Workload size chip and the CreateTask field chip. |
+| Reports: Overview UI (2026-10-12) | Workload is open to every member (tab shown to all); People ↔ My performance redirect by role. Aging shows 6 rows; "View all" expands in place (`?aging=all` → API `agingLimit=all`). The throughput "insight" is the figure's aria-label summary (none is drawn). Custom period = From/To popover under the segmented control (not drawn). No Sparkline (no design uses one). Empty state names the scope (project, else space, else workspace); "Go to project" only for a project. Mongolian "N-аас/-оос" suffixes come from `mnFrom()`. |
 
 ## 1. Screens
 
@@ -359,7 +360,7 @@ Reused: `PageHeader`, `NavItem`/`RailLink`, `UnderlineTabs`, `SegmentedControl`,
 
 | Component | Props | Used in |
 |---|---|---|
-| `StatCard` (extended) | + `unit?`, `delta?: ReactNode`, `tone?: 'default'\|'danger'\|'warm'`, `swatch?`, `valueSize?: 28\|26` | My Tasks, all Reports tabs |
+| `StatCard` (`components/ui`) | `icon`, `label`, `value`, `unit?` (13px), `sub?` (12px), `aside?`, `footer?`, `tone?: 'default'\|'danger'`, `valueSize?: 28\|26` | My Tasks, all Reports tabs |
 | `ReportsLayout` | — (header, tabs, toolbar slot, `<Outlet/>`, "Updated" / loading status) | /reports/* |
 | `PeriodControl` | `value: {period, from?, to?}`, `onChange`, `disabled?` (Custom opens a from/to popover) | Overview, People, Mine |
 | `ScopeFilters` | `spaceId`, `projectId`, `onChange`, `requireProject?` | Overview, Sprints, Workload |
@@ -368,8 +369,11 @@ Reused: `PageHeader`, `NavItem`/`RailLink`, `UnderlineTabs`, `SegmentedControl`,
 | `InsightBox` | `tone: 'accent'\|'warning'\|'neutral'`, `icon`, `children` | waits, burndown, People/Mine notes |
 | `WarnChip` | `label` (Stale / Replan) | aging, carried |
 | `ChartTooltip` | `x` (%), `align`, `children` | all charts |
-| `ThroughputChart` | `weeks: {weekStart, count, prevCount, partial}[]` | Overview |
-| `WaitBars` | `items: {category, medianDays}[]`, `max?` | Overview |
+| `ChartFrame` | `ticks`, `xLabels`, `ariaLabel`, `gutter`, `endMargin` (gridlines, y gutter, x labels) | every chart |
+| `LineTrend` | `points: {label, title, value, prev?, partial?}[]`, `seriesLabel`, `prevLabel?`, `partialNote?` | Overview throughput (People/Mine trends in R5) |
+| `BarByCategory` | `items: {key, label, marker, value, valueLabel, color}[]`, `max?` | Overview waits |
+| `StackedBar` | `segments: {key, value, fill \| 'hatch', title}[]`, `scale`, `marker?` | Workload |
+| `Burndown` | `points: {label, title, remaining, ideal, projected, added}[]`, `todayIndex` | Sprints |
 | `ReportTaskTable` | `columns`, `rows`, `template` (grid), `label` | aging, carried |
 | `SprintPicker` | `sprints`, `value`, `onChange` | Sprints |
 | `SprintBanner` | `sprint`, `workingDays`, `dayIndex`, `daysLeft` | Sprints |

@@ -6,6 +6,9 @@ import { ListView, SpaceListView } from './features/list/ListView';
 import { BoardView, SpaceBoardView } from './features/board/BoardView';
 import { CalendarView, SpaceCalendarView } from './features/calendar/CalendarView';
 import { ProjectLayout } from './features/project/ProjectLayout';
+import { OverviewTab } from './features/reports/overview/OverviewTab';
+import { ReportsPlaceholder } from './features/reports/ReportsPlaceholder';
+import { MyPerformanceRoute, PeopleRoute } from './features/reports/ReportsRoutes';
 import { AppShell } from './features/shell/AppShell';
 import { SpaceLayout } from './features/space/SpaceLayout';
 import { InboxPage } from './pages/InboxPage';
@@ -44,6 +47,17 @@ export const routes: RouteObject[] = [
               { path: '/inbox', element: <InboxPage /> },
               { path: '/settings', element: <SettingsPage /> },
               { path: '/t/:taskKey', element: <TaskPage /> },
+              {
+                path: '/reports',
+                children: [
+                  { index: true, element: <Navigate to="overview" replace /> },
+                  { path: 'overview', element: <OverviewTab /> },
+                  { path: 'sprints', element: <ReportsPlaceholder tab="sprints" /> },
+                  { path: 'workload', element: <ReportsPlaceholder tab="workload" /> },
+                  { path: 'people/:userId?', element: <PeopleRoute /> },
+                  { path: 'me', element: <MyPerformanceRoute /> },
+                ],
+              },
               {
                 path: '/p/:projectId',
                 element: <ProjectLayout />,

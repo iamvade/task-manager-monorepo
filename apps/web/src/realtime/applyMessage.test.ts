@@ -5,7 +5,7 @@ import { queryKeys } from '../api/queryKeys';
 import { TASK_MUTATION } from '../api/taskCache';
 import { PROJECT_ID, SIDEBAR, SPACE_ID, WORKSPACE_ID } from '../test/fixtures';
 import { PROJECT_WITH_STATUSES, at, makeTasks, statusOf } from '../test/tasks';
-import { COALESCE_MS, createMessageHandler } from './applyMessage';
+import { COALESCE_MS, REPORTS_THROTTLE_MS, createMessageHandler } from './applyMessage';
 
 const OTHER_SPACE = '01890000-0000-7000-8000-000000000011';
 const SARA = '01890000-0000-7000-8000-000000000099';
@@ -140,5 +140,43 @@ describe('createMessageHandler', () => {
     expect(s.stale(queryKeys.notificationsOf(WORKSPACE_ID))).toBe(true);
     expect(s.stale(queryKeys.sidebar(WORKSPACE_ID))).toBe(true);
     expect(s.stale(s.projectList)).toBe(false);
+  });
+});
+
+describe('report refreshes', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('refresh reports at once, then at most once per throttle window', () => {
+    const s = setup();
+    const invalidate = vi.spyOn(s.queryClient, 'invalidateQueries');
+    const reportCalls = () =>
+      invalidate.mock.calls.filter(
+        ([filters]) => filters?.queryKey?.[1] === 'reports' && filters.queryKey[2] === WORKSPACE_ID,
+      ).length;
+    const message = (): RealtimeTaskMessage => ({
+      type: 'task.updated',
+      ...base(at(s.tasks, 0)),
+      changes: ['priority.changed'],
+    });
+
+    s.handler.handle(message());
+    expect(reportCalls()).toBe(1);
+    s.handler.handle(message());
+    s.handler.handle(message());
+    vi.advanceTimersByTime(REPORTS_THROTTLE_MS - 1);
+    expect(reportCalls()).toBe(1);
+    vi.advanceTimersByTime(1);
+    expect(reportCalls()).toBe(2);
+    // Quiet for a full window: the next change refreshes right away again.
+    vi.advanceTimersByTime(REPORTS_THROTTLE_MS);
+    expect(reportCalls()).toBe(2);
+    s.handler.handle(message());
+    expect(reportCalls()).toBe(3);
+    s.handler.dispose();
   });
 });

@@ -280,3 +280,38 @@ export const UnarchiveIcon = make(
     <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M9.5 14.5 12 12l2.5 2.5M12 12v6" />
   </>,
 );
+/** Bar chart (Reports nav item and page heading). */
+export const ReportsIcon = make(
+  <>
+    <path d="M3 3v18h18" />
+    <path d="M8 17v-5M13 17V8M18 17v-9" />
+  </>,
+);
+/** Stopwatch (median cycle time, Reports empty state badge). */
+export const StopwatchIcon = make(
+  <>
+    <circle cx="12" cy="13" r="8" />
+    <path d="M12 9v4l2 2M9 2h6" />
+  </>,
+);
+/** Calendar with a check (on-time delivery). */
+export const CalendarCheckIcon = make(
+  <>
+    <rect x="3" y="4" width="18" height="18" rx="2" />
+    <path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4" />
+  </>,
+);
+export const InfoIcon = make(
+  <>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 16v-4M12 8h.01" />
+  </>,
+);
+export const ArrowUpIcon = make(<path d="M12 19V5M5 12l7-7 7 7" />, { strokeWidth: 2.5 });
+export const ArrowDownIcon = make(<path d="M12 5v14M19 12l-7 7-7-7" />, { strokeWidth: 2.5 });
+/** Line chart (Reports empty state preview: Throughput). */
+export const TrendIcon = make(<path d="M3 3v18h18M7 14l4-4 3 3 5-6" />);
+/** Clock with a full circle (Reports empty state preview: Where work waits). */
+export const WaitIcon = make(<path d="M12 6v6l4 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />);
+/** Partial ring (Reports loading status). */
+export const SpinnerIcon = make(<path d="M21 12a9 9 0 1 1-6.2-8.6" />, { strokeWidth: 2.5 });

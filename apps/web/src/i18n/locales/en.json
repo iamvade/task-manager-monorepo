@@ -70,6 +70,7 @@
     "expand": "Expand sidebar",
     "myTasks": "My Tasks",
     "inbox": "Inbox",
+    "reports": "Reports",
     "unread_one": "{{count}} unread",
     "unread_other": "{{count}} unread",
     "openTasks_one": "{{count}} open task",
@@ -848,5 +849,144 @@
     "FILE_TYPE_BLOCKED": "That file type isn’t allowed.",
     "UNAUTHORIZED": "Your session ended. Sign in again.",
     "network": "Can’t reach the server. Check your connection and try again."
+  },
+  "reports": {
+    "title": "Reports",
+    "tabs": {
+      "overview": "Overview",
+      "sprints": "Sprints",
+      "workload": "Workload",
+      "people": "People",
+      "me": "My performance"
+    },
+    "updated": "Updated {{ago}}",
+    "loading": "Loading reports…",
+    "period": {
+      "label": "Period",
+      "week": "This week",
+      "4w": "Last 4 weeks",
+      "quarter": "This quarter",
+      "custom": "Custom",
+      "customTitle": "Custom period",
+      "from": "From",
+      "to": "To",
+      "apply": "Apply",
+      "cancel": "Cancel",
+      "customInvalid": "The start must be on or before the end, at most 366 days apart."
+    },
+    "filters": {
+      "space": "Space:",
+      "project": "Project:",
+      "all": "All",
+      "allSpaces": "All spaces",
+      "allProjects": "All projects",
+      "searchSpaces": "Search spaces",
+      "searchProjects": "Search projects",
+      "spaceLabel": "Filter by space",
+      "projectLabel": "Filter by project"
+    },
+    "export": "Export CSV",
+    "range": {
+      "compare4w": "{{range}} · compared with the previous 4 weeks ({{previous}})",
+      "compareDays_one": "{{range}} · compared with the previous {{count}} day ({{previous}})",
+      "compareDays_other": "{{range}} · compared with the previous {{count}} days ({{previous}})"
+    },
+    "delta": {
+      "vsPrev": "vs previous period",
+      "lowerBetter": "lower is better",
+      "up": "Up",
+      "down": "Down",
+      "same": "No change",
+      "percent": "{{value}}%",
+      "days_one": "{{value}} day",
+      "days_other": "{{value}} days",
+      "points_one": "{{count}} pt",
+      "points_other": "{{count}} pts"
+    },
+    "cards": {
+      "completed": "Completed",
+      "points_one": "· {{count}} point",
+      "points_other": "· {{count}} points",
+      "unsized_one": "· {{count}} unsized",
+      "unsized_other": "· {{count}} unsized",
+      "cycle": "Median cycle time",
+      "days_one": "day",
+      "days_other": "days",
+      "onTime": "On-time delivery",
+      "onTimeOf": "{{onTime}} of {{total}}",
+      "noDueDates": "no due dates",
+      "overdue": "Overdue",
+      "tasks_one": "task",
+      "tasks_other": "tasks",
+      "oldestLate_one": "Oldest is {{count}} day late",
+      "oldestLate_other": "Oldest is {{count}} days late",
+      "noOverdue": "No overdue tasks"
+    },
+    "throughput": {
+      "title": "Throughput",
+      "sub": "Tasks completed per week · last 12 weeks",
+      "thisPeriod": "This period",
+      "prevPeriod": "Previous period",
+      "partialWeek": "This week is still in progress",
+      "weekOf": "Week of {{date}}",
+      "summary": "Tasks completed per week over the last 12 weeks: {{first}} in the first week and {{last}} in the latest, peaking at {{peak}}; {{total}} in total versus {{previousTotal}} in the previous period."
+    },
+    "waits": {
+      "title": "Where work waits",
+      "sub": "Median days spent in each status",
+      "days_one": "{{value}} day",
+      "days_other": "{{value}} days",
+      "status": {
+        "todo": "To Do",
+        "in_progress": "progress",
+        "review": "review"
+      },
+      "insight": {
+        "twice": "Tasks wait longest in {{status}} — {{days}} days on median, about twice as long as any other status.",
+        "times": "Tasks wait longest in {{status}} — {{days}} days on median, about {{ratio}} times as long as any other status.",
+        "slight": "Tasks wait longest in {{status}} — {{days}} days on median, a little longer than any other status.",
+        "much": "Tasks wait longest in {{status}} — {{days}} days on median, far longer than any other status."
+      }
+    },
+    "aging": {
+      "title": "Aging tasks",
+      "sub": "Flagged when a task has been in its current status for more than {{days}} days",
+      "viewAll": "View all",
+      "showLess": "Show less",
+      "cols": {
+        "task": "Task",
+        "project": "Project",
+        "assignee": "Assignee",
+        "status": "Status",
+        "days": "Days in status"
+      },
+      "stale": "Stale",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days",
+      "unassigned": "Unassigned",
+      "empty": "No open tasks right now."
+    },
+    "empty": {
+      "title": "Reports appear after your team completes a few tasks",
+      "bodyProject": "{{name}} is new, so there isn’t enough history to show trends yet. Once the team finishes {{required}} tasks, throughput, wait times and the other reports will show up here automatically.",
+      "bodyScope": "{{name}} doesn’t have enough history to show trends yet. Once the team finishes {{required}} tasks, throughput, wait times and the other reports will show up here automatically.",
+      "progressLabel": "Toward your first report",
+      "progressHint_one": "{{count}} task completed so far · {{left}} more to go",
+      "progressHint_other": "{{count}} tasks completed so far · {{left}} more to go",
+      "ctaCreate": "Create a task",
+      "ctaProject": "Go to project",
+      "ctaAll": "See reports for all projects",
+      "preview": "What you’ll see",
+      "throughputTitle": "Throughput",
+      "throughputDesc": "How many tasks get done each week",
+      "waitsTitle": "Where work waits",
+      "waitsDesc": "Which status tasks spend the longest in",
+      "agingTitle": "Aging tasks",
+      "agingDesc": "A short list of tasks that need attention"
+    },
+    "placeholder": {
+      "title": "Coming soon",
+      "body": "This report is on its way. Overview already shows your team’s throughput, wait times and aging tasks."
+    }
   }
 }
