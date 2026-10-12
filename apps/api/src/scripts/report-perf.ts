@@ -1,9 +1,12 @@
 /**
- * Reports performance check: `pnpm db:perf` (add `--drop` to remove the data, `--fresh` to
- * rebuild it). Builds a "Perf" workspace in DATABASE_URL with 10k tasks and ~24 weeks of
- * history (status periods, sprints with carry-overs, comments with @mentions, subtasks), then
- * times every report endpoint uncached (median of 5) and prints EXPLAIN ANALYZE for the
- * slowest query of the slowest report. Target: every endpoint under 300 ms.
+ * Performance check: `pnpm db:perf` (add `--drop` to remove the data, `--fresh` to rebuild it).
+ * Builds a "Perf" workspace in DATABASE_URL with 10k tasks and ~24 weeks of history (status
+ * periods, sprints with carry-overs, comments with @mentions, subtasks, tags, attachments), then
+ * - times every report endpoint uncached (median of 5) and prints EXPLAIN ANALYZE for the
+ *   slowest query of the slowest report;
+ * - times the task list endpoints (project/space List view, My Tasks) and prints EXPLAIN ANALYZE
+ *   for each list query variant, with the full plan of the slowest.
+ * Target: every endpoint under 300 ms.
  */
 import {
   DEFAULT_STATUS_CATEGORIES,
@@ -13,15 +16,17 @@ import {
   todayInZone,
   type StatusCategory,
 } from '@kite/shared';
-import { eq, inArray, sql, type SQL } from 'drizzle-orm';
+import { and, eq, inArray, isNull, sql, type SQL } from 'drizzle-orm';
 import { uuidv7 } from 'uuidv7';
 import { buildApp } from '../app.js';
 import { hashPassword } from '../auth/password.js';
 import { loadConfig } from '../config.js';
 import { createDb, type Db } from '../db/client.js';
 import { MN_PUBLIC_HOLIDAYS_2026 } from '../db/holidays.js';
+import { positionAfter } from '../db/position.js';
 import {
   activity,
+  attachments,
   comments,
   projectMembers,
   projects,
@@ -29,8 +34,11 @@ import {
   sprintMemberships,
   sprints,
   statuses,
+  subtasks,
+  tags,
   taskAssignees,
   taskStatusPeriods,
+  taskTags,
   tasks,
   users,
   workspaceHolidays,
@@ -42,6 +50,7 @@ import { personQueries } from '../reports/people.js';
 import type { ReportContext } from '../reports/scope.js';
 import { planSprints, sprintQueries } from '../reports/sprints.js';
 import { workloadQueries } from '../reports/workload.js';
+import { projectTaskListQuery, spaceTaskListQuery } from '../tasks/list.js';
 
 const TASKS = 10_000;
 const PEOPLE = 30;
@@ -389,6 +398,69 @@ async function generate(database: Db) {
   await database.execute(sql`analyze`);
 }
 
+/**
+ * Tags, subtasks and attachments for the list view's per-row aggregates. Added separately (and
+ * only once) so existing Perf data doesn't need a rebuild.
+ */
+async function ensureListData(database: Db, workspaceId: string) {
+  const [hasTags] = await database
+    .select({ id: tags.id })
+    .from(tags)
+    .where(eq(tags.workspaceId, workspaceId))
+    .limit(1);
+  if (hasTags) return;
+  const rows = await database
+    .select({ id: tasks.id, createdBy: tasks.createdBy })
+    .from(tasks)
+    .innerJoin(projects, eq(projects.id, tasks.projectId))
+    .where(eq(projects.workspaceId, workspaceId));
+  const tagRows = ['Frontend', 'Backend', 'iOS', 'Android', 'UX/UI', 'Research', 'Bug', 'Docs'].map(
+    (name) => ({
+      id: uuidv7(),
+      workspaceId,
+      name,
+      color: pick(['blue', 'violet', 'teal', 'neutral'] as const),
+    }),
+  );
+  const taskTagRows: (typeof taskTags.$inferInsert)[] = [];
+  const subtaskRows: (typeof subtasks.$inferInsert)[] = [];
+  const attachmentRows: (typeof attachments.$inferInsert)[] = [];
+  for (const task of rows) {
+    if (chance(0.4)) {
+      const chosen = new Set([pick(tagRows).id, ...(chance(0.4) ? [pick(tagRows).id] : [])]);
+      for (const tagId of chosen) taskTagRows.push({ taskId: task.id, tagId });
+    }
+    if (chance(0.4)) {
+      let position: string | null = null;
+      const n = 1 + Math.floor(rand() * 5);
+      for (let i = 0; i < n; i++) {
+        position = positionAfter(position);
+        subtaskRows.push({ taskId: task.id, title: `Step ${i + 1}`, done: chance(0.5), position });
+      }
+    }
+    if (chance(0.1)) {
+      attachmentRows.push({
+        taskId: task.id,
+        uploaderId: task.createdBy,
+        filename: 'spec.pdf',
+        mime: 'application/pdf',
+        size: 1000 + Math.floor(rand() * 100_000),
+        storageKey: `${workspaceId}/${task.id}/${uuidv7()}`,
+      });
+    }
+  }
+  await database.transaction(async (tx) => {
+    await tx.insert(tags).values(tagRows);
+    await insertChunks(taskTagRows, (c) => tx.insert(taskTags).values(c));
+    await insertChunks(subtaskRows, (c) => tx.insert(subtasks).values(c));
+    await insertChunks(attachmentRows, (c) => tx.insert(attachments).values(c));
+  });
+  await database.execute(sql`analyze`);
+  console.log(
+    `Added ${taskTagRows.length} task tags, ${subtaskRows.length} subtasks, ${attachmentRows.length} attachments.`,
+  );
+}
+
 const median = (xs: number[]) => {
   const s = [...xs].sort((a, b) => a - b);
   return s[Math.floor(s.length / 2)] ?? 0;
@@ -404,6 +476,7 @@ async function main() {
   if (!existing) await generate(db);
   const [ws] = await db.select().from(workspaces).where(eq(workspaces.slug, SLUG));
   if (!ws) throw new Error('Perf workspace missing');
+  await ensureListData(db, ws.id);
 
   const app = await buildApp({ ...config, NODE_ENV: 'test', REPORTS_CACHE_TTL_MS: 0 }, db);
   await app.ready();
@@ -431,10 +504,8 @@ async function main() {
     'people (owner)': 'people/me',
     'people (member)': `people/${member.id}`,
   };
-  const timings: [string, number][] = [];
-  console.log(`\nReport endpoints, uncached, median of ${RUNS} (target < ${TARGET_MS} ms):`);
-  for (const [name, path] of Object.entries(endpoints)) {
-    const url = `/api/v1/workspaces/${ws.id}/reports/${path}`;
+  /** Median request time of `url`, printed as one line. */
+  const time = async (name: string, url: string) => {
     const warm = await app.inject({ method: 'GET', url, headers: { cookie } });
     if (warm.statusCode !== 200) throw new Error(`${name}: ${warm.statusCode} ${warm.body}`);
     const ms: number[] = [];
@@ -444,9 +515,20 @@ async function main() {
       ms.push(performance.now() - start);
     }
     const m = median(ms);
-    timings.push([name, m]);
-    console.log(`  ${name.padEnd(22)} ${m.toFixed(0).padStart(5)} ms ${m < TARGET_MS ? '✓' : '✗'}`);
+    const rows = Array.isArray(warm.json()) ? ` · ${warm.json<unknown[]>().length} rows` : '';
+    console.log(
+      `  ${name.padEnd(28)} ${m.toFixed(0).padStart(5)} ms ${m < TARGET_MS ? '✓' : '✗'}${rows}`,
+    );
+    return m;
+  };
+
+  const timings: [string, number][] = [];
+  console.log(`\nReport endpoints, uncached, median of ${RUNS} (target < ${TARGET_MS} ms):`);
+  for (const [name, path] of Object.entries(endpoints)) {
+    timings.push([name, await time(name, `/api/v1/workspaces/${ws.id}/reports/${path}`)]);
   }
+
+  await taskListPerf(ws.id, project, time);
 
   // EXPLAIN the queries of the slowest report and print the plan of the slowest one.
   const [owner] = await db.select().from(users).where(eq(users.email, 'perf-1@kite.test'));
@@ -498,6 +580,62 @@ async function main() {
   if (worst)
     console.log(`\nEXPLAIN (ANALYZE, BUFFERS) · ${slowest} · ${worst.name}\n${worst.plan}`);
   await app.close();
+}
+
+/** List view and My Tasks: endpoint timings, then EXPLAIN ANALYZE of each list query. */
+async function taskListPerf(
+  workspaceId: string,
+  project: typeof projects.$inferSelect,
+  time: (name: string, url: string) => Promise<number>,
+) {
+  const [assignee] = await db
+    .select({ userId: taskAssignees.userId })
+    .from(taskAssignees)
+    .innerJoin(tasks, eq(tasks.id, taskAssignees.taskId))
+    .where(and(eq(tasks.projectId, project.id), isNull(tasks.deletedAt)))
+    .limit(1);
+  const someone = assignee?.userId ?? '';
+  const p = `/api/v1/projects/${project.id}/tasks`;
+  const s = `/api/v1/spaces/${project.spaceId}/tasks`;
+  console.log(`\nTask list endpoints, median of ${RUNS} (target < ${TARGET_MS} ms):`);
+  // The List view loads every task of the project (done included) and filters on the client.
+  await time('project list', p);
+  await time('project list, open only', `${p}?includeDone=false`);
+  await time('project list by due date', `${p}?sort=dueDate`);
+  await time('project list, one assignee', `${p}?assigneeId=${someone}`);
+  await time('project list, search', `${p}?q=task`);
+  await time('space list', s);
+  await time('space list, open only', `${s}?includeDone=false`);
+  await time('my tasks (owner)', `/api/v1/me/home?workspaceId=${workspaceId}`);
+
+  const base = { sort: 'position', dir: 'asc', includeDone: true } as const;
+  const variants: Record<string, { getSQL: () => SQL }> = {
+    'project list': projectTaskListQuery(db, project.id, base),
+    'project list, open only': projectTaskListQuery(db, project.id, {
+      ...base,
+      includeDone: false,
+    }),
+    'project list by due date': projectTaskListQuery(db, project.id, { ...base, sort: 'dueDate' }),
+    'project list, one assignee': projectTaskListQuery(db, project.id, {
+      ...base,
+      assigneeId: [someone],
+    }),
+    'space list': spaceTaskListQuery(db, project.spaceId, base),
+  };
+  let worst: { name: string; ms: number; plan: string } | null = null;
+  for (const [name, query] of Object.entries(variants)) {
+    const result = await db.execute<{ 'QUERY PLAN': string }>(
+      sql`explain (analyze, buffers) ${query.getSQL()}`,
+    );
+    const plan = result.rows.map((r) => r['QUERY PLAN']).join('\n');
+    const ms = Number(/Execution Time: ([\d.]+) ms/.exec(plan)?.[1] ?? 0);
+    const seqScans = [...plan.matchAll(/Seq Scan on (\w+)/g)].map((m) => m[1]);
+    console.log(
+      `  ${name}: ${ms.toFixed(1)} ms${seqScans.length ? ` · seq scans: ${[...new Set(seqScans)].join(', ')}` : ''}`,
+    );
+    if (!worst || ms > worst.ms) worst = { name, ms, plan };
+  }
+  if (worst) console.log(`\nEXPLAIN (ANALYZE, BUFFERS) · ${worst.name}\n${worst.plan}`);
 }
 
 try {

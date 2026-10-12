@@ -1,42 +1,65 @@
-import type { ReactElement } from 'react';
+import type { ComponentType } from 'react';
 import { Navigate, createBrowserRouter, type RouteObject } from 'react-router';
 import { RedirectIfAuthed, RequireAuth } from './auth/RouteGuards';
 import { RouteError } from './components/ErrorState';
-import { ListView, SpaceListView } from './features/list/ListView';
-import { BoardView, SpaceBoardView } from './features/board/BoardView';
-import { CalendarView, SpaceCalendarView } from './features/calendar/CalendarView';
-import { ProjectLayout } from './features/project/ProjectLayout';
-import { OverviewTab } from './features/reports/overview/OverviewTab';
-import { MyPerformanceRoute, PeopleRoute } from './features/reports/ReportsRoutes';
-import { SprintsTab } from './features/reports/sprints/SprintsTab';
-import { WorkloadTab } from './features/reports/workload/WorkloadTab';
 import { AppShell } from './features/shell/AppShell';
-import { SpaceLayout } from './features/space/SpaceLayout';
-import { InboxPage } from './pages/InboxPage';
-import { InviteAcceptPage } from './pages/InviteAcceptPage';
-import { LoginPage } from './pages/LoginPage';
-import { MyTasksPage } from './pages/MyTasksPage';
-import { SettingsPage } from './pages/SettingsPage';
-import { TaskPage } from './pages/TaskPage';
+
+/**
+ * Every page is its own chunk (`route.lazy`), loaded on first visit; the guards and the shell
+ * (sidebar, overlays) stay in the entry chunk.
+ */
+const page =
+  <M,>(load: () => Promise<M>, pick: (module: M) => ComponentType) =>
+  async (): Promise<Pick<RouteObject, 'Component'>> => ({ Component: pick(await load()) });
+
+const views = {
+  list: () => import('./features/list/ListView'),
+  board: () => import('./features/board/BoardView'),
+  calendar: () => import('./features/calendar/CalendarView'),
+};
 
 /** List / Board / Calendar children of the project and space routes. */
-const viewRoutes = (
-  list: ReactElement,
-  board: ReactElement,
-  calendar: ReactElement,
-): RouteObject[] => [
+const viewRoutes = (level: 'project' | 'space'): RouteObject[] => [
   { index: true, element: <Navigate to="list" replace /> },
-  { path: 'list', element: list },
-  { path: 'board', element: board },
-  { path: 'calendar', element: calendar },
+  {
+    path: 'list',
+    lazy: page(views.list, (m) => (level === 'project' ? m.ListView : m.SpaceListView)),
+  },
+  {
+    path: 'board',
+    lazy: page(views.board, (m) => (level === 'project' ? m.BoardView : m.SpaceBoardView)),
+  },
+  {
+    path: 'calendar',
+    lazy: page(views.calendar, (m) => (level === 'project' ? m.CalendarView : m.SpaceCalendarView)),
+  },
 ];
+
+const reportsRoutes = () => import('./features/reports/ReportsRoutes');
 
 export const routes: RouteObject[] = [
   {
     errorElement: <RouteError />,
     children: [
-      { element: <RedirectIfAuthed />, children: [{ path: '/login', element: <LoginPage /> }] },
-      { path: '/invite/:token', element: <InviteAcceptPage /> },
+      {
+        element: <RedirectIfAuthed />,
+        children: [
+          {
+            path: '/login',
+            lazy: page(
+              () => import('./pages/LoginPage'),
+              (m) => m.LoginPage,
+            ),
+          },
+        ],
+      },
+      {
+        path: '/invite/:token',
+        lazy: page(
+          () => import('./pages/InviteAcceptPage'),
+          (m) => m.InviteAcceptPage,
+        ),
+      },
       {
         element: <RequireAuth />,
         children: [
@@ -44,30 +67,78 @@ export const routes: RouteObject[] = [
             element: <AppShell />,
             children: [
               { path: '/', element: <Navigate to="/my-tasks" replace /> },
-              { path: '/my-tasks', element: <MyTasksPage /> },
-              { path: '/inbox', element: <InboxPage /> },
-              { path: '/settings', element: <SettingsPage /> },
-              { path: '/t/:taskKey', element: <TaskPage /> },
+              {
+                path: '/my-tasks',
+                lazy: page(
+                  () => import('./pages/MyTasksPage'),
+                  (m) => m.MyTasksPage,
+                ),
+              },
+              {
+                path: '/inbox',
+                lazy: page(
+                  () => import('./pages/InboxPage'),
+                  (m) => m.InboxPage,
+                ),
+              },
+              {
+                path: '/settings',
+                lazy: page(
+                  () => import('./pages/SettingsPage'),
+                  (m) => m.SettingsPage,
+                ),
+              },
+              {
+                path: '/t/:taskKey',
+                lazy: page(
+                  () => import('./pages/TaskPage'),
+                  (m) => m.TaskPage,
+                ),
+              },
               {
                 path: '/reports',
                 children: [
                   { index: true, element: <Navigate to="overview" replace /> },
-                  { path: 'overview', element: <OverviewTab /> },
-                  { path: 'sprints', element: <SprintsTab /> },
-                  { path: 'workload', element: <WorkloadTab /> },
-                  { path: 'people/:userId?', element: <PeopleRoute /> },
-                  { path: 'me', element: <MyPerformanceRoute /> },
+                  {
+                    path: 'overview',
+                    lazy: page(
+                      () => import('./features/reports/overview/OverviewTab'),
+                      (m) => m.OverviewTab,
+                    ),
+                  },
+                  {
+                    path: 'sprints',
+                    lazy: page(
+                      () => import('./features/reports/sprints/SprintsTab'),
+                      (m) => m.SprintsTab,
+                    ),
+                  },
+                  {
+                    path: 'workload',
+                    lazy: page(
+                      () => import('./features/reports/workload/WorkloadTab'),
+                      (m) => m.WorkloadTab,
+                    ),
+                  },
+                  { path: 'people/:userId?', lazy: page(reportsRoutes, (m) => m.PeopleRoute) },
+                  { path: 'me', lazy: page(reportsRoutes, (m) => m.MyPerformanceRoute) },
                 ],
               },
               {
                 path: '/p/:projectId',
-                element: <ProjectLayout />,
-                children: viewRoutes(<ListView />, <BoardView />, <CalendarView />),
+                lazy: page(
+                  () => import('./features/project/ProjectLayout'),
+                  (m) => m.ProjectLayout,
+                ),
+                children: viewRoutes('project'),
               },
               {
                 path: '/s/:spaceId',
-                element: <SpaceLayout />,
-                children: viewRoutes(<SpaceListView />, <SpaceBoardView />, <SpaceCalendarView />),
+                lazy: page(
+                  () => import('./features/space/SpaceLayout'),
+                  (m) => m.SpaceLayout,
+                ),
+                children: viewRoutes('space'),
               },
               { path: '*', element: <Navigate to="/my-tasks" replace /> },
             ],
