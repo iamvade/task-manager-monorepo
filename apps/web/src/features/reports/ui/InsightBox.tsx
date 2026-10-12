@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react';
-import { InfoIcon } from '../../../components/icons';
+import { InfoIcon, WarningIcon } from '../../../components/icons';
 import { cn } from '../../../lib/cn';
 
 /**
  * Tinted note under a chart (Reports.dc.html "Where work waits"): radius 8, padding 10 12,
- * 13/20 `--text-2` with a 14px info icon; accent-soft, or warning-soft (burndown).
+ * 13/20 `--text-2` with a 14px info icon on accent-soft, or a warning icon on warning-soft
+ * (burndown).
  */
 export function InsightBox({
   tone = 'accent',
@@ -23,13 +24,11 @@ export function InsightBox({
         className,
       )}
     >
-      <InfoIcon
-        size={14}
-        className={cn(
-          'mt-[3px] flex-none',
-          tone === 'accent' ? 'text-accent-ink' : 'text-warning-icon',
-        )}
-      />
+      {tone === 'accent' ? (
+        <InfoIcon size={14} className="mt-[3px] flex-none text-accent-ink" />
+      ) : (
+        <WarningIcon size={14} className="mt-[3px] flex-none text-warning-icon" />
+      )}
       <span>{children}</span>
     </p>
   );

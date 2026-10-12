@@ -62,12 +62,29 @@ export type OverviewReportQuery = z.infer<typeof overviewReportQuerySchema>;
 export const workloadReportQuerySchema = z.object(scopeFields);
 export type WorkloadReportQuery = z.infer<typeof workloadReportQuerySchema>;
 
-export const sprintsReportQuerySchema = z.object({
+export const sprintsReportQuerySchema = z
+  .object({
+    /**
+     * Default: the first project in scope (space order, then project order) that has a sprint,
+     * else the first project in scope.
+     */
+    projectId: z.uuid().optional(),
+    /** Narrows the default project to one space. */
+    spaceId: z.uuid().optional(),
+    /** Default: the current sprint, else the latest started, else the newest. Needs projectId. */
+    sprintId: z.uuid().optional(),
+  })
+  .refine((q) => !q.sprintId || q.projectId, {
+    message: 'sprintId needs projectId',
+    path: ['sprintId'],
+  });
+export type SprintsReportQuery = z.infer<typeof sprintsReportQuerySchema>;
+
+/** The CSV always names the project (the page knows it from the report). */
+export const sprintsExportQuerySchema = z.object({
   projectId: z.uuid(),
-  /** Default: the current sprint, else the latest. */
   sprintId: z.uuid().optional(),
 });
-export type SprintsReportQuery = z.infer<typeof sprintsReportQuerySchema>;
 
 export const personReportQuerySchema = z.object(periodFields).superRefine(checkCustomPeriod);
 export type PersonReportQuery = z.infer<typeof personReportQuerySchema>;
@@ -282,6 +299,11 @@ export const sprintDetailSchema = sprintRefSchema
     /** Current sprint: where the projected line ends at the current pace; null otherwise. */
     projectedRemaining: nullableNumber,
     pace: z.enum(SPRINT_PACES).nullable(),
+    /**
+     * Current sprint: the status category its open tasks have waited longest in (median days in
+     * their current status); null otherwise or when nothing is open.
+     */
+    waitingMost: statusCategorySchema.exclude(['done']).nullable(),
     /** Up to 6 sprints ending with this one, oldest first. */
     recent: z.array(sprintTotalsSchema),
     /** Tasks carried over from the previous sprint, most-carried first. */
@@ -293,7 +315,8 @@ export type SprintDetail = z.infer<typeof sprintDetailSchema>;
 export const sprintsReportSchema = z
   .object({
     ...reportMeta,
-    project: taskProjectRefSchema,
+    /** The requested project, else the default one; null when the scope has no projects. */
+    project: taskProjectRefSchema.nullable(),
     /** Newest first. */
     sprints: z.array(sprintRefSchema),
     /** Null when the project has no sprints. */
@@ -321,8 +344,11 @@ export const workloadTaskSchema = z
     dueDate: dateSchema.nullable(),
     bucket: workloadBucketSchema,
     project: taskProjectRefSchema,
+    /** Everyone assigned (the task is listed under each of them). */
+    assignees: z.array(userRefSchema),
   })
   .meta({ id: 'WorkloadTask' });
+export type WorkloadTask = z.infer<typeof workloadTaskSchema>;
 
 export const workloadPersonSchema = z
   .object({

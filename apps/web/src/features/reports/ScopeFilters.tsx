@@ -15,27 +15,40 @@ interface ScopeFiltersProps {
   onChange: (patch: Partial<ReportFilters>) => void;
   /** Empty state: only the Project filter. */
   projectOnly?: boolean;
+  /**
+   * Sprints: one project is always shown (no "All projects" row); `shownProjectId` is the one
+   * the report picked while the URL names none.
+   */
+  requireProject?: boolean;
+  shownProjectId?: string;
 }
 
 type ProjectItem = { project: SidebarSpace['projects'][number]; space: SidebarSpace } | null;
 
 /** "Space: All ▾" and "Project: All ▾" outline buttons, each a searchable picker. */
-export function ScopeFilters({ value, onChange, projectOnly }: ScopeFiltersProps) {
+export function ScopeFilters({
+  value,
+  onChange,
+  projectOnly,
+  requireProject,
+  shownProjectId,
+}: ScopeFiltersProps) {
   const { t } = useTranslation();
   const workspace = useCurrentWorkspace();
   const sidebar = useSidebar(workspace?.id).data;
   const spaces = useMemo(() => sidebar?.spaces ?? [], [sidebar]);
   const space = spaces.find((s) => s.id === value.spaceId);
-  const project = spaces.flatMap((s) => s.projects).find((p) => p.id === value.projectId);
+  const projectId = value.projectId ?? (requireProject ? shownProjectId : undefined);
+  const project = spaces.flatMap((s) => s.projects).find((p) => p.id === projectId);
 
   const projectItems = useMemo<ProjectItem[]>(
     () => [
-      null,
+      ...(requireProject ? [] : [null]),
       ...spaces
         .filter((s) => !value.spaceId || s.id === value.spaceId)
         .flatMap((s) => s.projects.map((p) => ({ project: p, space: s }))),
     ],
-    [spaces, value.spaceId],
+    [spaces, value.spaceId, requireProject],
   );
 
   return (
@@ -89,14 +102,14 @@ export function ScopeFilters({ value, onChange, projectOnly }: ScopeFiltersProps
             props={props}
             open={open}
             label={t('reports.filters.project')}
-            value={project?.name ?? t('reports.filters.all')}
+            value={project?.name ?? (requireProject ? '—' : t('reports.filters.all'))}
           />
         )}
       >
         {(close) => (
           <Picker<ProjectItem>
             items={projectItems}
-            value={value.projectId ?? ''}
+            value={projectId ?? ''}
             getKey={(i) => i?.project.id ?? ''}
             getLabel={(i) => i?.project.name ?? t('reports.filters.allProjects')}
             label={t('reports.filters.projectLabel')}

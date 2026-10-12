@@ -5,6 +5,7 @@ import {
   personReportQuerySchema,
   personReportSchema,
   reportQuerySchema,
+  sprintsExportQuerySchema,
   sprintsReportQuerySchema,
   sprintsReportSchema,
   workloadReportQuerySchema,
@@ -19,7 +20,7 @@ import { overviewExport, personExport, sprintsExport, workloadExport } from '../
 import { buildOverview } from '../reports/overview.js';
 import { buildPerson } from '../reports/people.js';
 import { resolveReportScope, type ReportContext } from '../reports/scope.js';
-import { buildSprints } from '../reports/sprints.js';
+import { buildSprints, defaultSprintProject } from '../reports/sprints.js';
 import { buildWorkload } from '../reports/workload.js';
 
 const err = apiErrorSchema;
@@ -110,7 +111,7 @@ export const reportRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       schema: {
         tags: ['Reports'],
         summary: 'Reports · Sprints',
-        description: `One project’s sprints and the selected one (default: current, else the latest started): working days without weekends and workspace holidays, committed / added / completed, carried over, burndown and the last 6 sprints. 404 for a sprint of another project. ${MEMBERS}`,
+        description: `One project’s sprints and the selected one (default: current, else the latest started): working days without weekends and workspace holidays, committed / added / completed, carried over, burndown, the status open tasks wait longest in, and the last 6 sprints. Without \`projectId\` the first project in scope (\`spaceId\`, else the workspace) that has a sprint is shown, else the first project; \`project\` is null when there is none. \`sprintId\` needs \`projectId\`. 404 for a sprint of another project. ${MEMBERS}`,
         params,
         querystring: sprintsReportQuerySchema,
         response: { 200: sprintsReportSchema, ...errors },
@@ -118,12 +119,13 @@ export const reportRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     },
     async (request) => {
       const { workspaceId } = request.params;
-      const { projectId, sprintId } = request.query;
-      const ctx = await resolveReportScope(request, workspaceId, { projectId });
+      const { projectId, spaceId, sprintId } = request.query;
+      const ctx = await resolveReportScope(request, workspaceId, { projectId, spaceId });
+      const shown = projectId ?? (await defaultSprintProject(app.db, ctx));
       const { value, generatedAt } = await app.reportCache.get(
         workspaceId,
-        `sprints|${projectId}|${sprintId ?? ''}|${contextKey(ctx)}`,
-        () => buildSprints(app.db, ctx, projectId, sprintId),
+        `sprints|${shown ?? ''}|${ctx.spaceId ?? ''}|${sprintId ?? ''}|${contextKey(ctx)}`,
+        () => buildSprints(app.db, ctx, shown, sprintId),
       );
       return { ...value, generatedAt: generatedAt.toISOString() };
     },
@@ -138,7 +140,7 @@ export const reportRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         summary: 'Reports · Sprints as CSV',
         description: `The selected sprint’s tasks: committed, added mid-sprint, done, times carried. ${CSV_NOTE} ${MEMBERS}`,
         params,
-        querystring: sprintsReportQuerySchema,
+        querystring: sprintsExportQuerySchema,
         response: { 200: csvResponse, ...errors },
       },
     },

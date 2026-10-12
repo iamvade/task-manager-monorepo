@@ -12,6 +12,8 @@ const ACCENT_INK_DARK: Record<Accent, string> = {
   '#3F3F46': '#D4D4D8',
 };
 
+const DEFAULT_ACCENT: Accent = '#6E56CF';
+
 /** Language picked before sign-in (on /login), remembered per browser. */
 export function getStoredLanguage(): Locale | null {
   try {
@@ -40,6 +42,13 @@ export function applyAppearance(theme: Theme, accent: Accent): void {
   // accent at 10% (light) / 20% (dark), as hex alpha like the designs (`accent + '1A'`).
   root.style.setProperty('--accent-soft-light', `${accent}1A`);
   root.style.setProperty('--accent-soft-dark', `${accent}33`);
+  // Sprint chart (ReportsSprints.dc.html): the default accent has its own tints, others use the
+  // accent at 45% (`+ '73'`) for committed and solid for completed; dark uses the accent ink.
+  const isDefault = accent === DEFAULT_ACCENT;
+  root.style.setProperty('--sprint-committed-light', isDefault ? '#9C8BE3' : `${accent}73`);
+  root.style.setProperty('--sprint-completed-light', isDefault ? '#5B45B8' : accent);
+  root.style.setProperty('--sprint-committed-dark', `${ACCENT_INK_DARK[accent]}73`);
+  root.style.setProperty('--sprint-completed-dark', ACCENT_INK_DARK[accent]);
   try {
     localStorage.setItem(APPEARANCE_KEY, JSON.stringify({ theme, accent }));
   } catch {

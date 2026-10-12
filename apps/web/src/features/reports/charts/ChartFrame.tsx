@@ -5,7 +5,7 @@ interface ChartFrameProps {
   /** Y tick values, 0 first; the last one is the top of the plot. */
   ticks: readonly number[];
   /** Labels under the plot, one per equal-width column ('' = no label). */
-  xLabels: readonly string[];
+  xLabels: readonly ReactNode[];
   /** Accessible summary sentence of the whole figure. */
   ariaLabel: string;
   height?: number;

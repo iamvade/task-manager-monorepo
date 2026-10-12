@@ -6,6 +6,7 @@ import {
   type PaletteKey,
   type Priority,
   type Size,
+  type UserRef,
   type WorkloadBucket,
   type WorkloadPerson,
   type WorkloadReport,
@@ -20,6 +21,7 @@ import {
   type ReportContext,
 } from './scope.js';
 import { rows, sizePoints } from './sql.js';
+import { assigneesColumn } from './tasks.js';
 
 /**
  * Open tasks in the scope per assignee (a task with several assignees counts for each), with
@@ -72,7 +74,7 @@ const tasksQuery = (ctx: ReportContext, weekEnd: string) => sql`
   select a.user_id, a.id, a.number, a.title, a.priority, a.size, a.pts,
     a.due_date::text as due_date, a.bucket,
     p.id as project_id, p.space_id as project_space_id, p.key as project_key,
-    p.name as project_name, p.color as project_color
+    p.name as project_name, p.color as project_color, ${assigneesColumn('a')}
   from a join projects p on p.id = a.project_id
   order by a.user_id,
     array_position(array['overdue', 'week', 'later', 'none'], a.bucket),
@@ -112,6 +114,7 @@ interface TaskRow extends Record<string, unknown> {
   project_key: string;
   project_name: string;
   project_color: PaletteKey;
+  assignees: UserRef[];
 }
 
 /** Every query of the Workload report (the perf script EXPLAINs them). */
@@ -162,6 +165,7 @@ export async function buildWorkload(
           name: t.project_name,
           color: t.project_color,
         },
+        assignees: t.assignees,
       })),
   }));
 

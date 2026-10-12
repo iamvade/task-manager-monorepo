@@ -134,6 +134,24 @@
   --bucket-none-a: #f4f4f5;
   --bucket-none-b: #d4d4d8;
   --bucket-none-border: #c4c4cc;
+  /* Sprints (ReportsSprints.dc.html): committed / completed follow the accent (applyAppearance
+     sets the -light/-dark pairs; defaults = the default accent's #9C8BE3 / #5B45B8). */
+  --sprint-committed-light: #9c8be3;
+  --sprint-completed-light: #5b45b8;
+  --sprint-committed-dark: #b4a5ff73;
+  --sprint-completed-dark: #b4a5ff;
+  --sprint-committed: var(--sprint-committed-light);
+  --sprint-completed: var(--sprint-completed-light);
+  --sprint-added: #d97706;
+  --sprint-carried: #8b8b94;
+  --pip-empty: #e6e6ea;
+  --warm-card-bg: #fffbf5;
+  --warm-card-border: #f5ddb8;
+  --warm-card-fg: #92400e;
+  /* Workload capacity pill dots (Heavy / Balanced / Light). */
+  --load-heavy-dot: #e39b2b;
+  --load-balanced-dot: #8b8b94;
+  --load-light-dot: #16a34a;
 }
 
 :root[data-theme='dark'] {
@@ -246,4 +264,15 @@
   --bucket-none-a: #232328;
   --bucket-none-b: #3a3a42;
   --bucket-none-border: #4a4a52;
+  --sprint-committed: var(--sprint-committed-dark);
+  --sprint-completed: var(--sprint-completed-dark);
+  --sprint-added: #f59e0b;
+  --sprint-carried: #9a9aa4;
+  --pip-empty: #2a2a30;
+  --warm-card-bg: rgba(251, 191, 36, 0.06);
+  --warm-card-border: rgba(251, 191, 36, 0.24);
+  --warm-card-fg: #fcd34d;
+  --load-heavy-dot: #e8a33d;
+  --load-balanced-dot: #9a9aa4;
+  --load-light-dot: #22c55e;
 }

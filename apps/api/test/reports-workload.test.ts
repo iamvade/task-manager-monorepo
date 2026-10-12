@@ -106,6 +106,12 @@ describe('GET /workspaces/:id/reports/workload', () => {
       ['none', null],
       ['none', null],
     ]);
+    // Each task names everyone assigned (for the reassign picker).
+    const shared = row(w.owner.id)?.tasks[0];
+    expect(shared?.assignees.map((u) => u.id).sort()).toEqual(
+      [balanced.user.id, w.owner.id].sort(),
+    );
+    expect(row(late.user.id)?.tasks[0]?.assignees.map((u) => u.id)).toEqual([late.user.id]);
     // People by open points; totals count the shared task once.
     expect(r.people[0]?.user.id).toBe(balanced.user.id);
     expect(r.totals).toEqual({ openTasks: 7, points: 36 });

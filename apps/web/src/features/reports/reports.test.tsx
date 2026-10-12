@@ -1,48 +1,13 @@
-import { QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { RouterProvider, createMemoryRouter } from 'react-router';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { AuthProvider } from '../../auth/AuthProvider';
 import i18n from '../../i18n';
-import { createQueryClient } from '../../queryClient';
-import { routes } from '../../router';
 import { useUiStore } from '../../stores/ui';
-import { ME, PROJECT_ID, SIDEBAR, WORKSPACE_ID, mockApi } from '../../test/fixtures';
+import { ME, PROJECT_ID, WORKSPACE_ID } from '../../test/fixtures';
+import { MEMBER_ME, REPORTS_API, renderReports, requested } from '../../test/renderReports';
 import { REPORTS_NOW, overview } from '../../test/reports';
 import { at } from '../../test/tasks';
 
-type Handler = (init?: RequestInit) => Response | Promise<Response>;
-
-const EN_ME = { ...ME, preferences: { ...ME.preferences, locale: 'en' } };
-const MEMBER_ME = {
-  ...EN_ME,
-  workspaces: EN_ME.workspaces.map((w) => ({ ...w, role: 'member' })),
-};
-const OVERVIEW = `GET /api/v1/workspaces/${WORKSPACE_ID}/reports/overview`;
-
-function renderReports(
-  entry: string,
-  { me = EN_ME, extra = {} }: { me?: typeof EN_ME; extra?: Record<string, Handler> } = {},
-) {
-  const fetchMock = mockApi({
-    'GET /api/v1/auth/me': () => Response.json(me),
-    [`GET /api/v1/workspaces/${WORKSPACE_ID}/sidebar`]: () => Response.json(SIDEBAR),
-    [OVERVIEW]: () => Response.json(overview()),
-    ...extra,
-  });
-  const router = createMemoryRouter(routes, { initialEntries: [entry] });
-  render(
-    <QueryClientProvider client={createQueryClient()}>
-      <AuthProvider>
-        <RouterProvider router={router} />
-      </AuthProvider>
-    </QueryClientProvider>,
-  );
-  return { fetchMock, router };
-}
-
-const requested = (fetchMock: ReturnType<typeof mockApi>, part: string) =>
-  fetchMock.mock.calls.some(([input]) => typeof input === 'string' && input.includes(part));
+const OVERVIEW = `${REPORTS_API}/overview`;
 
 describe('Reports', () => {
   beforeEach(async () => {

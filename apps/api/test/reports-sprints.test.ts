@@ -2,6 +2,7 @@ import { sprintsReportSchema } from '@kite/shared';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createTestApp } from './helpers.js';
 import { insertHoliday, insertSprint, timelineTask } from './report-fixtures.js';
+import { createSpace } from './fixtures.js';
 import { taskWorld } from './task-setup.js';
 
 // Wednesday Oct 14 2026, 12:00 in Ulaanbaatar. Sprint 4 (Oct 12–23, Oct 15 a holiday) is
@@ -222,6 +223,41 @@ describe('GET /workspaces/:id/reports/sprints', () => {
       `/workspaces/${fx.w.ws.id}/reports/sprints?projectId=${other.id}&sprintId=${fx.s3.id}`,
     );
     expect(res.statusCode).toBe(404);
+  });
+
+  it('names the status open tasks wait longest in (current sprint only)', async () => {
+    const current = (await sprints(fx.w, `projectId=${fx.w.project.id}`)).sprint;
+    // T1 has waited in To Do since August; nothing else is in progress or review.
+    expect(current?.waitingMost).toBe('todo');
+    const past = (await sprints(fx.w, `projectId=${fx.w.project.id}&sprintId=${fx.s3.id}`)).sprint;
+    expect(past?.waitingMost).toBeNull();
+  });
+
+  it('without projectId shows the first project in scope that has sprints', async () => {
+    const t = await taskWorld(ctx, 'Default Owner');
+    // The first project (by position) has no sprints; a later one does.
+    const later = await t.newProject('Later');
+    await insertSprint(ctx.db, later.id, 1, '2026-10-12', '2026-10-23');
+    const r = await sprints(t, '');
+    expect(r.project?.id).toBe(later.id);
+    expect(r.sprint?.number).toBe(1);
+    expect(r.scope.projectId).toBeNull();
+
+    // A space without sprint projects falls back to its first project.
+    const space = await createSpace(ctx.db, t.ws.id);
+    const plain = await t.newProject('Plain', space.id);
+    const inSpace = await sprints(t, `spaceId=${space.id}`);
+    expect(inSpace.project?.id).toBe(plain.id);
+    expect(inSpace.sprint).toBeNull();
+
+    // An empty space has nothing to show.
+    const empty = await createSpace(ctx.db, t.ws.id);
+    const none = await sprints(t, `spaceId=${empty.id}`);
+    expect(none).toMatchObject({ project: null, sprints: [], sprint: null });
+
+    // sprintId alone is rejected.
+    const res = await t.api('GET', `/workspaces/${t.ws.id}/reports/sprints?sprintId=${fx.s3.id}`);
+    expect(res.statusCode).toBe(400);
   });
 
   it('a project without sprints has no sprint', async () => {

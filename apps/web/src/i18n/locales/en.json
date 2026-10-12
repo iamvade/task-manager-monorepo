@@ -984,6 +984,158 @@
       "agingTitle": "Aging tasks",
       "agingDesc": "A short list of tasks that need attention"
     },
+    "sprints": {
+      "selectLabel": "Choose a sprint",
+      "current": "Current",
+      "short": "S{{number}}",
+      "heading": "{{name}} · {{range}}",
+      "dayOf_one": "Day {{day}} of {{total}} working days · {{count}} day left",
+      "dayOf_other": "Day {{day}} of {{total}} working days · {{count}} days left",
+      "completedSprint": "Completed sprint · {{total}} working days",
+      "futureSprint": "Starts {{date}} · {{total}} working days",
+      "elapsedLabel": "Working days elapsed",
+      "cards": {
+        "committed": "Committed",
+        "committedCarried": "incl. {{count}} carried over",
+        "committedStart": "at sprint start",
+        "completed": "Completed",
+        "ofScopePace": "{{pct}} of scope · {{pace}}",
+        "ofScope": "{{pct}} of scope",
+        "ofTotalScope": "{{pct}} of total scope",
+        "added": "Added mid-sprint",
+        "addedScope": "Scope +{{pct}}",
+        "carried": "Carried over",
+        "carriedFrom": "from Sprint {{number}}",
+        "carriedFromRepeated": "from Sprint {{number}} · {{count}} carried 2+ times",
+        "carriedNone": "first sprint of the project",
+        "carriedOut": "Carried to next sprint",
+        "carriedInto": "into Sprint {{number}}",
+        "carriedIntoNone": "no next sprint yet"
+      },
+      "pace": {
+        "on_track": "on track",
+        "slightly_behind": "slightly behind ideal",
+        "behind": "behind ideal"
+      },
+      "chart": {
+        "title": "Committed vs completed",
+        "sub": "Last 6 sprints · number of tasks",
+        "inProgress": "in progress",
+        "done": "{{pct}} done",
+        "summaryItem": "{{name}}: committed {{committed}}, added mid-sprint {{added}}, completed {{completed}}"
+      },
+      "burndown": {
+        "title": "Current sprint burndown",
+        "titleOther": "{{name}} burndown",
+        "sub": "Remaining tasks per day · {{name}}",
+        "remaining": "Remaining",
+        "ideal": "Ideal",
+        "projection": "Projected",
+        "scopeAdded": "Scope added",
+        "today": "Today",
+        "start": "Sprint start · {{date}}",
+        "todayTitle": "{{date}} · today",
+        "tasks_one": "{{count}} task",
+        "tasks_other": "{{count}} tasks",
+        "projectedEnd": "≈ {{count}}",
+        "insight_one": "At the current pace about {{count}} task will be left when the sprint ends.",
+        "insight_other": "At the current pace about {{count}} tasks will be left when the sprint ends.",
+        "insightStatus": "Consider trimming scope or unblocking tasks in {{status}}.",
+        "insightNoStatus": "Consider trimming scope or unblocking stuck tasks.",
+        "status": {
+          "todo": "to do",
+          "in_progress": "progress",
+          "review": "review"
+        },
+        "summary": "Sprint started with {{committed}} tasks; on day {{day}}, {{remaining}} remain versus {{ideal}} on the ideal line.",
+        "summaryProjected": "Projected to finish with about {{count}} tasks left.",
+        "summaryPast": "Sprint started with {{committed}} tasks and ended with {{remaining}} still open.",
+        "summaryFuture": "The sprint has not started yet; {{committed}} tasks are planned."
+      },
+      "carried": {
+        "title": "Carried over from last sprint",
+        "sub_one": "{{count}} task moved from Sprint {{from}} into Sprint {{to}} · flagged when carried {{times}} or more times",
+        "sub_other": "{{count}} tasks moved from Sprint {{from}} into Sprint {{to}} · flagged when carried {{times}} or more times",
+        "subFirst": "This is the project’s first sprint",
+        "cols": {
+          "task": "Task",
+          "project": "Project",
+          "assignee": "Assignee",
+          "status": "Status",
+          "times": "Times carried"
+        },
+        "replan": "Replan",
+        "times_one": "{{count}} time",
+        "times_other": "{{count}} times",
+        "empty": "Nothing was carried over from the last sprint.",
+        "unassigned": "Unassigned"
+      },
+      "replan": "Replan",
+      "replanTitle": "Open this sprint’s unfinished tasks in the List view to move some out",
+      "empty": {
+        "noSprintsTitle": "No sprints in {{project}} yet",
+        "noSprintsBody": "Sprint reports appear here once the project plans its first sprint.",
+        "noProjectTitle": "No projects to report on",
+        "noProjectBody": "Pick another space, or create a project first."
+      }
+    },
+    "workload": {
+      "title": "Team workload",
+      "people_one": "{{count}} person",
+      "people_other": "{{count}} people",
+      "openTasks_one": "{{count}} open task",
+      "openTasks_other": "{{count}} open tasks",
+      "pointsTotal_one": "{{count}} point in total",
+      "pointsTotal_other": "{{count}} points in total",
+      "average": "{{avg}} points per person on average.",
+      "capacityLine": "The dashed line marks capacity for the next 2 weeks ({{count}} points).",
+      "capacityLineMixed": "The dashed line marks each person’s capacity for the next 2 weeks.",
+      "sortBy": "Sort by:",
+      "sort": {
+        "size": "Open size",
+        "overdue": "Overdue"
+      },
+      "cols": {
+        "person": "Person",
+        "tasks": "Open tasks",
+        "size": "Size",
+        "capacity": "Capacity"
+      },
+      "buckets": {
+        "overdue": "Overdue",
+        "week": "Due this week",
+        "later": "Later",
+        "none": "No due date"
+      },
+      "load": {
+        "heavy": "Heavy",
+        "balanced": "Balanced",
+        "light": "Light"
+      },
+      "capTitle": "Capacity for the next 2 weeks ≈ {{count}} points",
+      "pts_one": "{{count}} pt",
+      "pts_other": "{{count}} pts",
+      "overduePts_one": "{{count}} pt overdue",
+      "overduePts_other": "{{count}} pts overdue",
+      "tasks_one": "{{count}} task",
+      "tasks_other": "{{count}} tasks",
+      "segment": "{{bucket}}: {{points}} ({{tasks}})",
+      "rowLabel": "{{name}}, {{tasks}}, {{points}}, {{load}}",
+      "sizeTitle": "Size (points)",
+      "noSize": "No size",
+      "over_one": "{{count}} pt over capacity",
+      "over_other": "{{count}} pts over capacity",
+      "room_one": "{{count}} pt of room",
+      "room_other": "{{count}} pts of room",
+      "assign": "Assign work",
+      "reassign": "Reassign {{key}}",
+      "assignees": "Assignees",
+      "noTasks": "No open tasks.",
+      "footnote": "Size is the sum of story points on open tasks. The capacity marker is a rough per-person amount for the next 2 weeks ({{count}} points) — it is there to help share work fairly, not to rate anyone.",
+      "footnoteMixed": "Size is the sum of story points on open tasks. The capacity marker is a rough per-person amount for the next 2 weeks — it is there to help share work fairly, not to rate anyone.",
+      "emptyTitle": "No one to show",
+      "emptyBody": "No one in this scope has open tasks or belongs to its projects."
+    },
     "placeholder": {
       "title": "Coming soon",
       "body": "This report is on its way. Overview already shows your team’s throughput, wait times and aging tasks."

@@ -8,12 +8,13 @@ import {
   type ReportSprintRef,
   type SprintDetail,
   type SprintsReport,
+  type StatusCategory,
 } from '@kite/shared';
 import { and, eq, sql, type SQL } from 'drizzle-orm';
 import type { DbOrTx } from '../db/client.js';
 import { projects, workspaceHolidays } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
-import { loadHistory, scopeDto, type ReportContext } from './scope.js';
+import { loadHistory, scopeDto, scopedProjectIds, type ReportContext } from './scope.js';
 import { dayStart, doneAt, isoTs, rows, textArray } from './sql.js';
 import { reportTaskColumns, reportTaskJoins, toReportTask, type ReportTaskRow } from './tasks.js';
 
@@ -133,6 +134,22 @@ const carriedOutQuery = (ctx: ReportContext, sprint: SprintRow, next: SprintRow)
       and exists (select 1 from sprint_memberships nm
         where nm.task_id = sm.task_id and nm.sprint_id = ${next.id})`;
 };
+
+/**
+ * Current sprint: the status category its open tasks have waited longest in, by the median
+ * time in their current (open) status period.
+ */
+const waitingQuery = (sprintId: string, nowIso: string) => sql`
+  select tsp.category
+  from sprint_memberships sm
+  join tasks t on t.id = sm.task_id and t.deleted_at is null and t.completed_at is null
+  join task_status_periods tsp on tsp.task_id = t.id and tsp.exited_at is null
+  where sm.sprint_id = ${sprintId} and sm.removed_at is null and tsp.category <> 'done'
+  group by tsp.category
+  order by percentile_cont(0.5) within group (
+    order by extract(epoch from ${nowIso}::timestamptz - tsp.entered_at)) desc,
+    tsp.category
+  limit 1`;
 
 export type CarriedRow = ReportTaskRow & { times: number };
 
@@ -294,22 +311,53 @@ export async function sprintQueries(db: DbOrTx, ctx: ReportContext, plan: Sprint
       burndown: burndownQuery(s.id, selectedStart, points),
       carried: prev ? carriedQuery(ctx, plan.project.id, s, prev) : null,
       carriedOut: next && ctx.today > s.end_date ? carriedOutQuery(ctx, s, next) : null,
+      waiting:
+        s.start_date <= ctx.today && ctx.today <= s.end_date ? waitingQuery(s.id, nowIso) : null,
     } satisfies Record<string, SQL | null>,
   };
+}
+
+/**
+ * The project the Sprints tab opens on: the first non-archived project in scope (space order,
+ * then project order) that has a sprint, else the first project in scope; null without any.
+ */
+export async function defaultSprintProject(db: DbOrTx, ctx: ReportContext): Promise<string | null> {
+  const [row] = await rows<{ id: string }>(
+    db,
+    sql`select p.id from projects p join spaces sp on sp.id = p.space_id
+      where p.id in ${scopedProjectIds(ctx)}
+      order by exists (select 1 from sprints x where x.project_id = p.id) desc,
+        sp.position, p.position, p.id
+      limit 1`,
+  );
+  return row?.id ?? null;
 }
 
 export async function buildSprints(
   db: DbOrTx,
   ctx: ReportContext,
-  projectId: string,
+  projectId: string | null,
   sprintId: string | undefined,
 ): Promise<Omit<SprintsReport, 'generatedAt'>> {
-  const plan = await planSprints(db, ctx, projectId, sprintId);
-  const [history, detail] = await Promise.all([loadHistory(db, ctx), sprintDetail(db, ctx, plan)]);
+  const meta = { today: ctx.today, timezone: ctx.timezone, scope: scopeDto(ctx) };
+  if (!projectId) {
+    return {
+      ...meta,
+      history: await loadHistory(db, ctx),
+      project: null,
+      sprints: [],
+      sprint: null,
+    };
+  }
+  // History counts the shown project, whichever way it was chosen.
+  const projectCtx = { ...ctx, projectId };
+  const plan = await planSprints(db, projectCtx, projectId, sprintId);
+  const [history, detail] = await Promise.all([
+    loadHistory(db, projectCtx),
+    sprintDetail(db, projectCtx, plan),
+  ]);
   return {
-    today: ctx.today,
-    timezone: ctx.timezone,
-    scope: scopeDto(ctx),
+    ...meta,
     history,
     project: plan.project,
     sprints: plan.sprints,
@@ -326,11 +374,14 @@ async function sprintDetail(
   if (!prepared) return null;
   const { sprint: s, prev, next, recent, days, elapsed, queries: q } = prepared;
 
-  const [totals, burn, carried, carriedOut] = await Promise.all([
+  const [totals, burn, carried, carriedOut, waiting] = await Promise.all([
     rows<{ id: string; committed: number; added: number; completed: number }>(db, q.totals),
     rows<{ idx: number; remaining: number; added: number }>(db, q.burndown),
     q.carried ? rows<CarriedRow>(db, q.carried) : Promise.resolve([]),
     q.carriedOut ? rows<{ n: number }>(db, q.carriedOut) : Promise.resolve(null),
+    q.waiting
+      ? rows<{ category: Exclude<StatusCategory, 'done'> }>(db, q.waiting)
+      : Promise.resolve([]),
   ]);
 
   const refOf = (x: SprintRow | null) =>
@@ -382,6 +433,7 @@ async function sprintDetail(
     burndown,
     projectedRemaining,
     pace,
+    waitingMost: waiting[0]?.category ?? null,
     recent: recent.map((r) => {
       const ref = refOf(r) ?? toRef(r, false);
       const t = totalsOf(r.id);

@@ -55,6 +55,7 @@
   --background-color-panel: var(--panel);
   --background-color-success-soft: var(--success-soft);
   --background-color-warning-soft: var(--warning-soft);
+  --background-color-warm-card: var(--warm-card-bg);
   --background-color-wait-track: var(--wait-track);
   --background-color-skeleton: var(--skeleton);
   --background-color-progress-track: var(--progress-track);
@@ -80,6 +81,8 @@
   --text-color-danger-soft: var(--danger-soft-fg);
   --text-color-success-soft: var(--success-soft-fg);
   --text-color-warning-soft: var(--warning-soft-fg);
+  --text-color-warm-card: var(--warm-card-fg);
+  --text-color-warning-icon: var(--warning-icon);
   --text-color-tint-todo: var(--tint-todo-fg);
   --text-color-tint-progress: var(--tint-progress-fg);
   --text-color-tint-review: var(--tint-review-fg);
@@ -96,6 +99,7 @@
   --border-color-subtle: var(--border-subtle);
   --border-color-strong: var(--border-strong);
   --border-color-danger-card: var(--danger-card-border);
+  --border-color-warm-card: var(--warm-card-border);
   --border-color-table-row: var(--table-row-border);
   --border-color-tooltip: var(--tooltip-border);
 }

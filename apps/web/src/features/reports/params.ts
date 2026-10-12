@@ -99,11 +99,17 @@ export function useReportParams() {
   const agingAll = params.get(AGING_PARAM) === 'all';
 
   const setFilters = useCallback(
-    (patch: Partial<ReportFilters>) => {
+    (patch: Partial<ReportFilters>, extra: Record<string, string | null> = {}) => {
       setParams(
         (prev) => {
           // An explicit `undefined` in the patch clears that param.
-          return writeReportFilters(prev, { ...parseReportFilters(prev), ...patch });
+          const next = writeReportFilters(prev, { ...parseReportFilters(prev), ...patch });
+          // Tab params written together with the scope (the Sprints tab's sprint); null clears.
+          for (const [key, value] of Object.entries(extra)) {
+            if (value) next.set(key, value);
+            else next.delete(key);
+          }
+          return next;
         },
         { replace: true },
       );
@@ -127,4 +133,50 @@ export function useReportParams() {
   );
 
   return { filters, setFilters, agingAll, setAgingAll };
+}
+
+/** Sprints: the selected sprint (`?sprint=`); unset = the API's default. */
+export const SPRINT_PARAM = 'sprint';
+/** Workload: `?sort=overdue`; the default (open size) is omitted. */
+export const SORT_PARAM = 'sort';
+
+export type WorkloadSort = 'size' | 'overdue';
+
+/** A single optional search param with a `replace` setter (null/default clears it). */
+function useParam(name: string) {
+  const [params, setParams] = useSearchParams();
+  const value = params.get(name);
+  const setValue = useCallback(
+    (next: string | null) => {
+      setParams(
+        (prev) => {
+          const out = new URLSearchParams(prev);
+          if (next) out.set(name, next);
+          else out.delete(name);
+          return out;
+        },
+        { replace: true },
+      );
+    },
+    [name, setParams],
+  );
+  return [value, setValue] as const;
+}
+
+/** The selected sprint; it is written with the scope through `setFilters(patch, extra)`. */
+export function useSprintParam(): string | undefined {
+  const [params] = useSearchParams();
+  return params.get(SPRINT_PARAM) ?? undefined;
+}
+
+export function useWorkloadSort() {
+  const [raw, setRaw] = useParam(SORT_PARAM);
+  const sort: WorkloadSort = raw === 'overdue' ? 'overdue' : 'size';
+  const setSort = useCallback(
+    (next: WorkloadSort) => {
+      setRaw(next === 'size' ? null : next);
+    },
+    [setRaw],
+  );
+  return { sort, setSort };
 }
