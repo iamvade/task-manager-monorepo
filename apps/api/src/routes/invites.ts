@@ -2,6 +2,7 @@ import {
   acceptInviteSchema,
   apiErrorSchema,
   createInviteSchema,
+  createdInviteSchema,
   initialsFor,
   invitePreviewSchema,
   inviteSchema,
@@ -58,10 +59,10 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Invites'],
         summary: 'Invite someone',
         description:
-          'Admin or owner. Replaces any earlier pending invite for the same email; in development the link is logged to the console.',
+          'Admin or owner. Replaces any earlier pending invite for the same email. The response carries the accept link, once (only its hash is stored); the admin shares it. In development it is also logged to the console.',
         params: z.object({ workspaceId: z.uuid() }),
         body: createInviteSchema,
-        response: { 201: inviteSchema, 401: err, 403: err, 404: err, 409: err },
+        response: { 201: createdInviteSchema, 401: err, 403: err, 404: err, 409: err },
       },
     },
     async (request, reply) => {
@@ -101,17 +102,19 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         return one(await tx.insert(invites).values(values).returning(), 'invite');
       });
 
+      const link = `${new URL(app.config.WEB_ORIGIN).origin}/invite/${token}`;
       if (app.config.NODE_ENV !== 'production') {
-        // No email delivery yet: in dev the link goes to the console.
-        const link = `${new URL(app.config.WEB_ORIGIN).origin}/invite/${token}`;
+        // Handy in dev; production logs never carry invite tokens.
         app.log.info({ email, link }, 'Invite link');
       }
 
-      return reply.code(201).send({
+      // The link is a credential: keep it out of every cache.
+      return reply.code(201).header('cache-control', 'no-store').send({
         id: invite.id,
         email: invite.email,
         role: role,
         expiresAt: invite.expiresAt.toISOString(),
+        link,
       });
     },
   );

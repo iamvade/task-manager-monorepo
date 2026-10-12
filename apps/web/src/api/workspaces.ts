@@ -1,4 +1,5 @@
 import {
+  createdInviteSchema,
   inviteSchema,
   sidebarResponseSchema,
   workspaceMemberSchema,
@@ -85,7 +86,7 @@ export function useCreateInvite(workspaceId: string) {
     // The invite form shows errors inline.
     meta: { errorToast: false },
     mutationFn: (body: CreateInvite) =>
-      apiSend(`/workspaces/${workspaceId}/invites`, inviteSchema, 'POST', body),
+      apiSend(`/workspaces/${workspaceId}/invites`, createdInviteSchema, 'POST', body),
     onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.invites(workspaceId) }),
   });
 }

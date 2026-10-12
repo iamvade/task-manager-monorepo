@@ -1,4 +1,10 @@
-import { invitePreviewSchema, inviteSchema, meResponseSchema } from '@kite/shared';
+import {
+  createdInviteSchema,
+  invitePreviewSchema,
+  inviteSchema,
+  meResponseSchema,
+} from '@kite/shared';
+import { Writable } from 'node:stream';
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { hashToken, newToken } from '../src/auth/tokens.js';
@@ -42,7 +48,7 @@ describe('invites', () => {
       payload,
     });
 
-  /** Inserts an invite directly so the test knows the raw token (the API only logs it). */
+  /** Inserts an invite directly with a known raw token. */
   async function seedInvite(workspaceId: string, email: string, expiresInMs = 60_000) {
     const token = newToken();
     await ctx.db.insert(invites).values({
@@ -67,11 +73,48 @@ describe('invites', () => {
       const res = await createInvite(ws.id, cookie, 'New.Person@Kite.test', 'admin');
       expect(res.statusCode).toBe(201);
       expect(res.json()).toMatchObject({ email: 'new.person@kite.test', role: 'admin' });
-      expect(JSON.stringify(res.json())).not.toMatch(/token/i);
+      expect(res.headers['cache-control']).toBe('no-store');
 
-      const { id } = inviteSchema.parse(res.json());
+      const { id, link } = createdInviteSchema.parse(res.json());
+      const url = new URL(link);
+      expect(url.origin).toBe(ORIGIN);
+      const token = url.pathname.replace('/invite/', '');
       const row = one(await ctx.db.select().from(invites).where(eq(invites.id, id)));
       expect(row.tokenHash).toMatch(/^[0-9a-f]{64}$/);
+      expect(row.tokenHash).toBe(hashToken(token));
+      expect(row.tokenHash).not.toBe(token);
+
+      // The returned link is the one that opens the invite.
+      const preview = await ctx.app.inject({ method: 'GET', url: `/api/v1/invites/${token}` });
+      expect(preview.statusCode).toBe(200);
+      expect(preview.json()).toMatchObject({ email: 'new.person@kite.test', role: 'admin' });
+    });
+
+    it('returns the link in production too, where it is never logged', async () => {
+      const lines: string[] = [];
+      const stream = new Writable({
+        write(chunk: Buffer, _enc, done) {
+          lines.push(chunk.toString());
+          done();
+        },
+      });
+      const prod = await createTestApp({ NODE_ENV: 'production' }, { logStream: stream });
+      try {
+        const owner = await createUser(prod.db);
+        const ws = await createWorkspace(prod.db, owner.id);
+        const res = await prod.app.inject({
+          method: 'POST',
+          url: `/api/v1/workspaces/${ws.id}/invites`,
+          headers: { origin: ORIGIN, cookie: await login(prod.app, owner.email) },
+          payload: { email: 'prod.invite@kite.test', role: 'member' },
+        });
+        expect(res.statusCode).toBe(201);
+        const { link } = createdInviteSchema.parse(res.json());
+        const token = new URL(link).pathname.replace('/invite/', '');
+        expect(lines.join('')).not.toContain(token);
+      } finally {
+        await prod.close();
+      }
     });
 
     it('forbids plain members', async () => {
