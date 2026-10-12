@@ -3,9 +3,7 @@ import { mkdir, rm, stat } from 'node:fs/promises';
 import { dirname, resolve, sep } from 'node:path';
 import type { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
-import { StorageNotFoundError, type Storage } from './storage.js';
-
-const KEY = /^[A-Za-z0-9_-]+(\/[A-Za-z0-9_-]+)*$/;
+import { STORAGE_KEY, StorageNotFoundError, type Storage } from './storage.js';
 
 const isNotFound = (err: unknown) =>
   err instanceof Error && 'code' in err && (err.code === 'ENOENT' || err.code === 'ENOTDIR');
@@ -21,7 +19,7 @@ export class LocalDiskStorage implements Storage {
   /** Path of a key; keys are plain segments, so the path can't leave `root`. */
   pathOf(key: string): string {
     const path = resolve(this.root, key);
-    if (!KEY.test(key) || !path.startsWith(this.root + sep)) {
+    if (!STORAGE_KEY.test(key) || !path.startsWith(this.root + sep)) {
       throw new Error(`Invalid storage key: ${key}`);
     }
     return path;

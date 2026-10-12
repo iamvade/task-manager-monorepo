@@ -42,7 +42,7 @@ import { taskActivityRoutes } from './routes/task-activity.js';
 import { taskRoutes } from './routes/tasks.js';
 import { templateRoutes } from './routes/templates.js';
 import { workspaceRoutes } from './routes/workspaces.js';
-import { LocalDiskStorage } from './storage/local.js';
+import { createStorage } from './storage/index.js';
 import type { Storage } from './storage/storage.js';
 
 declare module 'fastify' {
@@ -61,7 +61,7 @@ declare module 'fastify' {
 }
 
 export interface AppOptions {
-  /** Defaults to local disk under `UPLOADS_DIR`. */
+  /** Defaults to the `STORAGE_DRIVER` store (local disk under `UPLOADS_DIR`, or S3). */
   storage?: Storage;
   /** Defaults to the system clock. */
   now?: () => Date;
@@ -84,7 +84,7 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
   app.decorate('config', config);
   app.decorate('db', db);
   app.decorate('events', new EventBus(app.log));
-  app.decorate('storage', options.storage ?? new LocalDiskStorage(config.UPLOADS_DIR));
+  app.decorate('storage', options.storage ?? (await createStorage(config)));
   app.decorate('clock', options.now ?? (() => new Date()));
   app.decorate('reportCache', new ReportCache(config.REPORTS_CACHE_TTL_MS, () => app.clock()));
   app.events.on('*', (event) => {

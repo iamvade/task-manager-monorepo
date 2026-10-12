@@ -1,10 +1,15 @@
 import { buildApp } from './app.js';
-import { loadConfig } from './config.js';
+import { loadConfig, secureCookies } from './config.js';
 import { createDb } from './db/client.js';
 
 const config = loadConfig();
 const { db, pool } = createDb(config.DATABASE_URL);
 const app = await buildApp(config, db);
+if (config.NODE_ENV === 'production' && !secureCookies(config)) {
+  app.log.warn(
+    `WEB_ORIGIN is ${config.WEB_ORIGIN}: session cookies are not Secure. Serve the app over https.`,
+  );
+}
 
 const shutdown = async (signal: string) => {
   app.log.info(`${signal} received, shutting down`);
