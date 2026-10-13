@@ -204,7 +204,7 @@ export const overviewReportSchema = z
     throughput: z.object({
       /** The last 12 Monday–Sunday weeks, oldest first; the last one is partial. */
       weeks: z.array(throughputWeekSchema),
-      /** The 12 weeks before those. */
+      /** The 12 weeks before those; empty when nothing was completed in them (young workspace). */
       previous: z.array(throughputWeekSchema),
     }),
     /** Median length of status periods that ended in the period, To Do / In Progress / In Review. */

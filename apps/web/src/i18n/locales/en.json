@@ -961,7 +961,8 @@
       "prevPeriod": "Previous period",
       "partialWeek": "This week is still in progress",
       "weekOf": "Week of {{date}}",
-      "summary": "Tasks completed per week over the last 12 weeks: {{first}} in the first week and {{last}} in the latest, peaking at {{peak}}; {{total}} in total versus {{previousTotal}} in the previous period."
+      "summary": "Tasks completed per week over the last 12 weeks: {{first}} in the first week and {{last}} in the latest, peaking at {{peak}}; {{total}} in total versus {{previousTotal}} in the previous period.",
+      "summaryNoPrev": "Tasks completed per week over the last 12 weeks: {{first}} in the first week and {{last}} in the latest, peaking at {{peak}}; {{total}} in total. No earlier history to compare with."
     },
     "waits": {
       "title": "Where work waits",

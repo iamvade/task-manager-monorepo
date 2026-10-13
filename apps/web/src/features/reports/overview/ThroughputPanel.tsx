@@ -7,22 +7,27 @@ import { Panel, PanelHeading } from '../ui/Panel';
 
 /**
  * Tasks completed per week, last 12 weeks, against the 12 before (Reports.dc.html). The current
- * week is the hollow point; the figure's summary sentence is its accessible name.
+ * week is the hollow point; the figure's summary sentence is its accessible name. A workspace
+ * younger than the window has no previous series (the API sends none), so only one line shows.
  */
 export function ThroughputPanel({ throughput }: { throughput: OverviewReport['throughput'] }) {
   const { t } = useTranslation();
   const { locale } = useDates();
   const { weeks, previous } = throughput;
+  const hasPrevious = previous.length > 0;
   const counts = weeks.map((w) => w.count);
   const sum = (values: readonly number[]) => values.reduce((a, b) => a + b, 0);
 
-  const summary = t('reports.throughput.summary', {
-    first: counts[0] ?? 0,
-    last: counts[counts.length - 1] ?? 0,
-    peak: Math.max(0, ...counts),
-    total: sum(counts),
-    previousTotal: sum(previous.map((w) => w.count)),
-  });
+  const summary = t(
+    hasPrevious ? 'reports.throughput.summary' : 'reports.throughput.summaryNoPrev',
+    {
+      first: counts[0] ?? 0,
+      last: counts[counts.length - 1] ?? 0,
+      peak: Math.max(0, ...counts),
+      total: sum(counts),
+      previousTotal: sum(previous.map((w) => w.count)),
+    },
+  );
 
   return (
     <Panel labelledBy="reports-throughput" className="flex-[999_1_560px] gap-4 p-5">
@@ -34,7 +39,9 @@ export function ThroughputPanel({ throughput }: { throughput: OverviewReport['th
         />
         <div className="flex items-center gap-4 text-[12px] text-3">
           <LegendLine color="var(--accent-ink)" label={t('reports.throughput.thisPeriod')} />
-          <LegendLine color="var(--chart-prev)" label={t('reports.throughput.prevPeriod')} />
+          {hasPrevious && (
+            <LegendLine color="var(--chart-prev)" label={t('reports.throughput.prevPeriod')} />
+          )}
         </div>
       </div>
       <LineTrend
@@ -44,22 +51,22 @@ export function ThroughputPanel({ throughput }: { throughput: OverviewReport['th
           columns: [
             t('reports.chartTable.week'),
             t('reports.throughput.thisPeriod'),
-            t('reports.throughput.prevPeriod'),
+            ...(hasPrevious ? [t('reports.throughput.prevPeriod')] : []),
           ],
           rows: weeks.map((w, i) => [
             t('reports.throughput.weekOf', { date: weekLabel(w.weekStart, locale) }),
             w.count,
-            previous[i]?.count ?? '—',
+            ...(hasPrevious ? [previous[i]?.count ?? '—'] : []),
           ]),
         }}
         seriesLabel={t('reports.throughput.thisPeriod')}
-        prevLabel={t('reports.throughput.prevPeriod')}
+        {...(hasPrevious ? { prevLabel: t('reports.throughput.prevPeriod') } : {})}
         partialNote={t('reports.throughput.partialWeek')}
         points={weeks.map((w, i) => ({
           label: weekLabel(w.weekStart, locale),
           title: t('reports.throughput.weekOf', { date: weekLabel(w.weekStart, locale) }),
           value: w.count,
-          prev: previous[i]?.count ?? null,
+          prev: hasPrevious ? (previous[i]?.count ?? null) : null,
           partial: w.partial,
         }))}
       />
