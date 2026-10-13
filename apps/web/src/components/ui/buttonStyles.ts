@@ -1,4 +1,4 @@
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
 /** Color classes per button variant (also used to style links as buttons). */
 export const buttonVariants: Record<ButtonVariant, string> = {
@@ -6,4 +6,6 @@ export const buttonVariants: Record<ButtonVariant, string> = {
   secondary:
     'border border-control bg-control text-default enabled:hover:bg-hover [a&]:hover:bg-hover',
   ghost: 'bg-transparent text-2 enabled:hover:bg-hover [a&]:hover:bg-hover',
+  /** Destructive confirmations (ConfirmDialog). */
+  danger: 'bg-danger text-white enabled:hover:brightness-110 [a&]:hover:brightness-110',
 };

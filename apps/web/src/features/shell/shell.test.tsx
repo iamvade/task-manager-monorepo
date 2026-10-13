@@ -364,7 +364,6 @@ describe('app shell', () => {
 
   it('deletes a space after confirming', async () => {
     useToastStore.setState({ toasts: [] });
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
     const deleted: string[] = [];
     api({
       [`DELETE /api/v1/spaces/${SPACE_ID}`]: () => {
@@ -376,7 +375,14 @@ describe('app shell', () => {
 
     fireEvent.click(await screen.findByRole('button', { name: 'Орон зайн сонголтууд' }));
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Орон зайг устгах' }));
-    expect(confirm).toHaveBeenCalledWith('«Product» орон зайг устгах уу? Буцаах боломжгүй.');
+    const dialog = await screen.findByRole('dialog', {
+      name: '«Product» орон зайг устгах уу? Буцаах боломжгүй.',
+    });
+    // Focus starts on Cancel: Enter backs out of a destructive action.
+    await waitFor(() => {
+      expect(within(dialog).getByRole('button', { name: 'Болих' })).toHaveFocus();
+    });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Орон зайг устгах' }));
     await waitFor(() => {
       expect(router.state.location.pathname).toBe('/my-tasks');
     });
@@ -386,7 +392,6 @@ describe('app shell', () => {
 
   it('keeps a space that still has projects, and asks before deleting', async () => {
     useToastStore.setState({ toasts: [] });
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValueOnce(false).mockReturnValue(true);
     const fetchMock = api({
       [`DELETE /api/v1/spaces/${SPACE_ID}`]: () =>
         Response.json(
@@ -400,12 +405,19 @@ describe('app shell', () => {
       fireEvent.click(await screen.findByRole('menuitem', { name: 'Орон зайг устгах' }));
     };
     const deletes = () => fetchMock.mock.calls.filter(([, init]) => init?.method === 'DELETE');
+    const confirmDialog = () => screen.findByRole('dialog', { name: /орон зайг устгах уу/ });
 
     await openDelete();
-    expect(confirm).toHaveBeenCalledTimes(1);
+    fireEvent.click(within(await confirmDialog()).getByRole('button', { name: 'Болих' }));
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: /орон зайг устгах уу/ })).toBeNull();
+    });
     expect(deletes()).toHaveLength(0);
 
     await openDelete();
+    fireEvent.click(
+      within(await confirmDialog()).getByRole('button', { name: 'Орон зайг устгах' }),
+    );
     await waitFor(() => {
       expect(toasts().map((x) => x.message)).toEqual([
         'Энэ орон зайд төсөл (архивласан ч гэсэн) байна. Эхлээд тэдгээрийг өөр орон зай руу шилжүүлнэ үү.',

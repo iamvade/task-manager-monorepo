@@ -369,6 +369,62 @@ describe('task drawer', () => {
     );
   });
 
+  it('asks in a dialog before deleting a comment', async () => {
+    const { state, task } = setup();
+    const commentId = '01890000-0000-7000-8000-700000000009';
+    state.feed = [
+      {
+        kind: 'comment',
+        id: commentId,
+        taskId: task.id,
+        parentId: null,
+        author: ref(at(PROJECT.members, 0).user),
+        body: {
+          type: 'doc',
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Old note' }] }],
+        },
+        bodyText: 'Old note',
+        createdAt: '2026-10-07T06:00:00.000Z',
+        editedAt: null,
+        deletedAt: null,
+        replies: [],
+      },
+    ];
+    const deleted: string[] = [];
+    api(state, (s) => ({
+      [`DELETE /api/v1/comments/${commentId}`]: () => {
+        deleted.push(commentId);
+        s.feed = s.feed.filter((item) => item.id !== commentId);
+        return new Response(null, { status: 204 });
+      },
+    }));
+    renderAt(`${LIST}&task=APP-135`);
+    const dialog = await drawer();
+    const feed = within(await within(dialog).findByRole('region', { name: /Activity/ }));
+    expect(await feed.findByText('Old note')).toBeInTheDocument();
+
+    fireEvent.click(feed.getByRole('button', { name: 'Comment options' }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Delete' }));
+    const confirm = await screen.findByRole('dialog', { name: 'Delete this comment?' });
+    fireEvent.click(within(confirm).getByRole('button', { name: 'Cancel' }));
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: 'Delete this comment?' })).toBeNull();
+    });
+    expect(deleted).toEqual([]);
+    expect(feed.getByText('Old note')).toBeInTheDocument();
+
+    fireEvent.click(feed.getByRole('button', { name: 'Comment options' }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Delete' }));
+    const again = await screen.findByRole('dialog', { name: 'Delete this comment?' });
+    fireEvent.click(within(again).getByRole('button', { name: 'Delete' }));
+    await waitFor(() => {
+      expect(deleted).toEqual([commentId]);
+    });
+    await waitFor(() => {
+      expect(feed.queryByText('Old note')).toBeNull();
+    });
+  });
+
   it('posts a comment with a mention and appends it right away', async () => {
     const { state, task } = setup();
     const posted: { body: RichTextNode }[] = [];

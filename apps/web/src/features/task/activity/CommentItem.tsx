@@ -7,6 +7,7 @@ import { RichTextEditor } from '../../../components/editor/RichTextEditor';
 import { RichTextView } from '../../../components/editor/RichTextView';
 import { MoreIcon, PencilIcon, TrashIcon } from '../../../components/icons';
 import { Avatar } from '../../../components/ui/Avatar';
+import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { IconButton } from '../../../components/ui/IconButton';
 import { Menu, type MenuItem } from '../../../components/ui/Menu';
 import { cn } from '../../../lib/cn';
@@ -92,6 +93,7 @@ export function CommentItem({
   const { ago } = useRelativeTime();
   const remove = useDeleteComment();
   const [editing, setEditing] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const temp = isTempComment(comment);
   const own = comment.author.id === me.id;
   const deleted = comment.deletedAt !== null || comment.body === null;
@@ -123,9 +125,7 @@ export function CommentItem({
             icon: <TrashIcon size={14} />,
             danger: true,
             onSelect: () => {
-              if (window.confirm(t('drawer.deleteCommentConfirm'))) {
-                remove.mutate({ taskId: task.id, commentId: comment.id });
-              }
+              setConfirmingDelete(true);
             },
           },
         ]
@@ -134,6 +134,19 @@ export function CommentItem({
 
   return (
     <div ref={root} className="flex scroll-mb-36 items-start gap-2.5 py-2">
+      <ConfirmDialog
+        open={confirmingDelete}
+        title={t('drawer.deleteCommentConfirm')}
+        confirmLabel={t('table.delete')}
+        tone="danger"
+        onConfirm={() => {
+          setConfirmingDelete(false);
+          remove.mutate({ taskId: task.id, commentId: comment.id });
+        }}
+        onClose={() => {
+          setConfirmingDelete(false);
+        }}
+      />
       <Avatar user={comment.author} size={24} title={null} />
       {editing && comment.body ? (
         <div className="min-w-0 flex-1">
