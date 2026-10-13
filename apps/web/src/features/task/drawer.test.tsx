@@ -560,6 +560,33 @@ describe('task drawer', () => {
     expect(await within(group('In Review')).findByText(task.title)).toBeInTheDocument();
   });
 
+  it('traps focus while open and returns it to the row that opened it', async () => {
+    const { state } = setup();
+    api(state);
+    renderAt(LIST);
+    const title = await screen.findByText('Checkout page — responsive layout');
+    const row = title.closest<HTMLElement>('[role="row"]');
+    if (!row) throw new Error('no row');
+    act(() => {
+      row.focus();
+    });
+    fireEvent.keyDown(row, { key: 'Enter' });
+    const dialog = await drawer();
+    await waitFor(() => {
+      expect(dialog.contains(document.activeElement)).toBe(true);
+    });
+
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: 'Task APP-135' })).toBeNull();
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByText('Checkout page — responsive layout').closest('[role="row"]'),
+      ).toHaveFocus();
+    });
+  });
+
   it('closes an open picker on Esc before the drawer', async () => {
     const { state } = setup();
     api(state);

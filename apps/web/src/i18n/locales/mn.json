@@ -65,6 +65,7 @@
     "goToSignIn": "Нэвтрэх хуудас руу"
   },
   "shell": {
+    "skipToContent": "Агуулга руу шилжих",
     "workspace": "Ажлын орчин",
     "switchWorkspace": "Ажлын орчин солих",
     "search": "Хайх",

@@ -1,4 +1,5 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Outlet } from 'react-router';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
 import { Toaster } from '../../components/ui/Toaster';
@@ -58,6 +59,24 @@ function usePreloadOverlays() {
  * Signed-in layout: sidebar (or rail) + the routed page, plus the app-wide overlays, all under
  * the tab's realtime connection.
  */
+/** First tab stop: jumps past the sidebar (45 stops when expanded) to the page. */
+function SkipLink() {
+  const { t } = useTranslation();
+  return (
+    <a
+      href="#main"
+      onClick={(e) => {
+        // Focus without touching the URL (it may carry `?task=` and filters).
+        e.preventDefault();
+        document.getElementById('main')?.focus();
+      }}
+      className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[80] focus:rounded-[8px] focus:border focus:border-default focus:bg-surface focus:px-3 focus:py-2 focus:text-[13px] focus:font-medium focus:text-default focus:shadow-popover"
+    >
+      {t('shell.skipToContent')}
+    </a>
+  );
+}
+
 export function AppShell() {
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
   useGlobalShortcuts();
@@ -66,9 +85,10 @@ export function AppShell() {
   return (
     <RealtimeProvider>
       <div className="flex h-screen min-h-0 bg-default text-default">
+        <SkipLink />
         {collapsed ? <SidebarRail /> : <Sidebar />}
         <div className="relative flex min-w-0 flex-1">
-          <main className="flex min-w-0 flex-1 flex-col overflow-auto">
+          <main id="main" tabIndex={-1} className="flex min-w-0 flex-1 flex-col overflow-auto">
             <ErrorBoundary>
               <Outlet />
             </ErrorBoundary>

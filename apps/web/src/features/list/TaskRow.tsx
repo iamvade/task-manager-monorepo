@@ -125,6 +125,7 @@ export function TaskRow({
       {...rowProps}
       role="row"
       data-task-row={task.id}
+      data-task-key={task.key}
       data-selected={selected ? true : undefined}
       tabIndex={inert ? undefined : tabbable ? 0 : -1}
       onClick={(e) => {

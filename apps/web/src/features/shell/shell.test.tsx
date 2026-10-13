@@ -133,6 +133,17 @@ describe('app shell', () => {
     });
   });
 
+  it('starts with a skip link that moves focus to the page', async () => {
+    api();
+    renderAt('/my-tasks');
+    await screen.findByRole('navigation', { name: 'Ажлын орчин' });
+
+    const skip = screen.getByRole('link', { name: 'Агуулга руу шилжих' });
+    expect(document.body.firstElementChild?.querySelector('a')).toBe(skip);
+    fireEvent.click(skip);
+    expect(screen.getByRole('main')).toHaveFocus();
+  });
+
   it('collapses to the rail and remembers it', async () => {
     api();
     renderAt('/my-tasks');

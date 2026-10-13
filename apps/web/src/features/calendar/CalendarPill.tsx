@@ -106,6 +106,7 @@ export const Pill = forwardRef<HTMLElement, PillProps>(function Pill(
       to={href}
       title={t('calendar.pillTitle', { title: task.title, project: task.project.name })}
       data-task-pill={task.id}
+      data-task-key={task.key}
       className={classes}
       {...props}
     >

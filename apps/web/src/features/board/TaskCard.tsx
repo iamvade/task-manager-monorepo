@@ -153,6 +153,7 @@ export const TaskCard = forwardRef<HTMLElement, TaskCardProps>(function TaskCard
       ref={ref as Ref<HTMLAnchorElement>}
       to={href}
       data-task-card={task.id}
+      data-task-key={task.key}
       className={classes}
       {...props}
     >

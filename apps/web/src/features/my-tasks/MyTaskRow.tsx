@@ -54,6 +54,7 @@ export function MyTaskRow({ task, section, onToggle }: MyTaskRowProps) {
       <span role="cell" className="flex min-w-0 pr-4">
         <Link
           to={{ search: `?task=${task.key}` }}
+          data-task-key={task.key}
           className={cn(
             'truncate text-[14px] no-underline',
             task.done ? 'text-muted line-through' : 'text-default hover:text-default',

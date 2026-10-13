@@ -43,9 +43,17 @@ describe('Picker', () => {
     expect(screen.getByRole('option')).toHaveTextContent('Dorj E.');
   });
 
+  it('opens with the current value highlighted', () => {
+    const { input } = setup();
+    const options = screen.getAllByRole('option');
+    expect(input).toHaveAttribute('aria-activedescendant', options[1]?.id);
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    expect(input).toHaveAttribute('aria-activedescendant', options[2]?.id);
+  });
+
   it('moves with arrows and selects with Enter', () => {
     const { input, onSelect } = setup();
-    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    // Starts on the selected option (Sara, index 1).
     fireEvent.keyDown(input, { key: 'ArrowDown' });
     expect(input).toHaveAttribute('aria-activedescendant', screen.getAllByRole('option')[2]?.id);
     fireEvent.keyDown(input, { key: 'Enter' });

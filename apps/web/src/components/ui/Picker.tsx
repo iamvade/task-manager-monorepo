@@ -1,5 +1,5 @@
 import { Check, Search } from 'lucide-react';
-import { useId, useMemo, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { useEffect, useId, useMemo, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/cn';
 import { Kbd } from './Kbd';
@@ -69,10 +69,16 @@ export function Picker<T>({
     if (!controlled) setQueryState(next);
     onQueryChange?.(next);
   };
-  const [active, setActive] = useState(0);
   const selectedKeys = useMemo(
     () => new Set(value === null ? [] : typeof value === 'string' ? [value] : value),
     [value],
+  );
+  // Opens on the current value, so ↓ ↵ moves one step from it rather than from the top.
+  const [active, setActive] = useState(() =>
+    Math.max(
+      0,
+      items.findIndex((item) => selectedKeys.has(getKey(item))),
+    ),
   );
 
   const filtered = useMemo(() => {
@@ -108,6 +114,12 @@ export function Picker<T>({
 
   const optionId = (index: number) => `${id}-opt-${index}`;
   const groups = groupBy ? filtered.map(groupBy) : [];
+
+  useEffect(() => {
+    document.getElementById(optionId(activeIndex))?.scrollIntoView({ block: 'nearest' });
+    // optionId is stable per instance (useId).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeIndex]);
 
   return (
     <div className="flex flex-col" onKeyDown={onKeyDown}>
