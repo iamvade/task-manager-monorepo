@@ -1,7 +1,8 @@
-import type { ProjectDetail } from '@kite/shared';
+import { NOTIFICATION_LEVELS, type ProjectDetail } from '@kite/shared';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
+import { useNotificationLevels, useSetNotificationLevel } from '../../api/notifications';
 import { useSetArchived, useToggleFavorite } from '../../api/projects';
 import { useCanManageCreated } from '../../lib/useCanManageCreated';
 import { ArchiveIcon, MoreIcon, SprintIcon, StarIcon, UnarchiveIcon } from '../../components/icons';
@@ -30,6 +31,8 @@ export function ProjectHeader({ project, view }: { project: ProjectDetail; view:
   const favoriteLabel = project.isFavorite ? t('header.unfavorite') : t('header.favorite');
   const canArchive = useCanManageCreated(project.createdById);
   const setArchived = useSetArchived(project.workspaceId);
+  const levels = useNotificationLevels(project.workspaceId);
+  const setLevel = useSetNotificationLevel(project.workspaceId);
   const navigate = useNavigate();
 
   function archive() {
@@ -141,6 +144,16 @@ export function ProjectHeader({ project, view }: { project: ProjectDetail; view:
                   setNewSprintOpen(true);
                 },
               },
+              { type: 'separator', id: 'sep-notify' },
+              { type: 'heading', id: 'notify', label: t('notifyLevel.heading') },
+              ...NOTIFICATION_LEVELS.map((level) => ({
+                id: `notify-${level}`,
+                label: t(`notifyLevel.${level}`),
+                checked: (levels.data?.get(project.id) ?? 'all') === level,
+                onSelect: () => {
+                  setLevel.mutate({ projectId: project.id, level });
+                },
+              })),
               ...(archiveItems.length ? [{ type: 'separator', id: 'sep-archive' } as const] : []),
               ...archiveItems,
             ]}

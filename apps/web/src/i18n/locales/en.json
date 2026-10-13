@@ -476,7 +476,12 @@
     "deleteCommentConfirm": "Delete this comment?",
     "hideReplies": "Hide replies",
     "viewers": "Also viewing: {{names}}",
-    "removeAssignee": "Remove {{name}}"
+    "removeAssignee": "Remove {{name}}",
+    "followers": "Followers",
+    "followersLabel_one": "{{count}} follower: {{names}}",
+    "followersLabel_other": "{{count}} followers: {{names}}",
+    "follow": "Follow",
+    "following": "Following"
   },
   "myTasks": {
     "allSpaces": "All spaces",
@@ -735,7 +740,9 @@
       "mentions": "No one has mentioned you yet",
       "assigned": "No new assignments",
       "archived": "No archived notifications"
-    }
+    },
+    "projectFilter": "Filter by project",
+    "allProjects": "All projects"
   },
   "palette": {
     "label": "Command palette",
@@ -849,7 +856,10 @@
       "comment": "Comments",
       "commentHint": "New comments on tasks you follow.",
       "status": "Status changes",
-      "statusHint": "A task you follow moves to another status."
+      "statusHint": "A task you follow moves to another status.",
+      "perProject": "Per project",
+      "perProjectHint": "Turn down projects you don’t need to follow closely: only mentions and assignments, or nothing at all.",
+      "levelOf": "Notifications for {{project}}"
     },
     "roles": {
       "owner": "Owner",
@@ -1320,5 +1330,11 @@
       "sprint": "Sprint",
       "day": "Day"
     }
+  },
+  "notifyLevel": {
+    "all": "All activity",
+    "direct": "Mentions and assignments",
+    "none": "Nothing",
+    "heading": "Notify me about"
   }
 }

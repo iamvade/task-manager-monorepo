@@ -83,6 +83,33 @@ describe('Inbox', () => {
     expect(badge()).toHaveAccessibleName('2 unread');
   });
 
+  it('narrows to one project with ?project=, keeping it across tabs', async () => {
+    const checkout = SIDEBAR.spaces[0]?.projects[1];
+    if (!checkout) throw new Error('fixture');
+    const { router } = renderInbox(
+      {
+        'GET /api/v1/me/notifications': () =>
+          Response.json(page([STATUS], { unread: 2, archived: 1 })),
+      },
+      () => INBOX,
+      `/inbox?project=${checkout.id}`,
+    );
+    const filter = await screen.findByRole('button', { name: /Checkout v2/ });
+    expect(filter).toBeInTheDocument();
+    await waitFor(() => {
+      expect(rows()).toHaveLength(1);
+    });
+    expect(screen.getByRole('tab', { name: 'Mentions' })).toHaveAttribute(
+      'href',
+      `/inbox?tab=mentions&project=${checkout.id}`,
+    );
+    fireEvent.click(filter);
+    fireEvent.click(await screen.findByRole('menuitemradio', { name: 'All projects' }));
+    await waitFor(() => {
+      expect(router.state.location.search).toBe('');
+    });
+  });
+
   it('opening a row marks it read and opens the task drawer', async () => {
     let inbox = INBOX;
     const { fetchMock, router } = renderInbox(

@@ -244,6 +244,44 @@ describe('notifications', () => {
       expect(await w.rows(w.dorj.user.id)).toHaveLength(1);
     });
 
+    it('applies per-project levels: direct keeps mentions and assignments, none sends nothing', async () => {
+      const w = await world();
+      const task = await w.createTask({ title: 'T' });
+      await w.call(w.dorj.api, 'POST', `/tasks/${task.id}/follow`);
+      const level = (level: string) =>
+        w.call(w.dorj.api, 'PUT', `/projects/${w.project.id}/notification-level`, { level });
+
+      await level('direct');
+      await w.comment(w.sara.api, task.id, doc('plain comment'));
+      expect(await w.rows(w.dorj.user.id)).toEqual([]);
+      await w.comment(w.sara.api, task.id, doc('hey ', { id: w.dorj.user.id }));
+      expect((await w.rows(w.dorj.user.id)).map((n) => n.type)).toEqual(['mention']);
+
+      await level('none');
+      await w.call(w.sara.api, 'PUT', `/tasks/${task.id}/assignees`, { userIds: [w.dorj.user.id] });
+      await w.comment(w.sara.api, task.id, doc('again ', { id: w.dorj.user.id }));
+      expect(await w.rows(w.dorj.user.id)).toHaveLength(1);
+
+      const levels = await w.call(w.dorj.api, 'GET', `/workspaces/${w.ws.id}/notification-levels`);
+      expect(levels.json()).toEqual([{ projectId: w.project.id, level: 'none' }]);
+      // Back to all removes the row.
+      await level('all');
+      expect(
+        (await w.call(w.dorj.api, 'GET', `/workspaces/${w.ws.id}/notification-levels`)).json(),
+      ).toEqual([]);
+      await w.comment(w.sara.api, task.id, doc('third'));
+      expect((await w.rows(w.dorj.user.id)).map((n) => n.type)).toEqual(['mention', 'comment']);
+    });
+
+    it('stops comment notifications after unfollowing', async () => {
+      const w = await world();
+      const task = await w.createTask({ title: 'T' });
+      await w.call(w.dorj.api, 'POST', `/tasks/${task.id}/follow`);
+      await w.call(w.dorj.api, 'DELETE', `/tasks/${task.id}/follow`);
+      await w.comment(w.sara.api, task.id, doc('anyone?'));
+      expect(await w.rows(w.dorj.user.id)).toEqual([]);
+    });
+
     it('skips people who are no longer workspace members', async () => {
       const w = await world();
       const task = await w.createTask({ title: 'T' });
@@ -332,6 +370,17 @@ describe('notifications', () => {
       });
       expect(readAllResultSchema.parse(res.json())).toEqual({ updated: 3 });
       expect((await w.inbox(w.sara.api)).counts).toEqual({ unread: 0, archived: 1 });
+    });
+
+    it('filters the inbox by project, keeping workspace-wide counts', async () => {
+      const w = await world();
+      const other = await w.newProject('Other');
+      const a = await w.createTask({ title: 'In main' });
+      const b = await w.createTask({ title: 'In other' }, other.id);
+      for (const t of [a, b]) await w.comment(w.sara.api, t.id, doc('hi'));
+      const page = await w.inbox(w.api, 'all', `&projectId=${other.id}`);
+      expect(page.items.map((n) => n.task.title)).toEqual(['In other']);
+      expect(page.counts.unread).toBe(2);
     });
 
     it('keeps the first read time', async () => {

@@ -11,7 +11,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { createdAt, id, position, timestamptz } from './columns.js';
-import { statusCategoryEnum } from './enums.js';
+import { notificationLevelEnum, statusCategoryEnum } from './enums.js';
 import { users } from './users.js';
 import { workspaces } from './workspaces.js';
 
@@ -95,6 +95,21 @@ export const favorites = pgTable(
     projectId: uuid('project_id')
       .notNull()
       .references(() => projects.id, { onDelete: 'cascade' }),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.projectId] })],
+);
+
+/** Per-person notification level for a project (Settings → Notifications); no row = `all`. */
+export const projectNotificationLevels = pgTable(
+  'project_notification_levels',
+  {
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    level: notificationLevelEnum('level').notNull(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.projectId] })],
 );

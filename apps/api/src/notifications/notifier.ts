@@ -2,12 +2,20 @@ import { and, desc, eq, gt, inArray, isNull } from 'drizzle-orm';
 import type { NotificationType } from '@kite/shared';
 import type { FastifyInstance } from 'fastify';
 import type { Db } from '../db/client.js';
-import { notifications, users, workspaceMembers } from '../db/schema/index.js';
+import {
+  notifications,
+  projectNotificationLevels,
+  users,
+  workspaceMembers,
+} from '../db/schema/index.js';
 import type { DomainEvent } from '../events/bus.js';
 import { candidatesFor, pickCandidate } from './fanout.js';
 
 /** An unread notification of the same type on the same task this recent absorbs the new one. */
 export const COLLAPSE_WINDOW_MS = 5 * 60_000;
+
+/** What a project set to "direct" still sends: @mentions and new assignments. */
+const DIRECT_TYPES: ReadonlySet<NotificationType> = new Set(['mention', 'assigned']);
 
 /**
  * Creates notifications for task events: @mentions, new assignees, and comments and status
@@ -51,9 +59,13 @@ export async function notify(db: Db, event: DomainEvent): Promise<Notified[]> {
   candidates.delete(event.actorId);
   if (candidates.size === 0) return [];
 
-  // Current members of the workspace only, with their preferences.
+  // Current members of the workspace only, with their preferences and level for this project.
   const recipients = await db
-    .select({ id: users.id, prefs: users.notificationPrefs })
+    .select({
+      id: users.id,
+      prefs: users.notificationPrefs,
+      level: projectNotificationLevels.level,
+    })
     .from(users)
     .innerJoin(
       workspaceMembers,
@@ -62,10 +74,22 @@ export async function notify(db: Db, event: DomainEvent): Promise<Notified[]> {
         eq(workspaceMembers.workspaceId, event.workspaceId),
       ),
     )
+    .leftJoin(
+      projectNotificationLevels,
+      and(
+        eq(projectNotificationLevels.userId, users.id),
+        eq(projectNotificationLevels.projectId, event.projectId),
+      ),
+    )
     .where(inArray(users.id, [...candidates.keys()]));
 
   const picks = recipients.flatMap((r) => {
-    const pick = pickCandidate(candidates.get(r.id) ?? [], r.prefs);
+    const level = r.level ?? 'all';
+    if (level === 'none') return [];
+    const options = (candidates.get(r.id) ?? []).filter(
+      (c) => level === 'all' || DIRECT_TYPES.has(c.type),
+    );
+    const pick = pickCandidate(options, r.prefs);
     return pick ? [{ userId: r.id, ...pick }] : [];
   });
   if (picks.length === 0) return [];

@@ -145,6 +145,22 @@ describe('Settings', () => {
     });
   });
 
+  it('sets a per-project notification level', async () => {
+    const { fetchMock } = renderSettings('/settings?tab=notifications', {
+      [`GET /api/v1/workspaces/${WORKSPACE_ID}/notification-levels`]: () => Response.json([]),
+      [`PUT /api/v1/projects/${PROJECT.id}/notification-level`]: () =>
+        Response.json({ projectId: PROJECT.id, level: 'none' }),
+    });
+    fireEvent.click(await screen.findByRole('button', { name: 'Notifications for App Redesign' }));
+    fireEvent.click(await screen.findByRole('menuitemradio', { name: 'Nothing' }));
+    await waitFor(() => {
+      expect(bodies(fetchMock, 'PUT')).toEqual([{ level: 'none' }]);
+    });
+    expect(
+      await screen.findByRole('button', { name: 'Notifications for App Redesign' }),
+    ).toHaveTextContent('Nothing');
+  });
+
   it('lets admins invite, revoke and change roles of others', async () => {
     const { fetchMock } = renderSettings('/settings?tab=members', {
       [`POST /api/v1/workspaces/${WORKSPACE_ID}/invites`]: () =>

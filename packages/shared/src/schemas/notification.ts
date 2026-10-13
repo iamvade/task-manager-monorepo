@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { notificationTypeSchema } from '../enums.js';
+import { notificationLevelSchema, notificationTypeSchema } from '../enums.js';
 import { userRefSchema } from './common.js';
 import { historyEntrySchema } from './feed.js';
 import { taskProjectRefSchema } from './task.js';
@@ -17,6 +17,8 @@ export const notificationListQuerySchema = z.object({
   tab: inboxTabSchema.default('all'),
   cursor: cursorSchema.optional(),
   limit: z.coerce.number().int().min(1).max(100).default(30),
+  /** Only notifications about this project's tasks (the counts stay workspace-wide). */
+  projectId: z.uuid().optional(),
 });
 export type NotificationListQuery = z.input<typeof notificationListQuerySchema>;
 
@@ -73,3 +75,14 @@ export type ReadAllNotifications = z.infer<typeof readAllNotificationsSchema>;
 export const readAllResultSchema = z
   .object({ updated: z.number().int() })
   .meta({ id: 'ReadAllResult' });
+
+/** A project where the caller changed the notification level (others are `all`). */
+export const projectNotificationLevelSchema = z
+  .object({ projectId: z.uuid(), level: notificationLevelSchema })
+  .meta({ id: 'ProjectNotificationLevel' });
+export type ProjectNotificationLevel = z.infer<typeof projectNotificationLevelSchema>;
+
+export const setNotificationLevelSchema = z
+  .object({ level: notificationLevelSchema })
+  .meta({ id: 'SetNotificationLevel' });
+export type SetNotificationLevel = z.infer<typeof setNotificationLevelSchema>;

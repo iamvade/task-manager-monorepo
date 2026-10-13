@@ -116,6 +116,36 @@ describe('task drawer', () => {
     vi.restoreAllMocks();
   });
 
+  it('follows and unfollows the task from the Followers row', async () => {
+    const { state, task } = setup();
+    const calls: string[] = [];
+    const me = {
+      id: ME.user.id,
+      name: ME.user.name,
+      initials: ME.user.initials,
+      avatarColor: ME.user.avatarColor,
+    };
+    api(state, () => ({
+      [`POST /api/v1/tasks/${task.id}/follow`]: () => {
+        calls.push('follow');
+        return Response.json({ following: true, followers: [me] });
+      },
+      [`DELETE /api/v1/tasks/${task.id}/follow`]: () => {
+        calls.push('unfollow');
+        return Response.json({ following: false, followers: [] });
+      },
+    }));
+    renderAt(`${LIST}&task=APP-135`);
+    const view = within(await drawer());
+    fireEvent.click(await view.findByRole('button', { name: 'Follow' }));
+    const following = await view.findByRole('button', { name: 'Following' });
+    expect(following).toHaveAttribute('aria-pressed', 'true');
+    expect(view.getByRole('img', { name: `1 follower: ${ME.user.name}` })).toBeInTheDocument();
+    fireEvent.click(following);
+    expect(await view.findByRole('button', { name: 'Follow' })).toBeInTheDocument();
+    expect(calls).toEqual(['follow', 'unfollow']);
+  });
+
   it('saves the title on Enter and updates the row behind the drawer', async () => {
     const { state, task } = setup();
     const patches: unknown[] = [];
