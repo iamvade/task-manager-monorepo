@@ -67,10 +67,10 @@ Tabs: Overview, Sprints, Workload, plus People (admins/owner) or My performance 
     - Projected = linear from today at (remaining at start − remaining today) / days elapsed.
     - Scope-added chips show the tasks added per day.
   - **Pace**: "slightly behind ideal" when remaining > ideal by at most 15 % of committed; "behind" beyond that; on track otherwise.
-  - **Carried over**: members of sprint N that were in sprint N−1 of the same project and not done at its end.
-    - **Times carried** = the number of earlier sprints the task left unfinished.
+  - **Carried over**: tasks in sprint N's scope (committed or added) that were in sprint N−1 of the same project during it and left it unfinished: not done at the moment their N−1 membership ended, or at N−1's end if it was still open then. Memberships of N−1 that ended before N−1 started don't count. (A replan on the last afternoon or after sprint N started counts; `setSprint` closes and opens memberships at the same instant.)
+    - **Times carried** = the number of earlier sprints of the project the task left unfinished the same way (each sprint once).
     - **Replan** when ≥ 3.
-    - For a past sprint, the card shows "Carried to next sprint" instead.
+    - For a past sprint, the card shows "Carried to next sprint" instead: its scope's tasks that left it unfinished and are (or were) in sprint N+1.
 - **Workload**: a snapshot of open tasks per assignee (a task with several assignees counts fully for each). Lists workspace members, or with a scope filter the scoped projects' members plus anyone with open tasks there.
   - **Buckets** by due date:
     - Overdue (< today)

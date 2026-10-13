@@ -39,6 +39,18 @@ function workingDays(start: string, end: string, holidays: ReadonlySet<string>):
 const sprintEndSql = (alias: string, timezone: string) =>
   sql`((${sql.raw(alias)}.end_date + 1)::timestamp at time zone ${timezone})`;
 
+/** Sprint start as an instant: midnight at the start of its first day. */
+const sprintStartSql = (alias: string, timezone: string) =>
+  sql`(${sql.raw(alias)}.start_date::timestamp at time zone ${timezone})`;
+
+/**
+ * When a membership stopped counting for its sprint: when it was removed, or the sprint's end
+ * if it was still open then (moves on the last day happen before midnight, so `removed_at`
+ * is the earlier instant).
+ */
+const membershipLeftSql = (m: string, sprintAlias: string, timezone: string) =>
+  sql`least(coalesce(${sql.raw(m)}.removed_at, 'infinity'::timestamptz), ${sprintEndSql(sprintAlias, timezone)})`;
+
 /**
  * The project's sprint numbers per sprint, as of `at[i]`: committed (open at the start),
  * added after the start, and members done at the cutoff (end of sprint, or now).
@@ -81,25 +93,31 @@ const burndownQuery = (sprintId: string, startIso: string, ats: string[]) => {
 };
 
 /**
- * Committed tasks of sprint `n` that were in sprint `prev` at its end and not done, with how
- * many earlier sprints of the project each one left unfinished.
+ * Tasks in sprint `n`'s scope (committed or added by the cutoff) that left sprint `prev`
+ * unfinished: not done when their membership there ended, or at the sprint's end if it was
+ * still open then. `times` = how many earlier sprints of the project the task left that way.
+ * A task moved to the next sprint on the last afternoon, or after the next one started, counts
+ * (`setSprint` closes and opens memberships at the same instant, so "open at the end" never
+ * matches a replan done inside a sprint).
  */
 export const carriedQuery = (
   ctx: ReportContext,
   projectId: string,
   sprint: SprintRow,
   prev: SprintRow,
+  cutoffIso: string,
 ) => {
   const startAt = dayStart(sprint.start_date, ctx.timezone);
   return sql`
     with members as (
       select distinct sm.task_id from sprint_memberships sm
       join tasks t on t.id = sm.task_id and t.deleted_at is null
-      where sm.sprint_id = ${sprint.id} and sm.added_at <= ${startAt}
-        and (sm.removed_at is null or sm.removed_at > ${startAt})
+      where sm.sprint_id = ${sprint.id}
+        and ((sm.added_at <= ${startAt} and (sm.removed_at is null or sm.removed_at > ${startAt}))
+          or (sm.added_at > ${startAt} and sm.added_at <= ${cutoffIso}::timestamptz))
     ),
     unfinished as (
-      -- (task, earlier sprint) pairs where the task was in the sprint at its end, not done.
+      -- (task, earlier sprint) pairs where the task was in the sprint and left it not done.
       select em.task_id, es.id as sprint_id
       from sprint_memberships em
       join sprints es on es.id = em.sprint_id
@@ -107,8 +125,8 @@ export const carriedQuery = (
       where em.task_id in (select task_id from members)
         and es.project_id = ${projectId} and es.number < ${sprint.number}
         and em.added_at < ${sprintEndSql('es', ctx.timezone)}
-        and (em.removed_at is null or em.removed_at >= ${sprintEndSql('es', ctx.timezone)})
-        and not ${doneAt('et', sprintEndSql('es', ctx.timezone))}
+        and (em.removed_at is null or em.removed_at > ${sprintStartSql('es', ctx.timezone)})
+        and not ${doneAt('et', membershipLeftSql('em', 'es', ctx.timezone))}
     ),
     carried as (
       select task_id, count(distinct sprint_id)::int as times from unfinished
@@ -122,15 +140,16 @@ export const carriedQuery = (
     order by c.times desc, p.key, t.number`;
 };
 
-/** Past sprint: unfinished tasks at its end that are in the next sprint. */
+/** Past sprint: tasks that left it unfinished (see `carriedQuery`) and are or were in the next. */
 const carriedOutQuery = (ctx: ReportContext, sprint: SprintRow, next: SprintRow) => {
+  const startAt = dayStart(sprint.start_date, ctx.timezone);
   const endAt = dayStart(addDays(sprint.end_date, 1), ctx.timezone);
   return sql`
     select count(distinct sm.task_id)::int as n from sprint_memberships sm
     join tasks t on t.id = sm.task_id and t.deleted_at is null
     where sm.sprint_id = ${sprint.id} and sm.added_at < ${endAt}
-      and (sm.removed_at is null or sm.removed_at >= ${endAt})
-      and not ${doneAt('t', endAt)}
+      and (sm.removed_at is null or sm.removed_at > ${startAt})
+      and not ${doneAt('t', sql`least(coalesce(sm.removed_at, 'infinity'::timestamptz), ${endAt})`)}
       and exists (select 1 from sprint_memberships nm
         where nm.task_id = sm.task_id and nm.sprint_id = ${next.id})`;
 };
@@ -309,7 +328,7 @@ export async function sprintQueries(db: DbOrTx, ctx: ReportContext, plan: Sprint
         cutoffs,
       ),
       burndown: burndownQuery(s.id, selectedStart, points),
-      carried: prev ? carriedQuery(ctx, plan.project.id, s, prev) : null,
+      carried: prev ? carriedQuery(ctx, plan.project.id, s, prev, selectedCutoff) : null,
       carriedOut: next && ctx.today > s.end_date ? carriedOutQuery(ctx, s, next) : null,
       waiting:
         s.start_date <= ctx.today && ctx.today <= s.end_date ? waitingQuery(s.id, nowIso) : null,

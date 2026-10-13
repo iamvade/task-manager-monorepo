@@ -1,4 +1,4 @@
-import { sprintsReportSchema } from '@kite/shared';
+import { sprintsReportSchema, type StatusCategory } from '@kite/shared';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createTestApp } from './helpers.js';
 import { insertHoliday, insertSprint, timelineTask } from './report-fixtures.js';
@@ -265,6 +265,137 @@ describe('GET /workspaces/:id/reports/sprints', () => {
     const r = await sprints(fx.w, `projectId=${other.id}`);
     expect(r.sprints).toEqual([]);
     expect(r.sprint).toBeNull();
+  });
+
+  describe('carried over: when the task left the previous sprint', () => {
+    // Replans happen inside sprints too (the last afternoon, or after the next sprint started):
+    // a task counts as carried when it was not done at the moment it left the previous sprint.
+    let w: Awaited<ReturnType<typeof taskWorld>>;
+    let s3: Awaited<ReturnType<typeof insertSprint>>;
+    let s4: Awaited<ReturnType<typeof insertSprint>>;
+
+    beforeAll(async () => {
+      w = await taskWorld(ctx, 'Carry Owner');
+      const p = w.project.id;
+      const s2 = await insertSprint(ctx.db, p, 2, '2026-09-14', '2026-09-25');
+      s3 = await insertSprint(ctx.db, p, 3, '2026-09-28', '2026-10-09');
+      s4 = await insertSprint(ctx.db, p, 4, '2026-10-12', '2026-10-23');
+      const base = { projectId: p, createdBy: w.owner.id };
+      const [, p2, p3, p4] = PLAN as [string, string, string, string];
+      const todo = (iso: string): [StatusCategory, string][] => [['todo', iso]];
+
+      // Moved on sprint 3's last afternoon (Friday Oct 9, 16:00 in Ulaanbaatar).
+      await timelineTask(ctx.db, {
+        ...base,
+        title: 'LastAfternoon',
+        timeline: todo('2026-09-29T00:00:00Z'),
+        sprints: [
+          { sprintId: s3.id, added: p3, removed: '2026-10-09T08:00:00Z' },
+          { sprintId: s4.id, added: '2026-10-09T08:00:00Z' },
+        ],
+      });
+      // Moved after sprint 4 had started: carried and added mid-sprint.
+      await timelineTask(ctx.db, {
+        ...base,
+        title: 'AfterStart',
+        timeline: todo('2026-09-29T00:00:00Z'),
+        sprints: [
+          { sprintId: s3.id, added: p3, removed: '2026-10-13T02:00:00Z' },
+          { sprintId: s4.id, added: '2026-10-13T02:00:00Z' },
+        ],
+      });
+      // Parked (no sprint) mid-sprint 3, planned into sprint 4.
+      await timelineTask(ctx.db, {
+        ...base,
+        title: 'Parked',
+        timeline: todo('2026-09-29T00:00:00Z'),
+        sprints: [
+          { sprintId: s3.id, added: p3, removed: '2026-10-05T02:00:00Z' },
+          { sprintId: s4.id, added: p4 },
+        ],
+      });
+      // Done inside sprint 3 and moved while done (reopened later): not carried.
+      await timelineTask(ctx.db, {
+        ...base,
+        title: 'DoneBeforeLeaving',
+        timeline: [
+          ['todo', '2026-09-29T00:00:00Z'],
+          ['done', '2026-10-02T02:00:00Z'],
+          ['in_progress', '2026-10-13T02:00:00Z'],
+        ],
+        sprints: [
+          { sprintId: s3.id, added: p3, removed: p4 },
+          { sprintId: s4.id, added: p4 },
+        ],
+      });
+      // Done, then reopened before sprint 3 ended: carried.
+      await timelineTask(ctx.db, {
+        ...base,
+        title: 'Reopened',
+        timeline: [
+          ['todo', '2026-09-29T00:00:00Z'],
+          ['done', '2026-10-02T02:00:00Z'],
+          ['todo', '2026-10-07T02:00:00Z'],
+        ],
+        sprints: [
+          { sprintId: s3.id, added: p3, removed: p4 },
+          { sprintId: s4.id, added: p4 },
+        ],
+      });
+      // Bounced 3 → 4 → 3 → 4: one row, carried once.
+      await timelineTask(ctx.db, {
+        ...base,
+        title: 'PingPong',
+        timeline: todo('2026-09-29T00:00:00Z'),
+        sprints: [
+          { sprintId: s3.id, added: p3, removed: '2026-10-01T02:00:00Z' },
+          { sprintId: s4.id, added: '2026-10-01T02:00:00Z', removed: '2026-10-02T02:00:00Z' },
+          { sprintId: s3.id, added: '2026-10-02T02:00:00Z', removed: p4 },
+          { sprintId: s4.id, added: p4 },
+        ],
+      });
+      // Pulled out of sprint 3 before it began: never in it.
+      await timelineTask(ctx.db, {
+        ...base,
+        title: 'PulledEarly',
+        timeline: todo('2026-09-26T00:00:00Z'),
+        sprints: [
+          { sprintId: s3.id, added: p3, removed: '2026-09-27T00:00:00Z' },
+          { sprintId: s4.id, added: p4 },
+        ],
+      });
+      // Carried 2 → 3 in the gap, then 3 → 4 on the last afternoon: carried twice.
+      await timelineTask(ctx.db, {
+        ...base,
+        title: 'Twice',
+        timeline: todo('2026-09-12T00:00:00Z'),
+        sprints: [
+          { sprintId: s2.id, added: p2, removed: p3 },
+          { sprintId: s3.id, added: p3, removed: '2026-10-09T09:00:00Z' },
+          { sprintId: s4.id, added: '2026-10-09T09:00:00Z' },
+        ],
+      });
+    });
+
+    it('counts tasks that left the previous sprint unfinished, whenever they left', async () => {
+      const s = (await sprints(w, `projectId=${w.project.id}`)).sprint;
+      expect(s).toMatchObject({ number: 4, committed: 7, added: 1, carriedIn: 6 });
+      expect(s?.carried.map((t) => [t.title, t.timesCarried]).sort()).toEqual([
+        ['AfterStart', 1],
+        ['LastAfternoon', 1],
+        ['Parked', 1],
+        ['PingPong', 1],
+        ['Reopened', 1],
+        ['Twice', 2],
+      ]);
+      expect(s?.carriedInRepeated).toBe(1);
+    });
+
+    it('a past sprint counts the same tasks as carried to the next one', async () => {
+      const s = (await sprints(w, `projectId=${w.project.id}&sprintId=${s3.id}`)).sprint;
+      expect(s).toMatchObject({ number: 3, state: 'past', carriedOut: 6, carriedIn: 1 });
+      expect(s?.carried.map((t) => t.title)).toEqual(['Twice']);
+    });
   });
 
   it('exports the sprint’s tasks as CSV', async () => {
