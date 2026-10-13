@@ -113,6 +113,7 @@ export const workspaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           initial: s.initial,
           color: s.color,
           position: s.position,
+          createdById: s.createdBy,
           projects: projectRows.filter((p) => p.spaceId === s.id).map(toSidebarProject),
         })),
         favorites: projectRows

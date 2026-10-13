@@ -70,6 +70,8 @@ export const homeSchema = z
       thisWeek: z.array(myTaskSchema),
       /** Open, due after Sunday, then those without a due date. */
       later: z.array(myTaskSchema),
+      /** Completed this week (Mon–Sun), latest first; done ones due today are in `today` too. */
+      done: z.array(myTaskSchema),
     }),
     stats: z.object({
       dueToday: z.object({

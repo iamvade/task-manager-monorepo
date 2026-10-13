@@ -14,6 +14,8 @@ export const projectSummarySchema = z
     name: z.string(),
     color: paletteKeySchema,
     archivedAt: z.iso.datetime().nullable(),
+    /** Who created it (may archive / restore it like an admin); null before migration 0007. */
+    createdById: z.uuid().nullable(),
   })
   .meta({ id: 'ProjectSummary' });
 export type ProjectSummary = z.infer<typeof projectSummarySchema>;

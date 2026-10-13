@@ -1,4 +1,4 @@
-import type { ArchivedProject, WorkspaceRole } from '@kite/shared';
+import { canManageCreated, type ArchivedProject, type WorkspaceRole } from '@kite/shared';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useArchivedProjects, useSetArchived } from '../../api/projects';
@@ -23,6 +23,8 @@ export function ArchivedProjectsSection({ workspaceId, role }: ArchivedProjectsS
   const archived = useArchivedProjects(workspaceId);
   const setArchived = useSetArchived(workspaceId);
   const isAdmin = role !== 'member';
+  const { me } = useAuth();
+  const meId = me?.user.id ?? '';
 
   function restore(project: ArchivedProject) {
     setArchived.mutate(
@@ -72,7 +74,7 @@ export function ArchivedProjectsSection({ workspaceId, role }: ArchivedProjectsS
               <ArchivedRow
                 key={project.id}
                 project={project}
-                canRestore={isAdmin}
+                canRestore={canManageCreated(role, project.createdById, meId)}
                 restoring={setArchived.isPending && setArchived.variables.projectId === project.id}
                 onRestore={() => {
                   restore(project);

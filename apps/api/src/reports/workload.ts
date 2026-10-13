@@ -1,4 +1,5 @@
 import {
+  LOAD_WINDOW_DAYS,
   addDays,
   formatTaskKey,
   startOfWeek,
@@ -25,7 +26,9 @@ import { assigneesColumn } from './tasks.js';
 
 /**
  * Open tasks in the scope per assignee (a task with several assignees counts for each), with
- * their due bucket: overdue (before today), week (today → Sunday), later, none.
+ * their due bucket: overdue (before today), week (today → Sunday), later, none; `counted` =
+ * the task weighs on the load (`LOAD_WINDOW_DAYS`): due by today + 13 days (overdue included)
+ * or in a sprint running today.
  */
 const assignedOpen = (ctx: ReportContext, weekEnd: string) => sql`
   select ta.user_id, t.id, t.number, t.title, t.priority, t.size, t.due_date, t.project_id,
@@ -35,7 +38,11 @@ const assignedOpen = (ctx: ReportContext, weekEnd: string) => sql`
       when t.due_date < ${ctx.today}::date then 'overdue'
       when t.due_date <= ${weekEnd}::date then 'week'
       else 'later'
-    end as bucket
+    end as bucket,
+    (t.due_date <= ${addDays(ctx.today, LOAD_WINDOW_DAYS - 1)}::date
+      or exists (select 1 from sprints s where s.id = t.sprint_id
+        and s.start_date <= ${ctx.today}::date and s.end_date >= ${ctx.today}::date)
+    ) is true as counted
   from tasks t
   join task_assignees ta on ta.task_id = t.id
   where ${taskInScope(ctx, 't')} and t.completed_at is null`;
@@ -61,6 +68,7 @@ const peopleQuery = (ctx: ReportContext, weekEnd: string) => sql`
   with a as (${assignedOpen(ctx, weekEnd)})
   select u.id, u.name, u.initials, u.avatar_color, wm.title, wm.capacity_points,
     count(a.id)::int as open_tasks, coalesce(sum(a.pts), 0)::int as points,
+    coalesce(sum(a.pts) filter (where a.counted), 0)::int as load_points,
     ${sql.join(bucketSums, sql`,`)}
   from workspace_members wm
   join users u on u.id = wm.user_id
@@ -72,7 +80,7 @@ const peopleQuery = (ctx: ReportContext, weekEnd: string) => sql`
 const tasksQuery = (ctx: ReportContext, weekEnd: string) => sql`
   with a as (${assignedOpen(ctx, weekEnd)})
   select a.user_id, a.id, a.number, a.title, a.priority, a.size, a.pts,
-    a.due_date::text as due_date, a.bucket,
+    a.due_date::text as due_date, a.bucket, a.counted,
     p.id as project_id, p.space_id as project_space_id, p.key as project_key,
     p.name as project_name, p.color as project_color, ${assigneesColumn('a')}
   from a join projects p on p.id = a.project_id
@@ -89,6 +97,7 @@ interface PersonRow extends Record<string, unknown> {
   capacity_points: number;
   open_tasks: number;
   points: number;
+  load_points: number;
   overdue_points: number;
   overdue_tasks: number;
   week_points: number;
@@ -109,6 +118,7 @@ interface TaskRow extends Record<string, unknown> {
   pts: number;
   due_date: string | null;
   bucket: WorkloadBucket;
+  counted: boolean;
   project_id: string;
   project_space_id: string;
   project_key: string;
@@ -140,13 +150,14 @@ export async function buildWorkload(
     capacity: p.capacity_points,
     openTasks: p.open_tasks,
     points: p.points,
+    loadPoints: p.load_points,
     buckets: {
       overdue: { points: p.overdue_points, tasks: p.overdue_tasks },
       week: { points: p.week_points, tasks: p.week_tasks },
       later: { points: p.later_points, tasks: p.later_tasks },
       none: { points: p.none_points, tasks: p.none_tasks },
     },
-    load: workloadLoad(p.points, p.overdue_points, p.capacity_points),
+    load: workloadLoad(p.load_points, p.overdue_points, p.capacity_points),
     tasks: tasks
       .filter((t) => t.user_id === p.id)
       .map((t) => ({
@@ -158,6 +169,7 @@ export async function buildWorkload(
         points: t.pts,
         dueDate: t.due_date,
         bucket: t.bucket,
+        counted: t.counted,
         project: {
           id: t.project_id,
           spaceId: t.project_space_id,

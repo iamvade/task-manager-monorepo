@@ -21,8 +21,26 @@ export const FILTER_PARAMS = [
 
 /** `sprint=none` = the user removed the default sprint filter; keeps it from re-applying. */
 export const NO_SPRINT = 'none';
+/** `done=all` = List/Board load every done task, not only the last 14 days (not a filter). */
+export const ALL_DONE = 'all';
 /** `assignee=me` stays literal in the URL so a shared link means "the viewer". */
 export const ASSIGNEE_ME = 'me';
+
+/**
+ * URL changes that clear every filter. With an active sprint the sprint becomes `none`, which
+ * keeps the default sprint filter from coming back.
+ */
+export function clearedFilters(hasActiveSprint: boolean): Record<string, string | null> {
+  return {
+    status: null,
+    assignee: null,
+    priority: null,
+    tag: null,
+    dueFrom: null,
+    dueTo: null,
+    sprint: hasActiveSprint ? NO_SPRINT : null,
+  };
+}
 
 /** Filter values read from the URL (lists are comma-separated: `?status=a,b`). */
 export interface ViewFilters {
@@ -104,6 +122,7 @@ export function useViewParams() {
     filters,
     sprintId: filters.sprint,
     hasFilterParams: FILTER_PARAMS.some((key) => params.has(key)),
+    allDone: params.get('done') === ALL_DONE,
     activeFilterCount: activeFilterFields(filters).length,
     defaultSort,
     sort: pick(params.get('sort'), SORT_FIELDS, defaultSort),

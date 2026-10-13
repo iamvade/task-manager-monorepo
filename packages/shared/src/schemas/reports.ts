@@ -343,6 +343,8 @@ export const workloadTaskSchema = z
     points: z.number().int(),
     dueDate: dateSchema.nullable(),
     bucket: workloadBucketSchema,
+    /** Weighs on the load: due within `LOAD_WINDOW_DAYS` (overdue included) or in a current sprint. */
+    counted: z.boolean(),
     project: taskProjectRefSchema,
     /** Everyone assigned (the task is listed under each of them). */
     assignees: z.array(userRefSchema),
@@ -356,7 +358,10 @@ export const workloadPersonSchema = z
     title: z.string().nullable(),
     capacity: z.number().int(),
     openTasks: z.number().int(),
+    /** All open points. */
     points: z.number().int(),
+    /** Points of the `counted` tasks: what `load` compares with capacity. */
+    loadPoints: z.number().int(),
     buckets: z.object({
       /** Due before today. */
       overdue: bucketTotals,

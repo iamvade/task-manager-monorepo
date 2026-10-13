@@ -19,6 +19,8 @@ export interface CreateDefaults {
 }
 
 export interface ListColumns {
+  /** Task key (`APP-142`) before the title; on by default. */
+  key: boolean;
   size: boolean;
 }
 
@@ -37,6 +39,8 @@ interface UiState {
   createDefaults: CreateDefaults;
   /** Quick create's "Create more" switch (remembered). */
   createMore: boolean;
+  /** Project of the last task made in quick create: the default outside a project page. */
+  lastCreateProjectId: string | null;
   /** Calendar range (Month / Week), shared by every calendar. */
   calendarMode: CalendarMode;
   /** Projects toggled off on a space calendar, per space id. */
@@ -52,6 +56,7 @@ interface UiState {
   openCreate: (defaults?: CreateDefaults) => void;
   closeCreate: () => void;
   setCreateMore: (on: boolean) => void;
+  setLastCreateProject: (projectId: string) => void;
   setCalendarMode: (mode: CalendarMode) => void;
   toggleCalendarProject: (spaceId: string, projectId: string) => void;
   setListColumn: (column: keyof ListColumns, on: boolean) => void;
@@ -68,6 +73,7 @@ type UiData = Omit<
   | 'openCreate'
   | 'closeCreate'
   | 'setCreateMore'
+  | 'setLastCreateProject'
   | 'setCalendarMode'
   | 'toggleCalendarProject'
   | 'setListColumn'
@@ -83,9 +89,10 @@ export const initialUiState: UiData = {
   createOpen: false,
   createDefaults: {},
   createMore: false,
+  lastCreateProjectId: null,
   calendarMode: 'month',
   calendarHidden: {},
-  listColumns: { size: false },
+  listColumns: { key: true, size: false },
   paletteOpen: false,
   shortcutsOpen: false,
 };
@@ -132,6 +139,9 @@ export const useUiStore = create<UiState>()(
       setCreateMore: (on) => {
         set({ createMore: on });
       },
+      setLastCreateProject: (projectId) => {
+        set({ lastCreateProjectId: projectId });
+      },
       setCalendarMode: (mode) => {
         set({ calendarMode: mode });
       },
@@ -162,12 +172,21 @@ export const useUiStore = create<UiState>()(
       name: ANONYMOUS_KEY,
       // Private mode / blocked storage: zustand falls back to memory when getItem throws.
       storage: createJSONStorage(() => localStorage),
+      merge: (persisted, current) => {
+        const saved = (persisted ?? {}) as Partial<UiData>;
+        return {
+          ...current,
+          ...saved,
+          listColumns: { ...current.listColumns, ...saved.listColumns },
+        };
+      },
       partialize: (s) => ({
         sidebarCollapsed: s.sidebarCollapsed,
         openSpaces: s.openSpaces,
         lastWorkspaceId: s.lastWorkspaceId,
         collapsedGroups: s.collapsedGroups,
         createMore: s.createMore,
+        lastCreateProjectId: s.lastCreateProjectId,
         calendarMode: s.calendarMode,
         calendarHidden: s.calendarHidden,
         listColumns: s.listColumns,
@@ -192,6 +211,15 @@ function readStored(name: string): Partial<UiData> | null {
   }
 }
 
+/** Saved state over the defaults; columns added since it was saved get their default. */
+function withDefaults(stored: Partial<UiData> | null): UiData {
+  return {
+    ...initialUiState,
+    ...stored,
+    listColumns: { ...initialUiState.listColumns, ...stored?.listColumns },
+  };
+}
+
 /**
  * Keeps layout state per account on a shared browser: switches the persisted key to the
  * user's (`kite.ui.<id>`), resets everything to defaults and loads what that user saved. The
@@ -210,5 +238,5 @@ export function scopeUiStore(userId: string | null) {
       // Storage blocked: nothing to migrate.
     }
   }
-  useUiStore.setState({ ...initialUiState, ...stored });
+  useUiStore.setState(withDefaults(stored));
 }

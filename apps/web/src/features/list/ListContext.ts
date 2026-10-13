@@ -22,6 +22,8 @@ export interface ListActions {
   setSize: (task: TaskListItem, size: Size | null) => void;
   /** The optional Size column (toolbar Columns menu). */
   showSize: boolean;
+  /** The task key before the title (toolbar Columns menu, on by default). */
+  showKey: boolean;
   setTags: (task: TaskListItem, tags: Tag[]) => void;
 }
 

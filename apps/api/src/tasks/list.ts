@@ -26,13 +26,15 @@ import {
   type SQL,
 } from 'drizzle-orm';
 import type { DbOrTx } from '../db/client.js';
+import { dayStart } from '../reports/sql.js';
 import { projects, statuses, taskAssignees, taskTags, tasks } from '../db/schema/index.js';
 
 /** `%`, `_` and `\` are literal in the search text. */
 export const escapeLike = (text: string) => text.replace(/[\\%_]/g, '\\$&');
 
 // Aggregates are correlated subqueries: one statement for the whole list, no N+1.
-const assigneesSql = sql<UserRef[]>`coalesce((
+/** A task's assignees as user refs (by name); also used by search. */
+export const assigneesSql = sql<UserRef[]>`coalesce((
   select json_agg(json_build_object(
     'id', u.id, 'name', u.name, 'initials', u.initials, 'avatarColor', u.avatar_color
   ) order by u.name, u.id)
@@ -91,8 +93,11 @@ const listColumns = {
   attachmentCount: attachmentCountSql,
 };
 
-/** Filter conditions shared by the project- and space-level lists. */
-export function taskFilters(db: DbOrTx, query: TaskListQuery): SQL[] {
+/**
+ * Filter conditions shared by the project- and space-level lists. `timezone` is the caller's:
+ * `doneSince` is a local date.
+ */
+export function taskFilters(db: DbOrTx, query: TaskListQuery, timezone: string): SQL[] {
   const where: SQL[] = [isNull(tasks.deletedAt)];
   if (query.statusId?.length) where.push(inArray(tasks.statusId, query.statusId));
   if (query.statusCategory?.length) where.push(inArray(statuses.category, query.statusCategory));
@@ -104,6 +109,13 @@ export function taskFilters(db: DbOrTx, query: TaskListQuery): SQL[] {
     where.push(query.hasDueDate ? isNotNull(tasks.dueDate) : isNull(tasks.dueDate));
   }
   if (!query.includeDone) where.push(ne(statuses.category, 'done'));
+  if (query.doneSince) {
+    const recent = or(
+      ne(statuses.category, 'done'),
+      gte(tasks.completedAt, dayStart(query.doneSince, timezone)),
+    );
+    if (recent) where.push(recent);
+  }
 
   if (query.assigneeId?.length) {
     const ids = query.assigneeId.filter((id) => id !== UNASSIGNED);
@@ -189,30 +201,50 @@ export const toTaskListItem = (row: ListRow): TaskListItem => ({
 });
 
 /** The project list query, unexecuted (`pnpm db:perf` EXPLAINs it). */
-export function projectTaskListQuery(db: DbOrTx, projectId: string, query: TaskListQuery) {
-  const where = [eq(tasks.projectId, projectId), ...taskFilters(db, query)];
+export function projectTaskListQuery(
+  db: DbOrTx,
+  projectId: string,
+  query: TaskListQuery,
+  timezone: string,
+) {
+  const where = [eq(tasks.projectId, projectId), ...taskFilters(db, query, timezone)];
   return selectTaskList(db, where, taskOrder(query, false));
 }
 
 /** The space list query, unexecuted: every non-archived project of the space. */
-export function spaceTaskListQuery(db: DbOrTx, spaceId: string, query: SpaceTaskListQuery) {
+export function spaceTaskListQuery(
+  db: DbOrTx,
+  spaceId: string,
+  query: SpaceTaskListQuery,
+  timezone: string,
+) {
   const where = [
     eq(projects.spaceId, spaceId),
     isNull(projects.archivedAt),
     ...(query.projectId?.length ? [inArray(tasks.projectId, query.projectId)] : []),
-    ...taskFilters(db, query),
+    ...taskFilters(db, query, timezone),
   ];
   return selectTaskList(db, where, taskOrder(query, true));
 }
 
 /** `GET /projects/:id/tasks`. */
-export async function listProjectTasks(db: DbOrTx, projectId: string, query: TaskListQuery) {
-  return (await projectTaskListQuery(db, projectId, query)).map(toTaskListItem);
+export async function listProjectTasks(
+  db: DbOrTx,
+  projectId: string,
+  query: TaskListQuery,
+  timezone: string,
+) {
+  return (await projectTaskListQuery(db, projectId, query, timezone)).map(toTaskListItem);
 }
 
 /** `GET /spaces/:id/tasks`. */
-export async function listSpaceTasks(db: DbOrTx, spaceId: string, query: SpaceTaskListQuery) {
-  return (await spaceTaskListQuery(db, spaceId, query)).map(toTaskListItem);
+export async function listSpaceTasks(
+  db: DbOrTx,
+  spaceId: string,
+  query: SpaceTaskListQuery,
+  timezone: string,
+) {
+  return (await spaceTaskListQuery(db, spaceId, query, timezone)).map(toTaskListItem);
 }
 
 /** One task as a list item, deleted or not (move/complete responses, the detail base). */

@@ -90,6 +90,23 @@ describe('board', () => {
     vi.restoreAllMocks();
   });
 
+  it('says how many tasks the filters hide, per column and in the count line', async () => {
+    const urgent = makeTasks().filter((x) => x.priority === 'urgent');
+    api(urgent);
+    const router = renderAt(`/p/${PROJECT_ID}/board?sprint=none&priority=urgent`);
+
+    expect(await screen.findByText('2 of 7 tasks · 0 done')).toBeInTheDocument();
+    expect(within(column(/^To Do/)).getByText('+2 hidden by filters')).toBeInTheDocument();
+    expect(within(column(/^In Progress/)).getByText('+1 hidden by filters')).toBeInTheDocument();
+    expect(within(column(/^Done/)).queryByText(/hidden by filters/)).toBeNull();
+    expect(within(column(/^Done/)).getByText('Done in the last 14 days')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Clear filters to show 2 more in To Do' }));
+    await waitFor(() => {
+      expect(router.state.location.search).toBe('?sprint=none');
+    });
+  });
+
   it('shows one tinted column per status with counts and design cards', async () => {
     const tasks = makeTasks();
     // Three tags on the first card: two chips + "+1".

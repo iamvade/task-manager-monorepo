@@ -97,7 +97,11 @@ export function OverviewTab() {
         <p className="m-0 text-[13px] text-muted">
           {filters.period === '4w'
             ? t('reports.range.compare4w', { range, previous })
-            : t('reports.range.compareDays', { range, previous, count: days })}
+            : filters.period === 'lastWeek'
+              ? t('reports.range.compareWeek', { range, previous })
+              : filters.period === 'lastMonth'
+                ? t('reports.range.compareMonth', { range, previous })
+                : t('reports.range.compareDays', { range, previous, count: days })}
         </p>
         <OverviewStats report={data} />
         <div className="flex flex-wrap items-stretch gap-4">

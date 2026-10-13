@@ -1,5 +1,5 @@
 import type { TaskListItem } from '@kite/shared';
-import type { HTMLAttributes, MouseEvent, ReactNode, Ref } from 'react';
+import { useState, type HTMLAttributes, type MouseEvent, type ReactNode, type Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { isTempTask } from '../../api/tasks';
@@ -118,6 +118,8 @@ export function TaskRow({
   const temp = isTempTask(task);
   const [first, ...others] = task.assignees;
   const inert = temp || dragState === 'overlay';
+  // The assignee picker: open to add/remove, or (row menu "Reassign…") to replace everyone.
+  const [assigning, setAssigning] = useState<'edit' | 'replace' | null>(null);
 
   return (
     <div
@@ -168,6 +170,11 @@ export function TaskRow({
             <span className="truncate">{task.project.name}</span>
           </span>
         )}
+        {actions.showKey && (
+          <span className="min-w-[64px] flex-none font-mono text-[12px] text-muted">
+            {task.key}
+          </span>
+        )}
         <Link
           to={actions.taskHref(task)}
           tabIndex={inert ? -1 : undefined}
@@ -209,7 +216,16 @@ export function TaskRow({
             value={task.assignees}
             members={actions.members}
             teamIds={actions.teamIds}
-            label={t('table.setAssignee', { name: task.title })}
+            label={
+              assigning === 'replace'
+                ? t('table.reassignTo', { name: task.title })
+                : t('table.setAssignee', { name: task.title })
+            }
+            single={assigning === 'replace'}
+            open={assigning !== null}
+            onOpenChange={(next) => {
+              setAssigning((mode) => (next ? (mode ?? 'edit') : null));
+            }}
             onChange={(users) => {
               actions.setAssignees(task, users);
             }}
@@ -375,6 +391,16 @@ export function TaskRow({
                 label: done ? t('table.reopen') : t('drawer.markComplete'),
                 onSelect: () => {
                   actions.toggleComplete(task);
+                },
+              },
+              {
+                id: 'reassign',
+                label: t('table.reassign'),
+                onSelect: () => {
+                  // After the menu has closed and returned focus to its button.
+                  requestAnimationFrame(() => {
+                    setAssigning('replace');
+                  });
                 },
               },
               {

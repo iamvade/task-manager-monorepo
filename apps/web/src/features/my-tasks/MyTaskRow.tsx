@@ -15,6 +15,7 @@ const SECTION_TONE: Record<SectionId, DueTone> = {
   today: 'today',
   thisWeek: 'soon',
   later: 'later',
+  done: 'done',
 };
 
 interface MyTaskRowProps {
@@ -65,7 +66,12 @@ export function MyTaskRow({ task, section, onToggle }: MyTaskRowProps) {
       </span>
       <span role="cell" className="flex min-w-0 items-center gap-1.5 text-[12px] text-3">
         <SpaceBadge initial={task.space.initial} color={task.space.color} size={16} />
-        <span className="truncate">{task.project.name}</span>
+        <Link
+          to={`/p/${task.project.id}/list`}
+          className="truncate text-3 no-underline hover:text-default hover:underline"
+        >
+          {task.project.name}
+        </Link>
       </span>
       <span
         role="cell"

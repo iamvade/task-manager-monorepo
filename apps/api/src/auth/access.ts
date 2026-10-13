@@ -1,4 +1,4 @@
-import type { WorkspaceRole } from '@kite/shared';
+import { canManageCreated, type WorkspaceRole } from '@kite/shared';
 import { and, eq } from 'drizzle-orm';
 import type { FastifyRequest } from 'fastify';
 import {
@@ -23,6 +23,18 @@ function checkRole(role: WorkspaceRole, minRole: WorkspaceRole): void {
   if (!roleAtLeast(role, minRole)) {
     throw httpError(403, 'FORBIDDEN', 'You do not have permission to do this');
   }
+}
+
+/**
+ * Archive/restore a project, delete an empty space: admins and owners, or the member who created
+ * it (`canManageCreated` in packages/shared, which the web uses to show the actions). 403 else.
+ */
+export function requireCreatorOrAdmin(
+  request: FastifyRequest,
+  role: WorkspaceRole,
+  createdBy: string | null,
+): void {
+  if (!canManageCreated(role, createdBy, requireAuth(request).user.id)) checkRole(role, 'admin');
 }
 
 /**

@@ -12,7 +12,11 @@ import { and, asc, count, desc, eq, isNotNull, max } from 'drizzle-orm';
 import type { FastifyRequest } from 'fastify';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { loadProjectAccess, requireWorkspaceMember } from '../auth/access.js';
+import {
+  loadProjectAccess,
+  requireCreatorOrAdmin,
+  requireWorkspaceMember,
+} from '../auth/access.js';
 import { requireAuth } from '../auth/plugin.js';
 import { isUniqueViolation } from '../db/errors.js';
 import { movePosition, positionAfter } from '../db/position.js';
@@ -89,6 +93,7 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
             key: key ?? (await pickProjectKey(tx, workspaceId, name)),
             color: color ?? PROJECT_COLORS[(existing?.n ?? 0) % PROJECT_COLORS.length] ?? 'violet',
             position: positionAfter(last?.position),
+            createdBy: user.id,
           };
           const project = one(await tx.insert(projects).values(values).returning(), 'project');
           await insertDefaultStatuses(tx, project.id);
@@ -118,7 +123,7 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Projects'],
         summary: 'List archived projects',
         description:
-          'Most recently archived first, with their space. Any member can list them; restoring is for admins and owners.',
+          "Most recently archived first, with their space. Any member can list them; restoring is for admins, owners and the project's creator.",
         params: z.object({ workspaceId: z.uuid() }),
         response: { 200: z.array(archivedProjectSchema), 401: err, 404: err },
       },
@@ -143,6 +148,7 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
                 name: project.name,
                 color: project.color,
                 archivedAt: project.archivedAt.toISOString(),
+                createdById: project.createdBy,
                 space: {
                   id: space.id,
                   name: space.name,
@@ -249,13 +255,15 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         schema: {
           tags: ['Projects'],
           summary: action === 'archive' ? 'Archive a project' : 'Restore an archived project',
-          description: 'Admin or owner. Archived projects leave the sidebar but stay readable.',
+          description:
+            'Admin, owner, or the member who created the project. Archived projects leave the sidebar but stay readable.',
           params: projectParams,
           response: { 200: projectDetailSchema, 401: err, 403: err, 404: err },
         },
       },
       async (request) => {
-        const { project } = await loadProjectAccess(request, request.params.projectId, 'admin');
+        const { project, role } = await loadProjectAccess(request, request.params.projectId);
+        requireCreatorOrAdmin(request, role, project.createdBy);
         const archivedAt = action === 'archive' ? (project.archivedAt ?? new Date()) : null;
         const [updated] = await app.db
           .update(projects)

@@ -1,5 +1,5 @@
 import { matchesName, type UserRef, type WorkspaceMember } from '@kite/shared';
-import { useMemo, type ReactElement } from 'react';
+import { useMemo, useState, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../auth/useAuth';
 import { Avatar } from '../../components/ui/Avatar';
@@ -58,13 +58,22 @@ export function AssigneePicker({
   const meId = me?.user.id;
   const none = noneLabel ?? t('create.unassigned');
 
-  const sorted = useMemo(() => {
-    const rank = (m: WorkspaceMember) => (m.user.id === meId ? 0 : teamIds?.has(m.user.id) ? 1 : 2);
-    return [...members].sort((a, b) => rank(a) - rank(b) || a.user.name.localeCompare(b.user.name));
-  }, [members, meId, teamIds]);
-  const items: Item[] = single ? [...sorted, null] : sorted;
-  const grouped = Boolean(teamIds?.size) && sorted.some((m) => !teamIds?.has(m.user.id));
   const selected = value.map((u) => u.id);
+  // Multi-select: who was assigned when the list opened sits on top ("Assigned"), so removing
+  // someone is as easy as adding; it doesn't reorder while you click.
+  const [assignedAtOpen, setAssignedAtOpen] = useState<ReadonlySet<string>>(new Set());
+  const pinned = useMemo(
+    () => (single ? new Set<string>() : assignedAtOpen),
+    [single, assignedAtOpen],
+  );
+  const sorted = useMemo(() => {
+    const rank = (m: WorkspaceMember) =>
+      pinned.has(m.user.id) ? -1 : m.user.id === meId ? 0 : teamIds?.has(m.user.id) ? 1 : 2;
+    return [...members].sort((a, b) => rank(a) - rank(b) || a.user.name.localeCompare(b.user.name));
+  }, [members, meId, teamIds, pinned]);
+  const items: Item[] = single ? [...sorted, null] : sorted;
+  const grouped =
+    pinned.size > 0 || (Boolean(teamIds?.size) && sorted.some((m) => !teamIds?.has(m.user.id)));
 
   function pick(item: Item) {
     if (item === null) {
@@ -88,7 +97,10 @@ export function AssigneePicker({
       width={264}
       elevation="lg"
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={(next) => {
+        if (next) setAssignedAtOpen(new Set(selected));
+        onOpenChange?.(next);
+      }}
     >
       {(close) => (
         <Picker<Item>
@@ -106,9 +118,11 @@ export function AssigneePicker({
           groupBy={
             grouped
               ? (m) =>
-                  m && (m.user.id === meId || teamIds?.has(m.user.id))
-                    ? t('picker.projectTeam')
-                    : t('picker.others')
+                  m && pinned.has(m.user.id)
+                    ? t('picker.assigned')
+                    : m && (m.user.id === meId || teamIds?.has(m.user.id))
+                      ? t('picker.projectTeam')
+                      : t('picker.others')
               : undefined
           }
           onSelect={pick}

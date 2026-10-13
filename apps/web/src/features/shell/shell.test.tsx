@@ -346,6 +346,29 @@ describe('app shell', () => {
     expect(screen.queryByRole('menuitem', { name: 'Орон зайг устгах' })).toBeNull();
   });
 
+  it('shows archive and space delete to the member who created them', async () => {
+    const mine = { createdById: ME.user.id };
+    api({
+      'GET /api/v1/auth/me': asMember,
+      [`GET /api/v1/projects/${PROJECT_ID}`]: () =>
+        Response.json({ ...PROJECT_WITH_STATUSES, ...mine }),
+      [`GET /api/v1/workspaces/${WORKSPACE_ID}/sidebar`]: () =>
+        Response.json({
+          ...SIDEBAR,
+          spaces: SIDEBAR.spaces.map((space) => ({ ...space, ...mine })),
+        }),
+    });
+    const router = renderAt(`/p/${PROJECT_ID}/list`);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Төслийн сонголтууд' }));
+    expect(await screen.findByRole('menuitem', { name: 'Төслийг архивлах' })).toBeInTheDocument();
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
+
+    await act(() => router.navigate(`/s/${SPACE_ID}/list`));
+    fireEvent.click(await screen.findByRole('button', { name: 'Орон зайн сонголтууд' }));
+    expect(await screen.findByRole('menuitem', { name: 'Орон зайг устгах' })).toBeInTheDocument();
+  });
+
   it('shows a banner with Restore on an archived project', async () => {
     const calls: string[] = [];
     api({

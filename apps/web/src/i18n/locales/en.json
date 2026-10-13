@@ -125,7 +125,11 @@
     "list": "List",
     "board": "Board",
     "calendar": "Calendar",
-    "notYet": "This view is next on the design list. Switch back to List to see the {{project}} tasks."
+    "notYet": "This view is next on the design list. Switch back to List to see the {{project}} tasks.",
+    "doneRecent": "Done in the last {{count}} days",
+    "doneAll": "All done tasks",
+    "doneShowAll": "Show all",
+    "doneRecentOnly": "Recent only"
   },
   "toolbar": {
     "filter": "Filter",
@@ -150,7 +154,8 @@
     },
     "columns": "Columns",
     "columnsMenu": "Show columns",
-    "columnSize": "Size"
+    "columnSize": "Size",
+    "columnKey": "Task key"
   },
   "filters": {
     "sprintIs": "Sprint is",
@@ -190,7 +195,9 @@
   },
   "summary": {
     "tasks_one": "{{count}} task · {{done}} done",
-    "tasks_other": "{{count}} tasks · {{done}} done"
+    "tasks_other": "{{count}} tasks · {{done}} done",
+    "tasksOf_one": "{{count}} of {{total}} tasks · {{done}} done",
+    "tasksOf_other": "{{count}} of {{total}} tasks · {{done}} done"
   },
   "table": {
     "label": "{{project}} tasks",
@@ -222,7 +229,9 @@
     "setTags": "Tags of {{name}}",
     "open": "Open",
     "reopen": "Reopen",
-    "delete": "Delete"
+    "delete": "Delete",
+    "reassign": "Reassign…",
+    "reassignTo": "Reassign {{name}} to"
   },
   "status": {
     "todo": "To Do",
@@ -278,7 +287,10 @@
     "priorityLabel": "Priority",
     "tagsLabel": "Tags",
     "dueLabel": "Due date",
-    "assigneeLabel": "Assignees"
+    "assigneeLabel": "Assignees",
+    "createTag": "Create tag “{{name}}”",
+    "createTagFailed": "Couldn't create the tag",
+    "assigned": "Assigned"
   },
   "board": {
     "sortManual": "Sort: Manual",
@@ -307,7 +319,10 @@
       "dropped": "{{title}} was dropped in {{status}}.",
       "cancelled": "Moving {{title}} was cancelled."
     },
-    "label": "{{project}} board"
+    "label": "{{project}} board",
+    "hiddenByFilters_one": "+{{count}} hidden by filters",
+    "hiddenByFilters_other": "+{{count}} hidden by filters",
+    "showHidden": "Clear filters to show {{count}} more in {{status}}"
   },
   "drawer": {
     "closeToList": "Close task and return to list",
@@ -460,7 +475,8 @@
     "commentDeleted": "This comment was deleted",
     "deleteCommentConfirm": "Delete this comment?",
     "hideReplies": "Hide replies",
-    "viewers": "Also viewing: {{names}}"
+    "viewers": "Also viewing: {{names}}",
+    "removeAssignee": "Remove {{name}}"
   },
   "myTasks": {
     "allSpaces": "All spaces",
@@ -482,7 +498,8 @@
       "perDayItem": "{{day}} {{count}}",
       "overdue": "Overdue",
       "oldestLate_one": "oldest is {{count}} day late",
-      "oldestLate_other": "oldest is {{count}} days late"
+      "oldestLate_other": "oldest is {{count}} days late",
+      "showSection": "Show {{section}}"
     },
     "sections": {
       "overdue": "Overdue",
@@ -490,7 +507,8 @@
       "thisWeek": "This Week",
       "later": "Later",
       "laterHint": "After this week",
-      "rangeHint": "{{start}} – {{end}}"
+      "rangeHint": "{{start}} – {{end}}",
+      "done": "Done this week"
     },
     "recentActivity": "Recent activity",
     "viewInbox": "View inbox",
@@ -660,7 +678,9 @@
     "noTags": "No tags",
     "created": "Created {{key}}",
     "openTask": "Open",
-    "failed": "Couldn't create the task. Try again."
+    "failed": "Couldn't create the task. Try again.",
+    "sprint": "Sprint",
+    "noSprint": "No sprint"
   },
   "emptyProject": {
     "newBadge": "New",
@@ -862,7 +882,9 @@
       "capacityOf": "Capacity of {{name}} (points per 2 weeks)",
       "capacityUnit": "pts / 2 wks",
       "capacityHint": "Points each person can take on over the next 2 weeks. Workload shows it as the dashed capacity marker.",
-      "saved": "Saved"
+      "saved": "Saved",
+      "search": "Search members by name, title or email",
+      "noMatches": "No members match"
     },
     "archived": {
       "title": "Archived projects",
@@ -870,7 +892,7 @@
       "empty": "No archived projects",
       "archivedOn": "Archived {{date}}",
       "restore": "Restore",
-      "adminsOnly": "Only admins can restore projects.",
+      "adminsOnly": "Only admins and the person who created a project can restore it.",
       "loadError": "Couldn’t load archived projects."
     }
   },
@@ -907,7 +929,9 @@
       "to": "To",
       "apply": "Apply",
       "cancel": "Cancel",
-      "customInvalid": "The start must be on or before the end, at most 366 days apart."
+      "customInvalid": "The start must be on or before the end, at most 366 days apart.",
+      "lastWeek": "Last week",
+      "lastMonth": "Last month"
     },
     "filters": {
       "space": "Space:",
@@ -924,7 +948,9 @@
     "range": {
       "compare4w": "{{range}} · compared with the previous 4 weeks ({{previous}})",
       "compareDays_one": "{{range}} · compared with the previous {{count}} day ({{previous}})",
-      "compareDays_other": "{{range}} · compared with the previous {{count}} days ({{previous}})"
+      "compareDays_other": "{{range}} · compared with the previous {{count}} days ({{previous}})",
+      "compareWeek": "{{range}} · compared with the week before ({{previous}})",
+      "compareMonth": "{{range}} · compared with the month before ({{previous}})"
     },
     "delta": {
       "vsPrev": "vs previous period",
@@ -1167,10 +1193,13 @@
       "reassign": "Reassign {{key}}",
       "assignees": "Assignees",
       "noTasks": "No open tasks.",
-      "footnote": "Size is the sum of story points on open tasks. The capacity marker is a rough per-person amount for the next 2 weeks ({{count}} points) — it is there to help share work fairly, not to rate anyone.",
-      "footnoteMixed": "Size is the sum of story points on open tasks. The capacity marker is a rough per-person amount for the next 2 weeks — it is there to help share work fairly, not to rate anyone.",
+      "footnote": "Size is the sum of story points on open tasks. The capacity marker is a rough per-person amount for the next 2 weeks ({{count}} points) — it is there to help share work fairly, not to rate anyone. Heavy / Balanced / Light compare it with what is overdue, due in the next 2 weeks or in a current sprint; the rest is outlined as “Not due soon”.",
+      "footnoteMixed": "Size is the sum of story points on open tasks. The capacity marker is a rough per-person amount for the next 2 weeks — it is there to help share work fairly, not to rate anyone. Heavy / Balanced / Light compare it with what is overdue, due in the next 2 weeks or in a current sprint; the rest is outlined as “Not due soon”.",
       "emptyTitle": "No one to show",
-      "emptyBody": "No one in this scope has open tasks or belongs to its projects."
+      "emptyBody": "No one in this scope has open tasks or belongs to its projects.",
+      "outside": "Not due soon",
+      "outsideHint": "Due later than 2 weeks from now, or undated, and not in a current sprint: shown, but not counted against capacity.",
+      "notCounted": "not counted"
     },
     "person": {
       "pickPerson": "Choose a person",
@@ -1200,7 +1229,9 @@
         "periods": {
           "week": "this week",
           "4w": "last 4 weeks",
-          "quarter": "this quarter"
+          "quarter": "this quarter",
+          "lastWeek": "last week",
+          "lastMonth": "last month"
         },
         "subtasks": "Subtasks done on others’ tasks",
         "across_one": "across {{count}} task",
@@ -1254,7 +1285,9 @@
           "week": "Your week so far",
           "4w": "Your last 4 weeks",
           "quarter": "Your quarter so far",
-          "custom": "Your chosen period"
+          "custom": "Your chosen period",
+          "lastWeek": "Your last week",
+          "lastMonth": "Your last month"
         },
         "privacy": "Visible only to you and workspace admins",
         "note": "This is a look at how your work has been flowing. Use it to prepare for 1:1s or spot what you might want to change — it is not a score.",
@@ -1278,7 +1311,9 @@
         "openTasks": "Your open tasks",
         "openLink": "Go to My Tasks",
         "comments": "Comments on others’ tasks"
-      }
+      },
+      "rangeWeek": "{{range}} · compared with the week before",
+      "rangeMonth": "{{range}} · compared with the month before"
     },
     "chartTable": {
       "week": "Week",

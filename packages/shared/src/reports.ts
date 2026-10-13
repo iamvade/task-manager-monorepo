@@ -26,7 +26,7 @@ export const MENTION_REPLY_DAYS = 7;
 /** Longest custom period, in days. */
 export const MAX_REPORT_DAYS = 366;
 
-export const REPORT_PERIODS = ['week', '4w', 'quarter', 'custom'] as const;
+export const REPORT_PERIODS = ['week', 'lastWeek', '4w', 'lastMonth', 'quarter', 'custom'] as const;
 export type ReportPeriod = (typeof REPORT_PERIODS)[number];
 
 /** Inclusive `YYYY-MM-DD` bounds. */
@@ -42,10 +42,23 @@ function startOfQuarter(date: string): string {
   return `${year}-${String(first).padStart(2, '0')}-01`;
 }
 
+/** First day of the calendar month containing `date`. */
+function startOfMonth(date: string): string {
+  return `${date.slice(0, 7)}-01`;
+}
+
+/** The calendar month before the one containing `date`. */
+function monthBefore(date: string): DateRange {
+  const to = addDays(startOfMonth(date), -1);
+  return { from: startOfMonth(to), to };
+}
+
 /**
- * The period ending `today` (in the caller's time zone) and the same-length window right before
- * it. `4w` = the 28 days ending today, `week` = Monday → today, `quarter` = the calendar quarter
- * up to today, `custom` = `from`–`to`.
+ * The period (dates in the caller's time zone) and the window it is compared with. `4w` = the 28
+ * days ending today, `week` = Monday → today, `lastWeek` = last Monday → Sunday, `lastMonth` =
+ * the previous calendar month, `quarter` = the calendar quarter up to today, `custom` =
+ * `from`–`to`. The comparison is the same-length window right before, except `lastMonth`,
+ * which is compared with the calendar month before it.
  */
 export function reportRange(
   period: ReportPeriod,
@@ -57,6 +70,15 @@ export function reportRange(
     case 'week':
       range = { from: startOfWeek(today), to: today };
       break;
+    case 'lastWeek': {
+      const from = addDays(startOfWeek(today), -7);
+      range = { from, to: addDays(from, 6) };
+      break;
+    }
+    case 'lastMonth': {
+      range = monthBefore(today);
+      return { range, previousRange: monthBefore(range.from) };
+    }
     case 'quarter':
       range = { from: startOfQuarter(today), to: today };
       break;
@@ -74,20 +96,28 @@ export function reportRange(
   };
 }
 
+/**
+ * Workload load window: a task weighs on someone's load when it is due within this many days
+ * from today (overdue included) or sits in a sprint running today; capacity is "points for the
+ * next 2 weeks", so later and undated work outside a sprint doesn't count against it.
+ */
+export const LOAD_WINDOW_DAYS = 14;
+
 export const WORKLOAD_LOADS = ['heavy', 'balanced', 'light'] as const;
 export type WorkloadLoad = (typeof WORKLOAD_LOADS)[number];
 
 /**
- * Heavy when open points exceed capacity × 1.2 or overdue points reach 5; Light at half the
- * capacity or less; Balanced otherwise (capacity 15 → more than 18 / at most 7).
+ * Heavy when load points (see `LOAD_WINDOW_DAYS`) exceed capacity × 1.2 or overdue points reach
+ * 5; Light at half the capacity or less; Balanced otherwise (capacity 15 → more than 18 / at
+ * most 7).
  */
 export function workloadLoad(
-  points: number,
+  loadPoints: number,
   overduePoints: number,
   capacity: number,
 ): WorkloadLoad {
-  if (points > capacity * HEAVY_FACTOR || overduePoints >= HEAVY_OVERDUE_POINTS) return 'heavy';
-  if (points <= capacity / 2) return 'light';
+  if (loadPoints > capacity * HEAVY_FACTOR || overduePoints >= HEAVY_OVERDUE_POINTS) return 'heavy';
+  if (loadPoints <= capacity / 2) return 'light';
   return 'balanced';
 }
 

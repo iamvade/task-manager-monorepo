@@ -17,7 +17,8 @@ interface PeriodControlProps {
 }
 
 /**
- * This week / Last 4 weeks / This quarter / Custom (Reports.dc.html period segmented). Custom
+ * This week / Last week / Last 4 weeks / Last month / This quarter / Custom (Reports.dc.html
+ * period segmented; Last week and Last month added after the usability review). Custom
  * opens a small From / To popover under the control (not drawn; derived-UI rules).
  */
 export function PeriodControl({ value, onChange, disabled }: PeriodControlProps) {

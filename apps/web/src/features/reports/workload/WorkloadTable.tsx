@@ -12,7 +12,7 @@ import { Avatar } from '../../../components/ui/Avatar';
 import { cn } from '../../../lib/cn';
 import { useShortNames } from '../../../lib/useShortNames';
 import { StackedBar } from '../charts/StackedBar';
-import { BUCKET_FILL, bucketSwatch } from './buckets';
+import { BUCKET_FILL, OUTSIDE_SWATCH, bucketSwatch } from './buckets';
 import { CapacityPill } from './CapacityPill';
 import { workloadTicks } from './layout';
 import { PersonTasks } from './PersonTasks';
@@ -74,6 +74,14 @@ export function WorkloadTable({
                     {t(`${k}.buckets.${b}`)}
                   </span>
                 ))}
+                <span className="flex items-center gap-1.5" title={t(`${k}.outsideHint`)}>
+                  <span
+                    aria-hidden="true"
+                    className="box-border size-2.5 rounded-[3px]"
+                    style={OUTSIDE_SWATCH}
+                  />
+                  {t(`${k}.outside`)}
+                </span>
               </div>
               <div aria-hidden="true" className="relative h-3.5">
                 {ticks.map((v) => (
@@ -145,16 +153,34 @@ function WorkloadRow({
   const k = 'reports.workload';
   const pts = t(`${k}.pts`, { count: person.points });
   const overdue = person.buckets.overdue.points;
-  const segments = WORKLOAD_BUCKETS.map((b) => ({
-    key: b,
-    value: person.buckets[b].points,
-    fill: BUCKET_FILL[b],
-    title: t(`${k}.segment`, {
-      bucket: t(`${k}.buckets.${b}`),
-      points: t(`${k}.pts`, { count: person.buckets[b].points }),
-      tasks: t(`${k}.tasks`, { count: person.buckets[b].tasks }),
-    }),
-  }));
+  // Counted points by due bucket, then the rest (later / undated work outside a current sprint)
+  // as one outlined segment: only the counted part is compared with the capacity marker.
+  const counted = (b: (typeof WORKLOAD_BUCKETS)[number]) =>
+    person.tasks.filter((x) => x.bucket === b && x.counted);
+  const outside = person.tasks.filter((x) => !x.counted);
+  const sum = (list: readonly WorkloadTask[]) => list.reduce((a, x) => a + x.points, 0);
+  const segments = [
+    ...WORKLOAD_BUCKETS.map((b) => ({
+      key: b,
+      value: sum(counted(b)),
+      fill: BUCKET_FILL[b],
+      title: t(`${k}.segment`, {
+        bucket: t(`${k}.buckets.${b}`),
+        points: t(`${k}.pts`, { count: sum(counted(b)) }),
+        tasks: t(`${k}.tasks`, { count: counted(b).length }),
+      }),
+    })),
+    {
+      key: 'outside',
+      value: sum(outside),
+      fill: 'outline',
+      title: t(`${k}.segment`, {
+        bucket: t(`${k}.outside`),
+        points: t(`${k}.pts`, { count: sum(outside) }),
+        tasks: t(`${k}.tasks`, { count: outside.length }),
+      }),
+    },
+  ];
 
   return (
     <div className="flex flex-col border-b border-table-row last:border-b-0">

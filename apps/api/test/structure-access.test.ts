@@ -182,6 +182,48 @@ describe('structural API access control', () => {
     }
   });
 
+  it('lets a member archive their own project and delete their own empty space', async () => {
+    const member = as('member');
+    const other = await createUser(ctx.db);
+    await addMember(ctx.db, ids.ws, other.id, 'member');
+    const colleague = apiClient(ctx.app, await login(ctx.app, other.email));
+
+    const space = spaceSchema.parse(
+      (
+        await member('POST', `/workspaces/${ids.ws}/spaces`, { name: 'Mine', color: 'blue' })
+      ).json(),
+    );
+    expect(space.createdById).toBe(ids.member);
+    const project = projectDetailSchema.parse(
+      (
+        await member('POST', `/workspaces/${ids.ws}/projects`, { spaceId: space.id, name: 'Oops' })
+      ).json(),
+    );
+    expect(project.createdById).toBe(ids.member);
+
+    // Someone else's: still admins only.
+    for (const path of [`/projects/${project.id}/archive`, `/projects/${project.id}/unarchive`]) {
+      const res = await colleague('POST', path);
+      expect(res.statusCode, path).toBe(403);
+    }
+    expect((await colleague('DELETE', `/spaces/${space.id}`)).statusCode).toBe(403);
+
+    let res = await member('POST', `/projects/${project.id}/archive`);
+    expect(res.statusCode, res.body).toBe(200);
+    expect(projectDetailSchema.parse(res.json()).archivedAt).not.toBeNull();
+    res = await member('POST', `/projects/${project.id}/unarchive`);
+    expect(res.statusCode, res.body).toBe(200);
+
+    // Not while it holds a project; once moved out, the creator may delete it.
+    res = await member('DELETE', `/spaces/${space.id}`);
+    expect(res.statusCode).toBe(409);
+    expect(errorCode(res)).toBe('SPACE_NOT_EMPTY');
+    res = await member('POST', `/projects/${project.id}/move`, { spaceId: ids.space });
+    expect(res.statusCode, res.body).toBeLessThan(300);
+    res = await member('DELETE', `/spaces/${space.id}`);
+    expect(res.statusCode, res.body).toBe(204);
+  });
+
   it('does not accept IDs from another workspace', async () => {
     const member = as('member');
 

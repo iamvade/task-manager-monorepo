@@ -94,6 +94,8 @@ describe('GET /me/home', () => {
     expect(h.sections.today.map((t) => t.done)).toEqual([false, true]);
     expect(titles(h.sections.thisWeek)).toEqual(['Next Sun']);
     expect(titles(h.sections.later)).toEqual(['Next Mon urgent', 'Next Mon low', 'No due']);
+    // Completed this week only ("Done due Mon" was completed in September).
+    expect(titles(h.sections.done)).toEqual(['UB Mon 00:30 / LA Sun 09:30']);
     expect(h.sections.today[0]).toMatchObject({
       key: `${project.key}-3`,
       priority: 'urgent',
@@ -123,6 +125,12 @@ describe('GET /me/home', () => {
       'Next Mon urgent',
       'Next Mon low',
       'No due',
+    ]);
+    // Latest first.
+    expect(titles(h.sections.done)).toEqual([
+      'UB Mon 00:30 / LA Sun 09:30',
+      'UB Sun 23:30 / LA Sun 08:30',
+      'UB Tue 01:00 / LA Mon 10:00',
     ]);
     expect(h.stats).toEqual({
       dueToday: { open: 1, total: 1, urgent: 0 },

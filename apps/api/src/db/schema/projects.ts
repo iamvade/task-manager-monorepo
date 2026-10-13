@@ -26,6 +26,8 @@ export const spaces = pgTable(
     initial: text('initial').notNull(),
     color: text('color').$type<PaletteKey>().notNull(),
     position: position('position').notNull(),
+    /** May delete the space while it is empty, like an admin. Null for spaces made before 0007. */
+    createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
   },
   (t) => [
     // Target of the composite FK from projects, which keeps projects.workspace_id in sync.
@@ -51,6 +53,8 @@ export const projects = pgTable(
     position: position('position').notNull(),
     /** Default reviewer for tasks entering review. */
     leadId: uuid('lead_id').references(() => users.id, { onDelete: 'set null' }),
+    /** May archive / restore the project, like an admin. Null for projects made before 0007. */
+    createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
     archivedAt: timestamptz('archived_at'),
     createdAt: createdAt(),
   },

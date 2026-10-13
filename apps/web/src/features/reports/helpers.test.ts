@@ -117,6 +117,9 @@ describe('report params', () => {
       parseReportFilters(new URLSearchParams('period=custom&from=2026-09-30&to=2026-09-01')),
     ).toEqual({ period: '4w' });
     expect(parseReportFilters(new URLSearchParams('period=year'))).toEqual({ period: '4w' });
+    expect(parseReportFilters(new URLSearchParams('period=lastMonth'))).toEqual({
+      period: 'lastMonth',
+    });
   });
 
   it('writes filters, keeping other params, omitting defaults', () => {

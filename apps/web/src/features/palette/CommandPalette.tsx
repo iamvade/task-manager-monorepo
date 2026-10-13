@@ -18,6 +18,8 @@ import { Kbd } from '../../components/ui/Kbd';
 import { Modal } from '../../components/ui/Modal';
 import { ProjectDot } from '../../components/ui/ProjectDot';
 import { StatusDot } from '../../components/ui/StatusDot';
+import { cn } from '../../lib/cn';
+import { useDates } from '../../lib/useDates';
 import { useUiStore } from '../../stores/ui';
 import { useOpenTask } from '../create/useOpenTask';
 import { useShellLocation } from '../shell/useShellLocation';
@@ -83,6 +85,7 @@ function PaletteBody({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const dates = useDates();
   const navigate = useNavigate();
   const openTask = useOpenTask();
   const shell = useShellLocation();
@@ -247,7 +250,24 @@ function PaletteBody({
               >
                 <StatusDot category={task.status.category} />
                 <span className="flex-none font-mono text-[12px] text-muted">{task.key}</span>
-                <span className="min-w-0 flex-1 truncate">{task.title}</span>
+                <span
+                  className={cn(
+                    'min-w-0 flex-1 truncate',
+                    task.status.category === 'done' && 'text-muted line-through',
+                  )}
+                >
+                  {task.title}
+                </span>
+                {/* Status, assignee and due tell look-alike titles apart. */}
+                <span className="max-w-[96px] flex-none truncate text-[12px] text-muted">
+                  {task.status.name ?? t(`status.${task.status.category}`)}
+                </span>
+                {task.dueDate && (
+                  <span className="flex-none text-[12px] text-muted">
+                    {dates.formatDue(task.dueDate)}
+                  </span>
+                )}
+                {task.assignees[0] && <Avatar user={task.assignees[0]} size={20} />}
                 <span className="flex max-w-[140px] flex-none items-center gap-1.5 text-[12px] text-muted">
                   <ProjectDot color={task.project.color} size={6} />
                   <span className="truncate">{task.project.name}</span>

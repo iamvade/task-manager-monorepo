@@ -98,6 +98,11 @@ export const LATER = [
   myTask('Plan Q1 research', '2026-10-12', 'medium'),
   myTask('Clean up design tokens', null, 'none'),
 ] as const;
+/** Completed this week, latest first (the done one due today is listed in both). */
+export const DONE = [
+  TODAY[3],
+  myTask('Ship onboarding survey', '2026-10-06', 'medium', true),
+] as const;
 
 export const FEED: ActivityFeedItem[] = activityFeedItemSchema.array().parse([
   feedItem(
@@ -139,7 +144,7 @@ export const HOME = homeSchema.parse({
   today: '2026-10-08',
   timezone: 'Asia/Ulaanbaatar',
   weekStart: '2026-10-05',
-  sections: { overdue: OVERDUE, today: TODAY, thisWeek: THIS_WEEK, later: LATER },
+  sections: { overdue: OVERDUE, today: TODAY, thisWeek: THIS_WEEK, later: LATER, done: DONE },
   stats: {
     dueToday: { open: 3, total: 4, urgent: 1 },
     completedThisWeek: { count: 7, delta: 3, perDay: [2, 3, 1, 1, 0, 0, 0] },

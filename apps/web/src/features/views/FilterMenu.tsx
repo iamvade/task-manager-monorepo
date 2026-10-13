@@ -8,7 +8,13 @@ import { Picker } from '../../components/ui/Picker';
 import { Popover, type TriggerProps } from '../../components/ui/Popover';
 import { useDates } from '../../lib/useDates';
 import { useFilterOptions, type FilterOption } from './filterOptions';
-import { NO_SPRINT, useViewParams, type FilterField, type ViewFilters } from './useViewParams';
+import {
+  clearedFilters,
+  NO_SPRINT,
+  useViewParams,
+  type FilterField,
+  type ViewFilters,
+} from './useViewParams';
 
 interface FilterMenuProps {
   /** Null on the space list (status categories, no sprints). */
@@ -61,16 +67,7 @@ export function FilterMenu({ project, workspaceId, trigger }: FilterMenuProps) {
   }
 
   function clearAll() {
-    view.update({
-      status: null,
-      assignee: null,
-      priority: null,
-      tag: null,
-      dueFrom: null,
-      dueTo: null,
-      // Keeps the default sprint filter from coming back.
-      sprint: project?.activeSprint ? NO_SPRINT : null,
-    });
+    view.update(clearedFilters(Boolean(project?.activeSprint)));
   }
 
   return (

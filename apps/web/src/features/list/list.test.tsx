@@ -80,7 +80,7 @@ describe('project list', () => {
     useUiStore.setState({
       collapsedGroups: {},
       lastWorkspaceId: null,
-      listColumns: { size: false },
+      listColumns: { key: true, size: false },
       createOpen: false,
       paletteOpen: false,
       shortcutsOpen: false,
@@ -123,6 +123,23 @@ describe('project list', () => {
       [`status:${statusOf('done').id}`]: false,
       [`status:${statusOf('todo').id}`]: true,
     });
+  });
+
+  it('loads done tasks of the last 14 days until "Show all"', async () => {
+    const { fetchMock } = api();
+    renderAt(LIST);
+    expect(await screen.findByText('Сүүлийн 14 хоногт дууссан')).toBeInTheDocument();
+    const listUrls = () =>
+      fetchMock.mock.calls.map(([input]) => href(input)).filter((u) => u.includes('/tasks'));
+    expect(listUrls()).toContain(`/api/v1/projects/${PROJECT_ID}/tasks?doneSince=2026-09-25`);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Бүгдийг харах' }));
+    expect(await screen.findByText('Бүх дууссан ажил')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(listUrls()).toContain(`/api/v1/projects/${PROJECT_ID}/tasks`);
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Зөвхөн сүүлийнх' }));
+    expect(await screen.findByText('Сүүлийн 14 хоногт дууссан')).toBeInTheDocument();
   });
 
   it('deletes a row from its menu with an Undo toast that restores it', async () => {
@@ -324,6 +341,81 @@ describe('project list', () => {
       within(row).getByRole('button', { name: '«Audit current navigation patterns» — хэмжээ' }),
     ).toBeInTheDocument();
     expect(useUiStore.getState().listColumns.size).toBe(true);
+  });
+
+  it('shows each task key before its title, and hides it from the Columns menu', async () => {
+    api();
+    renderAt(LIST);
+    await screen.findByRole('table', { name: 'App Redesign төслийн ажлууд' });
+    expect(within(rowOf('Audit current navigation patterns')).getByText('APP-131')).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Багана' }));
+    fireEvent.click(await screen.findByRole('menuitemradio', { name: 'Ажлын дугаар' }));
+    await waitFor(() => {
+      expect(within(rowOf('Audit current navigation patterns')).queryByText('APP-131')).toBeNull();
+    });
+    expect(useUiStore.getState().listColumns).toEqual({ key: false, size: false });
+  });
+
+  it('creates a tag from the tag picker and puts it on the task', async () => {
+    const created: unknown[] = [];
+    const tagged: unknown[] = [];
+    const brand = { id: '01890000-0000-7000-8000-700000000077', name: 'Brand', color: 'teal' };
+    api((st) => {
+      const audit = at(st.tasks, 0);
+      return {
+        [`POST /api/v1/workspaces/${WORKSPACE_ID}/tags`]: (init) => {
+          created.push(body(init));
+          return Response.json(brand, { status: 201 });
+        },
+        [`PUT /api/v1/tasks/${audit.id}/tags`]: (init) => {
+          tagged.push(body(init));
+          return Response.json({ ...audit, tags: [...audit.tags, brand] });
+        },
+      };
+    });
+    renderAt(LIST);
+    await screen.findByRole('table');
+    fireEvent.click(
+      screen.getByRole('button', { name: '«Audit current navigation patterns» — шошго' }),
+    );
+    const search = await screen.findByRole('combobox', { name: 'Шошго хайх' });
+    fireEvent.change(search, { target: { value: 'Brand' } });
+    fireEvent.click(await screen.findByRole('option', { name: '«Brand» шошго үүсгэх' }));
+    await waitFor(() => {
+      expect(tagged).toHaveLength(1);
+    });
+    expect(created).toEqual([{ name: 'Brand', color: expect.any(String) as string }]);
+    expect(tagged[0]).toEqual({ tagIds: [...at(makeTasks(), 0).tags.map((x) => x.id), brand.id] });
+    // An exact name offers no create row.
+    fireEvent.change(search, { target: { value: 'research' } });
+    expect(screen.queryByRole('option', { name: /шошго үүсгэх/ })).toBeNull();
+  });
+
+  it('replaces every assignee with "Reassign…" from the row menu', async () => {
+    const sent: unknown[] = [];
+    api((st) => {
+      const tabBar = at(st.tasks, 2);
+      return {
+        [`PUT /api/v1/tasks/${tabBar.id}/assignees`]: (init) => {
+          sent.push(body(init));
+          return Response.json(tabBar);
+        },
+      };
+    });
+    renderAt(LIST);
+    await screen.findByRole('table');
+    const title = 'Implement new bottom tab bar';
+    fireEvent.click(screen.getByRole('button', { name: `«${title}» — нэмэлт үйлдэл` }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Шилжүүлэх…' }));
+    const search = await screen.findByRole('combobox', { name: 'Хэнд оноох…' });
+    fireEvent.change(search, { target: { value: 'sara' } });
+    fireEvent.keyDown(search, { key: 'Enter' });
+    await waitFor(() => {
+      expect(sent).toHaveLength(1);
+    });
+    const sara = at(PROJECT_WITH_STATUSES.members, 1).user;
+    expect(sent[0]).toEqual({ userIds: [sara.id] });
   });
 
   it('opens the drawer when a row is clicked', async () => {

@@ -48,6 +48,8 @@ function api() {
             title: task.title,
             project: task.project,
             status: task.status,
+            assignees: task.assignees,
+            dueDate: task.dueDate,
           },
         ],
         projects: [],
@@ -101,6 +103,9 @@ describe('command palette', () => {
     fireEvent.change(input, { target: { value: 'APP-13' } });
     const result = await within(dialog).findByRole('option', { name: new RegExp(task.title) });
     expect(searches.at(-1)).toBe('APP-13');
+    // Status, due date and assignee tell look-alike titles apart.
+    expect(within(result).getByText('In Progress')).toBeInTheDocument();
+    expect(result).toHaveTextContent('Oct 10');
     fireEvent.click(result);
 
     await waitFor(() => {

@@ -1,26 +1,15 @@
 import type { ProjectDetail, SidebarSpace } from '@kite/shared';
-import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutletContext } from 'react-router';
 import { useTags } from '../../api/tags';
 import { useProjectTasks, useSpaceTasks } from '../../api/tasks';
 import { useCurrentWorkspace, useWorkspaceMembers } from '../../api/workspaces';
-import { useAuth } from '../../auth/useAuth';
 import { ErrorState } from '../../components/ErrorState';
 import { useUiStore } from '../../stores/ui';
-import { toTaskQuery } from '../views/taskQuery';
-import { useViewParams } from '../views/useViewParams';
+import { useTaskQuery } from '../views/useTaskQuery';
 import { EmptyProject } from './EmptyProject';
 import { ListSkeleton } from './ListSkeleton';
 import { TaskTable } from './TaskTable';
-
-/** The current filters as a list query (memoized: it is part of the query key). */
-function useListQuery(scope: 'project' | 'space') {
-  const { me } = useAuth();
-  const { filters } = useViewParams();
-  const meId = me?.user.id ?? '';
-  return useMemo(() => toTaskQuery(filters, meId, scope), [filters, meId, scope]);
-}
 
 /** `/p/:projectId/list`. */
 export function ListView() {
@@ -31,7 +20,7 @@ export function ListView() {
 
 function ProjectList({ project }: { project: ProjectDetail }) {
   const { t } = useTranslation();
-  const query = useListQuery('project');
+  const query = useTaskQuery('project');
   const tasks = useProjectTasks(project.id, query);
   const members = useWorkspaceMembers(project.workspaceId);
   const tags = useTags(project.workspaceId);
@@ -69,7 +58,7 @@ export function SpaceListView() {
   const { t } = useTranslation();
   const space = useOutletContext<SidebarSpace>();
   const workspace = useCurrentWorkspace();
-  const query = useListQuery('space');
+  const query = useTaskQuery('space');
   const tasks = useSpaceTasks(space.id, query);
   const members = useWorkspaceMembers(workspace?.id);
   const tags = useTags(workspace?.id);

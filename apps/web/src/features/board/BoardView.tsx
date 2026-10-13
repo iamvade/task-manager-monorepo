@@ -1,24 +1,14 @@
 import type { ProjectDetail, SidebarSpace } from '@kite/shared';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutletContext } from 'react-router';
 import { useProjectTasks, useSpaceTasks } from '../../api/tasks';
 import { useCurrentWorkspace, useWorkspaceMembers } from '../../api/workspaces';
-import { useAuth } from '../../auth/useAuth';
 import { ErrorState } from '../../components/ErrorState';
 import { EmptyProject } from '../list/EmptyProject';
 import { ListSkeleton } from '../list/ListSkeleton';
-import { toTaskQuery, type ListScope } from '../views/taskQuery';
-import { useViewParams } from '../views/useViewParams';
+import { useTaskQuery } from '../views/useTaskQuery';
 import { Board } from './Board';
-
-/** The List's filters as a query: same cache entry as the List (sorting is client-side). */
-function useBoardQuery(scope: ListScope) {
-  const { me } = useAuth();
-  const { filters } = useViewParams();
-  const meId = me?.user.id ?? '';
-  return useMemo(() => toTaskQuery(filters, meId, scope), [filters, meId, scope]);
-}
 
 /** `/p/:projectId/board`. */
 export function BoardView() {
@@ -28,7 +18,7 @@ export function BoardView() {
 
 function ProjectBoard({ project }: { project: ProjectDetail }) {
   const { t } = useTranslation();
-  const query = useBoardQuery('project');
+  const query = useTaskQuery('project');
   const tasks = useProjectTasks(project.id, query);
   const members = useWorkspaceMembers(project.workspaceId);
   const [createFirst, setCreateFirst] = useState(false);
@@ -62,7 +52,7 @@ export function SpaceBoardView() {
   const { t } = useTranslation();
   const space = useOutletContext<SidebarSpace>();
   const workspace = useCurrentWorkspace();
-  const query = useBoardQuery('space');
+  const query = useTaskQuery('space');
   const tasks = useSpaceTasks(space.id, query);
   const members = useWorkspaceMembers(workspace?.id);
 

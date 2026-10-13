@@ -10,6 +10,7 @@ import {
   sprints,
   subtasks,
   tags,
+  tasks,
 } from '../src/db/schema/index.js';
 import { addMember, createSpace, createUser } from './fixtures.js';
 import { createTestApp } from './helpers.js';
@@ -94,6 +95,30 @@ describe('listing tasks', () => {
     ]);
   });
 
+  it('keeps only recently completed done tasks with doneSince', async () => {
+    const t = world.titles;
+    const [done] = await ctx.db
+      .update(tasks)
+      .set({ completedAt: new Date('2026-09-30T15:59:00Z') }) // Sep 30 23:59 in Ulaanbaatar
+      .where(eq(tasks.title, 'Release notes 100%_done'))
+      .returning({ id: tasks.id, completedAt: tasks.completedAt });
+    const open = [
+      'Onboarding flow',
+      'Payment icons',
+      'Empty state copy',
+      'Checkout page — responsive layout',
+    ];
+    try {
+      expect(await t('?doneSince=2026-10-01')).toEqual(open);
+      expect(await t('?doneSince=2026-09-30')).toEqual([...open, 'Release notes 100%_done']);
+    } finally {
+      await ctx.db
+        .update(tasks)
+        .set({ completedAt: new Date() })
+        .where(eq(tasks.id, done?.id ?? ''));
+    }
+  });
+
   it('filters', async () => {
     const t = world.titles;
     const { status, owner } = world;
@@ -152,6 +177,7 @@ describe('listing tasks', () => {
       '?statusCategory=blocked',
       '?priority=extreme',
       '?dueFrom=10/08',
+      '?doneSince=yesterday',
       '?sort=title',
     ]) {
       expect(

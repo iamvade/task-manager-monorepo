@@ -33,7 +33,8 @@ export function PersonTasks({ person, members, onReassign, onAssignWork }: Perso
   const { formatDue } = useDates();
   const { pathname, search } = useLocation();
   const k = 'reports.workload';
-  const diff = person.points - person.capacity;
+  // Against the load (counted points), like the pill.
+  const diff = person.loadPoints - person.capacity;
 
   const taskHref = (key: string) => {
     const params = new URLSearchParams(search);
@@ -79,6 +80,11 @@ export function PersonTasks({ person, members, onReassign, onAssignWork }: Perso
                 style={bucketSwatch(task.bucket)}
               />
               {task.dueDate ? formatDue(task.dueDate) : t(`${k}.buckets.none`)}
+              {!task.counted && (
+                <span className="font-normal text-muted" title={t(`${k}.outsideHint`)}>
+                  · {t(`${k}.notCounted`)}
+                </span>
+              )}
             </span>
             <span
               title={task.size ? t(`${k}.sizeTitle`) : t(`${k}.noSize`)}

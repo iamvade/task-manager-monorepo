@@ -32,13 +32,23 @@ describe('workspace search', () => {
     await addMember(ctx.db, ws.id, sara.id);
     const checkout = await newProject('Checkout v2');
     for (let i = 1; i <= 12; i++) await createTask({ title: `Filler ${i}` });
-    const target = await createTask({ title: 'Checkout page — responsive layout' });
+    const target = await createTask({
+      title: 'Checkout page — responsive layout',
+      dueDate: '2026-10-20',
+      assigneeIds: [sara.id],
+    });
     await createTask({ title: 'Fix the checkout bug' });
     await createTask({ title: 'Checkout analytics' }, checkout.id);
 
     const byKey = await search(target.key);
     expect(byKey.tasks[0]?.id).toBe(target.id);
-    expect(byKey.tasks[0]).toMatchObject({ key: target.key, project: { id: project.id } });
+    expect(byKey.tasks[0]).toMatchObject({
+      key: target.key,
+      project: { id: project.id },
+      status: { category: 'todo' },
+      dueDate: '2026-10-20',
+      assignees: [{ id: sara.id, name: 'Sara Khan' }],
+    });
 
     // `KEY-1` also matches KEY-10, KEY-11…, exact first.
     const partial = await search(`${project.key}-1`);

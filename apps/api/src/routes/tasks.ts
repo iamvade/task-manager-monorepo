@@ -95,7 +95,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       schema: {
         tags: ['Tasks'],
         summary: 'List tasks of a project',
-        description: `${FILTERS_DOC} Includes done tasks unless \`includeDone=false\`.`,
+        description: `${FILTERS_DOC} Includes done tasks unless \`includeDone=false\`; \`doneSince\` keeps only those completed on or after that date (caller's time zone).`,
         params: z.object({ projectId: z.uuid() }),
         querystring: taskListQuerySchema,
         response: { 200: z.array(taskListItemSchema), 400: err, 401: err, 404: err },
@@ -103,7 +103,8 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     },
     async (request) => {
       const { project } = await loadProjectAccess(request, request.params.projectId);
-      return listProjectTasks(app.db, project.id, request.query);
+      const { user } = requireAuth(request);
+      return listProjectTasks(app.db, project.id, request.query, user.timezone);
     },
   );
 
@@ -122,7 +123,8 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     },
     async (request) => {
       const { space } = await loadSpaceAccess(request, request.params.spaceId);
-      return listSpaceTasks(app.db, space.id, request.query);
+      const { user } = requireAuth(request);
+      return listSpaceTasks(app.db, space.id, request.query, user.timezone);
     },
   );
 

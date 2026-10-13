@@ -7,6 +7,7 @@ import { useMoveTaskToProject, useSetAssignees, useSetTags, useUpdateTask } from
 import {
   CalendarIcon,
   ChevronDownIcon,
+  CloseIcon,
   FlagIcon,
   FolderIcon,
   PersonIcon,
@@ -18,6 +19,7 @@ import {
   TagIcon,
 } from '../../components/icons';
 import { Avatar } from '../../components/ui/Avatar';
+import { IconButton } from '../../components/ui/IconButton';
 import type { TriggerProps } from '../../components/ui/Popover';
 import { PriorityFlag } from '../../components/ui/PriorityFlag';
 import { ProjectDot } from '../../components/ui/ProjectDot';
@@ -201,10 +203,19 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
         {task.assignees.map((user) => (
           <span
             key={user.id}
-            className="inline-flex h-7 items-center gap-1.5 rounded-full border border-default pr-2.5 pl-[3px] text-[13px]"
+            className="inline-flex h-7 items-center gap-1.5 rounded-full border border-default pr-[3px] pl-[3px] text-[13px]"
           >
             <Avatar user={user} size={22} title={null} />
             {shortNameOf(user)}
+            <IconButton
+              label={t('drawer.removeAssignee', { name: user.name })}
+              size={20}
+              radius={10}
+              onClick={() => {
+                setAssigneeList(task.assignees.filter((u) => u.id !== user.id));
+              }}
+              icon={<CloseIcon size={12} className="text-icon" />}
+            />
           </span>
         ))}
         <AssigneePicker

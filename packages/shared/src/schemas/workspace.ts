@@ -59,6 +59,8 @@ export const sidebarSpaceSchema = z
     initial: z.string(),
     color: paletteKeySchema,
     position: z.string(),
+    /** Who created it (may delete it while empty, like an admin); null before migration 0007. */
+    createdById: z.uuid().nullable(),
     /** Non-archived projects, by position. */
     projects: z.array(sidebarProjectSchema),
   })

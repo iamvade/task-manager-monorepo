@@ -2,7 +2,7 @@ import { daysBetween, weekdayIndex, type Home, type MyTask } from '@kite/shared'
 import { todayFor } from '../lib/dates';
 
 export type SectionId = keyof Home['sections'];
-export const SECTION_IDS: readonly SectionId[] = ['overdue', 'today', 'thisWeek', 'later'];
+export const SECTION_IDS: readonly SectionId[] = ['overdue', 'today', 'thisWeek', 'later', 'done'];
 
 /** The section holding `taskId`, if any. */
 export function sectionOf(home: Home, taskId: string): SectionId | undefined {
