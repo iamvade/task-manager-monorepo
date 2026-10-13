@@ -455,6 +455,43 @@ describe('task drawer', () => {
     });
   });
 
+  it('turns a typed @Name that was never picked into a mention on send', async () => {
+    const { state, task } = setup();
+    const posted: { body: RichTextNode }[] = [];
+    api(state, () => ({
+      [`POST /api/v1/tasks/${task.id}/comments`]: (init) => {
+        posted.push(body(init) as (typeof posted)[number]);
+        return Response.json({ error: { code: 'INTERNAL', message: 'x' } }, { status: 500 });
+      },
+    }));
+    renderAt(`${LIST}&task=APP-135`);
+    const dialog = await drawer();
+    const composer = await within(dialog).findByRole('textbox', { name: 'Write a comment' });
+    const editor = (composer as HTMLElement & { editor?: Editor }).editor;
+    if (!editor) throw new Error('no editor');
+    act(() => {
+      editor.commands.insertContent('Looping in @Bat O. and @dorj now');
+    });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Comment' }));
+
+    await waitFor(() => {
+      expect(posted).toHaveLength(1);
+    });
+    expect(at(posted, 0).body.content?.[0]?.content).toEqual([
+      { type: 'text', text: 'Looping in ' },
+      {
+        type: 'mention',
+        attrs: expect.objectContaining({ id: BAT.id, label: 'Bat O.' }) as object,
+      },
+      { type: 'text', text: ' and ' },
+      {
+        type: 'mention',
+        attrs: expect.objectContaining({ id: DORJ.id, label: 'Dorj E.' }) as object,
+      },
+      { type: 'text', text: ' now' },
+    ]);
+  });
+
   it('posts a comment with a mention and appends it right away', async () => {
     const { state, task } = setup();
     const posted: { body: RichTextNode }[] = [];

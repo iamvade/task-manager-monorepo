@@ -1,8 +1,38 @@
 import type { RichTextMark, RichTextNode } from '@kite/shared';
 import type { ReactNode } from 'react';
+import i18n from '../../i18n';
 import { cn } from '../../lib/cn';
+import { UNRESOLVED_MENTION } from './typedMentions';
 
 const SAFE_URL = /^(https?:|mailto:)/i;
+
+/**
+ * "@word" that is not a mention node never notified anyone: shown muted with a hint, so the
+ * author notices (code and links are left as typed).
+ */
+function dimUnresolved(text: string, marks: readonly RichTextMark[] | undefined, key: string) {
+  if (!text.includes('@') || marks?.some((m) => m.type === 'code' || m.type === 'link')) {
+    return text;
+  }
+  const parts: ReactNode[] = [];
+  let last = 0;
+  for (const match of text.matchAll(UNRESOLVED_MENTION)) {
+    if (match.index > last) parts.push(text.slice(last, match.index));
+    parts.push(
+      <span
+        key={`${key}@${match.index}`}
+        className="text-muted"
+        title={i18n.t('drawer.notAMention')}
+      >
+        {match[0]}
+      </span>,
+    );
+    last = match.index + match[0].length;
+  }
+  if (parts.length === 0) return text;
+  if (last < text.length) parts.push(text.slice(last));
+  return parts;
+}
 
 function withMarks(text: ReactNode, marks: readonly RichTextMark[] | undefined, key: string) {
   let out = text;
@@ -71,7 +101,7 @@ function renderNode(node: RichTextNode, key: string): ReactNode {
       );
     }
     case 'text':
-      return withMarks(node.text ?? '', node.marks, key);
+      return withMarks(dimUnresolved(node.text ?? '', node.marks, key), node.marks, key);
     default:
       return node.content ? <span key={key}>{children()}</span> : null;
   }

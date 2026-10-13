@@ -421,6 +421,7 @@
     "deleted": "{{key}} deleted",
     "deletedBanner": "This task was deleted. Restore it to edit or comment.",
     "restore": "Restore",
+    "notAMention": "Not a mention — pick a person from the @ list",
     "movedTo": "Moved to {{project}} as {{key}}",
     "notFound": "This task doesn't exist or was deleted.",
     "startDate": "Start date",

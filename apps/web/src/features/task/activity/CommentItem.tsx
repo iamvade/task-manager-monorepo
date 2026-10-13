@@ -1,10 +1,11 @@
-import { shortName, type CommentReply, type RichTextNode } from '@kite/shared';
+import { shortName, type CommentReply } from '@kite/shared';
 import type { Editor } from '@tiptap/core';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { isTempComment, useDeleteComment, useUpdateComment } from '../../../api/activity';
 import { RichTextEditor } from '../../../components/editor/RichTextEditor';
 import { RichTextView } from '../../../components/editor/RichTextView';
+import { prepareBody } from '../../../components/editor/typedMentions';
 import { MoreIcon, PencilIcon, TrashIcon } from '../../../components/icons';
 import { Avatar } from '../../../components/ui/Avatar';
 import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
@@ -35,7 +36,7 @@ function EditComment({ comment, onDone }: { comment: CommentReply; onDone: () =>
     update.mutate({
       taskId: task.id,
       commentId: comment.id,
-      body: editor.getJSON() as RichTextNode,
+      body: prepareBody(editor, mentions),
     });
     onDone();
   }

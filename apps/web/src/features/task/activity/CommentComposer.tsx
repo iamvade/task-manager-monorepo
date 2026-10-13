@@ -1,10 +1,10 @@
-import type { RichTextNode } from '@kite/shared';
 import type { Editor } from '@tiptap/core';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCreateComment } from '../../../api/activity';
 import { insertMentionTrigger } from '../../../components/editor/commands';
 import { RichTextEditor } from '../../../components/editor/RichTextEditor';
+import { prepareBody } from '../../../components/editor/typedMentions';
 import { PaperclipIcon } from '../../../components/icons';
 import { Avatar } from '../../../components/ui/Avatar';
 import { IconButton } from '../../../components/ui/IconButton';
@@ -36,7 +36,8 @@ export function CommentComposer({ parentId, autoFocus, onDone }: CommentComposer
   function send() {
     const editor = editorRef.current;
     if (!editor || editor.isEmpty) return;
-    const body = editor.getJSON() as RichTextNode;
+    // A typed "@Name" the author never picked from the popup still notifies that person.
+    const body = prepareBody(editor, mentions);
     create.mutate(
       { taskId: task.id, body, parentId, author: me, tempId: `temp-${crypto.randomUUID()}` },
       {
