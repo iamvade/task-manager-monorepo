@@ -194,7 +194,9 @@
   },
   "summary": {
     "tasks_one": "{{count}} task · {{done}} done",
-    "tasks_other": "{{count}} tasks · {{done}} done"
+    "tasks_other": "{{count}} tasks · {{done}} done",
+    "tasksOf_one": "{{count}} of {{total}} tasks · {{done}} done",
+    "tasksOf_other": "{{count}} of {{total}} tasks · {{done}} done"
   },
   "table": {
     "label": "{{project}} tasks",
@@ -311,7 +313,10 @@
       "dropped": "{{title}} was dropped in {{status}}.",
       "cancelled": "Moving {{title}} was cancelled."
     },
-    "label": "{{project}} board"
+    "label": "{{project}} board",
+    "hiddenByFilters_one": "+{{count}} hidden by filters",
+    "hiddenByFilters_other": "+{{count}} hidden by filters",
+    "showHidden": "Clear filters to show {{count}} more in {{status}}"
   },
   "drawer": {
     "closeToList": "Close task and return to list",
@@ -664,7 +669,9 @@
     "noTags": "No tags",
     "created": "Created {{key}}",
     "openTask": "Open",
-    "failed": "Couldn't create the task. Try again."
+    "failed": "Couldn't create the task. Try again.",
+    "sprint": "Sprint",
+    "noSprint": "No sprint"
   },
   "emptyProject": {
     "newBadge": "New",

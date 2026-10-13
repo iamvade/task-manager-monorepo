@@ -129,6 +129,9 @@ export interface BoardColumnProps {
   onCreate: () => void;
   taskHref: (task: TaskListItem) => string;
   showProject: boolean;
+  /** Tasks of this status the active filters hide ("+3 hidden by filters"); 0 = no line. */
+  hiddenCount?: number;
+  onShowHidden?: () => void;
 }
 
 /**
@@ -154,6 +157,8 @@ export function BoardColumn({
   onCreate,
   taskHref,
   showProject,
+  hiddenCount = 0,
+  onShowHidden,
 }: BoardColumnProps) {
   const { t } = useTranslation();
   const { setNodeRef } = useDroppable({ id: `${COLUMN_PREFIX}${columnKey}`, disabled: !dnd });
@@ -269,6 +274,16 @@ export function BoardColumn({
         {placeholderAt === 'end' && <DropPlaceholder status={label} />}
         {adding && onAdd && <AddCard onSubmit={onAdd} onCancel={onCancelAdd} />}
         {category === 'done' && <DoneScopeNote className="px-2.5 py-1" />}
+        {hiddenCount > 0 && onShowHidden && (
+          <button
+            type="button"
+            onClick={onShowHidden}
+            aria-label={t('board.showHidden', { count: hiddenCount, status: label })}
+            className="self-start rounded-[6px] border-0 bg-transparent px-2.5 py-1 text-left text-[12px] text-muted hover:bg-hover hover:text-2"
+          >
+            {t('board.hiddenByFilters', { count: hiddenCount })}
+          </button>
+        )}
       </div>
 
       {onAdd && !adding && (

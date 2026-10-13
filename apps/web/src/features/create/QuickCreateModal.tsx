@@ -15,7 +15,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { Editor } from '@tiptap/core';
 import { useMemo, useRef, useState, type KeyboardEvent, type MutableRefObject } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useProject } from '../../api/projects';
+import { useProject, useSprints } from '../../api/projects';
 import { queryKeys } from '../../api/queryKeys';
 import { useTags } from '../../api/tags';
 import { useCreateTask } from '../../api/tasks';
@@ -30,6 +30,7 @@ import {
   CloseIcon,
   MoreIcon,
   SizeIcon,
+  SprintIcon,
   TagIcon,
 } from '../../components/icons';
 import { Avatar } from '../../components/ui/Avatar';
@@ -42,6 +43,7 @@ import { ProjectDot } from '../../components/ui/ProjectDot';
 import { StatusDot } from '../../components/ui/StatusDot';
 import { Switch } from '../../components/ui/Switch';
 import { hasMod, isEditableTarget, modKey } from '../../lib/keyboard';
+import { sprintLabel } from '../../lib/sprint';
 import { useDates } from '../../lib/useDates';
 import { toast } from '../../stores/toast';
 import { useUiStore, type CreateDefaults } from '../../stores/ui';
@@ -50,6 +52,7 @@ import { DuePicker } from '../pickers/DuePicker';
 import { PriorityPicker } from '../pickers/PriorityPicker';
 import { ProjectPicker } from '../pickers/ProjectPicker';
 import { SizePicker } from '../pickers/SizePicker';
+import { SprintPicker } from '../pickers/SprintPicker';
 import { StatusPicker } from '../pickers/StatusPicker';
 import { TagPicker } from '../pickers/TagPicker';
 import { useShellLocation } from '../shell/useShellLocation';
@@ -76,14 +79,20 @@ export function QuickCreateModal() {
   );
 }
 
-/** Where a new task goes when nothing says otherwise: this page's project, else the first. */
+/**
+ * Where a new task goes when nothing says otherwise: this page's project; else the project of
+ * the last quick-created task (inside this page's space, if any); else the space's first
+ * project, else the first.
+ */
 function fallbackProject(
   spaces: readonly SidebarSpace[],
   shell: { projectId?: string; spaceId?: string },
+  lastId: string | null,
 ): string | null {
   const all = spaces.flatMap((s) => s.projects);
   if (shell.projectId && all.some((p) => p.id === shell.projectId)) return shell.projectId;
   const space = spaces.find((s) => s.id === shell.spaceId);
+  if (lastId && (space ?? { projects: all }).projects.some((p) => p.id === lastId)) return lastId;
   return space?.projects[0]?.id ?? all[0]?.id ?? null;
 }
 
@@ -127,12 +136,17 @@ function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
   const tags = useTags(workspace?.id);
   const createMore = useUiStore((s) => s.createMore);
   const setCreateMore = useUiStore((s) => s.setCreateMore);
+  const lastCreateProjectId = useUiStore((s) => s.lastCreateProjectId);
+  const setLastCreateProject = useUiStore((s) => s.setLastCreateProject);
 
   const spaces = useMemo(() => sidebar.data?.spaces ?? [], [sidebar.data]);
   const [chosenProjectId, setChosenProjectId] = useState<string | null>(defaults.projectId ?? null);
-  const projectId = chosenProjectId ?? fallbackProject(spaces, shell);
+  // Read once: creating a task updates it, and the open form shouldn't jump.
+  const [lastProjectId] = useState(lastCreateProjectId);
+  const projectId = chosenProjectId ?? fallbackProject(spaces, shell, lastProjectId);
   const sidebarProject = spaces.flatMap((s) => s.projects).find((p) => p.id === projectId);
   const project = useProject(projectId ?? undefined);
+  const sprints = useSprints(projectId ?? undefined);
   const create = useCreateTask(projectId ?? '');
 
   const [title, setTitle] = useState('');
@@ -150,7 +164,7 @@ function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
   });
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [moreFields, setMoreFields] = useState(
-    Boolean(defaults.statusId ?? defaults.statusCategory ?? defaults.priority),
+    Boolean(defaults.statusId ?? defaults.statusCategory),
   );
   const [openPicker, setOpenPicker] = useState<PickerField | null>(null);
   const [pending, setPending] = useState(false);
@@ -166,11 +180,22 @@ function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
   );
   const teamIds = useMemo(() => new Set(team?.map((m) => m.user.id) ?? []), [team]);
   const assignee = memberList.find((m) => m.user.id === assigneeId)?.user ?? null;
-  // The sprint the view was filtered to only applies inside that project.
-  const sprintId =
+  // Undefined until picked: then the sprint the view was filtered to (only inside that
+  // project), else the project's current sprint. Null = "No sprint".
+  const [sprintChoice, setSprintChoice] = useState<string | null | undefined>(undefined);
+  const viewSprint =
     defaults.sprintId && projectId === (defaults.projectId ?? shell.projectId)
       ? defaults.sprintId
       : undefined;
+  const sprintList = useMemo(
+    () => (sprints.data?.[0]?.projectId === projectId ? sprints.data : []),
+    [sprints.data, projectId],
+  );
+  const sprintId =
+    sprintChoice === undefined
+      ? (viewSprint ?? detail?.activeSprint?.id)
+      : (sprintChoice ?? undefined);
+  const sprint = sprintList.find((s) => s.id === sprintId) ?? detail?.activeSprint ?? null;
 
   const meId = me?.user.id;
   const mentions = useMemo((): MentionCandidate[] => {
@@ -220,6 +245,7 @@ function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
       {
         onSuccess: (task) => {
           setPending(false);
+          setLastCreateProject(detail.id);
           if (openAfter) {
             onClose();
             openTask(task.key);
@@ -405,6 +431,42 @@ function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
             />
           )}
         />
+        <PriorityPicker
+          value={priority}
+          onChange={setPriority}
+          label={t('create.priority')}
+          trigger={(props, isOpen) => (
+            <FieldChip
+              {...props}
+              active={isOpen}
+              aria-label={`${t('create.priority')}: ${t(`priority.${priority}`)}`}
+              leading={<PriorityFlag priority={priority} />}
+              label={t(`priority.${priority}`)}
+              muted={priority === 'none'}
+            />
+          )}
+        />
+        {sprintList.length > 0 && (
+          <SprintPicker
+            value={sprintId ?? null}
+            sprints={sprintList}
+            onChange={setSprintChoice}
+            label={t('create.sprint')}
+            trigger={(props, isOpen) => {
+              const name = sprintId && sprint ? sprintLabel(t, sprint) : t('create.noSprint');
+              return (
+                <FieldChip
+                  {...props}
+                  active={isOpen}
+                  aria-label={`${t('create.sprint')}: ${name}`}
+                  leading={<SprintIcon size={14} />}
+                  label={name}
+                  muted={!sprintId}
+                />
+              );
+            }}
+          />
+        )}
         <ProjectPicker
           {...pickerState('project')}
           spaces={spaces}
@@ -412,6 +474,8 @@ function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
           label={t('create.project')}
           onChange={(p) => {
             setChosenProjectId(p.id);
+            // Sprints are per project: back to the new project's current one.
+            setSprintChoice(undefined);
             // Keep the status's category; the new project's statuses differ.
             if (status) setStatusChoice({ category: status.category });
           }}
@@ -429,21 +493,6 @@ function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
         />
         {moreFields ? (
           <>
-            <PriorityPicker
-              value={priority}
-              onChange={setPriority}
-              label={t('create.priority')}
-              trigger={(props, isOpen) => (
-                <FieldChip
-                  {...props}
-                  active={isOpen}
-                  aria-label={`${t('create.priority')}: ${t(`priority.${priority}`)}`}
-                  leading={<PriorityFlag priority={priority} />}
-                  label={t(`priority.${priority}`)}
-                  muted={priority === 'none'}
-                />
-              )}
-            />
             <SizePicker
               value={size}
               onChange={setSize}

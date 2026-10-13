@@ -17,14 +17,14 @@ import {
 import type { ProjectDetail, TaskListItem, WorkspaceMember } from '@kite/shared';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMoveTask } from '../../api/tasks';
+import { isTempTask, useMoveTask } from '../../api/tasks';
 import { useUiStore } from '../../stores/ui';
 import { groupTasks, sortTasks, type TaskGroup } from '../list/grouping';
 import { placeInStatus } from '../list/positions';
 import { useMoveUndoToast } from '../list/useMoveUndoToast';
 import { statusRef, useCreateInStatus } from '../list/useCreateInStatus';
 import type { ListScope } from '../views/taskQuery';
-import { useViewParams } from '../views/useViewParams';
+import { activeFilterFields, clearedFilters, useViewParams } from '../views/useViewParams';
 import { COLUMN_PREFIX, BoardColumn } from './BoardColumn';
 import {
   dropTarget,
@@ -76,6 +76,14 @@ export function Board({ scope, boardKey, label, tasks, project, members }: Board
   );
   const byId = useMemo(() => new Map(tasks.map((task) => [task.id, task])), [tasks]);
   const labelOf = (c: TaskGroup) => c.name ?? (c.labelKey ? t(c.labelKey) : '');
+  // Project board with filters: how many of each open status's tasks they hide (Done has its
+  // own "recent only" note).
+  const filtering = project !== null && activeFilterFields(view.filters).length > 0;
+  const hiddenIn = (c: TaskGroup) => {
+    if (!filtering || !c.status || c.status.category === 'done') return 0;
+    const total = project.taskCounts.find((x) => x.statusId === c.status?.id)?.count ?? 0;
+    return Math.max(0, total - c.tasks.filter((x) => !isTempTask(x)).length);
+  };
 
   const stored = useUiStore((s) => s.collapsedGroups[boardKey]);
   const setCollapsed = useUiStore((s) => s.setGroupCollapsed);
@@ -324,6 +332,10 @@ export function Board({ scope, boardKey, label, tasks, project, members }: Board
                   }}
                   taskHref={taskHref}
                   showProject={scope === 'space'}
+                  hiddenCount={hiddenIn(column)}
+                  onShowHidden={() => {
+                    view.update(clearedFilters(Boolean(project?.activeSprint)));
+                  }}
                 />
               );
             })}

@@ -26,6 +26,22 @@ export const ALL_DONE = 'all';
 /** `assignee=me` stays literal in the URL so a shared link means "the viewer". */
 export const ASSIGNEE_ME = 'me';
 
+/**
+ * URL changes that clear every filter. With an active sprint the sprint becomes `none`, which
+ * keeps the default sprint filter from coming back.
+ */
+export function clearedFilters(hasActiveSprint: boolean): Record<string, string | null> {
+  return {
+    status: null,
+    assignee: null,
+    priority: null,
+    tag: null,
+    dueFrom: null,
+    dueTo: null,
+    sprint: hasActiveSprint ? NO_SPRINT : null,
+  };
+}
+
 /** Filter values read from the URL (lists are comma-separated: `?status=a,b`). */
 export interface ViewFilters {
   /** Status ids (project) or status categories (space). */

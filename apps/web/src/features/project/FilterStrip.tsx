@@ -89,10 +89,17 @@ export function FilterStrip({ project, spaceId }: FilterStripProps) {
       })}
       {tasks && (
         <span className="text-[12px] text-muted">
-          {t('summary.tasks', {
-            count: tasks.length,
-            done: tasks.filter((x) => x.status.category === 'done').length,
-          })}
+          {/* "27 of 139 tasks" whenever filters or the recent-done window hide some. */}
+          {project && tasks.length < project.taskCount
+            ? t('summary.tasksOf', {
+                count: tasks.length,
+                total: project.taskCount,
+                done: tasks.filter((x) => x.status.category === 'done').length,
+              })
+            : t('summary.tasks', {
+                count: tasks.length,
+                done: tasks.filter((x) => x.status.category === 'done').length,
+              })}
         </span>
       )}
     </div>

@@ -30,8 +30,17 @@ export const statusOf = (category: StatusCategory) =>
     0,
   );
 
-/** PROJECT with its four default statuses (what `GET /projects/:id` returns). */
-export const PROJECT_WITH_STATUSES = projectDetailSchema.parse({ ...PROJECT, statuses: STATUSES });
+/**
+ * PROJECT with its four default statuses (what `GET /projects/:id` returns); counts match
+ * `makeTasks()` (2 to do, 2 in progress, 2 in review, 1 done).
+ */
+export const PROJECT_WITH_STATUSES = projectDetailSchema.parse({
+  ...PROJECT,
+  statuses: STATUSES,
+  taskCounts: STATUSES.map((s) => ({ statusId: s.id, count: s.category === 'done' ? 1 : 2 })),
+  taskCount: 7,
+  doneCount: 1,
+});
 
 const users = Object.fromEntries(PROJECT.members.map((m) => [m.user.initials, m.user]));
 const ref = (initials: string) => {

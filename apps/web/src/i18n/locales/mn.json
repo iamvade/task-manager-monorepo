@@ -194,7 +194,9 @@
   },
   "summary": {
     "tasks_one": "{{count}} ажил · {{done}} дууссан",
-    "tasks_other": "{{count}} ажил · {{done}} дууссан"
+    "tasks_other": "{{count}} ажил · {{done}} дууссан",
+    "tasksOf_one": "{{total}}-аас {{count}} ажил · {{done}} дууссан",
+    "tasksOf_other": "{{total}}-аас {{count}} ажил · {{done}} дууссан"
   },
   "table": {
     "label": "{{project}} төслийн ажлууд",
@@ -311,7 +313,10 @@
       "dropped": "«{{title}}» шилжлээ: {{status}}.",
       "cancelled": "«{{title}}» шилжүүлэлтийг цуцаллаа."
     },
-    "label": "{{project}} — самбар"
+    "label": "{{project}} — самбар",
+    "hiddenByFilters_one": "Шүүлтүүрээр нуугдсан +{{count}}",
+    "hiddenByFilters_other": "Шүүлтүүрээр нуугдсан +{{count}}",
+    "showHidden": "Шүүлтүүрийг арилгаж {{status}} төлөвийн {{count}} ажлыг харах"
   },
   "drawer": {
     "closeToList": "Ажлыг хаагаад жагсаалт руу буцах",
@@ -664,7 +669,9 @@
     "noTags": "Шошгогүй",
     "created": "{{key}} үүслээ",
     "openTask": "Нээх",
-    "failed": "Ажил үүсгэж чадсангүй. Дахин оролдоно уу."
+    "failed": "Ажил үүсгэж чадсангүй. Дахин оролдоно уу.",
+    "sprint": "Спринт",
+    "noSprint": "Спринтгүй"
   },
   "emptyProject": {
     "newBadge": "Шинэ",

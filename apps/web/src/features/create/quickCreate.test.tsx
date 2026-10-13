@@ -9,7 +9,15 @@ import { createQueryClient } from '../../queryClient';
 import { routes } from '../../router';
 import { useToastStore } from '../../stores/toast';
 import { useUiStore } from '../../stores/ui';
-import { ME, PROJECT, PROJECT_ID, SIDEBAR, WORKSPACE_ID, mockApi } from '../../test/fixtures';
+import {
+  ME,
+  PROJECT,
+  PROJECT_ID,
+  SIDEBAR,
+  SPRINT_ID,
+  WORKSPACE_ID,
+  mockApi,
+} from '../../test/fixtures';
 import { at, listHandlers, makeTasks, statusOf } from '../../test/tasks';
 
 const LIST = `/p/${PROJECT_ID}/list?sprint=none`;
@@ -169,6 +177,8 @@ describe('quick create', () => {
           position: 'bottom',
           assigneeIds: [SARA.id],
           dueDate: '2026-10-16',
+          // The project's current sprint by default.
+          sprintId: SPRINT_ID,
         },
       ]);
     });
@@ -239,7 +249,12 @@ describe('quick create', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: /Create task/ }));
     await waitFor(() => {
       expect(created).toEqual([
-        { title: 'Review copy', statusId: statusOf('review').id, position: 'bottom' },
+        {
+          title: 'Review copy',
+          statusId: statusOf('review').id,
+          position: 'bottom',
+          sprintId: SPRINT_ID,
+        },
       ]);
     });
   });
@@ -257,5 +272,30 @@ describe('quick create', () => {
     await waitFor(() => {
       expect(created).toEqual([expect.objectContaining({ title: 'Sized task', size: 'L' })]);
     });
+  });
+
+  it('shows priority and sprint in the main row; "No sprint" leaves the sprint out', async () => {
+    const { created } = api();
+    renderAt(LIST);
+    const { dialog, title } = await openModal();
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Priority: No priority' }));
+    fireEvent.click(await screen.findByRole('option', { name: /^High/ }));
+    const sprintChip = await within(dialog).findByRole('button', { name: 'Sprint: Sprint 1' });
+    fireEvent.click(sprintChip);
+    fireEvent.click(await screen.findByRole('option', { name: /^No sprint/ }));
+    expect(await within(dialog).findByRole('button', { name: 'Sprint: No sprint' })).toBeVisible();
+    fireEvent.change(title, { target: { value: 'Unplanned bug' } });
+    fireEvent.click(within(dialog).getByRole('button', { name: /Create task/ }));
+    await waitFor(() => {
+      expect(created).toEqual([
+        {
+          title: 'Unplanned bug',
+          statusId: statusOf('todo').id,
+          position: 'bottom',
+          priority: 'high',
+        },
+      ]);
+    });
+    expect(useUiStore.getState().lastCreateProjectId).toBe(PROJECT_ID);
   });
 });
