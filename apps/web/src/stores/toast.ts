@@ -10,7 +10,7 @@ export interface Toast {
   message: string;
   action?: ToastAction;
   tone?: 'default' | 'danger';
-  /** ms before it disappears on its own. */
+  /** ms before it disappears on its own (5 s; 8 s when it offers an action such as Undo). */
   duration: number;
 }
 
@@ -29,7 +29,9 @@ export const useToastStore = create<ToastState>()((set) => ({
   show: (toast) => {
     const id = nextId++;
     set((s) => ({
-      toasts: [...s.toasts, { duration: 5000, ...toast, id }].slice(-MAX_TOASTS),
+      toasts: [...s.toasts, { duration: toast.action ? 8000 : 5000, ...toast, id }].slice(
+        -MAX_TOASTS,
+      ),
     }));
     return id;
   },

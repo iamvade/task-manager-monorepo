@@ -47,6 +47,7 @@ import { isEditableTarget } from '../../lib/keyboard';
 import { useCopyLink } from '../../lib/useCopyLink';
 import { useShortNames } from '../../lib/useShortNames';
 import { useDeleteWithUndo } from '../task/useDeleteWithUndo';
+import { useMoveUndoToast } from './useMoveUndoToast';
 import { useUiStore, type CreateDefaults } from '../../stores/ui';
 import type { ListScope } from '../views/taskQuery';
 import { useViewParams } from '../views/useViewParams';
@@ -115,6 +116,7 @@ export function TaskTable({
   // Mutations.
   const complete = useCompleteTask();
   const move = useMoveTask();
+  const undoToast = useMoveUndoToast();
   const update = useUpdateTask();
   const showSize = useUiStore((s) => s.listColumns.size);
   const setAssigneesMutation = useSetAssignees();
@@ -369,7 +371,10 @@ export function TaskTable({
 
     const statusTasks = tasks.filter((x) => x.status.id === group.status?.id);
     const placement = placeInStatus(statusTasks, task.id, afterId, beforeId);
+    const origin = tasks.filter((x) => x.status.id === task.status.id);
     move.mutate({ task, status: statusRef(group.status), ...placement });
+    // Dragging into the Done group completes the task: offer to put it back.
+    undoToast(task, statusRef(group.status), origin);
     // The dropped order is a manual order: show it.
     if (view.sort !== 'manual') updateParams({ sort: 'manual' });
   }
