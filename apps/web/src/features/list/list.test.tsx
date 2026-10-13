@@ -357,6 +357,67 @@ describe('project list', () => {
     expect(useUiStore.getState().listColumns).toEqual({ key: false, size: false });
   });
 
+  it('creates a tag from the tag picker and puts it on the task', async () => {
+    const created: unknown[] = [];
+    const tagged: unknown[] = [];
+    const brand = { id: '01890000-0000-7000-8000-700000000077', name: 'Brand', color: 'teal' };
+    api((st) => {
+      const audit = at(st.tasks, 0);
+      return {
+        [`POST /api/v1/workspaces/${WORKSPACE_ID}/tags`]: (init) => {
+          created.push(body(init));
+          return Response.json(brand, { status: 201 });
+        },
+        [`PUT /api/v1/tasks/${audit.id}/tags`]: (init) => {
+          tagged.push(body(init));
+          return Response.json({ ...audit, tags: [...audit.tags, brand] });
+        },
+      };
+    });
+    renderAt(LIST);
+    await screen.findByRole('table');
+    fireEvent.click(
+      screen.getByRole('button', { name: '«Audit current navigation patterns» — шошго' }),
+    );
+    const search = await screen.findByRole('combobox', { name: 'Шошго хайх' });
+    fireEvent.change(search, { target: { value: 'Brand' } });
+    fireEvent.click(await screen.findByRole('option', { name: '«Brand» шошго үүсгэх' }));
+    await waitFor(() => {
+      expect(tagged).toHaveLength(1);
+    });
+    expect(created).toEqual([{ name: 'Brand', color: expect.any(String) as string }]);
+    expect(tagged[0]).toEqual({ tagIds: [...at(makeTasks(), 0).tags.map((x) => x.id), brand.id] });
+    // An exact name offers no create row.
+    fireEvent.change(search, { target: { value: 'research' } });
+    expect(screen.queryByRole('option', { name: /шошго үүсгэх/ })).toBeNull();
+  });
+
+  it('replaces every assignee with "Reassign…" from the row menu', async () => {
+    const sent: unknown[] = [];
+    api((st) => {
+      const tabBar = at(st.tasks, 2);
+      return {
+        [`PUT /api/v1/tasks/${tabBar.id}/assignees`]: (init) => {
+          sent.push(body(init));
+          return Response.json(tabBar);
+        },
+      };
+    });
+    renderAt(LIST);
+    await screen.findByRole('table');
+    const title = 'Implement new bottom tab bar';
+    fireEvent.click(screen.getByRole('button', { name: `«${title}» — нэмэлт үйлдэл` }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Шилжүүлэх…' }));
+    const search = await screen.findByRole('combobox', { name: 'Хэнд оноох…' });
+    fireEvent.change(search, { target: { value: 'sara' } });
+    fireEvent.keyDown(search, { key: 'Enter' });
+    await waitFor(() => {
+      expect(sent).toHaveLength(1);
+    });
+    const sara = at(PROJECT_WITH_STATUSES.members, 1).user;
+    expect(sent[0]).toEqual({ userIds: [sara.id] });
+  });
+
   it('opens the drawer when a row is clicked', async () => {
     api((st) => ({
       'GET /api/v1/tasks/APP-131': () => Response.json(detail(at(st.tasks, 0))),

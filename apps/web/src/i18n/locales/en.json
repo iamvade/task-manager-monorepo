@@ -229,7 +229,9 @@
     "setTags": "Tags of {{name}}",
     "open": "Open",
     "reopen": "Reopen",
-    "delete": "Delete"
+    "delete": "Delete",
+    "reassign": "Reassign…",
+    "reassignTo": "Reassign {{name}} to"
   },
   "status": {
     "todo": "To Do",
@@ -285,7 +287,10 @@
     "priorityLabel": "Priority",
     "tagsLabel": "Tags",
     "dueLabel": "Due date",
-    "assigneeLabel": "Assignees"
+    "assigneeLabel": "Assignees",
+    "createTag": "Create tag “{{name}}”",
+    "createTagFailed": "Couldn't create the tag",
+    "assigned": "Assigned"
   },
   "board": {
     "sortManual": "Sort: Manual",
@@ -470,7 +475,8 @@
     "commentDeleted": "This comment was deleted",
     "deleteCommentConfirm": "Delete this comment?",
     "hideReplies": "Hide replies",
-    "viewers": "Also viewing: {{names}}"
+    "viewers": "Also viewing: {{names}}",
+    "removeAssignee": "Remove {{name}}"
   },
   "myTasks": {
     "allSpaces": "All spaces",
@@ -876,7 +882,9 @@
       "capacityOf": "Capacity of {{name}} (points per 2 weeks)",
       "capacityUnit": "pts / 2 wks",
       "capacityHint": "Points each person can take on over the next 2 weeks. Workload shows it as the dashed capacity marker.",
-      "saved": "Saved"
+      "saved": "Saved",
+      "search": "Search members by name, title or email",
+      "noMatches": "No members match"
     },
     "archived": {
       "title": "Archived projects",
@@ -921,7 +929,9 @@
       "to": "To",
       "apply": "Apply",
       "cancel": "Cancel",
-      "customInvalid": "The start must be on or before the end, at most 366 days apart."
+      "customInvalid": "The start must be on or before the end, at most 366 days apart.",
+      "lastWeek": "Last week",
+      "lastMonth": "Last month"
     },
     "filters": {
       "space": "Space:",
@@ -938,7 +948,9 @@
     "range": {
       "compare4w": "{{range}} · compared with the previous 4 weeks ({{previous}})",
       "compareDays_one": "{{range}} · compared with the previous {{count}} day ({{previous}})",
-      "compareDays_other": "{{range}} · compared with the previous {{count}} days ({{previous}})"
+      "compareDays_other": "{{range}} · compared with the previous {{count}} days ({{previous}})",
+      "compareWeek": "{{range}} · compared with the week before ({{previous}})",
+      "compareMonth": "{{range}} · compared with the month before ({{previous}})"
     },
     "delta": {
       "vsPrev": "vs previous period",
@@ -1214,7 +1226,9 @@
         "periods": {
           "week": "this week",
           "4w": "last 4 weeks",
-          "quarter": "this quarter"
+          "quarter": "this quarter",
+          "lastWeek": "last week",
+          "lastMonth": "last month"
         },
         "subtasks": "Subtasks done on others’ tasks",
         "across_one": "across {{count}} task",
@@ -1268,7 +1282,9 @@
           "week": "Your week so far",
           "4w": "Your last 4 weeks",
           "quarter": "Your quarter so far",
-          "custom": "Your chosen period"
+          "custom": "Your chosen period",
+          "lastWeek": "Your last week",
+          "lastMonth": "Your last month"
         },
         "privacy": "Visible only to you and workspace admins",
         "note": "This is a look at how your work has been flowing. Use it to prepare for 1:1s or spot what you might want to change — it is not a score.",
@@ -1292,7 +1308,9 @@
         "openTasks": "Your open tasks",
         "openLink": "Go to My Tasks",
         "comments": "Comments on others’ tasks"
-      }
+      },
+      "rangeWeek": "{{range}} · compared with the week before",
+      "rangeMonth": "{{range}} · compared with the month before"
     },
     "chartTable": {
       "week": "Week",

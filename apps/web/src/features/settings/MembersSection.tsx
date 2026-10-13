@@ -1,6 +1,7 @@
 import {
   MAX_CAPACITY_POINTS,
   emailSchema,
+  matchesName,
   type UpdateMember,
   type WorkspaceMember,
   type WorkspaceRole,
@@ -223,11 +224,24 @@ function PendingInvites({ workspaceId }: { workspaceId: string }) {
   );
 }
 
+/** The member list gets a search box above this many people. */
+const SEARCH_FROM = 8;
+
 function MemberList({ workspaceId, canEdit }: { workspaceId: string; canEdit: boolean }) {
   const { t } = useTranslation();
   const { me } = useAuth();
   const members = useWorkspaceMembers(workspaceId);
   const update = useUpdateMember(workspaceId);
+  const [query, setQuery] = useState('');
+  const q = query.trim();
+  // Name in either script ("Bat" finds Бат-Эрдэнэ), job title or email.
+  const shown = (members.data ?? []).filter(
+    (m) =>
+      !q ||
+      matchesName(m.user.name, q) ||
+      (m.title?.toLowerCase().includes(q.toLowerCase()) ?? false) ||
+      m.user.email.toLowerCase().includes(q.toLowerCase()),
+  );
 
   return (
     <SettingsSection
@@ -243,20 +257,39 @@ function MemberList({ workspaceId, canEdit }: { workspaceId: string; canEdit: bo
           ))}
         </div>
       ) : (
-        <ul className="m-0 list-none pl-0">
-          {members.data.map((member) => (
-            <MemberRow
-              key={member.user.id}
-              member={member}
-              isMe={member.user.id === me?.user.id}
-              canEdit={canEdit}
-              roleEditable={canEdit && member.role !== 'owner' && member.user.id !== me?.user.id}
-              onUpdate={(patch) => {
-                update.mutate({ userId: member.user.id, ...patch });
+        <>
+          {members.data.length > SEARCH_FROM && (
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
               }}
+              aria-label={t('settings.members.search')}
+              placeholder={t('settings.members.search')}
+              className={cn(settingsInput, 'mb-3')}
             />
-          ))}
-        </ul>
+          )}
+          {shown.length === 0 && (
+            <p className="m-0 border-t border-subtle py-4 text-[13px] text-muted">
+              {t('settings.members.noMatches')}
+            </p>
+          )}
+          <ul className="m-0 list-none pl-0">
+            {shown.map((member) => (
+              <MemberRow
+                key={member.user.id}
+                member={member}
+                isMe={member.user.id === me?.user.id}
+                canEdit={canEdit}
+                roleEditable={canEdit && member.role !== 'owner' && member.user.id !== me?.user.id}
+                onUpdate={(patch) => {
+                  update.mutate({ userId: member.user.id, ...patch });
+                }}
+              />
+            ))}
+          </ul>
+        </>
       )}
     </SettingsSection>
   );

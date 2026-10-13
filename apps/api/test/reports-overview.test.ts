@@ -208,6 +208,16 @@ describe('GET /workspaces/:id/reports/overview', () => {
     expect(r.previousRange).toEqual({ from: '2026-10-09', to: '2026-10-11' });
   });
 
+  it('last week and last month are whole calendar periods', async () => {
+    const w = await taskWorld(ctx);
+    const week = await overview(w, '?period=lastWeek');
+    expect(week.range).toEqual({ from: '2026-10-05', to: '2026-10-11' });
+    expect(week.previousRange).toEqual({ from: '2026-09-28', to: '2026-10-04' });
+    const month = await overview(w, '?period=lastMonth');
+    expect(month.range).toEqual({ from: '2026-09-01', to: '2026-09-30' });
+    expect(month.previousRange).toEqual({ from: '2026-08-01', to: '2026-08-31' });
+  });
+
   it('returns 20 aging tasks unless agingLimit asks for another number or all', async () => {
     const w = await taskWorld(ctx);
     for (let i = 0; i < 22; i++) {

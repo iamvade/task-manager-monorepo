@@ -33,6 +33,34 @@ describe('reportRange', () => {
     expect(reportRange('quarter', '2026-03-31').range.from).toBe('2026-01-01');
   });
 
+  it('lastWeek is the previous Monday–Sunday, compared with the week before', () => {
+    expect(reportRange('lastWeek', '2026-10-13')).toEqual({
+      range: { from: '2026-10-05', to: '2026-10-11' },
+      previousRange: { from: '2026-09-28', to: '2026-10-04' },
+    });
+    // On a Sunday "last week" is still the one before the current week.
+    expect(reportRange('lastWeek', '2026-10-11').range).toEqual({
+      from: '2026-09-28',
+      to: '2026-10-04',
+    });
+  });
+
+  it('lastMonth is the previous calendar month, compared with the month before it', () => {
+    expect(reportRange('lastMonth', '2026-10-13')).toEqual({
+      range: { from: '2026-09-01', to: '2026-09-30' },
+      previousRange: { from: '2026-08-01', to: '2026-08-31' },
+    });
+    // Across the year boundary, and a 28-day February before a 31-day March.
+    expect(reportRange('lastMonth', '2026-01-05')).toEqual({
+      range: { from: '2025-12-01', to: '2025-12-31' },
+      previousRange: { from: '2025-11-01', to: '2025-11-30' },
+    });
+    expect(reportRange('lastMonth', '2026-04-01').previousRange).toEqual({
+      from: '2026-02-01',
+      to: '2026-02-28',
+    });
+  });
+
   it('custom uses from–to', () => {
     expect(reportRange('custom', '2026-10-09', { from: '2026-09-01', to: '2026-09-10' })).toEqual({
       range: { from: '2026-09-01', to: '2026-09-10' },

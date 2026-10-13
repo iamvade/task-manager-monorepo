@@ -82,7 +82,11 @@ export function PersonTab({ variant, personId }: PersonTabProps) {
   const compared =
     filters.period === '4w'
       ? t('reports.person.range4w', { range })
-      : t('reports.person.rangeDays', { range, count: days });
+      : filters.period === 'lastWeek'
+        ? t('reports.person.rangeWeek', { range })
+        : filters.period === 'lastMonth'
+          ? t('reports.person.rangeMonth', { range })
+          : t('reports.person.rangeDays', { range, count: days });
 
   return (
     <>
