@@ -154,7 +154,8 @@
     },
     "columns": "Багана",
     "columnsMenu": "Багана харуулах",
-    "columnSize": "Хэмжээ"
+    "columnSize": "Хэмжээ",
+    "columnKey": "Ажлын дугаар"
   },
   "filters": {
     "sprintIs": "Спринт:",
@@ -491,7 +492,8 @@
       "perDayItem": "{{day}}: {{count}}",
       "overdue": "Хугацаа хэтэрсэн",
       "oldestLate_one": "хамгийн удаан нь {{count}} хоног хоцорсон",
-      "oldestLate_other": "хамгийн удаан нь {{count}} хоног хоцорсон"
+      "oldestLate_other": "хамгийн удаан нь {{count}} хоног хоцорсон",
+      "showSection": "{{section}} харах"
     },
     "sections": {
       "overdue": "Хугацаа хэтэрсэн",
@@ -499,7 +501,8 @@
       "thisWeek": "Энэ долоо хоног",
       "later": "Дараа",
       "laterHint": "Энэ долоо хоногоос хойш",
-      "rangeHint": "{{start}} – {{end}}"
+      "rangeHint": "{{start}} – {{end}}",
+      "done": "Энэ долоо хоногт дууссан"
     },
     "recentActivity": "Сүүлийн үйл ажиллагаа",
     "viewInbox": "Мэдэгдэл харах",

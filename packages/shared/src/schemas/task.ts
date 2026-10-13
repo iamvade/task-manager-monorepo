@@ -219,7 +219,15 @@ export const searchQuerySchema = z.object({ q: z.string().trim().min(1).max(200)
 export const searchResultSchema = z
   .object({
     tasks: z.array(
-      taskListItemSchema.pick({ id: true, key: true, title: true, project: true, status: true }),
+      taskListItemSchema.pick({
+        id: true,
+        key: true,
+        title: true,
+        project: true,
+        status: true,
+        assignees: true,
+        dueDate: true,
+      }),
     ),
     projects: z.array(projectSummarySchema),
     people: z.array(userRefSchema),

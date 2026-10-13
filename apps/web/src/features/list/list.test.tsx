@@ -80,7 +80,7 @@ describe('project list', () => {
     useUiStore.setState({
       collapsedGroups: {},
       lastWorkspaceId: null,
-      listColumns: { size: false },
+      listColumns: { key: true, size: false },
       createOpen: false,
       paletteOpen: false,
       shortcutsOpen: false,
@@ -341,6 +341,20 @@ describe('project list', () => {
       within(row).getByRole('button', { name: '«Audit current navigation patterns» — хэмжээ' }),
     ).toBeInTheDocument();
     expect(useUiStore.getState().listColumns.size).toBe(true);
+  });
+
+  it('shows each task key before its title, and hides it from the Columns menu', async () => {
+    api();
+    renderAt(LIST);
+    await screen.findByRole('table', { name: 'App Redesign төслийн ажлууд' });
+    expect(within(rowOf('Audit current navigation patterns')).getByText('APP-131')).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Багана' }));
+    fireEvent.click(await screen.findByRole('menuitemradio', { name: 'Ажлын дугаар' }));
+    await waitFor(() => {
+      expect(within(rowOf('Audit current navigation patterns')).queryByText('APP-131')).toBeNull();
+    });
+    expect(useUiStore.getState().listColumns).toEqual({ key: false, size: false });
   });
 
   it('opens the drawer when a row is clicked', async () => {

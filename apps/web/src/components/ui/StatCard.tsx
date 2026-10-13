@@ -17,6 +17,9 @@ interface StatCardProps {
   tone?: 'default' | 'danger';
   /** 28/32 (Overview, My Tasks) or 26/32 (Sprints, People, My performance). */
   valueSize?: 28 | 26;
+  /** Makes the whole card a button (My Tasks: opens the card's section), named `actionLabel`. */
+  onClick?: () => void;
+  actionLabel?: string;
   className?: string;
 }
 
@@ -34,6 +37,8 @@ export function StatCard({
   footer,
   tone = 'default',
   valueSize = 28,
+  onClick,
+  actionLabel,
   className,
 }: StatCardProps) {
   return (
@@ -43,9 +48,20 @@ export function StatCard({
       className={cn(
         'flex min-w-0 flex-col gap-2 rounded-[12px] border p-4',
         tone === 'danger' ? 'border-danger-card bg-danger-card' : 'border-default',
+        onClick && 'relative',
+        onClick && tone !== 'danger' && 'hover:bg-subtle',
         className,
       )}
     >
+      {onClick && (
+        // Covers the card; the card's text stays readable in the group.
+        <button
+          type="button"
+          aria-label={actionLabel}
+          onClick={onClick}
+          className="absolute inset-0 cursor-pointer rounded-[12px] border-0 bg-transparent"
+        />
+      )}
       <div className="flex items-center gap-2 text-[13px] text-3">
         {icon}
         {label}

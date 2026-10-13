@@ -93,8 +93,12 @@ export async function buildHome(
       .where(
         and(
           mineIn(user.id, workspaceId),
-          // Open tasks, plus done ones due today ("3 of 4 left").
-          or(ne(statuses.category, 'done'), eq(tasks.dueDate, today)),
+          // Open tasks, plus done ones due today ("3 of 4 left") or completed this week.
+          or(
+            ne(statuses.category, 'done'),
+            eq(tasks.dueDate, today),
+            sql`${tasks.completedAt} >= (${weekStart}::timestamp at time zone ${timezone})`,
+          ),
         ),
       ),
     db
@@ -139,6 +143,14 @@ export async function buildHome(
     (t) => !t.done && t.dueDate !== null && t.dueDate > today && t.dueDate <= weekEnd,
   );
   const later = all.filter((t) => !t.done && (t.dueDate === null || t.dueDate > weekEnd));
+  const done = all
+    .filter(
+      (t) =>
+        t.done &&
+        t.completedAt !== null &&
+        todayInZone(timezone, new Date(t.completedAt)) >= weekStart,
+    )
+    .sort((a, b) => (b.completedAt ?? '').localeCompare(a.completedAt ?? ''));
 
   const perDayOf = (start: string) =>
     Array.from(
@@ -159,6 +171,7 @@ export async function buildHome(
       today: dueToday.map(strip),
       thisWeek: thisWeek.map(strip),
       later: later.map(strip),
+      done: done.map(strip),
     },
     stats: {
       dueToday: {

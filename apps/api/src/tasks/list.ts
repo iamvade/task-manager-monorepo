@@ -33,7 +33,8 @@ import { projects, statuses, taskAssignees, taskTags, tasks } from '../db/schema
 export const escapeLike = (text: string) => text.replace(/[\\%_]/g, '\\$&');
 
 // Aggregates are correlated subqueries: one statement for the whole list, no N+1.
-const assigneesSql = sql<UserRef[]>`coalesce((
+/** A task's assignees as user refs (by name); also used by search. */
+export const assigneesSql = sql<UserRef[]>`coalesce((
   select json_agg(json_build_object(
     'id', u.id, 'name', u.name, 'initials', u.initials, 'avatarColor', u.avatar_color
   ) order by u.name, u.id)

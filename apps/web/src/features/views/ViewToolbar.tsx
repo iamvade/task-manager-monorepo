@@ -131,6 +131,14 @@ export function ViewToolbar({ project = null, empty = false }: ViewToolbarProps)
               label={t('toolbar.columnsMenu')}
               items={[
                 {
+                  id: 'key',
+                  label: t('toolbar.columnKey'),
+                  checked: listColumns.key,
+                  onSelect: () => {
+                    setListColumn('key', !listColumns.key);
+                  },
+                },
+                {
                   id: 'size',
                   label: t('toolbar.columnSize'),
                   checked: listColumns.size,

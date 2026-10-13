@@ -16,6 +16,7 @@ import { PageHeader } from '../views/PageHeader';
 import { ActivityPanel } from './ActivityPanel';
 import { Greeting } from './Greeting';
 import { StatCards } from './StatCards';
+import { MY_TASKS_LIST_ID, sectionElementId } from './sections';
 import { TaskSection } from './TaskSection';
 
 /** My Tasks home (MyTasks.dc.html): greeting, stat cards, due-date sections, recent activity. */
@@ -66,6 +67,7 @@ function HomeBody({ workspaceId, home }: { workspaceId: string; home: Home }) {
   const { me } = useAuth();
   const dates = useDates();
   const openCreate = useUiStore((s) => s.openCreate);
+  const setGroupCollapsed = useUiStore((s) => s.setGroupCollapsed);
   const complete = useCompleteMyTask(workspaceId);
   // Rows completed here stay on screen (struck through) after refetches drop them.
   const [kept, setKept] = useState<Record<string, KeptRow>>({});
@@ -133,6 +135,23 @@ function HomeBody({ workspaceId, home }: { workspaceId: string; home: Home }) {
       dueDate: tomorrow,
     },
     later: { label: t('myTasks.sections.later'), hint: t('myTasks.sections.laterHint') },
+    done: {
+      label: t('myTasks.sections.done'),
+      hint: t('myTasks.sections.rangeHint', {
+        start: dates.formatDay('weekdayShortDate', home.weekStart),
+        end: dates.formatDay('weekdayShortDate', sunday),
+      }),
+    },
+  };
+
+  // A stat card opens its section and moves there (focus on the section's header).
+  const showSection = (id: SectionId) => {
+    setGroupCollapsed(MY_TASKS_LIST_ID, id, false);
+    requestAnimationFrame(() => {
+      const el = document.getElementById(sectionElementId(id));
+      el?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      el?.querySelector<HTMLElement>('button[aria-expanded]')?.focus({ preventScroll: true });
+    });
   };
 
   const feed = dedupe([
@@ -145,7 +164,12 @@ function HomeBody({ workspaceId, home }: { workspaceId: string; home: Home }) {
     <div className="flex flex-wrap items-start gap-6 px-6 pt-6 pb-10">
       <div className="flex min-w-0 flex-[999_1_560px] flex-col gap-6">
         <Greeting today={today} />
-        <StatCards home={home} />
+        <StatCards
+          home={home}
+          onShow={(id) => {
+            showSection(id);
+          }}
+        />
         <div className="overflow-x-auto">
           <div className="flex min-w-[640px] flex-col gap-4">
             {SECTION_IDS.map((id) => {
@@ -160,7 +184,7 @@ function HomeBody({ workspaceId, home }: { workspaceId: string; home: Home }) {
                   hint={section.hint}
                   tasks={tasks}
                   onToggle={toggle(id)}
-                  onAdd={add(section.dueDate)}
+                  onAdd={id === 'done' ? undefined : add(section.dueDate)}
                 />
               );
             })}

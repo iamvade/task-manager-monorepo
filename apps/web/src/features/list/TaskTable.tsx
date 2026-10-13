@@ -120,6 +120,7 @@ export function TaskTable({
   const undoToast = useMoveUndoToast();
   const update = useUpdateTask();
   const showSize = useUiStore((s) => s.listColumns.size);
+  const showKey = useUiStore((s) => s.listColumns.key);
   const setAssigneesMutation = useSetAssignees();
   const setTagsMutation = useSetTags();
   const remove = useDeleteWithUndo();
@@ -241,6 +242,7 @@ export function TaskTable({
       if (size !== task.size) update.mutate({ task, patch: { size } });
     },
     showSize,
+    showKey,
     setTags: (task, next) => {
       setTagsMutation.mutate({ task, tags: next });
     },

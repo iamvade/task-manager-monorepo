@@ -59,6 +59,33 @@ describe('My Tasks', () => {
     vi.useRealTimers();
   });
 
+  it('opens the Done section from the Completed card; project names link to the project', async () => {
+    const { router } = renderHome();
+    const done = await screen.findByRole('region', { name: 'Done this week' });
+    const toggle = within(done).getByRole('button', { name: /^Done this week/ });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(within(done).queryByText('Ship onboarding survey')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show Done this week' }));
+    expect(await within(done).findByText('Ship onboarding survey')).toBeInTheDocument();
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    await waitFor(() => {
+      expect(toggle).toHaveFocus();
+    });
+    // Overdue and Due today open their sections too.
+    expect(screen.getByRole('button', { name: 'Show Overdue' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Show Today' })).toBeInTheDocument();
+
+    const row = within(section('Overdue'))
+      .getByText(OVERDUE[0].title)
+      .closest<HTMLElement>('[role="row"]');
+    if (!row) throw new Error('no row');
+    fireEvent.click(within(row).getByRole('link', { name: 'App Redesign' }));
+    await waitFor(() => {
+      expect(router.state.location.pathname).toMatch(/^\/p\/.+\/list$/);
+    });
+  });
+
   it('recovers in place with Try again when the home feed fails', async () => {
     let fail = true;
     const client = createQueryClient();

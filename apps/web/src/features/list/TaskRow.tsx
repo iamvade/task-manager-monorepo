@@ -168,6 +168,11 @@ export function TaskRow({
             <span className="truncate">{task.project.name}</span>
           </span>
         )}
+        {actions.showKey && (
+          <span className="min-w-[64px] flex-none font-mono text-[12px] text-muted">
+            {task.key}
+          </span>
+        )}
         <Link
           to={actions.taskHref(task)}
           tabIndex={inert ? -1 : undefined}

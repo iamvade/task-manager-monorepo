@@ -154,7 +154,8 @@
     },
     "columns": "Columns",
     "columnsMenu": "Show columns",
-    "columnSize": "Size"
+    "columnSize": "Size",
+    "columnKey": "Task key"
   },
   "filters": {
     "sprintIs": "Sprint is",
@@ -491,7 +492,8 @@
       "perDayItem": "{{day}} {{count}}",
       "overdue": "Overdue",
       "oldestLate_one": "oldest is {{count}} day late",
-      "oldestLate_other": "oldest is {{count}} days late"
+      "oldestLate_other": "oldest is {{count}} days late",
+      "showSection": "Show {{section}}"
     },
     "sections": {
       "overdue": "Overdue",
@@ -499,7 +501,8 @@
       "thisWeek": "This Week",
       "later": "Later",
       "laterHint": "After this week",
-      "rangeHint": "{{start}} – {{end}}"
+      "rangeHint": "{{start}} – {{end}}",
+      "done": "Done this week"
     },
     "recentActivity": "Recent activity",
     "viewInbox": "View inbox",

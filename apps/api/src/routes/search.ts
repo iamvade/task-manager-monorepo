@@ -13,7 +13,7 @@ import { z } from 'zod';
 import { requireWorkspaceMember } from '../auth/access.js';
 import { projects, statuses, tasks, users, workspaceMembers } from '../db/schema/index.js';
 import { userRefColumns } from '../tasks/user-ref.js';
-import { escapeLike } from '../tasks/list.js';
+import { assigneesSql, escapeLike } from '../tasks/list.js';
 
 const err = apiErrorSchema;
 const LIMIT = 20;
@@ -30,7 +30,7 @@ export const searchRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Search'],
         summary: 'Search the workspace (⌘K)',
         description:
-          'Up to 20 results in all: at most 5 projects (name or key) and 5 people (name in either script — "Bat" finds Бат-Эрдэнэ — or email prefix), tasks fill the rest. Tasks match by key (`APP-142`, or a prefix like `APP-14`) or title (substring or similar words); the exact key first, then title prefixes, then by similarity. Archived projects and deleted tasks are left out.',
+          'Up to 20 results in all: at most 5 projects (name or key) and 5 people (name in either script — "Bat" finds Бат-Эрдэнэ — or email prefix), tasks fill the rest. Tasks (with status, assignees and due date, so look-alike titles can be told apart) match by key (`APP-142`, or a prefix like `APP-14`) or title (substring or similar words); the exact key first, then title prefixes, then by similarity. Archived projects and deleted tasks are left out.',
         params: z.object({ workspaceId: z.uuid() }),
         querystring: searchQuerySchema,
         response: { 200: searchResultSchema, 400: err, 401: err, 404: err },
@@ -82,6 +82,8 @@ export const searchRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
             id: tasks.id,
             number: tasks.number,
             title: tasks.title,
+            dueDate: tasks.dueDate,
+            assignees: assigneesSql,
             project: {
               id: projects.id,
               spaceId: projects.spaceId,
