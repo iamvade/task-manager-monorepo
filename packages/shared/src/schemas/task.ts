@@ -37,6 +37,11 @@ export const taskListQuerySchema = z.object({
   hasDueDate: z.stringbool().optional(),
   q: z.string().trim().min(1).max(200).optional(),
   includeDone: z.stringbool().default(true),
+  /**
+   * Keep only done tasks completed on or after this date (caller's time zone); open tasks are
+   * unaffected. List and Board send today − 13 days so a big project doesn't ship years of Done.
+   */
+  doneSince: dateSchema.optional(),
   sort: taskSortSchema.default('position'),
   dir: z.enum(['asc', 'desc']).default('asc'),
 });

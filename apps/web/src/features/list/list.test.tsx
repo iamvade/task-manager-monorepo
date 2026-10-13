@@ -125,6 +125,23 @@ describe('project list', () => {
     });
   });
 
+  it('loads done tasks of the last 14 days until "Show all"', async () => {
+    const { fetchMock } = api();
+    renderAt(LIST);
+    expect(await screen.findByText('Сүүлийн 14 хоногт дууссан')).toBeInTheDocument();
+    const listUrls = () =>
+      fetchMock.mock.calls.map(([input]) => href(input)).filter((u) => u.includes('/tasks'));
+    expect(listUrls()).toContain(`/api/v1/projects/${PROJECT_ID}/tasks?doneSince=2026-09-25`);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Бүгдийг харах' }));
+    expect(await screen.findByText('Бүх дууссан ажил')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(listUrls()).toContain(`/api/v1/projects/${PROJECT_ID}/tasks`);
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Зөвхөн сүүлийнх' }));
+    expect(await screen.findByText('Сүүлийн 14 хоногт дууссан')).toBeInTheDocument();
+  });
+
   it('deletes a row from its menu with an Undo toast that restores it', async () => {
     useToastStore.setState({ toasts: [] });
     const calls: string[] = [];

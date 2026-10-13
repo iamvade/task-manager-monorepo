@@ -598,8 +598,10 @@ async function taskListPerf(
   const p = `/api/v1/projects/${project.id}/tasks`;
   const s = `/api/v1/spaces/${project.spaceId}/tasks`;
   console.log(`\nTask list endpoints, median of ${RUNS} (target < ${TARGET_MS} ms):`);
-  // The List view loads every task of the project (done included) and filters on the client.
+  // The List and Board load open tasks plus the last 14 days of done; "Show all" loads everything.
+  const recent = addDays(todayInZone(TZ), -13);
   await time('project list', p);
+  await time('project list, recent done', `${p}?doneSince=${recent}`);
   await time('project list, open only', `${p}?includeDone=false`);
   await time('project list by due date', `${p}?sort=dueDate`);
   await time('project list, one assignee', `${p}?assigneeId=${someone}`);
@@ -610,17 +612,32 @@ async function taskListPerf(
 
   const base = { sort: 'position', dir: 'asc', includeDone: true } as const;
   const variants: Record<string, { getSQL: () => SQL }> = {
-    'project list': projectTaskListQuery(db, project.id, base),
-    'project list, open only': projectTaskListQuery(db, project.id, {
-      ...base,
-      includeDone: false,
-    }),
-    'project list by due date': projectTaskListQuery(db, project.id, { ...base, sort: 'dueDate' }),
-    'project list, one assignee': projectTaskListQuery(db, project.id, {
-      ...base,
-      assigneeId: [someone],
-    }),
-    'space list': spaceTaskListQuery(db, project.spaceId, base),
+    'project list': projectTaskListQuery(db, project.id, base, TZ),
+    'project list, recent done': projectTaskListQuery(
+      db,
+      project.id,
+      { ...base, doneSince: recent },
+      TZ,
+    ),
+    'project list, open only': projectTaskListQuery(
+      db,
+      project.id,
+      { ...base, includeDone: false },
+      TZ,
+    ),
+    'project list by due date': projectTaskListQuery(
+      db,
+      project.id,
+      { ...base, sort: 'dueDate' },
+      TZ,
+    ),
+    'project list, one assignee': projectTaskListQuery(
+      db,
+      project.id,
+      { ...base, assigneeId: [someone] },
+      TZ,
+    ),
+    'space list': spaceTaskListQuery(db, project.spaceId, base, TZ),
   };
   let worst: { name: string; ms: number; plan: string } | null = null;
   for (const [name, query] of Object.entries(variants)) {

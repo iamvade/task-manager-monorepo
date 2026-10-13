@@ -13,6 +13,7 @@ import { IconButton } from '../../components/ui/IconButton';
 import { Menu, type MenuItem } from '../../components/ui/Menu';
 import { StatusDot } from '../../components/ui/StatusDot';
 import { cn } from '../../lib/cn';
+import { DoneScopeNote } from '../views/DoneScopeNote';
 import type { DropTarget } from './boardDrag';
 import { DropPlaceholder } from './DropPlaceholder';
 import { TaskCard } from './TaskCard';
@@ -267,6 +268,7 @@ export function BoardColumn({
         </SortableContext>
         {placeholderAt === 'end' && <DropPlaceholder status={label} />}
         {adding && onAdd && <AddCard onSubmit={onAdd} onCancel={onCancelAdd} />}
+        {category === 'done' && <DoneScopeNote className="px-2.5 py-1" />}
       </div>
 
       {onAdd && !adding && (

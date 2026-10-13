@@ -125,7 +125,11 @@
     "list": "List",
     "board": "Board",
     "calendar": "Calendar",
-    "notYet": "This view is next on the design list. Switch back to List to see the {{project}} tasks."
+    "notYet": "This view is next on the design list. Switch back to List to see the {{project}} tasks.",
+    "doneRecent": "Done in the last {{count}} days",
+    "doneAll": "All done tasks",
+    "doneShowAll": "Show all",
+    "doneRecentOnly": "Recent only"
   },
   "toolbar": {
     "filter": "Filter",

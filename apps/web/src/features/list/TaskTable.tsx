@@ -49,6 +49,7 @@ import { useShortNames } from '../../lib/useShortNames';
 import { useDeleteWithUndo } from '../task/useDeleteWithUndo';
 import { useMoveUndoToast } from './useMoveUndoToast';
 import { useUiStore, type CreateDefaults } from '../../stores/ui';
+import { DoneScopeNote } from '../views/DoneScopeNote';
 import type { ListScope } from '../views/taskQuery';
 import { useViewParams } from '../views/useViewParams';
 import { AddTaskRow } from './AddTaskRow';
@@ -481,6 +482,11 @@ export function TaskTable({
               {activeTask && <TaskRow task={activeTask} height={rowHeight} dragState="overlay" />}
             </DragOverlay>
           </DndContext>
+          {!showNoMatches && (
+            <FullRow>
+              <DoneScopeNote className="px-2 pt-4" />
+            </FullRow>
+          )}
         </div>
       </div>
     </ListContext.Provider>

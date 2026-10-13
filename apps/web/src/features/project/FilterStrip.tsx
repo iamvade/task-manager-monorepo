@@ -1,13 +1,11 @@
 import type { ProjectDetail } from '@kite/shared';
-import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProjectTasks, useSpaceTasks } from '../../api/tasks';
 import { useCurrentWorkspace } from '../../api/workspaces';
-import { useAuth } from '../../auth/useAuth';
 import { FilterChip } from '../../components/ui/FilterChip';
 import { useDates } from '../../lib/useDates';
 import { useFilterOptions, type FilterOption } from '../views/filterOptions';
-import { toTaskQuery } from '../views/taskQuery';
+import { useTaskQuery } from '../views/useTaskQuery';
 import { useCurrentView } from '../views/useCurrentView';
 import {
   activeFilterFields,
@@ -28,7 +26,6 @@ const names = (options: FilterOption[], keys: readonly string[]) =>
 /** Active filter chips + "16 tasks · 4 done" for the filtered list (Main.dc.html, 12/24/0). */
 export function FilterStrip({ project, spaceId }: FilterStripProps) {
   const { t } = useTranslation();
-  const { me } = useAuth();
   const dates = useDates();
   const workspace = useCurrentWorkspace();
   const view = useViewParams();
@@ -38,9 +35,7 @@ export function FilterStrip({ project, spaceId }: FilterStripProps) {
   // Same query (and cache entry) as the list itself. The calendar shows chips only (its tasks
   // are a date range, so a count would mislead).
   const calendar = useCurrentView() === 'calendar';
-  const meId = me?.user.id ?? '';
-  const scope = project ? 'project' : 'space';
-  const query = useMemo(() => toTaskQuery(filters, meId, scope), [filters, meId, scope]);
+  const query = useTaskQuery(project ? 'project' : 'space');
   const projectTasks = useProjectTasks(calendar ? undefined : project?.id, query);
   const spaceTasks = useSpaceTasks(calendar ? undefined : spaceId, query);
   const tasks = calendar ? undefined : (project ? projectTasks : spaceTasks).data;

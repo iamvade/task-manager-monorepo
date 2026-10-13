@@ -33,4 +33,12 @@ describe('toTaskQuery', () => {
     const filters = readFilters(new URLSearchParams('sprint=none&dueFrom=10/08'));
     expect(toTaskQuery(filters, ME_ID, 'project')).toEqual({});
   });
+
+  it('adds doneSince when given', () => {
+    const filters = readFilters(new URLSearchParams('priority=high'));
+    expect(toTaskQuery(filters, ME_ID, 'space', '2026-09-25')).toEqual({
+      priority: ['high'],
+      doneSince: '2026-09-25',
+    });
+  });
 });
