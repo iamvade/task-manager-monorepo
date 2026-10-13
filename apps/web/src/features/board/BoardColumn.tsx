@@ -273,18 +273,20 @@ export function BoardColumn({
         </SortableContext>
         {placeholderAt === 'end' && <DropPlaceholder status={label} />}
         {adding && onAdd && <AddCard onSubmit={onAdd} onCancel={onCancelAdd} />}
-        {category === 'done' && <DoneScopeNote className="px-2.5 py-1" />}
-        {hiddenCount > 0 && onShowHidden && (
-          <button
-            type="button"
-            onClick={onShowHidden}
-            aria-label={t('board.showHidden', { count: hiddenCount, status: label })}
-            className="self-start rounded-[6px] border-0 bg-transparent px-2.5 py-1 text-left text-[12px] text-muted hover:bg-hover hover:text-2"
-          >
-            {t('board.hiddenByFilters', { count: hiddenCount })}
-          </button>
-        )}
       </div>
+
+      {/* Below the scrolling cards, so they stay in view. */}
+      {category === 'done' && <DoneScopeNote className="flex-none px-2.5 pt-1" />}
+      {hiddenCount > 0 && onShowHidden && (
+        <button
+          type="button"
+          onClick={onShowHidden}
+          aria-label={t('board.showHidden', { count: hiddenCount, status: label })}
+          className="flex-none self-start rounded-[6px] border-0 bg-transparent px-2.5 py-1 text-left text-[12px] text-muted hover:bg-hover hover:text-2"
+        >
+          {t('board.hiddenByFilters', { count: hiddenCount })}
+        </button>
+      )}
 
       {onAdd && !adding && (
         <button
