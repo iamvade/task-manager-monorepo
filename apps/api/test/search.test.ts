@@ -59,6 +59,21 @@ describe('workspace search', () => {
     expect((await search('sara')).people.map((p) => p.name)).toEqual(['Sara Khan']);
   });
 
+  it('finds people across scripts and by email prefix', async () => {
+    const { ws } = world;
+    const ganbold = await createUser(ctx.db, { name: 'Бат-Эрдэнэ Ганболд' });
+    const tsogt = await createUser(ctx.db, { name: 'Bat-Erdene Tsogt' });
+    await addMember(ctx.db, ws.id, ganbold.id);
+    await addMember(ctx.db, ws.id, tsogt.id);
+
+    const latin = (await search('bat')).people.map((p) => p.name).sort();
+    expect(latin).toEqual(['Bat-Erdene Tsogt', 'Бат-Эрдэнэ Ганболд']);
+    const cyrillic = (await search('Бат-Эрдэнэ')).people.map((p) => p.name).sort();
+    expect(cyrillic).toEqual(['Bat-Erdene Tsogt', 'Бат-Эрдэнэ Ганболд']);
+    expect((await search('цогт')).people.map((p) => p.name)).toEqual(['Bat-Erdene Tsogt']);
+    expect((await search(tsogt.email.slice(0, 8))).people.map((p) => p.id)).toContain(tsogt.id);
+  });
+
   it('caps the results at 20 and hides other workspaces', async () => {
     const { createTask } = world;
     for (let i = 1; i <= 25; i++) await createTask({ title: `Bulk item ${i}` });

@@ -1,16 +1,16 @@
 import {
   WORKLOAD_BUCKETS,
-  shortName,
   type UserRef,
   type WorkloadPerson,
   type WorkloadTask,
   type WorkspaceMember,
 } from '@kite/shared';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronRightIcon } from '../../../components/icons';
 import { Avatar } from '../../../components/ui/Avatar';
 import { cn } from '../../../lib/cn';
+import { useShortNames } from '../../../lib/useShortNames';
 import { StackedBar } from '../charts/StackedBar';
 import { BUCKET_FILL, bucketSwatch } from './buckets';
 import { CapacityPill } from './CapacityPill';
@@ -45,6 +45,8 @@ export function WorkloadTable({
   const [open, setOpen] = useState<ReadonlySet<string>>(() => new Set());
   const ticks = workloadTicks(scale);
   const pct = (v: number) => `${((v / scale) * 100).toFixed(2)}%`;
+  const users = useMemo(() => people.map((person) => person.user), [people]);
+  const shortNameOf = useShortNames(users);
 
   return (
     <section
@@ -95,6 +97,7 @@ export function WorkloadTable({
             <WorkloadRow
               key={person.user.id}
               person={person}
+              name={shortNameOf(person.user)}
               scale={scale}
               open={open.has(person.user.id)}
               onToggle={() => {
@@ -124,12 +127,15 @@ export function WorkloadTable({
 
 function WorkloadRow({
   person,
+  name,
   scale,
   open,
   onToggle,
   children,
 }: {
   person: WorkloadPerson;
+  /** Short name, distinct within the table. */
+  name: string;
   scale: number;
   open: boolean;
   onToggle: () => void;
@@ -137,7 +143,6 @@ function WorkloadRow({
 }) {
   const { t } = useTranslation();
   const k = 'reports.workload';
-  const name = shortName(person.user.name);
   const pts = t(`${k}.pts`, { count: person.points });
   const overdue = person.buckets.overdue.points;
   const segments = WORKLOAD_BUCKETS.map((b) => ({

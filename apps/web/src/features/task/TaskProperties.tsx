@@ -1,5 +1,5 @@
-import { shortName, type Status, type StatusCategory, type UserRef } from '@kite/shared';
-import type { ReactNode } from 'react';
+import type { Status, StatusCategory, UserRef } from '@kite/shared';
+import { useMemo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useSidebar } from '../../api/workspaces';
@@ -26,6 +26,7 @@ import { TagChip } from '../../components/ui/TagChip';
 import { cn } from '../../lib/cn';
 import { DUE_TONE_CLASS, relativeDay } from '../../lib/dates';
 import { useDates } from '../../lib/useDates';
+import { useShortNames } from '../../lib/useShortNames';
 import { toast } from '../../stores/toast';
 import { AssigneePicker } from '../pickers/AssigneePicker';
 import { DuePicker } from '../pickers/DuePicker';
@@ -106,6 +107,8 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
   const { t } = useTranslation();
   const view = useTaskView();
   const { task, project, members, teamIds, tags, sprints, layout } = view;
+  const memberUsers = useMemo(() => members.map((m) => m.user), [members]);
+  const shortNameOf = useShortNames(memberUsers);
   const dates = useDates();
   const navigate = useNavigate();
   const [, setParams] = useSearchParams();
@@ -201,7 +204,7 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
             className="inline-flex h-7 items-center gap-1.5 rounded-full border border-default pr-2.5 pl-[3px] text-[13px]"
           >
             <Avatar user={user} size={22} title={null} />
-            {shortName(user.name)}
+            {shortNameOf(user)}
           </span>
         ))}
         <AssigneePicker
@@ -252,7 +255,7 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
                 {reviewer ? (
                   <>
                     <Avatar user={reviewer} size={20} title={null} />
-                    <span className="truncate">{shortName(reviewer.name)}</span>
+                    <span className="truncate">{shortNameOf(reviewer)}</span>
                   </>
                 ) : (
                   t('drawer.noReviewer')

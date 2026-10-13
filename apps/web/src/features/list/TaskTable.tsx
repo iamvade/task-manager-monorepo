@@ -46,6 +46,7 @@ import {
 import { useAuth } from '../../auth/useAuth';
 import { isEditableTarget } from '../../lib/keyboard';
 import { useCopyLink } from '../../lib/useCopyLink';
+import { useShortNames } from '../../lib/useShortNames';
 import { useUiStore, type CreateDefaults } from '../../stores/ui';
 import type { ListScope } from '../views/taskQuery';
 import { useViewParams } from '../views/useViewParams';
@@ -121,6 +122,8 @@ export function TaskTable({
   const remove = useDeleteTask();
   const createInStatus = useCreateInStatus(project, tasks, members);
   const { copied, copy } = useCopyLink();
+  const memberUsers = useMemo(() => members.map((m) => m.user), [members]);
+  const shortNameOf = useShortNames(memberUsers);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [adding, setAdding] = useState<string | null>(null);
@@ -207,6 +210,7 @@ export function TaskTable({
 
   const actions: ListActions = {
     members,
+    shortNameOf,
     teamIds: new Set(project?.members.map((m) => m.user.id) ?? []),
     tags,
     taskHref,

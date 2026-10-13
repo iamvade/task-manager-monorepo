@@ -1,3 +1,4 @@
+import { matchesName } from '@kite/shared';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router';
@@ -60,6 +61,22 @@ describe('Picker', () => {
     const { input, onClear } = setup();
     fireEvent.keyDown(input, { key: 'Backspace' });
     expect(onClear).toHaveBeenCalled();
+  });
+
+  it('takes a custom search filter (cross-script names)', () => {
+    render(
+      <Picker
+        label="Assignee"
+        items={[{ id: 'g', name: 'Бат-Эрдэнэ Ганболд' }, ...PEOPLE]}
+        value={null}
+        getKey={(p) => p.id}
+        getLabel={(p) => p.name}
+        onSelect={vi.fn()}
+        search={{ placeholder: 'Assign to…', filter: (p, q) => matchesName(p.name, q) }}
+      />,
+    );
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'bat' } });
+    expect(screen.getByRole('option')).toHaveTextContent('Бат-Эрдэнэ Ганболд');
   });
 
   it('shows the empty text', () => {

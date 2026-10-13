@@ -1,4 +1,4 @@
-import { addDays, startOfWeek, type ProjectDetail } from '@kite/shared';
+import { addDays, matchesName, startOfWeek, type ProjectDetail } from '@kite/shared';
 import { ChevronLeft } from 'lucide-react';
 import { useState, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -186,7 +186,11 @@ function OptionPicker({
       getLabel={(o) => o.label}
       label={label}
       emptyText={emptyText}
-      search={search ? { placeholder: search } : undefined}
+      search={
+        search
+          ? { placeholder: search, filter: (o, q) => matchesName(o.searchText ?? o.label, q) }
+          : undefined
+      }
       onSelect={onSelect}
       renderItem={(o) => o.content ?? <span className="truncate">{o.label}</span>}
     />

@@ -1,4 +1,4 @@
-import type { UserRef, WorkspaceMember } from '@kite/shared';
+import { matchesName, type UserRef, type WorkspaceMember } from '@kite/shared';
 import { useMemo, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../auth/useAuth';
@@ -98,7 +98,11 @@ export function AssigneePicker({
           getKey={(m) => m?.user.id ?? NONE}
           getLabel={(m) => m?.user.name ?? none}
           label={t('picker.assigneeLabel')}
-          search={{ placeholder: t('create.assignTo') }}
+          search={{
+            placeholder: t('create.assignTo'),
+            // Across scripts: "Bat" finds Бат-Эрдэнэ, "Цогт" finds Tsogt.
+            filter: (m, q) => matchesName(m?.user.name ?? none, q),
+          }}
           groupBy={
             grouped
               ? (m) =>

@@ -4,6 +4,8 @@ import { createContext, useContext } from 'react';
 /** Data and actions every row of one List needs (provided by TaskTable). */
 export interface ListActions {
   members: readonly WorkspaceMember[];
+  /** Short display name, kept distinct when two members' short names collide. */
+  shortNameOf: (user: UserRef) => string;
   /** Project team ids (assignee picker suggestions); empty on the space list. */
   teamIds: ReadonlySet<string>;
   tags: readonly Tag[];
