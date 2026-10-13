@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Navigate, Outlet, useLocation, useSearchParams } from 'react-router';
+import { ErrorState } from '../components/ErrorState';
 import { safeNext } from './safeNext';
 import { useAuth } from './useAuth';
 
@@ -14,11 +15,21 @@ function FullPageStatus() {
   );
 }
 
-/** Layout route: renders children only with a session, otherwise redirects to /login?next=…. */
+/**
+ * Layout route: renders children only with a session, otherwise redirects to /login?next=….
+ * A server that can't be reached is not a sign-out: the page offers Try again instead.
+ */
 export function RequireAuth() {
-  const { me, isError } = useAuth();
+  const { me, isError, error } = useAuth();
   const location = useLocation();
   if (me === undefined && !isError) return <FullPageStatus />;
+  if (me === undefined) {
+    return (
+      <main className="flex min-h-screen bg-default text-default">
+        <ErrorState error={error} />
+      </main>
+    );
+  }
   if (!me) {
     const next = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/login?next=${next}`} replace />;

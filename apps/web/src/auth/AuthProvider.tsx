@@ -6,7 +6,7 @@ import { scopeUiStore } from '../stores/ui';
 import { AuthContext } from './useAuth';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { data, isError } = useMe();
+  const { data, isError, error } = useMe();
   const { i18n } = useTranslation();
   const prefs = data?.preferences;
 
@@ -26,5 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (i18n.language !== prefs.locale) void i18n.changeLanguage(prefs.locale);
   }, [data, prefs, i18n]);
 
-  return <AuthContext.Provider value={{ me: data, isError }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ me: data, isError, error }}>{children}</AuthContext.Provider>
+  );
 }

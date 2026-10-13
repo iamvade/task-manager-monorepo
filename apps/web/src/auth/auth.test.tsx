@@ -36,6 +36,27 @@ describe('auth flow', () => {
     expect(router.state.location.search).toBe('?next=%2Fmy-tasks');
   });
 
+  it('offers Try again when the server is unreachable, instead of the sign-in page', async () => {
+    let down = true;
+    mockApi({
+      'GET /api/v1/auth/me': () => {
+        if (down) throw new TypeError('Failed to fetch');
+        return Response.json(ME);
+      },
+      [`GET /api/v1/workspaces/${WORKSPACE_ID}/sidebar`]: () => Response.json(SIDEBAR),
+      ...homeHandlers(),
+    });
+    const router = renderAt('/my-tasks');
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Сервертэй холбогдож чадсангүй');
+    expect(router.state.location.pathname).toBe('/my-tasks');
+
+    down = false;
+    fireEvent.click(screen.getByRole('button', { name: 'Дахин оролдох' }));
+    expect(await screen.findByRole('navigation', { name: 'Ажлын орчин' })).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
   it('shows the generic error on bad credentials', async () => {
     mockApi({
       'GET /api/v1/auth/me': unauthorized,

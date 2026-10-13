@@ -16,7 +16,7 @@
     "close": "Close",
     "noResults": "No results",
     "errorTitle": "Something went wrong",
-    "errorBody": "An unexpected error stopped this page. Reload to try again.",
+    "errorBody": "An unexpected error stopped this page.",
     "reload": "Reload page",
     "notFoundTitle": "Not found",
     "notFoundBody": "This page doesn't exist or you don't have access to it.",
