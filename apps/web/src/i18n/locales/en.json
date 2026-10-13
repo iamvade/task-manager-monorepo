@@ -1193,10 +1193,13 @@
       "reassign": "Reassign {{key}}",
       "assignees": "Assignees",
       "noTasks": "No open tasks.",
-      "footnote": "Size is the sum of story points on open tasks. The capacity marker is a rough per-person amount for the next 2 weeks ({{count}} points) — it is there to help share work fairly, not to rate anyone.",
-      "footnoteMixed": "Size is the sum of story points on open tasks. The capacity marker is a rough per-person amount for the next 2 weeks — it is there to help share work fairly, not to rate anyone.",
+      "footnote": "Size is the sum of story points on open tasks. The capacity marker is a rough per-person amount for the next 2 weeks ({{count}} points) — it is there to help share work fairly, not to rate anyone. Heavy / Balanced / Light compare it with what is overdue, due in the next 2 weeks or in a current sprint; the rest is outlined as “Not due soon”.",
+      "footnoteMixed": "Size is the sum of story points on open tasks. The capacity marker is a rough per-person amount for the next 2 weeks — it is there to help share work fairly, not to rate anyone. Heavy / Balanced / Light compare it with what is overdue, due in the next 2 weeks or in a current sprint; the rest is outlined as “Not due soon”.",
       "emptyTitle": "No one to show",
-      "emptyBody": "No one in this scope has open tasks or belongs to its projects."
+      "emptyBody": "No one in this scope has open tasks or belongs to its projects.",
+      "outside": "Not due soon",
+      "outsideHint": "Due later than 2 weeks from now, or undated, and not in a current sprint: shown, but not counted against capacity.",
+      "notCounted": "not counted"
     },
     "person": {
       "pickPerson": "Choose a person",

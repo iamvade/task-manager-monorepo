@@ -96,20 +96,28 @@ export function reportRange(
   };
 }
 
+/**
+ * Workload load window: a task weighs on someone's load when it is due within this many days
+ * from today (overdue included) or sits in a sprint running today; capacity is "points for the
+ * next 2 weeks", so later and undated work outside a sprint doesn't count against it.
+ */
+export const LOAD_WINDOW_DAYS = 14;
+
 export const WORKLOAD_LOADS = ['heavy', 'balanced', 'light'] as const;
 export type WorkloadLoad = (typeof WORKLOAD_LOADS)[number];
 
 /**
- * Heavy when open points exceed capacity × 1.2 or overdue points reach 5; Light at half the
- * capacity or less; Balanced otherwise (capacity 15 → more than 18 / at most 7).
+ * Heavy when load points (see `LOAD_WINDOW_DAYS`) exceed capacity × 1.2 or overdue points reach
+ * 5; Light at half the capacity or less; Balanced otherwise (capacity 15 → more than 18 / at
+ * most 7).
  */
 export function workloadLoad(
-  points: number,
+  loadPoints: number,
   overduePoints: number,
   capacity: number,
 ): WorkloadLoad {
-  if (points > capacity * HEAVY_FACTOR || overduePoints >= HEAVY_OVERDUE_POINTS) return 'heavy';
-  if (points <= capacity / 2) return 'light';
+  if (loadPoints > capacity * HEAVY_FACTOR || overduePoints >= HEAVY_OVERDUE_POINTS) return 'heavy';
+  if (loadPoints <= capacity / 2) return 'light';
   return 'balanced';
 }
 

@@ -1,7 +1,10 @@
 export interface StackedSegment {
   key: string;
   value: number;
-  /** CSS color, or `hatch` for the striped "No due date" segment. */
+  /**
+   * CSS color, `hatch` for the striped "No due date" segment, or `outline` for an empty dashed
+   * box (Workload: points outside the load window).
+   */
   fill: string;
   /** Hover title ("Overdue: 8 pts (2 tasks)"). */
   title: string;
@@ -57,7 +60,9 @@ export function StackedBar({ segments, scale, marker, markerTitle }: StackedBarP
               borderRadius: radius(j, shown.length),
               ...(s.fill === 'hatch'
                 ? { background: HATCH, border: '1px solid var(--bucket-none-border)' }
-                : { background: s.fill }),
+                : s.fill === 'outline'
+                  ? { border: '1px dashed var(--bucket-none-border)' }
+                  : { background: s.fill }),
             }}
           />
         ))}

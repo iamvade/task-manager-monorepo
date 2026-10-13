@@ -220,6 +220,8 @@ export function workloadTask(
   bucket: WorkloadTask['bucket'],
   dueDate: string | null,
   assignees: WorkloadTask['assignees'],
+  /** Weighs on the load; by default everything with a due date (the fixtures' dates are near). */
+  counted = bucket !== 'none',
 ): WorkloadTask {
   const size = ({ 1: 'S', 3: 'M', 5: 'L', 8: 'XL' } as const)[points as 1 | 3 | 5 | 8];
   return {
@@ -231,6 +233,7 @@ export function workloadTask(
     points,
     dueDate,
     bucket,
+    counted,
     project: PROJECT_REF,
     assignees,
   };
@@ -252,13 +255,17 @@ export function workloadPerson(
     capacity: 15,
     openTasks: tasks.length,
     points: tasks.reduce((a, t) => a + t.points, 0),
+    loadPoints: tasks.reduce((a, t) => a + (t.counted ? t.points : 0), 0),
     buckets: { overdue: sum('overdue'), week: sum('week'), later: sum('later'), none: sum('none') },
     load,
     tasks,
   };
 }
 
-/** Dorj: 16 pts with 8 overdue (Heavy); Sara: 10 pts (Balanced); Bat: 1 pt (Light). */
+/**
+ * Dorj: 16 pts with 8 overdue (Heavy); Sara: 10 pts, her undated task in the current sprint
+ * (Balanced); Bat: 1 undated pt outside any sprint (Light).
+ */
 export function workloadReport(extra: Partial<WorkloadReport> = {}): WorkloadReport {
   const dorj = [
     workloadTask(1, 3, 'overdue', '2026-10-03', [DORJ]),
@@ -267,7 +274,7 @@ export function workloadReport(extra: Partial<WorkloadReport> = {}): WorkloadRep
   ];
   const sara = [
     workloadTask(4, 5, 'later', '2026-10-20', [SARA]),
-    workloadTask(5, 5, 'none', null, [SARA]),
+    workloadTask(5, 5, 'none', null, [SARA], true),
   ];
   const bat = [workloadTask(6, 1, 'none', null, [BAT])];
   return {

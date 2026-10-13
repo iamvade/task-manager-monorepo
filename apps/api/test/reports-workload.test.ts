@@ -1,7 +1,7 @@
 import { workloadReportSchema, type Size } from '@kite/shared';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createTestApp } from './helpers.js';
-import { timelineTask } from './report-fixtures.js';
+import { insertSprint, timelineTask } from './report-fixtures.js';
 import { taskWorld } from './task-setup.js';
 
 // Wednesday Oct 14 2026 in Ulaanbaatar: overdue < Oct 14, this week = Oct 14 → Sunday Oct 18.
@@ -115,6 +115,62 @@ describe('GET /workspaces/:id/reports/workload', () => {
     // People by open points; totals count the shared task once.
     expect(r.people[0]?.user.id).toBe(balanced.user.id);
     expect(r.totals).toEqual({ openTasks: 7, points: 36 });
+  });
+
+  it('counts only work due in the next 2 weeks or in a current sprint against capacity', async () => {
+    const { w, balanced } = await world();
+    const current = await insertSprint(ctx.db, w.project.id, 1, '2026-10-12', '2026-10-23');
+    const past = await insertSprint(ctx.db, w.project.id, 0, '2026-09-28', '2026-10-09');
+    const sprintTask = (sprintId: string, size: Size, dueDate: string | null) =>
+      timelineTask(ctx.db, {
+        projectId: w.project.id,
+        createdBy: w.owner.id,
+        assigneeIds: [balanced.user.id],
+        size,
+        dueDate,
+        timeline: [['todo', '2026-10-01T00:00:00Z']],
+        sprints: [{ sprintId, added: '2026-10-01T00:00:00Z' }],
+      });
+    // Undated but in the running sprint: counted. Far due in a finished sprint: not.
+    await sprintTask(current.id, 'L', null);
+    await sprintTask(past.id, 'L', '2026-11-20');
+
+    const res = await w.api('GET', `/workspaces/${w.ws.id}/reports/workload`);
+    const r = workloadReportSchema.parse(res.json());
+    const row = r.people.find((p) => p.user.id === balanced.user.id);
+    // XL due Oct 19 (8) + the sprint task (5); Oct 30, Nov 20 and the undated ones are outside.
+    expect(row).toMatchObject({ points: 28, loadPoints: 13, load: 'balanced' });
+    expect(row?.tasks.map((t) => [t.dueDate, t.points, t.counted])).toEqual([
+      ['2026-10-19', 8, true],
+      ['2026-10-30', 1, false],
+      ['2026-11-20', 5, false],
+      [null, 8, false],
+      [null, 1, false],
+      [null, 5, true],
+    ]);
+  });
+
+  it('ends the window on today + 13 days', async () => {
+    const { w, idle } = await world();
+    for (const dueDate of ['2026-10-27', '2026-10-28']) {
+      await timelineTask(ctx.db, {
+        projectId: w.project.id,
+        createdBy: w.owner.id,
+        assigneeIds: [idle.user.id],
+        size: 'M',
+        dueDate,
+        timeline: [['todo', '2026-10-01T00:00:00Z']],
+      });
+    }
+    const res = await w.api('GET', `/workspaces/${w.ws.id}/reports/workload`);
+    const row = workloadReportSchema
+      .parse(res.json())
+      .people.find((p) => p.user.id === idle.user.id);
+    expect(row?.tasks.map((t) => [t.dueDate, t.counted])).toEqual([
+      ['2026-10-27', true],
+      ['2026-10-28', false],
+    ]);
+    expect(row).toMatchObject({ points: 6, loadPoints: 3, load: 'light' });
   });
 
   it('with a project filter lists its team and anyone with open tasks there', async () => {

@@ -27,3 +27,6 @@ export const BUCKET_TEXT: Record<WorkloadBucket, string> = {
   later: 'text-2',
   none: 'text-muted',
 };
+
+/** Legend swatch of the points outside the load window ("Not due soon"). */
+export const OUTSIDE_SWATCH: CSSProperties = { border: '1px dashed var(--bucket-none-border)' };

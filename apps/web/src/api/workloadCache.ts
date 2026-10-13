@@ -29,13 +29,15 @@ export function summarize(person: WorkloadPerson, tasks: WorkloadTask[]): Worklo
     }),
   ) as WorkloadPerson['buckets'];
   const points = tasks.reduce((s, t) => s + t.points, 0);
+  const loadPoints = tasks.reduce((s, t) => s + (t.counted ? t.points : 0), 0);
   return {
     ...person,
     tasks: [...tasks].sort(byBucket),
     openTasks: tasks.length,
     points,
+    loadPoints,
     buckets,
-    load: workloadLoad(points, buckets.overdue.points, person.capacity),
+    load: workloadLoad(loadPoints, buckets.overdue.points, person.capacity),
   };
 }
 
@@ -49,6 +51,7 @@ function newRow(member: WorkspaceMember): WorkloadPerson {
     capacity: member.capacityPoints,
     openTasks: 0,
     points: 0,
+    loadPoints: 0,
     buckets: { overdue: empty, week: empty, later: empty, none: empty },
     load: 'light',
     tasks: [],
