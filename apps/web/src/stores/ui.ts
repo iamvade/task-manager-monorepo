@@ -59,22 +59,47 @@ interface UiState {
   setShortcutsOpen: (open: boolean) => void;
 }
 
-/** UI-only state (never server data). Layout preferences persist in localStorage. */
+type UiData = Omit<
+  UiState,
+  | 'toggleSidebar'
+  | 'setSpaceOpen'
+  | 'setLastWorkspace'
+  | 'setGroupCollapsed'
+  | 'openCreate'
+  | 'closeCreate'
+  | 'setCreateMore'
+  | 'setCalendarMode'
+  | 'toggleCalendarProject'
+  | 'setListColumn'
+  | 'setPaletteOpen'
+  | 'setShortcutsOpen'
+>;
+
+export const initialUiState: UiData = {
+  sidebarCollapsed: false,
+  openSpaces: {},
+  lastWorkspaceId: null,
+  collapsedGroups: {},
+  createOpen: false,
+  createDefaults: {},
+  createMore: false,
+  calendarMode: 'month',
+  calendarHidden: {},
+  listColumns: { size: false },
+  paletteOpen: false,
+  shortcutsOpen: false,
+};
+
+/** Signed out, or before `/auth/me` answers. Signed in: `kite.ui.<userId>`. */
+const ANONYMOUS_KEY = 'kite.ui';
+const uiStorageKey = (userId: string | null) =>
+  userId ? `${ANONYMOUS_KEY}.${userId}` : ANONYMOUS_KEY;
+
+/** UI-only state (never server data). Layout preferences persist in localStorage, per user. */
 export const useUiStore = create<UiState>()(
   persist(
     (set) => ({
-      sidebarCollapsed: false,
-      openSpaces: {},
-      lastWorkspaceId: null,
-      collapsedGroups: {},
-      createOpen: false,
-      createDefaults: {},
-      createMore: false,
-      calendarMode: 'month',
-      calendarHidden: {},
-      listColumns: { size: false },
-      paletteOpen: false,
-      shortcutsOpen: false,
+      ...initialUiState,
       toggleSidebar: () => {
         set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed }));
       },
@@ -134,7 +159,7 @@ export const useUiStore = create<UiState>()(
       },
     }),
     {
-      name: 'kite.ui',
+      name: ANONYMOUS_KEY,
       // Private mode / blocked storage: zustand falls back to memory when getItem throws.
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({
@@ -150,3 +175,40 @@ export const useUiStore = create<UiState>()(
     },
   ),
 );
+
+/** The persisted slice stored under `name`, or null when there is none (or storage is blocked). */
+function readStored(name: string): Partial<UiData> | null {
+  try {
+    const raw = localStorage.getItem(name);
+    if (!raw) return null;
+    const parsed: unknown = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object' && 'state' in parsed) {
+      const { state } = parsed as { state?: Partial<UiData> | null };
+      if (state && typeof state === 'object') return state;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Keeps layout state per account on a shared browser: switches the persisted key to the
+ * user's (`kite.ui.<id>`), resets everything to defaults and loads what that user saved. The
+ * pre-account `kite.ui` entry is adopted by the first user who signs in, then removed.
+ */
+export function scopeUiStore(userId: string | null) {
+  const name = uiStorageKey(userId);
+  if (useUiStore.persist.getOptions().name === name) return;
+  useUiStore.persist.setOptions({ name });
+  let stored = readStored(name);
+  if (userId && !stored) {
+    stored = readStored(ANONYMOUS_KEY);
+    try {
+      localStorage.removeItem(ANONYMOUS_KEY);
+    } catch {
+      // Storage blocked: nothing to migrate.
+    }
+  }
+  useUiStore.setState({ ...initialUiState, ...stored });
+}

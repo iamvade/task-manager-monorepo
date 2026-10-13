@@ -492,6 +492,8 @@ describe('task drawer', () => {
     await waitFor(() => {
       expect(new URLSearchParams(router.state.location.search).has('task')).toBe(false);
     });
+    // Closing replaces the history entry, so Back goes to the previous screen (F-26).
+    expect(router.state.historyAction).toBe('REPLACE');
   });
 
   it('shows the task as a full page at /t/:key', async () => {

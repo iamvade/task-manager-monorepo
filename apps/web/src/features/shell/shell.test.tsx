@@ -55,6 +55,8 @@ const sidebarNav = () => screen.getByRole('navigation', { name: 'Ажлын ор
 describe('app shell', () => {
   beforeEach(async () => {
     localStorage.clear();
+    // Each test signs in afresh: start from the anonymous storage key.
+    useUiStore.persist.setOptions({ name: 'kite.ui' });
     useUiStore.setState({ sidebarCollapsed: false, openSpaces: {}, lastWorkspaceId: null });
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date('2026-10-08T03:00:00Z'));
@@ -139,9 +141,33 @@ describe('app shell', () => {
     expect(
       await screen.findByRole('button', { name: 'Хажуу самбарыг дэлгэх' }),
     ).toBeInTheDocument();
-    expect(JSON.parse(localStorage.getItem('kite.ui') ?? '{}')).toMatchObject({
+    expect(JSON.parse(localStorage.getItem(`kite.ui.${ME.user.id}`) ?? '{}')).toMatchObject({
       state: { sidebarCollapsed: true },
     });
+  });
+
+  it('keeps layout state per account on a shared browser', async () => {
+    // Another account left the sidebar collapsed on this browser.
+    localStorage.setItem(
+      'kite.ui.01890000-0000-7000-8000-00000000ffff',
+      JSON.stringify({ state: { sidebarCollapsed: true }, version: 0 }),
+    );
+    // Our own saved state has it expanded with the first space open.
+    localStorage.setItem(
+      `kite.ui.${ME.user.id}`,
+      JSON.stringify({ state: { sidebarCollapsed: false, openSpaces: { [SPACE_ID]: true } } }),
+    );
+    useUiStore.setState({ sidebarCollapsed: true });
+    api();
+    renderAt('/my-tasks');
+
+    expect(
+      await screen.findByRole('button', { name: 'Хажуу самбарыг хураах' }),
+    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(useUiStore.getState().openSpaces[SPACE_ID]).toBe(true);
+    });
+    expect(useUiStore.getState().sidebarCollapsed).toBe(false);
   });
 
   it('flips every shell string when switching to English', async () => {

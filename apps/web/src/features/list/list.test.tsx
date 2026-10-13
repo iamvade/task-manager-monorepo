@@ -115,7 +115,7 @@ describe('project list', () => {
     fireEvent.click(toggleOf('Хийх'));
     expect(screen.queryByText('Audit current navigation patterns')).not.toBeInTheDocument();
 
-    const stored = JSON.parse(localStorage.getItem('kite.ui') ?? '{}') as {
+    const stored = JSON.parse(localStorage.getItem(`kite.ui.${ME.user.id}`) ?? '{}') as {
       state: { collapsedGroups: Record<string, Record<string, boolean>> };
     };
     expect(stored.state.collapsedGroups[`p:${PROJECT_ID}`]).toEqual({

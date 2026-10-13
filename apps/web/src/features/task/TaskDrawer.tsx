@@ -10,7 +10,8 @@ const TaskDetailView = lazy(() =>
 
 /**
  * Task drawer opened by `?task=APP-142` over any page (TaskDetail.dc.html): 40% wide (min
- * 520px) from the right over a scrim; Esc, the scrim or × removes the param. Not shown on the
+ * 520px) from the right over a scrim; Esc, the scrim or × removes the param (replacing the
+ * history entry). Not shown on the
  * task's full page (`/t/:key`).
  */
 export function TaskDrawer() {
@@ -20,11 +21,16 @@ export function TaskDrawer() {
   const key = params.get('task');
 
   const close = useCallback(() => {
-    setParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.delete('task');
-      return next;
-    });
+    // Replace, not push: Back after closing goes to the previous screen, not back into the
+    // drawer (opening still pushes, so Back from an open drawer closes it).
+    setParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('task');
+        return next;
+      },
+      { replace: true },
+    );
   }, [setParams]);
 
   if (!key || onTaskPage) return null;
