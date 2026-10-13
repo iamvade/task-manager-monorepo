@@ -23,18 +23,17 @@ import { httpError } from '../errors.js';
 const errorResponses = { 401: apiErrorSchema, 429: apiErrorSchema };
 
 export const authRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
-  // Failed attempts per email (+ IP), on top of the per-IP route limit.
+  // Failed attempts per email (+ IP); successes never count.
   const throttle = new LoginThrottle();
 
   app.post(
     '/auth/login',
     {
-      config: { rateLimit: { max: 10, timeWindow: '1 minute' } },
       schema: {
         tags: ['Auth'],
         summary: 'Sign in',
         description:
-          'Sets the `kite_session` cookie. Rate-limited per IP (10/min) and by failed attempts (5 per email and IP, 50 per email, per 15 min; a success clears them): 429 `RATE_LIMITED`. Wrong email or password answers 401 `INVALID_CREDENTIALS` either way.',
+          'Sets the `kite_session` cookie. Throttled by failed attempts only (5 per email and IP, 50 per email, per 15 min; a success clears them): 429 `RATE_LIMITED` with a `Retry-After` header in seconds. Wrong email or password answers 401 `INVALID_CREDENTIALS` either way.',
         security: [],
         body: loginRequestSchema,
         response: { 200: meResponseSchema, ...errorResponses },

@@ -56,6 +56,28 @@ describe('auth flow', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Имэйл эсвэл нууц үг буруу байна.');
   });
 
+  it('shows how long to wait when the login throttle answers 429', async () => {
+    mockApi({
+      'GET /api/v1/auth/me': unauthorized,
+      'POST /api/v1/auth/login': () =>
+        Response.json(
+          { error: { code: 'RATE_LIMITED', message: 'Too many sign-in attempts' } },
+          { status: 429, headers: { 'Retry-After': '51' } },
+        ),
+    });
+    renderAt('/login');
+
+    fireEvent.change(await screen.findByLabelText('Имэйл'), {
+      target: { value: 'anu@kite.test' },
+    });
+    fireEvent.change(screen.getByLabelText('Нууц үг'), { target: { value: 'wrong' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Нэвтрэх' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Хэт олон оролдлого. 51 секундын дараа дахин оролдоно уу.',
+    );
+  });
+
   it('signs in and lands on the requested page', async () => {
     const fetchMock = mockApi({
       'GET /api/v1/auth/me': unauthorized,

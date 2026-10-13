@@ -40,6 +40,7 @@
     "signOut": "Sign out",
     "invalidCredentials": "Invalid email or password.",
     "rateLimited": "Too many attempts. Wait a moment and try again.",
+    "rateLimitedRetry": "Too many attempts. Try again in {{seconds}} s.",
     "signedInAs": "Signed in as {{name}}"
   },
   "invite": {

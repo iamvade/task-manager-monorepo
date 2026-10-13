@@ -3,14 +3,25 @@ import type { z } from 'zod';
 import { CLIENT_ID } from '../realtime/clientId';
 
 export class ApiError extends Error {
+  /** Seconds to wait, from a 429's `Retry-After` header. */
+  readonly retryAfter: number | undefined;
+
   constructor(
     readonly status: number,
     readonly code: string,
     message: string,
+    options: { retryAfter?: number } = {},
   ) {
     super(message);
     this.name = 'ApiError';
+    this.retryAfter = options.retryAfter;
   }
+}
+
+/** `Retry-After` in whole seconds; HTTP-date forms and nonsense are ignored. */
+export function parseRetryAfter(header: string | null): number | undefined {
+  if (header === null || !/^\d+$/.test(header.trim())) return undefined;
+  return Number.parseInt(header, 10);
 }
 
 type QueryValue = string | number | boolean | null | undefined;
@@ -41,9 +52,10 @@ export async function apiFetch<S extends z.ZodType>(
   const body: unknown = res.status === 204 ? null : await res.json().catch(() => null);
   if (!res.ok) {
     const parsed = apiErrorSchema.safeParse(body);
+    const options = { retryAfter: parseRetryAfter(res.headers.get('retry-after')) };
     throw parsed.success
-      ? new ApiError(res.status, parsed.data.error.code, parsed.data.error.message)
-      : new ApiError(res.status, 'HTTP_ERROR', res.statusText);
+      ? new ApiError(res.status, parsed.data.error.code, parsed.data.error.message, options)
+      : new ApiError(res.status, 'HTTP_ERROR', res.statusText, options);
   }
   return schema.parse(body);
 }

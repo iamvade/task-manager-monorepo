@@ -21,7 +21,7 @@ How to run Kite on a single Linux server with Docker Compose. Caddy terminates H
 | Backups | `docker/backup/backup.sh`, written to `./backups/` |
 | Volumes | `pgdata` (database), `uploads` (attachments), `caddy_data` (certificates), `caddy_config` |
 
-The API keeps realtime connections, rate limits and the report cache in memory, so run exactly **one** `api` container.
+The API keeps realtime connections, the login throttle and the report cache in memory, so run exactly **one** `api` container.
 
 ## 1. What you need
 
@@ -69,7 +69,7 @@ Set at least:
 
 The rest have working defaults: `LOG_LEVEL=info`, `TZ` / `BACKUP_TIME` / `BACKUP_KEEP_DAYS` for backups, `STORAGE_DRIVER=local` (see [S3](#s3-attachment-storage-optional)). `.env` sets `COMPOSE_FILE=docker-compose.prod.yml`, so every `docker compose` command below uses the production file when run from `/opt/kite`.
 
-The compose file sets the production API settings itself: `NODE_ENV=production`, `WEB_ORIGIN=https://$DOMAIN` (so session cookies are `Secure` and CSRF/WebSocket origin checks match), `TRUST_PROXY=1` (Caddy is the one proxy in front, so per-IP rate limits see the real client), and uploads at `/data/uploads` on the `uploads` volume. Swagger UI stays off unless `API_DOCS=true`.
+The compose file sets the production API settings itself: `NODE_ENV=production`, `WEB_ORIGIN=https://$DOMAIN` (so session cookies are `Secure` and CSRF/WebSocket origin checks match), `TRUST_PROXY=1` (Caddy is the one proxy in front, so the login throttle and logs see the real client IP), and uploads at `/data/uploads` on the `uploads` volume. Swagger UI stays off unless `API_DOCS=true`.
 
 ## 4. Build and start
 

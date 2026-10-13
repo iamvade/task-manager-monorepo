@@ -253,17 +253,3 @@ describe('uploads and rich text', () => {
     expect(iframe.statusCode).toBe(400);
   });
 });
-
-describe('health', () => {
-  it('is rate limited, generously', async () => {
-    const ctx = await createTestApp();
-    try {
-      const ip = randomIp();
-      const hit = () => ctx.app.inject({ method: 'GET', url: '/api/v1/health', remoteAddress: ip });
-      for (let i = 0; i < 120; i++) expect((await hit()).statusCode).toBe(200);
-      expect((await hit()).statusCode).toBe(429);
-    } finally {
-      await ctx.close();
-    }
-  });
-});
