@@ -53,6 +53,7 @@ import { DoneScopeNote } from '../views/DoneScopeNote';
 import type { ListScope } from '../views/taskQuery';
 import { useViewParams } from '../views/useViewParams';
 import { AddTaskRow } from './AddTaskRow';
+import { BulkBar } from './BulkBar';
 import { GroupHeader } from './GroupHeader';
 import { groupTasks, sortTasks, type TaskGroup } from './grouping';
 import { gridColumns, isDone, ListContext, type ListActions } from './ListContext';
@@ -60,6 +61,8 @@ import { placeInStatus } from './positions';
 import { statusRef, useCreateInStatus } from './useCreateInStatus';
 import { TaskRow } from './TaskRow';
 import { toast } from '../../stores/toast';
+import { Checkbox } from '../../components/ui/Checkbox';
+import { cn } from '../../lib/cn';
 
 interface TaskTableProps {
   scope: ListScope;
@@ -130,6 +133,16 @@ export function TaskTable({
   const shortNameOf = useShortNames(memberUsers);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Multi-select (project list): ids checked for the bulk bar, and the last toggled row.
+  const selectable = scope === 'project' && project !== null;
+  const [checked, setChecked] = useState<ReadonlySet<string>>(() => new Set());
+  const anchor = useRef<string | null>(null);
+  // Rows that left the list (deleted, filtered out) drop out of the selection here.
+  const checkedTasks = sorted.filter((task) => checked.has(task.id));
+  const clearChecked = useCallback(() => {
+    setChecked(new Set());
+    anchor.current = null;
+  }, []);
   const [adding, setAdding] = useState<string | null>(null);
   const openCreate = useUiStore((s) => s.openCreate);
 
@@ -212,6 +225,7 @@ export function TaskTable({
     [params],
   );
 
+  const visibleIds = groups.flatMap((g) => (isOpen(g) ? g.tasks.map((x) => x.id) : []));
   const actions: ListActions = {
     members,
     shortNameOf,
@@ -243,16 +257,55 @@ export function TaskTable({
     },
     showSize,
     showKey,
+    selectable,
+    anySelected: checkedTasks.length > 0,
+    isSelected: (task) => checked.has(task.id),
+    toggleSelected: (task, range) => {
+      setChecked((prev) => {
+        const next = new Set(prev);
+        const ids = visibleIds.filter((id) => !id.startsWith('temp-'));
+        const from = anchor.current ? ids.indexOf(anchor.current) : -1;
+        const to = ids.indexOf(task.id);
+        if (range && from >= 0 && to >= 0) {
+          const on = !prev.has(task.id);
+          for (const id of ids.slice(Math.min(from, to), Math.max(from, to) + 1)) {
+            if (on) next.add(id);
+            else next.delete(id);
+          }
+        } else if (next.has(task.id)) {
+          next.delete(task.id);
+        } else {
+          next.add(task.id);
+        }
+        return next;
+      });
+      anchor.current = task.id;
+    },
     setTags: (task, next) => {
       setTagsMutation.mutate({ task, tags: next });
     },
   };
 
   // ---- Keyboard: j/k move the selection, Enter opens, x toggles complete. ----
-  const visibleIds = groups.flatMap((g) => (isOpen(g) ? g.tasks.map((x) => x.id) : []));
-  const keyState = useRef({ visibleIds, selectedId, byId, toggleComplete, open: actions.open });
+  const keyState = useRef({
+    visibleIds,
+    selectedId,
+    byId,
+    toggleComplete,
+    open: actions.open,
+    anyChecked: checkedTasks.length > 0,
+    clearChecked,
+  });
   useEffect(() => {
-    keyState.current = { visibleIds, selectedId, byId, toggleComplete, open: actions.open };
+    keyState.current = {
+      visibleIds,
+      selectedId,
+      byId,
+      toggleComplete,
+      open: actions.open,
+      anyChecked: checkedTasks.length > 0,
+      clearChecked,
+    };
   });
 
   useEffect(() => {
@@ -280,6 +333,15 @@ export function TaskTable({
         const row = document.querySelector<HTMLElement>(`[data-task-row="${id}"]`);
         row?.focus({ preventScroll: true });
         row?.scrollIntoView({ block: 'nearest' });
+        return;
+      }
+      if (
+        event.key === 'Escape' &&
+        state.anyChecked &&
+        !document.querySelector('[role="dialog"]')
+      ) {
+        event.preventDefault();
+        state.clearChecked();
         return;
       }
       const task = state.selectedId ? state.byId.get(state.selectedId) : undefined;
@@ -404,14 +466,32 @@ export function TaskTable({
         <div
           role="table"
           aria-label={label}
-          className={showSize ? 'min-w-[1032px]' : 'min-w-[960px]'}
+          className={cn(
+            showSize ? 'min-w-[1032px]' : 'min-w-[960px]',
+            selectable && (showSize ? 'min-w-[1060px]' : 'min-w-[988px]'),
+          )}
         >
           <div role="rowgroup">
             <div
               role="row"
               className="box-border grid h-9 items-center border-b border-default px-2 text-[12px] font-medium text-muted"
-              style={{ gridTemplateColumns: gridColumns(showSize) }}
+              style={{ gridTemplateColumns: gridColumns(showSize, selectable) }}
             >
+              {selectable && (
+                <span role="columnheader" className="flex items-center justify-center">
+                  <Checkbox
+                    checked={visibleIds.length > 0 && visibleIds.every((id) => checked.has(id))}
+                    onChange={(on) => {
+                      setChecked(
+                        on
+                          ? new Set(visibleIds.filter((id) => !id.startsWith('temp-')))
+                          : new Set(),
+                      );
+                    }}
+                    label={t('table.selectAll')}
+                  />
+                </span>
+              )}
               <span role="columnheader">
                 <span className="sr-only">{t('table.complete')}</span>
               </span>
@@ -491,6 +571,15 @@ export function TaskTable({
           )}
         </div>
       </div>
+      {selectable && checkedTasks.length > 0 && (
+        <BulkBar
+          project={project}
+          tasks={checkedTasks}
+          members={members}
+          teamIds={actions.teamIds}
+          onClear={clearChecked}
+        />
+      )}
     </ListContext.Provider>
   );
 }

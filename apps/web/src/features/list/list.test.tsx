@@ -418,6 +418,68 @@ describe('project list', () => {
     expect(sent[0]).toEqual({ userIds: [sara.id] });
   });
 
+  it('selects rows (shift-click for a range) and changes them together, with Undo', async () => {
+    useToastStore.setState({ toasts: [] });
+    const batches: unknown[] = [];
+    const deleted: unknown[] = [];
+    api((st) => ({
+      [`POST /api/v1/projects/${PROJECT_ID}/tasks/batch`]: (init) => {
+        const b = body(init) as { updates: { id: string; priority?: string }[] };
+        batches.push(b);
+        st.tasks = st.tasks.map((t) => {
+          const u = b.updates.find((x) => x.id === t.id);
+          return u?.priority ? { ...t, priority: u.priority as typeof t.priority } : t;
+        });
+        return Response.json(st.tasks.filter((t) => b.updates.some((u) => u.id === t.id)));
+      },
+      [`POST /api/v1/projects/${PROJECT_ID}/tasks/batch-delete`]: (init) => {
+        deleted.push(body(init));
+        return new Response(null, { status: 204 });
+      },
+    }));
+    renderAt(LIST);
+    await screen.findByRole('table');
+    const audit = 'Audit current navigation patterns';
+    const tokens = 'Define color tokens for dark mode';
+    fireEvent.click(screen.getByRole('checkbox', { name: `«${audit}» сонгох` }));
+    fireEvent.click(screen.getByRole('checkbox', { name: `«${tokens}» сонгох` }), {
+      shiftKey: true,
+    });
+    const bar = await screen.findByRole('toolbar', { name: 'Сонгосон 2 ажлын үйлдэл' });
+    expect(within(bar).getByText('2 сонгосон')).toBeInTheDocument();
+
+    fireEvent.click(within(bar).getByRole('button', { name: /Ач холбогдол/ }));
+    fireEvent.click(await screen.findByRole('option', { name: /^Өндөр/ }));
+    await waitFor(() => {
+      expect(batches).toHaveLength(1);
+    });
+    const ids = [at(makeTasks(), 0).id, at(makeTasks(), 1).id];
+    expect(batches[0]).toEqual({
+      updates: ids.map((id) => ({ id, priority: 'high' })),
+    });
+    await waitFor(() => {
+      expect(useToastStore.getState().toasts[0]?.message).toBe('2 ажлыг «Өндөр» болголоо');
+    });
+    act(() => {
+      useToastStore.getState().toasts[0]?.action?.onClick();
+    });
+    await waitFor(() => {
+      expect(batches).toHaveLength(2);
+    });
+    expect(batches[1]).toEqual({
+      updates: [
+        { id: ids[0], priority: 'medium' },
+        { id: ids[1], priority: 'low' },
+      ],
+    });
+
+    fireEvent.click(within(bar).getByRole('button', { name: /Устгах/ }));
+    await waitFor(() => {
+      expect(deleted).toEqual([{ ids }]);
+    });
+    expect(screen.queryByRole('toolbar', { name: /Сонгосон/ })).toBeNull();
+  });
+
   it('opens the drawer when a row is clicked', async () => {
     api((st) => ({
       'GET /api/v1/tasks/APP-131': () => Response.json(detail(at(st.tasks, 0))),

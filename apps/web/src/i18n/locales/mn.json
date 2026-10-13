@@ -231,7 +231,9 @@
     "reopen": "Дахин нээх",
     "delete": "Устгах",
     "reassign": "Шилжүүлэх…",
-    "reassignTo": "«{{name}}» ажлыг шилжүүлэх"
+    "reassignTo": "«{{name}}» ажлыг шилжүүлэх",
+    "select": "«{{name}}» сонгох",
+    "selectAll": "Харагдаж буй бүх ажлыг сонгох"
   },
   "status": {
     "todo": "Хийх",
@@ -1336,5 +1338,44 @@
     "direct": "Дурдсан ба оноосон",
     "none": "Юу ч үгүй",
     "heading": "Мэдэгдэх зүйл"
+  },
+  "bulk": {
+    "label_one": "Сонгосон {{count}} ажлын үйлдэл",
+    "label_other": "Сонгосон {{count}} ажлын үйлдэл",
+    "selected_one": "{{count}} сонгосон",
+    "selected_other": "{{count}} сонгосон",
+    "setStatus": "Сонгосон ажлын төлөв",
+    "setSprint": "Сонгосон ажлын спринт",
+    "setDue": "Сонгосон ажлын дуусах огноо",
+    "setPriority": "Сонгосон ажлын ач холбогдол",
+    "assignees": "Сонгосон ажлын хариуцагч",
+    "assign": {
+      "add": "Хариуцагч нэмэх…",
+      "replace": "Хариуцагчийг солих…",
+      "remove": "Хариуцагч хасах…"
+    },
+    "assigned": {
+      "add_one": "{{count}} ажилд {{name}}-г нэмлээ",
+      "add_other": "{{count}} ажилд {{name}}-г нэмлээ",
+      "replace_one": "{{count}} ажлыг {{name}}-д шилжүүллээ",
+      "replace_other": "{{count}} ажлыг {{name}}-д шилжүүллээ",
+      "remove_one": "{{count}} ажлаас {{name}}-г хаслаа",
+      "remove_other": "{{count}} ажлаас {{name}}-г хаслаа"
+    },
+    "moved_one": "{{count}} ажлыг «{{status}}» руу шилжүүллээ",
+    "moved_other": "{{count}} ажлыг «{{status}}» руу шилжүүллээ",
+    "sprint_one": "{{count}} ажлыг {{sprint}} руу шилжүүллээ",
+    "sprint_other": "{{count}} ажлыг {{sprint}} руу шилжүүллээ",
+    "noSprint_one": "{{count}} ажлыг спринтээс гаргалаа",
+    "noSprint_other": "{{count}} ажлыг спринтээс гаргалаа",
+    "due_one": "{{count}} ажлын дуусах огноог өөрчиллөө",
+    "due_other": "{{count}} ажлын дуусах огноог өөрчиллөө",
+    "noDue_one": "{{count}} ажлын дуусах огноог арилгалаа",
+    "noDue_other": "{{count}} ажлын дуусах огноог арилгалаа",
+    "priority_one": "{{count}} ажлыг «{{priority}}» болголоо",
+    "priority_other": "{{count}} ажлыг «{{priority}}» болголоо",
+    "deleted_one": "{{count}} ажил устгалаа",
+    "deleted_other": "{{count}} ажил устгалаа",
+    "clear": "Сонголтыг цуцлах"
   }
 }

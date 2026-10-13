@@ -231,7 +231,9 @@
     "reopen": "Reopen",
     "delete": "Delete",
     "reassign": "Reassign…",
-    "reassignTo": "Reassign {{name}} to"
+    "reassignTo": "Reassign {{name}} to",
+    "select": "Select {{name}}",
+    "selectAll": "Select all visible tasks"
   },
   "status": {
     "todo": "To Do",
@@ -1336,5 +1338,44 @@
     "direct": "Mentions and assignments",
     "none": "Nothing",
     "heading": "Notify me about"
+  },
+  "bulk": {
+    "label_one": "Actions for {{count}} selected task",
+    "label_other": "Actions for {{count}} selected tasks",
+    "selected_one": "{{count}} selected",
+    "selected_other": "{{count}} selected",
+    "setStatus": "Set status of selected tasks",
+    "setSprint": "Set sprint of selected tasks",
+    "setDue": "Set due date of selected tasks",
+    "setPriority": "Set priority of selected tasks",
+    "assignees": "Change assignees of selected tasks",
+    "assign": {
+      "add": "Add assignee…",
+      "replace": "Replace assignees with…",
+      "remove": "Remove assignee…"
+    },
+    "assigned": {
+      "add_one": "Added {{name}} to {{count}} task",
+      "add_other": "Added {{name}} to {{count}} tasks",
+      "replace_one": "Assigned {{count}} task to {{name}}",
+      "replace_other": "Assigned {{count}} tasks to {{name}}",
+      "remove_one": "Removed {{name}} from {{count}} task",
+      "remove_other": "Removed {{name}} from {{count}} tasks"
+    },
+    "moved_one": "Moved {{count}} task to {{status}}",
+    "moved_other": "Moved {{count}} tasks to {{status}}",
+    "sprint_one": "Moved {{count}} task to {{sprint}}",
+    "sprint_other": "Moved {{count}} tasks to {{sprint}}",
+    "noSprint_one": "Took {{count}} task out of its sprint",
+    "noSprint_other": "Took {{count}} tasks out of their sprint",
+    "due_one": "Changed the due date of {{count}} task",
+    "due_other": "Changed the due date of {{count}} tasks",
+    "noDue_one": "Cleared the due date of {{count}} task",
+    "noDue_other": "Cleared the due date of {{count}} tasks",
+    "priority_one": "Set {{count}} task to {{priority}}",
+    "priority_other": "Set {{count}} tasks to {{priority}}",
+    "deleted_one": "Deleted {{count}} task",
+    "deleted_other": "Deleted {{count}} tasks",
+    "clear": "Clear selection"
   }
 }

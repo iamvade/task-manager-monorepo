@@ -179,6 +179,37 @@ export const updateTaskSchema = z
   .meta({ id: 'UpdateTask' });
 export type UpdateTask = z.input<typeof updateTaskSchema>;
 
+/** Most tasks one batch request may change (List multi-select). */
+export const MAX_BATCH_TASKS = 200;
+
+/** One task's new values in a batch; the client sends exact per-task values (also for Undo). */
+export const batchTaskUpdateSchema = z
+  .object({
+    id: z.uuid(),
+    statusId: z.uuid().optional(),
+    sprintId: z.uuid().nullable().optional(),
+    assigneeIds: z.array(z.uuid()).max(50).optional(),
+    dueDate: dateSchema.nullable().optional(),
+    priority: prioritySchema.optional(),
+  })
+  .strict()
+  .meta({ id: 'BatchTaskUpdate' });
+export type BatchTaskUpdate = z.infer<typeof batchTaskUpdateSchema>;
+
+const distinctIds = (ids: readonly string[]) => new Set(ids).size === ids.length;
+
+export const batchUpdateTasksSchema = z
+  .object({ updates: z.array(batchTaskUpdateSchema).min(1).max(MAX_BATCH_TASKS) })
+  .refine((b) => distinctIds(b.updates.map((u) => u.id)), 'Each task may appear once')
+  .meta({ id: 'BatchUpdateTasks' });
+export type BatchUpdateTasks = z.infer<typeof batchUpdateTasksSchema>;
+
+export const batchTaskIdsSchema = z
+  .object({ ids: z.array(z.uuid()).min(1).max(MAX_BATCH_TASKS) })
+  .refine((b) => distinctIds(b.ids), 'Each task may appear once')
+  .meta({ id: 'BatchTaskIds' });
+export type BatchTaskIds = z.infer<typeof batchTaskIdsSchema>;
+
 /** Board drag / list reorder: target status plus the neighbors after the move. */
 export const moveTaskSchema = moveSchema.extend({ statusId: z.uuid() }).meta({ id: 'MoveTask' });
 export type MoveTask = z.input<typeof moveTaskSchema>;
