@@ -61,6 +61,7 @@ const pages = (ids: Ids): [string, string][] => [
   ['Inbox', '/inbox'],
   ['Settings', '/settings'],
   ['Settings · members', '/settings?tab=members'],
+  ['Settings · archived', '/settings?tab=archived'],
   ['Task page', `/t/${ids.taskKey}`],
   ['Project list', `/p/${ids.project}/list`],
   ['Project board', `/p/${ids.project}/board`],

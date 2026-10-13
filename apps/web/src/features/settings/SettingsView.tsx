@@ -5,12 +5,13 @@ import { useCurrentWorkspace } from '../../api/workspaces';
 import { SettingsIcon } from '../../components/icons';
 import { UnderlineTabs } from '../../components/ui/UnderlineTabs';
 import { PageHeader } from '../views/PageHeader';
+import { ArchivedProjectsSection } from './ArchivedProjectsSection';
 import { MembersSection } from './MembersSection';
 import { NotificationsSection } from './NotificationsSection';
 import { PreferencesSection } from './PreferencesSection';
 import { ProfileSection } from './ProfileSection';
 
-const TABS = ['profile', 'preferences', 'notifications', 'members'] as const;
+const TABS = ['profile', 'preferences', 'notifications', 'members', 'archived'] as const;
 const tabSchema = z.enum(TABS).catch('profile');
 
 /** /settings (not designed; built from the design system): one section per `?tab=`. */
@@ -48,6 +49,9 @@ export function SettingsView() {
           {tab === 'notifications' && <NotificationsSection />}
           {tab === 'members' && workspace && (
             <MembersSection workspaceId={workspace.id} role={workspace.role} />
+          )}
+          {tab === 'archived' && workspace && (
+            <ArchivedProjectsSection workspaceId={workspace.id} role={workspace.role} />
           )}
         </div>
       </div>

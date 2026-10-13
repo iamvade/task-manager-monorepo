@@ -1,13 +1,14 @@
 import {
   PALETTE_KEYS,
   apiErrorSchema,
+  archivedProjectSchema,
   createProjectSchema,
   moveProjectSchema,
   projectDetailSchema,
   updateProjectSchema,
   type PaletteKey,
 } from '@kite/shared';
-import { and, asc, count, eq, max } from 'drizzle-orm';
+import { and, asc, count, desc, eq, isNotNull, max } from 'drizzle-orm';
 import type { FastifyRequest } from 'fastify';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
@@ -106,6 +107,52 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         }
       }
       return reply.code(201).send(await detail(request, project));
+    },
+  );
+
+  app.get(
+    '/workspaces/:workspaceId/archived-projects',
+    {
+      preHandler: app.authenticate,
+      schema: {
+        tags: ['Projects'],
+        summary: 'List archived projects',
+        description:
+          'Most recently archived first, with their space. Any member can list them; restoring is for admins and owners.',
+        params: z.object({ workspaceId: z.uuid() }),
+        response: { 200: z.array(archivedProjectSchema), 401: err, 404: err },
+      },
+    },
+    async (request) => {
+      const { workspaceId } = request.params;
+      await requireWorkspaceMember(request, workspaceId);
+      const rows = await app.db
+        .select({ project: projects, space: spaces })
+        .from(projects)
+        .innerJoin(spaces, eq(spaces.id, projects.spaceId))
+        .where(and(eq(projects.workspaceId, workspaceId), isNotNull(projects.archivedAt)))
+        .orderBy(desc(projects.archivedAt), asc(projects.id));
+      return rows.flatMap(({ project, space }) =>
+        project.archivedAt
+          ? [
+              {
+                id: project.id,
+                workspaceId: project.workspaceId,
+                spaceId: project.spaceId,
+                key: project.key,
+                name: project.name,
+                color: project.color,
+                archivedAt: project.archivedAt.toISOString(),
+                space: {
+                  id: space.id,
+                  name: space.name,
+                  initial: space.initial,
+                  color: space.color,
+                },
+              },
+            ]
+          : [],
+      );
     },
   );
 

@@ -1,5 +1,6 @@
 import {
   applyTemplateResponseSchema,
+  archivedProjectSchema,
   projectDetailSchema,
   sprintSchema,
   type CreateProject,
@@ -59,6 +60,44 @@ export function useCreateSprint(project: Pick<ProjectDetail, 'id' | 'workspaceId
         queryClient.invalidateQueries({ queryKey: queryKeys.project(project.id) }),
         queryClient.invalidateQueries({ queryKey: queryKeys.reportsOf(project.workspaceId) }),
       ]),
+  });
+}
+
+/** Settings → Archived: the workspace's archived projects, most recent first. */
+export function useArchivedProjects(workspaceId: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.archivedProjects(workspaceId ?? ''),
+    queryFn: () =>
+      apiFetch(
+        `/workspaces/${workspaceId ?? ''}/archived-projects`,
+        z.array(archivedProjectSchema),
+      ),
+    enabled: Boolean(workspaceId),
+  });
+}
+
+/**
+ * Archive / restore (admins and owners). Archived projects leave the sidebar, search, My Tasks
+ * and reports, so those refetch.
+ */
+export function useSetArchived(workspaceId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ projectId, archived }: { projectId: string; archived: boolean }) =>
+      apiSend(
+        `/projects/${projectId}/${archived ? 'archive' : 'unarchive'}`,
+        projectDetailSchema,
+        'POST',
+      ),
+    onSuccess: (detail) => {
+      queryClient.setQueryData(queryKeys.project(detail.id), detail);
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.sidebar(workspaceId) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.archivedProjects(workspaceId) }),
+        // My Tasks, space-level lists and reports all sit under `tasks`.
+        queryClient.invalidateQueries({ queryKey: queryKeys.tasks }),
+      ]);
+    },
   });
 }
 

@@ -233,6 +233,6 @@ Tabs: Overview, Sprints, Workload, plus People (admins/owner) or My performance 
 - `/p/:projectId/list` · `/board` · `/calendar` (task drawer opens via `?task=APP-142`)
 - `/s/:spaceId/list` · `/board` · `/calendar` (space-level views across all the space's projects; calendar has a project filter)
 - `/t/:taskKey` (task as full page)
-- `/settings` (profile, language, theme, accent, density, notifications, members; admins also edit members' job titles and capacity)
+- `/settings` (profile, language, theme, accent, density, notifications, members, archived projects; admins also edit members' job titles and capacity, and restore archived projects)
 - `/reports` → `/reports/overview` · `/reports/sprints` · `/reports/workload` · `/reports/people` (admins/owner) · `/reports/me` (members: "My performance"). Period, scope, sprint, person and sort live in the URL.
 - Global: ⌘K palette, `C` = new task modal, `G` then `I` = Inbox, `Esc` closes drawer/modal.

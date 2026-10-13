@@ -18,6 +18,20 @@ export const projectSummarySchema = z
   .meta({ id: 'ProjectSummary' });
 export type ProjectSummary = z.infer<typeof projectSummarySchema>;
 
+/** Settings → Archived: an archived project with its space. */
+export const archivedProjectSchema = projectSummarySchema
+  .extend({
+    archivedAt: z.iso.datetime(),
+    space: z.object({
+      id: z.uuid(),
+      name: z.string(),
+      initial: z.string(),
+      color: paletteKeySchema,
+    }),
+  })
+  .meta({ id: 'ArchivedProject' });
+export type ArchivedProject = z.infer<typeof archivedProjectSchema>;
+
 export const statusSchema = z
   .object({
     id: z.uuid(),
