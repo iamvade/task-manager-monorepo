@@ -138,12 +138,30 @@ describe('GET /workspaces/:id/reports/overview', () => {
   it('buckets throughput by Monday weeks in Asia/Ulaanbaatar and flags the current week', () => {
     const weeks = report.throughput.weeks;
     expect(weeks).toHaveLength(12);
-    expect(report.throughput.previous).toHaveLength(12);
     expect(weeks.at(-1)).toEqual({ weekStart: '2026-10-12', count: 3, partial: true });
     expect(weeks.at(-2)).toEqual({ weekStart: '2026-10-05', count: 3, partial: false });
     expect(weeks[0]?.weekStart).toBe('2026-07-27');
-    expect(report.throughput.previous.at(-1)?.weekStart).toBe('2026-07-20');
     expect(weeks.filter((w) => w.partial)).toHaveLength(1);
+    // Nothing was completed in the 12 weeks before: no previous series (F-28).
+    expect(report.throughput.previous).toEqual([]);
+  });
+
+  it('returns the previous 12 weeks once something was completed in them', async () => {
+    const w = await taskWorld(ctx);
+    await timelineTask(ctx.db, {
+      projectId: w.project.id,
+      createdBy: w.owner.id,
+      timeline: [
+        ['todo', '2026-06-01T00:00:00Z'],
+        ['done', '2026-06-03T02:00:00Z'],
+      ],
+    });
+    const r = await overview(w);
+    expect(r.throughput.previous).toHaveLength(12);
+    expect(r.throughput.previous[0]?.weekStart).toBe('2026-05-04');
+    expect(r.throughput.previous.at(-1)?.weekStart).toBe('2026-07-20');
+    expect(r.throughput.previous.map((x) => x.count)).toEqual([0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]);
+    expect(r.throughput.previous.every((x) => !x.partial)).toBe(true);
   });
 
   it('medians the status periods that ended in the period', () => {
@@ -178,6 +196,9 @@ describe('GET /workspaces/:id/reports/overview', () => {
     const r = await overview(w, `?projectId=${fresh.id}`);
     expect(r.history).toEqual({ completed: 1, required: 5 });
     expect(r.scope).toEqual({ workspaceId: w.ws.id, spaceId: null, projectId: fresh.id });
+    // Nothing was completed in the 12 weeks before the chart: no previous series to draw.
+    expect(r.throughput.weeks).toHaveLength(12);
+    expect(r.throughput.previous).toEqual([]);
   });
 
   it('this week runs Monday → today, compared with as many days before', async () => {

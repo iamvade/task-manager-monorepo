@@ -24,14 +24,16 @@ export const taskActivityRoutes: FastifyPluginCallbackZod = (app, _opts, done) =
         tags: ['Activity'],
         summary: 'Activity feed of a task',
         description:
-          'History lines (`kind: "history"`, typed `payload` per `type`) and comment threads (`kind: "comment"`, replies nested) merged oldest first: the drawer\'s All / Comments / History tabs (`type=all|comments|history`).',
+          'History lines (`kind: "history"`, typed `payload` per `type`) and comment threads (`kind: "comment"`, replies nested) merged oldest first: the drawer\'s All / Comments / History tabs (`type=all|comments|history`). Readable for a soft-deleted task too (its page shows the feed next to Restore).',
         params: taskParams,
         querystring: feedQuerySchema,
         response: { 200: z.array(feedItemSchema), 400: err, 401: err, 404: err },
       },
     },
     async (request) => {
-      const { task } = await loadTaskAccess(request, request.params.taskId);
+      const { task } = await loadTaskAccess(request, request.params.taskId, {
+        includeDeleted: true,
+      });
       return buildFeed(app.db, task.id, request.query.type, request.log);
     },
   );

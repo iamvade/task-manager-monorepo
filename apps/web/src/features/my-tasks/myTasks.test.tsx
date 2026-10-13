@@ -17,7 +17,11 @@ const EN_ME = { ...ME, preferences: { ...ME.preferences, locale: 'en' } };
 
 type Handler = (init?: RequestInit) => Response | Promise<Response>;
 
-function renderHome(extra: Record<string, Handler> = {}, home: () => Home = () => HOME) {
+function renderHome(
+  extra: Record<string, Handler> = {},
+  home: () => Home = () => HOME,
+  client = createQueryClient(),
+) {
   const fetchMock = mockApi({
     'GET /api/v1/auth/me': () => Response.json(EN_ME),
     [`GET /api/v1/workspaces/${WORKSPACE_ID}/sidebar`]: () => Response.json(SIDEBAR),
@@ -26,7 +30,7 @@ function renderHome(extra: Record<string, Handler> = {}, home: () => Home = () =
   });
   const router = createMemoryRouter(routes, { initialEntries: ['/my-tasks'] });
   render(
-    <QueryClientProvider client={createQueryClient()}>
+    <QueryClientProvider client={client}>
       <AuthProvider>
         <RouterProvider router={router} />
       </AuthProvider>
@@ -53,6 +57,30 @@ describe('My Tasks', () => {
   });
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it('recovers in place with Try again when the home feed fails', async () => {
+    let fail = true;
+    const client = createQueryClient();
+    client.setDefaultOptions({ queries: { retry: false } });
+    renderHome(
+      {
+        'GET /api/v1/me/home': () =>
+          fail
+            ? Response.json({ error: { code: 'INTERNAL', message: 'x' } }, { status: 500 })
+            : Response.json(HOME),
+      },
+      () => HOME,
+      client,
+    );
+    expect(await screen.findByRole('alert')).toHaveTextContent('Something went wrong');
+
+    fail = false;
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Good morning, Anu' }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).toBeNull();
   });
 
   it('greets by time of day and shows the stat cards', async () => {

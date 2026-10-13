@@ -144,6 +144,20 @@ describe('Reports', () => {
     expect(screen.queryByText(/^Updated/)).toBeNull();
   });
 
+  it('draws one throughput line when there is no previous period', async () => {
+    const base = overview();
+    renderReports('/reports/overview', {
+      extra: {
+        [OVERVIEW]: () =>
+          Response.json(overview({ throughput: { weeks: base.throughput.weeks, previous: [] } })),
+      },
+    });
+    const figure = await screen.findByRole('figure', { name: /No earlier history to compare/ });
+    expect(figure).toBeInTheDocument();
+    expect(screen.getAllByText('This period').length).toBeGreaterThan(0);
+    expect(screen.queryByText('Previous period')).toBeNull();
+  });
+
   it('renders Mongolian copy from the design', async () => {
     await i18n.changeLanguage('mn');
     renderReports('/reports/overview', { me: ME });

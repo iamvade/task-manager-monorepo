@@ -25,6 +25,8 @@ export interface TaskView {
   /** The caller's workspace role (admins may delete others' comments and attachments). */
   role: WorkspaceRole;
   layout: 'drawer' | 'page';
+  /** The task is in the trash (`deletedAt`): nothing can be edited until it is restored. */
+  readOnly: boolean;
   /** Closes the drawer (or leaves the full page). */
   close: () => void;
   /** Uploads files to the task (attach button, drop on the drawer, composer paperclip). */

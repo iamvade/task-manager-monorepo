@@ -37,7 +37,7 @@ const envSchema = z
     DATABASE_URL: z.url(),
     TEST_DATABASE_URL: z.url().optional(),
     WEB_ORIGIN: z.url().default('http://localhost:5173'),
-    /** Set when running behind a reverse proxy so `request.ip` (per-IP rate limits) is the client's. */
+    /** Set when running behind a reverse proxy so `request.ip` (login throttle, logs) is the client's. */
     TRUST_PROXY: trustProxySchema,
     /** OpenAPI spec + Swagger UI at /api/docs. Unset = on everywhere except production. */
     API_DOCS: z.stringbool().optional(),

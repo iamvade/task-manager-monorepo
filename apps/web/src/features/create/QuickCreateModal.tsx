@@ -23,6 +23,7 @@ import { useCurrentWorkspace, useSidebar, useWorkspaceMembers } from '../../api/
 import { useAuth } from '../../auth/useAuth';
 import { RichTextEditor } from '../../components/editor/RichTextEditor';
 import type { MentionCandidate } from '../../components/editor/mentions';
+import { resolveTypedMentions } from '../../components/editor/typedMentions';
 import {
   CalendarIcon,
   ChevronRightIcon,
@@ -192,7 +193,9 @@ function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
       title: trimmed,
       statusId: status.id,
       position: 'bottom',
-      ...(description && !descriptionEmpty ? { description } : {}),
+      ...(description && !descriptionEmpty
+        ? { description: resolveTypedMentions(description, mentions) }
+        : {}),
       ...(assignees.length ? { assigneeIds: assignees.map((a) => a.id) } : {}),
       ...(dueDate ? { dueDate } : {}),
       ...(priority !== 'none' ? { priority } : {}),

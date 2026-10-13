@@ -1,6 +1,7 @@
 import {
   apiErrorSchema,
   formatTaskKey,
+  matchesName,
   parseTaskKey,
   searchQuerySchema,
   searchResultSchema,
@@ -29,7 +30,7 @@ export const searchRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Search'],
         summary: 'Search the workspace (⌘K)',
         description:
-          'Up to 20 results in all: at most 5 projects (name or key) and 5 people (name or email), tasks fill the rest. Tasks match by key (`APP-142`, or a prefix like `APP-14`) or title (substring or similar words); the exact key first, then title prefixes, then by similarity. Archived projects and deleted tasks are left out.',
+          'Up to 20 results in all: at most 5 projects (name or key) and 5 people (name in either script — "Bat" finds Бат-Эрдэнэ — or email prefix), tasks fill the rest. Tasks match by key (`APP-142`, or a prefix like `APP-14`) or title (substring or similar words); the exact key first, then title prefixes, then by similarity. Archived projects and deleted tasks are left out.',
         params: z.object({ workspaceId: z.uuid() }),
         querystring: searchQuerySchema,
         response: { 200: searchResultSchema, 400: err, 401: err, 404: err },
@@ -55,7 +56,7 @@ export const searchRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         ? [desc(sql`(${projects.key} = ${exact.key} and ${tasks.number} = ${exact.number})`)]
         : [];
 
-      const [projectRows, people, taskRows] = await Promise.all([
+      const [projectRows, memberRows, taskRows] = await Promise.all([
         db
           .select()
           .from(projects)
@@ -68,18 +69,14 @@ export const searchRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           )
           .orderBy(desc(sql`${projects.key} = upper(${q})`), asc(projects.name))
           .limit(GROUP_LIMIT),
+        // Every member, matched in JS so Latin and Cyrillic spellings find each other
+        // (`matchesName`); a workspace has at most a few hundred people.
         db
-          .select(userRefColumns)
+          .select({ ...userRefColumns, email: users.email })
           .from(workspaceMembers)
           .innerJoin(users, eq(users.id, workspaceMembers.userId))
-          .where(
-            and(
-              eq(workspaceMembers.workspaceId, workspaceId),
-              or(ilike(users.name, contains), ilike(users.email, prefix)),
-            ),
-          )
-          .orderBy(asc(users.name))
-          .limit(GROUP_LIMIT),
+          .where(eq(workspaceMembers.workspaceId, workspaceId))
+          .orderBy(asc(users.name)),
         db
           .select({
             id: tasks.id,
@@ -119,6 +116,12 @@ export const searchRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           )
           .limit(LIMIT),
       ]);
+
+      const emailPrefix = q.trim().toLowerCase();
+      const people = memberRows
+        .filter((m) => matchesName(m.name, q) || m.email.toLowerCase().startsWith(emailPrefix))
+        .slice(0, GROUP_LIMIT)
+        .map(({ email: _email, ...user }) => user);
 
       return {
         projects: projectRows.map((p) => ({

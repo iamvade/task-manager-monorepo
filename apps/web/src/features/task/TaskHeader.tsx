@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useSearchParams } from 'react-router';
-import { useCompleteTask, useDeleteTask, useDuplicateTask, useRestoreTask } from '../../api/tasks';
+import { useCompleteTask, useDuplicateTask, useRestoreTask } from '../../api/tasks';
 import {
   CheckIcon,
   ChevronRightIcon,
@@ -11,6 +11,7 @@ import {
   MoreIcon,
   MoveIcon,
   TrashIcon,
+  UnarchiveIcon,
 } from '../../components/icons';
 import { Button } from '../../components/ui/Button';
 import { IconButton } from '../../components/ui/IconButton';
@@ -18,6 +19,7 @@ import { Menu } from '../../components/ui/Menu';
 import { toast } from '../../stores/toast';
 import { useTaskView } from './TaskContext';
 import { TaskViewers } from './TaskViewers';
+import { useDeleteWithUndo } from './useDeleteWithUndo';
 
 interface TaskHeaderProps {
   /** Opens the Project property's picker (move to another project). */
@@ -31,11 +33,11 @@ interface TaskHeaderProps {
  */
 export function TaskHeader({ onMoveToProject }: TaskHeaderProps) {
   const { t } = useTranslation();
-  const { task, project, layout, close } = useTaskView();
+  const { task, project, layout, close, readOnly } = useTaskView();
   const navigate = useNavigate();
   const [, setParams] = useSearchParams();
   const complete = useCompleteTask();
-  const remove = useDeleteTask();
+  const remove = useDeleteWithUndo();
   const restore = useRestoreTask();
   const duplicate = useDuplicateTask();
   const done = task.status.category === 'done';
@@ -82,24 +84,7 @@ export function TaskHeader({ onMoveToProject }: TaskHeaderProps) {
   }
 
   function onDelete() {
-    const { key } = task;
-    // The error toast comes from the mutation cache.
-    const failed = () => undefined;
-    // Promises, not per-call callbacks: the drawer unmounts before the server answers.
-    remove
-      .mutateAsync(task)
-      .then(() => {
-        toast({
-          message: t('drawer.deleted', { key }),
-          action: {
-            label: t('drawer.undo'),
-            onClick: () => {
-              restore.mutateAsync(task).catch(failed);
-            },
-          },
-        });
-      })
-      .catch(failed);
+    remove(task);
     if (layout === 'page') void navigate(projectHref);
     else close();
   }
@@ -119,35 +104,37 @@ export function TaskHeader({ onMoveToProject }: TaskHeaderProps) {
         </span>
       </nav>
       <TaskViewers taskId={task.id} />
-      <Button
-        icon={<CheckIcon size={14} />}
-        onClick={() => {
-          // Completing goes to the first Done status; reopening is decided by the server.
-          const target = done ? undefined : project?.statuses.find((s) => s.category === 'done');
-          const status = target
-            ? { id: target.id, name: target.name, category: target.category, color: target.color }
-            : task.status;
-          complete.mutate({ task, done: !done, optimistic: { status, position: task.position } });
-          if (!done) {
-            toast({
-              message: t('common.completed', { key: task.key }),
-              action: {
-                label: t('common.undo'),
-                onClick: () => {
-                  complete.mutate({
-                    task: { ...task, status },
-                    done: false,
-                    optimistic: { status: task.status, position: task.position },
-                  });
+      {!readOnly && (
+        <Button
+          icon={<CheckIcon size={14} />}
+          onClick={() => {
+            // Completing goes to the first Done status; reopening is decided by the server.
+            const target = done ? undefined : project?.statuses.find((s) => s.category === 'done');
+            const status = target
+              ? { id: target.id, name: target.name, category: target.category, color: target.color }
+              : task.status;
+            complete.mutate({ task, done: !done, optimistic: { status, position: task.position } });
+            if (!done) {
+              toast({
+                message: t('common.completed', { key: task.key }),
+                action: {
+                  label: t('common.undo'),
+                  onClick: () => {
+                    complete.mutate({
+                      task: { ...task, status },
+                      done: false,
+                      optimistic: { status: task.status, position: task.position },
+                    });
+                  },
                 },
-              },
-            });
-          }
-        }}
-        className="text-2"
-      >
-        {done ? t('drawer.markIncomplete') : t('drawer.markComplete')}
-      </Button>
+              });
+            }
+          }}
+          className="text-2"
+        >
+          {done ? t('drawer.markIncomplete') : t('drawer.markComplete')}
+        </Button>
+      )}
       <IconButton
         label={t('drawer.copyLink')}
         title={t('drawer.copyLink')}
@@ -170,28 +157,41 @@ export function TaskHeader({ onMoveToProject }: TaskHeaderProps) {
       <Menu
         label={t('drawer.moreActions')}
         placement="bottom-end"
-        items={[
-          {
-            id: 'duplicate',
-            label: t('drawer.duplicate'),
-            icon: <CopyIcon size={14} />,
-            onSelect: onDuplicate,
-          },
-          {
-            id: 'move',
-            label: t('create.moveToProject'),
-            icon: <MoveIcon size={14} />,
-            onSelect: onMoveToProject,
-          },
-          { type: 'separator', id: 'sep' },
-          {
-            id: 'delete',
-            label: t('table.delete'),
-            icon: <TrashIcon size={14} />,
-            danger: true,
-            onSelect: onDelete,
-          },
-        ]}
+        items={
+          readOnly
+            ? [
+                {
+                  id: 'restore',
+                  label: t('drawer.restore'),
+                  icon: <UnarchiveIcon size={14} />,
+                  onSelect: () => {
+                    restore.mutate(task);
+                  },
+                },
+              ]
+            : [
+                {
+                  id: 'duplicate',
+                  label: t('drawer.duplicate'),
+                  icon: <CopyIcon size={14} />,
+                  onSelect: onDuplicate,
+                },
+                {
+                  id: 'move',
+                  label: t('create.moveToProject'),
+                  icon: <MoveIcon size={14} />,
+                  onSelect: onMoveToProject,
+                },
+                { type: 'separator', id: 'sep' },
+                {
+                  id: 'delete',
+                  label: t('table.delete'),
+                  icon: <TrashIcon size={14} />,
+                  danger: true,
+                  onSelect: onDelete,
+                },
+              ]
+        }
         trigger={(props, open) => (
           <IconButton
             {...props}

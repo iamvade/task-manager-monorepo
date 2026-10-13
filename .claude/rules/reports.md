@@ -52,7 +52,7 @@ Tabs: Overview, Sprints, Workload, plus People (admins/owner) or My performance 
 - **On-time delivery**: among completed tasks that have a due date, the share with completion date (local) ≤ `due_date`. Shown as "% · N of M". Delta in percentage points.
 - **Overdue**: open tasks with `due_date` < today. A snapshot that ignores the period. "Oldest is N days late" = max(today − due).
 - **Throughput**: tasks completed per Monday–Sunday week over the last 12 weeks, regardless of the period.
-  - Previous series = the 12 weeks before.
+  - Previous series = the 12 weeks before; omitted (empty array, one legend line) when nothing was completed in them.
   - The current week is flagged `partial`: hollow point, with the tooltip "This week is still in progress".
 - **Where work waits**: per category (To Do, In Progress, In Review), the median length in days of status periods that ended within the period.
   - The insight names the slowest category and its ratio to the next slowest.
@@ -67,10 +67,10 @@ Tabs: Overview, Sprints, Workload, plus People (admins/owner) or My performance 
     - Projected = linear from today at (remaining at start − remaining today) / days elapsed.
     - Scope-added chips show the tasks added per day.
   - **Pace**: "slightly behind ideal" when remaining > ideal by at most 15 % of committed; "behind" beyond that; on track otherwise.
-  - **Carried over**: members of sprint N that were in sprint N−1 of the same project and not done at its end.
-    - **Times carried** = the number of earlier sprints the task left unfinished.
+  - **Carried over**: tasks in sprint N's scope (committed or added) that were in sprint N−1 of the same project during it and left it unfinished: not done at the moment their N−1 membership ended, or at N−1's end if it was still open then. Memberships of N−1 that ended before N−1 started don't count. (A replan on the last afternoon or after sprint N started counts; `setSprint` closes and opens memberships at the same instant.)
+    - **Times carried** = the number of earlier sprints of the project the task left unfinished the same way (each sprint once).
     - **Replan** when ≥ 3.
-    - For a past sprint, the card shows "Carried to next sprint" instead.
+    - For a past sprint, the card shows "Carried to next sprint" instead: its scope's tasks that left it unfinished and are (or were) in sprint N+1.
 - **Workload**: a snapshot of open tasks per assignee (a task with several assignees counts fully for each). Lists workspace members, or with a scope filter the scoped projects' members plus anyone with open tasks there.
   - **Buckets** by due date:
     - Overdue (< today)

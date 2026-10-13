@@ -7,7 +7,7 @@ import { useCurrentWorkspace } from '../../api/workspaces';
 import { useAuth } from '../../auth/useAuth';
 import { MyTasksIcon, PlusIcon } from '../../components/icons';
 import { Button } from '../../components/ui/Button';
-import { EmptyState } from '../../components/ui/EmptyState';
+import { ErrorState } from '../../components/ErrorState';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useDates } from '../../lib/useDates';
 import { toast } from '../../stores/toast';
@@ -54,10 +54,9 @@ export function MyTasksView() {
 }
 
 function MyTasksContent({ workspaceId }: { workspaceId: string }) {
-  const { t } = useTranslation();
   const home = useHome(workspaceId);
 
-  if (home.isError) return <EmptyState body={t('common.genericError')} />;
+  if (home.isError) return <ErrorState error={home.error} />;
   if (!home.data) return <HomeSkeleton />;
   return <HomeBody workspaceId={workspaceId} home={home.data} />;
 }

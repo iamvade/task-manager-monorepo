@@ -1,8 +1,10 @@
 import type { RichTextNode } from '@kite/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { Editor } from '@tiptap/core';
 import { useTranslation } from 'react-i18next';
 import { useUpdateTask } from '../../api/tasks';
 import { RichTextEditor } from '../../components/editor/RichTextEditor';
+import { resolveTypedMentions } from '../../components/editor/typedMentions';
 import { CheckIcon } from '../../components/icons';
 import { useTaskView } from './TaskContext';
 import { markErrorHandled } from '../../lib/mutationErrors';
@@ -21,10 +23,11 @@ export function TaskDescription() {
   const [state, setState] = useState<SaveState>('idle');
   /** The unsaved document (`null` = cleared); `undefined` when nothing is pending. */
   const pending = useRef<RichTextNode | null | undefined>(undefined);
+  const editorRef = useRef<Editor | null>(null);
   const timer = useRef<number | undefined>(undefined);
-  const latest = useRef({ task, mutate: update.mutate });
+  const latest = useRef({ task, mutate: update.mutate, mentions });
   useEffect(() => {
-    latest.current = { task, mutate: update.mutate };
+    latest.current = { task, mutate: update.mutate, mentions };
   });
 
   const flush = useCallback(() => {
@@ -97,11 +100,21 @@ export function TaskDescription() {
         value={task.description}
         mentions={mentions}
         onChange={(doc, editor) => {
-          pending.current = editor.isEmpty ? null : doc;
+          pending.current = editor.isEmpty ? null : resolveTypedMentions(doc, mentions);
           window.clearTimeout(timer.current);
           timer.current = window.setTimeout(flush, SAVE_DELAY);
         }}
-        onBlur={flush}
+        editorRef={editorRef}
+        onBlur={() => {
+          // Show the chip for a typed "@Name" once the author leaves the field.
+          const editor = editorRef.current;
+          if (editor) {
+            const doc = editor.getJSON() as RichTextNode;
+            const resolved = resolveTypedMentions(doc, mentions);
+            if (resolved !== doc) editor.commands.setContent(resolved, { emitUpdate: false });
+          }
+          flush();
+        }}
         onEscape={() => {
           // Esc leaves the editor (saving); a second Esc closes the drawer.
           (document.activeElement as HTMLElement | null)?.blur();

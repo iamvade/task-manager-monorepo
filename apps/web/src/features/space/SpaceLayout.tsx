@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet, useNavigate, useParams } from 'react-router';
 import { useDeleteSpace } from '../../api/spaces';
 import { useCurrentWorkspace, useSidebar } from '../../api/workspaces';
 import { ErrorState } from '../../components/ErrorState';
 import { MoreIcon, TrashIcon } from '../../components/icons';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { IconButton } from '../../components/ui/IconButton';
 import { Menu, type MenuItem } from '../../components/ui/Menu';
 import { useCopyLink } from '../../lib/useCopyLink';
@@ -29,6 +31,7 @@ export function SpaceLayout() {
   const navigate = useNavigate();
   const deleteSpace = useDeleteSpace(workspace?.id ?? '');
   const isAdmin = workspace !== undefined && workspace.role !== 'member';
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
 
   if (sidebar.isPending) return <HeaderSkeleton />;
   if (sidebar.isError) return <ErrorState error={sidebar.error} />;
@@ -36,7 +39,7 @@ export function SpaceLayout() {
   if (!space) return <ErrorState error={new ApiError(404, 'NOT_FOUND', 'Space not found')} />;
 
   function onDelete(target: { id: string; name: string }) {
-    if (!window.confirm(t('header.deleteSpaceConfirm', { name: target.name }))) return;
+    setPendingDelete(null);
     // 409 SPACE_NOT_EMPTY and other errors toast from the mutation cache.
     deleteSpace
       .mutateAsync(target.id)
@@ -58,7 +61,7 @@ export function SpaceLayout() {
             icon: <TrashIcon size={14} />,
             danger: true,
             onSelect: () => {
-              onDelete(space);
+              setPendingDelete(space);
             },
           },
         ] satisfies MenuItem[])
@@ -67,6 +70,19 @@ export function SpaceLayout() {
 
   return (
     <>
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title={t('header.deleteSpaceConfirm', { name: pendingDelete?.name ?? '' })}
+        confirmLabel={t('header.deleteSpace')}
+        tone="danger"
+        pending={deleteSpace.isPending}
+        onConfirm={() => {
+          if (pendingDelete) onDelete(pendingDelete);
+        }}
+        onClose={() => {
+          setPendingDelete(null);
+        }}
+      />
       <PageHeader
         title={<Breadcrumb space={space} current={t('header.allProjects')} />}
         actions={

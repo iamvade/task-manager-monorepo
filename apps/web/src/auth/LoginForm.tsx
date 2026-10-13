@@ -30,7 +30,9 @@ export function LoginForm({ fixedEmail, onSuccess }: LoginFormProps) {
     error instanceof ApiError && error.code === 'INVALID_CREDENTIALS'
       ? t('auth.invalidCredentials')
       : error instanceof ApiError && error.code === 'RATE_LIMITED'
-        ? t('auth.rateLimited')
+        ? error.retryAfter
+          ? t('auth.rateLimitedRetry', { seconds: error.retryAfter })
+          : t('auth.rateLimited')
         : error
           ? t('common.genericError')
           : null;

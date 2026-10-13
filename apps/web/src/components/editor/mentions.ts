@@ -1,4 +1,4 @@
-import type { UserRef } from '@kite/shared';
+import { nameSearchKey, type UserRef } from '@kite/shared';
 
 /** A person offered in @-suggestions: avatar, name and a role hint ("Eng lead", "You"). */
 export interface MentionCandidate extends UserRef {
@@ -8,17 +8,18 @@ export interface MentionCandidate extends UserRef {
 export const MAX_SUGGESTIONS = 6;
 
 /**
- * Candidates matching `query` (case-insensitive): names starting with it first, then names with
- * a word starting with it, then any substring; the input order (project team first) breaks ties.
+ * Candidates matching `query` (case-insensitive, across scripts: "bat" finds Бат): names
+ * starting with it first, then names with a word starting with it, then any substring; the
+ * input order (project team first) breaks ties.
  */
 export function filterMentions(
   candidates: readonly MentionCandidate[],
   query: string,
 ): MentionCandidate[] {
-  const q = query.trim().toLowerCase();
+  const q = nameSearchKey(query.trim());
   if (!q) return candidates.slice(0, MAX_SUGGESTIONS);
   const rank = (name: string) => {
-    const n = name.toLowerCase();
+    const n = nameSearchKey(name);
     if (n.startsWith(q)) return 0;
     if (n.split(/\s+/).some((w) => w.startsWith(q))) return 1;
     return n.includes(q) ? 2 : -1;

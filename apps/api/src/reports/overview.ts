@@ -253,7 +253,11 @@ export async function buildOverview(
     overdue: { count: overdue[0]?.count ?? 0, oldestDaysLate: overdue[0]?.oldest ?? null },
     throughput: {
       weeks: series.slice(THROUGHPUT_WEEKS),
-      previous: series.slice(0, THROUGHPUT_WEEKS),
+      // A workspace younger than the window has no previous period to compare with: omit the
+      // series rather than draw twelve zeros.
+      previous: series.slice(0, THROUGHPUT_WEEKS).some((w) => w.count > 0)
+        ? series.slice(0, THROUGHPUT_WEEKS)
+        : [],
     },
     waits: (['todo', 'in_progress', 'review'] as const).map((category) => {
       const w = waits.find((x) => x.category === category);

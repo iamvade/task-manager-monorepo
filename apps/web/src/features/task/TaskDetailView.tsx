@@ -11,11 +11,13 @@ import { useAuth } from '../../auth/useAuth';
 import type { MentionCandidate } from '../../components/editor/mentions';
 import { UploadIcon } from '../../components/icons';
 import { Skeleton } from '../../components/ui/Skeleton';
+import { cn } from '../../lib/cn';
 import { toast } from '../../stores/toast';
 import { ActivitySection } from './activity/ActivitySection';
 import { CommentComposer } from './activity/CommentComposer';
 import { AttachmentSection } from './attachments/AttachmentSection';
 import { SubtaskList } from './subtasks/SubtaskList';
+import { DeletedBanner } from './DeletedBanner';
 import { TaskViewContext, type TaskView } from './TaskContext';
 import { TaskDescription } from './TaskDescription';
 import { TaskHeader } from './TaskHeader';
@@ -23,6 +25,9 @@ import { TaskProperties } from './TaskProperties';
 import { TaskTitle } from './TaskTitle';
 import { reportError } from '../../lib/mutationErrors';
 import { useViewingTask } from '../../realtime/context';
+
+// React 18's types don't know `inert`; the attribute itself works in every current browser.
+const INERT = { inert: '' } as Record<string, string>;
 
 interface TaskDetailViewProps {
   taskKey: string;
@@ -160,6 +165,7 @@ function LoadedTask({
       },
       role,
       layout,
+      readOnly: task.deletedAt !== null,
       close: onClose,
       upload,
     };
@@ -199,7 +205,12 @@ function LoadedTask({
             setMoveOpen(true);
           }}
         />
-        <div className="flex flex-1 flex-col gap-6 px-6 pt-6 pb-8">
+        {view.readOnly && <DeletedBanner />}
+        {/* A deleted task reads but doesn't edit: `inert` keeps every control out of reach. */}
+        <div
+          className={cn('flex flex-1 flex-col gap-6 px-6 pt-6 pb-8', view.readOnly && 'opacity-80')}
+          {...(view.readOnly ? INERT : {})}
+        >
           <TaskTitle />
           <TaskProperties moveOpen={moveOpen} onMoveOpenChange={setMoveOpen} />
           <TaskDescription key={task.id} />
@@ -207,9 +218,11 @@ function LoadedTask({
           <AttachmentSection />
           <ActivitySection />
         </div>
-        <div className="sticky bottom-0 z-[2] border-t border-subtle bg-surface px-6 pt-3 pb-4">
-          <CommentComposer />
-        </div>
+        {!view.readOnly && (
+          <div className="sticky bottom-0 z-[2] border-t border-subtle bg-surface px-6 pt-3 pb-4">
+            <CommentComposer />
+          </div>
+        )}
         {dropping && (
           <div
             aria-hidden="true"

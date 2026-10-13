@@ -369,6 +369,129 @@ describe('task drawer', () => {
     );
   });
 
+  it('shows a deleted task read-only with a banner, and Restore brings it back', async () => {
+    const { state, task } = setup({ deletedAt: '2026-10-08T05:00:00.000Z' });
+    const restores: string[] = [];
+    api(state, (s) => ({
+      [`POST /api/v1/tasks/${task.id}/restore`]: () => {
+        restores.push(task.id);
+        s.detail = { ...s.detail, deletedAt: null };
+        return Response.json(s.detail);
+      },
+    }));
+    renderAt(`${LIST}&task=APP-135`);
+    const dialog = await drawer();
+    const bannerText = 'This task was deleted. Restore it to edit or comment.';
+    expect(await within(dialog).findByText(bannerText)).toBeInTheDocument();
+    // Read-only: no Mark complete, no composer, the body is inert.
+    expect(within(dialog).queryByRole('button', { name: 'Mark complete' })).toBeNull();
+    expect(within(dialog).queryByRole('textbox', { name: 'Write a comment' })).toBeNull();
+    expect(dialog.querySelector('[inert]')).not.toBeNull();
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Restore' }));
+    await waitFor(() => {
+      expect(restores).toEqual([task.id]);
+    });
+    await waitFor(() => {
+      expect(within(dialog).queryByText(bannerText)).toBeNull();
+    });
+    expect(within(dialog).getByRole('button', { name: 'Mark complete' })).toBeInTheDocument();
+    expect(dialog.querySelector('[inert]')).toBeNull();
+  });
+
+  it('asks in a dialog before deleting a comment', async () => {
+    const { state, task } = setup();
+    const commentId = '01890000-0000-7000-8000-700000000009';
+    state.feed = [
+      {
+        kind: 'comment',
+        id: commentId,
+        taskId: task.id,
+        parentId: null,
+        author: ref(at(PROJECT.members, 0).user),
+        body: {
+          type: 'doc',
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Old note' }] }],
+        },
+        bodyText: 'Old note',
+        createdAt: '2026-10-07T06:00:00.000Z',
+        editedAt: null,
+        deletedAt: null,
+        replies: [],
+      },
+    ];
+    const deleted: string[] = [];
+    api(state, (s) => ({
+      [`DELETE /api/v1/comments/${commentId}`]: () => {
+        deleted.push(commentId);
+        s.feed = s.feed.filter((item) => item.id !== commentId);
+        return new Response(null, { status: 204 });
+      },
+    }));
+    renderAt(`${LIST}&task=APP-135`);
+    const dialog = await drawer();
+    const feed = within(await within(dialog).findByRole('region', { name: /Activity/ }));
+    expect(await feed.findByText('Old note')).toBeInTheDocument();
+
+    fireEvent.click(feed.getByRole('button', { name: 'Comment options' }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Delete' }));
+    const confirm = await screen.findByRole('dialog', { name: 'Delete this comment?' });
+    fireEvent.click(within(confirm).getByRole('button', { name: 'Cancel' }));
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: 'Delete this comment?' })).toBeNull();
+    });
+    expect(deleted).toEqual([]);
+    expect(feed.getByText('Old note')).toBeInTheDocument();
+
+    fireEvent.click(feed.getByRole('button', { name: 'Comment options' }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Delete' }));
+    const again = await screen.findByRole('dialog', { name: 'Delete this comment?' });
+    fireEvent.click(within(again).getByRole('button', { name: 'Delete' }));
+    await waitFor(() => {
+      expect(deleted).toEqual([commentId]);
+    });
+    await waitFor(() => {
+      expect(feed.queryByText('Old note')).toBeNull();
+    });
+  });
+
+  it('turns a typed @Name that was never picked into a mention on send', async () => {
+    const { state, task } = setup();
+    const posted: { body: RichTextNode }[] = [];
+    api(state, () => ({
+      [`POST /api/v1/tasks/${task.id}/comments`]: (init) => {
+        posted.push(body(init) as (typeof posted)[number]);
+        return Response.json({ error: { code: 'INTERNAL', message: 'x' } }, { status: 500 });
+      },
+    }));
+    renderAt(`${LIST}&task=APP-135`);
+    const dialog = await drawer();
+    const composer = await within(dialog).findByRole('textbox', { name: 'Write a comment' });
+    const editor = (composer as HTMLElement & { editor?: Editor }).editor;
+    if (!editor) throw new Error('no editor');
+    act(() => {
+      editor.commands.insertContent('Looping in @Bat O. and @dorj now');
+    });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Comment' }));
+
+    await waitFor(() => {
+      expect(posted).toHaveLength(1);
+    });
+    expect(at(posted, 0).body.content?.[0]?.content).toEqual([
+      { type: 'text', text: 'Looping in ' },
+      {
+        type: 'mention',
+        attrs: expect.objectContaining({ id: BAT.id, label: 'Bat O.' }) as object,
+      },
+      { type: 'text', text: ' and ' },
+      {
+        type: 'mention',
+        attrs: expect.objectContaining({ id: DORJ.id, label: 'Dorj E.' }) as object,
+      },
+      { type: 'text', text: ' now' },
+    ]);
+  });
+
   it('posts a comment with a mention and appends it right away', async () => {
     const { state, task } = setup();
     const posted: { body: RichTextNode }[] = [];
@@ -474,6 +597,33 @@ describe('task drawer', () => {
     expect(await within(group('In Review')).findByText(task.title)).toBeInTheDocument();
   });
 
+  it('traps focus while open and returns it to the row that opened it', async () => {
+    const { state } = setup();
+    api(state);
+    renderAt(LIST);
+    const title = await screen.findByText('Checkout page — responsive layout');
+    const row = title.closest<HTMLElement>('[role="row"]');
+    if (!row) throw new Error('no row');
+    act(() => {
+      row.focus();
+    });
+    fireEvent.keyDown(row, { key: 'Enter' });
+    const dialog = await drawer();
+    await waitFor(() => {
+      expect(dialog.contains(document.activeElement)).toBe(true);
+    });
+
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: 'Task APP-135' })).toBeNull();
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByText('Checkout page — responsive layout').closest('[role="row"]'),
+      ).toHaveFocus();
+    });
+  });
+
   it('closes an open picker on Esc before the drawer', async () => {
     const { state } = setup();
     api(state);
@@ -492,6 +642,8 @@ describe('task drawer', () => {
     await waitFor(() => {
       expect(new URLSearchParams(router.state.location.search).has('task')).toBe(false);
     });
+    // Closing replaces the history entry, so Back goes to the previous screen (F-26).
+    expect(router.state.historyAction).toBe('REPLACE');
   });
 
   it('shows the task as a full page at /t/:key', async () => {

@@ -1,10 +1,12 @@
-import { STALE_DAYS, shortName, type AgingTask } from '@kite/shared';
+import { STALE_DAYS, type AgingTask, type UserRef } from '@kite/shared';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router';
 import { Avatar } from '../../../components/ui/Avatar';
 import { ProjectDot } from '../../../components/ui/ProjectDot';
 import { StatusDot } from '../../../components/ui/StatusDot';
 import { useDates } from '../../../lib/useDates';
+import { useShortNames } from '../../../lib/useShortNames';
 import { mnFrom } from '../format';
 import { Panel, PanelHeading } from '../ui/Panel';
 import { WarnChip } from '../ui/WarnChip';
@@ -31,6 +33,8 @@ export function AgingTable({ tasks, total, expanded, onExpandedChange }: AgingTa
   const { locale } = useDates();
   const { pathname, search } = useLocation();
   const rows = expanded ? tasks : tasks.slice(0, AGING_PREVIEW);
+  const assignees = useMemo(() => tasks.flatMap((task) => task.assignees), [tasks]);
+  const shortNameOf = useShortNames(assignees);
   const days = STALE_DAYS.todo;
 
   const taskHref = (key: string) => {
@@ -83,7 +87,12 @@ export function AgingTable({ tasks, total, expanded, onExpandedChange }: AgingTa
               </div>
             )}
             {rows.map((task) => (
-              <AgingRow key={task.id} task={task} to={taskHref(task.key)} />
+              <AgingRow
+                key={task.id}
+                task={task}
+                to={taskHref(task.key)}
+                shortNameOf={shortNameOf}
+              />
             ))}
           </div>
         </div>
@@ -92,7 +101,15 @@ export function AgingTable({ tasks, total, expanded, onExpandedChange }: AgingTa
   );
 }
 
-function AgingRow({ task, to }: { task: AgingTask; to: { pathname: string; search: string } }) {
+function AgingRow({
+  task,
+  to,
+  shortNameOf,
+}: {
+  task: AgingTask;
+  to: { pathname: string; search: string };
+  shortNameOf: (user: UserRef) => string;
+}) {
   const { t } = useTranslation();
   const [first, ...others] = task.assignees;
   const status = task.status.name ?? t(`status.${task.status.category}`);
@@ -115,7 +132,7 @@ function AgingRow({ task, to }: { task: AgingTask; to: { pathname: string; searc
           <>
             <Avatar user={first} size={24} title={null} />
             <span className="truncate text-[13px] text-2" title={first.name}>
-              {shortName(first.name)}
+              {shortNameOf(first)}
               {others.length > 0 && <span className="text-muted"> +{others.length}</span>}
             </span>
           </>

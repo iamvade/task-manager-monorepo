@@ -51,7 +51,6 @@ export const attachmentRoutes: FastifyPluginCallbackZod = (app, _opts, done) => 
     '/tasks/:taskId/attachments',
     {
       preHandler: app.authenticate,
-      config: { rateLimit: { max: 60, timeWindow: '1 minute' } },
       schema: {
         tags: ['Attachments'],
         summary: 'Upload an attachment',

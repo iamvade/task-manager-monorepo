@@ -24,6 +24,8 @@ export interface FilterOption {
   key: string;
   /** Text for chips and search. */
   label: string;
+  /** Text searched instead of the label (people: the full name, matched across scripts). */
+  searchText?: string;
   /** Option content in the menu (defaults to the label). */
   content?: ReactNode;
 }
@@ -96,6 +98,7 @@ export function useFilterOptions(
     ...people.map((m) => ({
       key: m.user.id,
       label: shortName(m.user.name),
+      searchText: m.user.name,
       content: withIcon(<Avatar user={m.user} size={20} title={null} />, m.user.name),
     })),
   ];

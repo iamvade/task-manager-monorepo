@@ -1,10 +1,12 @@
-import { REPLAN_TIMES, shortName, type CarriedTask, type SprintDetail } from '@kite/shared';
+import { REPLAN_TIMES, type CarriedTask, type SprintDetail, type UserRef } from '@kite/shared';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router';
 import { Avatar } from '../../../components/ui/Avatar';
 import { ProjectDot } from '../../../components/ui/ProjectDot';
 import { StatusDot } from '../../../components/ui/StatusDot';
 import { cn } from '../../../lib/cn';
+import { useShortNames } from '../../../lib/useShortNames';
 import { Panel, PanelHeading } from '../ui/Panel';
 import { WarnChip } from '../ui/WarnChip';
 
@@ -26,6 +28,8 @@ export function CarriedTable({ sprint, replanHref }: CarriedTableProps) {
   const { pathname, search } = useLocation();
   const k = 'reports.sprints.carried';
   const prev = sprint.previousSprint;
+  const assignees = useMemo(() => sprint.carried.flatMap((task) => task.assignees), [sprint]);
+  const shortNameOf = useShortNames(assignees);
 
   const taskHref = (key: string) => {
     const params = new URLSearchParams(search);
@@ -83,7 +87,12 @@ export function CarriedTable({ sprint, replanHref }: CarriedTableProps) {
               </div>
             )}
             {sprint.carried.map((task) => (
-              <CarriedRow key={task.id} task={task} to={taskHref(task.key)} />
+              <CarriedRow
+                key={task.id}
+                task={task}
+                to={taskHref(task.key)}
+                shortNameOf={shortNameOf}
+              />
             ))}
           </div>
         </div>
@@ -92,7 +101,15 @@ export function CarriedTable({ sprint, replanHref }: CarriedTableProps) {
   );
 }
 
-function CarriedRow({ task, to }: { task: CarriedTask; to: { pathname: string; search: string } }) {
+function CarriedRow({
+  task,
+  to,
+  shortNameOf,
+}: {
+  task: CarriedTask;
+  to: { pathname: string; search: string };
+  shortNameOf: (user: UserRef) => string;
+}) {
   const { t } = useTranslation();
   const k = 'reports.sprints.carried';
   const [first, ...others] = task.assignees;
@@ -117,7 +134,7 @@ function CarriedRow({ task, to }: { task: CarriedTask; to: { pathname: string; s
           <>
             <Avatar user={first} size={24} title={null} />
             <span className="truncate text-[13px] text-2" title={first.name}>
-              {shortName(first.name)}
+              {shortNameOf(first)}
               {others.length > 0 && <span className="text-muted"> +{others.length}</span>}
             </span>
           </>

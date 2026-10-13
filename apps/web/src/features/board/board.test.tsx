@@ -10,7 +10,7 @@ import { routes } from '../../router';
 import { useToastStore } from '../../stores/toast';
 import { useUiStore } from '../../stores/ui';
 import { ME, PROJECT_ID, SIDEBAR, SPACE_ID, WORKSPACE_ID, mockApi } from '../../test/fixtures';
-import { at, listHandlers, makeTasks, statusOf } from '../../test/tasks';
+import { PROJECT_WITH_STATUSES, at, listHandlers, makeTasks, statusOf } from '../../test/tasks';
 
 type Handler = (init?: RequestInit) => Response;
 const body = (init?: RequestInit): unknown =>
@@ -201,6 +201,58 @@ describe('board', () => {
       expect(
         within(column(/^To Do/)).getByText('Audit current navigation patterns'),
       ).toBeInTheDocument();
+    });
+  });
+
+  it('offers Undo after a card is dropped into Done, moving it back where it was', async () => {
+    const tasks = makeTasks();
+    const audit = at(tasks, 0);
+    const moves: { statusId: string; prevId: string | null; nextId: string | null }[] = [];
+    api(tasks, {
+      [`POST /api/v1/tasks/${audit.id}/move`]: (init) => {
+        const vars = body(init) as (typeof moves)[number];
+        moves.push(vars);
+        const status = PROJECT_WITH_STATUSES.statuses.find((s) => s.id === vars.statusId);
+        return Response.json({ ...audit, status: status ?? audit.status });
+      },
+    });
+    renderAt(BOARD);
+    await screen.findByRole('region', { name: /^To Do/ });
+    stubLayout();
+
+    const card = cardOf('Audit current navigation patterns');
+    act(() => {
+      card.focus();
+    });
+    fireEvent.keyDown(card, { key: ' ', code: 'Space' });
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+    for (let i = 0; i < 3; i++) {
+      fireEvent.keyDown(document.activeElement ?? document.body, {
+        key: 'ArrowRight',
+        code: 'ArrowRight',
+      });
+    }
+    expect(await screen.findByText('Drop to move to Done')).toBeInTheDocument();
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: ' ', code: 'Space' });
+
+    await waitFor(() => {
+      expect(moves).toHaveLength(1);
+    });
+    expect(at(moves, 0).statusId).toBe(statusOf('done').id);
+    const toast = await screen.findByText(`${audit.key} completed`);
+    fireEvent.click(
+      within(toast.closest('[role="status"]') ?? toast).getByRole('button', { name: 'Undo' }),
+    );
+    await waitFor(() => {
+      expect(moves).toHaveLength(2);
+    });
+    // Back to To Do, right before the card that followed it.
+    expect(at(moves, 1)).toEqual({
+      statusId: statusOf('todo').id,
+      prevId: null,
+      nextId: at(tasks, 1).id,
     });
   });
 

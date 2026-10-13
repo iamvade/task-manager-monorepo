@@ -36,6 +36,27 @@ describe('auth flow', () => {
     expect(router.state.location.search).toBe('?next=%2Fmy-tasks');
   });
 
+  it('offers Try again when the server is unreachable, instead of the sign-in page', async () => {
+    let down = true;
+    mockApi({
+      'GET /api/v1/auth/me': () => {
+        if (down) throw new TypeError('Failed to fetch');
+        return Response.json(ME);
+      },
+      [`GET /api/v1/workspaces/${WORKSPACE_ID}/sidebar`]: () => Response.json(SIDEBAR),
+      ...homeHandlers(),
+    });
+    const router = renderAt('/my-tasks');
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Сервертэй холбогдож чадсангүй');
+    expect(router.state.location.pathname).toBe('/my-tasks');
+
+    down = false;
+    fireEvent.click(screen.getByRole('button', { name: 'Дахин оролдох' }));
+    expect(await screen.findByRole('navigation', { name: 'Ажлын орчин' })).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
   it('shows the generic error on bad credentials', async () => {
     mockApi({
       'GET /api/v1/auth/me': unauthorized,
@@ -54,6 +75,28 @@ describe('auth flow', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Нэвтрэх' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Имэйл эсвэл нууц үг буруу байна.');
+  });
+
+  it('shows how long to wait when the login throttle answers 429', async () => {
+    mockApi({
+      'GET /api/v1/auth/me': unauthorized,
+      'POST /api/v1/auth/login': () =>
+        Response.json(
+          { error: { code: 'RATE_LIMITED', message: 'Too many sign-in attempts' } },
+          { status: 429, headers: { 'Retry-After': '51' } },
+        ),
+    });
+    renderAt('/login');
+
+    fireEvent.change(await screen.findByLabelText('Имэйл'), {
+      target: { value: 'anu@kite.test' },
+    });
+    fireEvent.change(screen.getByLabelText('Нууц үг'), { target: { value: 'wrong' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Нэвтрэх' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Хэт олон оролдлого. 51 секундын дараа дахин оролдоно уу.',
+    );
   });
 
   it('signs in and lands on the requested page', async () => {

@@ -16,7 +16,7 @@
     "close": "Close",
     "noResults": "No results",
     "errorTitle": "Something went wrong",
-    "errorBody": "An unexpected error stopped this page. Reload to try again.",
+    "errorBody": "An unexpected error stopped this page.",
     "reload": "Reload page",
     "notFoundTitle": "Not found",
     "notFoundBody": "This page doesn't exist or you don't have access to it.",
@@ -40,6 +40,7 @@
     "signOut": "Sign out",
     "invalidCredentials": "Invalid email or password.",
     "rateLimited": "Too many attempts. Wait a moment and try again.",
+    "rateLimitedRetry": "Too many attempts. Try again in {{seconds}} s.",
     "signedInAs": "Signed in as {{name}}"
   },
   "invite": {
@@ -64,6 +65,7 @@
     "goToSignIn": "Go to sign in"
   },
   "shell": {
+    "skipToContent": "Skip to content",
     "workspace": "Workspace",
     "switchWorkspace": "Switch workspace",
     "search": "Search",
@@ -220,8 +222,7 @@
     "setTags": "Tags of {{name}}",
     "open": "Open",
     "reopen": "Reopen",
-    "delete": "Delete",
-    "deleteConfirm": "Delete “{{name}}”? You can restore it later."
+    "delete": "Delete"
   },
   "status": {
     "todo": "To Do",
@@ -418,7 +419,9 @@
     "duplicate": "Duplicate",
     "duplicated": "Duplicated as {{key}}",
     "deleted": "{{key}} deleted",
-    "undo": "Undo",
+    "deletedBanner": "This task was deleted. Restore it to edit or comment.",
+    "restore": "Restore",
+    "notAMention": "Not a mention — pick a person from the @ list",
     "movedTo": "Moved to {{project}} as {{key}}",
     "notFound": "This task doesn't exist or was deleted.",
     "startDate": "Start date",
@@ -961,7 +964,8 @@
       "prevPeriod": "Previous period",
       "partialWeek": "This week is still in progress",
       "weekOf": "Week of {{date}}",
-      "summary": "Tasks completed per week over the last 12 weeks: {{first}} in the first week and {{last}} in the latest, peaking at {{peak}}; {{total}} in total versus {{previousTotal}} in the previous period."
+      "summary": "Tasks completed per week over the last 12 weeks: {{first}} in the first week and {{last}} in the latest, peaking at {{peak}}; {{total}} in total versus {{previousTotal}} in the previous period.",
+      "summaryNoPrev": "Tasks completed per week over the last 12 weeks: {{first}} in the first week and {{last}} in the latest, peaking at {{peak}}; {{total}} in total. No earlier history to compare with."
     },
     "waits": {
       "title": "Where work waits",

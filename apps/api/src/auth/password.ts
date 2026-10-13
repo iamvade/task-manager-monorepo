@@ -2,7 +2,8 @@ import argon2 from 'argon2';
 
 /**
  * Each argon2id hash takes ~64 MiB and a CPU core for a moment. Cap how many run at once so a
- * burst of sign-ins (from many IPs, past the per-IP limit) queues instead of exhausting memory.
+ * burst of sign-ins (from many IPs; there is no request rate limit) queues instead of exhausting
+ * memory.
  */
 const MAX_CONCURRENT = 4;
 let running = 0;

@@ -54,7 +54,6 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     '/workspaces/:workspaceId/invites',
     {
       preHandler: app.authenticate,
-      config: { rateLimit: { max: 20, timeWindow: '1 minute' } },
       schema: {
         tags: ['Invites'],
         summary: 'Invite someone',
@@ -188,7 +187,6 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
   app.get(
     '/invites/:token',
     {
-      config: { rateLimit: { max: 30, timeWindow: '1 minute' } },
       schema: {
         tags: ['Invites'],
         summary: 'Preview an invite',
@@ -219,7 +217,6 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
   app.post(
     '/invites/:token/accept',
     {
-      config: { rateLimit: { max: 10, timeWindow: '1 minute' } },
       schema: {
         tags: ['Invites'],
         summary: 'Accept an invite',

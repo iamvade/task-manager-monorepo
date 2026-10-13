@@ -2,7 +2,6 @@ import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import multipart from '@fastify/multipart';
-import rateLimit from '@fastify/rate-limit';
 import Fastify from 'fastify';
 import {
   serializerCompiler,
@@ -94,7 +93,6 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
 
   await app.register(helmet);
   await app.register(cors, { origin: config.WEB_ORIGIN, credentials: true });
-  await app.register(rateLimit, { max: 300, timeWindow: '1 minute' });
   // Session cookies are random tokens checked against the database, so no signing secret.
   await app.register(cookie);
   // Size limits are checked by the upload route (413 with our error body), not thrown here.

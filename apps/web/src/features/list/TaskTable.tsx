@@ -37,7 +37,6 @@ import { useTranslation } from 'react-i18next';
 import {
   isTempTask,
   useCompleteTask,
-  useDeleteTask,
   useMoveTask,
   useSetAssignees,
   useSetTags,
@@ -46,6 +45,9 @@ import {
 import { useAuth } from '../../auth/useAuth';
 import { isEditableTarget } from '../../lib/keyboard';
 import { useCopyLink } from '../../lib/useCopyLink';
+import { useShortNames } from '../../lib/useShortNames';
+import { useDeleteWithUndo } from '../task/useDeleteWithUndo';
+import { useMoveUndoToast } from './useMoveUndoToast';
 import { useUiStore, type CreateDefaults } from '../../stores/ui';
 import type { ListScope } from '../views/taskQuery';
 import { useViewParams } from '../views/useViewParams';
@@ -114,13 +116,16 @@ export function TaskTable({
   // Mutations.
   const complete = useCompleteTask();
   const move = useMoveTask();
+  const undoToast = useMoveUndoToast();
   const update = useUpdateTask();
   const showSize = useUiStore((s) => s.listColumns.size);
   const setAssigneesMutation = useSetAssignees();
   const setTagsMutation = useSetTags();
-  const remove = useDeleteTask();
+  const remove = useDeleteWithUndo();
   const createInStatus = useCreateInStatus(project, tasks, members);
   const { copied, copy } = useCopyLink();
+  const memberUsers = useMemo(() => members.map((m) => m.user), [members]);
+  const shortNameOf = useShortNames(memberUsers);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [adding, setAdding] = useState<string | null>(null);
@@ -207,6 +212,7 @@ export function TaskTable({
 
   const actions: ListActions = {
     members,
+    shortNameOf,
     teamIds: new Set(project?.members.map((m) => m.user.id) ?? []),
     tags,
     taskHref,
@@ -217,9 +223,7 @@ export function TaskTable({
       setSelectedId(task.id);
     },
     toggleComplete,
-    remove: (task) => {
-      if (window.confirm(t('table.deleteConfirm', { name: task.title }))) remove.mutate(task);
-    },
+    remove,
     copyLink: (task) => {
       void copy(`${window.location.origin}/t/${task.key}`);
     },
@@ -367,7 +371,10 @@ export function TaskTable({
 
     const statusTasks = tasks.filter((x) => x.status.id === group.status?.id);
     const placement = placeInStatus(statusTasks, task.id, afterId, beforeId);
+    const origin = tasks.filter((x) => x.status.id === task.status.id);
     move.mutate({ task, status: statusRef(group.status), ...placement });
+    // Dragging into the Done group completes the task: offer to put it back.
+    undoToast(task, statusRef(group.status), origin);
     // The dropped order is a manual order: show it.
     if (view.sort !== 'manual') updateParams({ sort: 'manual' });
   }

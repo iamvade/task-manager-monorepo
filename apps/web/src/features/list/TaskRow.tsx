@@ -1,4 +1,4 @@
-import { shortName, type TaskListItem } from '@kite/shared';
+import type { TaskListItem } from '@kite/shared';
 import type { HTMLAttributes, MouseEvent, ReactNode, Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -125,6 +125,7 @@ export function TaskRow({
       {...rowProps}
       role="row"
       data-task-row={task.id}
+      data-task-key={task.key}
       data-selected={selected ? true : undefined}
       tabIndex={inert ? undefined : tabbable ? 0 : -1}
       onClick={(e) => {
@@ -229,10 +230,10 @@ export function TaskRow({
                     <span className="truncate text-[13px] text-2">
                       {others.length
                         ? t('table.assigneeMore', {
-                            name: shortName(first.name),
+                            name: actions.shortNameOf(first),
                             count: others.length,
                           })
-                        : shortName(first.name)}
+                        : actions.shortNameOf(first)}
                     </span>
                   </>
                 ) : (

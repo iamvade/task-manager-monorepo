@@ -115,7 +115,7 @@ describe('auth', () => {
       for (let i = 0; i < 6; i++) {
         expect((await postLogin(user.email, PASSWORD, home)).statusCode).toBe(200);
       }
-      // A success clears that IP's failures for the email (separate IP: 10/min per IP applies).
+      // A success clears that IP's failures for the email.
       const ip = randomIp();
       for (let i = 0; i < 4; i++) await postLogin(user.email, 'wrong', ip);
       expect((await postLogin(user.email, PASSWORD, ip)).statusCode).toBe(200);
@@ -130,14 +130,6 @@ describe('auth', () => {
         expect((await postLogin(user.email, 'wrong')).statusCode).toBe(401);
       }
       expect((await postLogin(user.email, PASSWORD)).statusCode).toBe(429);
-    });
-
-    it('limits attempts per IP across emails', async () => {
-      const ip = randomIp();
-      for (let i = 0; i < 10; i++) {
-        expect((await postLogin(`ip-${i}@kite.test`, 'wrong', ip)).statusCode).toBe(401);
-      }
-      expect((await postLogin('ip-last@kite.test', 'wrong', ip)).statusCode).toBe(429);
     });
   });
 

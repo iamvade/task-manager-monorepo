@@ -55,6 +55,8 @@ const sidebarNav = () => screen.getByRole('navigation', { name: 'Ажлын ор
 describe('app shell', () => {
   beforeEach(async () => {
     localStorage.clear();
+    // Each test signs in afresh: start from the anonymous storage key.
+    useUiStore.persist.setOptions({ name: 'kite.ui' });
     useUiStore.setState({ sidebarCollapsed: false, openSpaces: {}, lastWorkspaceId: null });
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date('2026-10-08T03:00:00Z'));
@@ -131,6 +133,17 @@ describe('app shell', () => {
     });
   });
 
+  it('starts with a skip link that moves focus to the page', async () => {
+    api();
+    renderAt('/my-tasks');
+    await screen.findByRole('navigation', { name: 'Ажлын орчин' });
+
+    const skip = screen.getByRole('link', { name: 'Агуулга руу шилжих' });
+    expect(document.body.firstElementChild?.querySelector('a')).toBe(skip);
+    fireEvent.click(skip);
+    expect(screen.getByRole('main')).toHaveFocus();
+  });
+
   it('collapses to the rail and remembers it', async () => {
     api();
     renderAt('/my-tasks');
@@ -139,9 +152,33 @@ describe('app shell', () => {
     expect(
       await screen.findByRole('button', { name: 'Хажуу самбарыг дэлгэх' }),
     ).toBeInTheDocument();
-    expect(JSON.parse(localStorage.getItem('kite.ui') ?? '{}')).toMatchObject({
+    expect(JSON.parse(localStorage.getItem(`kite.ui.${ME.user.id}`) ?? '{}')).toMatchObject({
       state: { sidebarCollapsed: true },
     });
+  });
+
+  it('keeps layout state per account on a shared browser', async () => {
+    // Another account left the sidebar collapsed on this browser.
+    localStorage.setItem(
+      'kite.ui.01890000-0000-7000-8000-00000000ffff',
+      JSON.stringify({ state: { sidebarCollapsed: true }, version: 0 }),
+    );
+    // Our own saved state has it expanded with the first space open.
+    localStorage.setItem(
+      `kite.ui.${ME.user.id}`,
+      JSON.stringify({ state: { sidebarCollapsed: false, openSpaces: { [SPACE_ID]: true } } }),
+    );
+    useUiStore.setState({ sidebarCollapsed: true });
+    api();
+    renderAt('/my-tasks');
+
+    expect(
+      await screen.findByRole('button', { name: 'Хажуу самбарыг хураах' }),
+    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(useUiStore.getState().openSpaces[SPACE_ID]).toBe(true);
+    });
+    expect(useUiStore.getState().sidebarCollapsed).toBe(false);
   });
 
   it('flips every shell string when switching to English', async () => {
@@ -338,7 +375,6 @@ describe('app shell', () => {
 
   it('deletes a space after confirming', async () => {
     useToastStore.setState({ toasts: [] });
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
     const deleted: string[] = [];
     api({
       [`DELETE /api/v1/spaces/${SPACE_ID}`]: () => {
@@ -350,7 +386,14 @@ describe('app shell', () => {
 
     fireEvent.click(await screen.findByRole('button', { name: 'Орон зайн сонголтууд' }));
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Орон зайг устгах' }));
-    expect(confirm).toHaveBeenCalledWith('«Product» орон зайг устгах уу? Буцаах боломжгүй.');
+    const dialog = await screen.findByRole('dialog', {
+      name: '«Product» орон зайг устгах уу? Буцаах боломжгүй.',
+    });
+    // Focus starts on Cancel: Enter backs out of a destructive action.
+    await waitFor(() => {
+      expect(within(dialog).getByRole('button', { name: 'Болих' })).toHaveFocus();
+    });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Орон зайг устгах' }));
     await waitFor(() => {
       expect(router.state.location.pathname).toBe('/my-tasks');
     });
@@ -360,7 +403,6 @@ describe('app shell', () => {
 
   it('keeps a space that still has projects, and asks before deleting', async () => {
     useToastStore.setState({ toasts: [] });
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValueOnce(false).mockReturnValue(true);
     const fetchMock = api({
       [`DELETE /api/v1/spaces/${SPACE_ID}`]: () =>
         Response.json(
@@ -374,12 +416,19 @@ describe('app shell', () => {
       fireEvent.click(await screen.findByRole('menuitem', { name: 'Орон зайг устгах' }));
     };
     const deletes = () => fetchMock.mock.calls.filter(([, init]) => init?.method === 'DELETE');
+    const confirmDialog = () => screen.findByRole('dialog', { name: /орон зайг устгах уу/ });
 
     await openDelete();
-    expect(confirm).toHaveBeenCalledTimes(1);
+    fireEvent.click(within(await confirmDialog()).getByRole('button', { name: 'Болих' }));
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: /орон зайг устгах уу/ })).toBeNull();
+    });
     expect(deletes()).toHaveLength(0);
 
     await openDelete();
+    fireEvent.click(
+      within(await confirmDialog()).getByRole('button', { name: 'Орон зайг устгах' }),
+    );
     await waitFor(() => {
       expect(toasts().map((x) => x.message)).toEqual([
         'Энэ орон зайд төсөл (архивласан ч гэсэн) байна. Эхлээд тэдгээрийг өөр орон зай руу шилжүүлнэ үү.',

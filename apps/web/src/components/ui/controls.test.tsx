@@ -1,3 +1,4 @@
+import { matchesName } from '@kite/shared';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router';
@@ -42,9 +43,17 @@ describe('Picker', () => {
     expect(screen.getByRole('option')).toHaveTextContent('Dorj E.');
   });
 
+  it('opens with the current value highlighted', () => {
+    const { input } = setup();
+    const options = screen.getAllByRole('option');
+    expect(input).toHaveAttribute('aria-activedescendant', options[1]?.id);
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    expect(input).toHaveAttribute('aria-activedescendant', options[2]?.id);
+  });
+
   it('moves with arrows and selects with Enter', () => {
     const { input, onSelect } = setup();
-    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    // Starts on the selected option (Sara, index 1).
     fireEvent.keyDown(input, { key: 'ArrowDown' });
     expect(input).toHaveAttribute('aria-activedescendant', screen.getAllByRole('option')[2]?.id);
     fireEvent.keyDown(input, { key: 'Enter' });
@@ -60,6 +69,22 @@ describe('Picker', () => {
     const { input, onClear } = setup();
     fireEvent.keyDown(input, { key: 'Backspace' });
     expect(onClear).toHaveBeenCalled();
+  });
+
+  it('takes a custom search filter (cross-script names)', () => {
+    render(
+      <Picker
+        label="Assignee"
+        items={[{ id: 'g', name: 'Бат-Эрдэнэ Ганболд' }, ...PEOPLE]}
+        value={null}
+        getKey={(p) => p.id}
+        getLabel={(p) => p.name}
+        onSelect={vi.fn()}
+        search={{ placeholder: 'Assign to…', filter: (p, q) => matchesName(p.name, q) }}
+      />,
+    );
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'bat' } });
+    expect(screen.getByRole('option')).toHaveTextContent('Бат-Эрдэнэ Ганболд');
   });
 
   it('shows the empty text', () => {

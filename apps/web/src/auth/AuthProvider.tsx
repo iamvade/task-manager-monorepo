@@ -2,12 +2,18 @@ import { useEffect, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMe } from '../api/auth';
 import { applyAppearance } from '../preferences';
+import { scopeUiStore } from '../stores/ui';
 import { AuthContext } from './useAuth';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { data, isError } = useMe();
+  const { data, isError, error } = useMe();
   const { i18n } = useTranslation();
   const prefs = data?.preferences;
+
+  useEffect(() => {
+    // Layout state (sidebar, columns, last workspace) is kept per account.
+    if (data !== undefined) scopeUiStore(data?.user.id ?? null);
+  }, [data]);
 
   useEffect(() => {
     // Signed out → defaults. While /auth/me is loading, keep what theme-init.js painted.
@@ -20,5 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (i18n.language !== prefs.locale) void i18n.changeLanguage(prefs.locale);
   }, [data, prefs, i18n]);
 
-  return <AuthContext.Provider value={{ me: data, isError }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ me: data, isError, error }}>{children}</AuthContext.Provider>
+  );
 }

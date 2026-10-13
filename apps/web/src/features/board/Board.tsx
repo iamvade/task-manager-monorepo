@@ -21,6 +21,7 @@ import { useMoveTask } from '../../api/tasks';
 import { useUiStore } from '../../stores/ui';
 import { groupTasks, sortTasks, type TaskGroup } from '../list/grouping';
 import { placeInStatus } from '../list/positions';
+import { useMoveUndoToast } from '../list/useMoveUndoToast';
 import { statusRef, useCreateInStatus } from '../list/useCreateInStatus';
 import type { ListScope } from '../views/taskQuery';
 import { useViewParams } from '../views/useViewParams';
@@ -82,6 +83,7 @@ export function Board({ scope, boardKey, label, tasks, project, members }: Board
   const [adding, setAdding] = useState<string | null>(null);
   const createInStatus = useCreateInStatus(project, tasks, members);
   const move = useMoveTask();
+  const undoToast = useMoveUndoToast();
 
   const { params } = view;
   const taskHref = useCallback(
@@ -204,6 +206,7 @@ export function Board({ scope, boardKey, label, tasks, project, members }: Board
       drop.prevId,
       drop.nextId,
     );
+    const origin = tasks.filter((x) => x.status.id === task.status.id);
     move.mutate(
       { task, status: statusRef(status), ...placement },
       {
@@ -212,6 +215,8 @@ export function Board({ scope, boardKey, label, tasks, project, members }: Board
         },
       },
     );
+    // Dropping into Done completes the task: offer to put it back.
+    undoToast(task, statusRef(status), origin);
     // The dropped order is the manual order: show it.
     if (view.sort !== 'manual') view.update({ sort: null });
   }

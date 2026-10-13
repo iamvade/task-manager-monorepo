@@ -12,3 +12,6 @@ test-results/
 .DS_Store
 apps/web/e2e/.auth/
 backups/
+
+# Usability review screenshots (14 MB of PNGs; the review text is committed)
+docs/review/screenshots/

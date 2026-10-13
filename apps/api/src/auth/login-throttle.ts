@@ -4,7 +4,7 @@
  * - per email + IP: `perClient` failures per window (guessing from one place);
  * - per email: `perAccount` failures per window from anywhere (guessing from many IPs).
  *
- * In-memory, so per API process; the per-IP route limit still applies on top.
+ * In-memory, so per API process. This is the only login limit: there is no per-IP request cap.
  */
 export class LoginThrottle {
   private readonly counts = new Map<string, { failures: number; resetAt: number }>();
