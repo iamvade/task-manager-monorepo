@@ -20,6 +20,7 @@ const KNOWN_CODES = [
   'FILE_TOO_LARGE',
   'FILE_TYPE_BLOCKED',
   'STORAGE_QUOTA_EXCEEDED',
+  'SPACE_NOT_EMPTY',
 ];
 
 /** The toast text for a failed request: by API error code, offline, or the generic line. */

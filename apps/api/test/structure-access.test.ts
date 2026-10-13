@@ -93,6 +93,7 @@ describe('structural API access control', () => {
     ['DELETE', `/spaces/${ids.emptySpace}`],
     ['POST', `/workspaces/${ids.ws}/projects`, { spaceId: ids.space, name: 'Another' }],
     ['GET', `/projects/${ids.project}`],
+    ['GET', `/workspaces/${ids.ws}/archived-projects`],
     ['PATCH', `/projects/${ids.project}`, { color: 'teal' }],
     ['POST', `/projects/${ids.project}/move`, {}],
     ['POST', `/projects/${ids.project}/archive`],

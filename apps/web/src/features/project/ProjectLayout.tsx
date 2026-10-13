@@ -5,6 +5,7 @@ import { ErrorState } from '../../components/ErrorState';
 import { HeaderSkeleton } from '../views/HeaderSkeleton';
 import { useCurrentView } from '../views/useCurrentView';
 import { useViewParams } from '../views/useViewParams';
+import { ArchivedBanner } from './ArchivedBanner';
 import { FilterStrip } from './FilterStrip';
 import { ProjectHeader } from './ProjectHeader';
 
@@ -30,6 +31,7 @@ export function ProjectLayout() {
   return (
     <>
       <ProjectHeader project={project.data} view={view} />
+      {project.data.archivedAt && <ArchivedBanner project={project.data} />}
       {project.data.taskCount > 0 && <FilterStrip project={project.data} />}
       <Outlet context={project.data} />
     </>

@@ -108,7 +108,15 @@
     "spaceOptions": "Space options",
     "copyLink": "Copy link",
     "linkCopied": "Link copied",
-    "allProjects": "All projects"
+    "allProjects": "All projects",
+    "archiveProject": "Archive project",
+    "restoreProject": "Restore project",
+    "projectArchived": "{{name}} archived",
+    "projectRestored": "{{name}} restored",
+    "archivedBanner": "This project is archived. It’s hidden from the sidebar, search, My Tasks and reports.",
+    "deleteSpace": "Delete space",
+    "deleteSpaceConfirm": "Delete the space “{{name}}”? This can’t be undone.",
+    "spaceDeleted": "{{name}} deleted"
   },
   "views": {
     "view": "View",
@@ -768,7 +776,8 @@
       "profile": "Profile",
       "preferences": "Preferences",
       "notifications": "Notifications",
-      "members": "Members"
+      "members": "Members",
+      "archived": "Archived"
     },
     "profile": {
       "name": "Name",
@@ -851,6 +860,15 @@
       "capacityUnit": "pts / 2 wks",
       "capacityHint": "Points each person can take on over the next 2 weeks. Workload shows it as the dashed capacity marker.",
       "saved": "Saved"
+    },
+    "archived": {
+      "title": "Archived projects",
+      "hint": "Archived projects are hidden from the sidebar, search, My Tasks and reports. Their tasks are kept.",
+      "empty": "No archived projects",
+      "archivedOn": "Archived {{date}}",
+      "restore": "Restore",
+      "adminsOnly": "Only admins can restore projects.",
+      "loadError": "Couldn’t load archived projects."
     }
   },
   "errors": {
@@ -861,7 +879,8 @@
     "FILE_TYPE_BLOCKED": "That file type isn’t allowed.",
     "STORAGE_QUOTA_EXCEEDED": "This workspace is out of file storage. Delete old attachments to free space.",
     "UNAUTHORIZED": "Your session ended. Sign in again.",
-    "network": "Can’t reach the server. Check your connection and try again."
+    "network": "Can’t reach the server. Check your connection and try again.",
+    "SPACE_NOT_EMPTY": "This space still has projects, archived ones included. Move them to another space first."
   },
   "reports": {
     "title": "Reports",

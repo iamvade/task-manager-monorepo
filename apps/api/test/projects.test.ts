@@ -1,4 +1,5 @@
 import {
+  archivedProjectSchema,
   projectDetailSchema,
   sidebarResponseSchema,
   spaceSchema,
@@ -241,9 +242,21 @@ describe('spaces, projects and the sidebar', () => {
       (await api('GET', `/projects/${archived.id}`)).json(),
     );
     expect(archivedDetail.archivedAt).not.toBeNull();
+    const listArchived = async () =>
+      z
+        .array(archivedProjectSchema)
+        .parse((await api('GET', `/workspaces/${ws.id}/archived-projects`)).json());
+    // Most recently archived first, with the space.
+    await api('POST', `/projects/${roadmap.id}/archive`);
+    expect((await listArchived()).map((p) => [p.name, p.space.name])).toEqual([
+      ['Q4 Roadmap', 'Product'],
+      ['Old stuff', 'Product'],
+    ]);
+    await api('POST', `/projects/${roadmap.id}/unarchive`);
     await api('POST', `/projects/${archived.id}/unarchive`);
     const [row] = await ctx.db.select().from(projects).where(eq(projects.id, archived.id));
     expect(row?.archivedAt).toBeNull();
+    expect(await listArchived()).toEqual([]);
   });
 
   it('deletes only empty spaces and validates moves', async () => {

@@ -2,14 +2,14 @@ import type { WorkspaceRole } from '@kite/shared';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { RouterProvider, createMemoryRouter } from 'react-router';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '../../auth/AuthProvider';
 import i18n from '../../i18n';
 import { createQueryClient } from '../../queryClient';
 import { routes } from '../../router';
 import { useToastStore } from '../../stores/toast';
 import { useUiStore } from '../../stores/ui';
-import { ME, PROJECT, SIDEBAR, WORKSPACE_ID, mockApi } from '../../test/fixtures';
+import { ME, PROJECT, SIDEBAR, SPACE_ID, WORKSPACE_ID, mockApi } from '../../test/fixtures';
 import { at } from '../../test/tasks';
 
 const meAs = (role: WorkspaceRole) => ({
@@ -37,6 +37,21 @@ const INVITE = {
   role: 'member',
   expiresAt: '2026-10-15T00:00:00.000Z',
 };
+
+const archivedProject = (n: number, name: string, key: string, archivedAt: string) => ({
+  id: `01890000-0000-7000-8000-00000000092${String(n)}`,
+  workspaceId: WORKSPACE_ID,
+  spaceId: SPACE_ID,
+  key,
+  name,
+  color: 'blue',
+  archivedAt,
+  space: { id: SPACE_ID, name: 'Product', initial: 'P', color: 'violet' },
+});
+const ARCHIVED = [
+  archivedProject(1, 'Old site', 'OLD', '2026-10-06T04:00:00.000Z'),
+  archivedProject(2, 'Pilot', 'PIL', '2026-09-20T04:00:00.000Z'),
+];
 
 type Handler = (init?: RequestInit) => Response | Promise<Response>;
 
@@ -200,6 +215,69 @@ describe('Settings', () => {
         { title: 'Frontend engineer' },
         { capacityPoints: 12 },
       ]);
+    });
+  });
+  describe('Archived', () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date('2026-10-08T03:00:00Z'));
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('lists archived projects and restores one', async () => {
+      let archived = ARCHIVED;
+      const restored: string[] = [];
+      const old = ARCHIVED[0];
+      if (!old) throw new Error('fixture');
+      renderSettings('/settings?tab=archived', {
+        [`GET /api/v1/workspaces/${WORKSPACE_ID}/archived-projects`]: () => Response.json(archived),
+        [`POST /api/v1/projects/${old.id}/unarchive`]: () => {
+          restored.push(old.id);
+          archived = archived.filter((p) => p.id !== old.id);
+          return Response.json({ ...PROJECT, id: old.id, name: old.name, archivedAt: null });
+        },
+      });
+
+      const list = await screen.findByRole('list');
+      const rows = within(list).getAllByRole('listitem');
+      expect(rows.map((r) => r.textContent)).toEqual([
+        expect.stringContaining('Old siteOLDProduct · Archived Oct 6'),
+        expect.stringContaining('PilotPILProduct · Archived Sep 20'),
+      ]);
+      expect(within(at(rows, 0)).getByRole('link', { name: 'Old site' })).toHaveAttribute(
+        'href',
+        `/p/${old.id}/list`,
+      );
+
+      fireEvent.click(within(at(rows, 0)).getByRole('button', { name: 'Restore' }));
+      await waitFor(() => {
+        expect(screen.queryByText('Old site')).toBeNull();
+      });
+      expect(restored).toEqual([old.id]);
+      expect(useToastStore.getState().toasts.map((x) => x.message)).toEqual(['Old site restored']);
+    });
+
+    it('shows members the list without Restore', async () => {
+      renderSettings(
+        '/settings?tab=archived',
+        {
+          [`GET /api/v1/workspaces/${WORKSPACE_ID}/archived-projects`]: () =>
+            Response.json(ARCHIVED),
+        },
+        'member',
+      );
+      expect(await screen.findByText('Pilot')).toBeInTheDocument();
+      expect(screen.getByText('Only admins can restore projects.')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Restore' })).toBeNull();
+    });
+
+    it('says when nothing is archived', async () => {
+      renderSettings('/settings?tab=archived', {
+        [`GET /api/v1/workspaces/${WORKSPACE_ID}/archived-projects`]: () => Response.json([]),
+      });
+      expect(await screen.findByText('No archived projects')).toBeInTheDocument();
     });
   });
 });

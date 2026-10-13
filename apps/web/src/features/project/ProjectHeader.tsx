@@ -1,14 +1,17 @@
 import type { ProjectDetail } from '@kite/shared';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useToggleFavorite } from '../../api/projects';
-import { MoreIcon, SprintIcon, StarIcon } from '../../components/icons';
+import { useNavigate } from 'react-router';
+import { useSetArchived, useToggleFavorite } from '../../api/projects';
+import { useCurrentWorkspace } from '../../api/workspaces';
+import { ArchiveIcon, MoreIcon, SprintIcon, StarIcon, UnarchiveIcon } from '../../components/icons';
+import { Menu, type MenuItem } from '../../components/ui/Menu';
 import { AvatarStack } from '../../components/ui/AvatarStack';
 import { IconButton } from '../../components/ui/IconButton';
-import { Menu } from '../../components/ui/Menu';
 import { cn } from '../../lib/cn';
 import { useOnlineIds } from '../../stores/realtime';
 import { useCopyLink } from '../../lib/useCopyLink';
+import { toast } from '../../stores/toast';
 import { Breadcrumb } from '../views/Breadcrumb';
 import { PageHeader } from '../views/PageHeader';
 import { ShareButton } from '../views/ShareButton';
@@ -25,6 +28,53 @@ export function ProjectHeader({ project, view }: { project: ProjectDetail; view:
   const { copied, copy } = useCopyLink();
   const [newSprintOpen, setNewSprintOpen] = useState(false);
   const favoriteLabel = project.isFavorite ? t('header.unfavorite') : t('header.favorite');
+  const isAdmin = useCurrentWorkspace()?.role !== 'member';
+  const setArchived = useSetArchived(project.workspaceId);
+  const navigate = useNavigate();
+
+  function archive() {
+    const { id: projectId, name, spaceId } = project;
+    // The error toast comes from the mutation cache.
+    const failed = () => undefined;
+    // Promises, not per-call callbacks: the header unmounts when the space list opens.
+    setArchived
+      .mutateAsync({ projectId, archived: true })
+      .then(() => {
+        void navigate(`/s/${spaceId}/list`);
+        toast({
+          message: t('header.projectArchived', { name }),
+          action: {
+            label: t('common.undo'),
+            onClick: () => {
+              setArchived.mutateAsync({ projectId, archived: false }).catch(failed);
+            },
+          },
+        });
+      })
+      .catch(failed);
+  }
+
+  const archiveItems: MenuItem[] = !isAdmin
+    ? []
+    : project.archivedAt
+      ? [
+          {
+            id: 'restore',
+            label: t('header.restoreProject'),
+            icon: <UnarchiveIcon size={14} />,
+            onSelect: () => {
+              setArchived.mutate({ projectId: project.id, archived: false });
+            },
+          },
+        ]
+      : [
+          {
+            id: 'archive',
+            label: t('header.archiveProject'),
+            icon: <ArchiveIcon size={14} />,
+            onSelect: archive,
+          },
+        ];
 
   return (
     <PageHeader
@@ -91,6 +141,8 @@ export function ProjectHeader({ project, view }: { project: ProjectDetail; view:
                   setNewSprintOpen(true);
                 },
               },
+              ...(archiveItems.length ? [{ type: 'separator', id: 'sep-archive' } as const] : []),
+              ...archiveItems,
             ]}
             trigger={(props) => (
               <IconButton

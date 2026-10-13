@@ -1,13 +1,22 @@
 import { QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { RouterProvider, createMemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '../../auth/AuthProvider';
 import i18n from '../../i18n';
 import { createQueryClient } from '../../queryClient';
 import { routes } from '../../router';
+import { useToastStore } from '../../stores/toast';
 import { useUiStore } from '../../stores/ui';
-import { ME, PROJECT_ID, SIDEBAR, SPRINT_ID, WORKSPACE_ID, mockApi } from '../../test/fixtures';
+import {
+  ME,
+  PROJECT_ID,
+  SIDEBAR,
+  SPACE_ID,
+  SPRINT_ID,
+  WORKSPACE_ID,
+  mockApi,
+} from '../../test/fixtures';
 import { homeHandlers } from '../../test/home';
 import { PROJECT_WITH_STATUSES, listHandlers } from '../../test/tasks';
 
@@ -29,9 +38,14 @@ function api(extra: Record<string, (init?: RequestInit) => Response> = {}) {
     [`GET /api/v1/workspaces/${WORKSPACE_ID}/sidebar`]: () => Response.json(SIDEBAR),
     ...listHandlers(),
     ...homeHandlers(),
+    [`GET /api/v1/spaces/${SPACE_ID}/tasks`]: () => Response.json([]),
     ...extra,
   });
 }
+
+const asMember = () =>
+  Response.json({ ...ME, workspaces: ME.workspaces.map((w) => ({ ...w, role: 'member' })) });
+const toasts = () => useToastStore.getState().toasts;
 
 const body = (init?: RequestInit): unknown =>
   typeof init?.body === 'string' ? JSON.parse(init.body) : null;
@@ -250,5 +264,128 @@ describe('app shell', () => {
       expect(screen.queryByRole('dialog', { name: 'Шинэ спринт' })).toBeNull();
     });
     expect(posted).toEqual([{ startDate: '2026-10-26', endDate: '2026-11-06' }]);
+  });
+  it('archives a project from its options menu, with Undo', async () => {
+    useToastStore.setState({ toasts: [] });
+    const calls: string[] = [];
+    const archivedAt = '2026-10-08T03:00:00.000Z';
+    api({
+      [`POST /api/v1/projects/${PROJECT_ID}/archive`]: () => {
+        calls.push('archive');
+        return Response.json({ ...PROJECT_WITH_STATUSES, archivedAt });
+      },
+      [`POST /api/v1/projects/${PROJECT_ID}/unarchive`]: () => {
+        calls.push('unarchive');
+        return Response.json(PROJECT_WITH_STATUSES);
+      },
+    });
+    const router = renderAt(`/p/${PROJECT_ID}/list`);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Төслийн сонголтууд' }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Төслийг архивлах' }));
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe(`/s/${SPACE_ID}/list`);
+    });
+    const [toast] = toasts();
+    expect(toast?.message).toBe('App Redesign архивлагдлаа');
+    toast?.action?.onClick();
+    await waitFor(() => {
+      expect(calls).toEqual(['archive', 'unarchive']);
+    });
+  });
+
+  it('hides archive and space delete from members', async () => {
+    api({ 'GET /api/v1/auth/me': asMember });
+    const router = renderAt(`/p/${PROJECT_ID}/list`);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Төслийн сонголтууд' }));
+    await screen.findByRole('menuitem', { name: 'Шинэ спринт' });
+    expect(screen.queryByRole('menuitem', { name: 'Төслийг архивлах' })).toBeNull();
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
+
+    await act(() => router.navigate(`/s/${SPACE_ID}/list`));
+    fireEvent.click(await screen.findByRole('button', { name: 'Орон зайн сонголтууд' }));
+    await screen.findByRole('menuitem', { name: 'Холбоос хуулах' });
+    expect(screen.queryByRole('menuitem', { name: 'Орон зайг устгах' })).toBeNull();
+  });
+
+  it('shows a banner with Restore on an archived project', async () => {
+    const calls: string[] = [];
+    api({
+      [`GET /api/v1/projects/${PROJECT_ID}`]: () =>
+        Response.json({
+          ...PROJECT_WITH_STATUSES,
+          archivedAt: calls.length ? null : '2026-10-06T03:00:00.000Z',
+        }),
+      [`POST /api/v1/projects/${PROJECT_ID}/unarchive`]: () => {
+        calls.push('unarchive');
+        return Response.json(PROJECT_WITH_STATUSES);
+      },
+    });
+    renderAt(`/p/${PROJECT_ID}/list`);
+
+    expect(
+      await screen.findByText(
+        'Энэ төсөл архивлагдсан. Хажуугийн цэс, хайлт, Миний ажлууд болон тайланд харагдахгүй.',
+      ),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Төслийг сэргээх' }));
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: 'Төслийг сэргээх' })).toBeNull();
+    });
+    expect(calls).toEqual(['unarchive']);
+  });
+
+  it('deletes a space after confirming', async () => {
+    useToastStore.setState({ toasts: [] });
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const deleted: string[] = [];
+    api({
+      [`DELETE /api/v1/spaces/${SPACE_ID}`]: () => {
+        deleted.push(SPACE_ID);
+        return new Response(null, { status: 204 });
+      },
+    });
+    const router = renderAt(`/s/${SPACE_ID}/list`);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Орон зайн сонголтууд' }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Орон зайг устгах' }));
+    expect(confirm).toHaveBeenCalledWith('«Product» орон зайг устгах уу? Буцаах боломжгүй.');
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe('/my-tasks');
+    });
+    expect(deleted).toEqual([SPACE_ID]);
+    expect(toasts().map((x) => x.message)).toEqual(['Product устгагдлаа']);
+  });
+
+  it('keeps a space that still has projects, and asks before deleting', async () => {
+    useToastStore.setState({ toasts: [] });
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValueOnce(false).mockReturnValue(true);
+    const fetchMock = api({
+      [`DELETE /api/v1/spaces/${SPACE_ID}`]: () =>
+        Response.json(
+          { error: { code: 'SPACE_NOT_EMPTY', message: 'Move or delete its projects first' } },
+          { status: 409 },
+        ),
+    });
+    const router = renderAt(`/s/${SPACE_ID}/list`);
+    const openDelete = async () => {
+      fireEvent.click(await screen.findByRole('button', { name: 'Орон зайн сонголтууд' }));
+      fireEvent.click(await screen.findByRole('menuitem', { name: 'Орон зайг устгах' }));
+    };
+    const deletes = () => fetchMock.mock.calls.filter(([, init]) => init?.method === 'DELETE');
+
+    await openDelete();
+    expect(confirm).toHaveBeenCalledTimes(1);
+    expect(deletes()).toHaveLength(0);
+
+    await openDelete();
+    await waitFor(() => {
+      expect(toasts().map((x) => x.message)).toEqual([
+        'Энэ орон зайд төсөл (архивласан ч гэсэн) байна. Эхлээд тэдгээрийг өөр орон зай руу шилжүүлнэ үү.',
+      ]);
+    });
+    expect(deletes()).toHaveLength(1);
+    expect(router.state.location.pathname).toBe(`/s/${SPACE_ID}/list`);
   });
 });
