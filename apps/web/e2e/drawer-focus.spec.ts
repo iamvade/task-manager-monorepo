@@ -37,17 +37,28 @@ test.describe('keyboard', () => {
     await page.keyboard.press('Enter');
     const dialog = page.getByRole('dialog', { name: `Task ${key ?? ''}` });
     await expect(dialog).toBeVisible();
+    // Focus moves into the panel (and back from the focus guards) on the next animation frame.
+    const focusInside = () =>
+      page.evaluate(
+        () =>
+          new Promise<boolean>((resolve) => {
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                resolve(Boolean(document.activeElement?.closest('[role="dialog"]')));
+              });
+            });
+          }),
+      );
+    await expect.poll(focusInside).toBe(true);
 
     for (let i = 0; i < 60; i++) {
       await page.keyboard.press('Tab');
-      const inside = await page.evaluate(() => {
-        const active = document.activeElement;
-        return Boolean(active?.closest('[role="dialog"]'));
-      });
-      expect(inside, `Tab ${i + 1} left the drawer`).toBe(true);
+      expect(await focusInside(), `Tab ${i + 1} left the drawer`).toBe(true);
     }
-    for (let i = 0; i < 5; i++) await page.keyboard.press('Shift+Tab');
-    await expect(dialog).toBeVisible();
+    for (let i = 0; i < 5; i++) {
+      await page.keyboard.press('Shift+Tab');
+      expect(await focusInside(), `Shift+Tab ${i + 1} left the drawer`).toBe(true);
+    }
 
     await page.keyboard.press('Escape');
     await expect(dialog).toBeHidden();

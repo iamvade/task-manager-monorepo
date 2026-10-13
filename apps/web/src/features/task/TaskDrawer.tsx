@@ -24,22 +24,27 @@ export function TaskDrawer() {
   const opener = useRef<HTMLElement | null>(null);
   const lastKey = useRef<string | null>(null);
   const prevKey = useRef<string | null>(null);
-  // Layout effect: before the focus manager moves focus into the panel (a microtask later).
+  // Layout effect: on open, before the focus manager moves focus into the panel (a frame
+  // later); on close, after the panel is gone. Not an unmount cleanup: StrictMode's simulated
+  // unmount would steal focus back from the panel in development.
   useLayoutEffect(() => {
     if (key && !prevKey.current) {
       const active = document.activeElement;
       opener.current = active instanceof HTMLElement && active !== document.body ? active : null;
     }
+    if (!key && prevKey.current) {
+      // Back to the opener; if it re-rendered (realtime patch, regrouping), find the row/card
+      // by task key; else the page.
+      const k = lastKey.current;
+      const target =
+        (opener.current?.isConnected ? opener.current : null) ??
+        (k ? document.querySelector<HTMLElement>(`[data-task-key="${CSS.escape(k)}"]`) : null) ??
+        document.getElementById('main');
+      target?.focus({ preventScroll: true });
+    }
     if (key) lastKey.current = key;
     prevKey.current = key;
   }, [key]);
-
-  const returnFocusTo = useCallback(() => {
-    if (opener.current?.isConnected) return opener.current;
-    // The opener re-rendered (realtime patch, regrouping): find the row/card by task key.
-    const k = lastKey.current;
-    return k ? document.querySelector<HTMLElement>(`[data-task-key="${CSS.escape(k)}"]`) : null;
-  }, []);
 
   const close = useCallback(() => {
     // Replace, not push: Back after closing goes to the previous screen, not back into the
@@ -56,13 +61,7 @@ export function TaskDrawer() {
 
   if (!key || onTaskPage) return null;
   return (
-    <Drawer
-      open
-      onClose={close}
-      label={t('drawer.dialogLabel', { key })}
-      returnFocusTo={returnFocusTo}
-      contentKey={key}
-    >
+    <Drawer open onClose={close} label={t('drawer.dialogLabel', { key })} contentKey={key}>
       <Suspense fallback={null}>
         <TaskDetailView key={key} taskKey={key} layout="drawer" onClose={close} />
       </Suspense>

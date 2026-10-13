@@ -20,11 +20,6 @@ interface DrawerProps {
   children: ReactNode;
   /** Extra attributes on the panel (e.g. drop handlers for attachments). */
   panelProps?: HTMLAttributes<HTMLElement>;
-  /**
-   * Where focus goes when the drawer closes: the element that opened it, looked up at close
-   * time (it may have re-rendered meanwhile). Falls back to `#main`.
-   */
-  returnFocusTo?: () => HTMLElement | null;
   /** Changes when the content is swapped for another item: focus moves back to the panel. */
   contentKey?: string;
 }
@@ -37,7 +32,8 @@ const keepOpen = (event: MouseEvent) =>
  * Right-side panel over a scrim (TaskDetail.dc.html): 40% wide, min 520px (never wider than
  * the viewport), `--surface`, `--shadow-drawer`. Focus is trapped inside (and brought back
  * when the focused element disappears, e.g. a lazy section or a closed composer); Esc or a
- * click on the scrim closes it and focus returns to the opener.
+ * click on the scrim closes it. The owner returns focus to the opener (`TaskDrawer`), since
+ * floating-ui gives up when the opener re-rendered meanwhile.
  */
 export function Drawer(props: DrawerProps) {
   return (
@@ -47,15 +43,7 @@ export function Drawer(props: DrawerProps) {
   );
 }
 
-function DrawerPanel({
-  open,
-  onClose,
-  label,
-  children,
-  panelProps,
-  returnFocusTo,
-  contentKey,
-}: DrawerProps) {
+function DrawerPanel({ open, onClose, label, children, panelProps, contentKey }: DrawerProps) {
   const nodeId = useFloatingNodeId();
   const { context } = useFloating({
     nodeId,
@@ -82,7 +70,6 @@ function DrawerPanel({
             setFloating={setFloating}
             floatingProps={getFloatingProps(panelProps)}
             label={label}
-            returnFocusTo={returnFocusTo}
             contentKey={contentKey}
           >
             {children}
@@ -98,7 +85,6 @@ function Panel({
   setFloating,
   floatingProps,
   label,
-  returnFocusTo,
   contentKey,
   children,
 }: {
@@ -106,38 +92,17 @@ function Panel({
   setFloating: (node: HTMLElement | null) => void;
   floatingProps: Record<string, unknown>;
   label: string;
-  returnFocusTo: DrawerProps['returnFocusTo'];
   contentKey: string | undefined;
   children: ReactNode;
 }) {
   const panelRef = useRef<HTMLElement | null>(null);
-  const returnRef = useRef(returnFocusTo);
-  useEffect(() => {
-    returnRef.current = returnFocusTo;
-  });
-
-  // Return focus ourselves: floating-ui gives up when the opener re-rendered or the focused
-  // element inside the panel was removed, which is exactly when a list row needs it back.
-  useEffect(
-    () => () => {
-      const target = returnRef.current?.() ?? null;
-      queueMicrotask(() => {
-        const el = target?.isConnected ? target : document.getElementById('main');
-        el?.focus({ preventScroll: true });
-      });
-    },
-    [],
-  );
 
   // Another item in the same drawer (`?task=A` → `?task=B`): the old content, and the focus
   // with it, is gone; start from the panel again.
-  const first = useRef(true);
+  const shownKey = useRef(contentKey);
   useEffect(() => {
-    if (first.current) {
-      first.current = false;
-      return;
-    }
-    panelRef.current?.focus({ preventScroll: true });
+    if (shownKey.current !== contentKey) panelRef.current?.focus({ preventScroll: true });
+    shownKey.current = contentKey;
   }, [contentKey]);
 
   return (
