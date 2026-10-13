@@ -17,7 +17,8 @@
     "db:e2e": "tsx src/scripts/e2e-db.ts",
     "db:print": "tsx src/scripts/print-project.ts",
     "db:waits": "tsx src/scripts/status-waits.ts",
-    "db:perf": "tsx src/scripts/report-perf.ts"
+    "db:perf": "tsx src/scripts/report-perf.ts",
+    "db:scenario": "tsx src/scripts/scenario.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1149.0",

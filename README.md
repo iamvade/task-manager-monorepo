@@ -97,21 +97,22 @@ Docker Compose on one server: Caddy (automatic HTTPS, serves the SPA and proxies
 
 ## Scripts (run from the repo root)
 
-| Script             | Does                                                         |
-| ------------------ | ------------------------------------------------------------ |
-| `pnpm dev`         | API (tsx watch) + web (Vite) in parallel                     |
-| `pnpm build`       | Production builds of all packages                            |
-| `pnpm typecheck`   | `tsc` in every package                                       |
-| `pnpm lint`        | ESLint over the repo                                         |
-| `pnpm format`      | Prettier write                                               |
-| `pnpm test`        | Vitest in every package (API tests need `docker compose up`) |
-| `pnpm e2e`         | Playwright end-to-end tests (see below)                      |
-| `pnpm db:generate` | Generate a migration from `apps/api/src/db/schema`           |
-| `pnpm db:migrate`  | Apply migrations                                             |
-| `pnpm db:init`     | Create the first workspace + owner on an empty database      |
-| `pnpm db:seed`     | Insert the sample data from the designs                      |
-| `pnpm db:reset`    | Drop everything, migrate, seed (refuses in production)       |
-| `pnpm db:print`    | Print a project's tasks by status (`pnpm db:print CHK`)      |
+| Script             | Does                                                           |
+| ------------------ | -------------------------------------------------------------- |
+| `pnpm dev`         | API (tsx watch) + web (Vite) in parallel                       |
+| `pnpm build`       | Production builds of all packages                              |
+| `pnpm typecheck`   | `tsc` in every package                                         |
+| `pnpm lint`        | ESLint over the repo                                           |
+| `pnpm format`      | Prettier write                                                 |
+| `pnpm test`        | Vitest in every package (API tests need `docker compose up`)   |
+| `pnpm e2e`         | Playwright end-to-end tests (see below)                        |
+| `pnpm db:generate` | Generate a migration from `apps/api/src/db/schema`             |
+| `pnpm db:migrate`  | Apply migrations                                               |
+| `pnpm db:init`     | Create the first workspace + owner on an empty database        |
+| `pnpm db:seed`     | Insert the sample data from the designs                        |
+| `pnpm db:reset`    | Drop everything, migrate, seed (refuses in production)         |
+| `pnpm db:print`    | Print a project's tasks by status (`pnpm db:print CHK`)        |
+| `pnpm db:scenario` | Add a realistic test workspace (`small` or `large`, see below) |
 
 ### Sample data
 
@@ -119,6 +120,15 @@ Docker Compose on one server: Caddy (automatic HTTPS, serves the SPA and proxies
 
 - `SEED_LANG=mn|en` (default `mn`): language of task, project, space, tag and people names that the designs have in both languages.
 - `SEED_TODAY=2026-10-08`: pin "today" for an exact match with the mockups (weekday-based views such as My Tasks' _This Week_ only match on a Thursday).
+
+### Scenario data
+
+`pnpm db:scenario small|large` adds a realistic workspace next to the design seed (re-running replaces it, `--drop` removes it, refuses in production). Dates are relative to today (`SEED_TODAY` pins it); everyone's password is `password123`, and the command prints a login for each role and situation.
+
+- **small** — "Nomad Labs" (`@nomadlabs.test`): 7 people, 2 spaces, 4 projects, ~300 tasks over 3 months. A busy lead, a designer who mostly comments, an overloaded developer, someone on vacation with tasks still assigned, a new joiner from last week.
+- **large** — "Altai Group" (`@altaigroup.test`, ~45 s): 120 people in 8 departments plus 9 who left (still assignees, one still a project lead), 10 spaces, 60 projects (5 archived, 4 with 1,000+ tasks), ~25k tasks over a year, 300+ tags, two-week sprints in the engineering spaces only. Mixed Mongolian/English names with shared first names (three Bat-Erdenes, two Sarangerels with the same short name, two Anus) and long Mongolian project and task names; a few people sit in 20+ projects.
+
+Both have mostly small tasks, a few 50+ comment threads, tasks without an assignee or due date, and a pile of stale tasks nobody touches. Code: `apps/api/src/db/scenario/`.
 
 API tests run against `TEST_DATABASE_URL` (the `kite_test` database); migrations are applied to it automatically before the suite.
 
