@@ -221,8 +221,7 @@
     "setTags": "Tags of {{name}}",
     "open": "Open",
     "reopen": "Reopen",
-    "delete": "Delete",
-    "deleteConfirm": "Delete “{{name}}”? You can restore it later."
+    "delete": "Delete"
   },
   "status": {
     "todo": "To Do",
@@ -419,7 +418,8 @@
     "duplicate": "Duplicate",
     "duplicated": "Duplicated as {{key}}",
     "deleted": "{{key}} deleted",
-    "undo": "Undo",
+    "deletedBanner": "This task was deleted. Restore it to edit or comment.",
+    "restore": "Restore",
     "movedTo": "Moved to {{project}} as {{key}}",
     "notFound": "This task doesn't exist or was deleted.",
     "startDate": "Start date",

@@ -7,6 +7,7 @@ import { AuthProvider } from '../../auth/AuthProvider';
 import i18n from '../../i18n';
 import { createQueryClient } from '../../queryClient';
 import { routes } from '../../router';
+import { useToastStore } from '../../stores/toast';
 import { useUiStore } from '../../stores/ui';
 import { ME, PROJECT_ID, SIDEBAR, SPACE_ID, WORKSPACE_ID, mockApi } from '../../test/fixtures';
 import { PROJECT_WITH_STATUSES, at, listHandlers, makeTasks, statusOf } from '../../test/tasks';
@@ -122,6 +123,47 @@ describe('project list', () => {
       [`status:${statusOf('done').id}`]: false,
       [`status:${statusOf('todo').id}`]: true,
     });
+  });
+
+  it('deletes a row from its menu with an Undo toast that restores it', async () => {
+    useToastStore.setState({ toasts: [] });
+    const calls: string[] = [];
+    const { state } = api((st) => {
+      const audit = at(st.tasks, 0);
+      return {
+        [`DELETE /api/v1/tasks/${audit.id}`]: () => {
+          calls.push('delete');
+          st.tasks = st.tasks.filter((t) => t.id !== audit.id);
+          return new Response(null, { status: 204 });
+        },
+        [`POST /api/v1/tasks/${audit.id}/restore`]: () => {
+          calls.push('restore');
+          st.tasks = [audit, ...st.tasks];
+          return Response.json(detail(audit));
+        },
+      };
+    });
+    const audit = at(state.tasks, 0);
+    renderAt(LIST);
+    expect(await screen.findByText(audit.title)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: `«${audit.title}» — нэмэлт үйлдэл` }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Устгах' }));
+    // No confirm: the row goes right away and the toast offers Undo.
+    await waitFor(() => {
+      expect(screen.queryByText(audit.title)).toBeNull();
+    });
+    await waitFor(() => {
+      expect(calls).toEqual(['delete']);
+    });
+    const toast = await screen.findByText(`${audit.key} устгагдлаа`);
+    fireEvent.click(
+      within(toast.closest('[role="status"]') ?? toast).getByRole('button', { name: 'Буцаах' }),
+    );
+    await waitFor(() => {
+      expect(calls).toEqual(['delete', 'restore']);
+    });
+    expect(await screen.findByText(audit.title)).toBeInTheDocument();
   });
 
   it('completes a task optimistically and rolls back on error', async () => {

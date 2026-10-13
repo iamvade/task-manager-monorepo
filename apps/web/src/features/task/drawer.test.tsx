@@ -369,6 +369,36 @@ describe('task drawer', () => {
     );
   });
 
+  it('shows a deleted task read-only with a banner, and Restore brings it back', async () => {
+    const { state, task } = setup({ deletedAt: '2026-10-08T05:00:00.000Z' });
+    const restores: string[] = [];
+    api(state, (s) => ({
+      [`POST /api/v1/tasks/${task.id}/restore`]: () => {
+        restores.push(task.id);
+        s.detail = { ...s.detail, deletedAt: null };
+        return Response.json(s.detail);
+      },
+    }));
+    renderAt(`${LIST}&task=APP-135`);
+    const dialog = await drawer();
+    const bannerText = 'This task was deleted. Restore it to edit or comment.';
+    expect(await within(dialog).findByText(bannerText)).toBeInTheDocument();
+    // Read-only: no Mark complete, no composer, the body is inert.
+    expect(within(dialog).queryByRole('button', { name: 'Mark complete' })).toBeNull();
+    expect(within(dialog).queryByRole('textbox', { name: 'Write a comment' })).toBeNull();
+    expect(dialog.querySelector('[inert]')).not.toBeNull();
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Restore' }));
+    await waitFor(() => {
+      expect(restores).toEqual([task.id]);
+    });
+    await waitFor(() => {
+      expect(within(dialog).queryByText(bannerText)).toBeNull();
+    });
+    expect(within(dialog).getByRole('button', { name: 'Mark complete' })).toBeInTheDocument();
+    expect(dialog.querySelector('[inert]')).toBeNull();
+  });
+
   it('asks in a dialog before deleting a comment', async () => {
     const { state, task } = setup();
     const commentId = '01890000-0000-7000-8000-700000000009';

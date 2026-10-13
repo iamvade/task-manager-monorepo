@@ -223,6 +223,10 @@ export function useRestoreTask() {
     mutationKey: TASK_MUTATION,
     mutationFn: (task: Pick<TaskListItem, 'id'>) =>
       apiSend(`/tasks/${task.id}/restore`, taskDetailSchema, 'POST'),
+    onSuccess: (detail) => {
+      // An open drawer/page of the deleted task flips back to live without waiting.
+      queryClient.setQueryData(queryKeys.task(detail.key), detail);
+    },
     onSettled: () => {
       settle(queryClient);
     },

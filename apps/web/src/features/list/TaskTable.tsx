@@ -37,7 +37,6 @@ import { useTranslation } from 'react-i18next';
 import {
   isTempTask,
   useCompleteTask,
-  useDeleteTask,
   useMoveTask,
   useSetAssignees,
   useSetTags,
@@ -47,6 +46,7 @@ import { useAuth } from '../../auth/useAuth';
 import { isEditableTarget } from '../../lib/keyboard';
 import { useCopyLink } from '../../lib/useCopyLink';
 import { useShortNames } from '../../lib/useShortNames';
+import { useDeleteWithUndo } from '../task/useDeleteWithUndo';
 import { useUiStore, type CreateDefaults } from '../../stores/ui';
 import type { ListScope } from '../views/taskQuery';
 import { useViewParams } from '../views/useViewParams';
@@ -119,7 +119,7 @@ export function TaskTable({
   const showSize = useUiStore((s) => s.listColumns.size);
   const setAssigneesMutation = useSetAssignees();
   const setTagsMutation = useSetTags();
-  const remove = useDeleteTask();
+  const remove = useDeleteWithUndo();
   const createInStatus = useCreateInStatus(project, tasks, members);
   const { copied, copy } = useCopyLink();
   const memberUsers = useMemo(() => members.map((m) => m.user), [members]);
@@ -221,9 +221,7 @@ export function TaskTable({
       setSelectedId(task.id);
     },
     toggleComplete,
-    remove: (task) => {
-      if (window.confirm(t('table.deleteConfirm', { name: task.title }))) remove.mutate(task);
-    },
+    remove,
     copyLink: (task) => {
       void copy(`${window.location.origin}/t/${task.key}`);
     },

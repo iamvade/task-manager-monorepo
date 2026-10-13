@@ -208,9 +208,15 @@ describe('updating tasks', () => {
     expect(await titles()).toEqual([]);
     const deleted = taskDetailSchema.parse((await api('GET', `/tasks/${task.id}`)).json());
     expect(deleted.deletedAt).not.toBeNull();
-    // Deleted tasks can't be edited or deleted again.
+    // Deleted tasks can't be edited or deleted again, but their feed still reads.
     expect((await api('PATCH', `/tasks/${task.id}`, { title: 'x' })).statusCode).toBe(404);
     expect((await api('DELETE', `/tasks/${task.id}`)).statusCode).toBe(404);
+    const feed = await api('GET', `/tasks/${task.id}/activity`);
+    expect(feed.statusCode).toBe(200);
+    expect(feed.json<{ type?: string }[]>().map((f) => f.type)).toEqual([
+      'task.created',
+      'task.deleted',
+    ]);
 
     const restored = await api('POST', `/tasks/${task.id}/restore`);
     expect(restored.statusCode, restored.body).toBe(200);

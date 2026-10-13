@@ -196,6 +196,14 @@ function patchNow(queryClient: QueryClient, m: RealtimeTaskMessage) {
           );
         }
       }
+      // Someone looking at it sees the "deleted" banner right away.
+      patchDetails(queryClient, m.taskId, (task) => ({
+        ...task,
+        deletedAt: new Date().toISOString(),
+      }));
+      return;
+    case 'task.created':
+      if (m.restored) patchDetails(queryClient, m.taskId, (task) => ({ ...task, deletedAt: null }));
       return;
     case 'comment.created':
       patchRows(queryClient, m.taskId, (t) => ({ ...t, commentCount: t.commentCount + 1 }), true);
@@ -221,6 +229,18 @@ function patchNow(queryClient: QueryClient, m: RealtimeTaskMessage) {
 }
 
 /** Patches the task's list rows (and its open detail with `detail`). */
+function patchDetails(
+  queryClient: QueryClient,
+  taskId: string,
+  patch: (task: TaskDetail) => TaskDetail,
+) {
+  for (const [key, task] of queryClient.getQueriesData<TaskDetail>({
+    queryKey: queryKeys.taskDetails,
+  })) {
+    if (task?.id === taskId) queryClient.setQueryData(key, patch(task));
+  }
+}
+
 function patchRows(queryClient: QueryClient, taskId: string, patch: Patch, detail = false) {
   for (const [key, tasks] of queryClient.getQueriesData<TaskListItem[]>({
     queryKey: queryKeys.taskLists,
