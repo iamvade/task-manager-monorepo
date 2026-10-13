@@ -44,6 +44,7 @@ export const SIDEBAR = {
       initial: 'P',
       color: 'violet',
       position: 'a0',
+      createdById: null,
       projects: [project(0, 'App Redesign'), project(1, 'Checkout v2'), project(2, 'Q4 Roadmap')],
     },
     {
@@ -52,6 +53,7 @@ export const SIDEBAR = {
       initial: 'E',
       color: 'green',
       position: 'a1',
+      createdById: null,
       projects: [project(3, 'Bug triage', '01890000-0000-7000-8000-000000000011')],
     },
   ],
@@ -82,6 +84,7 @@ export const PROJECT = {
   name: 'App Redesign',
   color: 'violet',
   archivedAt: null,
+  createdById: null,
   space: { id: SPACE_ID, name: 'Product', initial: 'P', color: 'violet' },
   position: 'a0',
   createdAt: '2026-01-01T00:00:00.000Z',

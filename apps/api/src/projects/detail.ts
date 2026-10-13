@@ -77,6 +77,7 @@ export async function buildProjectDetail(
     name: project.name,
     color: project.color,
     archivedAt: project.archivedAt?.toISOString() ?? null,
+    createdById: project.createdBy,
     space: { id: space.id, name: space.name, initial: space.initial, color: space.color },
     position: project.position,
     createdAt: project.createdAt.toISOString(),

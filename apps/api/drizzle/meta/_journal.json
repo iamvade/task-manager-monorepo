@@ -50,6 +50,13 @@
       "when": 1791738906116,
       "tag": "0006_report_backfill",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791883301171,
+      "tag": "0007_creator_columns",
+      "breakpoints": true
     }
   ]
 }

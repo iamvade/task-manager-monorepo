@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useSetArchived, useToggleFavorite } from '../../api/projects';
-import { useCurrentWorkspace } from '../../api/workspaces';
+import { useCanManageCreated } from '../../lib/useCanManageCreated';
 import { ArchiveIcon, MoreIcon, SprintIcon, StarIcon, UnarchiveIcon } from '../../components/icons';
 import { Menu, type MenuItem } from '../../components/ui/Menu';
 import { AvatarStack } from '../../components/ui/AvatarStack';
@@ -28,7 +28,7 @@ export function ProjectHeader({ project, view }: { project: ProjectDetail; view:
   const { copied, copy } = useCopyLink();
   const [newSprintOpen, setNewSprintOpen] = useState(false);
   const favoriteLabel = project.isFavorite ? t('header.unfavorite') : t('header.favorite');
-  const isAdmin = useCurrentWorkspace()?.role !== 'member';
+  const canArchive = useCanManageCreated(project.createdById);
   const setArchived = useSetArchived(project.workspaceId);
   const navigate = useNavigate();
 
@@ -54,7 +54,7 @@ export function ProjectHeader({ project, view }: { project: ProjectDetail; view:
       .catch(failed);
   }
 
-  const archiveItems: MenuItem[] = !isAdmin
+  const archiveItems: MenuItem[] = !canArchive
     ? []
     : project.archivedAt
       ? [

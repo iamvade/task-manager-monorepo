@@ -892,7 +892,7 @@
       "empty": "No archived projects",
       "archivedOn": "Archived {{date}}",
       "restore": "Restore",
-      "adminsOnly": "Only admins can restore projects.",
+      "adminsOnly": "Only admins and the person who created a project can restore it.",
       "loadError": "Couldn’t load archived projects."
     }
   },

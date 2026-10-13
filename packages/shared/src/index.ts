@@ -2,6 +2,7 @@ export * from './attachments.js';
 export * from './dates.js';
 export * from './enums.js';
 export * from './people.js';
+export * from './permissions.js';
 export * from './project-key.js';
 export * from './rich-text.js';
 export * from './schemas/auth.js';

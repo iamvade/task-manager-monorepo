@@ -1,8 +1,10 @@
+import { canManageCreated } from '@kite/shared';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet, useNavigate, useParams } from 'react-router';
 import { useDeleteSpace } from '../../api/spaces';
 import { useCurrentWorkspace, useSidebar } from '../../api/workspaces';
+import { useAuth } from '../../auth/useAuth';
 import { ErrorState } from '../../components/ErrorState';
 import { MoreIcon, TrashIcon } from '../../components/icons';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
@@ -30,12 +32,18 @@ export function SpaceLayout() {
   const { copied, copy } = useCopyLink();
   const navigate = useNavigate();
   const deleteSpace = useDeleteSpace(workspace?.id ?? '');
-  const isAdmin = workspace !== undefined && workspace.role !== 'member';
+  const { me } = useAuth();
   const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
 
   if (sidebar.isPending) return <HeaderSkeleton />;
   if (sidebar.isError) return <ErrorState error={sidebar.error} />;
   const space = sidebar.data.spaces.find((s) => s.id === spaceId);
+  // Admins, or the member who created the space (the API checks the same rule).
+  const canDelete =
+    space !== undefined &&
+    workspace !== undefined &&
+    me != null &&
+    canManageCreated(workspace.role, space.createdById, me.user.id);
   if (!space) return <ErrorState error={new ApiError(404, 'NOT_FOUND', 'Space not found')} />;
 
   function onDelete(target: { id: string; name: string }) {
@@ -52,7 +60,7 @@ export function SpaceLayout() {
 
   const items: MenuItem[] = [
     { id: 'copy', label: t('header.copyLink'), onSelect: () => void copy() },
-    ...(isAdmin
+    ...(canDelete
       ? ([
           { type: 'separator', id: 'sep-delete' },
           {

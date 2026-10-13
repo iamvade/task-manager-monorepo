@@ -8,7 +8,8 @@ import {
 import { asc, eq, max } from 'drizzle-orm';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { loadSpaceAccess, requireWorkspaceMember } from '../auth/access.js';
+import { loadSpaceAccess, requireCreatorOrAdmin, requireWorkspaceMember } from '../auth/access.js';
+import { requireAuth } from '../auth/plugin.js';
 import { movePosition, positionAfter } from '../db/position.js';
 import { one } from '../db/rows.js';
 import { projects, spaces } from '../db/schema/index.js';
@@ -24,6 +25,7 @@ const toSpaceDto = (s: typeof spaces.$inferSelect) => ({
   initial: s.initial,
   color: s.color,
   position: s.position,
+  createdById: s.createdBy,
 });
 
 /** "Product" → "P", "дизайн" → "Д". */
@@ -47,6 +49,7 @@ export const spaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     async (request, reply) => {
       const { workspaceId } = request.params;
       await requireWorkspaceMember(request, workspaceId);
+      const { user } = requireAuth(request);
       const { name, color, initial } = request.body;
       const space = await app.db.transaction(async (tx) => {
         const [last] = await tx
@@ -59,6 +62,7 @@ export const spaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           color,
           initial: initial ?? initialOf(name),
           position: positionAfter(last?.position),
+          createdBy: user.id,
         };
         return one(await tx.insert(spaces).values(values).returning(), 'space');
       });
@@ -128,13 +132,14 @@ export const spaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Spaces'],
         summary: 'Delete an empty space',
         description:
-          'Admin or owner. 409 `SPACE_NOT_EMPTY` while it still has projects (archived ones included).',
+          'Admin, owner, or the member who created the space. 409 `SPACE_NOT_EMPTY` while it still has projects (archived ones included).',
         params: spaceParams,
         response: { 204: z.null(), 401: err, 403: err, 404: err, 409: err },
       },
     },
     async (request, reply) => {
-      const { space } = await loadSpaceAccess(request, request.params.spaceId, 'admin');
+      const { space, role } = await loadSpaceAccess(request, request.params.spaceId);
+      requireCreatorOrAdmin(request, role, space.createdBy);
       await app.db.transaction(async (tx) => {
         // Lock the space so a project can't be created in it between the check and the delete.
         await tx

@@ -134,6 +134,7 @@ export const searchRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           name: p.name,
           color: p.color,
           archivedAt: null,
+          createdById: p.createdBy,
         })),
         people,
         tasks: taskRows

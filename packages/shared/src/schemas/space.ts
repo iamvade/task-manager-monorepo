@@ -14,6 +14,8 @@ export const spaceSchema = z
     initial: z.string(),
     color: paletteKeySchema,
     position: z.string(),
+    /** Who created it (may delete it while empty, like an admin); null before migration 0007. */
+    createdById: z.uuid().nullable(),
   })
   .meta({ id: 'Space' });
 export type Space = z.infer<typeof spaceSchema>;

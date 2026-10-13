@@ -46,6 +46,7 @@ const archivedProject = (n: number, name: string, key: string, archivedAt: strin
   name,
   color: 'blue',
   archivedAt,
+  createdById: null,
   space: { id: SPACE_ID, name: 'Product', initial: 'P', color: 'violet' },
 });
 const ARCHIVED = [
@@ -294,18 +295,24 @@ describe('Settings', () => {
       expect(useToastStore.getState().toasts.map((x) => x.message)).toEqual(['Old site restored']);
     });
 
-    it('shows members the list without Restore', async () => {
+    it('shows members Restore only on projects they created', async () => {
+      const [old, pilot] = ARCHIVED;
       renderSettings(
         '/settings?tab=archived',
         {
           [`GET /api/v1/workspaces/${WORKSPACE_ID}/archived-projects`]: () =>
-            Response.json(ARCHIVED),
+            Response.json([old, { ...pilot, createdById: ME.user.id }]),
         },
         'member',
       );
       expect(await screen.findByText('Pilot')).toBeInTheDocument();
-      expect(screen.getByText('Only admins can restore projects.')).toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'Restore' })).toBeNull();
+      expect(
+        screen.getByText('Only admins and the person who created a project can restore it.'),
+      ).toBeInTheDocument();
+      expect(screen.getAllByRole('button', { name: 'Restore' })).toHaveLength(1);
+      const pilotRow = screen.getByText('Pilot').closest('li');
+      if (!pilotRow) throw new Error('no row');
+      expect(within(pilotRow).getByRole('button', { name: 'Restore' })).toBeInTheDocument();
     });
 
     it('says when nothing is archived', async () => {
