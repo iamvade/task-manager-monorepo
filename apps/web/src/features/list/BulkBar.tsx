@@ -151,160 +151,165 @@ export function BulkBar({ project, tasks, members, teamIds, onClear }: BulkBarPr
     assignMode === 'remove' ? members.filter((m) => assignedIds.has(m.user.id)) : members;
 
   return (
-    <div
-      role="toolbar"
-      aria-label={t('bulk.label', { count })}
-      className="fixed bottom-20 left-1/2 z-[60] flex max-w-[calc(100vw-32px)] -translate-x-1/2 flex-wrap items-center gap-1.5 rounded-[12px] border border-default bg-surface p-1.5 pl-3.5 shadow-popover"
-    >
-      <span className="mr-1 text-[13px] font-medium whitespace-nowrap" aria-live="polite">
-        {t('bulk.selected', { count })}
-      </span>
-      <StatusPicker
-        value=""
-        statuses={project.statuses}
-        label={t('bulk.setStatus')}
-        onChange={(status) => {
-          const full = project.statuses.find((s) => s.id === status.id);
-          if (!full) return;
-          apply(
-            (task) =>
-              task.status.id === full.id
-                ? null
-                : { change: { statusId: full.id }, row: { status: statusRef(full) } },
-            t('bulk.moved', { count, status: full.name ?? t(`status.${full.category}`) }),
-          );
-        }}
-        trigger={(props) => (
-          <ToolbarButton {...props} icon={<StatusIcon size={14} />}>
-            {t('drawer.status')}
-          </ToolbarButton>
-        )}
-      />
-      {(sprints.data?.length ?? 0) > 0 && (
-        <SprintPicker
-          value={null}
-          sprints={sprints.data ?? []}
-          label={t('bulk.setSprint')}
-          onChange={(sprintId) => {
-            const sprint = sprints.data?.find((s) => s.id === sprintId);
+    // Full-width fixed strip so the bar can be as wide as it needs (a centred `fixed` element
+    // would shrink to half the viewport); clicks pass through around it.
+    <div className="pointer-events-none fixed inset-x-0 bottom-20 z-[60] flex justify-center px-4">
+      <div
+        role="toolbar"
+        aria-label={t('bulk.label', { count })}
+        className="pointer-events-auto flex max-w-full flex-wrap items-center gap-1.5 rounded-[12px] border border-default bg-surface p-1.5 pl-3.5 shadow-popover"
+      >
+        <span className="mr-1 text-[13px] font-medium whitespace-nowrap" aria-live="polite">
+          {t('bulk.selected', { count })}
+        </span>
+        <StatusPicker
+          value=""
+          statuses={project.statuses}
+          label={t('bulk.setStatus')}
+          onChange={(status) => {
+            const full = project.statuses.find((s) => s.id === status.id);
+            if (!full) return;
             apply(
               (task) =>
-                task.sprintId === sprintId ? null : { change: { sprintId }, row: { sprintId } },
-              sprint
-                ? t('bulk.sprint', {
-                    count,
-                    sprint: sprint.name ?? t('sprint.name', { number: sprint.number }),
-                  })
-                : t('bulk.noSprint', { count }),
+                task.status.id === full.id
+                  ? null
+                  : { change: { statusId: full.id }, row: { status: statusRef(full) } },
+              t('bulk.moved', { count, status: full.name ?? t(`status.${full.category}`) }),
             );
           }}
           trigger={(props) => (
-            <ToolbarButton {...props} icon={<SprintIcon size={14} />}>
-              {t('drawer.sprint')}
+            <ToolbarButton {...props} icon={<StatusIcon size={14} />}>
+              {t('drawer.status')}
             </ToolbarButton>
           )}
         />
-      )}
-      <span className="relative flex">
-        <Menu
-          label={t('bulk.assignees')}
-          items={(['add', 'replace', 'remove'] as const).map((mode) => ({
-            id: mode,
-            label: t(`bulk.assign.${mode}`),
-            disabled: mode === 'remove' && assignedIds.size === 0,
-            onSelect: () => {
-              // After the menu has closed and returned focus to its button.
-              requestAnimationFrame(() => {
-                setAssignMode(mode);
-              });
-            },
-          }))}
+        {(sprints.data?.length ?? 0) > 0 && (
+          <SprintPicker
+            value={null}
+            sprints={sprints.data ?? []}
+            label={t('bulk.setSprint')}
+            onChange={(sprintId) => {
+              const sprint = sprints.data?.find((s) => s.id === sprintId);
+              apply(
+                (task) =>
+                  task.sprintId === sprintId ? null : { change: { sprintId }, row: { sprintId } },
+                sprint
+                  ? t('bulk.sprint', {
+                      count,
+                      sprint: sprint.name ?? t('sprint.name', { number: sprint.number }),
+                    })
+                  : t('bulk.noSprint', { count }),
+              );
+            }}
+            trigger={(props) => (
+              <ToolbarButton {...props} icon={<SprintIcon size={14} />}>
+                {t('drawer.sprint')}
+              </ToolbarButton>
+            )}
+          />
+        )}
+        <span className="relative flex">
+          <Menu
+            label={t('bulk.assignees')}
+            items={(['add', 'replace', 'remove'] as const).map((mode) => ({
+              id: mode,
+              label: t(`bulk.assign.${mode}`),
+              disabled: mode === 'remove' && assignedIds.size === 0,
+              onSelect: () => {
+                // After the menu has closed and returned focus to its button.
+                requestAnimationFrame(() => {
+                  setAssignMode(mode);
+                });
+              },
+            }))}
+            trigger={(props) => (
+              <ToolbarButton {...props} icon={<PersonIcon size={14} />}>
+                {t('drawer.assignees')}
+              </ToolbarButton>
+            )}
+          />
+          <AssigneePicker
+            single
+            value={[]}
+            members={pickable}
+            teamIds={teamIds}
+            label={assignMode ? t(`bulk.assign.${assignMode}`) : t('bulk.assignees')}
+            open={assignMode !== null}
+            onOpenChange={(open) => {
+              if (!open) setAssignMode(null);
+            }}
+            onChange={([user]) => {
+              if (assignMode) assign(user, assignMode);
+              setAssignMode(null);
+            }}
+            trigger={(props) => (
+              <span ref={props.ref} aria-hidden="true" className="absolute inset-0 -z-10" />
+            )}
+          />
+        </span>
+        <DuePicker
+          value={null}
+          label={t('bulk.setDue')}
+          onChange={(dueDate) => {
+            apply(
+              (task) =>
+                task.dueDate === dueDate ? null : { change: { dueDate }, row: { dueDate } },
+              dueDate ? t('bulk.due', { count }) : t('bulk.noDue', { count }),
+            );
+          }}
           trigger={(props) => (
-            <ToolbarButton {...props} icon={<PersonIcon size={14} />}>
-              {t('drawer.assignees')}
+            <ToolbarButton {...props} icon={<CalendarIcon size={14} />}>
+              {t('table.colDue')}
             </ToolbarButton>
           )}
         />
-        <AssigneePicker
-          single
-          value={[]}
-          members={pickable}
-          teamIds={teamIds}
-          label={assignMode ? t(`bulk.assign.${assignMode}`) : t('bulk.assignees')}
-          open={assignMode !== null}
-          onOpenChange={(open) => {
-            if (!open) setAssignMode(null);
-          }}
-          onChange={([user]) => {
-            if (assignMode) assign(user, assignMode);
-            setAssignMode(null);
+        <PriorityPicker
+          value={'none'}
+          label={t('bulk.setPriority')}
+          onChange={(priority) => {
+            apply(
+              (task) =>
+                task.priority === priority ? null : { change: { priority }, row: { priority } },
+              t('bulk.priority', { count, priority: t(`priority.${priority}`) }),
+            );
           }}
           trigger={(props) => (
-            <span ref={props.ref} aria-hidden="true" className="absolute inset-0 -z-10" />
+            <ToolbarButton {...props} icon={<FlagIcon size={14} />}>
+              {t('table.colPriority')}
+            </ToolbarButton>
           )}
         />
-      </span>
-      <DuePicker
-        value={null}
-        label={t('bulk.setDue')}
-        onChange={(dueDate) => {
-          apply(
-            (task) => (task.dueDate === dueDate ? null : { change: { dueDate }, row: { dueDate } }),
-            dueDate ? t('bulk.due', { count }) : t('bulk.noDue', { count }),
-          );
-        }}
-        trigger={(props) => (
-          <ToolbarButton {...props} icon={<CalendarIcon size={14} />}>
-            {t('table.colDue')}
-          </ToolbarButton>
-        )}
-      />
-      <PriorityPicker
-        value={'none'}
-        label={t('bulk.setPriority')}
-        onChange={(priority) => {
-          apply(
-            (task) =>
-              task.priority === priority ? null : { change: { priority }, row: { priority } },
-            t('bulk.priority', { count, priority: t(`priority.${priority}`) }),
-          );
-        }}
-        trigger={(props) => (
-          <ToolbarButton {...props} icon={<FlagIcon size={14} />}>
-            {t('table.colPriority')}
-          </ToolbarButton>
-        )}
-      />
-      <ToolbarButton
-        icon={<TrashIcon size={14} />}
-        className="text-danger"
-        onClick={() => {
-          const ids = tasks.map((task) => task.id);
-          onClear();
-          remove.mutate(ids, {
-            onSuccess: () => {
-              toast({
-                message: t('bulk.deleted', { count: ids.length }),
-                action: {
-                  label: t('common.undo'),
-                  onClick: () => {
-                    restore.mutate(ids);
+        <ToolbarButton
+          icon={<TrashIcon size={14} />}
+          className="text-danger"
+          onClick={() => {
+            const ids = tasks.map((task) => task.id);
+            onClear();
+            remove.mutate(ids, {
+              onSuccess: () => {
+                toast({
+                  message: t('bulk.deleted', { count: ids.length }),
+                  action: {
+                    label: t('common.undo'),
+                    onClick: () => {
+                      restore.mutate(ids);
+                    },
                   },
-                },
-              });
-            },
-          });
-        }}
-      >
-        {t('table.delete')}
-      </ToolbarButton>
-      <IconButton
-        label={t('bulk.clear')}
-        title={t('bulk.clear')}
-        size={32}
-        onClick={onClear}
-        icon={<CloseIcon size={14} />}
-      />
+                });
+              },
+            });
+          }}
+        >
+          {t('table.delete')}
+        </ToolbarButton>
+        <IconButton
+          label={t('bulk.clear')}
+          title={t('bulk.clear')}
+          size={32}
+          onClick={onClear}
+          icon={<CloseIcon size={14} />}
+        />
+      </div>
     </div>
   );
 }
