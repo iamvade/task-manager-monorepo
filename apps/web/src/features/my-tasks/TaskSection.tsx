@@ -28,7 +28,9 @@ interface TaskSectionProps {
 export function TaskSection({ id, label, hint, tasks, onToggle, onAdd }: TaskSectionProps) {
   const { t } = useTranslation();
   const bodyId = useId();
-  const collapsed = useUiStore((s) => s.collapsedGroups[LIST_ID]?.[id] ?? id === 'done');
+  const collapsed = useUiStore(
+    (s) => s.collapsedGroups[LIST_ID]?.[id] ?? (id === 'done' || id === 'requested'),
+  );
   const setCollapsed = useUiStore((s) => s.setGroupCollapsed);
 
   return (

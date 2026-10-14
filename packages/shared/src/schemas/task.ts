@@ -29,6 +29,8 @@ export const taskListQuerySchema = z.object({
   /** Status category; the space-level list filters by it since statuses are per project. */
   statusCategory: queryArray(statusCategorySchema),
   assigneeId: queryArray(z.union([z.uuid(), z.literal(UNASSIGNED)])),
+  /** Who created the task ("Created by me"). */
+  createdBy: queryArray(z.uuid()),
   tagId: queryArray(z.uuid()),
   priority: queryArray(prioritySchema),
   sprintId: z.uuid().optional(),

@@ -166,7 +166,8 @@
       "priority": "Priority",
       "tag": "Tags",
       "sprint": "Sprint",
-      "due": "Due date"
+      "due": "Due date",
+      "creator": "Created by"
     },
     "is": {
       "status": "Status is",
@@ -174,7 +175,8 @@
       "priority": "Priority is",
       "tag": "Tags include",
       "sprint": "Sprint is",
-      "due": "Due"
+      "due": "Due",
+      "creator": "Created by"
     },
     "me": "Me",
     "clearAll": "Clear all",
@@ -515,7 +517,9 @@
       "later": "Later",
       "laterHint": "After this week",
       "rangeHint": "{{start}} – {{end}}",
-      "done": "Done this week"
+      "done": "Done this week",
+      "requested": "Requested by me",
+      "requestedHint": "Open tasks you created for others"
     },
     "recentActivity": "Recent activity",
     "viewInbox": "View inbox",
@@ -1290,7 +1294,8 @@
         "workedWith": "Worked with most",
         "openTasks": "Current open tasks",
         "openLink": "See workload",
-        "comments": "Comments on others’ tasks"
+        "comments": "Comments on others’ tasks",
+        "completedTasks": "Completed in this period"
       },
       "mine": {
         "titles": {
@@ -1322,10 +1327,26 @@
         "workedWith": "People you worked with most",
         "openTasks": "Your open tasks",
         "openLink": "Go to My Tasks",
-        "comments": "Comments on others’ tasks"
+        "comments": "Comments on others’ tasks",
+        "completedTasks": "What you completed"
       },
       "rangeWeek": "{{range}} · compared with the week before",
-      "rangeMonth": "{{range}} · compared with the month before"
+      "rangeMonth": "{{range}} · compared with the month before",
+      "completedList": {
+        "cols": {
+          "task": "Task",
+          "project": "Project",
+          "completed": "Completed",
+          "cycle": "Cycle time",
+          "priority": "Priority"
+        },
+        "empty": "Nothing completed in this period",
+        "days_one": "{{value}} day",
+        "days_other": "{{value}} days",
+        "showAll": "Show all {{count}}",
+        "showLess": "Show fewer",
+        "show": "Show the completed tasks"
+      }
     },
     "chartTable": {
       "week": "Week",

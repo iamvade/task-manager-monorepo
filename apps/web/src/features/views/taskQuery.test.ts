@@ -41,4 +41,9 @@ describe('toTaskQuery', () => {
       doneSince: '2026-09-25',
     });
   });
+
+  it('maps "Created by" with me to createdBy', () => {
+    const filters = readFilters(new URLSearchParams(`creator=me,${T1},bogus`));
+    expect(toTaskQuery(filters, ME_ID, 'project')).toEqual({ createdBy: [ME_ID, T1] });
+  });
 });

@@ -135,6 +135,10 @@ function HomeBody({ workspaceId, home }: { workspaceId: string; home: Home }) {
       dueDate: tomorrow,
     },
     later: { label: t('myTasks.sections.later'), hint: t('myTasks.sections.laterHint') },
+    requested: {
+      label: t('myTasks.sections.requested'),
+      hint: t('myTasks.sections.requestedHint'),
+    },
     done: {
       label: t('myTasks.sections.done'),
       hint: t('myTasks.sections.rangeHint', {
@@ -174,7 +178,7 @@ function HomeBody({ workspaceId, home }: { workspaceId: string; home: Home }) {
           <div className="flex min-w-[640px] flex-col gap-4">
             {SECTION_IDS.map((id) => {
               const tasks = shown.sections[id];
-              if (id === 'overdue' && tasks.length === 0) return null;
+              if ((id === 'overdue' || id === 'requested') && tasks.length === 0) return null;
               const section = sections[id];
               return (
                 <TaskSection
@@ -184,7 +188,7 @@ function HomeBody({ workspaceId, home }: { workspaceId: string; home: Home }) {
                   hint={section.hint}
                   tasks={tasks}
                   onToggle={toggle(id)}
-                  onAdd={id === 'done' ? undefined : add(section.dueDate)}
+                  onAdd={id === 'done' || id === 'requested' ? undefined : add(section.dueDate)}
                 />
               );
             })}

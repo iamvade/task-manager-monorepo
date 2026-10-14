@@ -13,6 +13,7 @@ export const FILTER_PARAMS = [
   'sprint',
   'status',
   'assignee',
+  'creator',
   'priority',
   'tag',
   'dueFrom',
@@ -34,6 +35,7 @@ export function clearedFilters(hasActiveSprint: boolean): Record<string, string 
   return {
     status: null,
     assignee: null,
+    creator: null,
     priority: null,
     tag: null,
     dueFrom: null,
@@ -48,6 +50,8 @@ export interface ViewFilters {
   status: string[];
   /** User ids, `me`, `unassigned`. */
   assignee: string[];
+  /** Who created the task: user ids, `me` ("Created by me"). */
+  creator: string[];
   priority: Priority[];
   tag: string[];
   sprint: string | null;
@@ -56,7 +60,7 @@ export interface ViewFilters {
 }
 
 /** Filter fields shown as chips / counted on the Filter button. */
-export type FilterField = 'status' | 'assignee' | 'priority' | 'tag' | 'sprint' | 'due';
+export type FilterField = 'status' | 'assignee' | 'creator' | 'priority' | 'tag' | 'sprint' | 'due';
 
 const list = (value: string | null) => (value ? value.split(',').filter(Boolean) : []);
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -67,6 +71,7 @@ export function readFilters(params: URLSearchParams): ViewFilters {
   return {
     status: list(params.get('status')),
     assignee: list(params.get('assignee')),
+    creator: list(params.get('creator')),
     priority: list(params.get('priority')).filter((p): p is Priority =>
       PRIORITIES.some((x) => x === p),
     ),
@@ -82,6 +87,7 @@ export function activeFilterFields(filters: ViewFilters): FilterField[] {
   if (filters.sprint) fields.push('sprint');
   if (filters.status.length) fields.push('status');
   if (filters.assignee.length) fields.push('assignee');
+  if (filters.creator.length) fields.push('creator');
   if (filters.priority.length) fields.push('priority');
   if (filters.tag.length) fields.push('tag');
   if (filters.dueFrom || filters.dueTo) fields.push('due');

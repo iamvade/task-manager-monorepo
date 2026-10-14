@@ -45,6 +45,7 @@ export function myTask(
     status: { id: status.id, name: null, category: status.category, color: null },
     project,
     space,
+    assignees: [],
   };
 }
 
@@ -144,7 +145,14 @@ export const HOME = homeSchema.parse({
   today: '2026-10-08',
   timezone: 'Asia/Ulaanbaatar',
   weekStart: '2026-10-05',
-  sections: { overdue: OVERDUE, today: TODAY, thisWeek: THIS_WEEK, later: LATER, done: DONE },
+  sections: {
+    overdue: OVERDUE,
+    today: TODAY,
+    thisWeek: THIS_WEEK,
+    later: LATER,
+    done: DONE,
+    requested: [],
+  },
   stats: {
     dueToday: { open: 3, total: 4, urgent: 1 },
     completedThisWeek: { count: 7, delta: 3, perDay: [2, 3, 1, 1, 0, 0, 0] },

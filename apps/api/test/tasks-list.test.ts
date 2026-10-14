@@ -156,6 +156,8 @@ describe('listing tasks', () => {
       'Checkout page — responsive layout',
     ]);
     expect(await t('?hasDueDate=false')).toEqual(['Payment icons']);
+    expect(await t(`?createdBy=${owner.id}`)).toHaveLength(5);
+    expect(await t(`?createdBy=${saraId}`)).toEqual([]);
     expect(await t('?hasDueDate=true&includeDone=false')).toEqual([
       'Onboarding flow',
       'Empty state copy',

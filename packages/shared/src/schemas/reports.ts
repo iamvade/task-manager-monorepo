@@ -170,6 +170,19 @@ export const reportTaskSchema = z
   .meta({ id: 'ReportTask' });
 export type ReportTask = z.infer<typeof reportTaskSchema>;
 
+/** People / My performance "Completed in this period": when (local) and how long it took. */
+export const completedReportTaskSchema = reportTaskSchema
+  .extend({
+    /** Local `YYYY-MM-DD HH:MM` in the caller's time zone. */
+    completedAt: z.string(),
+    cycleDays: z.number().nullable(),
+  })
+  .meta({ id: 'CompletedReportTask' });
+export type CompletedReportTask = z.infer<typeof completedReportTaskSchema>;
+
+/** Most completed tasks the person report lists (the CSV has them all). */
+export const COMPLETED_LIST_LIMIT = 200;
+
 // ── Overview ─────────────────────────────────────────────────────────────────────────────────
 
 export const agingTaskSchema = reportTaskSchema
@@ -440,6 +453,8 @@ export const personReportSchema = z
     }),
     /** By due date (none last). */
     openTasks: z.array(reportTaskSchema),
+    /** Completed in the period, latest first, at most `COMPLETED_LIST_LIMIT` (count: `completed`). */
+    completedTasks: z.array(completedReportTaskSchema),
   })
   .meta({ id: 'PersonReport' });
 export type PersonReport = z.infer<typeof personReportSchema>;

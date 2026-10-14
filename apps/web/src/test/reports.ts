@@ -344,6 +344,22 @@ export function personReport(extra: Partial<PersonReport> = {}): PersonReport {
       { ...reportTask(1), dueDate: '2026-10-03', priority: 'urgent' },
       { ...reportTask(2), dueDate: null, priority: 'low' },
     ],
+    completedTasks: [
+      {
+        ...reportTask(3),
+        dueDate: '2026-10-08',
+        priority: 'high' as const,
+        completedAt: '2026-10-07 16:30',
+        cycleDays: 2.5,
+      },
+      {
+        ...reportTask(4),
+        dueDate: null,
+        priority: 'none' as const,
+        completedAt: '2026-10-02 09:00',
+        cycleDays: null,
+      },
+    ],
     ...extra,
   };
 }

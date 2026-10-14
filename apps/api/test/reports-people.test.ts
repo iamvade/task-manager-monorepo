@@ -202,6 +202,17 @@ describe('GET /workspaces/:id/reports/people/:userId', () => {
     expect(report.trends.teamCycleMedian).not.toBeNull();
   });
 
+  it('lists the person’s completed tasks in the report, latest first', async () => {
+    const res = await fx.u.api('GET', `/workspaces/${fx.w.ws.id}/reports/people/me`);
+    expect(res.statusCode, res.body).toBe(200);
+    const report = personReportSchema.parse(res.json());
+    expect(report.completedTasks).toHaveLength(report.completed.current.count);
+    const times = report.completedTasks.map((t) => t.completedAt);
+    expect(times).toEqual([...times].sort().reverse());
+    expect(report.completedTasks.some((t) => t.title === 'mine now')).toBe(true);
+    expect(report.completedTasks[0]).toMatchObject({ cycleDays: expect.any(Number) as number });
+  });
+
   it('exports the person’s completed tasks', async () => {
     const res = await fx.u.api('GET', `/workspaces/${fx.w.ws.id}/reports/people/me.csv`);
     expect(res.statusCode, res.body).toBe(200);
