@@ -487,7 +487,11 @@
     "followersLabel_one": "{{count}} follower: {{names}}",
     "followersLabel_other": "{{count}} followers: {{names}}",
     "follow": "Follow",
-    "following": "Following"
+    "following": "Following",
+    "editedBy": "{{name}} just now",
+    "someone": "Someone",
+    "titleChanged": "{{name}} changed the title to “{{title}}”.",
+    "useTheirs": "Use theirs"
   },
   "myTasks": {
     "allSpaces": "All spaces",
@@ -760,7 +764,8 @@
       "actions": "Actions",
       "tasks": "Tasks",
       "projects": "Projects",
-      "people": "People"
+      "people": "People",
+      "comments": "Comments"
     },
     "actions": {
       "newTask": "New task",
@@ -775,7 +780,8 @@
       "navigate": "navigate",
       "open": "open",
       "close": "close"
-    }
+    },
+    "moreTasks": "Show more tasks"
   },
   "shortcuts": {
     "title": "Keyboard shortcuts",

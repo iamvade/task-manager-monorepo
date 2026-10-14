@@ -85,6 +85,13 @@
       "when": 1791945266837,
       "tag": "0011_member_offboarding",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791946306325,
+      "tag": "0012_search_text_indexes",
+      "breakpoints": true
     }
   ]
 }

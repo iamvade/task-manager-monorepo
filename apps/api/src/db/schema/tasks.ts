@@ -65,6 +65,7 @@ export const tasks = pgTable(
     // "Created by me": the List filter and My Tasks' "Requested by me".
     index('tasks_created_by_created_at_idx').on(t.createdBy, t.createdAt),
     index('tasks_title_trgm_idx').using('gin', t.title.op('gin_trgm_ops')),
+    index('tasks_description_text_trgm_idx').using('gin', t.descriptionText.op('gin_trgm_ops')),
   ],
 );
 

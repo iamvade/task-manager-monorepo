@@ -16,6 +16,7 @@ import i18n from '../../i18n';
 import { createQueryClient } from '../../queryClient';
 import { routes } from '../../router';
 import { useToastStore } from '../../stores/toast';
+import { useRealtimeStore } from '../../stores/realtime';
 import { useUiStore } from '../../stores/ui';
 import { ME, PROJECT, PROJECT_ID, SIDEBAR, WORKSPACE_ID, mockApi } from '../../test/fixtures';
 import { at, listHandlers, makeTasks, statusOf } from '../../test/tasks';
@@ -144,6 +145,19 @@ describe('task drawer', () => {
     fireEvent.click(following);
     expect(await view.findByRole('button', { name: 'Follow' })).toBeInTheDocument();
     expect(calls).toEqual(['follow', 'unfollow']);
+  });
+
+  it('says who just changed a field', async () => {
+    const { state, task } = setup();
+    api(state);
+    renderAt(`${LIST}&task=APP-135`);
+    const view = within(await drawer());
+    await view.findByRole('textbox', { name: 'Task title' });
+    const dorj = at(PROJECT.members, 3).user;
+    act(() => {
+      useRealtimeStore.getState().noteEdits(task.id, dorj.id, ['priority']);
+    });
+    expect(await view.findByText('Dorj E. just now')).toBeInTheDocument();
   });
 
   it('saves the title on Enter and updates the row behind the drawer', async () => {

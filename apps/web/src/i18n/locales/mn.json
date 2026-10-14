@@ -487,7 +487,11 @@
     "followersLabel_one": "{{count}} дагагч: {{names}}",
     "followersLabel_other": "{{count}} дагагч: {{names}}",
     "follow": "Дагах",
-    "following": "Дагаж байна"
+    "following": "Дагаж байна",
+    "editedBy": "{{name}} саяхан",
+    "someone": "Хэн нэгэн",
+    "titleChanged": "{{name}} гарчгийг «{{title}}» болгож өөрчиллөө.",
+    "useTheirs": "Түүнийхийг авах"
   },
   "myTasks": {
     "allSpaces": "Бүх орон зай",
@@ -760,7 +764,8 @@
       "actions": "Үйлдэл",
       "tasks": "Ажлууд",
       "projects": "Төслүүд",
-      "people": "Хүмүүс"
+      "people": "Хүмүүс",
+      "comments": "Сэтгэгдэл"
     },
     "actions": {
       "newTask": "Шинэ ажил",
@@ -775,7 +780,8 @@
       "navigate": "шилжих",
       "open": "нээх",
       "close": "хаах"
-    }
+    },
+    "moreTasks": "Илүү олон ажил харах"
   },
   "shortcuts": {
     "title": "Товчлолууд",

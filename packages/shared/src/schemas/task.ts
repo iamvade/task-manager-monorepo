@@ -247,7 +247,29 @@ export const taskRefQuerySchema = z.object({
   workspaceId: z.uuid().optional(),
 });
 
-export const searchQuerySchema = z.object({ q: z.string().trim().min(1).max(200) });
+export const searchQuerySchema = z.object({
+  q: z.string().trim().min(1).max(200),
+  /** "Show more tasks": skip this many task results (then only tasks come back). */
+  offset: z.coerce.number().int().min(0).max(1000).default(0),
+});
+
+/** A ⌘K comment hit: the comment, its task and the text around the match. */
+export const searchCommentSchema = z
+  .object({
+    id: z.uuid(),
+    task: z.object({
+      id: z.uuid(),
+      key: z.string(),
+      title: z.string(),
+      status: taskStatusRefSchema,
+    }),
+    author: userRefSchema,
+    /** Up to ~120 characters of the comment around the match. */
+    snippet: z.string(),
+    createdAt: z.iso.datetime(),
+  })
+  .meta({ id: 'SearchComment' });
+export type SearchComment = z.infer<typeof searchCommentSchema>;
 
 export const searchResultSchema = z
   .object({
@@ -264,6 +286,10 @@ export const searchResultSchema = z
     ),
     projects: z.array(projectSummarySchema),
     people: z.array(userRefSchema),
+    /** Comments whose text matches (first page only), newest first. */
+    comments: z.array(searchCommentSchema),
+    /** Pass as `offset` for more tasks; null when there are no more. */
+    nextTaskOffset: z.number().int().nullable(),
   })
   .meta({ id: 'SearchResult' });
 export type SearchResult = z.infer<typeof searchResultSchema>;

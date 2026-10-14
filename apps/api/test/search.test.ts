@@ -93,5 +93,51 @@ describe('workspace search', () => {
     expect(result.tasks.length + result.projects.length + result.people.length).toBe(20);
     expect(result.tasks.some((t) => t.title.includes('elsewhere'))).toBe(false);
     expect((await search('zzzz-nothing')).tasks).toEqual([]);
+
+    // "Show more": the next tasks after the first page, tasks only.
+    const first = await search('Bulk item');
+    expect(first.nextTaskOffset).toBe(first.tasks.length);
+    const res = await world.api(
+      'GET',
+      `/workspaces/${world.ws.id}/search?q=Bulk%20item&offset=${String(first.nextTaskOffset)}`,
+    );
+    const next = searchResultSchema.parse(res.json());
+    expect(next.projects).toEqual([]);
+    expect(next.people).toEqual([]);
+    expect(next.comments).toEqual([]);
+    const ids = new Set(first.tasks.map((t) => t.id));
+    expect(next.tasks.length).toBe(25 - first.tasks.length);
+    expect(next.tasks.some((t) => ids.has(t.id))).toBe(false);
+    expect(next.nextTaskOffset).toBeNull();
+  });
+
+  it('finds comments and task descriptions', async () => {
+    const { createTask, api } = world;
+    const doc = (text: string) => ({
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text }] }],
+    });
+    const pool = await createTask({
+      title: 'Database outage',
+      description: doc('see the pg bouncer'),
+    });
+    let res = await api('POST', `/tasks/${pool.id}/comments`, {
+      body: doc('Root cause: the connection pool ran out of slots during the deploy.'),
+    });
+    expect(res.statusCode, res.body).toBe(201);
+    const gone = await api('POST', `/tasks/${pool.id}/comments`, {
+      body: doc('connection pool, deleted note'),
+    });
+    res = await api('DELETE', `/comments/${gone.json<{ id: string }>().id}`);
+    expect(res.statusCode).toBeLessThan(300);
+
+    const hits = await search('connection pool');
+    expect(hits.comments).toHaveLength(1);
+    expect(hits.comments[0]).toMatchObject({
+      task: { id: pool.id, key: pool.key, title: 'Database outage' },
+      snippet: 'Root cause: the connection pool ran out of slots during the deploy.',
+    });
+    // A description-only match still finds the task.
+    expect((await search('pg bouncer')).tasks.map((t) => t.id)).toEqual([pool.id]);
   });
 });

@@ -1,9 +1,10 @@
-import { isAway, type Status, type StatusCategory, type UserRef } from '@kite/shared';
+import { isAway, shortName, type Status, type StatusCategory, type UserRef } from '@kite/shared';
 import { useMemo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useFollowTask } from '../../api/activity';
 import { useSidebar } from '../../api/workspaces';
+import { useRecentEdit, type EditedField } from '../../stores/realtime';
 import { useAuth } from '../../auth/useAuth';
 import { useMoveTaskToProject, useSetAssignees, useSetTags, useUpdateTask } from '../../api/tasks';
 import {
@@ -202,6 +203,7 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
             </button>
           )}
         />
+        <EditedBy field="status" />
       </PropertyRow>
 
       <PropertyRow icon={<PersonIcon size={14} />} label={t('drawer.assignees')}>
@@ -247,6 +249,7 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
             </button>
           )}
         />
+        <EditedBy field="assignees" />
       </PropertyRow>
 
       {inReview && (
@@ -333,6 +336,7 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
             </button>
           )}
         />
+        <EditedBy field="due" />
       </PropertyRow>
 
       <PropertyRow icon={<FlagIcon size={14} />} label={t('table.colPriority')}>
@@ -348,6 +352,7 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
             </FieldButton>
           )}
         />
+        <EditedBy field="priority" />
       </PropertyRow>
 
       <PropertyRow icon={<SizeIcon size={14} />} label={t('taskSize.label')}>
@@ -485,5 +490,20 @@ function FollowersField() {
         {following ? t('drawer.following') : t('drawer.follow')}
       </button>
     </>
+  );
+}
+
+/** "Dorj E. just now" after a field someone else changed in the last 10 s (not designed). */
+function EditedBy({ field }: { field: EditedField }) {
+  const { t } = useTranslation();
+  const { me } = useAuth();
+  const { task, members } = useTaskView();
+  const actorId = useRecentEdit(task.id, field, me?.user.id);
+  if (!actorId) return null;
+  const name = members.find((m) => m.user.id === actorId)?.user.name ?? t('drawer.someone');
+  return (
+    <span role="status" className="text-[11px] whitespace-nowrap text-muted">
+      {t('drawer.editedBy', { name: shortName(name) })}
+    </span>
   );
 }
