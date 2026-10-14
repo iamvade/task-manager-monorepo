@@ -1,4 +1,5 @@
 import { daysBetween } from '@kite/shared';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { reportCsvUrl, usePersonReport } from '../../../api/reports';
 import { ErrorState } from '../../../components/ErrorState';
@@ -13,6 +14,7 @@ import { useReportsRole } from '../useReportsRole';
 import type { PersonVariant } from './copy';
 import { HelpingPanel } from './HelpingPanel';
 import { MineHeader } from './MineHeader';
+import { CompletedTasksList, COMPLETED_SECTION_ID } from './CompletedTasksList';
 import { OpenTasksList } from './OpenTasksList';
 import { PersonPickerRow } from './PersonPicker';
 import { PersonSkeleton } from './PersonSkeleton';
@@ -37,6 +39,7 @@ export function PersonTab({ variant, personId }: PersonTabProps) {
   const { filters, setFilters } = useReportParams();
   const report = usePersonReport(workspace?.id, personId, filters);
   const data = report.data;
+  const [completedExpanded, setCompletedExpanded] = useState(false);
   const tab = variant === 'me' ? 'me' : 'people';
   const csv = workspace
     ? reportCsvUrl(workspace.id, `people/${personId}`, {
@@ -110,7 +113,18 @@ export function PersonTab({ variant, personId }: PersonTabProps) {
         ) : (
           <PersonPickerRow person={data.person} compared={compared} />
         )}
-        <PersonStats report={data} variant={variant} />
+        <PersonStats
+          report={data}
+          variant={variant}
+          onShowCompleted={() => {
+            setCompletedExpanded(true);
+            requestAnimationFrame(() => {
+              document
+                .getElementById(COMPLETED_SECTION_ID)
+                ?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+            });
+          }}
+        />
         <TrendCards trends={data.trends} variant={variant} />
         <HelpingPanel
           helping={data.helping}
@@ -119,6 +133,13 @@ export function PersonTab({ variant, personId }: PersonTabProps) {
           range={range}
         />
         <OpenTasksList tasks={data.openTasks} variant={variant} />
+        <CompletedTasksList
+          tasks={data.completedTasks}
+          total={data.completed.current.count}
+          variant={variant}
+          expanded={completedExpanded}
+          onExpandedChange={setCompletedExpanded}
+        />
       </div>
     </>
   );

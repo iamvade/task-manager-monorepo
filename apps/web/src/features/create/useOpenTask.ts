@@ -15,14 +15,17 @@ export function useOpenTask() {
   });
 
   return useCallback(
-    (key: string) => {
+    /** `commentId`: the drawer scrolls to that comment (⌘K comment hits). */
+    (key: string, commentId?: string) => {
       const { pathname, search } = latest.current;
       if (pathname.startsWith('/t/')) {
-        void navigate(`/t/${key}`);
+        void navigate(`/t/${key}${commentId ? `?comment=${commentId}` : ''}`);
         return;
       }
       const params = new URLSearchParams(search);
       params.set('task', key);
+      if (commentId) params.set('comment', commentId);
+      else params.delete('comment');
       void navigate({ pathname, search: `?${params.toString()}` });
     },
     [navigate],

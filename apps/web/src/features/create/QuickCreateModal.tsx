@@ -20,7 +20,6 @@ import { queryKeys } from '../../api/queryKeys';
 import { useTags } from '../../api/tags';
 import { useCreateTask } from '../../api/tasks';
 import { useCurrentWorkspace, useSidebar, useWorkspaceMembers } from '../../api/workspaces';
-import { useAuth } from '../../auth/useAuth';
 import { RichTextEditor } from '../../components/editor/RichTextEditor';
 import type { MentionCandidate } from '../../components/editor/mentions';
 import { resolveTypedMentions } from '../../components/editor/typedMentions';
@@ -59,6 +58,7 @@ import { useShellLocation } from '../shell/useShellLocation';
 import { buildOptimisticTask } from './optimisticTask';
 import { useOpenTask } from './useOpenTask';
 import { reportError } from '../../lib/mutationErrors';
+import { useMemberHint } from '../pickers/useMemberHint';
 
 const HEADING_ID = 'quick-create-heading';
 
@@ -126,7 +126,6 @@ interface FormProps {
 function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
   const { t } = useTranslation();
   const dates = useDates();
-  const { me } = useAuth();
   const queryClient = useQueryClient();
   const openTask = useOpenTask();
   const shell = useShellLocation();
@@ -197,16 +196,13 @@ function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
       : (sprintChoice ?? undefined);
   const sprint = sprintList.find((s) => s.id === sprintId) ?? detail?.activeSprint ?? null;
 
-  const meId = me?.user.id;
+  const hintOf = useMemberHint();
   const mentions = useMemo((): MentionCandidate[] => {
     const rank = (id: string) => (teamIds.has(id) ? 0 : 1);
     return [...memberList]
       .sort((a, b) => rank(a.user.id) - rank(b.user.id) || a.user.name.localeCompare(b.user.name))
-      .map(({ user, title: jobTitle }) => ({
-        ...userRef(user),
-        hint: user.id === meId ? t('create.you') : jobTitle,
-      }));
-  }, [memberList, teamIds, meId, t]);
+      .map((member) => ({ ...userRef(member.user), hint: hintOf(member) }));
+  }, [memberList, teamIds, hintOf]);
 
   const canSubmit = Boolean(title.trim() && detail && status && !pending);
 

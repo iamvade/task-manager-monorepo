@@ -6,6 +6,7 @@ import { useAuth } from '../../auth/useAuth';
 import { formatDate, todayFor } from '../../lib/dates';
 import { useDates } from '../../lib/useDates';
 import { useRelativeTime } from '../../lib/useRelativeTime';
+import { useRealtimeStore } from '../../stores/realtime';
 import { useTaskView } from './TaskContext';
 
 export const TITLE_ID = 'task-title';
@@ -23,8 +24,14 @@ export function TaskTitle() {
   const { ago } = useRelativeTime();
   const update = useUpdateTask();
   const [draft, setDraft] = useState<string | null>(null);
+  // The title when editing started: if it changes underneath, someone else renamed the task.
+  const [base, setBase] = useState<string | null>(null);
   const ref = useRef<HTMLTextAreaElement>(null);
   const value = draft ?? task.title;
+  const { members } = useTaskView();
+  const editorId = useRealtimeStore((s) => s.recentEdits[task.id]?.title?.actorId);
+  const conflict = draft !== null && base !== null && task.title !== base;
+  const editorName = members.find((m) => m.user.id === editorId)?.user.name ?? t('drawer.someone');
 
   // Grow with the text (the design's rows="2" is the minimum).
   useLayoutEffect(() => {
@@ -37,6 +44,7 @@ export function TaskTitle() {
   function save() {
     const title = draft?.trim();
     setDraft(null);
+    setBase(null);
     if (!title || title === task.title) return;
     update.mutate({ task, patch: { title } });
   }
@@ -56,6 +64,7 @@ export function TaskTitle() {
         maxLength={500}
         onFocus={() => {
           setDraft(task.title);
+          setBase(task.title);
         }}
         onChange={(e) => {
           setDraft(e.target.value.replace(/\n/g, ' '));
@@ -69,11 +78,31 @@ export function TaskTitle() {
             e.preventDefault();
             e.stopPropagation();
             setDraft(task.title);
+            setBase(task.title);
             requestAnimationFrame(() => ref.current?.blur());
           }
         }}
         className="-mx-2 box-border resize-none overflow-hidden rounded-[8px] border border-transparent bg-transparent px-2 py-1 text-[22px] leading-[30px] font-semibold tracking-[-0.01em] text-default outline-none hover:border-default focus:border-accent focus-visible:outline-none"
       />
+      {conflict && (
+        <span role="status" className="flex flex-wrap items-center gap-1.5 text-[12px] text-2">
+          {t('drawer.titleChanged', { name: shortName(editorName), title: task.title })}
+          <button
+            type="button"
+            // Keeps focus in the textarea (blur would save the local text).
+            onMouseDown={(e) => {
+              e.preventDefault();
+            }}
+            onClick={() => {
+              setDraft(task.title);
+              setBase(task.title);
+            }}
+            className="rounded-[4px] border-0 bg-transparent p-0 text-[12px] font-medium text-accent-ink hover:underline"
+          >
+            {t('drawer.useTheirs')}
+          </button>
+        </span>
+      )}
       <span className="text-[12px] text-muted">
         {t('drawer.createdMeta', {
           name: shortName(task.creator.name),

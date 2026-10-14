@@ -1,5 +1,6 @@
 import {
   PRIORITIES,
+  REQUESTED_LIMIT,
   addDays,
   daysBetween,
   formatTaskKey,
@@ -9,12 +10,13 @@ import {
   type Home,
   type MyTask,
 } from '@kite/shared';
-import { and, eq, isNull, ne, or, sql } from 'drizzle-orm';
+import { and, asc, eq, isNull, ne, notExists, or, sql } from 'drizzle-orm';
 import type { FastifyBaseLogger } from 'fastify';
 import type { UserRow } from '../auth/plugin.js';
 import type { DbOrTx } from '../db/client.js';
 import { projects, spaces, statuses, taskAssignees, tasks } from '../db/schema/index.js';
 import { projectRefColumns } from '../notifications/display.js';
+import { assigneesSql } from '../tasks/list.js';
 import { listMyActivity } from './activity.js';
 
 export const HOME_ACTIVITY_LIMIT = 10;
@@ -66,25 +68,27 @@ export async function buildHome(
   const todayIndex = weekdayIndex(today);
 
   const localDay = sql<string>`to_char(${tasks.completedAt} at time zone ${timezone}, 'YYYY-MM-DD')`;
-  const [taskRows, completions, activity] = await Promise.all([
+  const rowColumns = {
+    id: tasks.id,
+    number: tasks.number,
+    title: tasks.title,
+    priority: tasks.priority,
+    dueDate: tasks.dueDate,
+    completedAt: tasks.completedAt,
+    createdAt: tasks.createdAt,
+    status: {
+      id: statuses.id,
+      name: statuses.name,
+      category: statuses.category,
+      color: statuses.color,
+    },
+    project: projectRefColumns,
+    space: { id: spaces.id, initial: spaces.initial, color: spaces.color },
+    assignees: assigneesSql,
+  };
+  const [taskRows, completions, activity, requestedRows] = await Promise.all([
     db
-      .select({
-        id: tasks.id,
-        number: tasks.number,
-        title: tasks.title,
-        priority: tasks.priority,
-        dueDate: tasks.dueDate,
-        completedAt: tasks.completedAt,
-        createdAt: tasks.createdAt,
-        status: {
-          id: statuses.id,
-          name: statuses.name,
-          category: statuses.category,
-          color: statuses.color,
-        },
-        project: projectRefColumns,
-        space: { id: spaces.id, initial: spaces.initial, color: spaces.color },
-      })
+      .select(rowColumns)
       .from(tasks)
       .innerJoin(taskAssignees, eq(taskAssignees.taskId, tasks.id))
       .innerJoin(projects, eq(projects.id, tasks.projectId))
@@ -118,23 +122,47 @@ export async function buildHome(
       // By position: the expression carries parameters, which Postgres won't match up.
       .groupBy(sql`1`),
     listMyActivity(db, log, user.id, { workspaceId, limit: HOME_ACTIVITY_LIMIT }),
+    // "Requested by me": open tasks I created that someone else (or nobody) has.
+    db
+      .select(rowColumns)
+      .from(tasks)
+      .innerJoin(projects, eq(projects.id, tasks.projectId))
+      .innerJoin(spaces, eq(spaces.id, projects.spaceId))
+      .innerJoin(statuses, eq(statuses.id, tasks.statusId))
+      .where(
+        and(
+          eq(tasks.createdBy, user.id),
+          eq(projects.workspaceId, workspaceId),
+          isNull(projects.archivedAt),
+          isNull(tasks.deletedAt),
+          ne(statuses.category, 'done'),
+          notExists(
+            db
+              .select({ one: sql`1` })
+              .from(taskAssignees)
+              .where(and(eq(taskAssignees.taskId, tasks.id), eq(taskAssignees.userId, user.id))),
+          ),
+        ),
+      )
+      .orderBy(sql`${tasks.dueDate} asc nulls last`, asc(tasks.createdAt))
+      .limit(REQUESTED_LIMIT),
   ]);
 
-  const all = taskRows
-    .map((t) => ({
-      id: t.id,
-      key: formatTaskKey(t.project.key, t.number),
-      title: t.title,
-      priority: t.priority,
-      dueDate: t.dueDate,
-      done: t.status.category === 'done',
-      completedAt: t.completedAt?.toISOString() ?? null,
-      status: t.status,
-      project: t.project,
-      space: t.space,
-      createdAt: t.createdAt,
-    }))
-    .sort(compareTasks);
+  const toRow = (t: (typeof taskRows)[number]) => ({
+    id: t.id,
+    key: formatTaskKey(t.project.key, t.number),
+    title: t.title,
+    priority: t.priority,
+    dueDate: t.dueDate,
+    done: t.status.category === 'done',
+    completedAt: t.completedAt?.toISOString() ?? null,
+    status: t.status,
+    project: t.project,
+    space: t.space,
+    assignees: t.assignees,
+    createdAt: t.createdAt,
+  });
+  const all = taskRows.map(toRow).sort(compareTasks);
   const strip = ({ createdAt: _, ...task }: (typeof all)[number]): MyTask => task;
 
   const overdue = all.filter((t) => !t.done && t.dueDate !== null && t.dueDate < today);
@@ -172,6 +200,7 @@ export async function buildHome(
       thisWeek: thisWeek.map(strip),
       later: later.map(strip),
       done: done.map(strip),
+      requested: requestedRows.map((t) => strip(toRow(t))),
     },
     stats: {
       dueToday: {

@@ -33,5 +33,9 @@ export const queryKeys = {
     ['tasks', 'reports', workspaceId, report, query] as const,
   /** Prefix of every inbox tab of a workspace. */
   notificationsOf: (workspaceId: string) => ['notifications', workspaceId] as const,
-  notifications: (workspaceId: string, tab: string) => ['notifications', workspaceId, tab] as const,
+  notifications: (workspaceId: string, tab: string, projectId?: string) =>
+    ['notifications', workspaceId, tab, projectId ?? null] as const,
+  /** My per-project notification levels (Settings → Notifications, project menu). */
+  notificationLevels: (workspaceId: string) =>
+    ['workspaces', workspaceId, 'notification-levels'] as const,
 };

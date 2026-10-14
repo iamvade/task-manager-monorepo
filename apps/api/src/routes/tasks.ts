@@ -1,6 +1,8 @@
 import {
   activityPayloadSchemas,
   apiErrorSchema,
+  batchTaskIdsSchema,
+  batchUpdateTasksSchema,
   completeTaskSchema,
   createTaskSchema,
   duplicateTaskSchema,
@@ -40,15 +42,15 @@ import {
   taskTags,
   tasks,
   tags,
-  users,
 } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
 import { listStatuses } from '../projects/statuses.js';
 import { buildTaskDetail } from '../tasks/detail.js';
 import { follow, workspaceMemberIds } from '../tasks/followers.js';
-import { stableJson } from '../tasks/json.js';
 import { getTaskListItem, listProjectTasks, listSpaceTasks } from '../tasks/list.js';
 import { mutateTasks } from '../tasks/mutation.js';
+import { applyTaskPatch, setTaskAssignees } from '../tasks/patch.js';
+import { syncReferences } from '../tasks/references.js';
 import { clientIdOf } from '../realtime/client-id.js';
 import {
   endOfStatus,
@@ -241,6 +243,11 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
             extractMentionIds(description),
           );
           await follow(tx, task.id, [user.id, ...assignees.map((a) => a.id), ...mentioned]);
+          await syncReferences(
+            tx,
+            { taskId: task.id, workspaceId },
+            `${body.title}\n${description ? richTextToPlain(description) : ''}`,
+          );
 
           m.log(task.id, 'task.created', { status: statusSnapshot(status) });
           await openStatusPeriods(tx, [{ taskId: task.id, status, at: m.now, actorId: user.id }]);
@@ -276,88 +283,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       const body = request.body;
 
       await mutateTasks(app, scope, async (m) => {
-        const { tx } = m;
-        const task = await m.lockTask(request.params.taskId);
-        const patch: Partial<typeof tasks.$inferInsert> = {};
-        let mentioned: string[] = [];
-
-        if (body.title !== undefined && body.title !== task.title) {
-          patch.title = body.title;
-          m.log(task.id, 'title.changed', { from: task.title, to: body.title });
-        }
-        if (
-          body.description !== undefined &&
-          stableJson(body.description) !== stableJson(task.description)
-        ) {
-          patch.description = body.description;
-          patch.descriptionText = body.description ? richTextToPlain(body.description) : '';
-          m.log(task.id, 'description.changed', {});
-          const before = new Set(extractMentionIds(task.description));
-          mentioned = await workspaceMemberIds(
-            tx,
-            m.project.workspaceId,
-            extractMentionIds(body.description).filter((id) => !before.has(id)),
-          );
-          await follow(tx, task.id, mentioned);
-        }
-        if (body.priority !== undefined && body.priority !== task.priority) {
-          patch.priority = body.priority;
-          m.log(task.id, 'priority.changed', { from: task.priority, to: body.priority });
-        }
-        if (body.size !== undefined && body.size !== task.size) {
-          patch.size = body.size;
-          m.log(task.id, 'size.changed', { from: task.size, to: body.size });
-        }
-        let reviewerId = task.reviewerId;
-        if (body.reviewerId !== undefined && body.reviewerId !== task.reviewerId) {
-          const [to] = body.reviewerId
-            ? await requireMembers(tx, m.project.workspaceId, [body.reviewerId], 'Reviewer')
-            : [];
-          const [from] = task.reviewerId
-            ? await tx
-                .select({ id: users.id, name: users.name })
-                .from(users)
-                .where(eq(users.id, task.reviewerId))
-            : [];
-          reviewerId = patch.reviewerId = to?.id ?? null;
-          m.log(task.id, 'reviewer.changed', { from: from ?? null, to: to ?? null });
-        }
-        if (body.startDate !== undefined && body.startDate !== task.startDate) {
-          patch.startDate = body.startDate;
-          m.log(task.id, 'start.changed', { from: task.startDate, to: body.startDate });
-        }
-        if (body.dueDate !== undefined && body.dueDate !== task.dueDate) {
-          patch.dueDate = body.dueDate;
-          m.log(task.id, 'due.changed', { from: task.dueDate, to: body.dueDate });
-        }
-        if (body.sprintId !== undefined && body.sprintId !== task.sprintId) {
-          const to = body.sprintId
-            ? await requireSprintIn(tx, task.projectId, body.sprintId)
-            : null;
-          Object.assign(patch, await setSprint(m, task, to));
-        }
-        if (body.statusId !== undefined && body.statusId !== task.statusId) {
-          const to = await requireStatusIn(tx, task.projectId, body.statusId);
-          const from = await requireStatusIn(tx, task.projectId, task.statusId);
-          Object.assign(
-            patch,
-            await changeStatus(m, { ...task, reviewerId }, from, to, {
-              // An explicit `reviewerId: null` keeps the task without a reviewer.
-              ...(body.reviewerId === null ? { reviewer: null } : {}),
-            }),
-          );
-        }
-
-        if (Object.keys(patch).length === 0) return;
-        await tx
-          .update(tasks)
-          .set({ ...patch, updatedAt: m.now })
-          .where(eq(tasks.id, task.id));
-        m.emit(
-          'task.updated',
-          task.id,
-          mentioned.length > 0 ? { mentionedUserIds: mentioned } : {},
-        );
+        await applyTaskPatch(m, await m.lockTask(request.params.taskId), body);
       });
       return buildTaskDetail(app.db, request.params.taskId);
     },
@@ -429,45 +355,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       const scope = await target(request, request.params.taskId);
 
       await mutateTasks(app, scope, async (m) => {
-        const { tx } = m;
-        const task = await m.lockTask(request.params.taskId);
-        const next = await requireMembers(tx, m.project.workspaceId, request.body.userIds);
-        const current = await tx
-          .select({ id: users.id, name: users.name })
-          .from(taskAssignees)
-          .innerJoin(users, eq(users.id, taskAssignees.userId))
-          .where(eq(taskAssignees.taskId, task.id))
-          .orderBy(users.name);
-        const nextIds = new Set(next.map((u) => u.id));
-        const currentIds = new Set(current.map((u) => u.id));
-        const removed = current.filter((u) => !nextIds.has(u.id));
-        const added = next.filter((u) => !currentIds.has(u.id));
-        if (removed.length === 0 && added.length === 0) return;
-
-        if (removed.length > 0) {
-          await tx.delete(taskAssignees).where(
-            and(
-              eq(taskAssignees.taskId, task.id),
-              inArray(
-                taskAssignees.userId,
-                removed.map((u) => u.id),
-              ),
-            ),
-          );
-        }
-        if (added.length > 0) {
-          const rows = added.map((u) => ({ taskId: task.id, userId: u.id }));
-          await tx.insert(taskAssignees).values(rows);
-          await follow(
-            tx,
-            task.id,
-            added.map((u) => u.id),
-          );
-        }
-        for (const user of removed) m.log(task.id, 'assignee.removed', { user });
-        for (const user of added) m.log(task.id, 'assignee.added', { user });
-        await tx.update(tasks).set({ updatedAt: m.now }).where(eq(tasks.id, task.id));
-        m.emit('task.updated', task.id);
+        await setTaskAssignees(m, await m.lockTask(request.params.taskId), request.body.userIds);
       });
       return listItem(request.params.taskId);
     },
@@ -617,6 +505,82 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     },
   );
 
+  /** The project in the URL, access-checked, as a mutation scope (batch routes). */
+  async function projectScope(request: FastifyRequest, projectId: string) {
+    const { project } = await loadProjectAccess(request, projectId);
+    const { user } = requireAuth(request);
+    return { projectId: project.id, actorId: user.id, clientId: clientIdOf(request) };
+  }
+  const listItems = async (ids: readonly string[]) =>
+    (await Promise.all(ids.map((id) => getTaskListItem(app.db, id)))).flatMap((t) =>
+      t ? [t] : [],
+    );
+
+  app.post(
+    '/projects/:projectId/tasks/batch',
+    {
+      preHandler: app.authenticate,
+      schema: {
+        tags: ['Tasks'],
+        summary: 'Update many tasks at once',
+        description:
+          'List multi-select: status, sprint, assignees (the full new set), due date and priority per task, all in one transaction with the same rules and activity rows as the single-task routes. Every task must be a non-deleted task of this project (404 otherwise, and nothing changes). Returns the tasks as list items.',
+        params: z.object({ projectId: z.uuid() }),
+        body: batchUpdateTasksSchema,
+        response: { 200: z.array(taskListItemSchema), 400: err, 401: err, 404: err },
+      },
+    },
+    async (request) => {
+      const scope = await projectScope(request, request.params.projectId);
+      await mutateTasks(app, scope, async (m) => {
+        for (const { id, assigneeIds, ...patch } of request.body.updates) {
+          const task = await m.lockTask(id);
+          await applyTaskPatch(m, task, patch);
+          if (assigneeIds) await setTaskAssignees(m, task, assigneeIds);
+        }
+      });
+      return listItems(request.body.updates.map((u) => u.id));
+    },
+  );
+
+  for (const action of ['delete', 'restore'] as const) {
+    app.post(
+      `/projects/:projectId/tasks/batch-${action}`,
+      {
+        preHandler: app.authenticate,
+        schema: {
+          tags: ['Tasks'],
+          summary: action === 'delete' ? 'Delete many tasks' : 'Restore many deleted tasks',
+          description:
+            action === 'delete'
+              ? 'Soft delete, in one transaction (List multi-select). Every task must be a non-deleted task of this project (404 otherwise, nothing changes).'
+              : 'Undo of a batch delete: each task goes back to its status and position. Tasks that are not deleted are skipped.',
+          params: z.object({ projectId: z.uuid() }),
+          body: batchTaskIdsSchema,
+          response: { 204: z.null(), 400: err, 401: err, 404: err },
+        },
+      },
+      async (request, reply) => {
+        const scope = await projectScope(request, request.params.projectId);
+        await mutateTasks(app, scope, async (m) => {
+          for (const id of request.body.ids) {
+            const task = await m.lockTask(id, { includeDeleted: action === 'restore' });
+            if (action === 'delete') {
+              await m.tx.update(tasks).set({ deletedAt: m.now }).where(eq(tasks.id, task.id));
+              m.log(task.id, 'task.deleted', {});
+              m.emit('task.deleted', task.id);
+            } else if (task.deletedAt) {
+              await m.tx.update(tasks).set({ deletedAt: null }).where(eq(tasks.id, task.id));
+              m.log(task.id, 'task.restored', {});
+              m.emit('task.restored', task.id);
+            }
+          }
+        });
+        return reply.code(204).send(null);
+      },
+    );
+  }
+
   app.post(
     '/tasks/:taskId/restore',
     {
@@ -704,6 +668,11 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
             })
             .returning({ id: tasks.id }),
           'task',
+        );
+        await syncReferences(
+          tx,
+          { taskId: copy.id, workspaceId: m.project.workspaceId },
+          `${request.body?.title ?? source.title}\n${source.descriptionText}`,
         );
 
         const assigneeIds = (

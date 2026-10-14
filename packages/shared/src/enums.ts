@@ -30,6 +30,14 @@ export const NOTIFICATION_TYPES = ['mention', 'assigned', 'comment', 'status'] a
 export const notificationTypeSchema = z.enum(NOTIFICATION_TYPES);
 export type NotificationType = z.infer<typeof notificationTypeSchema>;
 
+/**
+ * How much of a project reaches someone's Inbox: everything they'd normally get, only @mentions
+ * and new assignments ("direct"), or nothing. No setting = `all`.
+ */
+export const NOTIFICATION_LEVELS = ['all', 'direct', 'none'] as const;
+export const notificationLevelSchema = z.enum(NOTIFICATION_LEVELS);
+export type NotificationLevel = z.infer<typeof notificationLevelSchema>;
+
 export const notificationPrefsSchema = z.object({
   mention: z.boolean(),
   assigned: z.boolean(),

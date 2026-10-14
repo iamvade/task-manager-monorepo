@@ -53,6 +53,7 @@ export function TaskDrawer() {
       (prev) => {
         const next = new URLSearchParams(prev);
         next.delete('task');
+        next.delete('comment');
         return next;
       },
       { replace: true },

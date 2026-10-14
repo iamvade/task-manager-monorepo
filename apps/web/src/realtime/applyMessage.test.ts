@@ -5,6 +5,7 @@ import { queryKeys } from '../api/queryKeys';
 import { TASK_MUTATION } from '../api/taskCache';
 import { PROJECT_ID, SIDEBAR, SPACE_ID, WORKSPACE_ID } from '../test/fixtures';
 import { PROJECT_WITH_STATUSES, at, makeTasks, statusOf } from '../test/tasks';
+import { RECENT_EDIT_MS, useRealtimeStore } from '../stores/realtime';
 import { COALESCE_MS, REPORTS_THROTTLE_MS, createMessageHandler } from './applyMessage';
 
 const OTHER_SPACE = '01890000-0000-7000-8000-000000000011';
@@ -66,6 +67,23 @@ describe('createMessageHandler', () => {
     expect(s.stale(s.otherSpace)).toBe(false);
     expect(s.stale(queryKeys.project(PROJECT_ID))).toBe(true);
     expect(s.stale(queryKeys.home(WORKSPACE_ID))).toBe(true);
+  });
+
+  it('remembers who changed which drawer fields, for 10 seconds', () => {
+    const s = setup();
+    const task = at(s.tasks, 0);
+    useRealtimeStore.setState({ recentEdits: {} });
+    s.handler.handle({
+      type: 'task.updated',
+      ...base(task),
+      changes: ['title.changed', 'assignee.added', 'tag.added'],
+    });
+    expect(useRealtimeStore.getState().recentEdits[task.id]).toEqual({
+      title: { actorId: SARA, at: expect.any(Number) as number },
+      assignees: { actorId: SARA, at: expect.any(Number) as number },
+    });
+    vi.advanceTimersByTime(RECENT_EDIT_MS);
+    expect(useRealtimeStore.getState().recentEdits[task.id]).toBeUndefined();
   });
 
   it('removes a deleted task from lists right away', () => {

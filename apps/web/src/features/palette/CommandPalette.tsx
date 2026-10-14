@@ -185,10 +185,12 @@ function PaletteBody({
     ? actions.filter((a) => `${a.label} ${a.keywords}`.toLowerCase().includes(q))
     : actions;
 
-  const results = q ? search.data : undefined;
-  const tasks = results?.tasks ?? [];
+  const pages = q ? search.data?.pages : undefined;
+  const results = pages?.[0];
+  const tasks = pages?.flatMap((page) => page.tasks) ?? [];
   const projects = q ? (results?.projects ?? []) : spaces.flatMap((s) => s.projects).slice(0, 8);
   const people = results?.people ?? [];
+  const comments = results?.comments ?? [];
 
   /** A person's tasks: this project's / space's list filtered to them, else the first space's. */
   function personHref(userId: string) {
@@ -274,6 +276,40 @@ function PaletteBody({
                 </span>
               </Command.Item>
             ))}
+            {search.hasNextPage && (
+              <Command.Item
+                value="tasks:more"
+                onSelect={() => {
+                  void search.fetchNextPage();
+                }}
+                className={cn(itemClass, 'text-accent-ink')}
+              >
+                {search.isFetchingNextPage ? t('palette.loading') : t('palette.moreTasks')}
+              </Command.Item>
+            )}
+          </Command.Group>
+        )}
+
+        {comments.length > 0 && (
+          <Command.Group heading={t('palette.groups.comments')} className={groupClass}>
+            {comments.map((comment) => (
+              <Command.Item
+                key={comment.id}
+                value={`comment:${comment.id}`}
+                onSelect={run(() => {
+                  openTask(comment.task.key, comment.id);
+                })}
+                className={itemClass}
+              >
+                <Avatar user={comment.author} size={20} title={null} />
+                <span className="min-w-0 flex-1 truncate">
+                  <Highlight text={comment.snippet} query={query.trim()} />
+                </span>
+                <span className="flex-none font-mono text-[12px] text-muted">
+                  {comment.task.key}
+                </span>
+              </Command.Item>
+            ))}
           </Command.Group>
         )}
 
@@ -332,5 +368,18 @@ function PaletteBody({
         </span>
       </div>
     </Command>
+  );
+}
+
+/** `text` with the first case-insensitive match of `query` in bold. */
+function Highlight({ text, query }: { text: string; query: string }) {
+  const at = query ? text.toLowerCase().indexOf(query.toLowerCase()) : -1;
+  if (at < 0) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, at)}
+      <strong className="font-semibold">{text.slice(at, at + query.length)}</strong>
+      {text.slice(at + query.length)}
+    </>
   );
 }

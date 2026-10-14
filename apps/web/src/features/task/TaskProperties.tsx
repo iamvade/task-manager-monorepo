@@ -1,10 +1,14 @@
-import type { Status, StatusCategory, UserRef } from '@kite/shared';
+import { isAway, shortName, type Status, type StatusCategory, type UserRef } from '@kite/shared';
 import { useMemo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router';
+import { useFollowTask } from '../../api/activity';
 import { useSidebar } from '../../api/workspaces';
+import { useRecentEdit, type EditedField } from '../../stores/realtime';
+import { useAuth } from '../../auth/useAuth';
 import { useMoveTaskToProject, useSetAssignees, useSetTags, useUpdateTask } from '../../api/tasks';
 import {
+  BellIcon,
   CalendarIcon,
   ChevronDownIcon,
   CloseIcon,
@@ -19,6 +23,7 @@ import {
   TagIcon,
 } from '../../components/icons';
 import { Avatar } from '../../components/ui/Avatar';
+import { AvatarStack } from '../../components/ui/AvatarStack';
 import { IconButton } from '../../components/ui/IconButton';
 import type { TriggerProps } from '../../components/ui/Popover';
 import { PriorityFlag } from '../../components/ui/PriorityFlag';
@@ -112,6 +117,7 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
   const memberUsers = useMemo(() => members.map((m) => m.user), [members]);
   const shortNameOf = useShortNames(memberUsers);
   const dates = useDates();
+  const awayIds = new Set(members.filter((m) => isAway(m, dates.today)).map((m) => m.user.id));
   const navigate = useNavigate();
   const [, setParams] = useSearchParams();
   const sidebar = useSidebar(project?.workspaceId);
@@ -197,6 +203,7 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
             </button>
           )}
         />
+        <EditedBy field="status" />
       </PropertyRow>
 
       <PropertyRow icon={<PersonIcon size={14} />} label={t('drawer.assignees')}>
@@ -207,6 +214,9 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
           >
             <Avatar user={user} size={22} title={null} />
             {shortNameOf(user)}
+            {awayIds.has(user.id) && (
+              <span className="text-[11px] text-muted">{t('picker.away')}</span>
+            )}
             <IconButton
               label={t('drawer.removeAssignee', { name: user.name })}
               size={20}
@@ -239,6 +249,7 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
             </button>
           )}
         />
+        <EditedBy field="assignees" />
       </PropertyRow>
 
       {inReview && (
@@ -325,6 +336,7 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
             </button>
           )}
         />
+        <EditedBy field="due" />
       </PropertyRow>
 
       <PropertyRow icon={<FlagIcon size={14} />} label={t('table.colPriority')}>
@@ -340,6 +352,7 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
             </FieldButton>
           )}
         />
+        <EditedBy field="priority" />
       </PropertyRow>
 
       <PropertyRow icon={<SizeIcon size={14} />} label={t('taskSize.label')}>
@@ -413,6 +426,10 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
         />
       </PropertyRow>
 
+      <PropertyRow icon={<BellIcon size={14} />} label={t('drawer.followers')}>
+        <FollowersField />
+      </PropertyRow>
+
       <PropertyRow icon={<FolderIcon size={14} />} label={t('drawer.project')}>
         <ProjectPicker
           label={t('create.moveToProject')}
@@ -430,5 +447,63 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
         />
       </PropertyRow>
     </div>
+  );
+}
+
+/**
+ * Who gets comment and status notifications (creator, assignees and commenters follow
+ * automatically), and the viewer's Follow / Following toggle (not designed).
+ */
+function FollowersField() {
+  const { t } = useTranslation();
+  const { me } = useAuth();
+  const { task } = useTaskView();
+  const follow = useFollowTask();
+  const following = task.followers.some((u) => u.id === me?.user.id);
+  return (
+    <>
+      {task.followers.length > 0 && (
+        <AvatarStack
+          users={task.followers}
+          size={24}
+          ring="surface"
+          max={5}
+          label={t('drawer.followersLabel', {
+            count: task.followers.length,
+            names: task.followers.map((u) => u.name).join(', '),
+          })}
+        />
+      )}
+      <button
+        type="button"
+        aria-pressed={following}
+        disabled={follow.isPending}
+        onClick={() => {
+          follow.mutate({ taskId: task.id, follow: !following });
+        }}
+        className={cn(
+          'flex h-7 items-center gap-1.5 rounded-[8px] border border-control bg-control px-2.5 text-[12px] font-medium hover:bg-hover',
+          following ? 'text-2' : 'text-accent-ink',
+        )}
+      >
+        <BellIcon size={12} />
+        {following ? t('drawer.following') : t('drawer.follow')}
+      </button>
+    </>
+  );
+}
+
+/** "Dorj E. just now" after a field someone else changed in the last 10 s (not designed). */
+function EditedBy({ field }: { field: EditedField }) {
+  const { t } = useTranslation();
+  const { me } = useAuth();
+  const { task, members } = useTaskView();
+  const actorId = useRecentEdit(task.id, field, me?.user.id);
+  if (!actorId) return null;
+  const name = members.find((m) => m.user.id === actorId)?.user.name ?? t('drawer.someone');
+  return (
+    <span role="status" className="text-[11px] whitespace-nowrap text-muted">
+      {t('drawer.editedBy', { name: shortName(name) })}
+    </span>
   );
 }

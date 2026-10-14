@@ -2,6 +2,7 @@ import {
   PALETTE_KEYS,
   apiErrorSchema,
   archivedProjectSchema,
+  richTextToPlain,
   createProjectSchema,
   moveProjectSchema,
   projectDetailSchema,
@@ -189,7 +190,7 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Projects'],
         summary: 'Update a project',
         description:
-          'Name, key, color or lead (the default reviewer; a workspace member, else 400 `INVALID_REFERENCE`). 409 `PROJECT_KEY_TAKEN` when the key is in use.',
+          'Name, key, color, lead (the default reviewer; a workspace member, else 400 `INVALID_REFERENCE`) or the brief (`description`, TipTap JSON; its plain text is stored for search). Any member may edit. 409 `PROJECT_KEY_TAKEN` when the key is in use.',
         params: projectParams,
         body: updateProjectSchema,
         response: { 200: projectDetailSchema, 400: err, 401: err, 404: err, 409: err },
@@ -201,9 +202,18 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         await requireMembers(app.db, project.workspaceId, [request.body.leadId], 'Lead');
       }
       try {
+        const { description, ...rest } = request.body;
         const [updated] = await app.db
           .update(projects)
-          .set(request.body)
+          .set({
+            ...rest,
+            ...(description !== undefined
+              ? {
+                  description,
+                  descriptionText: description ? richTextToPlain(description) : '',
+                }
+              : {}),
+          })
           .where(eq(projects.id, project.id))
           .returning();
         return await detail(request, updated ?? project);

@@ -166,7 +166,8 @@
       "priority": "Priority",
       "tag": "Tags",
       "sprint": "Sprint",
-      "due": "Due date"
+      "due": "Due date",
+      "creator": "Created by"
     },
     "is": {
       "status": "Status is",
@@ -174,7 +175,8 @@
       "priority": "Priority is",
       "tag": "Tags include",
       "sprint": "Sprint is",
-      "due": "Due"
+      "due": "Due",
+      "creator": "Created by"
     },
     "me": "Me",
     "clearAll": "Clear all",
@@ -231,7 +233,9 @@
     "reopen": "Reopen",
     "delete": "Delete",
     "reassign": "Reassign…",
-    "reassignTo": "Reassign {{name}} to"
+    "reassignTo": "Reassign {{name}} to",
+    "select": "Select {{name}}",
+    "selectAll": "Select all visible tasks"
   },
   "status": {
     "todo": "To Do",
@@ -290,7 +294,9 @@
     "assigneeLabel": "Assignees",
     "createTag": "Create tag “{{name}}”",
     "createTagFailed": "Couldn't create the tag",
-    "assigned": "Assigned"
+    "assigned": "Assigned",
+    "awayUntil": "Away until {{date}}",
+    "away": "away"
   },
   "board": {
     "sortManual": "Sort: Manual",
@@ -476,7 +482,20 @@
     "deleteCommentConfirm": "Delete this comment?",
     "hideReplies": "Hide replies",
     "viewers": "Also viewing: {{names}}",
-    "removeAssignee": "Remove {{name}}"
+    "removeAssignee": "Remove {{name}}",
+    "followers": "Followers",
+    "followersLabel_one": "{{count}} follower: {{names}}",
+    "followersLabel_other": "{{count}} followers: {{names}}",
+    "follow": "Follow",
+    "following": "Following",
+    "editedBy": "{{name}} just now",
+    "someone": "Someone",
+    "titleChanged": "{{name}} changed the title to “{{title}}”.",
+    "useTheirs": "Use theirs",
+    "references": "Refers to",
+    "mentionedIn": "Mentioned in",
+    "inComment": "in a comment",
+    "inDescription": "in the description"
   },
   "myTasks": {
     "allSpaces": "All spaces",
@@ -508,7 +527,9 @@
       "later": "Later",
       "laterHint": "After this week",
       "rangeHint": "{{start}} – {{end}}",
-      "done": "Done this week"
+      "done": "Done this week",
+      "requested": "Requested by me",
+      "requestedHint": "Open tasks you created for others"
     },
     "recentActivity": "Recent activity",
     "viewInbox": "View inbox",
@@ -735,7 +756,9 @@
       "mentions": "No one has mentioned you yet",
       "assigned": "No new assignments",
       "archived": "No archived notifications"
-    }
+    },
+    "projectFilter": "Filter by project",
+    "allProjects": "All projects"
   },
   "palette": {
     "label": "Command palette",
@@ -745,7 +768,8 @@
       "actions": "Actions",
       "tasks": "Tasks",
       "projects": "Projects",
-      "people": "People"
+      "people": "People",
+      "comments": "Comments"
     },
     "actions": {
       "newTask": "New task",
@@ -760,7 +784,8 @@
       "navigate": "navigate",
       "open": "open",
       "close": "close"
-    }
+    },
+    "moreTasks": "Show more tasks"
   },
   "shortcuts": {
     "title": "Keyboard shortcuts",
@@ -849,7 +874,10 @@
       "comment": "Comments",
       "commentHint": "New comments on tasks you follow.",
       "status": "Status changes",
-      "statusHint": "A task you follow moves to another status."
+      "statusHint": "A task you follow moves to another status.",
+      "perProject": "Per project",
+      "perProjectHint": "Turn down projects you don’t need to follow closely: only mentions and assignments, or nothing at all.",
+      "levelOf": "Notifications for {{project}}"
     },
     "roles": {
       "owner": "Owner",
@@ -1278,7 +1306,8 @@
         "workedWith": "Worked with most",
         "openTasks": "Current open tasks",
         "openLink": "See workload",
-        "comments": "Comments on others’ tasks"
+        "comments": "Comments on others’ tasks",
+        "completedTasks": "Completed in this period"
       },
       "mine": {
         "titles": {
@@ -1310,15 +1339,123 @@
         "workedWith": "People you worked with most",
         "openTasks": "Your open tasks",
         "openLink": "Go to My Tasks",
-        "comments": "Comments on others’ tasks"
+        "comments": "Comments on others’ tasks",
+        "completedTasks": "What you completed"
       },
       "rangeWeek": "{{range}} · compared with the week before",
-      "rangeMonth": "{{range}} · compared with the month before"
+      "rangeMonth": "{{range}} · compared with the month before",
+      "completedList": {
+        "cols": {
+          "task": "Task",
+          "project": "Project",
+          "completed": "Completed",
+          "cycle": "Cycle time",
+          "priority": "Priority"
+        },
+        "empty": "Nothing completed in this period",
+        "days_one": "{{value}} day",
+        "days_other": "{{value}} days",
+        "showAll": "Show all {{count}}",
+        "showLess": "Show fewer",
+        "show": "Show the completed tasks"
+      }
     },
     "chartTable": {
       "week": "Week",
       "sprint": "Sprint",
       "day": "Day"
+    }
+  },
+  "notifyLevel": {
+    "all": "All activity",
+    "direct": "Mentions and assignments",
+    "none": "Nothing",
+    "heading": "Notify me about"
+  },
+  "bulk": {
+    "label_one": "Actions for {{count}} selected task",
+    "label_other": "Actions for {{count}} selected tasks",
+    "selected_one": "{{count}} selected",
+    "selected_other": "{{count}} selected",
+    "setStatus": "Set status of selected tasks",
+    "setSprint": "Set sprint of selected tasks",
+    "setDue": "Set due date of selected tasks",
+    "setPriority": "Set priority of selected tasks",
+    "assignees": "Change assignees of selected tasks",
+    "assign": {
+      "add": "Add assignee…",
+      "replace": "Replace assignees with…",
+      "remove": "Remove assignee…"
+    },
+    "assigned": {
+      "add_one": "Added {{name}} to {{count}} task",
+      "add_other": "Added {{name}} to {{count}} tasks",
+      "replace_one": "Assigned {{count}} task to {{name}}",
+      "replace_other": "Assigned {{count}} tasks to {{name}}",
+      "remove_one": "Removed {{name}} from {{count}} task",
+      "remove_other": "Removed {{name}} from {{count}} tasks"
+    },
+    "moved_one": "Moved {{count}} task to {{status}}",
+    "moved_other": "Moved {{count}} tasks to {{status}}",
+    "sprint_one": "Moved {{count}} task to {{sprint}}",
+    "sprint_other": "Moved {{count}} tasks to {{sprint}}",
+    "noSprint_one": "Took {{count}} task out of its sprint",
+    "noSprint_other": "Took {{count}} tasks out of their sprint",
+    "due_one": "Changed the due date of {{count}} task",
+    "due_other": "Changed the due date of {{count}} tasks",
+    "noDue_one": "Cleared the due date of {{count}} task",
+    "noDue_other": "Cleared the due date of {{count}} tasks",
+    "priority_one": "Set {{count}} task to {{priority}}",
+    "priority_other": "Set {{count}} tasks to {{priority}}",
+    "deleted_one": "Deleted {{count}} task",
+    "deleted_other": "Deleted {{count}} tasks",
+    "clear": "Clear selection"
+  },
+  "brief": {
+    "label": "About {{project}}",
+    "title": "Project brief",
+    "empty": "Add a brief: goal, links, who to ask",
+    "none": "No brief yet",
+    "placeholder": "What is this project for? Goals, links, who to ask…",
+    "lead": "Lead",
+    "noLead": "No lead",
+    "setLead": "Project lead"
+  },
+  "members": {
+    "actions": "More actions for {{name}}",
+    "away": {
+      "set": "Set out of office…",
+      "titleOf": "Out of office: {{name}}",
+      "label": "Out of office",
+      "hint": "Teammates see “Away” next to your name in pickers and Workload until this date.",
+      "until": "Away until",
+      "note": "Note (optional)",
+      "notePlaceholder": "e.g. Vacation, back on Monday",
+      "save": "Save",
+      "back": "I’m back",
+      "badge": "Away until {{date}}"
+    },
+    "deactivate": {
+      "action": "Deactivate…",
+      "title": "Deactivate {{name}}?",
+      "intro": "They lose access to this workspace and leave pickers and Workload. Their history stays; you can reactivate them later.",
+      "openTasks_one": "{{count}} open task assigned",
+      "openTasks_other": "{{count}} open tasks assigned",
+      "reviewing_one": "Reviewer on {{count}} open task",
+      "reviewing_other": "Reviewer on {{count}} open tasks",
+      "leads_one": "Leads {{projects}}",
+      "leads_other": "Leads {{count}} projects: {{projects}}",
+      "leadsNone": "Leads no project",
+      "handTo": "Hand their open work to",
+      "nobody": "Nobody (just remove them)",
+      "confirm": "Deactivate",
+      "done": "{{name}} was deactivated"
+    },
+    "deactivated": {
+      "title_one": "Deactivated ({{count}})",
+      "title_other": "Deactivated ({{count}})",
+      "reactivate": "Reactivate",
+      "back": "{{name}} is back in the workspace"
     }
   }
 }

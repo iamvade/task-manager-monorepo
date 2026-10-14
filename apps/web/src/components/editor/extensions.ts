@@ -5,6 +5,7 @@ import { ReactRenderer } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { MentionList, type MentionListHandle, type MentionListProps } from './MentionList';
 import { filterMentions, type MentionCandidate } from './mentions';
+import { TaskKeys } from './taskKeys';
 
 export interface EditorCallbacks {
   /** Current @-suggestion candidates (read on every keystroke, so they can change). */
@@ -28,6 +29,7 @@ export function editorExtensions(
   { placeholder, placement }: { placeholder: string; placement: 'top-start' | 'bottom-start' },
 ) {
   return [
+    TaskKeys,
     StarterKit.configure({
       heading: { levels: [3, 4] },
       codeBlock: false,

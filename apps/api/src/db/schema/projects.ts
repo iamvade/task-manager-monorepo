@@ -1,9 +1,10 @@
-import type { PaletteKey } from '@kite/shared';
+import type { PaletteKey, RichTextNode } from '@kite/shared';
 import {
   date,
   foreignKey,
   index,
   integer,
+  jsonb,
   pgTable,
   primaryKey,
   text,
@@ -11,7 +12,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { createdAt, id, position, timestamptz } from './columns.js';
-import { statusCategoryEnum } from './enums.js';
+import { notificationLevelEnum, statusCategoryEnum } from './enums.js';
 import { users } from './users.js';
 import { workspaces } from './workspaces.js';
 
@@ -53,6 +54,9 @@ export const projects = pgTable(
     position: position('position').notNull(),
     /** Default reviewer for tasks entering review. */
     leadId: uuid('lead_id').references(() => users.id, { onDelete: 'set null' }),
+    /** The project brief (TipTap JSON) and its plain text. */
+    description: jsonb('description').$type<RichTextNode>(),
+    descriptionText: text('description_text').notNull().default(''),
     /** May archive / restore the project, like an admin. Null for projects made before 0007. */
     createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
     archivedAt: timestamptz('archived_at'),
@@ -95,6 +99,21 @@ export const favorites = pgTable(
     projectId: uuid('project_id')
       .notNull()
       .references(() => projects.id, { onDelete: 'cascade' }),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.projectId] })],
+);
+
+/** Per-person notification level for a project (Settings → Notifications); no row = `all`. */
+export const projectNotificationLevels = pgTable(
+  'project_notification_levels',
+  {
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    level: notificationLevelEnum('level').notNull(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.projectId] })],
 );

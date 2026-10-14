@@ -7,7 +7,7 @@ import { UnderlineTabs } from '../../components/ui/UnderlineTabs';
 import { PageHeader } from '../views/PageHeader';
 import { ArchivedProjectsSection } from './ArchivedProjectsSection';
 import { MembersSection } from './MembersSection';
-import { NotificationsSection } from './NotificationsSection';
+import { NotificationsSection, ProjectLevelsSection } from './NotificationsSection';
 import { PreferencesSection } from './PreferencesSection';
 import { ProfileSection } from './ProfileSection';
 
@@ -46,7 +46,12 @@ export function SettingsView() {
         <div className="mx-auto w-full max-w-[680px]">
           {tab === 'profile' && <ProfileSection />}
           {tab === 'preferences' && <PreferencesSection />}
-          {tab === 'notifications' && <NotificationsSection />}
+          {tab === 'notifications' && (
+            <div className="flex flex-col gap-8">
+              <NotificationsSection />
+              <ProjectLevelsSection />
+            </div>
+          )}
           {tab === 'members' && workspace && (
             <MembersSection workspaceId={workspace.id} role={workspace.role} />
           )}

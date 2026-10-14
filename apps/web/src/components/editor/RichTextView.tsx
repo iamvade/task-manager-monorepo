@@ -1,5 +1,6 @@
-import type { RichTextMark, RichTextNode } from '@kite/shared';
+import { splitTaskKeys, type RichTextMark, type RichTextNode } from '@kite/shared';
 import type { ReactNode } from 'react';
+import { Link } from 'react-router';
 import i18n from '../../i18n';
 import { cn } from '../../lib/cn';
 import { UNRESOLVED_MENTION } from './typedMentions';
@@ -32,6 +33,39 @@ function dimUnresolved(text: string, marks: readonly RichTextMark[] | undefined,
   if (parts.length === 0) return text;
   if (last < text.length) parts.push(text.slice(last));
   return parts;
+}
+
+/** Where a task key in the text links to; null leaves it as text (unknown project key). */
+export type TaskKeyHref = (key: string) => string | null;
+
+/** `KEY-123` in plain runs → links to that task (code and links are left alone). */
+function linkTaskKeys(
+  content: ReactNode,
+  marks: readonly RichTextMark[] | undefined,
+  key: string,
+  hrefOf: TaskKeyHref | undefined,
+): ReactNode {
+  if (!hrefOf || marks?.some((m) => m.type === 'code' || m.type === 'link')) return content;
+  const link = (text: string, at: string): ReactNode => {
+    const parts = splitTaskKeys(text);
+    if (!parts.some((part) => 'key' in part)) return text;
+    return parts.map((part, i) => {
+      const href = 'key' in part ? hrefOf(part.key) : null;
+      return href ? (
+        <Link key={`${at}k${String(i)}`} to={href} className="task-key-link">
+          {part.text}
+        </Link>
+      ) : (
+        part.text
+      );
+    });
+  };
+  if (typeof content === 'string') return link(content, key);
+  if (Array.isArray(content)) {
+    const items: readonly ReactNode[] = content;
+    return items.map((c, i) => (typeof c === 'string' ? link(c, `${key}.${String(i)}`) : c));
+  }
+  return content;
 }
 
 function withMarks(text: ReactNode, marks: readonly RichTextMark[] | undefined, key: string) {
@@ -67,8 +101,9 @@ function withMarks(text: ReactNode, marks: readonly RichTextMark[] | undefined, 
   return out;
 }
 
-function renderNode(node: RichTextNode, key: string): ReactNode {
-  const children = () => (node.content ?? []).map((child, i) => renderNode(child, `${key}.${i}`));
+function renderNode(node: RichTextNode, key: string, hrefOf?: TaskKeyHref): ReactNode {
+  const children = () =>
+    (node.content ?? []).map((child, i) => renderNode(child, `${key}.${i}`, hrefOf));
   switch (node.type) {
     case 'doc':
       return children();
@@ -101,7 +136,11 @@ function renderNode(node: RichTextNode, key: string): ReactNode {
       );
     }
     case 'text':
-      return withMarks(dimUnresolved(node.text ?? '', node.marks, key), node.marks, key);
+      return withMarks(
+        linkTaskKeys(dimUnresolved(node.text ?? '', node.marks, key), node.marks, key, hrefOf),
+        node.marks,
+        key,
+      );
     default:
       return node.content ? <span key={key}>{children()}</span> : null;
   }
@@ -109,8 +148,17 @@ function renderNode(node: RichTextNode, key: string): ReactNode {
 
 /**
  * Read-only rich text (comment bodies) rendered straight from the TipTap JSON — no editor
- * instance per comment and no HTML injection; links only for http(s)/mailto.
+ * instance per comment and no HTML injection; links only for http(s)/mailto, plus task keys
+ * (`APP-142`) when `taskHref` knows them.
  */
-export function RichTextView({ doc, className }: { doc: RichTextNode; className?: string }) {
-  return <div className={cn('rich-text', className)}>{renderNode(doc, 'n')}</div>;
+export function RichTextView({
+  doc,
+  className,
+  taskHref,
+}: {
+  doc: RichTextNode;
+  className?: string;
+  taskHref?: TaskKeyHref;
+}) {
+  return <div className={cn('rich-text', className)}>{renderNode(doc, 'n', taskHref)}</div>;
 }

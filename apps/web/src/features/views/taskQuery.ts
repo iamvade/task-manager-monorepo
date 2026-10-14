@@ -30,6 +30,10 @@ export function toTaskQuery(
     .map((a) => (a === ASSIGNEE_ME ? meId : a))
     .filter((a) => a === UNASSIGNED || UUID.test(a));
   if (assignees.length) query.assigneeId = assignees;
+  const creators = filters.creator
+    .map((a) => (a === ASSIGNEE_ME ? meId : a))
+    .filter((a) => UUID.test(a));
+  if (creators.length) query.createdBy = creators;
   if (filters.priority.length) query.priority = filters.priority;
   if (ids(filters.tag).length) query.tagId = ids(filters.tag);
   // Sprints belong to one project; the space list ignores the param.

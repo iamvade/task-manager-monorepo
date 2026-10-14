@@ -10,6 +10,7 @@ import type {
 import type { Query, QueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../api/queryKeys';
 import { TASK_MUTATION } from '../api/taskCache';
+import { useRealtimeStore, type EditedField } from '../stores/realtime';
 
 /** Changes arriving this close together share one round of refetches. */
 export const COALESCE_MS = 150;
@@ -125,6 +126,7 @@ export function createMessageHandler(queryClient: QueryClient) {
   }
 
   function onTask(m: RealtimeTaskMessage) {
+    noteEdits(queryClient, m);
     const quiet = busy();
     if (!quiet) patchNow(queryClient, m);
     refreshReports(m.workspaceId);
@@ -294,4 +296,28 @@ function spacesOf(
     spaces.add(space.id);
   }
   return spaces;
+}
+
+const EDITED_BY: Partial<Record<string, EditedField>> = {
+  'title.changed': 'title',
+  'status.changed': 'status',
+  'priority.changed': 'priority',
+  'due.changed': 'due',
+  'assignee.added': 'assignees',
+  'assignee.removed': 'assignees',
+};
+
+/** Remembers which drawer fields someone changed ("Edited by X just now", title conflicts). */
+function noteEdits(queryClient: QueryClient, m: RealtimeTaskMessage) {
+  let fields: EditedField[] = [];
+  if (m.type === 'task.updated') {
+    fields = [...new Set(m.changes.flatMap((c) => EDITED_BY[c] ?? []))];
+  } else if (m.type === 'task.moved') {
+    // A move inside the same status is just a reorder.
+    const detail = queryClient
+      .getQueriesData<TaskDetail>({ queryKey: queryKeys.taskDetails })
+      .find(([, task]) => task?.id === m.taskId)?.[1];
+    if (detail && detail.status.id !== m.statusId) fields = ['status'];
+  }
+  useRealtimeStore.getState().noteEdits(m.taskId, m.actorId, fields);
 }

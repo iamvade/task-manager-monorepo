@@ -6,6 +6,7 @@ import { sessions, workspaceMembers } from '../db/schema/index.js';
 import { LocalBroadcaster, type Broadcaster } from './broadcaster.js';
 import { RealtimeHub } from './hub.js';
 import { toRealtime } from './messages.js';
+import { activeMember } from '../auth/membership.js';
 
 /** Ping every socket this often; one that missed the previous ping is dropped. */
 const HEARTBEAT_MS = 25_000;
@@ -83,7 +84,9 @@ export async function revalidate(app: FastifyInstance): Promise<void> {
   const members = await app.db
     .select({ workspaceId: workspaceMembers.workspaceId, userId: workspaceMembers.userId })
     .from(workspaceMembers)
-    .where(inArray(workspaceMembers.userId, [...new Set(conns.map((c) => c.userId))]));
+    .where(
+      and(inArray(workspaceMembers.userId, [...new Set(conns.map((c) => c.userId))]), activeMember),
+    );
 
   const liveSessions = new Set(live.map((s) => s.id));
   const memberships = new Set(members.map((m) => `${m.workspaceId}:${m.userId}`));

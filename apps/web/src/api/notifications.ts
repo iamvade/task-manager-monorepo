@@ -1,5 +1,7 @@
 import {
   notificationPageSchema,
+  projectNotificationLevelSchema,
+  type NotificationLevel,
   readAllResultSchema,
   type InboxTab,
   type Notification,
@@ -9,6 +11,7 @@ import {
 import {
   useInfiniteQuery,
   useMutation,
+  useQuery,
   useQueryClient,
   type InfiniteData,
   type QueryClient,
@@ -19,13 +22,20 @@ import { queryKeys } from './queryKeys';
 
 type Pages = InfiniteData<NotificationPage, string>;
 
-/** One inbox tab, newest first, page by page. `counts` (unread/archived) ride on every page. */
-export function useNotifications(workspaceId: string | undefined, tab: InboxTab) {
+/**
+ * One inbox tab (optionally one project), newest first, page by page. `counts` (unread/archived)
+ * ride on every page and cover the whole inbox.
+ */
+export function useNotifications(
+  workspaceId: string | undefined,
+  tab: InboxTab,
+  projectId?: string,
+) {
   return useInfiniteQuery({
-    queryKey: queryKeys.notifications(workspaceId ?? '', tab),
+    queryKey: queryKeys.notifications(workspaceId ?? '', tab, projectId),
     queryFn: ({ pageParam }) =>
       apiFetch(
-        `/me/notifications${toQuery({ workspaceId, tab, cursor: pageParam || undefined })}`,
+        `/me/notifications${toQuery({ workspaceId, tab, projectId, cursor: pageParam || undefined })}`,
         notificationPageSchema,
       ),
     initialPageParam: '',
@@ -167,4 +177,43 @@ export function useMarkAllNotificationsRead(workspaceId: string) {
       counts: (c) => ({ ...c, unread: 0 }),
     }),
   );
+}
+
+/** My levels for the workspace's projects (missing project = `all`). */
+export function useNotificationLevels(workspaceId: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.notificationLevels(workspaceId ?? ''),
+    queryFn: () =>
+      apiFetch(
+        `/workspaces/${workspaceId ?? ''}/notification-levels`,
+        z.array(projectNotificationLevelSchema),
+      ),
+    enabled: Boolean(workspaceId),
+    select: (rows) => new Map(rows.map((r) => [r.projectId, r.level])),
+  });
+}
+
+/** Sets my level for a project; the cached list follows right away. */
+export function useSetNotificationLevel(workspaceId: string | undefined) {
+  const queryClient = useQueryClient();
+  const key = queryKeys.notificationLevels(workspaceId ?? '');
+  type Rows = z.infer<typeof projectNotificationLevelSchema>[];
+  return useMutation({
+    mutationFn: ({ projectId, level }: { projectId: string; level: NotificationLevel }) =>
+      apiSend(`/projects/${projectId}/notification-level`, projectNotificationLevelSchema, 'PUT', {
+        level,
+      }),
+    onMutate: async ({ projectId, level }) => {
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<Rows>(key);
+      queryClient.setQueryData<Rows>(key, (rows = []) => [
+        ...rows.filter((r) => r.projectId !== projectId),
+        ...(level === 'all' ? [] : [{ projectId, level }]),
+      ]);
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      queryClient.setQueryData(key, context?.previous);
+    },
+  });
 }

@@ -140,6 +140,25 @@ describe('GET /me/home', () => {
     });
   });
 
+  it('lists open tasks I created for others under requested', async () => {
+    const w = await taskWorld(ctx);
+    const sara = await w.person('member', 'Sara Khan');
+    await w.createTask({ title: 'For Sara', assigneeIds: [sara.user.id], dueDate: '2026-10-20' });
+    await w.createTask({ title: 'Nobody yet' });
+    await w.createTask({ title: 'Mine', assigneeIds: [w.owner.id] });
+    await w.createTask({
+      title: 'Done for Sara',
+      assigneeIds: [sara.user.id],
+      statusId: w.status('done').id,
+    });
+    // Sara's own task isn't my request.
+    await sara.api('POST', `/projects/${w.project.id}/tasks`, { title: 'Sara made it' });
+    const res = await w.api('GET', `/me/home?workspaceId=${w.ws.id}`);
+    const h = homeSchema.parse(res.json());
+    expect(titles(h.sections.requested)).toEqual(['For Sara', 'Nobody yet']);
+    expect(h.sections.requested[0]?.assignees.map((u) => u.name)).toEqual(['Sara Khan']);
+  });
+
   it("shows others' activity on my tasks with unread flags", async () => {
     const w = await world();
     const sara = await w.person('member', 'Sara Khan');

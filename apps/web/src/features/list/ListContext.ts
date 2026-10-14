@@ -24,6 +24,13 @@ export interface ListActions {
   showSize: boolean;
   /** The task key before the title (toolbar Columns menu, on by default). */
   showKey: boolean;
+  /** Project list: the select column for multi-select (bulk bar). */
+  selectable: boolean;
+  /** Any row selected: the select boxes stay visible. */
+  anySelected: boolean;
+  isSelected: (task: TaskListItem) => boolean;
+  /** Toggles one row; `range` (shift-click) selects from the last toggled row to this one. */
+  toggleSelected: (task: TaskListItem, range: boolean) => void;
   setTags: (task: TaskListItem, tags: Tag[]) => void;
 }
 
@@ -38,8 +45,8 @@ export function useListActions(): ListActions {
 export const isDone = (task: Pick<TaskListItem, 'status'>) => task.status.category === 'done';
 
 /**
- * Main.dc.html grid: checkbox · name · assignee · due · priority · [size] · tags · more. Size is
+ * Main.dc.html grid: [select (project list, not designed)] · checkbox · name · assignee · due · priority · [size] · tags · more. Size is
  * optional (not in the designs) and sits next to priority.
  */
-export const gridColumns = (showSize: boolean) =>
-  `40px minmax(0, 1fr) 152px 120px 112px ${showSize ? '72px ' : ''}224px 40px`;
+export const gridColumns = (showSize: boolean, selectable = false) =>
+  `${selectable ? '28px ' : ''}40px minmax(0, 1fr) 152px 120px 112px ${showSize ? '72px ' : ''}224px 40px`;

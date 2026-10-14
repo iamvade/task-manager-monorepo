@@ -7,6 +7,7 @@ import {
   type CreateSprint,
   type ProjectDetail,
   type TemplateId,
+  type UpdateProject,
 } from '@kite/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
@@ -141,6 +142,18 @@ export function useApplyTemplate(project: Pick<ProjectDetail, 'id' | 'workspaceI
       void queryClient.invalidateQueries({ queryKey: queryKeys.project(project.id) });
       void queryClient.invalidateQueries({ queryKey: queryKeys.tasks });
       void queryClient.invalidateQueries({ queryKey: queryKeys.sidebar(project.workspaceId) });
+    },
+  });
+}
+
+/** `PATCH /projects/:id` (brief, lead); the cached detail takes the server's copy. */
+export function useUpdateProject(projectId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (patch: UpdateProject) =>
+      apiSend(`/projects/${projectId}`, projectDetailSchema, 'PATCH', patch),
+    onSuccess: (detail) => {
+      queryClient.setQueryData(queryKeys.project(detail.id), detail);
     },
   });
 }

@@ -5,6 +5,7 @@ import { useAuth } from '../../auth/useAuth';
 import { Avatar } from '../../components/ui/Avatar';
 import { Picker } from '../../components/ui/Picker';
 import { Popover, type TriggerProps } from '../../components/ui/Popover';
+import { useMemberHint } from './useMemberHint';
 
 interface AssigneePickerProps {
   value: readonly UserRef[];
@@ -56,6 +57,7 @@ export function AssigneePicker({
   const { t } = useTranslation();
   const { me } = useAuth();
   const meId = me?.user.id;
+  const hintOf = useMemberHint();
   const none = noneLabel ?? t('create.unassigned');
 
   const selected = value.map((u) => u.id);
@@ -136,9 +138,7 @@ export function AssigneePicker({
               <>
                 <Avatar user={m.user} size={20} title={null} />
                 <span className="flex-1 truncate">{m.user.name}</span>
-                <span className="text-[12px] text-muted">
-                  {m.user.id === meId ? t('create.you') : m.title}
-                </span>
+                <span className="text-[12px] text-muted">{hintOf(m)}</span>
               </>
             ) : (
               <>

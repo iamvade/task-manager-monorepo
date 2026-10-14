@@ -13,6 +13,9 @@ const member = (user: typeof DORJ | typeof SARA | typeof BAT, title: string) => 
   title,
   capacityPoints: 15,
   joinedAt: '2026-01-01T00:00:00.000Z',
+  awayUntil: null,
+  awayNote: null,
+  deactivatedAt: null,
 });
 const membersApi = {
   [`GET /api/v1/workspaces/${WORKSPACE_ID}/members`]: () =>
@@ -183,6 +186,17 @@ describe('Reports · My performance', () => {
       extra: { [`${REPORTS_API}/people/me`]: () => Response.json(mine) },
     });
     expect(await screen.findByRole('heading', { name: title })).toBeInTheDocument();
+  });
+
+  it('lists what I completed behind the Completed card', async () => {
+    renderReports('/reports/me', {
+      me: MEMBER_ME,
+      extra: { [`${REPORTS_API}/people/me`]: () => Response.json(mine) },
+    });
+    fireEvent.click(await screen.findByRole('button', { name: 'Show the completed tasks' }));
+    const list = screen.getByRole('table', { name: 'What you completed' });
+    expect(within(list).getByRole('row', { name: /Open task 3/ })).toHaveTextContent('2.5 days');
+    expect(within(list).getByRole('row', { name: /Open task 4/ })).toHaveTextContent('—');
   });
 
   it('uses the “you” copy and exports my data', async () => {

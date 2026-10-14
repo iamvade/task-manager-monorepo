@@ -23,7 +23,7 @@ interface FilterMenuProps {
   trigger: (props: TriggerProps, open: boolean) => ReactElement;
 }
 
-type ListField = 'status' | 'assignee' | 'priority' | 'tag';
+type ListField = 'status' | 'assignee' | 'creator' | 'priority' | 'tag';
 
 const optionRow =
   'flex h-8 w-full items-center gap-2 rounded-[6px] border-0 bg-transparent px-2 text-left text-[13px] text-default hover:bg-popover-hover focus-visible:bg-popover-hover';
@@ -53,6 +53,7 @@ export function FilterMenu({ project, workspaceId, trigger }: FilterMenuProps) {
   const fields: FilterField[] = [
     'status',
     'assignee',
+    'creator',
     'priority',
     'tag',
     ...(project ? (['sprint'] as const) : []),

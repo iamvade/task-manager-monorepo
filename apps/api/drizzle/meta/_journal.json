@@ -57,6 +57,48 @@
       "when": 1791883301171,
       "tag": "0007_creator_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791886639598,
+      "tag": "0008_notification_levels",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791887736350,
+      "tag": "0009_created_by_index",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791944897475,
+      "tag": "0010_project_brief",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791945266837,
+      "tag": "0011_member_offboarding",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791946306325,
+      "tag": "0012_search_text_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791946944155,
+      "tag": "0013_task_references",
+      "breakpoints": true
     }
   ]
 }

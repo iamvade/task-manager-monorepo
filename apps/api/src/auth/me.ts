@@ -1,8 +1,9 @@
 import { accentSchema, type MeResponse } from '@kite/shared';
-import { asc, eq } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 import type { DbOrTx } from '../db/client.js';
 import { workspaceMembers, workspaces } from '../db/schema/index.js';
 import type { UserRow } from './plugin.js';
+import { activeMember } from './membership.js';
 
 /** Body of `GET /auth/me` (also returned by login, invite accept and `PATCH /me`). */
 export async function buildMe(db: DbOrTx, user: UserRow): Promise<MeResponse> {
@@ -16,7 +17,7 @@ export async function buildMe(db: DbOrTx, user: UserRow): Promise<MeResponse> {
     })
     .from(workspaceMembers)
     .innerJoin(workspaces, eq(workspaces.id, workspaceMembers.workspaceId))
-    .where(eq(workspaceMembers.userId, user.id))
+    .where(and(eq(workspaceMembers.userId, user.id), activeMember))
     .orderBy(asc(workspaceMembers.joinedAt));
 
   const accent = accentSchema.safeParse(user.accent);

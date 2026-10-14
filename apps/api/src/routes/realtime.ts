@@ -12,6 +12,7 @@ import { requireAuth } from '../auth/plugin.js';
 import { projects, tasks, workspaceMembers } from '../db/schema/index.js';
 import { errorBody } from '../errors.js';
 import type { Connection } from '../realtime/hub.js';
+import { activeMember } from '../auth/membership.js';
 
 /** More client messages than this in one window closes the socket (1008). */
 const MESSAGE_BUDGET = 50;
@@ -98,6 +99,7 @@ export const realtimeRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           and(
             eq(workspaceMembers.workspaceId, message.workspaceId),
             eq(workspaceMembers.userId, conn.userId),
+            activeMember,
           ),
         )
         .limit(1);

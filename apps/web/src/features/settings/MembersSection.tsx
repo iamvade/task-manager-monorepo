@@ -1,6 +1,7 @@
 import {
   MAX_CAPACITY_POINTS,
   emailSchema,
+  isAway,
   matchesName,
   type UpdateMember,
   type WorkspaceMember,
@@ -10,14 +11,17 @@ import { useId, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ApiError } from '../../api/client';
 import {
+  useAllMembers,
   useCreateInvite,
   useInvites,
   useRevokeInvite,
+  useSetMemberActive,
   useUpdateMember,
   useWorkspaceMembers,
 } from '../../api/workspaces';
 import { useAuth } from '../../auth/useAuth';
-import { ChevronDownIcon } from '../../components/icons';
+import { ChevronDownIcon, MoreIcon } from '../../components/icons';
+import { IconButton } from '../../components/ui/IconButton';
 import { Avatar } from '../../components/ui/Avatar';
 import { Button } from '../../components/ui/Button';
 import { Menu } from '../../components/ui/Menu';
@@ -28,6 +32,7 @@ import { useCopyLink } from '../../lib/useCopyLink';
 import { useDates } from '../../lib/useDates';
 import { useOnlineIds } from '../../stores/realtime';
 import { toast } from '../../stores/toast';
+import { AwayDialog, DeactivateDialog } from './MemberDialogs';
 import { SettingsSection, settingsInput } from './SettingsRow';
 
 type InviteRole = 'member' | 'admin';
@@ -232,6 +237,8 @@ function MemberList({ workspaceId, canEdit }: { workspaceId: string; canEdit: bo
   const { me } = useAuth();
   const members = useWorkspaceMembers(workspaceId);
   const update = useUpdateMember(workspaceId);
+  const [deactivating, setDeactivating] = useState<WorkspaceMember | null>(null);
+  const [awayFor, setAwayFor] = useState<WorkspaceMember | null>(null);
   const [query, setQuery] = useState('');
   const q = query.trim();
   // Name in either script ("Bat" finds Бат-Эрдэнэ), job title or email.
@@ -286,12 +293,87 @@ function MemberList({ workspaceId, canEdit }: { workspaceId: string; canEdit: bo
                 onUpdate={(patch) => {
                   update.mutate({ userId: member.user.id, ...patch });
                 }}
+                onSetAway={
+                  canEdit
+                    ? () => {
+                        setAwayFor(member);
+                      }
+                    : undefined
+                }
+                onDeactivate={
+                  canEdit && member.role !== 'owner' && member.user.id !== me?.user.id
+                    ? () => {
+                        setDeactivating(member);
+                      }
+                    : undefined
+                }
               />
             ))}
           </ul>
         </>
       )}
+      <DeactivateDialog
+        workspaceId={workspaceId}
+        member={deactivating}
+        members={members.data ?? []}
+        onClose={() => {
+          setDeactivating(null);
+        }}
+      />
+      <AwayDialog
+        member={awayFor}
+        onSave={(value) => {
+          if (awayFor) update.mutate({ userId: awayFor.user.id, ...value });
+        }}
+        onClose={() => {
+          setAwayFor(null);
+        }}
+      />
+      {canEdit && <DeactivatedList workspaceId={workspaceId} />}
     </SettingsSection>
+  );
+}
+
+/** Admins: deactivated members, each with Reactivate (not designed). */
+function DeactivatedList({ workspaceId }: { workspaceId: string }) {
+  const { t } = useTranslation();
+  const all = useAllMembers(workspaceId, true);
+  const setActive = useSetMemberActive(workspaceId);
+  const gone = (all.data ?? []).filter((m) => m.deactivatedAt !== null);
+  if (gone.length === 0) return null;
+  return (
+    <section aria-labelledby="deactivated-h" className="mt-6 flex flex-col">
+      <h3 id="deactivated-h" className="m-0 pb-2 text-[13px] font-semibold text-2">
+        {t('members.deactivated.title', { count: gone.length })}
+      </h3>
+      <ul className="m-0 list-none pl-0">
+        {gone.map((m) => (
+          <li key={m.user.id} className="flex items-center gap-3 border-t border-subtle py-2.5">
+            <Avatar user={m.user} size={28} title={null} />
+            <div className="flex min-w-0 flex-1 flex-col">
+              <span className="truncate text-[13px] font-medium text-2">{m.user.name}</span>
+              <span className="truncate text-[12px] text-muted">{m.user.email}</span>
+            </div>
+            <Button
+              size="sm"
+              disabled={setActive.isPending}
+              onClick={() => {
+                setActive.mutate(
+                  { userId: m.user.id, active: true },
+                  {
+                    onSuccess: () => {
+                      toast({ message: t('members.deactivated.back', { name: m.user.name }) });
+                    },
+                  },
+                );
+              }}
+            >
+              {t('members.deactivated.reactivate')}
+            </Button>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -301,6 +383,8 @@ function MemberRow({
   canEdit,
   roleEditable,
   onUpdate,
+  onSetAway,
+  onDeactivate,
 }: {
   member: WorkspaceMember;
   isMe: boolean;
@@ -308,8 +392,13 @@ function MemberRow({
   canEdit: boolean;
   roleEditable: boolean;
   onUpdate: (patch: UpdateMember) => void;
+  /** Admins: "Set away…" / "Deactivate…" in the row menu (not for the owner or yourself). */
+  onSetAway?: () => void;
+  onDeactivate?: () => void;
 }) {
   const { t } = useTranslation();
+  const dates = useDates();
+  const away = isAway(member, dates.today);
   const roleLabel = t(`settings.roles.${member.role}`);
   const online = useOnlineIds().has(member.user.id);
   return (
@@ -320,6 +409,14 @@ function MemberRow({
           {member.user.name}
           {isMe && <span className="font-normal text-muted"> {t('settings.members.you')}</span>}
           {online && <span className="sr-only"> · {t('shell.online')}</span>}
+          {away && member.awayUntil && (
+            <span
+              className="ml-2 inline-flex h-5 items-center rounded-[10px] bg-chip px-2 text-[11px] font-medium text-2"
+              title={member.awayNote ?? undefined}
+            >
+              {t('members.away.badge', { date: dates.formatDate(member.awayUntil) })}
+            </span>
+          )}
         </span>
         {canEdit ? (
           <span className="flex min-w-0 items-center gap-1 text-[12px] text-muted">
@@ -381,6 +478,37 @@ function MemberRow({
         />
       ) : (
         <span className="flex-none px-2 text-[13px] text-muted">{roleLabel}</span>
+      )}
+      {(onSetAway ?? onDeactivate) && (
+        <Menu
+          label={t('members.actions', { name: member.user.name })}
+          placement="bottom-end"
+          width={200}
+          items={[
+            ...(onSetAway
+              ? [{ id: 'away', label: t('members.away.set'), onSelect: onSetAway }]
+              : []),
+            ...(onDeactivate
+              ? [
+                  { type: 'separator' as const, id: 'sep' },
+                  {
+                    id: 'deactivate',
+                    label: t('members.deactivate.action'),
+                    danger: true,
+                    onSelect: onDeactivate,
+                  },
+                ]
+              : []),
+          ]}
+          trigger={(props) => (
+            <IconButton
+              {...props}
+              label={t('members.actions', { name: member.user.name })}
+              size={28}
+              icon={<MoreIcon size={14} className="text-icon" />}
+            />
+          )}
+        />
       )}
     </li>
   );

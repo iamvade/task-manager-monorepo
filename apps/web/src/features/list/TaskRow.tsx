@@ -146,8 +146,38 @@ export function TaskRow({
           'cursor-grabbing rounded-[8px] border-transparent bg-surface shadow-drag',
         temp && 'opacity-60',
       )}
-      style={{ ...rowProps?.style, gridTemplateColumns: gridColumns(actions.showSize), height }}
+      style={{
+        ...rowProps?.style,
+        gridTemplateColumns: gridColumns(actions.showSize, actions.selectable),
+        height,
+      }}
     >
+      {actions.selectable && (
+        <div
+          role="cell"
+          className={cn(
+            'flex items-center justify-center',
+            !actions.anySelected &&
+              'opacity-0 group-hover/row:opacity-100 focus-within:opacity-100',
+          )}
+          onClick={(e) => {
+            // Shift-click selects a range; the row itself doesn't open.
+            e.stopPropagation();
+          }}
+        >
+          {!inert && (
+            <Checkbox
+              checked={actions.isSelected(task)}
+              label={t('table.select', { name: task.title })}
+              // The click (Space included) carries Shift for range selection.
+              onChange={() => undefined}
+              onClick={(e) => {
+                actions.toggleSelected(task, e.shiftKey);
+              }}
+            />
+          )}
+        </div>
+      )}
       <div role="cell" className="flex items-center justify-center">
         <Checkbox
           checked={done}

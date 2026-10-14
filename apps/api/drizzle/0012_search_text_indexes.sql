@@ -1,0 +1,2 @@
+CREATE INDEX "comments_body_text_trgm_idx" ON "comments" USING gin ("body_text" gin_trgm_ops);--> statement-breakpoint
+CREATE INDEX "tasks_description_text_trgm_idx" ON "tasks" USING gin ("description_text" gin_trgm_ops);

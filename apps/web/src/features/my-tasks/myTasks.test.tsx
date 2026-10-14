@@ -10,10 +10,18 @@ import { routes } from '../../router';
 import { useToastStore } from '../../stores/toast';
 import { useUiStore } from '../../stores/ui';
 import { ME, SIDEBAR, WORKSPACE_ID, mockApi } from '../../test/fixtures';
-import { HOME, HOME_NOW, OLDER_FEED, OVERDUE, TODAY } from '../../test/home';
+import { HOME, HOME_NOW, OLDER_FEED, OVERDUE, TODAY, myTask } from '../../test/home';
+import { PROJECT } from '../../test/fixtures';
 import { at, makeTask } from '../../test/tasks';
 
 const EN_ME = { ...ME, preferences: { ...ME.preferences, locale: 'en' } };
+const DORJ = PROJECT.members.find((m) => m.user.initials === 'DE')?.user;
+const DORJ_REF = {
+  id: DORJ?.id ?? '',
+  name: DORJ?.name ?? '',
+  initials: 'DE',
+  avatarColor: 'amber' as const,
+};
 
 type Handler = (init?: RequestInit) => Response | Promise<Response>;
 
@@ -84,6 +92,23 @@ describe('My Tasks', () => {
     await waitFor(() => {
       expect(router.state.location.pathname).toMatch(/^\/p\/.+\/list$/);
     });
+  });
+
+  it('lists tasks I requested from others, collapsed, with who has them', async () => {
+    const requested = {
+      ...myTask('Ask design for icons', '2026-10-20', 'medium'),
+      assignees: [DORJ_REF],
+    };
+    renderHome({}, () => ({ ...HOME, sections: { ...HOME.sections, requested: [requested] } }));
+    const section = await screen.findByRole('region', { name: 'Requested by me' });
+    const toggle = within(section).getByRole('button', { name: /^Requested by me/ });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(toggle);
+    const row = within(section)
+      .getByText('Ask design for icons')
+      .closest<HTMLElement>('[role="row"]');
+    if (!row) throw new Error('no row');
+    expect(within(row).getByTitle('Dorj E.')).toBeInTheDocument();
   });
 
   it('recovers in place with Try again when the home feed fails', async () => {

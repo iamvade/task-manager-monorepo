@@ -15,6 +15,8 @@ function PersonCard({
   delta,
   sub,
   danger,
+  onClick,
+  actionLabel,
 }: {
   label: string;
   value: ReactNode;
@@ -24,6 +26,9 @@ function PersonCard({
   sub: string;
   /** Overdue now with overdue tasks: the only colored card (neutral tone otherwise). */
   danger?: boolean;
+  /** Makes the card a button (Completed: shows the tasks), named `actionLabel`. */
+  onClick?: () => void;
+  actionLabel?: string;
 }) {
   return (
     <div
@@ -32,8 +37,18 @@ function PersonCard({
       className={cn(
         'flex min-w-0 flex-col gap-1.5 rounded-[12px] border px-4 py-3.5',
         danger ? 'border-danger-card bg-danger-card' : 'border-default bg-panel',
+        onClick && 'relative hover:bg-subtle',
       )}
     >
+      {onClick && (
+        // Covers the card; its text stays readable in the group.
+        <button
+          type="button"
+          aria-label={actionLabel}
+          onClick={onClick}
+          className="absolute inset-0 cursor-pointer rounded-[12px] border-0 bg-transparent"
+        />
+      )}
       <span className="text-[13px] text-3">{label}</span>
       <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
         <span
@@ -61,7 +76,16 @@ const neutralDiff = (current: number | null, previous: number | null, decimals =
  * Completed · On-time · Median cycle time · Overdue now · Review turnaround, each against the
  * previous period with grey arrow-only chips (design-notes 1.14: never good/bad for a person).
  */
-export function PersonStats({ report, variant }: { report: PersonReport; variant: PersonVariant }) {
+export function PersonStats({
+  report,
+  variant,
+  onShowCompleted,
+}: {
+  report: PersonReport;
+  variant: PersonVariant;
+  /** The Completed card opens the list of those tasks. */
+  onShowCompleted?: () => void;
+}) {
   const { t } = useTranslation();
   const k = variantKeys(variant);
   const { completed, onTime, cycleTime, overdue, reviews } = report;
@@ -87,6 +111,9 @@ export function PersonStats({ report, variant }: { report: PersonReport; variant
         unit={`${t('reports.cards.tasks', { count: completed.current.count })} · ${pts(completed.current.points)}`}
         delta={completedDelta && { text: String(completedDelta.amount), delta: completedDelta }}
         sub={prev(`${String(completed.previous.count)} · ${pts(completed.previous.points)}`)}
+        {...(onShowCompleted && completed.current.count > 0
+          ? { onClick: onShowCompleted, actionLabel: t('reports.person.completedList.show') }
+          : {})}
       />
       <PersonCard
         label={t('reports.person.cards.onTime')}

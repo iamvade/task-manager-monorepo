@@ -3,6 +3,7 @@ import { dateSchema } from '../dates.js';
 import { notificationTypeSchema, paletteKeySchema, prioritySchema } from '../enums.js';
 import { historyEntrySchema } from './feed.js';
 import { cursorSchema, taskRefSchema } from './notification.js';
+import { userRefSchema } from './common.js';
 import { taskProjectRefSchema, taskStatusRefSchema } from './task.js';
 
 export const homeQuerySchema = z.object({ workspaceId: z.uuid() });
@@ -12,6 +13,9 @@ export const activityPageQuerySchema = z.object({
   cursor: cursorSchema.optional(),
   limit: z.coerce.number().int().min(1).max(50).default(10),
 });
+
+/** Most rows of My Tasks' "Requested by me". */
+export const REQUESTED_LIMIT = 50;
 
 /** A row in a My Tasks section. */
 export const myTaskSchema = z
@@ -26,6 +30,8 @@ export const myTaskSchema = z
     status: taskStatusRefSchema,
     project: taskProjectRefSchema,
     space: z.object({ id: z.uuid(), initial: z.string(), color: paletteKeySchema }),
+    /** By name ("Requested by me" shows who has it). */
+    assignees: z.array(userRefSchema),
   })
   .meta({ id: 'MyTask' });
 export type MyTask = z.infer<typeof myTaskSchema>;
@@ -72,6 +78,8 @@ export const homeSchema = z
       later: z.array(myTaskSchema),
       /** Completed this week (Mon–Sun), latest first; done ones due today are in `today` too. */
       done: z.array(myTaskSchema),
+      /** Open tasks I created and am not assigned to, by due date; at most `REQUESTED_LIMIT`. */
+      requested: z.array(myTaskSchema),
     }),
     stats: z.object({
       dueToday: z.object({

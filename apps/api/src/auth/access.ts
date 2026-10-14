@@ -13,6 +13,7 @@ import {
 } from '../db/schema/index.js';
 import { HttpError, httpError } from '../errors.js';
 import { requireAuth } from './plugin.js';
+import { activeMember } from './membership.js';
 
 const ROLE_RANK: Record<WorkspaceRole, number> = { member: 0, admin: 1, owner: 2 };
 
@@ -50,7 +51,13 @@ export async function requireWorkspaceMember(
   const [membership] = await request.server.db
     .select()
     .from(workspaceMembers)
-    .where(and(eq(workspaceMembers.workspaceId, workspaceId), eq(workspaceMembers.userId, user.id)))
+    .where(
+      and(
+        eq(workspaceMembers.workspaceId, workspaceId),
+        eq(workspaceMembers.userId, user.id),
+        activeMember,
+      ),
+    )
     .limit(1);
   if (!membership) throw httpError(404, 'NOT_FOUND', 'Workspace not found');
   checkRole(membership.role, minRole);
@@ -79,6 +86,7 @@ export async function loadProjectAccess(
       and(
         eq(workspaceMembers.workspaceId, spaces.workspaceId),
         eq(workspaceMembers.userId, user.id),
+        activeMember,
       ),
     )
     .where(eq(projects.id, projectId))
@@ -94,7 +102,13 @@ async function roleIn(request: FastifyRequest, workspaceId: string, what: string
   const [membership] = await request.server.db
     .select({ role: workspaceMembers.role })
     .from(workspaceMembers)
-    .where(and(eq(workspaceMembers.workspaceId, workspaceId), eq(workspaceMembers.userId, user.id)))
+    .where(
+      and(
+        eq(workspaceMembers.workspaceId, workspaceId),
+        eq(workspaceMembers.userId, user.id),
+        activeMember,
+      ),
+    )
     .limit(1);
   if (!membership) throw httpError(404, 'NOT_FOUND', `${what} not found`);
   return membership.role;
@@ -151,6 +165,7 @@ export async function loadTaskAccess(
       and(
         eq(workspaceMembers.workspaceId, projects.workspaceId),
         eq(workspaceMembers.userId, user.id),
+        activeMember,
       ),
     )
     .where(eq(tasks.id, taskId))
@@ -226,6 +241,7 @@ export async function findTaskIdByKey(
       and(
         eq(workspaceMembers.workspaceId, projects.workspaceId),
         eq(workspaceMembers.userId, user.id),
+        activeMember,
       ),
     )
     .where(

@@ -1,6 +1,7 @@
 import {
   commentSchema,
   feedItemSchema,
+  taskFollowersSchema,
   type Comment,
   type CommentFeedItem,
   type CommentReply,
@@ -12,7 +13,14 @@ import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tansta
 import { z } from 'zod';
 import { apiFetch, apiSend } from './client';
 import { queryKeys } from './queryKeys';
-import { TASK_MUTATION, bumpCount, restoreTask, settle, type TaskSnapshot } from './taskCache';
+import {
+  TASK_MUTATION,
+  bumpCount,
+  patchDetail,
+  restoreTask,
+  settle,
+  type TaskSnapshot,
+} from './taskCache';
 
 const feed = z.array(feedItemSchema);
 
@@ -170,4 +178,16 @@ export function useDeleteComment() {
         }),
     }),
   );
+}
+
+/** Follow / unfollow a task (drawer "Followers"); the detail's follower list follows the answer. */
+export function useFollowTask() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ taskId, follow }: { taskId: string; follow: boolean }) =>
+      apiSend(`/tasks/${taskId}/follow`, taskFollowersSchema, follow ? 'POST' : 'DELETE'),
+    onSuccess: async ({ followers }, { taskId }) => {
+      await patchDetail(queryClient, taskId, (task) => ({ ...task, followers }));
+    },
+  });
 }

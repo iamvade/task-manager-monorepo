@@ -67,14 +67,16 @@ const bucketSums = (['overdue', 'week', 'later', 'none'] as const).map((b) =>
 const peopleQuery = (ctx: ReportContext, weekEnd: string) => sql`
   with a as (${assignedOpen(ctx, weekEnd)})
   select u.id, u.name, u.initials, u.avatar_color, wm.title, wm.capacity_points,
+    wm.away_until::text as away_until, wm.away_note,
     count(a.id)::int as open_tasks, coalesce(sum(a.pts), 0)::int as points,
     coalesce(sum(a.pts) filter (where a.counted), 0)::int as load_points,
     ${sql.join(bucketSums, sql`,`)}
   from workspace_members wm
   join users u on u.id = wm.user_id
   left join a on a.user_id = wm.user_id
-  where wm.workspace_id = ${ctx.workspaceId} and ${listedPeople(ctx)}
-  group by u.id, u.name, u.initials, u.avatar_color, wm.title, wm.capacity_points
+  where wm.workspace_id = ${ctx.workspaceId} and wm.deactivated_at is null and ${listedPeople(ctx)}
+  group by u.id, u.name, u.initials, u.avatar_color, wm.title, wm.capacity_points,
+    wm.away_until, wm.away_note
   order by points desc, u.name, u.id`;
 
 const tasksQuery = (ctx: ReportContext, weekEnd: string) => sql`
@@ -95,6 +97,8 @@ interface PersonRow extends Record<string, unknown> {
   avatar_color: PaletteKey;
   title: string | null;
   capacity_points: number;
+  away_until: string | null;
+  away_note: string | null;
   open_tasks: number;
   points: number;
   load_points: number;
@@ -148,6 +152,8 @@ export async function buildWorkload(
     user: { id: p.id, name: p.name, initials: p.initials, avatarColor: p.avatar_color },
     title: p.title,
     capacity: p.capacity_points,
+    awayUntil: p.away_until,
+    awayNote: p.away_note,
     openTasks: p.open_tasks,
     points: p.points,
     loadPoints: p.load_points,

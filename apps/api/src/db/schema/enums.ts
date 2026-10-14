@@ -1,6 +1,7 @@
 import {
   DENSITIES,
   LOCALES,
+  NOTIFICATION_LEVELS,
   NOTIFICATION_TYPES,
   PRIORITIES,
   SIZES,
@@ -18,3 +19,4 @@ export const priorityEnum = pgEnum('priority', PRIORITIES);
 export const taskSizeEnum = pgEnum('task_size', SIZES);
 export const statusCategoryEnum = pgEnum('status_category', STATUS_CATEGORIES);
 export const notificationTypeEnum = pgEnum('notification_type', NOTIFICATION_TYPES);
+export const notificationLevelEnum = pgEnum('notification_level', NOTIFICATION_LEVELS);

@@ -48,6 +48,7 @@ function api(state: { tasks: TaskListItem[] }) {
         subtasks: [],
         attachments: [],
         followers: [],
+        mentionedIn: [],
         deletedAt: null,
       }),
     [`GET /api/v1/tasks/${task.id}/activity`]: () => Response.json([]),

@@ -27,6 +27,9 @@ const MEMBERS = [
     title: null,
     capacityPoints: 15,
     joinedAt: '2026-01-01T00:00:00.000Z',
+    awayUntil: null,
+    awayNote: null,
+    deactivatedAt: null,
   },
   SARA,
   DORJ,
@@ -143,6 +146,60 @@ describe('Settings', () => {
     await waitFor(() => {
       expect(bodies(fetchMock, 'PATCH')).toEqual([{ accent: '#0F766E' }, { theme: 'dark' }]);
     });
+  });
+
+  it('sets a per-project notification level', async () => {
+    const { fetchMock } = renderSettings('/settings?tab=notifications', {
+      [`GET /api/v1/workspaces/${WORKSPACE_ID}/notification-levels`]: () => Response.json([]),
+      [`PUT /api/v1/projects/${PROJECT.id}/notification-level`]: () =>
+        Response.json({ projectId: PROJECT.id, level: 'none' }),
+    });
+    fireEvent.click(await screen.findByRole('button', { name: 'Notifications for App Redesign' }));
+    fireEvent.click(await screen.findByRole('menuitemradio', { name: 'Nothing' }));
+    await waitFor(() => {
+      expect(bodies(fetchMock, 'PUT')).toEqual([{ level: 'none' }]);
+    });
+    expect(
+      await screen.findByRole('button', { name: 'Notifications for App Redesign' }),
+    ).toHaveTextContent('Nothing');
+  });
+
+  it('deactivates a member with a handover, and lists them for reactivation', async () => {
+    let deactivated = false;
+    const posts: unknown[] = [];
+    renderSettings('/settings?tab=members', {
+      [`GET /api/v1/workspaces/${WORKSPACE_ID}/members/${DORJ.user.id}/handover`]: () =>
+        Response.json({
+          openTasks: 3,
+          reviewing: 1,
+          leadOf: [{ id: PROJECT.id, key: 'APP', name: 'App Redesign' }],
+        }),
+      [`POST /api/v1/workspaces/${WORKSPACE_ID}/members/${DORJ.user.id}/deactivate`]: (init) => {
+        posts.push(JSON.parse(init?.body as string));
+        deactivated = true;
+        return Response.json({ ...DORJ, deactivatedAt: '2026-10-08T03:00:00.000Z' });
+      },
+      [`GET /api/v1/workspaces/${WORKSPACE_ID}/members?include=deactivated`]: () =>
+        Response.json(
+          deactivated
+            ? [...MEMBERS, { ...DORJ, deactivatedAt: '2026-10-08T03:00:00.000Z' }]
+            : MEMBERS,
+        ),
+    });
+    fireEvent.click(await screen.findByRole('button', { name: 'More actions for Dorj E.' }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Deactivate…' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Deactivate Dorj E.?' });
+    expect(await within(dialog).findByText('3 open tasks assigned')).toBeInTheDocument();
+    expect(within(dialog).getByText('Reviewer on 1 open task')).toBeInTheDocument();
+    expect(within(dialog).getByText('Leads App Redesign')).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole('button', { name: /^Hand their open work to/ }));
+    fireEvent.click(await screen.findByRole('option', { name: /Sara K\./ }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Deactivate' }));
+    await waitFor(() => {
+      expect(posts).toEqual([{ reassignTo: SARA.user.id }]);
+    });
+    expect(await screen.findByRole('heading', { name: 'Deactivated (1)' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Reactivate' })).toBeInTheDocument();
   });
 
   it('lets admins invite, revoke and change roles of others', async () => {

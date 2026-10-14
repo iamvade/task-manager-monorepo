@@ -14,6 +14,7 @@ import { one } from '../db/rows.js';
 import { comments } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
 import { getComment, listComments, parseCommentBody } from '../tasks/comments.js';
+import { dropCommentReferences, syncReferences } from '../tasks/references.js';
 import { follow, workspaceMemberIds } from '../tasks/followers.js';
 import { stableJson } from '../tasks/json.js';
 import { mutateTasks, type TaskMutation } from '../tasks/mutation.js';
@@ -113,6 +114,11 @@ export const commentRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
             'comment',
           );
           await follow(m.tx, task.id, [user.id, ...mentioned]);
+          await syncReferences(
+            m.tx,
+            { taskId: task.id, workspaceId: m.project.workspaceId, commentId: comment.id },
+            text,
+          );
           m.log(task.id, 'comment.added', { commentId: comment.id });
           await m.touch(task.id);
           m.emit('comment.created', task.id, {
@@ -170,6 +176,11 @@ export const commentRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
             .set({ body, bodyText: text, editedAt: m.now })
             .where(eq(comments.id, comment.id));
           await follow(m.tx, comment.taskId, added);
+          await syncReferences(
+            m.tx,
+            { taskId: comment.taskId, workspaceId: m.project.workspaceId, commentId: comment.id },
+            text,
+          );
           m.emit('comment.updated', comment.taskId, {
             commentId: comment.id,
             mentionedUserIds: added,
@@ -210,6 +221,7 @@ export const commentRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         async (m) => {
           const comment = await lockComment(m, found.taskId, found.id);
           await m.tx.update(comments).set({ deletedAt: m.now }).where(eq(comments.id, comment.id));
+          await dropCommentReferences(m.tx, comment.id);
           m.emit('comment.deleted', comment.taskId, { commentId: comment.id });
         },
       );

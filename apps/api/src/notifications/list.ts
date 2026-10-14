@@ -32,7 +32,13 @@ export async function listNotifications(
   db: DbOrTx,
   log: FastifyBaseLogger,
   userId: string,
-  query: { workspaceId: string; tab: InboxTab; cursor?: string | undefined; limit: number },
+  query: {
+    workspaceId: string;
+    tab: InboxTab;
+    cursor?: string | undefined;
+    limit: number;
+    projectId?: string | undefined;
+  },
 ): Promise<NotificationPage> {
   const mine = and(eq(notifications.userId, userId), liveTasksOf(query.workspaceId));
 
@@ -61,6 +67,7 @@ export async function listNotifications(
         and(
           mine,
           TAB_FILTER[query.tab],
+          query.projectId ? eq(tasks.projectId, query.projectId) : undefined,
           afterCursor(query.cursor, notifications.createdAt, notifications.id),
         ),
       )

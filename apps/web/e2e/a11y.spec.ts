@@ -160,6 +160,38 @@ for (const scheme of ['light', 'dark'] as const) {
         await expectAccessible(page, `New project (${scheme})`);
         await page.keyboard.press('Escape');
       });
+
+      await test.step('project brief and bulk bar', async () => {
+        await page.goto(`/p/${ids.project}/list?sprint=none`);
+        const brief = page.getByRole('button', { name: /^Project brief/ });
+        await brief.click();
+        await expect(brief).toHaveAttribute('aria-expanded', 'true');
+        const boxes = page.getByRole('checkbox', { name: /^Select / });
+        await boxes.nth(0).check();
+        await boxes.nth(1).check();
+        await expect(page.getByRole('toolbar', { name: /selected task/ })).toBeVisible();
+        await expectAccessible(page, `Brief + bulk bar (${scheme})`);
+        await page.getByRole('button', { name: 'Clear selection' }).click();
+        await brief.click();
+      });
+
+      await test.step('drawer with followers and Mentioned in', async () => {
+        await page.goto(`/p/${ids.project}/list?sprint=none&task=APP-142`);
+        await expect(page.getByRole('region', { name: 'Mentioned in' })).toBeVisible();
+        await expectAccessible(page, `Drawer · Mentioned in (${scheme})`);
+        await page.keyboard.press('Escape');
+      });
+
+      await test.step('deactivate dialog', async () => {
+        await page.goto('/settings?tab=members');
+        await page.getByRole('button', { name: 'More actions for Dorj E.' }).click();
+        await page.getByRole('menuitem', { name: 'Deactivate…' }).click();
+        const dialog = page.getByRole('dialog', { name: 'Deactivate Dorj E.?' });
+        await expect(dialog.getByText(/open tasks? assigned/)).toBeVisible();
+        await expectAccessible(page, `Deactivate dialog (${scheme})`);
+        await dialog.getByRole('button', { name: 'Cancel' }).click();
+        await expect(dialog).toBeHidden();
+      });
     });
   });
 }

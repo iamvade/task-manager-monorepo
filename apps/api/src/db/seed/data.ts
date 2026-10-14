@@ -143,6 +143,14 @@ export interface ProjectDef {
   createdAt: Stamp;
 }
 
+/** Project briefs (usability review F-22): goal, links, who to ask. Shown under the header. */
+export const PROJECT_BRIEFS: Partial<Record<string, readonly [string, string]>> = {
+  app: [
+    'Зорилго: 4-р улиралд гар утасны аппын шинэ навигаци, дизайн системийг гаргах. Асуулт байвал Ану (бүтээгдэхүүн) эсвэл Бат (инженерчлэл)-аас асуугаарай.',
+    'Goal: ship the new mobile navigation and design system in Q4. Questions go to Anu (product) or Bat (engineering).',
+  ],
+};
+
 export const PROJECTS = {
   app: {
     space: 'product',
@@ -657,6 +665,13 @@ const APP_SPRINT: AppTaskDef[] = [
       ICONS.map((name) => `Icon: ${name}`),
       'sara',
     ),
+    comments: [
+      {
+        author: 'sara',
+        at: { hoursAgo: 26 },
+        body: ['Uses the same breakpoints and spacing tokens as APP-142, so check them together.'],
+      },
+    ],
   },
   // Done
   {

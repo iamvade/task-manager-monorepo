@@ -40,6 +40,7 @@ import { tagRoutes } from './routes/tags.js';
 import { taskActivityRoutes } from './routes/task-activity.js';
 import { taskRoutes } from './routes/tasks.js';
 import { templateRoutes } from './routes/templates.js';
+import { offboardingRoutes } from './routes/offboarding.js';
 import { workspaceRoutes } from './routes/workspaces.js';
 import { createStorage } from './storage/index.js';
 import type { Storage } from './storage/storage.js';
@@ -113,6 +114,7 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
       await api.register(meRoutes);
       await api.register(inviteRoutes);
       await api.register(workspaceRoutes);
+      await api.register(offboardingRoutes);
       await api.register(spaceRoutes);
       await api.register(projectRoutes);
       await api.register(projectMemberRoutes);

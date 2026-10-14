@@ -160,6 +160,11 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       'PATCH /comments/{commentId}': { body: doc('Edited') },
       'POST /tasks/{taskId}/attachments': data,
       'POST /me/notifications/read-all': { workspaceId: ws },
+      'PUT /projects/{projectId}/notification-level': { level: 'none' },
+      'POST /workspaces/{workspaceId}/members/{userId}/deactivate': {},
+      'POST /projects/{projectId}/tasks/batch': { updates: [{ id: task.id, priority: 'low' }] },
+      'POST /projects/{projectId}/tasks/batch-delete': { ids: [task.id] },
+      'POST /projects/{projectId}/tasks/batch-restore': { ids: [task.id] },
     };
   });
 

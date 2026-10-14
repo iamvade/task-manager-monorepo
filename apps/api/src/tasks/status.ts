@@ -3,6 +3,7 @@ import type { DbOrTx } from '../db/client.js';
 import { taskStatusPeriods, users, workspaceMembers, type statuses } from '../db/schema/index.js';
 import type { TaskMutation, TaskRow } from './mutation.js';
 import { endOfStatus, statusSnapshot } from './refs.js';
+import { activeMember } from '../auth/membership.js';
 
 // The only code that changes `tasks.status_id`. Each status change closes the task's open
 // status period and opens one for the new status in the same transaction; a deferred trigger
@@ -55,6 +56,7 @@ export async function projectLead(
       and(
         eq(workspaceMembers.workspaceId, project.workspaceId),
         eq(workspaceMembers.userId, project.leadId),
+        activeMember,
       ),
     );
   return lead ?? null;

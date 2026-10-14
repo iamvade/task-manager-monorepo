@@ -4,6 +4,7 @@ import type { DbOrTx } from '../db/client.js';
 import { positionAfter, positionBefore } from '../db/position.js';
 import { sprints, statuses, tags, tasks, users, workspaceMembers } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
+import { activeMember } from '../auth/membership.js';
 
 type StatusRow = typeof statuses.$inferSelect;
 
@@ -53,7 +54,9 @@ export async function requireMembers(
     .select({ id: users.id, name: users.name })
     .from(workspaceMembers)
     .innerJoin(users, eq(users.id, workspaceMembers.userId))
-    .where(and(eq(workspaceMembers.workspaceId, workspaceId), inArray(users.id, unique)))
+    .where(
+      and(eq(workspaceMembers.workspaceId, workspaceId), inArray(users.id, unique), activeMember),
+    )
     .orderBy(users.name);
   if (rows.length !== unique.length) throw invalidReference(what);
   return rows;

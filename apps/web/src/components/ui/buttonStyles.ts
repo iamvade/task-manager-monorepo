@@ -7,5 +7,5 @@ export const buttonVariants: Record<ButtonVariant, string> = {
     'border border-control bg-control text-default enabled:hover:bg-hover [a&]:hover:bg-hover',
   ghost: 'bg-transparent text-2 enabled:hover:bg-hover [a&]:hover:bg-hover',
   /** Destructive confirmations (ConfirmDialog). */
-  danger: 'bg-danger text-white enabled:hover:brightness-110 [a&]:hover:brightness-110',
+  danger: 'bg-danger text-on-danger enabled:hover:brightness-110 [a&]:hover:brightness-110',
 };

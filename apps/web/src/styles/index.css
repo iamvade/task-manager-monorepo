@@ -79,6 +79,7 @@
   --text-color-chip: var(--chip-fg);
   --text-color-tooltip: var(--tooltip-fg);
   --text-color-danger-soft: var(--danger-soft-fg);
+  --text-color-on-danger: var(--on-danger);
   --text-color-success-soft: var(--success-soft-fg);
   --text-color-warning-soft: var(--warning-soft-fg);
   --text-color-warm-card: var(--warm-card-fg);
@@ -222,6 +223,15 @@
   }
   .rich-text strong {
     font-weight: 600;
+  }
+  /* Task keys (APP-142): mono like the key everywhere else, accent like a link. */
+  .rich-text .task-key-link {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    color: var(--accent-ink);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 2px;
   }
   .rich-text .mention {
     padding: 1px 6px;

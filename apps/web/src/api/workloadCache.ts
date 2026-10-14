@@ -49,6 +49,8 @@ function newRow(member: WorkspaceMember): WorkloadPerson {
     user: { id, name, initials, avatarColor },
     title: member.title,
     capacity: member.capacityPoints,
+    awayUntil: member.awayUntil,
+    awayNote: member.awayNote,
     openTasks: 0,
     points: 0,
     loadPoints: 0,

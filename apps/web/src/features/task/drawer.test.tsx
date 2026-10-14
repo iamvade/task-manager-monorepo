@@ -16,6 +16,7 @@ import i18n from '../../i18n';
 import { createQueryClient } from '../../queryClient';
 import { routes } from '../../router';
 import { useToastStore } from '../../stores/toast';
+import { useRealtimeStore } from '../../stores/realtime';
 import { useUiStore } from '../../stores/ui';
 import { ME, PROJECT, PROJECT_ID, SIDEBAR, WORKSPACE_ID, mockApi } from '../../test/fixtures';
 import { at, listHandlers, makeTasks, statusOf } from '../../test/tasks';
@@ -54,6 +55,7 @@ function toDetail(task: TaskListItem, extra: Partial<TaskDetail> = {}): TaskDeta
     subtasks: [],
     attachments: [],
     followers: [],
+    mentionedIn: [],
     deletedAt: null,
     ...extra,
   };
@@ -114,6 +116,84 @@ describe('task drawer', () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
+  });
+
+  it('follows and unfollows the task from the Followers row', async () => {
+    const { state, task } = setup();
+    const calls: string[] = [];
+    const me = {
+      id: ME.user.id,
+      name: ME.user.name,
+      initials: ME.user.initials,
+      avatarColor: ME.user.avatarColor,
+    };
+    api(state, () => ({
+      [`POST /api/v1/tasks/${task.id}/follow`]: () => {
+        calls.push('follow');
+        return Response.json({ following: true, followers: [me] });
+      },
+      [`DELETE /api/v1/tasks/${task.id}/follow`]: () => {
+        calls.push('unfollow');
+        return Response.json({ following: false, followers: [] });
+      },
+    }));
+    renderAt(`${LIST}&task=APP-135`);
+    const view = within(await drawer());
+    fireEvent.click(await view.findByRole('button', { name: 'Follow' }));
+    const following = await view.findByRole('button', { name: 'Following' });
+    expect(following).toHaveAttribute('aria-pressed', 'true');
+    expect(view.getByRole('img', { name: `1 follower: ${ME.user.name}` })).toBeInTheDocument();
+    fireEvent.click(following);
+    expect(await view.findByRole('button', { name: 'Follow' })).toBeInTheDocument();
+    expect(calls).toEqual(['follow', 'unfollow']);
+  });
+
+  it('lists where the task is mentioned and the keys its description refers to', async () => {
+    const tasks = makeTasks();
+    const other = at(tasks, 0);
+    const { state } = setup({
+      descriptionText: `Depends on ${other.key} and ISO-9001`,
+      mentionedIn: [
+        {
+          task: { id: other.id, key: other.key, title: other.title, status: other.status },
+          commentId: '01890000-0000-7000-8000-000000000555',
+          createdAt: '2026-10-07T03:00:00.000Z',
+        },
+      ],
+    });
+    api(state);
+    const router = renderAt(`${LIST}&task=APP-135`);
+    const view = within(await drawer());
+    const mentioned = await view.findByRole('region', { name: 'Mentioned in' });
+    const row = within(mentioned).getByRole('link', { name: new RegExp(other.title) });
+    expect(row).toHaveTextContent('in a comment');
+    expect(row.getAttribute('href')).toContain(`task=${other.key}`);
+    expect(row.getAttribute('href')).toContain('comment=01890000-0000-7000-8000-000000000555');
+    // Only keys of workspace projects link; ISO-9001 stays text.
+    const refers = view.getByText('Refers to').parentElement;
+    if (!refers) throw new Error('no references');
+    expect(
+      within(refers)
+        .getAllByRole('link')
+        .map((a) => a.textContent),
+    ).toEqual([other.key]);
+    fireEvent.click(within(refers).getByRole('link', { name: other.key }));
+    await waitFor(() => {
+      expect(router.state.location.search).toContain(`task=${other.key}`);
+    });
+  });
+
+  it('says who just changed a field', async () => {
+    const { state, task } = setup();
+    api(state);
+    renderAt(`${LIST}&task=APP-135`);
+    const view = within(await drawer());
+    await view.findByRole('textbox', { name: 'Task title' });
+    const dorj = at(PROJECT.members, 3).user;
+    act(() => {
+      useRealtimeStore.getState().noteEdits(task.id, dorj.id, ['priority']);
+    });
+    expect(await view.findByText('Dorj E. just now')).toBeInTheDocument();
   });
 
   it('saves the title on Enter and updates the row behind the drawer', async () => {

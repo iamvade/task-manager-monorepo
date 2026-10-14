@@ -1,4 +1,5 @@
 import {
+  COMPLETED_LIST_LIMIT,
   MENTION_REPLY_DAYS,
   THROUGHPUT_WEEKS,
   addDays,
@@ -82,7 +83,8 @@ const teamCredits = (ctx: ReportContext) => sql`
   where ${taskInScope(ctx, 't')}
     and t.completed_at >= ${dayStart(trendStart(ctx.today), ctx.timezone)}
     and ${assignedAtCompletion('t', sql`u.user_id`)}
-    and u.user_id in (select user_id from workspace_members where workspace_id = ${ctx.workspaceId})`;
+    and u.user_id in (select user_id from workspace_members
+      where workspace_id = ${ctx.workspaceId} and deactivated_at is null)`;
 
 const trendQuery = (ctx: ReportContext, userId: string) => {
   const first = trendStart(ctx.today);
@@ -202,8 +204,16 @@ const openTasksQuery = (ctx: ReportContext, userId: string) => sql`
   where ${taskInScope(ctx, 't')} and t.completed_at is null and ${isAssignee('t', userId)}
   order by t.due_date nulls last, p.key, t.number`;
 
-/** The person's completed tasks in the period (the CSV, "Export my data"). */
-export const completedTasksQuery = (ctx: ReportContext, b: PeriodBounds, userId: string) => sql`
+/**
+ * The person's completed tasks in the period: oldest first and all of them for the CSV ("Export
+ * my data"), or `latest` = the newest `COMPLETED_LIST_LIMIT` for the report's list.
+ */
+export const completedTasksQuery = (
+  ctx: ReportContext,
+  b: PeriodBounds,
+  userId: string,
+  latest = false,
+) => sql`
   select ${reportTaskColumns},
     to_char(t.completed_at at time zone ${ctx.timezone}, 'YYYY-MM-DD HH24:MI') as completed_local,
     round((${cycleDays('t')})::numeric, 1)::float8 as cycle
@@ -212,7 +222,7 @@ export const completedTasksQuery = (ctx: ReportContext, b: PeriodBounds, userId:
   where ${taskInScope(ctx, 't')}
     and t.completed_at >= ${b.curStart} and t.completed_at < ${b.curEnd}
     and ${creditedTo(ctx, 't', userId)}
-  order by t.completed_at, t.id`;
+  ${latest ? sql`order by t.completed_at desc, t.id desc limit ${COMPLETED_LIST_LIMIT}` : sql`order by t.completed_at, t.id`}`;
 
 /** Every query of the People report (the perf script EXPLAINs them). */
 export function personQueries(ctx: ReportContext, b: PeriodBounds, userId: string) {
@@ -227,6 +237,7 @@ export function personQueries(ctx: ReportContext, b: PeriodBounds, userId: strin
     mentions: mentionsQuery(ctx, b, userId),
     workedWith: workedWithQuery(ctx, b, userId),
     openTasks: openTasksQuery(ctx, userId),
+    completedTasks: completedTasksQuery(ctx, b, userId, true),
   };
 }
 
@@ -245,7 +256,8 @@ export async function loadPerson(db: DbOrTx, workspaceId: string, userId: string
     db,
     sql`select u.id, u.name, u.initials, u.avatar_color, wm.title, wm.role
       from workspace_members wm join users u on u.id = wm.user_id
-      where wm.workspace_id = ${workspaceId} and wm.user_id = ${userId}`,
+      where wm.workspace_id = ${workspaceId} and wm.user_id = ${userId}
+        and wm.deactivated_at is null`,
   );
   if (!person) throw httpError(404, 'NOT_FOUND', 'Person not found');
   return person;
@@ -274,6 +286,7 @@ export async function buildPerson(
     mentions,
     worked,
     open,
+    done,
   ] = await Promise.all([
     loadHistory(db, ctx),
     rows<CompletedStatsRow>(db, q.completed),
@@ -289,6 +302,7 @@ export async function buildPerson(
       q.workedWith,
     ),
     rows<ReportTaskRow>(db, q.openTasks),
+    rows<ReportTaskRow & { completed_local: string; cycle: number | null }>(db, q.completedTasks),
   ]);
 
   const review = (bucket: 'cur' | 'prev') => {
@@ -346,5 +360,10 @@ export async function buildPerson(
       })),
     },
     openTasks: open.map(toReportTask),
+    completedTasks: done.map((r) => ({
+      ...toReportTask(r),
+      completedAt: r.completed_local,
+      cycleDays: r.cycle,
+    })),
   };
 }

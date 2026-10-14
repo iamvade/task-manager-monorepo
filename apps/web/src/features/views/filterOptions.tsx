@@ -33,6 +33,8 @@ export interface FilterOption {
 export interface FilterOptions {
   status: FilterOption[];
   assignee: FilterOption[];
+  /** Me + members (no "Unassigned": every task has a creator). */
+  creator: FilterOption[];
   priority: FilterOption[];
   tag: FilterOption[];
   /** Project only (sprints belong to one project). */
@@ -130,5 +132,7 @@ export function useFilterOptions(
       }))
     : [];
 
-  return { status, assignee, priority, tag, sprint };
+  const creator = assignee.filter((o) => o.key !== UNASSIGNED);
+
+  return { status, assignee, creator, priority, tag, sprint };
 }

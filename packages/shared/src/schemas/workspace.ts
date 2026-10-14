@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { dateSchema } from '../dates.js';
 import { paletteKeySchema, workspaceRoleSchema } from '../enums.js';
 import { NOTHING_TO_UPDATE, nonEmptyPatch, userRefSchema } from './common.js';
 
@@ -12,6 +13,11 @@ export const workspaceMemberSchema = z
     /** Points this person can take on over the next 2 weeks (Workload capacity marker). */
     capacityPoints: z.number().int(),
     joinedAt: z.iso.datetime(),
+    /** Out of office through this date (inclusive); see `isAway`. */
+    awayUntil: dateSchema.nullable(),
+    awayNote: z.string().nullable(),
+    /** Set on deactivated members (Settings → Members with `include=deactivated` only). */
+    deactivatedAt: z.iso.datetime().nullable(),
   })
   .meta({ id: 'WorkspaceMember' });
 export type WorkspaceMember = z.infer<typeof workspaceMemberSchema>;
@@ -32,12 +38,51 @@ export const updateMemberSchema = z
       .nullable()
       .transform((t) => (t === '' ? null : t)),
     capacityPoints: z.number().int().min(0).max(MAX_CAPACITY_POINTS),
+    /** Out of office through this date; null = back. Members may set their own. */
+    awayUntil: dateSchema.nullable(),
+    awayNote: z
+      .string()
+      .trim()
+      .max(80)
+      .nullable()
+      .transform((t) => (t === '' ? null : t)),
   })
   .partial()
   .strict()
   .refine(nonEmptyPatch, NOTHING_TO_UPDATE)
   .meta({ id: 'UpdateMember' });
 export type UpdateMember = z.input<typeof updateMemberSchema>;
+
+/** Fields a member may change on their own membership (the rest is for admins). */
+export const SELF_MEMBER_FIELDS = ['awayUntil', 'awayNote'] as const;
+
+/** Whether a member is out of office on `today` (`YYYY-MM-DD`, the viewer's day). */
+export const isAway = (member: { awayUntil: string | null }, today: string) =>
+  member.awayUntil !== null && member.awayUntil >= today;
+
+/** `POST /workspaces/:id/members/:userId/deactivate`: who takes over their open work, if anyone. */
+export const deactivateMemberSchema = z
+  .object({ reassignTo: z.uuid().nullable().optional() })
+  .meta({ id: 'DeactivateMember' });
+export type DeactivateMember = z.infer<typeof deactivateMemberSchema>;
+
+/** What a deactivation hands over (the dialog shows it first). */
+export const memberHandoverSchema = z
+  .object({
+    /** Open tasks assigned to them. */
+    openTasks: z.number().int(),
+    /** Open tasks where they are the reviewer. */
+    reviewing: z.number().int(),
+    /** Non-archived projects they lead. */
+    leadOf: z.array(z.object({ id: z.uuid(), key: z.string(), name: z.string() })),
+  })
+  .meta({ id: 'MemberHandover' });
+export type MemberHandover = z.infer<typeof memberHandoverSchema>;
+
+export const memberListQuerySchema = z.object({
+  /** `deactivated` adds deactivated members (admins; Settings → Members). */
+  include: z.enum(['deactivated']).optional(),
+});
 
 export const sidebarProjectSchema = z
   .object({

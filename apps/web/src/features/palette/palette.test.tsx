@@ -26,6 +26,8 @@ function renderAt(path: string) {
   return router;
 }
 
+const COMMENT_ID = '01890000-0000-7000-8000-000000000777';
+
 function api() {
   const tasks = makeTasks();
   const task = at(tasks, 2);
@@ -56,6 +58,21 @@ function api() {
         people: [
           { id: SARA.id, name: SARA.name, initials: SARA.initials, avatarColor: SARA.avatarColor },
         ],
+        comments: [
+          {
+            id: COMMENT_ID,
+            task: { id: task.id, key: task.key, title: task.title, status: task.status },
+            author: {
+              id: SARA.id,
+              name: SARA.name,
+              initials: SARA.initials,
+              avatarColor: SARA.avatarColor,
+            },
+            snippet: 'Root cause: the connection pool ran out',
+            createdAt: '2026-10-07T03:00:00.000Z',
+          },
+        ],
+        nextTaskOffset: null,
       });
     },
     'PATCH /api/v1/me': (init) => {
@@ -112,6 +129,24 @@ describe('command palette', () => {
       expect(router.state.location.search).toContain(`task=${task.key}`);
     });
     expect(screen.queryByRole('dialog', { name: 'Command palette' })).toBeNull();
+  });
+
+  it('finds comments and opens the task at the comment', async () => {
+    const { task } = api();
+    const router = renderAt(`/p/${PROJECT_ID}/list?sprint=none`);
+    await screen.findByRole('table');
+    fireEvent.keyDown(document.body, { key: 'k', metaKey: true });
+    const dialog = await screen.findByRole('dialog', { name: 'Command palette' });
+    fireEvent.change(within(dialog).getByRole('combobox'), {
+      target: { value: 'connection pool' },
+    });
+    const hit = await within(dialog).findByRole('option', { name: /Root cause/ });
+    expect(within(hit).getByText('connection pool')).toBeInTheDocument();
+    fireEvent.click(hit);
+    await waitFor(() => {
+      expect(router.state.location.search).toContain(`task=${task.key}`);
+    });
+    expect(router.state.location.search).toContain(`comment=${COMMENT_ID}`);
   });
 
   it('opens a person’s tasks as a filtered list', async () => {

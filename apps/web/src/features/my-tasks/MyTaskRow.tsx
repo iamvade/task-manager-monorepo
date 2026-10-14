@@ -2,6 +2,7 @@ import type { MyTask } from '@kite/shared';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import type { SectionId } from '../../api/homeCache';
+import { Avatar } from '../../components/ui/Avatar';
 import { Checkbox } from '../../components/ui/Checkbox';
 import { PriorityFlag } from '../../components/ui/PriorityFlag';
 import { SpaceBadge } from '../../components/ui/SpaceBadge';
@@ -16,6 +17,7 @@ const SECTION_TONE: Record<SectionId, DueTone> = {
   thisWeek: 'soon',
   later: 'later',
   done: 'done',
+  requested: 'later',
 };
 
 interface MyTaskRowProps {
@@ -65,6 +67,23 @@ export function MyTaskRow({ task, section, onToggle }: MyTaskRowProps) {
         </Link>
       </span>
       <span role="cell" className="flex min-w-0 items-center gap-1.5 text-[12px] text-3">
+        {section === 'requested' && task.assignees.length > 0 && (
+          <span
+            className="flex flex-none items-center"
+            title={task.assignees.map((u) => u.name).join(', ')}
+          >
+            {task.assignees.slice(0, 2).map((u, i) => (
+              <Avatar
+                key={u.id}
+                user={u}
+                size={20}
+                title={null}
+                ring={i > 0}
+                className={i > 0 ? '-ml-1.5' : undefined}
+              />
+            ))}
+          </span>
+        )}
         <SpaceBadge initial={task.space.initial} color={task.space.color} size={16} />
         <Link
           to={`/p/${task.project.id}/list`}

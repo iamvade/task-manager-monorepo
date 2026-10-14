@@ -52,6 +52,8 @@
 
   /* Feedback */
   --danger: #c42b1c;
+  /* Text on a solid --danger fill (danger buttons). */
+  --on-danger: #ffffff;
   --danger-soft: #fdecec;
   --danger-soft-fg: #b42318;
   /* My Tasks overdue stat card */
@@ -193,6 +195,8 @@
   --text-faint: #5e5e68;
 
   --danger: #f87171;
+  /* White on #f87171 is 2.8:1; dark ink is 7.6:1. */
+  --on-danger: #18181b;
   --danger-soft: rgba(248, 113, 113, 0.12);
   --danger-soft-fg: #f87171;
   --danger-card-bg: rgba(248, 113, 113, 0.07);

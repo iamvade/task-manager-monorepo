@@ -8,10 +8,19 @@ import {
   useNotifications,
   useUnarchiveNotification,
 } from '../../api/notifications';
-import { useCurrentWorkspace } from '../../api/workspaces';
+import { useCurrentWorkspace, useSidebar } from '../../api/workspaces';
 import { ErrorState } from '../../components/ErrorState';
-import { BellIcon, CheckCheckIcon, InboxIcon } from '../../components/icons';
+import {
+  BellIcon,
+  CheckCheckIcon,
+  ChevronDownIcon,
+  FolderIcon,
+  InboxIcon,
+} from '../../components/icons';
+import { Menu } from '../../components/ui/Menu';
+import { ProjectDot } from '../../components/ui/ProjectDot';
 import { Skeleton } from '../../components/ui/Skeleton';
+import { ToolbarButton } from '../../components/ui/ToolbarButton';
 import { Tooltip } from '../../components/ui/Tooltip';
 import { UnderlineTabs } from '../../components/ui/UnderlineTabs';
 import { cn } from '../../lib/cn';
@@ -25,10 +34,17 @@ import { NotificationRow } from './NotificationRow';
 export function InboxView() {
   const { t } = useTranslation();
   const workspace = useCurrentWorkspace();
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const tab = inboxTabSchema.catch('all').parse(params.get('tab') ?? 'all');
   const workspaceId = workspace?.id ?? '';
-  const query = useNotifications(workspace?.id, tab);
+  const sidebar = useSidebar(workspace?.id);
+  const projects = (sidebar.data?.spaces ?? []).flatMap((s) => s.projects);
+  // `?project=` narrows the inbox to one project (not designed); unknown ids are ignored.
+  const projectParam = params.get('project');
+  const project = projects.find((p) => p.id === projectParam);
+  const query = useNotifications(workspace?.id, tab, project?.id);
+  const withProject = (path: string) =>
+    project ? `${path}${path.includes('?') ? '&' : '?'}project=${project.id}` : path;
   const markAll = useMarkAllNotificationsRead(workspaceId);
   const counts = query.data?.pages[0]?.counts;
   const unread = counts?.unread ?? 0;
@@ -44,6 +60,51 @@ export function InboxView() {
         }
         actions={
           <div className="flex items-center gap-2">
+            <Menu
+              label={t('inbox.projectFilter')}
+              placement="bottom-end"
+              width={240}
+              items={[
+                {
+                  id: 'all',
+                  label: t('inbox.allProjects'),
+                  checked: !project,
+                  onSelect: () => {
+                    setParams(
+                      (prev) => {
+                        const next = new URLSearchParams(prev);
+                        next.delete('project');
+                        return next;
+                      },
+                      { replace: true },
+                    );
+                  },
+                },
+                { type: 'separator', id: 'sep' },
+                ...projects.map((p) => ({
+                  id: p.id,
+                  label: p.name,
+                  icon: <ProjectDot color={p.color} size={8} />,
+                  checked: p.id === project?.id,
+                  onSelect: () => {
+                    setParams(
+                      (prev) => {
+                        const next = new URLSearchParams(prev);
+                        next.set('project', p.id);
+                        return next;
+                      },
+                      { replace: true },
+                    );
+                  },
+                })),
+              ]}
+              trigger={(props) => (
+                <ToolbarButton {...props} icon={<FolderIcon size={14} />}>
+                  {project ? project.name : t('inbox.allProjects')}
+                  <ChevronDownIcon size={12} className="text-icon" />
+                </ToolbarButton>
+              )}
+            />
             <button
               type="button"
               disabled={unread === 0}
@@ -81,7 +142,7 @@ export function InboxView() {
             items={INBOX_TABS.map((value) => ({
               value,
               label: t(`inbox.tabs.${value}`),
-              to: value === 'all' ? '/inbox' : `/inbox?tab=${value}`,
+              to: withProject(value === 'all' ? '/inbox' : `/inbox?tab=${value}`),
             }))}
           />
         }
@@ -92,7 +153,7 @@ export function InboxView() {
         <InboxSkeleton />
       ) : (
         <InboxList
-          key={`${workspaceId}:${tab}`}
+          key={`${workspaceId}:${tab}:${project?.id ?? ''}`}
           workspaceId={workspaceId}
           tab={tab}
           items={query.data.pages.flatMap((p) => p.items)}

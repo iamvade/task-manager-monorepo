@@ -2,6 +2,7 @@ import { shortName, type CommentReply } from '@kite/shared';
 import type { Editor } from '@tiptap/core';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router';
 import { isTempComment, useDeleteComment, useUpdateComment } from '../../../api/activity';
 import { RichTextEditor } from '../../../components/editor/RichTextEditor';
 import { RichTextView } from '../../../components/editor/RichTextView';
@@ -14,6 +15,7 @@ import { Menu, type MenuItem } from '../../../components/ui/Menu';
 import { cn } from '../../../lib/cn';
 import { useRelativeTime } from '../../../lib/useRelativeTime';
 import { canModerate, useTaskView } from '../TaskContext';
+import { useTaskKeyHref } from '../useTaskKeyHref';
 
 interface CommentItemProps {
   comment: CommentReply;
@@ -99,11 +101,27 @@ export function CommentItem({
   const own = comment.author.id === me.id;
   const deleted = comment.deletedAt !== null || comment.body === null;
   const root = useRef<HTMLDivElement>(null);
+  const taskHref = useTaskKeyHref();
 
   // A comment just sent from the composer scrolls into view.
   useEffect(() => {
     if (temp) root.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, [temp]);
+
+  // Opened from ⌘K (`?comment=`): scroll to it and highlight it for 2 s.
+  const [params] = useSearchParams();
+  const targeted = params.get('comment') === comment.id;
+  const [highlight, setHighlight] = useState(targeted);
+  useEffect(() => {
+    if (!targeted) return;
+    root.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    const id = window.setTimeout(() => {
+      setHighlight(false);
+    }, 2000);
+    return () => {
+      window.clearTimeout(id);
+    };
+  }, [targeted]);
 
   const items: MenuItem[] = [
     ...(own
@@ -134,7 +152,15 @@ export function CommentItem({
   ];
 
   return (
-    <div ref={root} className="flex scroll-mb-36 items-start gap-2.5 py-2">
+    <div
+      ref={root}
+      id={`comment-${comment.id}`}
+      data-highlight={highlight || undefined}
+      className={cn(
+        'flex scroll-mb-36 items-start gap-2.5 rounded-[8px] py-2 transition-colors',
+        highlight && 'bg-accent-soft',
+      )}
+    >
       <ConfirmDialog
         open={confirmingDelete}
         title={t('drawer.deleteCommentConfirm')}
@@ -197,7 +223,7 @@ export function CommentItem({
               {t('drawer.commentDeleted')}
             </p>
           ) : (
-            comment.body && <RichTextView doc={comment.body} />
+            comment.body && <RichTextView doc={comment.body} taskHref={taskHref} />
           )}
           {!temp && (Boolean(onReply) || Boolean(replies?.length)) && (
             <div className="flex gap-3 text-[12px]">

@@ -8,7 +8,7 @@ import {
   inviteSchema,
   meResponseSchema,
 } from '@kite/shared';
-import { and, asc, eq, gt, isNull } from 'drizzle-orm';
+import { and, asc, eq, gt, isNotNull, isNull } from 'drizzle-orm';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { requireWorkspaceMember } from '../auth/access.js';
@@ -23,6 +23,7 @@ import { isUniqueViolation } from '../db/errors.js';
 import { one } from '../db/rows.js';
 import { invites, users, workspaceMembers, workspaces } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
+import { activeMember } from '../auth/membership.js';
 
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const tokenParams = z.object({ token: z.string().min(1).max(100) });
@@ -73,7 +74,9 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         .select({ userId: workspaceMembers.userId })
         .from(workspaceMembers)
         .innerJoin(users, eq(users.id, workspaceMembers.userId))
-        .where(and(eq(workspaceMembers.workspaceId, workspaceId), eq(users.email, email)))
+        .where(
+          and(eq(workspaceMembers.workspaceId, workspaceId), eq(users.email, email), activeMember),
+        )
         .limit(1);
       if (alreadyMember) {
         throw httpError(409, 'ALREADY_MEMBER', 'This person is already in the workspace');
@@ -277,7 +280,12 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         await tx
           .insert(workspaceMembers)
           .values({ workspaceId: invite.workspaceId, userId: user.id, role: invite.role })
-          .onConflictDoNothing();
+          // A deactivated member who is invited again comes back (with the invited role).
+          .onConflictDoUpdate({
+            target: [workspaceMembers.workspaceId, workspaceMembers.userId],
+            set: { deactivatedAt: null, deactivatedBy: null, role: invite.role },
+            setWhere: isNotNull(workspaceMembers.deactivatedAt),
+          });
         await tx.update(invites).set({ acceptedAt: new Date() }).where(eq(invites.id, invite.id));
         return { user, newSessionToken };
       });
