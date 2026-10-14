@@ -1398,5 +1398,15 @@
     "deleted_one": "Deleted {{count}} task",
     "deleted_other": "Deleted {{count}} tasks",
     "clear": "Clear selection"
+  },
+  "brief": {
+    "label": "About {{project}}",
+    "title": "Project brief",
+    "empty": "Add a brief: goal, links, who to ask",
+    "none": "No brief yet",
+    "placeholder": "What is this project for? Goals, links, who to ask…",
+    "lead": "Lead",
+    "noLead": "No lead",
+    "setLead": "Project lead"
   }
 }

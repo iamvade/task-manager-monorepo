@@ -7,6 +7,7 @@ import { useCurrentView } from '../views/useCurrentView';
 import { useViewParams } from '../views/useViewParams';
 import { ArchivedBanner } from './ArchivedBanner';
 import { FilterStrip } from './FilterStrip';
+import { ProjectBrief } from './ProjectBrief';
 import { ProjectHeader } from './ProjectHeader';
 
 /** /p/:projectId/* — project top bar + filter strip around the routed view. */
@@ -32,6 +33,7 @@ export function ProjectLayout() {
     <>
       <ProjectHeader project={project.data} view={view} />
       {project.data.archivedAt && <ArchivedBanner project={project.data} />}
+      <ProjectBrief project={project.data} />
       {project.data.taskCount > 0 && <FilterStrip project={project.data} />}
       <Outlet context={project.data} />
     </>

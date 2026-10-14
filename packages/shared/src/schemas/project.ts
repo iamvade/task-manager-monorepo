@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { paletteKeySchema, statusCategorySchema, templateIdSchema } from '../enums.js';
 import { dateSchema } from '../dates.js';
 import { projectKeySchema } from '../project-key.js';
+import { richTextDocSchema, richTextNodeSchema } from '../rich-text.js';
 import { NOTHING_TO_UPDATE, moveSchema, nonEmptyPatch } from './common.js';
 import { workspaceMemberSchema } from './workspace.js';
 
@@ -75,6 +76,8 @@ export const projectDetailSchema = projectSummarySchema
     isFavorite: z.boolean(),
     /** Default reviewer for tasks entering review. */
     leadId: z.uuid().nullable(),
+    /** The project brief (TipTap JSON), null when nobody wrote one. */
+    description: richTextNodeSchema.nullable(),
     /** By position. */
     statuses: z.array(statusSchema),
     /** The project's team, by name. */
@@ -109,6 +112,8 @@ export const updateProjectSchema = z
     color: paletteKeySchema,
     /** A workspace member, or null. */
     leadId: z.uuid().nullable(),
+    /** The project brief (TipTap JSON): goal, links, who to ask. */
+    description: richTextDocSchema.nullable(),
   })
   .partial()
   .strict()

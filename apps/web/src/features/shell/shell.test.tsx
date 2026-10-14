@@ -369,6 +369,42 @@ describe('app shell', () => {
     expect(await screen.findByRole('menuitem', { name: 'Орон зайг устгах' })).toBeInTheDocument();
   });
 
+  it('shows the project brief collapsed with its first line, and sets the lead', async () => {
+    const patches: unknown[] = [];
+    const brief = {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: 'Ship the redesign by Q4' }] },
+      ],
+    };
+    const sara = PROJECT_WITH_STATUSES.members[1]?.user;
+    api({
+      [`GET /api/v1/projects/${PROJECT_ID}`]: () =>
+        Response.json({ ...PROJECT_WITH_STATUSES, description: brief }),
+      [`PATCH /api/v1/projects/${PROJECT_ID}`]: (init) => {
+        patches.push(JSON.parse(init?.body as string));
+        return Response.json({ ...PROJECT_WITH_STATUSES, description: brief, leadId: sara?.id });
+      },
+    });
+    renderAt(`/p/${PROJECT_ID}/list`);
+    const region = await screen.findByRole('region', { name: 'App Redesign төслийн тухай' });
+    const toggle = within(region).getByRole('button', { name: /Төслийн товч/ });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle).toHaveTextContent('Ship the redesign by Q4');
+
+    fireEvent.click(within(region).getByRole('button', { name: 'Ахлагч: Ахлагчгүй' }));
+    fireEvent.click(await screen.findByRole('option', { name: new RegExp(sara?.name ?? '') }));
+    await waitFor(() => {
+      expect(patches).toEqual([{ leadId: sara?.id }]);
+    });
+    expect(
+      await within(region).findByRole('button', { name: `Ахлагч: ${sara?.name ?? ''}` }),
+    ).toBeInTheDocument();
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(within(region).getByRole('textbox', { name: 'Төслийн товч' })).toBeInTheDocument();
+  });
+
   it('shows a banner with Restore on an archived project', async () => {
     const calls: string[] = [];
     api({
