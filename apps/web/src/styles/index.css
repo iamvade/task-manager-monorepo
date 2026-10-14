@@ -79,6 +79,7 @@
   --text-color-chip: var(--chip-fg);
   --text-color-tooltip: var(--tooltip-fg);
   --text-color-danger-soft: var(--danger-soft-fg);
+  --text-color-on-danger: var(--on-danger);
   --text-color-success-soft: var(--success-soft-fg);
   --text-color-warning-soft: var(--warning-soft-fg);
   --text-color-warm-card: var(--warm-card-fg);

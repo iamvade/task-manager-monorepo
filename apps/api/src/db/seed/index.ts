@@ -23,6 +23,7 @@ import {
   ATTACHMENTS,
   CARRIED_OVER,
   DESCRIPTIONS,
+  PROJECT_BRIEFS,
   EVENTS,
   ME,
   PASSWORD,
@@ -44,6 +45,7 @@ import {
 } from './data.js';
 import { createClock, type Clock } from './dates.js';
 import { buildHistory, planSprints, ubAt } from './history.js';
+import { backfillReferences } from '../../tasks/references.js';
 
 export interface SeedOptions {
   /** Language for user content that the designs have in both languages. */
@@ -133,6 +135,8 @@ export async function runSeed(db: Db, options: SeedOptions): Promise<void> {
     );
     await tx.insert(schema.attachments).values(rows.attachments);
     await insert(schema.activity, rows.activity);
+    // "Mentioned in": keys written in the seeded titles, descriptions and comments.
+    await backfillReferences(tx);
     await tx.insert(schema.notifications).values(rows.notifications);
   });
 
@@ -146,6 +150,20 @@ export async function runSeed(db: Db, options: SeedOptions): Promise<void> {
 }
 
 /** Every seed row, built in memory (exported for tests). */
+/** The project's brief as rows (`PROJECT_BRIEFS`), in the seed's language. */
+const briefRow = (pick: (text: Text) => string, ref: string) => {
+  const brief = PROJECT_BRIEFS[ref];
+  if (!brief) return {};
+  const text = pick(brief);
+  return {
+    description: {
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text }] }],
+    },
+    descriptionText: text,
+  };
+};
+
 export function buildRows(
   clock: Clock,
   pick: (text: Text) => string,
@@ -189,6 +207,10 @@ export function buildRows(
     title: p.title,
     capacityPoints: p.capacity,
     joinedAt: accountsCreated,
+    // Bayarmaa is on vacation this week (out-of-office badges, Workload "Away").
+    ...(ref === 'bay'
+      ? { awayUntil: addDays(clock.today, 6), awayNote: pick(['Амралт', 'Vacation']) }
+      : {}),
   }));
 
   // Spaces, projects, statuses, sprint, tags -----------------------------------------------------
@@ -227,6 +249,7 @@ export function buildRows(
         color: pr.color,
         taskSeq: 0,
         position: must(positions(siblings)[index], 'project position'),
+        ...briefRow(pick, ref),
         createdAt: HISTORY_PROJECTS.includes(ref)
           ? new Date(historyStart.getTime() - 21 * DAY_MS)
           : clock.at(pr.createdAt),
