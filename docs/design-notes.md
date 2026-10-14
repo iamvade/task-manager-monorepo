@@ -287,6 +287,19 @@ From `docs/review/USABILITY.md`; each reuses existing tokens and components.
 - **Workload**: a dashed-outline legend swatch and bar segment "Not due soon" (1px dashed `--bucket-none-border`) after the counted buckets; uncounted tasks in an expanded row read "· not counted".
 - **Settings → Members**: a search box (`settingsInput`) above lists longer than 8 people; "No members match".
 
+### 2.8 Phase-3 features (2026-10-14; not in the designs, approved: "follow existing language")
+From `docs/review/FIX_PLAN.md` phase 3; existing tokens and components only.
+- **Drawer · Followers**: a property row (bell icon) with a 24px avatar stack and a 28px outline toggle "Follow" (accent-ink) / "Following" (`aria-pressed`). **Mentioned in**: a section above Activity, 36px rows (status dot, mono key, title, "in a comment" / "in the description") linking to the task (at the comment). **Refers to**: a 12px muted row of chip links (`--chip`, mono, accent-ink) under the description for the keys it contains; keys in the editor and comments are mono, accent-ink, dotted underline (`.task-key-link`).
+- **Edited by**: 11px muted "Dorj E. just now" after a property another person changed (10 s); a title conflict line under the title: "Dorj E. changed the title to “…”. **Use theirs**".
+- **Notifications**: project options menu gets a heading "Notify me about" with All activity / Mentions and assignments / Nothing; Settings → Notifications adds a "Per project" list (project dot, name, space, level menu button); Inbox actions get a 32px outline "All projects ▾" filter (`?project=`).
+- **List multi-select**: a 28px select column before the complete checkbox (visible on hover/focus or while anything is selected; header box selects all visible). The bulk bar floats 80px above the bottom, centred, surface + `--border` + `shadow-popover`, radius 12: "N selected", 32px toolbar buttons Status / Sprint / Assignees (menu: add / replace / remove) / Due / Priority / Delete (danger text) and ×.
+- **Reports · People / My performance**: "Completed in this period" / "What you completed" list built like the open-tasks list (completed date, cycle time, priority), 5 rows then "Show all N"; the Completed card is a button that opens it.
+- **List filters**: "Created by" field (Me + members). **My Tasks**: "Requested by me" section (collapsed, no add row; rows show up to two assignee avatars before the space badge).
+- **Project brief**: a 40px strip under the header (chevron, "Project brief", first line of the brief in muted text, lead picker on the right); expanded, the description editor (max 760px) with Saving/Saved like a task.
+- **Members**: row "⋯" menu (Set out of office… / Deactivate…), "Away until Oct 20" chip (`--chip`, 11/500) after the name; the deactivate dialog (480px: counts, "Hand their open work to" picker, Cancel / danger "Deactivate"); a "Deactivated (N)" list with Reactivate. Profile gets an "Out of office" row (date + note, Save / I'm back). Pickers' hint and @-suggestions read "Away until …"; drawer assignee chips add a muted "away"; Workload's pill becomes a dashed-outline "Away until …".
+- **⌘K**: a Comments group (author avatar, snippet with the match in 600, key) and a "Show more tasks" row (accent-ink).
+- **Danger buttons in dark mode** use `--on-danger` (dark ink) on `--danger` (#f87171): white was 2.8:1.
+
 ## 3. Reusable components
 
 Primitives in `apps/web/src/components/ui`, composites in feature folders. `PaletteKey`, `StatusCategory`, `Priority`, `UserLite`, `TagLite` come from `packages/shared`.

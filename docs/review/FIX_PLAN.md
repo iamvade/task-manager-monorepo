@@ -93,7 +93,9 @@ Notes: decisions taken: F-07 open + done in the last 14 days (`doneSince`, `?don
 4. F-30 inline tag create, F-20 replace-assignee action, F-15 "Last week" preset, F-12 members search.
 5. F-13 workload metric (pending OK), F-29 creator can archive (pending OK).
 
-### Phase 3 — features worth building now (C, ~2 weeks)
+### Phase 3 — features worth building now (C, ~2 weeks) — **done 2026-10-14, branch `fix/phase-3-features`** (off `main`)
+
+Notes: decisions: all seven items; offboarding = deactivate (`workspace_members.deactivated_at`, `activeMember` guard everywhere, handover to one successor, reactivate / re-invite brings them back, sessions kept); notifications = drawer follow toggle + per-project level (all / direct / none) + inbox `?project=`; references = render-time links + `task_references` backfilled table for "Mentioned in"; out-of-office set by self or admins, Workload shows Away; bulk edit on the project List only (status, sprint, assignees add/replace/remove, due, priority, delete) with one Undo; title conflicts keep your text with "Use theirs" (no server versioning). Migrations 0008–0013. Also fixed on the way: dark-mode danger buttons (white on #f87171, 2.8:1) now use `--on-danger`. Not done: per-task mute (unfollow covers it), opening a reply that sits in a collapsed thread from ⌘K (scrolls only to visible comments), notification for references.
 
 1. Watchers: follow/unfollow, per-project notification level, inbox project filter (M).
 2. Bulk edit in the List view (M).
@@ -110,4 +112,4 @@ Task relations model, team/department grouping, trash page, full "My projects" v
 ## Decisions needed from you
 
 - ~~F-18, F-13, F-29, F-07~~: decided 2026-10-13 (see Phase 2 notes). ~~F-01~~: resolved in phase 1 (no per-IP limit).
-- **Phase 3 scope**: confirm the "now" list, or cut it to watchers + bulk edit + done lists. (Phase 2 already covered part of item 3: My Tasks' Done section; the People/My performance "Done N" list and "Created by me" remain.)
+- ~~Phase 3 scope~~: all seven built (2026-10-14). Remaining items are under "Later / wait".

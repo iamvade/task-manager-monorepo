@@ -85,10 +85,12 @@ Tabs: Overview, Sprints, Workload, plus People (admins/owner) or My performance 
     - **Light** if load points ≤ capacity / 2.
     - **Balanced** otherwise.
     - Capacity C is the person's `workspace_members.capacity_points` (default 15): Heavy means > 18 and Light ≤ 7.5, i.e. the designed > 18 / ≤ 7. The capacity marker is drawn per row; "N pts over capacity / of room" in the expanded row uses load points too.
+  - **Away**: while `workspace_members.away_until` ≥ today the pill reads "Away until …" instead of the load (the load is still computed). Deactivated members are not listed.
 - **People / My performance** (period-bound unless noted):
   - **Cards and trends**:
     - **Completed**, **On-time** and **Cycle time** as above, for tasks the person was assigned when they were completed.
     - **Overdue now** = their open overdue tasks.
+    - **Completed tasks** (`completedTasks`): the period's completions credited to the person, latest first, at most 200 (`COMPLETED_LIST_LIMIT`; the CSV has all), with local completion time and cycle days; the Completed card opens the list.
     - **Review turnaround**: a review period is credited to the task's `reviewer_id`, else to whoever moved the task **out of** In Review. Turnaround = median length of those review periods. The count is the number of reviews.
     - **Trends**: 12 weekly values (completed count; median cycle time). **Team median** = the median, over members with ≥ 1 completion in those 12 weeks, of each member's weekly average (completed), or the median cycle time of all team completions (cycle).
     - Deltas on this page are neutral: grey chip, arrow only (sideways when unchanged). Cards compare with the previous period only; the team median appears only as the dashed reference line in the two trend charts. No overall good/bad coloring of a person: only **Overdue now** with overdue tasks uses the danger card.
