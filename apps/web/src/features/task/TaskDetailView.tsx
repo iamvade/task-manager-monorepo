@@ -26,6 +26,7 @@ import { TaskTitle } from './TaskTitle';
 import { reportError } from '../../lib/mutationErrors';
 import { useViewingTask } from '../../realtime/context';
 import { useMemberHint } from '../pickers/useMemberHint';
+import { MentionedIn } from './MentionedIn';
 
 // React 18's types don't know `inert`; the attribute itself works in every current browser.
 const INERT = { inert: '' } as Record<string, string>;
@@ -218,6 +219,7 @@ function LoadedTask({
           <TaskDescription key={task.id} />
           <SubtaskList />
           <AttachmentSection />
+          <MentionedIn />
           <ActivitySection />
         </div>
         {!view.readOnly && (

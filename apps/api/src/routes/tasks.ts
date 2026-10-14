@@ -50,6 +50,7 @@ import { follow, workspaceMemberIds } from '../tasks/followers.js';
 import { getTaskListItem, listProjectTasks, listSpaceTasks } from '../tasks/list.js';
 import { mutateTasks } from '../tasks/mutation.js';
 import { applyTaskPatch, setTaskAssignees } from '../tasks/patch.js';
+import { syncReferences } from '../tasks/references.js';
 import { clientIdOf } from '../realtime/client-id.js';
 import {
   endOfStatus,
@@ -242,6 +243,11 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
             extractMentionIds(description),
           );
           await follow(tx, task.id, [user.id, ...assignees.map((a) => a.id), ...mentioned]);
+          await syncReferences(
+            tx,
+            { taskId: task.id, workspaceId },
+            `${body.title}\n${description ? richTextToPlain(description) : ''}`,
+          );
 
           m.log(task.id, 'task.created', { status: statusSnapshot(status) });
           await openStatusPeriods(tx, [{ taskId: task.id, status, at: m.now, actorId: user.id }]);
@@ -662,6 +668,11 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
             })
             .returning({ id: tasks.id }),
           'task',
+        );
+        await syncReferences(
+          tx,
+          { taskId: copy.id, workspaceId: m.project.workspaceId },
+          `${request.body?.title ?? source.title}\n${source.descriptionText}`,
         );
 
         const assigneeIds = (

@@ -56,6 +56,7 @@ const detail = (task: TaskListItem) => ({
   subtasks: [],
   attachments: [],
   followers: [],
+  mentionedIn: [],
   deletedAt: null,
 });
 

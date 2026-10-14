@@ -223,6 +223,15 @@
   .rich-text strong {
     font-weight: 600;
   }
+  /* Task keys (APP-142): mono like the key everywhere else, accent like a link. */
+  .rich-text .task-key-link {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    color: var(--accent-ink);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 2px;
+  }
   .rich-text .mention {
     padding: 1px 6px;
     border-radius: 6px;

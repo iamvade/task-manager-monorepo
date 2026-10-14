@@ -491,7 +491,11 @@
     "editedBy": "{{name}} just now",
     "someone": "Someone",
     "titleChanged": "{{name}} changed the title to “{{title}}”.",
-    "useTheirs": "Use theirs"
+    "useTheirs": "Use theirs",
+    "references": "Refers to",
+    "mentionedIn": "Mentioned in",
+    "inComment": "in a comment",
+    "inDescription": "in the description"
   },
   "myTasks": {
     "allSpaces": "All spaces",

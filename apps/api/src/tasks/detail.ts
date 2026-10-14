@@ -1,7 +1,16 @@
-import type { TaskDetail } from '@kite/shared';
-import { eq } from 'drizzle-orm';
+import { formatTaskKey, type TaskDetail } from '@kite/shared';
+import { and, desc, eq, isNull, or } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import type { Db } from '../db/client.js';
-import { sprints, tasks, users } from '../db/schema/index.js';
+import {
+  comments,
+  projects,
+  sprints,
+  statuses,
+  taskReferences,
+  tasks,
+  users,
+} from '../db/schema/index.js';
 import { httpError } from '../errors.js';
 import { toSprintDto } from '../projects/detail.js';
 import { listAttachments } from './attachments.js';
@@ -15,7 +24,7 @@ import { userRefColumns } from './user-ref.js';
  * pool, not a transaction.
  */
 export async function buildTaskDetail(db: Db, taskId: string): Promise<TaskDetail> {
-  const [item, [row], subtaskRows, attachmentRows, followers] = await Promise.all([
+  const [item, [row], subtaskRows, attachmentRows, followers, refs] = await Promise.all([
     getTaskListItem(db, taskId),
     db
       .select({
@@ -32,6 +41,7 @@ export async function buildTaskDetail(db: Db, taskId: string): Promise<TaskDetai
     listSubtasks(db, taskId),
     listAttachments(db, taskId),
     listFollowers(db, taskId),
+    mentionedIn(db, taskId),
   ]);
   if (!item || !row) throw httpError(404, 'NOT_FOUND', 'Task not found');
   const [reviewer] = item.reviewerId
@@ -49,5 +59,51 @@ export async function buildTaskDetail(db: Db, taskId: string): Promise<TaskDetai
     attachments: attachmentRows,
     followers,
     deletedAt: row.deletedAt?.toISOString() ?? null,
+    mentionedIn: refs,
   };
+}
+
+const source = alias(tasks, 'source');
+
+/** "Mentioned in": live tasks (and live comments) that reference `taskId`. */
+async function mentionedIn(db: Db, taskId: string): Promise<TaskDetail['mentionedIn']> {
+  const rows = await db
+    .select({
+      id: source.id,
+      number: source.number,
+      title: source.title,
+      projectKey: projects.key,
+      status: {
+        id: statuses.id,
+        name: statuses.name,
+        category: statuses.category,
+        color: statuses.color,
+      },
+      commentId: taskReferences.commentId,
+      createdAt: taskReferences.createdAt,
+    })
+    .from(taskReferences)
+    .innerJoin(source, eq(source.id, taskReferences.sourceTaskId))
+    .innerJoin(projects, eq(projects.id, source.projectId))
+    .innerJoin(statuses, eq(statuses.id, source.statusId))
+    .leftJoin(comments, eq(comments.id, taskReferences.commentId))
+    .where(
+      and(
+        eq(taskReferences.targetTaskId, taskId),
+        isNull(source.deletedAt),
+        or(isNull(taskReferences.commentId), isNull(comments.deletedAt)),
+      ),
+    )
+    .orderBy(desc(taskReferences.createdAt))
+    .limit(50);
+  return rows.map((r) => ({
+    task: {
+      id: r.id,
+      key: formatTaskKey(r.projectKey, r.number),
+      title: r.title,
+      status: r.status,
+    },
+    commentId: r.commentId,
+    createdAt: r.createdAt.toISOString(),
+  }));
 }

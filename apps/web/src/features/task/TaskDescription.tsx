@@ -1,12 +1,15 @@
-import type { RichTextNode } from '@kite/shared';
+import { findTaskKeys, type RichTextNode } from '@kite/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Editor } from '@tiptap/core';
 import { useTranslation } from 'react-i18next';
+import { Link, useNavigate } from 'react-router';
 import { useUpdateTask } from '../../api/tasks';
 import { RichTextEditor } from '../../components/editor/RichTextEditor';
+import { TASK_REF_ATTR } from '../../components/editor/taskKeys';
 import { resolveTypedMentions } from '../../components/editor/typedMentions';
 import { CheckIcon } from '../../components/icons';
 import { useTaskView } from './TaskContext';
+import { useTaskKeyHref } from './useTaskKeyHref';
 import { markErrorHandled } from '../../lib/mutationErrors';
 
 const SAVE_DELAY = 800;
@@ -20,6 +23,13 @@ export function TaskDescription() {
   const { t } = useTranslation();
   const { task, mentions } = useTaskView();
   const update = useUpdateTask();
+  const navigate = useNavigate();
+  const taskHref = useTaskKeyHref();
+  // Keys in the description, as links (keyboard reachable; the editor only styles them).
+  const references = findTaskKeys(task.descriptionText).flatMap(({ text }) => {
+    const href = text === task.key ? null : taskHref(text);
+    return href ? [{ key: text, href }] : [];
+  });
   const [state, setState] = useState<SaveState>('idle');
   /** The unsaved document (`null` = cleared); `undefined` when nothing is pending. */
   const pending = useRef<RichTextNode | null | undefined>(undefined);
@@ -93,34 +103,60 @@ export function TaskDescription() {
           )}
         </span>
       </div>
-      <RichTextEditor
-        variant="description"
-        label={t('drawer.description')}
-        placeholder={t('drawer.descriptionPlaceholder')}
-        value={task.description}
-        mentions={mentions}
-        onChange={(doc, editor) => {
-          pending.current = editor.isEmpty ? null : resolveTypedMentions(doc, mentions);
-          window.clearTimeout(timer.current);
-          timer.current = window.setTimeout(flush, SAVE_DELAY);
+      <div
+        onClick={(e) => {
+          // ⌘/Ctrl-click on a task key opens that task (a plain click keeps editing).
+          if (!(e.metaKey || e.ctrlKey) || !(e.target instanceof HTMLElement)) return;
+          const key = e.target.closest(`[${TASK_REF_ATTR}]`)?.getAttribute(TASK_REF_ATTR);
+          const href = key ? taskHref(key) : null;
+          if (!href) return;
+          e.preventDefault();
+          void navigate(href);
         }}
-        editorRef={editorRef}
-        onBlur={() => {
-          // Show the chip for a typed "@Name" once the author leaves the field.
-          const editor = editorRef.current;
-          if (editor) {
-            const doc = editor.getJSON() as RichTextNode;
-            const resolved = resolveTypedMentions(doc, mentions);
-            if (resolved !== doc) editor.commands.setContent(resolved, { emitUpdate: false });
-          }
-          flush();
-        }}
-        onEscape={() => {
-          // Esc leaves the editor (saving); a second Esc closes the drawer.
-          (document.activeElement as HTMLElement | null)?.blur();
-          return true;
-        }}
-      />
+      >
+        <RichTextEditor
+          variant="description"
+          label={t('drawer.description')}
+          placeholder={t('drawer.descriptionPlaceholder')}
+          value={task.description}
+          mentions={mentions}
+          onChange={(doc, editor) => {
+            pending.current = editor.isEmpty ? null : resolveTypedMentions(doc, mentions);
+            window.clearTimeout(timer.current);
+            timer.current = window.setTimeout(flush, SAVE_DELAY);
+          }}
+          editorRef={editorRef}
+          onBlur={() => {
+            // Show the chip for a typed "@Name" once the author leaves the field.
+            const editor = editorRef.current;
+            if (editor) {
+              const doc = editor.getJSON() as RichTextNode;
+              const resolved = resolveTypedMentions(doc, mentions);
+              if (resolved !== doc) editor.commands.setContent(resolved, { emitUpdate: false });
+            }
+            flush();
+          }}
+          onEscape={() => {
+            // Esc leaves the editor (saving); a second Esc closes the drawer.
+            (document.activeElement as HTMLElement | null)?.blur();
+            return true;
+          }}
+        />
+      </div>
+      {references.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 text-[12px] text-muted">
+          <span>{t('drawer.references')}</span>
+          {references.map(({ key, href }) => (
+            <Link
+              key={key}
+              to={href}
+              className="rounded-[6px] bg-chip px-1.5 font-mono text-[12px] text-accent-ink no-underline hover:underline"
+            >
+              {key}
+            </Link>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

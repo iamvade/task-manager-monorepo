@@ -1,5 +1,14 @@
 import type { RichTextNode } from '@kite/shared';
-import { foreignKey, index, integer, jsonb, pgTable, text, uuid } from 'drizzle-orm/pg-core';
+import {
+  foreignKey,
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  unique,
+  uuid,
+} from 'drizzle-orm/pg-core';
 import { createdAt, id, timestamptz } from './columns.js';
 import { tasks } from './tasks.js';
 import { users } from './users.js';
@@ -56,4 +65,29 @@ export const attachments = pgTable(
     createdAt: createdAt(),
   },
   (t) => [index('attachments_task_id_idx').on(t.taskId)],
+);
+
+/**
+ * `KEY-123` mentioned in a task's title/description (`comment_id` null) or in one of its
+ * comments: the target's "Mentioned in". Kept in sync on every write (tasks/references.ts).
+ */
+export const taskReferences = pgTable(
+  'task_references',
+  {
+    id: id(),
+    sourceTaskId: uuid('source_task_id')
+      .notNull()
+      .references(() => tasks.id, { onDelete: 'cascade' }),
+    targetTaskId: uuid('target_task_id')
+      .notNull()
+      .references(() => tasks.id, { onDelete: 'cascade' }),
+    commentId: uuid('comment_id').references(() => comments.id, { onDelete: 'cascade' }),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    unique('task_references_source_target_comment_unique')
+      .on(t.sourceTaskId, t.targetTaskId, t.commentId)
+      .nullsNotDistinct(),
+    index('task_references_target_task_id_idx').on(t.targetTaskId),
+  ],
 );

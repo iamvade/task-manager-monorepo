@@ -55,6 +55,7 @@ function toDetail(task: TaskListItem, extra: Partial<TaskDetail> = {}): TaskDeta
     subtasks: [],
     attachments: [],
     followers: [],
+    mentionedIn: [],
     deletedAt: null,
     ...extra,
   };
@@ -145,6 +146,41 @@ describe('task drawer', () => {
     fireEvent.click(following);
     expect(await view.findByRole('button', { name: 'Follow' })).toBeInTheDocument();
     expect(calls).toEqual(['follow', 'unfollow']);
+  });
+
+  it('lists where the task is mentioned and the keys its description refers to', async () => {
+    const tasks = makeTasks();
+    const other = at(tasks, 0);
+    const { state } = setup({
+      descriptionText: `Depends on ${other.key} and ISO-9001`,
+      mentionedIn: [
+        {
+          task: { id: other.id, key: other.key, title: other.title, status: other.status },
+          commentId: '01890000-0000-7000-8000-000000000555',
+          createdAt: '2026-10-07T03:00:00.000Z',
+        },
+      ],
+    });
+    api(state);
+    const router = renderAt(`${LIST}&task=APP-135`);
+    const view = within(await drawer());
+    const mentioned = await view.findByRole('region', { name: 'Mentioned in' });
+    const row = within(mentioned).getByRole('link', { name: new RegExp(other.title) });
+    expect(row).toHaveTextContent('in a comment');
+    expect(row.getAttribute('href')).toContain(`task=${other.key}`);
+    expect(row.getAttribute('href')).toContain('comment=01890000-0000-7000-8000-000000000555');
+    // Only keys of workspace projects link; ISO-9001 stays text.
+    const refers = view.getByText('Refers to').parentElement;
+    if (!refers) throw new Error('no references');
+    expect(
+      within(refers)
+        .getAllByRole('link')
+        .map((a) => a.textContent),
+    ).toEqual([other.key]);
+    fireEvent.click(within(refers).getByRole('link', { name: other.key }));
+    await waitFor(() => {
+      expect(router.state.location.search).toContain(`task=${other.key}`);
+    });
   });
 
   it('says who just changed a field', async () => {

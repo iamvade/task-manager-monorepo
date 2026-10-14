@@ -15,6 +15,7 @@ import { Menu, type MenuItem } from '../../../components/ui/Menu';
 import { cn } from '../../../lib/cn';
 import { useRelativeTime } from '../../../lib/useRelativeTime';
 import { canModerate, useTaskView } from '../TaskContext';
+import { useTaskKeyHref } from '../useTaskKeyHref';
 
 interface CommentItemProps {
   comment: CommentReply;
@@ -100,6 +101,7 @@ export function CommentItem({
   const own = comment.author.id === me.id;
   const deleted = comment.deletedAt !== null || comment.body === null;
   const root = useRef<HTMLDivElement>(null);
+  const taskHref = useTaskKeyHref();
 
   // A comment just sent from the composer scrolls into view.
   useEffect(() => {
@@ -221,7 +223,7 @@ export function CommentItem({
               {t('drawer.commentDeleted')}
             </p>
           ) : (
-            comment.body && <RichTextView doc={comment.body} />
+            comment.body && <RichTextView doc={comment.body} taskHref={taskHref} />
           )}
           {!temp && (Boolean(onReply) || Boolean(replies?.length)) && (
             <div className="flex gap-3 text-[12px]">

@@ -133,6 +133,24 @@ export const taskDetailSchema = taskListItemSchema
     followers: z.array(userRefSchema),
     /** Set when the task is in the trash (restorable). */
     deletedAt: z.iso.datetime().nullable(),
+    /** Tasks whose title, description (`commentId` null) or a comment mention this one, newest first. */
+    mentionedIn: z.array(
+      z.object({
+        task: z.object({
+          id: z.uuid(),
+          key: z.string(),
+          title: z.string(),
+          status: z.object({
+            id: z.uuid(),
+            name: z.string().nullable(),
+            category: statusCategorySchema,
+            color: z.string().nullable(),
+          }),
+        }),
+        commentId: z.uuid().nullable(),
+        createdAt: z.iso.datetime(),
+      }),
+    ),
   })
   .meta({ id: 'TaskDetail' });
 export type TaskDetail = z.infer<typeof taskDetailSchema>;

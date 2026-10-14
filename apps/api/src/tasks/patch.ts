@@ -6,6 +6,7 @@ import { taskAssignees, tasks, users } from '../db/schema/index.js';
 import { follow, workspaceMemberIds } from './followers.js';
 import { stableJson } from './json.js';
 import type { TaskMutation, TaskRow } from './mutation.js';
+import { syncReferences } from './references.js';
 import { requireMembers, requireSprintIn, requireStatusIn } from './refs.js';
 import { setSprint } from './sprint.js';
 import { changeStatus } from './status.js';
@@ -96,6 +97,13 @@ export async function applyTaskPatch(
     .update(tasks)
     .set({ ...patch, updatedAt: m.now })
     .where(eq(tasks.id, task.id));
+  if (patch.title !== undefined || patch.descriptionText !== undefined) {
+    await syncReferences(
+      tx,
+      { taskId: task.id, workspaceId: m.project.workspaceId },
+      `${patch.title ?? task.title}\n${patch.descriptionText ?? task.descriptionText}`,
+    );
+  }
   m.emit('task.updated', task.id, mentioned.length > 0 ? { mentionedUserIds: mentioned } : {});
   return true;
 }

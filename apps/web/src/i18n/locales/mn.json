@@ -491,7 +491,11 @@
     "editedBy": "{{name}} саяхан",
     "someone": "Хэн нэгэн",
     "titleChanged": "{{name}} гарчгийг «{{title}}» болгож өөрчиллөө.",
-    "useTheirs": "Түүнийхийг авах"
+    "useTheirs": "Түүнийхийг авах",
+    "references": "Холбогдох ажил",
+    "mentionedIn": "Дурдагдсан",
+    "inComment": "сэтгэгдэлд",
+    "inDescription": "тайлбарт"
   },
   "myTasks": {
     "allSpaces": "Бүх орон зай",
