@@ -9,6 +9,9 @@ const member = (user: UserRef, capacityPoints = 15): WorkspaceMember => ({
   title: 'QA',
   capacityPoints,
   joinedAt: '2026-01-01T00:00:00.000Z',
+  awayUntil: null,
+  awayNote: null,
+  deactivatedAt: null,
 });
 const NEW = {
   id: '01890000-0000-7000-8000-000000000108',

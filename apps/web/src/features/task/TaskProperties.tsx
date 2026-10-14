@@ -1,4 +1,4 @@
-import type { Status, StatusCategory, UserRef } from '@kite/shared';
+import { isAway, type Status, type StatusCategory, type UserRef } from '@kite/shared';
 import { useMemo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router';
@@ -116,6 +116,7 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
   const memberUsers = useMemo(() => members.map((m) => m.user), [members]);
   const shortNameOf = useShortNames(memberUsers);
   const dates = useDates();
+  const awayIds = new Set(members.filter((m) => isAway(m, dates.today)).map((m) => m.user.id));
   const navigate = useNavigate();
   const [, setParams] = useSearchParams();
   const sidebar = useSidebar(project?.workspaceId);
@@ -211,6 +212,9 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
           >
             <Avatar user={user} size={22} title={null} />
             {shortNameOf(user)}
+            {awayIds.has(user.id) && (
+              <span className="text-[11px] text-muted">{t('picker.away')}</span>
+            )}
             <IconButton
               label={t('drawer.removeAssignee', { name: user.name })}
               size={20}

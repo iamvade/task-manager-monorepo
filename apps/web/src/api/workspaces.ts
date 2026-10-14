@@ -6,6 +6,7 @@ import {
   type CreateInvite,
   type UpdateMember,
   type WorkspaceMember,
+  memberHandoverSchema,
 } from '@kite/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
@@ -110,5 +111,57 @@ export function useRevokeInvite(workspaceId: string) {
       if (context?.previous) queryClient.setQueryData(key, context.previous);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: key }),
+  });
+}
+
+/** Admins: every member including deactivated ones (Settings → Members, "Deactivated"). */
+export function useAllMembers(workspaceId: string | undefined, enabled: boolean) {
+  return useQuery({
+    queryKey: [...queryKeys.members(workspaceId ?? ''), 'all'],
+    queryFn: () =>
+      apiFetch(
+        `/workspaces/${workspaceId ?? ''}/members?include=deactivated`,
+        z.array(workspaceMemberSchema),
+      ),
+    enabled: Boolean(workspaceId) && enabled,
+  });
+}
+
+/** What deactivating `userId` hands over (the dialog loads it when it opens). */
+export function useMemberHandover(workspaceId: string, userId: string | null) {
+  return useQuery({
+    queryKey: [...queryKeys.members(workspaceId), 'handover', userId ?? ''],
+    queryFn: () =>
+      apiFetch(`/workspaces/${workspaceId}/members/${userId ?? ''}/handover`, memberHandoverSchema),
+    enabled: Boolean(userId),
+    staleTime: 0,
+  });
+}
+
+/** Deactivate (with an optional successor) / reactivate; members, tasks and reports refresh. */
+export function useSetMemberActive(workspaceId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      userId,
+      active,
+      reassignTo,
+    }: {
+      userId: string;
+      active: boolean;
+      reassignTo?: string | null;
+    }) =>
+      apiSend(
+        `/workspaces/${workspaceId}/members/${userId}/${active ? 'reactivate' : 'deactivate'}`,
+        workspaceMemberSchema,
+        'POST',
+        active ? undefined : { reassignTo: reassignTo ?? null },
+      ),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.members(workspaceId) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.tasks }),
+        queryClient.invalidateQueries({ queryKey: ['projects'] }),
+      ]),
   });
 }

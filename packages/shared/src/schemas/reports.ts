@@ -371,6 +371,9 @@ export const workloadPersonSchema = z
     title: z.string().nullable(),
     capacity: z.number().int(),
     openTasks: z.number().int(),
+    /** Out of office through this date (Workload shows "Away until …" instead of the load). */
+    awayUntil: dateSchema.nullable(),
+    awayNote: z.string().nullable(),
     /** All open points. */
     points: z.number().int(),
     /** Points of the `counted` tasks: what `load` compares with capacity. */

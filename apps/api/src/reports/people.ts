@@ -83,7 +83,8 @@ const teamCredits = (ctx: ReportContext) => sql`
   where ${taskInScope(ctx, 't')}
     and t.completed_at >= ${dayStart(trendStart(ctx.today), ctx.timezone)}
     and ${assignedAtCompletion('t', sql`u.user_id`)}
-    and u.user_id in (select user_id from workspace_members where workspace_id = ${ctx.workspaceId})`;
+    and u.user_id in (select user_id from workspace_members
+      where workspace_id = ${ctx.workspaceId} and deactivated_at is null)`;
 
 const trendQuery = (ctx: ReportContext, userId: string) => {
   const first = trendStart(ctx.today);
@@ -255,7 +256,8 @@ export async function loadPerson(db: DbOrTx, workspaceId: string, userId: string
     db,
     sql`select u.id, u.name, u.initials, u.avatar_color, wm.title, wm.role
       from workspace_members wm join users u on u.id = wm.user_id
-      where wm.workspace_id = ${workspaceId} and wm.user_id = ${userId}`,
+      where wm.workspace_id = ${workspaceId} and wm.user_id = ${userId}
+        and wm.deactivated_at is null`,
   );
   if (!person) throw httpError(404, 'NOT_FOUND', 'Person not found');
   return person;

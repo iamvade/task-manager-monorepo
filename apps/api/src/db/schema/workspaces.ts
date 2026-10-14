@@ -25,6 +25,15 @@ export const workspaceMembers = pgTable(
     /** Points this person can take on over the next 2 weeks (Workload capacity marker). */
     capacityPoints: integer('capacity_points').notNull().default(15),
     joinedAt: timestamptz('joined_at').notNull().defaultNow(),
+    /**
+     * Offboarded: no access to the workspace, hidden from pickers, mentions and Workload; their
+     * history stays. Null = active (`activeMember` in auth/membership.ts).
+     */
+    deactivatedAt: timestamptz('deactivated_at'),
+    deactivatedBy: uuid('deactivated_by').references(() => users.id, { onDelete: 'set null' }),
+    /** Out of office through this date (inclusive), with an optional note. */
+    awayUntil: date('away_until', { mode: 'string' }),
+    awayNote: text('away_note'),
   },
   (t) => [
     primaryKey({ columns: [t.workspaceId, t.userId] }),

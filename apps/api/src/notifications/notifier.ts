@@ -10,6 +10,7 @@ import {
 } from '../db/schema/index.js';
 import type { DomainEvent } from '../events/bus.js';
 import { candidatesFor, pickCandidate } from './fanout.js';
+import { activeMember } from '../auth/membership.js';
 
 /** An unread notification of the same type on the same task this recent absorbs the new one. */
 export const COLLAPSE_WINDOW_MS = 5 * 60_000;
@@ -72,6 +73,7 @@ export async function notify(db: Db, event: DomainEvent): Promise<Notified[]> {
       and(
         eq(workspaceMembers.userId, users.id),
         eq(workspaceMembers.workspaceId, event.workspaceId),
+        activeMember,
       ),
     )
     .leftJoin(

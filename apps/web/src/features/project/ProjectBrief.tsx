@@ -2,7 +2,6 @@ import { richTextToPlain, type ProjectDetail, type RichTextNode } from '@kite/sh
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUpdateProject } from '../../api/projects';
-import { useAuth } from '../../auth/useAuth';
 import { RichTextEditor } from '../../components/editor/RichTextEditor';
 import { RichTextView } from '../../components/editor/RichTextView';
 import type { MentionCandidate } from '../../components/editor/mentions';
@@ -13,6 +12,7 @@ import { cn } from '../../lib/cn';
 import { markErrorHandled } from '../../lib/mutationErrors';
 import { useUiStore } from '../../stores/ui';
 import { AssigneePicker } from '../pickers/AssigneePicker';
+import { useMemberHint } from '../pickers/useMemberHint';
 
 const SAVE_DELAY = 800;
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
@@ -25,8 +25,7 @@ type SaveState = 'idle' | 'saving' | 'saved' | 'error';
  */
 export function ProjectBrief({ project }: { project: ProjectDetail }) {
   const { t } = useTranslation();
-  const { me } = useAuth();
-  const meId = me?.user.id;
+  const hintOf = useMemberHint();
   const stored = useUiStore((s) => s.briefOpen[project.id]);
   const setBriefOpen = useUiStore((s) => s.setBriefOpen);
   const open = stored ?? false;
@@ -38,14 +37,14 @@ export function ProjectBrief({ project }: { project: ProjectDetail }) {
 
   const mentions = useMemo(
     (): MentionCandidate[] =>
-      project.members.map(({ user, title }) => ({
-        id: user.id,
-        name: user.name,
-        initials: user.initials,
-        avatarColor: user.avatarColor,
-        hint: user.id === meId ? t('create.you') : title,
+      project.members.map((member) => ({
+        id: member.user.id,
+        name: member.user.name,
+        initials: member.user.initials,
+        avatarColor: member.user.avatarColor,
+        hint: hintOf(member),
       })),
-    [project.members, meId, t],
+    [project.members, hintOf],
   );
 
   return (

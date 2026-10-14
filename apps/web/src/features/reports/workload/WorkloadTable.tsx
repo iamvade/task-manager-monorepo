@@ -1,5 +1,6 @@
 import {
   WORKLOAD_BUCKETS,
+  isAway,
   type UserRef,
   type WorkloadPerson,
   type WorkloadTask,
@@ -10,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { ChevronRightIcon } from '../../../components/icons';
 import { Avatar } from '../../../components/ui/Avatar';
 import { cn } from '../../../lib/cn';
+import { useDates } from '../../../lib/useDates';
 import { useShortNames } from '../../../lib/useShortNames';
 import { StackedBar } from '../charts/StackedBar';
 import { BUCKET_FILL, OUTSIDE_SWATCH, bucketSwatch } from './buckets';
@@ -150,6 +152,7 @@ function WorkloadRow({
   children: React.ReactNode;
 }) {
   const { t } = useTranslation();
+  const { today } = useDates();
   const k = 'reports.workload';
   const pts = t(`${k}.pts`, { count: person.points });
   const overdue = person.buckets.overdue.points;
@@ -230,7 +233,11 @@ function WorkloadRow({
           markerTitle={t(`${k}.capTitle`, { count: person.capacity })}
         />
         <span className="flex">
-          <CapacityPill load={person.load} capacity={person.capacity} />
+          <CapacityPill
+            load={person.load}
+            capacity={person.capacity}
+            awayUntil={isAway(person, today) ? person.awayUntil : null}
+          />
         </span>
       </button>
       {open && children}

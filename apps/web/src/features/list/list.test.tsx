@@ -480,6 +480,25 @@ describe('project list', () => {
     expect(screen.queryByRole('toolbar', { name: /Сонгосон/ })).toBeNull();
   });
 
+  it('marks people who are out of office in the assignee picker', async () => {
+    api(() => ({
+      [`GET /api/v1/workspaces/${WORKSPACE_ID}/members`]: () =>
+        Response.json(
+          PROJECT_WITH_STATUSES.members.map((m) =>
+            m.user.name === 'Sara K.' ? { ...m, awayUntil: '2026-10-20', awayNote: null } : m,
+          ),
+        ),
+    }));
+    renderAt(LIST);
+    await screen.findByRole('table');
+    fireEvent.click(
+      screen.getByRole('button', { name: '«Audit current navigation patterns» — хариуцагч' }),
+    );
+    expect(await screen.findByRole('option', { name: /Sara K\./ })).toHaveTextContent(
+      '10-р сарын 20 хүртэл чөлөөтэй',
+    );
+  });
+
   it('opens the drawer when a row is clicked', async () => {
     api((st) => ({
       'GET /api/v1/tasks/APP-131': () => Response.json(detail(at(st.tasks, 0))),

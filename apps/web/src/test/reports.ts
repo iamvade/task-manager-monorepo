@@ -253,6 +253,8 @@ export function workloadPerson(
     user,
     title,
     capacity: 15,
+    awayUntil: null,
+    awayNote: null,
     openTasks: tasks.length,
     points: tasks.reduce((a, t) => a + t.points, 0),
     loadPoints: tasks.reduce((a, t) => a + (t.counted ? t.points : 0), 0),

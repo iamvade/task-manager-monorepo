@@ -14,6 +14,7 @@ import { requireWorkspaceMember } from '../auth/access.js';
 import { projects, statuses, tasks, users, workspaceMembers } from '../db/schema/index.js';
 import { userRefColumns } from '../tasks/user-ref.js';
 import { assigneesSql, escapeLike } from '../tasks/list.js';
+import { activeMember } from '../auth/membership.js';
 
 const err = apiErrorSchema;
 const LIMIT = 20;
@@ -75,7 +76,7 @@ export const searchRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           .select({ ...userRefColumns, email: users.email })
           .from(workspaceMembers)
           .innerJoin(users, eq(users.id, workspaceMembers.userId))
-          .where(eq(workspaceMembers.workspaceId, workspaceId))
+          .where(and(eq(workspaceMembers.workspaceId, workspaceId), activeMember))
           .orderBy(asc(users.name)),
         db
           .select({

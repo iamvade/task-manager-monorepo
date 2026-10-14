@@ -3,6 +3,7 @@ import { and, asc, eq, inArray } from 'drizzle-orm';
 import type { DbOrTx } from '../db/client.js';
 import { taskFollowers, users, workspaceMembers } from '../db/schema/index.js';
 import { userRefColumns } from './user-ref.js';
+import { activeMember } from '../auth/membership.js';
 
 /** Makes users follow a task (already following is fine). */
 export async function follow(db: DbOrTx, taskId: string, userIds: Iterable<string>) {
@@ -47,6 +48,7 @@ export async function workspaceMemberIds(
       and(
         eq(workspaceMembers.workspaceId, workspaceId),
         inArray(workspaceMembers.userId, [...ids]),
+        activeMember,
       ),
     );
   const members = new Set(rows.map((r) => r.id));

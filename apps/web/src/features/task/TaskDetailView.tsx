@@ -25,6 +25,7 @@ import { TaskProperties } from './TaskProperties';
 import { TaskTitle } from './TaskTitle';
 import { reportError } from '../../lib/mutationErrors';
 import { useViewingTask } from '../../realtime/context';
+import { useMemberHint } from '../pickers/useMemberHint';
 
 // React 18's types don't know `inert`; the attribute itself works in every current browser.
 const INERT = { inert: '' } as Record<string, string>;
@@ -94,6 +95,7 @@ function LoadedTask({
 }) {
   const { t } = useTranslation();
   const { me } = useAuth();
+  const hintOf = useMemberHint();
   const project = useProject(task.project.id).data;
   const workspaceId = project?.workspaceId;
   const members = useWorkspaceMembers(workspaceId).data;
@@ -142,12 +144,12 @@ function LoadedTask({
     const rank = (id: string) => (teamIds.has(id) ? 0 : 1);
     const mentions: MentionCandidate[] = [...all]
       .sort((a, b) => rank(a.user.id) - rank(b.user.id) || a.user.name.localeCompare(b.user.name))
-      .map(({ user, title }) => ({
-        id: user.id,
-        name: user.name,
-        initials: user.initials,
-        avatarColor: user.avatarColor,
-        hint: user.id === meRef.id ? t('create.you') : title,
+      .map((member) => ({
+        id: member.user.id,
+        name: member.user.name,
+        initials: member.user.initials,
+        avatarColor: member.user.avatarColor,
+        hint: hintOf(member),
       }));
     return {
       task,
@@ -169,7 +171,7 @@ function LoadedTask({
       close: onClose,
       upload,
     };
-  }, [task, project, members, tags, sprints, meRef, role, layout, onClose, upload, t]);
+  }, [task, project, members, tags, sprints, meRef, role, layout, onClose, upload, hintOf]);
 
   if (!view) return null;
 

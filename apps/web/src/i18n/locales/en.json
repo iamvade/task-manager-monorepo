@@ -294,7 +294,9 @@
     "assigneeLabel": "Assignees",
     "createTag": "Create tag “{{name}}”",
     "createTagFailed": "Couldn't create the tag",
-    "assigned": "Assigned"
+    "assigned": "Assigned",
+    "awayUntil": "Away until {{date}}",
+    "away": "away"
   },
   "board": {
     "sortManual": "Sort: Manual",
@@ -1408,5 +1410,42 @@
     "lead": "Lead",
     "noLead": "No lead",
     "setLead": "Project lead"
+  },
+  "members": {
+    "actions": "More actions for {{name}}",
+    "away": {
+      "set": "Set out of office…",
+      "titleOf": "Out of office: {{name}}",
+      "label": "Out of office",
+      "hint": "Teammates see “Away” next to your name in pickers and Workload until this date.",
+      "until": "Away until",
+      "note": "Note (optional)",
+      "notePlaceholder": "e.g. Vacation, back on Monday",
+      "save": "Save",
+      "back": "I’m back",
+      "badge": "Away until {{date}}"
+    },
+    "deactivate": {
+      "action": "Deactivate…",
+      "title": "Deactivate {{name}}?",
+      "intro": "They lose access to this workspace and leave pickers and Workload. Their history stays; you can reactivate them later.",
+      "openTasks_one": "{{count}} open task assigned",
+      "openTasks_other": "{{count}} open tasks assigned",
+      "reviewing_one": "Reviewer on {{count}} open task",
+      "reviewing_other": "Reviewer on {{count}} open tasks",
+      "leads_one": "Leads {{projects}}",
+      "leads_other": "Leads {{count}} projects: {{projects}}",
+      "leadsNone": "Leads no project",
+      "handTo": "Hand their open work to",
+      "nobody": "Nobody (just remove them)",
+      "confirm": "Deactivate",
+      "done": "{{name}} was deactivated"
+    },
+    "deactivated": {
+      "title_one": "Deactivated ({{count}})",
+      "title_other": "Deactivated ({{count}})",
+      "reactivate": "Reactivate",
+      "back": "{{name}} is back in the workspace"
+    }
   }
 }

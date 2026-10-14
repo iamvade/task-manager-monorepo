@@ -2,11 +2,13 @@ import { AVATAR_COLORS, nameSchema, type AvatarColor } from '@kite/shared';
 import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSaveMe } from '../../api/useSaveMe';
+import { useCurrentWorkspace, useUpdateMember, useWorkspaceMembers } from '../../api/workspaces';
 import { useAuth } from '../../auth/useAuth';
 import { CheckIcon } from '../../components/icons';
 import { Avatar } from '../../components/ui/Avatar';
 import { cn } from '../../lib/cn';
 import { paletteClass } from '../../lib/palette';
+import { AwayFields } from './MemberDialogs';
 import { SettingsRow, SettingsSection, settingsInput } from './SettingsRow';
 
 export function ProfileSection() {
@@ -92,7 +94,31 @@ export function ProfileSection() {
       <SettingsRow label={t('settings.profile.email')} hint={t('settings.profile.emailHint')}>
         <span className="text-[13px] text-2">{me.user.email}</span>
       </SettingsRow>
+      <OutOfOffice userId={me.user.id} />
     </SettingsSection>
+  );
+}
+
+/** "Out of office until" for the current workspace (badges in pickers and Workload). */
+function OutOfOffice({ userId }: { userId: string }) {
+  const { t } = useTranslation();
+  const workspace = useCurrentWorkspace();
+  const members = useWorkspaceMembers(workspace?.id);
+  const update = useUpdateMember(workspace?.id ?? '');
+  const mine = members.data?.find((m) => m.user.id === userId);
+  if (!workspace || !mine) return null;
+  return (
+    <SettingsRow label={t('members.away.label')} hint={t('members.away.hint')}>
+      <AwayFields
+        key={`${mine.awayUntil ?? ''}:${mine.awayNote ?? ''}`}
+        awayUntil={mine.awayUntil}
+        awayNote={mine.awayNote}
+        pending={update.isPending}
+        onSave={(value) => {
+          update.mutate({ userId, ...value });
+        }}
+      />
+    </SettingsRow>
   );
 }
 

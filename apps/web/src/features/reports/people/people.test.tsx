@@ -13,6 +13,9 @@ const member = (user: typeof DORJ | typeof SARA | typeof BAT, title: string) => 
   title,
   capacityPoints: 15,
   joinedAt: '2026-01-01T00:00:00.000Z',
+  awayUntil: null,
+  awayNote: null,
+  deactivatedAt: null,
 });
 const membersApi = {
   [`GET /api/v1/workspaces/${WORKSPACE_ID}/members`]: () =>
