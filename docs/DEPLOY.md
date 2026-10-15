@@ -106,6 +106,62 @@ It also adds the 2026 Mongolian public holidays (used for sprint working days). 
 
 Sign in at `https://$DOMAIN` as the owner, open **Settings → Members**, enter a teammate's email and click **Create invite**. Kite doesn't send email: copy the link shown under the form and send it yourself (chat, email). The link is valid for 7 days and shown only once; creating a new invite for the same email replaces the old link. Admins can invite too; set job titles and capacity in the same list.
 
+## Behind an existing nginx, under a sub-path
+
+Use this when the server already runs nginx on ports 80/443 (so Caddy can't) and Kite should live under a path of an existing site, e.g. `https://staging.api.shoppyhub.mn/tasks`. nginx serves the built web app and proxies `/tasks/api/` (REST and the WebSocket) to the API container, stripping the `/tasks` prefix. Postgres, migrate, the API and backups run in Compose as above; only the `web` (Caddy) container is left out.
+
+**1. `.env`** (steps 1–3 above otherwise apply; skip the ufw part on AWS and open 80/443 in the security group instead):
+
+```sh
+DOMAIN=staging.api.shoppyhub.mn
+BASE_PATH=/tasks
+ACME_EMAIL=ops@shoppy.mn          # required by the compose file, unused without Caddy
+POSTGRES_PASSWORD=…
+COMPOSE_FILE=docker-compose.prod.yml:docker-compose.override.yml
+```
+
+`BASE_PATH` is baked into the web build (asset URLs, router, API and WebSocket URLs) and makes the API's `WEB_ORIGIN` `https://$DOMAIN$BASE_PATH`: the session cookie gets `Path=/tasks` (other apps on the host never see it) and invite links include the path.
+
+**2. `docker-compose.override.yml`** next to the prod file: publish the API on loopback only and keep Caddy from starting.
+
+```yaml
+services:
+  api:
+    ports: ['127.0.0.1:3000:3000']
+  web:
+    profiles: ['caddy']
+```
+
+**3. Build, start, copy the web build out of its image:**
+
+```sh
+docker compose build api                    # api + migrate image
+docker compose --profile caddy build web    # the SPA, built with BASE_PATH
+docker compose up -d                        # db, migrate, api, backup
+docker compose ps
+
+sudo mkdir -p /var/www/kite/tasks
+docker create --name kite-web-files kite-web:latest
+sudo docker cp kite-web-files:/srv/. /var/www/kite/tasks/
+docker rm kite-web-files
+```
+
+**4. nginx:** add the `map` and the `location` blocks from [`docker/nginx/kite-subpath.conf`](../docker/nginx/kite-subpath.conf) to the site's `server {}` (adjust `/tasks` and `/var/www/kite` if yours differ), then `sudo nginx -t && sudo systemctl reload nginx`. The site keeps its own TLS certificate (e.g. certbot). The API trusts one proxy hop (`TRUST_PROXY=1`); the config overwrites `X-Forwarded-For` with the client address, so keep it that way unless another proxy (a load balancer) sits in front, in which case raise `TRUST_PROXY` accordingly.
+
+**5. First owner and health check:**
+
+```sh
+docker compose run --rm api node dist/scripts/init.js \
+  --workspace "Shoppy" --email you@example.mn --name "Your Name"
+curl https://staging.api.shoppyhub.mn/tasks/api/v1/health
+```
+
+Sign in at `https://$DOMAIN/tasks/`.
+
+**Updating:** as in [Updating](#updating), then repeat the copy in step 3 (`docker compose --profile caddy build web` first). Old hashed assets can stay in `/var/www/kite/tasks/assets`; clear the folder before copying if it grows.
+
+Swagger UI (`API_DOCS=true`) doesn't work under a path.
+
 ## Backups
 
 The `backup` container runs every day at `BACKUP_TIME` (default 03:00, in `TZ`):

@@ -17,7 +17,8 @@ x-db-env: &db-env
 x-api-env: &api-env
   NODE_ENV: production
   DATABASE_URL: postgres://kite:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/kite
-  WEB_ORIGIN: https://${DOMAIN:?Set DOMAIN in .env}
+  # With BASE_PATH (e.g. /tasks) the app lives under that path: cookie path and invite links.
+  WEB_ORIGIN: https://${DOMAIN:?Set DOMAIN in .env}${BASE_PATH:-}
   # Caddy is the one proxy in front.
   TRUST_PROXY: '1'
   LOG_LEVEL: ${LOG_LEVEL:-info}
@@ -86,6 +87,8 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+      args:
+        BASE_PATH: ${BASE_PATH:-}
     restart: unless-stopped
     environment:
       DOMAIN: ${DOMAIN:?Set DOMAIN in .env}
