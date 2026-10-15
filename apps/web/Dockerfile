@@ -15,7 +15,9 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     pnpm install --frozen-lockfile --filter @kite/web...
 COPY packages/shared packages/shared
 COPY apps/web apps/web
-RUN pnpm --filter @kite/web build
+# Empty = served at the domain root; e.g. /tasks behind a proxy that serves the app there.
+ARG BASE_PATH=
+RUN BASE_PATH="$BASE_PATH" pnpm --filter @kite/web build
 
 FROM caddy:2.10.2-alpine
 COPY docker/caddy/Caddyfile /etc/caddy/Caddyfile

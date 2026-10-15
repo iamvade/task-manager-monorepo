@@ -18,6 +18,7 @@ import { hashPassword } from '../auth/password.js';
 import { resolveSession } from '../auth/plugin.js';
 import { createSession, setSessionCookie } from '../auth/sessions.js';
 import { hashToken, newToken } from '../auth/tokens.js';
+import { webUrl } from '../config.js';
 import type { DbOrTx } from '../db/client.js';
 import { isUniqueViolation } from '../db/errors.js';
 import { one } from '../db/rows.js';
@@ -104,7 +105,7 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         return one(await tx.insert(invites).values(values).returning(), 'invite');
       });
 
-      const link = `${new URL(app.config.WEB_ORIGIN).origin}/invite/${token}`;
+      const link = webUrl(app.config, `/invite/${token}`);
       if (app.config.NODE_ENV !== 'production') {
         // Handy in dev; production logs never carry invite tokens.
         app.log.info({ email, link }, 'Invite link');

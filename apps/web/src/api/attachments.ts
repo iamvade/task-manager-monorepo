@@ -3,10 +3,11 @@ import { useMutation, useMutationState, useQueryClient } from '@tanstack/react-q
 import { z } from 'zod';
 import { apiFetch, apiSend } from './client';
 import { TASK_MUTATION, bumpCount, patchTask, restoreTask, settle } from './taskCache';
+import { apiUrl } from '../lib/basePath';
 
 /** Download link (`inline` previews png/jpeg/gif/webp in an <img>); the session cookie applies. */
 export const attachmentUrl = (id: string, { inline = false } = {}) =>
-  `/api/v1/attachments/${id}/download${inline ? '?inline=true' : ''}`;
+  apiUrl(`/attachments/${id}/download${inline ? '?inline=true' : ''}`);
 
 const uploadKey = (taskId: string) => [...TASK_MUTATION, 'upload', taskId] as const;
 

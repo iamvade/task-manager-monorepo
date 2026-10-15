@@ -20,6 +20,7 @@ import { toast } from '../../stores/toast';
 import { useTaskView } from './TaskContext';
 import { TaskViewers } from './TaskViewers';
 import { useDeleteWithUndo } from './useDeleteWithUndo';
+import { appUrl } from '../../lib/basePath';
 
 interface TaskHeaderProps {
   /** Opens the Project property's picker (move to another project). */
@@ -45,7 +46,7 @@ export function TaskHeader({ onMoveToProject }: TaskHeaderProps) {
 
   async function copyLink() {
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/t/${task.key}`);
+      await navigator.clipboard.writeText(appUrl(`/t/${task.key}`));
       toast({ message: t('header.linkCopied') });
     } catch {
       toast({ message: t('drawer.copyFailed'), tone: 'danger' });

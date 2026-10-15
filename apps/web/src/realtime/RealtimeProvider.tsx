@@ -7,10 +7,11 @@ import { createMessageHandler } from './applyMessage';
 import { CLIENT_ID } from './clientId';
 import { SocketContext } from './context';
 import { RealtimeSocket } from './socket';
+import { apiUrl } from '../lib/basePath';
 
 function socketUrl() {
   const scheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
-  return `${scheme}://${window.location.host}/api/v1/ws?client=${CLIENT_ID}`;
+  return `${scheme}://${window.location.host}${apiUrl('/ws')}?client=${CLIENT_ID}`;
 }
 
 /**

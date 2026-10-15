@@ -93,7 +93,7 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
   registerErrorHandlers(app);
 
   await app.register(helmet);
-  await app.register(cors, { origin: config.WEB_ORIGIN, credentials: true });
+  await app.register(cors, { origin: new URL(config.WEB_ORIGIN).origin, credentials: true });
   // Session cookies are random tokens checked against the database, so no signing secret.
   await app.register(cookie);
   // Size limits are checked by the upload route (413 with our error body), not thrown here.

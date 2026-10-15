@@ -1,6 +1,7 @@
 import { REALTIME_CLIENT_HEADER, apiErrorSchema } from '@kite/shared';
 import type { z } from 'zod';
 import { CLIENT_ID } from '../realtime/clientId';
+import { apiUrl } from '../lib/basePath';
 
 export class ApiError extends Error {
   /** Seconds to wait, from a 429's `Retry-After` header. */
@@ -39,7 +40,7 @@ export function toQuery(params: Record<string, QueryValue | readonly QueryValue[
   return qs ? `?${qs}` : '';
 }
 
-/** Fetches `/api/v1{path}` and validates the JSON body with `schema`. */
+/** Fetches `/api/v1{path}` (under the base path) and validates the JSON body with `schema`. */
 export async function apiFetch<S extends z.ZodType>(
   path: string,
   schema: S,
@@ -48,7 +49,7 @@ export async function apiFetch<S extends z.ZodType>(
   const headers = new Headers(init?.headers);
   headers.set('Accept', 'application/json');
   headers.set(REALTIME_CLIENT_HEADER, CLIENT_ID);
-  const res = await fetch(`/api/v1${path}`, { credentials: 'include', ...init, headers });
+  const res = await fetch(apiUrl(path), { credentials: 'include', ...init, headers });
   const body: unknown = res.status === 204 ? null : await res.json().catch(() => null);
   if (!res.ok) {
     const parsed = apiErrorSchema.safeParse(body);

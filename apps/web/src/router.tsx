@@ -3,6 +3,7 @@ import { Navigate, createBrowserRouter, type RouteObject } from 'react-router';
 import { RedirectIfAuthed, RequireAuth } from './auth/RouteGuards';
 import { RouteError } from './components/ErrorState';
 import { AppShell } from './features/shell/AppShell';
+import { BASE_PATH } from './lib/basePath';
 
 /**
  * Every page is its own chunk (`route.lazy`), loaded on first visit; the guards and the shell
@@ -151,4 +152,4 @@ export const routes: RouteObject[] = [
   },
 ];
 
-export const router = createBrowserRouter(routes);
+export const router = createBrowserRouter(routes, { basename: BASE_PATH || '/' });

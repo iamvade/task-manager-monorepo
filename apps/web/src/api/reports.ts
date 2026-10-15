@@ -14,6 +14,7 @@ import { reassignInWorkload } from './workloadCache';
 import { apiFetch, apiSend, toQuery } from './client';
 import { queryKeys } from './queryKeys';
 import { TASK_MUTATION, patchTask, restoreTask, settle, type TaskSnapshot } from './taskCache';
+import { apiUrl } from '../lib/basePath';
 
 /** Reports refetch on this interval and on window focus (the server caches them as long). */
 export const REPORTS_REFETCH_MS = 5 * 60_000;
@@ -64,7 +65,7 @@ export function reportCsvUrl(
   query: ReportFilters | SprintsQuery | WorkloadQuery,
 ): string {
   const qs = 'period' in query ? reportQueryString(query) : toQuery({ ...query });
-  return `/api/v1/workspaces/${workspaceId}/reports/${report}.csv${qs}`;
+  return apiUrl(`/workspaces/${workspaceId}/reports/${report}.csv${qs}`);
 }
 
 /** Shared by every report query: keep numbers on screen while filters change, refresh often. */

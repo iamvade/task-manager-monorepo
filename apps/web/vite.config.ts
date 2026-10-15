@@ -5,7 +5,17 @@ import { defineConfig } from 'vite';
 
 const apiTarget = process.env.API_PROXY_TARGET ?? 'http://127.0.0.1:3000';
 
+/** `BASE_PATH=/tasks` builds the app for a sub-path (`/tasks/…`); empty = the domain root. */
+function basePath(raw = ''): string {
+  const trimmed = raw.trim().replace(/\/+$/, '');
+  if (trimmed && !/^\/[\w\-./]*$/.test(trimmed)) {
+    throw new Error(`BASE_PATH must look like /tasks, got "${raw}"`);
+  }
+  return `${trimmed}/`;
+}
+
 export default defineConfig({
+  base: basePath(process.env.BASE_PATH),
   plugins: [react(), tailwindcss()],
   server: {
     port: 5173,
