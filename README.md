@@ -30,7 +30,7 @@ docker compose up -d
 # 3. Dependencies
 pnpm install
 
-# 4. Database schema + sample data
+# 4. Database schema + one owner account (pnpm db:reset:demo for the sample data)
 pnpm db:reset
 
 # 5. Run API (http://127.0.0.1:3000) and web (http://localhost:5173) together
@@ -97,26 +97,29 @@ Docker Compose on one server: Caddy (automatic HTTPS, serves the SPA and proxies
 
 ## Scripts (run from the repo root)
 
-| Script             | Does                                                           |
-| ------------------ | -------------------------------------------------------------- |
-| `pnpm dev`         | API (tsx watch) + web (Vite) in parallel                       |
-| `pnpm build`       | Production builds of all packages                              |
-| `pnpm typecheck`   | `tsc` in every package                                         |
-| `pnpm lint`        | ESLint over the repo                                           |
-| `pnpm format`      | Prettier write                                                 |
-| `pnpm test`        | Vitest in every package (API tests need `docker compose up`)   |
-| `pnpm e2e`         | Playwright end-to-end tests (see below)                        |
-| `pnpm db:generate` | Generate a migration from `apps/api/src/db/schema`             |
-| `pnpm db:migrate`  | Apply migrations                                               |
-| `pnpm db:init`     | Create the first workspace + owner on an empty database        |
-| `pnpm db:seed`     | Insert the sample data from the designs                        |
-| `pnpm db:reset`    | Drop everything, migrate, seed (refuses in production)         |
-| `pnpm db:print`    | Print a project's tasks by status (`pnpm db:print CHK`)        |
-| `pnpm db:scenario` | Add a realistic test workspace (`small` or `large`, see below) |
+| Script               | Does                                                           |
+| -------------------- | -------------------------------------------------------------- |
+| `pnpm dev`           | API (tsx watch) + web (Vite) in parallel                       |
+| `pnpm build`         | Production builds of all packages                              |
+| `pnpm typecheck`     | `tsc` in every package                                         |
+| `pnpm lint`          | ESLint over the repo                                           |
+| `pnpm format`        | Prettier write                                                 |
+| `pnpm test`          | Vitest in every package (API tests need `docker compose up`)   |
+| `pnpm e2e`           | Playwright end-to-end tests (see below)                        |
+| `pnpm db:generate`   | Generate a migration from `apps/api/src/db/schema`             |
+| `pnpm db:migrate`    | Apply migrations                                               |
+| `pnpm db:init`       | Create the first workspace + owner on an empty database        |
+| `pnpm db:seed`       | Insert the sample data from the designs                        |
+| `pnpm db:reset`      | Drop everything, migrate, create one owner (refuses in prod)   |
+| `pnpm db:reset:demo` | Drop everything, migrate, insert the sample data               |
+| `pnpm db:print`      | Print a project's tasks by status (`pnpm db:print CHK`)        |
+| `pnpm db:scenario`   | Add a realistic test workspace (`small` or `large`, see below) |
 
 ### Sample data
 
-`db:seed` / `db:reset` recreate the workspace from the designs: **Kite Studio**, eight people (log in as `anu@kite.test`, everyone's password is `password123`), the Product / Engineering / Design spaces with their projects, App Redesign's tasks (APP-142 is the task from the detail drawer), Anu's My Tasks and the October calendar. Design dates are shifted so that Oct 8 2026 is today.
+`db:reset` leaves an empty workspace **Shoppy** with one owner, `lkhagvadorj.b@shoppy.mn` / `password123` (`apps/api/src/db/seed/blank.ts`).
+
+`db:seed` / `db:reset:demo` recreate the workspace from the designs: **Kite Studio**, eight people (log in as `anu@kite.test`, everyone's password is `password123`), the Product / Engineering / Design spaces with their projects, App Redesign's tasks (APP-142 is the task from the detail drawer), Anu's My Tasks and the October calendar. Design dates are shifted so that Oct 8 2026 is today.
 
 - `SEED_LANG=mn|en` (default `mn`): language of task, project, space, tag and people names that the designs have in both languages.
 - `SEED_TODAY=2026-10-08`: pin "today" for an exact match with the mockups (weekday-based views such as My Tasks' _This Week_ only match on a Thursday).

@@ -19,6 +19,7 @@
     "db:migrate": "pnpm --filter @kite/api db:migrate",
     "db:seed": "pnpm --filter @kite/api db:seed",
     "db:reset": "pnpm --filter @kite/api db:reset",
+    "db:reset:demo": "pnpm --filter @kite/api db:reset:demo",
     "db:print": "pnpm --filter @kite/api db:print",
     "db:waits": "pnpm --filter @kite/api db:waits",
     "db:perf": "pnpm --filter @kite/api db:perf",

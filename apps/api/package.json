@@ -14,6 +14,7 @@
     "db:init": "tsx src/scripts/init.ts",
     "db:seed": "tsx src/scripts/seed.ts",
     "db:reset": "tsx src/scripts/reset.ts",
+    "db:reset:demo": "tsx src/scripts/reset.ts --demo",
     "db:e2e": "tsx src/scripts/e2e-db.ts",
     "db:print": "tsx src/scripts/print-project.ts",
     "db:waits": "tsx src/scripts/status-waits.ts",
