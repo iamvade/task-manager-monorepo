@@ -20,6 +20,7 @@ import { PlusIcon } from '../../../components/icons';
 import { ProgressBar } from '../../../components/ui/ProgressBar';
 import { useTaskView } from '../TaskContext';
 import { SubtaskRow } from './SubtaskRow';
+import { randomUuid } from '../../../lib/randomUuid';
 
 /** Inline "Add subtask" row: Enter adds at the end and keeps focus; Esc clears. */
 function AddSubtask({ taskId }: { taskId: string }) {
@@ -44,7 +45,7 @@ function AddSubtask({ taskId }: { taskId: string }) {
             e.preventDefault();
             const value = title.trim();
             if (!value) return;
-            create.mutate({ taskId, title: value, tempId: `temp-${crypto.randomUUID()}` });
+            create.mutate({ taskId, title: value, tempId: `temp-${randomUuid()}` });
             setTitle('');
           } else if (e.key === 'Escape' && title) {
             e.preventDefault();

@@ -11,6 +11,7 @@ import { IconButton } from '../../../components/ui/IconButton';
 import { cn } from '../../../lib/cn';
 import { useTaskView } from '../TaskContext';
 import { reportError } from '../../../lib/mutationErrors';
+import { randomUuid } from '../../../lib/randomUuid';
 
 interface CommentComposerProps {
   /** Reply to this top-level comment (inline thread composer). */
@@ -39,7 +40,7 @@ export function CommentComposer({ parentId, autoFocus, onDone }: CommentComposer
     // A typed "@Name" the author never picked from the popup still notifies that person.
     const body = prepareBody(editor, mentions);
     create.mutate(
-      { taskId: task.id, body, parentId, author: me, tempId: `temp-${crypto.randomUUID()}` },
+      { taskId: task.id, body, parentId, author: me, tempId: `temp-${randomUuid()}` },
       {
         onError: (err) => {
           reportError(err, t('drawer.commentFailed'));
