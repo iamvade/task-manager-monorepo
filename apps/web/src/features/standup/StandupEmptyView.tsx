@@ -5,10 +5,10 @@ import { useAuth } from '../../auth/useAuth';
 import { PenIcon, SlidersIcon, UserPlusIcon } from '../../components/icons';
 import { Avatar } from '../../components/ui/Avatar';
 import { buttonVariants } from '../../components/ui/buttonStyles';
-import { Tooltip } from '../../components/ui/Tooltip';
 import { DEFAULT_TIMEZONE } from '../../lib/dates';
 import { cn } from '../../lib/cn';
 import { paletteClass } from '../../lib/palette';
+import { writeHref } from './day/links';
 import { daysLabel, zoneLabel } from './format';
 import { GroupSwitcher, StandupHeader } from './StandupHeader';
 
@@ -92,27 +92,18 @@ export function StandupEmptyView({
           </div>
 
           <div className="flex flex-wrap justify-center gap-2">
-            {/* Posting arrives with the group page; the button is drawn so the layout matches. */}
-            <Tooltip content={t('standup.empty.writeSoon')}>
-              {(props) => (
-                <button
-                  {...props}
-                  type="button"
-                  aria-disabled="true"
-                  aria-describedby="standup-write-soon"
-                  className={cn(
-                    buttonVariants.primary,
-                    'flex h-10 cursor-not-allowed items-center gap-2 rounded-[8px] border-0 px-4 text-[14px] font-medium opacity-60',
-                  )}
-                >
-                  <PenIcon size={14} />
-                  {t('standup.empty.ctaWrite')}
-                </button>
-              )}
-            </Tooltip>
-            <span id="standup-write-soon" className="sr-only">
-              {t('standup.empty.writeSoon')}
-            </span>
+            {group.isMember && group.meetsToday && (
+              <Link
+                to={writeHref(group.id)}
+                className={cn(
+                  buttonVariants.primary,
+                  'flex h-10 items-center gap-2 rounded-[8px] border-0 px-4 text-[14px] font-medium no-underline',
+                )}
+              >
+                <PenIcon size={14} />
+                {t('standup.empty.ctaWrite')}
+              </Link>
+            )}
             <Link
               to={`${settings}#members`}
               className={cn(outlineLink, 'h-10 gap-2 px-3.5 text-[14px]')}

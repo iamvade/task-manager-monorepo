@@ -2,7 +2,7 @@ import type { UserRef } from '@kite/shared';
 import { cn } from '../../lib/cn';
 import { paletteClass } from '../../lib/palette';
 
-export type AvatarSize = 20 | 22 | 24 | 26 | 28 | 30 | 36 | 40 | 44;
+export type AvatarSize = 20 | 22 | 24 | 26 | 28 | 30 | 32 | 36 | 40 | 44;
 
 type AvatarUser = Pick<UserRef, 'name' | 'initials' | 'avatarColor'>;
 

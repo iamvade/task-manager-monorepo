@@ -64,3 +64,17 @@ export function fileSize(bytes: number): { unit: 'b' | 'kb' | 'mb'; value: strin
     value: mb < 10 ? mb.toFixed(1).replace(/\.0$/, '') : String(Math.round(mb)),
   };
 }
+
+/** "09:05" in `timeZone`, 24h in both languages (standup times, as the designs draw them). */
+export function formatClock(at: Date, timeZone: string | undefined): string {
+  const options: Intl.DateTimeFormatOptions = {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  };
+  try {
+    return new Intl.DateTimeFormat('en-GB', { ...options, timeZone }).format(at);
+  } catch {
+    return new Intl.DateTimeFormat('en-GB', options).format(at);
+  }
+}

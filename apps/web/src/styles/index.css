@@ -52,6 +52,8 @@
   --background-color-segment-active: var(--segment-active);
   --background-color-danger-soft: var(--danger-soft);
   --background-color-danger-card: var(--danger-card-bg);
+  --background-color-card-footer: var(--card-footer);
+  --background-color-out-avatar: var(--out-avatar);
   --background-color-panel: var(--panel);
   --background-color-success-soft: var(--success-soft);
   --background-color-warning-soft: var(--warning-soft);
@@ -100,6 +102,8 @@
   --border-color-subtle: var(--border-subtle);
   --border-color-strong: var(--border-strong);
   --border-color-danger-card: var(--danger-card-border);
+  --border-color-danger-divider: var(--danger-card-divider);
+  --border-color-blocked: var(--blocked-card-border);
   --border-color-warm-card: var(--warm-card-border);
   --border-color-table-row: var(--table-row-border);
   --border-color-tooltip: var(--tooltip-border);

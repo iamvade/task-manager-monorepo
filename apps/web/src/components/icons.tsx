@@ -348,3 +348,35 @@ export const SlidersIcon = make(
 );
 /** Pen (Write update). */
 export const PenIcon = make(<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />);
+/** Play triangle, filled (Start standup). */
+export const PlayIcon = make(<path d="M7 4.5v15l12-7.5z" />, { fill: true });
+/** Circle with a diagonal (Blockers heading, the "Blocked" marker). */
+export const BanIcon = make(
+  <>
+    <circle cx="12" cy="12" r="9" />
+    <path d="m5.6 5.6 12.8 12.8" />
+  </>,
+);
+/** Reactions (Standup.dc.html): thumbs up, eyes ("Looking"), heart ("Love"). */
+export const ThumbsUpIcon = make(
+  <path d="M7 10v12M15 5.9 14 10h5.8a2 2 0 0 1 2 2.3l-1.4 8a2 2 0 0 1-2 1.7H7V10l4-8a3 3 0 0 1 4 3.9z" />,
+);
+export const EyeIcon = make(
+  <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />,
+);
+export const HeartIcon = make(
+  <path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7z" />,
+);
+/** Smiley (Add reaction). */
+export const SmileIcon = make(
+  <>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" />
+  </>,
+);
+/** Write modal Today chips: in progress (open arc), due today (clock), overdue (alert). */
+export const ArcIcon = make(<path d="M12 3a9 9 0 1 0 9 9" />, { strokeWidth: 2.5 });
+export const AlertCircleIcon = make(
+  <path d="M12 8v5M12 16h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />,
+  { strokeWidth: 2.5 },
+);

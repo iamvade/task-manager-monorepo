@@ -174,9 +174,9 @@ describe('Standup', () => {
       'href',
       `/standup/${DESIGN_ID}/settings#members`,
     );
-    expect(screen.getByRole('button', { name: 'Write the first update' })).toHaveAttribute(
-      'aria-disabled',
-      'true',
+    expect(screen.getByRole('link', { name: 'Write the first update' })).toHaveAttribute(
+      'href',
+      `/standup/${DESIGN_ID}?write=1`,
     );
   });
 
