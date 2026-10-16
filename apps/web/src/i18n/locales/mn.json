@@ -787,7 +787,8 @@
       "openBlockers_other": "{{count}} шийдээгүй саад",
       "meta": "{{time}} · {{group}}"
     },
-    "archivedStandup": "Мэдэгдлийг архивлалаа"
+    "archivedStandup": "Мэдэгдлийг архивлалаа",
+    "standupWaiting": "«{{group}}» стэндапад таны шинэчлэл хүлээгдэж байна"
   },
   "palette": {
     "label": "Тушаалын самбар",
@@ -1739,7 +1740,9 @@
       "meetingTasks": "Үүсгэсэн ажлууд",
       "noMeetingNotes": "Тэмдэглэл бичээгүй.",
       "leftGroup": "бүлгээс гарсан",
-      "everyoneOut": "Бүгд чөлөөтэй"
+      "everyoneOut": "Бүгд чөлөөтэй",
+      "moreBlockers_one": "Өөр {{count}} саад харуулах",
+      "moreBlockers_other": "Өөр {{count}} саад харуулах"
     },
     "write": {
       "title": "Таны стэндап",
@@ -1803,7 +1806,9 @@
         "ALREADY_POSTED": "Таны шинэчлэл аль хэдийн нийтлэгдсэн.",
         "INVALID_HELPER": "Зөвхөн бүлгийн бусад гишүүд туслах боломжтой.",
         "INVALID_TASK": "Холбосон ажил устсан байна."
-      }
+      },
+      "moreSuggestions_one": "Өөр {{count}} санал харуулах",
+      "moreSuggestions_other": "Өөр {{count}} санал харуулах"
     },
     "live": {
       "pageTitle": "{{group}} · Стэндап",

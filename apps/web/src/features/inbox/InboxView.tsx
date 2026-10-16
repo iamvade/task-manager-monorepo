@@ -8,6 +8,7 @@ import {
   useNotifications,
   useUnarchiveNotification,
 } from '../../api/notifications';
+import { useStandupGroups } from '../../api/standups';
 import { useCurrentWorkspace, useSidebar } from '../../api/workspaces';
 import { ErrorState } from '../../components/ErrorState';
 import {
@@ -26,6 +27,8 @@ import { UnderlineTabs } from '../../components/ui/UnderlineTabs';
 import { cn } from '../../lib/cn';
 import { toast } from '../../stores/toast';
 import { useOpenTask } from '../create/useOpenTask';
+import { writeHref } from '../standup/day/links';
+import { waitingForMe } from '../standup/useStandup';
 import { PageHeader } from '../views/PageHeader';
 import { InboxEmpty } from './InboxEmpty';
 import { NotificationRow } from './NotificationRow';
@@ -148,6 +151,7 @@ export function InboxView() {
           />
         }
       />
+      {tab === 'all' && <StandupWaiting workspaceId={workspaceId} />}
       {query.isError ? (
         <ErrorState error={query.error} />
       ) : !query.data ? (
@@ -269,5 +273,34 @@ function InboxSkeleton() {
         </div>
       ))}
     </div>
+  );
+}
+
+/**
+ * Today's standups still waiting for my update, pinned above the notifications: the 09:30
+ * reminder sinks below a day of task notifications in a busy workspace.
+ */
+function StandupWaiting({ workspaceId }: { workspaceId: string }) {
+  const { t } = useTranslation();
+  const groups = useStandupGroups(workspaceId || undefined);
+  const waiting = waitingForMe(groups.data);
+  if (waiting.length === 0) return null;
+  return (
+    <ul aria-label={t('shell.notPostedToday')} className="m-0 list-none border-b border-subtle p-0">
+      {waiting.map((g) => (
+        <li key={g.id} className="flex items-center gap-3 bg-accent-soft px-6 py-2.5 max-sm:px-4">
+          <span aria-hidden className="size-2 flex-none rounded-full bg-accent" />
+          <span className="min-w-0 flex-1 text-[13px] font-medium break-words text-default">
+            {t('inbox.standupWaiting', { group: g.name })}
+          </span>
+          <Link
+            to={writeHref(g.id)}
+            className="flex h-8 flex-none items-center rounded-[8px] bg-accent px-3 text-[13px] font-semibold text-white no-underline hover:brightness-110"
+          >
+            {t('standup.day.writeUpdate')}
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 }

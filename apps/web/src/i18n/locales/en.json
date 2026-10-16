@@ -787,7 +787,8 @@
       "openBlockers_other": "{{count}} open blockers",
       "meta": "{{time}} · {{group}}"
     },
-    "archivedStandup": "Notification archived"
+    "archivedStandup": "Notification archived",
+    "standupWaiting": "Your {{group}} standup is waiting for your update"
   },
   "palette": {
     "label": "Command palette",
@@ -1739,7 +1740,9 @@
       "meetingTasks": "Tasks created",
       "noMeetingNotes": "No notes were written.",
       "leftGroup": "no longer in this group",
-      "everyoneOut": "Everyone is out of office"
+      "everyoneOut": "Everyone is out of office",
+      "moreBlockers_one": "Show {{count}} more blocker",
+      "moreBlockers_other": "Show {{count}} more blockers"
     },
     "write": {
       "title": "Your standup",
@@ -1803,7 +1806,9 @@
         "ALREADY_POSTED": "Your update is already posted.",
         "INVALID_HELPER": "Only other members of the group can help.",
         "INVALID_TASK": "A linked task no longer exists."
-      }
+      },
+      "moreSuggestions_one": "Show {{count}} more suggestion",
+      "moreSuggestions_other": "Show {{count}} more suggestions"
     },
     "live": {
       "pageTitle": "{{group}} · Standup",

@@ -37,6 +37,8 @@ export interface Draft {
   yesterday: YesterdayRow[];
   /** Removed suggestion rows ("Restore 2 removed"). */
   removed: YesterdayRow[];
+  /** Suggestions past the first few, offered behind "Show N more" (not on the update yet). */
+  more: YesterdayRow[];
   /** Today chips: my open tasks (suggested, plus ones already on my update). */
   chips: { task: StandupTaskRef; tag: 'overdue' | 'due_today' | 'in_progress' | null }[];
   /** Task ids of the chips that are on. */
@@ -44,6 +46,10 @@ export interface Draft {
   today: TextRow[];
   blockers: BlockerRow[];
 }
+
+/** How many Yesterday suggestions a new update starts with. */
+export const SUGGESTED_YESTERDAY = 5;
+const KIND_RANK = { completed: 0, review: 1, commented: 2 } as const;
 
 let seq = 0;
 export const uid = () => `r${String((seq += 1))}`;
@@ -57,13 +63,15 @@ const emptyBlocker = (): BlockerRow => ({ uid: uid(), text: '', task: null, help
 export function initialDraft(entry: StandupEntry | null, suggestions: StandupSuggestions): Draft {
   const chips: Draft['chips'] = suggestions.today.map((s) => ({ task: s.task, tag: s.tag }));
   if (!entry) {
+    // Strongest first (completed, moved to review, commented on), newest first within a kind;
+    // only the first few go on the update, so someone who commented on twenty tasks isn't
+    // removing rows one by one.
+    const rows = [...suggestions.yesterday]
+      .sort((a, b) => KIND_RANK[a.kind] - KIND_RANK[b.kind])
+      .map((s) => ({ uid: uid(), kind: s.kind, task: s.task, text: s.task.title }));
     return {
-      yesterday: suggestions.yesterday.map((s) => ({
-        uid: uid(),
-        kind: s.kind,
-        task: s.task,
-        text: s.task.title,
-      })),
+      yesterday: rows.slice(0, SUGGESTED_YESTERDAY),
+      more: rows.slice(SUGGESTED_YESTERDAY),
       removed: [],
       chips,
       picked: [],
@@ -105,6 +113,7 @@ export function initialDraft(entry: StandupEntry | null, suggestions: StandupSug
             .filter((s) => !kept.has(s.task.id))
             .map((s) => ({ uid: uid(), kind: s.kind, task: s.task, text: s.task.title }))
         : [],
+    more: [],
     chips,
     picked,
     today,

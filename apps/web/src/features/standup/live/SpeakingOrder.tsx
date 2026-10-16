@@ -7,7 +7,8 @@ import { isSkipped } from './meeting';
 
 /**
  * The top bar's speaking order (StandupLive.dc.html): one dot per person with their first name.
- * Current = 16px accent with a soft ring; done (has spoken) = solid accent; upcoming = ring;
+ * Current = 16px accent with a soft ring; done (spoke, or before the current person) = solid
+ * accent; upcoming = ring;
  * out of office = hatched, struck through, not clickable. The driver jumps by clicking a dot;
  * followers see the same dots as plain text. Scrolls sideways in a big group, keeping the
  * current person in view.
@@ -22,6 +23,7 @@ export function SpeakingOrder({
 }) {
   const { t } = useTranslation();
   const currentRef = useRef<HTMLElement | null>(null);
+  const currentAt = meeting.order.findIndex((s) => s.user.id === meeting.currentUserId);
   useEffect(() => {
     currentRef.current?.scrollIntoView({ block: 'nearest', inline: 'center' });
   }, [meeting.currentUserId]);
@@ -32,10 +34,14 @@ export function SpeakingOrder({
       className="flex min-w-0 flex-1 justify-center overflow-x-auto max-lg:order-last max-lg:basis-full"
     >
       <ol className="m-0 flex list-none items-center gap-2.5 p-1">
-        {meeting.order.map((s) => {
+        {meeting.order.map((s, i) => {
           const current = s.user.id === meeting.currentUserId;
           const skipped = isSkipped(s);
-          const done = !current && !skipped && (meeting.durations[s.user.id] ?? 0) > 0;
+          // Done: spoke at some point, or comes before the current person (passed over quickly).
+          const done =
+            !current &&
+            !skipped &&
+            ((meeting.durations[s.user.id] ?? 0) > 0 || (currentAt >= 0 && i < currentAt));
           const label = current
             ? t('standup.live.speakingNow', { name: s.user.name })
             : skipped

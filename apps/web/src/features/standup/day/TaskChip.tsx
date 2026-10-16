@@ -12,9 +12,12 @@ import { useTaskKeyHref } from '../../task/useTaskKeyHref';
 export function TaskChip({
   task,
   size = 'sm',
+  label = 'title',
 }: {
   task: StandupTaskRef;
   size?: 'sm' | 'lg' | 'xl';
+  /** `key` when the title is already written next to it (live mode). */
+  label?: 'title' | 'key';
 }) {
   const href = useTaskKeyHref()(task.key);
   const className = cn(
@@ -29,7 +32,11 @@ export function TaskChip({
   const body = (
     <>
       <ProjectDot color={task.project.color} size={size === 'lg' ? 8 : 7} />
-      <span className="truncate">{task.title}</span>
+      {label === 'key' ? (
+        <span className="font-mono text-[12px]">{task.key}</span>
+      ) : (
+        <span className="truncate">{task.title}</span>
+      )}
     </>
   );
   if (!href) return <span className={className}>{body}</span>;

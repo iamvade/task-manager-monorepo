@@ -351,4 +351,17 @@ describe('Standup group page', () => {
     const card = screen.getByRole('article', { name: 'Sara K.' });
     expect(within(card).getByText(/no longer in this group/)).toBeVisible();
   });
+
+  it('shows the first six blockers of a big group, the rest behind "Show more"', async () => {
+    const many = Array.from({ length: 9 }, (_, i) => ({
+      ...BLOCKER,
+      id: `01890000-0000-7000-8000-0000000f${String(i).padStart(4, '0')}`,
+      text: `Blocker ${String(i + 1)}`,
+    }));
+    renderDay(`/standup/${MOBILE_ID}`, dayOf({ blockers: many }));
+    expect(await screen.findByText('Blocker 6')).toBeVisible();
+    expect(screen.queryByText('Blocker 7')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Show 3 more blockers' }));
+    expect(screen.getByText('Blocker 9')).toBeVisible();
+  });
 });

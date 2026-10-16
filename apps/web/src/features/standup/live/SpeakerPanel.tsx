@@ -205,7 +205,8 @@ export function SpeakerPanel({
         </Box>
       </div>
 
-      <div className="mt-auto flex flex-wrap items-center gap-3 border-t border-[color:var(--chip)] pt-4">
+      {/* Stays in view when a long update scrolls (the driver reaches Next without scrolling). */}
+      <div className="sticky bottom-0 z-[1] -mx-8 -mb-7 mt-auto flex flex-wrap items-center gap-3 rounded-b-[16px] border-t border-[color:var(--chip)] bg-surface px-8 pt-4 pb-7 max-sm:-mx-5 max-sm:-mb-5 max-sm:px-5 max-sm:pb-5">
         {onPrev && (
           <button
             type="button"
@@ -306,7 +307,7 @@ function Item({
       </span>
       {(task ?? children) && (
         <div className="flex min-w-0 flex-wrap items-center gap-2">
-          {task && <TaskChip task={task} size="xl" />}
+          {task && <TaskChip task={task} size="xl" label={task.title === text ? 'key' : 'title'} />}
           {children}
         </div>
       )}
