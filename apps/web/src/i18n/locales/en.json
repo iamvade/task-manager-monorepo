@@ -232,6 +232,7 @@
     "comments_other": "{{count}} comments",
     "setAssignee": "Assignee of {{name}}",
     "setDue": "Due date of {{name}}",
+    "setStatus": "Status of {{name}}: {{status}}",
     "setPriority": "Priority of {{name}}",
     "setSize": "Size of {{name}}",
     "setTags": "Tags of {{name}}",

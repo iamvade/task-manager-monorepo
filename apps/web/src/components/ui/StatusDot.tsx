@@ -19,7 +19,7 @@ const STYLES: Record<StatusCategory, CSSProperties> = {
 
 interface StatusDotProps {
   category: StatusCategory;
-  size?: 8 | 10 | 12;
+  size?: 8 | 10 | 12 | 16;
   /** Accessible name; omit when the status name is shown next to it. */
   label?: string;
 }

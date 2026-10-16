@@ -186,6 +186,18 @@ export function TaskTable({
     }
   }
 
+  /** Row status picker: like the drawer (end of the status); Undo when it completes the task. */
+  function setStatus(task: TaskListItem, target: Status) {
+    if (isTempTask(task) || target.id === task.status.id) return;
+    const status = statusRef(target);
+    update.mutate({ task, patch: { statusId: target.id }, status });
+    undoToast(
+      task,
+      status,
+      tasks.filter((x) => x.status.id === task.status.id),
+    );
+  }
+
   /** Quick-create defaults for a group's header "+" (project list: the group's fields). */
   function createDefaultsFor(group: TaskGroup): CreateDefaults {
     const sprint = view.sprintId ? { sprintId: view.sprintId } : {};
@@ -231,6 +243,7 @@ export function TaskTable({
     shortNameOf,
     teamIds: new Set(project?.members.map((m) => m.user.id) ?? []),
     tags,
+    statuses,
     taskHref,
     open: (task) => {
       if (!isTempTask(task)) updateParams({ task: task.key });
@@ -239,6 +252,7 @@ export function TaskTable({
       setSelectedId(task.id);
     },
     toggleComplete,
+    setStatus,
     remove,
     copyLink: (task) => {
       void copy(`${window.location.origin}/t/${task.key}`);

@@ -13,14 +13,28 @@ interface StatusPickerProps {
   onChange: (status: StatusOption) => void;
   trigger: (props: TriggerProps, open: boolean) => ReactElement;
   label: string;
+  /** Told when it opens/closes (e.g. to load the statuses only once it opens). */
+  onOpenChange?: (open: boolean) => void;
 }
 
 /** The project's statuses with their markers and an accent ✓ (TaskDetail.dc.html, 220px listbox). */
-export function StatusPicker({ value, statuses, onChange, trigger, label }: StatusPickerProps) {
+export function StatusPicker({
+  value,
+  statuses,
+  onChange,
+  trigger,
+  label,
+  onOpenChange,
+}: StatusPickerProps) {
   const { t } = useTranslation();
   const name = (s: StatusOption) => s.name ?? t(`status.${s.category}`);
   return (
-    <Popover trigger={trigger} label={label} width={220}>
+    <Popover
+      trigger={trigger}
+      label={label}
+      width={220}
+      {...(onOpenChange ? { onOpenChange } : {})}
+    >
       {(close) => (
         <Picker
           items={statuses}
