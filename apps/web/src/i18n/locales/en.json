@@ -1737,7 +1737,9 @@
       "meetingNotes": "Meeting notes",
       "meetingBy": "Run by {{name}} · {{duration}}",
       "meetingTasks": "Tasks created",
-      "noMeetingNotes": "No notes were written."
+      "noMeetingNotes": "No notes were written.",
+      "leftGroup": "no longer in this group",
+      "everyoneOut": "Everyone is out of office"
     },
     "write": {
       "title": "Your standup",
@@ -1861,7 +1863,8 @@
       "longMeeting": "{{people}} people × {{minutes}} min is longer than the {{total}} min meeting.",
       "minutes": "{{count}} min",
       "endFailed": "Couldn’t end the meeting."
-    }
+    },
+    "splitHint": "{{count}} people is a lot for one standup: updates get long and the meeting runs over. Consider splitting into teams of up to {{max}}."
   },
   "task": {
     "blocked": {

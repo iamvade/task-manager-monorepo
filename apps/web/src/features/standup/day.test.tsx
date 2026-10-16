@@ -320,4 +320,35 @@ describe('Standup group page', () => {
       expect(screen.queryByRole('dialog')).toBeNull();
     });
   });
+
+  it('nudges managers to split a group of more than 12', async () => {
+    const [, sara] = dayOf().members;
+    if (!sara) throw new Error('fixture');
+    const many = Array.from({ length: 13 }, (_, i) => ({
+      ...sara,
+      user: { ...SARA_REF, id: `01890000-0000-7000-8000-0000000c${String(i).padStart(4, '0')}` },
+    }));
+    renderDay(`/standup/${MOBILE_ID}`, dayOf({ members: many }));
+    expect(await screen.findByText(/13 people is a lot for one standup/)).toBeVisible();
+  });
+
+  it('says everyone is out, and labels an update by someone who left the group', async () => {
+    const base = dayOf();
+    const out = base.members.map((m) => ({ ...m, state: 'out' as const }));
+    renderDay(
+      `/standup/${MOBILE_ID}/2026-10-07`,
+      dayOf({
+        date: '2026-10-07',
+        editable: false,
+        members: out.filter((m) => m.user.id !== SARA_REF.id),
+        postedCount: 0,
+        expectedCount: 0,
+        entries: [SARA_ENTRY],
+      }),
+    );
+    const strip = await screen.findByRole('region', { name: 'Who has posted' });
+    expect(within(strip).getByText('Everyone is out of office')).toBeVisible();
+    const card = screen.getByRole('article', { name: 'Sara K.' });
+    expect(within(card).getByText(/no longer in this group/)).toBeVisible();
+  });
 });

@@ -42,7 +42,7 @@ describe('standup meetings', () => {
       api: Api,
       method: 'GET' | 'POST' | 'PATCH',
       path = '',
-      body?: unknown,
+      body?: Parameters<Api>[2],
       status = 200,
     ): Promise<StandupMeetingState> => {
       const r = await api(method, `${base}${path}`, body);
@@ -53,7 +53,7 @@ describe('standup meetings', () => {
       api: Api,
       method: 'GET' | 'POST' | 'PATCH',
       path: string,
-      body?: unknown,
+      body?: Parameters<Api>[2],
     ) => {
       const r = await api(method, `${base}${path}`, body);
       return { status: r.statusCode, code: r.statusCode >= 400 ? errorCode(r) : null };
@@ -316,7 +316,7 @@ describe('standup meetings', () => {
       expect(sent).toHaveLength(1);
       const [e] = sent;
       expect(e?.to).toMatchObject({ workspaceId: w.ws.id });
-      expect(new Set((e?.to as { userIds: string[] }).userIds)).toEqual(
+      expect(new Set(e && 'userIds' in e.to ? e.to.userIds : [])).toEqual(
         new Set([w.owner.id, w.bat.user.id, w.sara.user.id, w.dorj.user.id]),
       );
       // A no-op (start again) sends nothing.

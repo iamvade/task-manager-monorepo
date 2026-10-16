@@ -185,7 +185,7 @@ export const offboardingRoutes: FastifyPluginCallbackZod = (app, _opts, done) =>
           .update(projects)
           .set({ leadId: reassignTo })
           .where(and(eq(projects.workspaceId, workspaceId), eq(projects.leadId, userId)));
-        await handOverFacilitator(tx, workspaceId, userId, reassignTo);
+        await handOverFacilitator(tx, workspaceId, userId, reassignTo, app.clock());
         await tx
           .delete(taskFollowers)
           .where(

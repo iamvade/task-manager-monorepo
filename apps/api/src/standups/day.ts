@@ -13,11 +13,11 @@ import { and, asc, eq, isNull, lt, or } from 'drizzle-orm';
 import { upcomingAbsences } from '../absences/query.js';
 import type { DbOrTx } from '../db/client.js';
 import type { standupGroups } from '../db/schema/index.js';
-import { standupBlockers, standupEntries } from '../db/schema/index.js';
+import { standupBlockers, standupEntries, standupGroupMembers } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
 import { groupDtos } from './groups.js';
 import { dayMeetingView } from './meeting.js';
-import { hhmm, holidaySet, postByInstant } from './schedule.js';
+import { dayEnd, hhmm, holidaySet, postByInstant } from './schedule.js';
 import { blockerViews, entryViews, type StandupViewer } from './views.js';
 
 type GroupRow = typeof standupGroups.$inferSelect;
@@ -38,7 +38,7 @@ export async function buildStandupDay(
   date: string,
   now: Date,
 ): Promise<StandupDay> {
-  const [[dto], holidays, entries, blockerRows] = await Promise.all([
+  const [[dto], holidays, entries, blockerRows, joined] = await Promise.all([
     groupDtos(db, [group], viewer, now),
     holidaySet(db, group.workspaceId),
     db
@@ -70,6 +70,10 @@ export async function buildStandupDay(
         asc(standupBlockers.createdAt),
         asc(standupBlockers.id),
       ),
+    db
+      .select({ userId: standupGroupMembers.userId, addedAt: standupGroupMembers.addedAt })
+      .from(standupGroupMembers)
+      .where(eq(standupGroupMembers.groupId, group.id)),
   ]);
   if (!dto) throw httpError(404, 'NOT_FOUND', 'Standup group not found');
   const today = groupToday(group, now);
@@ -83,21 +87,28 @@ export async function buildStandupDay(
   );
   const posted = entries.filter((e) => e.status === 'posted');
   const postedBy = new Map(posted.map((e) => [e.userId, e]));
-  const members = dto.members.map((m): StandupDayMember => {
-    const own = { absences: absences.get(m.user.id) ?? [] };
-    const entry = postedBy.get(m.user.id);
-    const out = isAway(own, date);
-    const until = out ? awayUntil(own, date) : null;
-    return {
-      user: m.user,
-      title: m.title,
-      // Someone who posted while out of office still counts as posted.
-      state: entry ? 'posted' : out ? 'out' : 'not_yet',
-      postedAt: entry?.postedAt?.toISOString() ?? null,
-      isLate: entry?.isLate ?? false,
-      backOn: until ? nextStandupDay(group, until, holidays) : null,
-    };
-  });
+  // Someone who joined the group later isn't listed on earlier days (unless they posted then).
+  const end = dayEnd(group, date);
+  const addedAt = new Map(joined.map((r) => [r.userId, r.addedAt]));
+  const inGroupThen = (userId: string) =>
+    postedBy.has(userId) || (addedAt.get(userId) ?? end) < end;
+  const members = dto.members
+    .filter((m) => inGroupThen(m.user.id))
+    .map((m): StandupDayMember => {
+      const own = { absences: absences.get(m.user.id) ?? [] };
+      const entry = postedBy.get(m.user.id);
+      const out = isAway(own, date);
+      const until = out ? awayUntil(own, date) : null;
+      return {
+        user: m.user,
+        title: m.title,
+        // Someone who posted while out of office still counts as posted.
+        state: entry ? 'posted' : out ? 'out' : 'not_yet',
+        postedAt: entry?.postedAt?.toISOString() ?? null,
+        isLate: entry?.isLate ?? false,
+        backOn: until ? nextStandupDay(group, until, holidays) : null,
+      };
+    });
 
   const [entryDtos, blockers] = await Promise.all([
     entryViews(db, group, posted, viewer),

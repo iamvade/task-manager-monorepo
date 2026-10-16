@@ -28,7 +28,9 @@ export function PostedStrip({ yourTurn }: { yourTurn: boolean }) {
       className="flex flex-wrap items-center gap-x-6 gap-y-4 rounded-[12px] border border-default px-4 py-3.5"
     >
       <div className="flex min-w-[160px] flex-col gap-0.5">
-        <span className="text-[14px] font-semibold">{count}</span>
+        <span className="text-[14px] font-semibold">
+          {day.expectedCount === 0 && day.members.length > 0 ? t('standup.day.everyoneOut') : count}
+        </span>
         <span className="text-[12px] text-muted">
           {meeting
             ? t('standup.day.dueByMeeting', { time: postBy, meeting })

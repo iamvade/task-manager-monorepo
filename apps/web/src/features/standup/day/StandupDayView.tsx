@@ -16,6 +16,7 @@ import { DayContext, type DayView } from './DayContext';
 import { DayHeader } from './DayHeader';
 import { EntryCard } from './EntryCard';
 import { dayHref } from './links';
+import { SplitHint } from '../SplitHint';
 import { MeetingSection } from './MeetingSection';
 import { MyPlaceholderCard, OutCard } from './PersonCards';
 import { loadWriteModal } from '../write/loadWriteModal';
@@ -167,6 +168,7 @@ export function StandupDayView({
               })}
             </p>
           )}
+          {data.group.canEdit && isToday && <SplitHint count={data.members.length} />}
           <PostedStrip yourTurn={placeholder} />
           <MeetingSection />
           {/* On a phone blockers always come first (one column, they're what needs help). */}

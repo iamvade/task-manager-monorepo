@@ -159,6 +159,7 @@ export async function setGroupMembers(
   tx: DbOrTx,
   groupId: string,
   userIds: readonly string[],
+  now: Date,
 ): Promise<void> {
   const ordered = [...new Set(userIds)];
   // People who stay keep their join time (earlier days list only who was in the group then).
@@ -178,13 +179,13 @@ export async function setGroupMembers(
       groupId,
       userId,
       position: keys[i] ?? positionAfter(null),
-      ...(joined.has(userId) ? { addedAt: joined.get(userId) } : {}),
+      addedAt: joined.get(userId) ?? now,
     })),
   );
 }
 
 /** Appends `userId` to the group unless they're already in it. */
-export async function appendGroupMember(tx: DbOrTx, groupId: string, userId: string) {
+export async function appendGroupMember(tx: DbOrTx, groupId: string, userId: string, now: Date) {
   const rows = await tx
     .select({ userId: standupGroupMembers.userId, position: standupGroupMembers.position })
     .from(standupGroupMembers)
@@ -193,7 +194,7 @@ export async function appendGroupMember(tx: DbOrTx, groupId: string, userId: str
   if (rows.some((r) => r.userId === userId)) return;
   await tx
     .insert(standupGroupMembers)
-    .values({ groupId, userId, position: positionAfter(rows.at(-1)?.position) });
+    .values({ groupId, userId, position: positionAfter(rows.at(-1)?.position), addedAt: now });
 }
 
 /**
@@ -205,6 +206,7 @@ export async function handOverFacilitator(
   workspaceId: string,
   leaverId: string,
   successor: string | null,
+  now: Date,
 ): Promise<void> {
   const led = await tx
     .update(standupGroups)
@@ -220,6 +222,6 @@ export async function handOverFacilitator(
   if (!successor) return;
   for (const { id } of led) {
     await lockGroup(tx, id);
-    await appendGroupMember(tx, id, successor);
+    await appendGroupMember(tx, id, successor, now);
   }
 }

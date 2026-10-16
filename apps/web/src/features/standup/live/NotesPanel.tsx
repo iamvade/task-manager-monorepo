@@ -205,7 +205,7 @@ export function CreatedTaskCard({ task }: { task: StandupMeetingTask }) {
     </>
   );
   const shape =
-    'flex items-start gap-2.5 rounded-[10px] border border-subtle px-3 py-2.5 text-default no-underline';
+    'flex items-start gap-2.5 rounded-[10px] border border-default px-3 py-2.5 text-default no-underline';
   return href ? (
     <Link to={href} data-task-key={task.task.key} className={cn(shape, 'hover:bg-hover')}>
       {body}

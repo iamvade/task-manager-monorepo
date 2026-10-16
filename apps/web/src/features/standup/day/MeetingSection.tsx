@@ -37,7 +37,7 @@ export function MeetingSection() {
       {meeting.notesSavedAt && (
         <section
           aria-labelledby="standup-meeting-notes"
-          className="flex flex-col gap-3 rounded-[12px] border border-default bg-surface p-5 max-sm:p-4"
+          className="flex flex-col gap-3 rounded-[12px] border border-default p-5 max-sm:p-4"
         >
           <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
             <h2 id="standup-meeting-notes" className="m-0 text-[15px] font-semibold">

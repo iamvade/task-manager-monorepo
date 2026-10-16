@@ -36,6 +36,7 @@ import { DEFAULT_TIMEZONE } from '../../lib/dates';
 import { toast } from '../../stores/toast';
 import { AssigneePicker } from '../pickers/AssigneePicker';
 import { WEEKDAY_KEYS, zoneLabel } from './format';
+import { SplitHint } from './SplitHint';
 
 /** What the form edits; saved in one PATCH. */
 interface Draft {
@@ -330,6 +331,7 @@ function SettingsForm({
                 {t('standup.settings.membersSub', { count: draft.members.length })}
               </p>
             </div>
+            <SplitHint count={draft.members.length} />
             <div className="flex min-w-0 flex-col overflow-hidden rounded-[10px] border border-default">
               {draft.members.length === 0 && (
                 <p className="m-0 border-b border-subtle px-3 py-3 text-[13px] text-muted">

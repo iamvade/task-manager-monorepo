@@ -181,9 +181,14 @@ export function buildStandups({ clock, pick, workspaceId, user, task }: Ctx) {
     createdAt: clock.at({ hoursAgo: 2 }),
   } satisfies Row<typeof schema.standupGroups>;
 
-  const memberRows = (groupId: string, refs: PersonRef[]) => {
+  const memberRows = (groupId: string, refs: PersonRef[], addedAt: Date) => {
     const keys = generateNKeysBetween(null, null, refs.length);
-    return refs.map((ref, i) => ({ groupId, userId: user(ref).id, position: keys[i] ?? 'a0' }));
+    return refs.map((ref, i) => ({
+      groupId,
+      userId: user(ref).id,
+      position: keys[i] ?? 'a0',
+      addedAt,
+    }));
   };
 
   const entries: Row<typeof schema.standupEntries>[] = [];
@@ -265,8 +270,8 @@ export function buildStandups({ clock, pick, workspaceId, user, task }: Ctx) {
   return {
     standupGroups: [mobile, design],
     standupGroupMembers: [
-      ...memberRows(mobile.id, MOBILE_MEMBERS),
-      ...memberRows(design.id, DESIGN_MEMBERS),
+      ...memberRows(mobile.id, MOBILE_MEMBERS, mobile.createdAt),
+      ...memberRows(design.id, DESIGN_MEMBERS, design.createdAt),
     ],
     standupEntries: entries,
     standupBlockers: blockers,
