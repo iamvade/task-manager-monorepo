@@ -1,12 +1,16 @@
 import {
   standupBlockerSchema,
+  standupMeetingStateSchema,
   standupDaySchema,
   standupEntrySchema,
   standupGroupSchema,
   standupReactionSummarySchema,
   standupReplySchema,
   standupSuggestionsSchema,
+  type AddStandupMeetingTask,
   type CreateStandupGroup,
+  type StandupMeeting,
+  type StandupMeetingState,
   type CreateStandupReply,
   type SaveStandupEntry,
   type StandupBlocker,
@@ -316,4 +320,135 @@ export function useDeleteReply(groupId: string) {
       editDays(queryClient, groupId, withoutReply(replyId));
     },
   });
+}
+
+// ── Live meeting ────────────────────────────────────────────────────────────────────────────
+
+/** `GET …/days/:date/meeting`: the meeting (null until started) and whether I drive it. */
+export function useStandupMeeting(groupId: string, date: string, enabled = true) {
+  return useQuery({
+    queryKey: queryKeys.standupMeeting(groupId, date),
+    queryFn: () =>
+      apiFetch(`/standup-groups/${groupId}/days/${date}/meeting`, standupMeetingStateSchema),
+    enabled: enabled && Boolean(groupId),
+  });
+}
+
+/** Puts a meeting into the cache (keeping my `canDrive`), and refreshes the day page's summary. */
+export function setMeeting(
+  queryClient: QueryClient,
+  groupId: string,
+  date: string,
+  meeting: StandupMeeting,
+  serverNow?: string,
+) {
+  queryClient.setQueryData<StandupMeetingState>(queryKeys.standupMeeting(groupId, date), (old) =>
+    old ? { ...old, meeting, serverNow: serverNow ?? old.serverNow } : undefined,
+  );
+}
+
+function useMeetingWrite<V>(
+  groupId: string,
+  date: string,
+  send: (vars: V) => Promise<StandupMeetingState>,
+  options: {
+    refreshDay?: boolean;
+    optimistic?: (meeting: StandupMeeting, vars: V) => StandupMeeting;
+  } = {},
+) {
+  const queryClient = useQueryClient();
+  const key = queryKeys.standupMeeting(groupId, date);
+  return useMutation({
+    mutationFn: send,
+    onMutate: async (vars: V) => {
+      if (!options.optimistic) return undefined;
+      await queryClient.cancelQueries({ queryKey: key });
+      const before = queryClient.getQueryData<StandupMeetingState>(key);
+      if (before?.meeting) {
+        const meeting = options.optimistic(before.meeting, vars);
+        queryClient.setQueryData<StandupMeetingState>(key, { ...before, meeting });
+      }
+      return before;
+    },
+    onError: (_err, _vars, before) => {
+      if (before) queryClient.setQueryData(key, before);
+    },
+    onSuccess: (state) => {
+      queryClient.setQueryData(key, state);
+      if (options.refreshDay !== false) {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.standupDays(groupId) });
+      }
+    },
+  });
+}
+
+const meetingPath = (groupId: string, date: string, rest = '') =>
+  `/standup-groups/${groupId}/days/${date}/meeting${rest}`;
+
+export function useStartMeeting(groupId: string, date: string) {
+  return useMeetingWrite(groupId, date, () =>
+    apiSend(meetingPath(groupId, date, '/start'), standupMeetingStateSchema, 'POST'),
+  );
+}
+
+/** Previous / Next / a click in the speaking order: the speaker changes at once. */
+export function useAdvanceMeeting(groupId: string, date: string) {
+  return useMeetingWrite(
+    groupId,
+    date,
+    (toUserId: string) =>
+      apiSend(meetingPath(groupId, date, '/advance'), standupMeetingStateSchema, 'POST', {
+        toUserId,
+      }),
+    {
+      refreshDay: false,
+      optimistic: (meeting, toUserId) => {
+        const now = new Date();
+        const durations = { ...meeting.durations };
+        if (meeting.currentUserId && meeting.currentStartedAt) {
+          durations[meeting.currentUserId] =
+            (durations[meeting.currentUserId] ?? 0) +
+            Math.max(0, Math.round((now.getTime() - Date.parse(meeting.currentStartedAt)) / 1000));
+        }
+        return {
+          ...meeting,
+          durations,
+          currentUserId: toUserId,
+          currentStartedAt: now.toISOString(),
+        };
+      },
+    },
+  );
+}
+
+export function useEndMeeting(groupId: string, date: string) {
+  return useMeetingWrite(groupId, date, () =>
+    apiSend(meetingPath(groupId, date, '/end'), standupMeetingStateSchema, 'POST'),
+  );
+}
+
+/** Notes autosave (no toast on failure: the panel shows it). */
+export function useAutosaveMeetingNotes(groupId: string, date: string) {
+  return useMeetingWrite(
+    groupId,
+    date,
+    (notes: string) =>
+      apiSend(meetingPath(groupId, date), standupMeetingStateSchema, 'PATCH', { notes }),
+    { refreshDay: false },
+  );
+}
+
+/** "Save notes to standup" (with the latest text). */
+export function useSaveMeetingNotes(groupId: string, date: string) {
+  return useMeetingWrite(groupId, date, (notes: string) =>
+    apiSend(meetingPath(groupId, date, '/save-notes'), standupMeetingStateSchema, 'POST', {
+      notes,
+    }),
+  );
+}
+
+export function useAddMeetingTask(groupId: string, date: string) {
+  return useMeetingWrite(groupId, date, (body: AddStandupMeetingTask) =>
+    apiSend(meetingPath(groupId, date, '/tasks'), standupMeetingStateSchema, 'POST', body),
+  );
 }

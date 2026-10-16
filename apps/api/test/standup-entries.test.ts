@@ -137,9 +137,9 @@ describe('standup entries', () => {
   });
 
   it('shows who posted, who hasn’t and who is out, with earlier open blockers', async () => {
-    const w = await standupWorld(ctx);
-    // Wednesday: Dorj posts a blocker nobody resolves.
+    // Wednesday: the group exists; Dorj posts a blocker nobody resolves.
     clock.set('2026-10-07T01:00:00Z');
+    const w = await standupWorld(ctx);
     const wed = await w.post(w.dorj.api, { blockers: [{ text: 'Old blocker' }] });
     // Thursday: Bat is out until Friday, Sara posts with a blocker, Anu posts without one.
     clock.set('2026-10-08T01:00:00Z');

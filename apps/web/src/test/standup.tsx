@@ -249,6 +249,7 @@ export const dayOf = (overrides: Partial<StandupDay> = {}): StandupDay => ({
   entries: [DORJ_ENTRY, SARA_ENTRY],
   blockers: [BLOCKER],
   myEntry: null,
+  meeting: null,
   ...overrides,
 });
 

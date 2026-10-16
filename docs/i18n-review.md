@@ -513,6 +513,60 @@ Rows reuse the `myTasks.feed.*` sentences with the task key in `<task>` (the tit
 | `shell.openNavigation` | Open navigation | Цэс нээх |
 | `shell.closeNavigation` | Close navigation | Цэс хаах |
 
+## Standup live mode and polish (derived, 2026-10-16)
+
+The live screen's own labels (speaking order, total time, Previous/Next/Finish, Up next, Meeting notes, Tasks created, Create task / Created, From …'s blocker/plan, Save notes to standup) come from `StandupLive.dc.html` `STR.mn`. The follower view, the before/after states, the day page's Meeting notes section, the split nudge and the field-test fixes aren't designed; their Mongolian is drafted:
+
+| key | en | mn (draft) |
+|---|---|---|
+| `standup.live.sub` | {{date}} · {{time}} | {{date}} · {{time}} |
+| `standup.live.live` | Live | Шууд |
+| `standup.live.timeOf` | {{name}}’s time | {{name}}-ын хугацаа |
+| `standup.live.overTime` | over time | хугацаа хэтэрсэн |
+| `standup.live.keysHint` | ← → to move between people | ← → товчоор хүн солих |
+| `standup.live.notPosted` | hasn’t posted | бичээгүй |
+| `standup.live.nothing` | Nothing written | Бичээгүй |
+| `standup.live.createFor` | Create task: {{text}} | Ажил үүсгэх: {{text}} |
+| `standup.live.notesSaving` | Saving… | Хадгалж байна… |
+| `standup.live.notesSavedDraft` | Autosaved | Автоматаар хадгалсан |
+| `standup.live.notesFailed` | Couldn’t save. Retrying when you type again. | Хадгалж чадсангүй. Дахин бичихэд дахин оролдоно. |
+| `standup.live.noNotes` | No notes yet. | Тэмдэглэл алга. |
+| `standup.live.fromBlocker` | From {{name}}’s blocker · {{project}} | {{name}}-ын саадаас · {{project}} |
+| `standup.live.fromPlan` | From {{name}}’s plan · {{project}} | {{name}}-ын төлөвлөгөөнөөс · {{project}} |
+| `standup.live.notesSavedToast` | Notes saved to the standup page. | Тэмдэглэлийг стэндапын хуудсанд хадгаллаа. |
+| `standup.live.notesSavedAt` | On the standup page since {{time}} | {{time}}-аас стэндапын хуудсанд харагдаж байна |
+| `standup.live.descriptionFrom` | From the {{group}} standup on {{date}} | {{group}} бүлгийн {{date}}-ны стэндапаас |
+| `standup.live.followingHint` | {{name}} runs the meeting. This page moves with them. | Уулзалтыг {{name}} хөтөлж байна. Энэ хуудас хамт шилжинэ. |
+| `standup.live.notStarted` | The meeting hasn’t started yet | Уулзалт хараахан эхлээгүй байна |
+| `standup.live.notStartedDriver` | Start when everyone is here. The speaking order is fixed when you start. | Бүгд ирсэн үед эхлүүлээрэй. Эхлүүлэхэд ярих дараалал тогтоно. |
+| `standup.live.notStartedFollower` | This page follows along once {{name}} starts it. | {{name}} эхлүүлмэгц энэ хуудас дагаж харуулна. |
+| `standup.live.notStartedNobody` | This page follows along once the facilitator starts it. | Хөтлөгч эхлүүлмэгц энэ хуудас дагаж харуулна. |
+| `standup.live.backToStandup` | Back to standup | Стэндап руу буцах |
+| `standup.live.ended` | Meeting ended | Уулзалт дууслаа |
+| `standup.live.endedSummary_one` | Took {{duration}} · {{count}} task created | {{duration}} үргэлжилсэн · {{count}} ажил үүсгэсэн |
+| `standup.live.endedSummary_other` | Took {{duration}} · {{count}} tasks created | {{duration}} үргэлжилсэн · {{count}} ажил үүсгэсэн |
+| `standup.live.everyoneOut` | Everyone in the group is out of office today: there is nobody to go through. | Өнөөдөр бүлгийн бүх гишүүн чөлөөтэй тул ярих хүн алга. |
+| `standup.live.noMeetingTime` | This group meets async only: there is no meeting time in its settings. | Энэ бүлэг зөвхөн бичгээр стэндап хийдэг: тохиргоонд уулзалтын цаг алга. |
+| `standup.live.notToday` | A meeting runs on its own day only. | Уулзалтыг зөвхөн тухайн өдөрт нь хийнэ. |
+| `standup.live.longMeeting` | {{people}} people × {{minutes}} min is longer than the {{total}} min meeting. | {{people}} хүн × {{minutes}} мин нь {{total}} минутын уулзалтаас урт байна. |
+| `standup.live.minutes` | {{count}} min | {{count}} мин |
+| `standup.live.endFailed` | Couldn’t end the meeting. | Уулзалтыг дуусгаж чадсангүй. |
+| `standup.day.joinLive` | Join live | Шууд нэгдэх |
+| `standup.day.liveNow` | The standup meeting is live | Стэндап уулзалт явагдаж байна |
+| `standup.day.liveNowBy` | {{name}} is running the standup meeting | {{name}} стэндап уулзалтыг хөтөлж байна |
+| `standup.day.meetingNotes` | Meeting notes | Уулзалтын тэмдэглэл |
+| `standup.day.meetingBy` | Run by {{name}} · {{duration}} | Хөтлөгч {{name}} · {{duration}} |
+| `standup.day.meetingTasks` | Tasks created | Үүсгэсэн ажлууд |
+| `standup.day.noMeetingNotes` | No notes were written. | Тэмдэглэл бичээгүй. |
+| `standup.day.leftGroup` | no longer in this group | бүлгээс гарсан |
+| `standup.day.everyoneOut` | Everyone is out of office | Бүгд чөлөөтэй |
+| `standup.day.moreBlockers_one` | Show {{count}} more blocker | Өөр {{count}} саад харуулах |
+| `standup.day.moreBlockers_other` | Show {{count}} more blockers | Өөр {{count}} саад харуулах |
+| `standup.splitHint` | {{count}} people is a lot for one standup: updates get long and the meeting runs over. Consider splitting into teams of up to {{max}}. | Нэг стэндапад {{count}} хүн их байна: шинэчлэлүүд урт болж, уулзалт хэтэрнэ. {{max}} хүртэлх хүнтэй баг болгон хуваахыг бодоорой. |
+| `standup.write.moreSuggestions_one` | Show {{count}} more suggestion | Өөр {{count}} санал харуулах |
+| `standup.write.moreSuggestions_other` | Show {{count}} more suggestions | Өөр {{count}} санал харуулах |
+| `inbox.standupWaiting` | Your {{group}} standup is waiting for your update | «{{group}}» стэндапад таны шинэчлэл хүлээгдэж байна |
+
 ## Open questions
 
 1. **Unscheduled**: drafted "Огноогүй" (no date) rather than "Хуваарьгүй"; the hint uses "…хуваарьт оруулна уу". Pick one term.

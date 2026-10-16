@@ -8,7 +8,7 @@ import {
 } from '@kite/shared';
 import { and, eq, inArray, isNull } from 'drizzle-orm';
 import type { z } from 'zod';
-import type { Tx } from '../db/client.js';
+import type { DbOrTx, Tx } from '../db/client.js';
 import { one } from '../db/rows.js';
 import type { standupGroups } from '../db/schema/index.js';
 import { projects, standupBlockers, standupEntries, tasks } from '../db/schema/index.js';
@@ -238,7 +238,7 @@ export async function saveEntry(
 }
 
 /** 400 unless every linked task exists (not deleted) in the group's workspace. */
-async function assertLinkedTasks(tx: Tx, workspaceId: string, taskIds: string[]) {
+export async function assertLinkedTasks(tx: DbOrTx, workspaceId: string, taskIds: string[]) {
   const ids = [...new Set(taskIds)];
   if (ids.length === 0) return;
   const found = await tx

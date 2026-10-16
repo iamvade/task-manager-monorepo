@@ -6,21 +6,37 @@ import { useTaskKeyHref } from '../../task/useTaskKeyHref';
 
 /**
  * A linked task (Standup.dc.html): outline chip with the project dot and the title; opens the
- * task drawer. `size="lg"` is the Blockers section's 24px chip, otherwise the 22px card chip.
+ * task drawer. `size="lg"` is the Blockers section's 24px chip, `xl` live mode's 26px one,
+ * otherwise the 22px card chip.
  */
-export function TaskChip({ task, size = 'sm' }: { task: StandupTaskRef; size?: 'sm' | 'lg' }) {
+export function TaskChip({
+  task,
+  size = 'sm',
+  label = 'title',
+}: {
+  task: StandupTaskRef;
+  size?: 'sm' | 'lg' | 'xl';
+  /** `key` when the title is already written next to it (live mode). */
+  label?: 'title' | 'key';
+}) {
   const href = useTaskKeyHref()(task.key);
   const className = cn(
     'inline-flex min-w-0 items-center gap-1.5 rounded-[6px] border border-default bg-surface no-underline',
-    size === 'lg'
-      ? 'h-6 max-w-[320px] px-2 text-[12px] text-default'
-      : 'h-[22px] max-w-[260px] px-[7px] text-[12px] text-2',
+    size === 'xl'
+      ? 'h-[26px] max-w-full px-2 text-[13px] text-2'
+      : size === 'lg'
+        ? 'h-6 max-w-[320px] px-2 text-[12px] text-default'
+        : 'h-[22px] max-w-[260px] px-[7px] text-[12px] text-2',
     href && 'hover:border-strong hover:bg-subtle',
   );
   const body = (
     <>
       <ProjectDot color={task.project.color} size={size === 'lg' ? 8 : 7} />
-      <span className="truncate">{task.title}</span>
+      {label === 'key' ? (
+        <span className="font-mono text-[12px]">{task.key}</span>
+      ) : (
+        <span className="truncate">{task.title}</span>
+      )}
     </>
   );
   if (!href) return <span className={className}>{body}</span>;

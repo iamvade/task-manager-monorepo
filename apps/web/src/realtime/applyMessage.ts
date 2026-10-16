@@ -9,6 +9,7 @@ import type {
 } from '@kite/shared';
 import type { Query, QueryClient } from '@tanstack/react-query';
 import { refreshAfterAbsences } from '../api/absences';
+import { setMeeting } from '../api/standups';
 import { queryKeys } from '../api/queryKeys';
 import { TASK_MUTATION } from '../api/taskCache';
 import { useRealtimeStore, type EditedField } from '../stores/realtime';
@@ -190,6 +191,11 @@ export function createMessageHandler(queryClient: QueryClient) {
           void queryClient.invalidateQueries({
             queryKey: queryKeys.standupGroups(message.workspaceId),
           });
+          return;
+        case 'standup.meeting_changed':
+          // Followers move with the facilitator at once; the day page's summary refetches.
+          setMeeting(queryClient, message.groupId, message.date, message.meeting, message.at);
+          void queryClient.invalidateQueries({ queryKey: queryKeys.standupDays(message.groupId) });
           return;
         case 'tasks.blocked.changed':
           mark(message.workspaceId, (p) => {

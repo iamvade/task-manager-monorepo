@@ -124,7 +124,7 @@ export const standupGroupRoutes: FastifyPluginCallbackZod = (app, _opts, done) =
             .returning(),
           'standup group',
         );
-        await setGroupMembers(tx, created.id, memberIds);
+        await setGroupMembers(tx, created.id, memberIds, app.clock());
         return created;
       });
       broadcastGroupsChanged(app, request, workspaceId);
@@ -187,7 +187,7 @@ export const standupGroupRoutes: FastifyPluginCallbackZod = (app, _opts, done) =
 
       await app.db.transaction(async (tx) => {
         await lockGroup(tx, group.id);
-        if (memberIds) await setGroupMembers(tx, group.id, memberIds);
+        if (memberIds) await setGroupMembers(tx, group.id, memberIds, app.clock());
         const members = (
           await tx
             .select({ userId: standupGroupMembers.userId })
@@ -264,7 +264,7 @@ export const standupGroupRoutes: FastifyPluginCallbackZod = (app, _opts, done) =
       await requireActiveMembers(app.db, group.workspaceId, [userId]);
       await app.db.transaction(async (tx) => {
         await lockGroup(tx, group.id);
-        await appendGroupMember(tx, group.id, userId);
+        await appendGroupMember(tx, group.id, userId, app.clock());
       });
       broadcastGroupsChanged(app, request, group.workspaceId);
       return dto(request, group.id);

@@ -49,7 +49,6 @@ export function StandupWriteModal({ day, onClose }: { day: StandupDay; onClose: 
       width={640}
       top={56}
       fullScreen={narrow}
-      initialFocus={-1}
     >
       {narrow ? (
         <MobileHeader day={day} titleId={titleId} onClose={requestClose} />
@@ -208,6 +207,19 @@ function WriteForm({
     setCloser(form.closeKeepingDraft);
   });
 
+  // Desktop: start typing in the first empty field (the modal first focuses its header while
+  // suggestions load). A phone keeps focus on the header: no keyboard popping up on open.
+  const formRef = useRef<HTMLFormElement | null>(null);
+  useEffect(() => {
+    if (mobile) return;
+    const fields = formRef.current?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+      'textarea, input[type="text"]',
+    );
+    [...(fields ?? [])].find((f) => f.value === '')?.focus();
+    // Once, when the form appears.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
@@ -229,6 +241,7 @@ function WriteForm({
 
   return (
     <form
+      ref={formRef}
       onKeyDown={onKeyDown}
       onSubmit={(e) => {
         e.preventDefault();
