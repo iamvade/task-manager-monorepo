@@ -10,6 +10,7 @@ import { Skeleton } from '../../../components/ui/Skeleton';
 import { DEFAULT_TIMEZONE } from '../../../lib/dates';
 import { formatClock } from '../../../lib/relativeTime';
 import { useDates } from '../../../lib/useDates';
+import { useIsNarrow } from '../../../lib/useMediaQuery';
 import { BlockersSection } from './BlockersSection';
 import { DayContext, type DayView } from './DayContext';
 import { DayHeader } from './DayHeader';
@@ -39,6 +40,7 @@ export function StandupDayView({
   const { t } = useTranslation();
   const { me } = useAuth();
   const { formatDay } = useDates();
+  const narrow = useIsNarrow();
   const [params, setParams] = useSearchParams();
   const { hash } = useLocation();
   const valid =
@@ -156,7 +158,7 @@ export function StandupDayView({
     <DayContext.Provider value={view}>
       <div className="flex min-h-full flex-col">
         {header}
-        <div className="box-border flex w-full max-w-[1120px] flex-col gap-6 px-6 pt-5 pb-12">
+        <div className="box-border flex w-full max-w-[1120px] flex-col gap-6 px-6 pt-5 pb-12 max-sm:gap-5 max-sm:px-4 max-sm:pt-4">
           {noStandupToday && data.upcomingDate && (
             <p className="m-0 text-[13px] text-muted">
               {t('standup.day.noStandupToday', {
@@ -165,7 +167,8 @@ export function StandupDayView({
             </p>
           )}
           <PostedStrip yourTurn={placeholder} />
-          {data.group.showBlockersFirst && <BlockersSection />}
+          {/* On a phone blockers always come first (one column, they're what needs help). */}
+          {(data.group.showBlockersFirst || narrow) && <BlockersSection />}
           <section aria-labelledby="standup-updates" className="flex flex-col gap-3">
             <h2 id="standup-updates" className="m-0 text-[15px] font-semibold">
               {isToday ? t('standup.day.updates') : t('standup.day.updatesOn')}
@@ -197,7 +200,7 @@ export function StandupDayView({
 
 function DaySkeleton() {
   return (
-    <div aria-busy="true" className="flex max-w-[1120px] flex-col gap-6 px-6 pt-5">
+    <div aria-busy="true" className="flex max-w-[1120px] flex-col gap-6 px-6 pt-5 max-sm:px-4">
       <Skeleton height={96} />
       <Skeleton width={160} height={16} />
       <div className="grid grid-cols-[repeat(auto-fill,minmax(min(440px,100%),1fr))] gap-4">

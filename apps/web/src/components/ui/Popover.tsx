@@ -6,6 +6,7 @@ import {
   flip,
   offset,
   shift,
+  size,
   useClick,
   useDismiss,
   useFloating,
@@ -93,7 +94,18 @@ function PopoverPanel({
     open,
     onOpenChange: setOpen,
     placement,
-    middleware: [offset(offsetOptions), flip({ padding: 8 }), shift({ padding: 8 })],
+    middleware: [
+      offset(offsetOptions),
+      flip({ padding: 8 }),
+      shift({ padding: 8 }),
+      // Never taller than the room left (a phone with the keyboard up); the panel scrolls.
+      size({
+        padding: 8,
+        apply: ({ availableHeight, elements }) => {
+          elements.floating.style.maxHeight = `${String(Math.max(120, Math.floor(availableHeight)))}px`;
+        },
+      }),
+    ],
     whileElementsMounted: autoUpdate,
   });
   // Stable callback refs from floating-ui (plain functions, no `this`).
@@ -120,7 +132,7 @@ function PopoverPanel({
                 aria-label={label}
                 style={{ ...floatingStyles, width }}
                 className={cn(
-                  'z-50 box-border rounded-[10px] border border-default bg-surface p-1 text-default outline-none',
+                  'z-50 box-border overflow-y-auto rounded-[10px] border border-default bg-surface p-1 text-default outline-none',
                   elevation === 'sm' ? 'shadow-popover' : 'shadow-popover-lg',
                   className,
                 )}

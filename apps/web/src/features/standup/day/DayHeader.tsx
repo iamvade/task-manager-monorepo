@@ -54,7 +54,7 @@ export function DayHeader({
               ) : (
                 <DisabledNav label={t('standup.day.prevDay')} icon={<PrevIcon size={16} />} />
               )}
-              <h1 className="m-0 min-w-[168px] text-center text-[14px] font-medium">
+              <h1 className="m-0 min-w-[168px] text-center text-[14px] font-medium max-sm:min-w-0 max-sm:px-1">
                 {formatDay('weekdayLongDate', date)}
               </h1>
               {next ? (
@@ -112,7 +112,8 @@ export function DayHeader({
                     aria-describedby="standup-start-soon"
                     className={cn(
                       buttonVariants.primary,
-                      'flex h-9 cursor-not-allowed items-center gap-2 rounded-[8px] border-0 px-3.5 text-[13px] font-medium opacity-60',
+                      // Live mode is a screen-shared meeting: not offered on a phone.
+                      'flex h-9 cursor-not-allowed items-center gap-2 rounded-[8px] border-0 px-3.5 text-[13px] font-medium opacity-60 max-sm:hidden',
                     )}
                   >
                     <PlayIcon size={14} />

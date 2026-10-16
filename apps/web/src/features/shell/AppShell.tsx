@@ -2,14 +2,17 @@ import { Suspense, lazy, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet } from 'react-router';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
+import { cn } from '../../lib/cn';
 import { Toaster } from '../../components/ui/Toaster';
 import { RealtimeProvider } from '../../realtime/RealtimeProvider';
+import { useIsNarrow } from '../../lib/useMediaQuery';
 import { useUiStore } from '../../stores/ui';
 import { CommandPalette } from '../palette/CommandPalette';
 import { ShortcutsDialog } from '../shortcuts/ShortcutsDialog';
 import { loadTaskDetailView } from '../task/loadTaskDetailView';
 import { TaskDrawer } from '../task/TaskDrawer';
 import { ConnectionPill } from './ConnectionPill';
+import { MobileNavBar } from './MobileNav';
 import { Sidebar } from './Sidebar';
 import { SidebarRail } from './SidebarRail';
 import { useGlobalShortcuts } from './useGlobalShortcuts';
@@ -79,14 +82,21 @@ function SkipLink() {
 
 export function AppShell() {
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
+  const narrow = useIsNarrow();
   useGlobalShortcuts();
   usePreloadOverlays();
 
   return (
     <RealtimeProvider>
-      <div className="flex h-screen min-h-0 bg-default text-default">
+      <div
+        className={cn(
+          'flex h-dvh min-h-0 bg-default text-default',
+          // Phone: a menu bar on top, the sidebar opens as a sheet.
+          narrow && 'flex-col',
+        )}
+      >
         <SkipLink />
-        {collapsed ? <SidebarRail /> : <Sidebar />}
+        {narrow ? <MobileNavBar /> : collapsed ? <SidebarRail /> : <Sidebar />}
         <div className="relative flex min-w-0 flex-1">
           <main id="main" tabIndex={-1} className="flex min-w-0 flex-1 flex-col overflow-auto">
             <ErrorBoundary>

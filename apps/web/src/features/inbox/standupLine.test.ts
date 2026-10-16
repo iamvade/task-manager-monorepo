@@ -52,9 +52,14 @@ describe('standupLine', () => {
   });
 
   it('links to the group page on that day', () => {
-    const { standup } = standupNotification('standup_help');
-    expect(standup && standupHref(standup)).toBe(
-      '/standup/01890000-0000-7000-8000-00000000c001?date=2026-10-08',
+    expect(standupHref(standupNotification('standup_help'))).toBe(
+      '/standup/01890000-0000-7000-8000-00000000c001/2026-10-08',
+    );
+  });
+
+  it('opens the write page from a reminder', () => {
+    expect(standupHref(standupNotification('standup_reminder', { actor: null }))).toBe(
+      '/standup/01890000-0000-7000-8000-00000000c001?write=1',
     );
   });
 });

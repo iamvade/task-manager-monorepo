@@ -90,6 +90,7 @@ export function initialDraft(entry: StandupEntry | null, suggestions: StandupSug
     task: b.task,
     helpers: b.helpers,
   }));
+  const kept = new Set(entry.yesterday.map((item) => item.task?.id));
   return {
     yesterday: entry.yesterday.map((item) => ({
       uid: uid(),
@@ -97,7 +98,13 @@ export function initialDraft(entry: StandupEntry | null, suggestions: StandupSug
       task: item.task,
       text: item.text,
     })),
-    removed: [],
+    // A draft I come back to still offers the suggestions I removed ("Restore 2 removed").
+    removed:
+      entry.status === 'draft'
+        ? suggestions.yesterday
+            .filter((s) => !kept.has(s.task.id))
+            .map((s) => ({ uid: uid(), kind: s.kind, task: s.task, text: s.task.title }))
+        : [],
     chips,
     picked,
     today,
@@ -139,6 +146,61 @@ export function draftBody(draft: Draft, status: StandupEntryStatus): SaveStandup
     yesterday: yesterday.slice(0, MAX_STANDUP_ITEMS),
     today: today.slice(0, MAX_STANDUP_ITEMS),
     blockers: blockers.slice(0, MAX_STANDUP_BLOCKERS),
+  };
+}
+
+/**
+ * What a save would change, without the status and the blocker ids (the ids only come
+ * back from the server): equal keys = nothing new to save.
+ */
+export function contentKey(body: SaveStandupEntry): string {
+  return JSON.stringify({
+    yesterday: body.yesterday,
+    today: body.today,
+    blockers: body.blockers?.map(({ id: _id, ...rest }) => rest),
+  });
+}
+
+/** The blocker rows a body sends, in its order (blank rows are left out). */
+export function sentBlockerUids(draft: Draft): { uid: string; id?: string }[] {
+  return draft.blockers
+    .filter((b) => b.text.trim())
+    .slice(0, MAX_STANDUP_BLOCKERS)
+    .map((b) => ({ uid: b.uid, ...(b.id ? { id: b.id } : {}) }));
+}
+
+/**
+ * After a save, gives new blocker rows the ids the server made for them, so the next save
+ * updates them instead of deleting and re-creating them. New blockers come back after the
+ * existing ones, in the order they were sent. Rows whose blocker the server no longer has
+ * lose their id.
+ */
+export function withSavedBlockerIds(
+  draft: Draft,
+  sent: readonly { uid: string; id?: string }[],
+  entry: StandupEntry,
+): Draft {
+  const known = new Set(sent.flatMap((b) => (b.id ? [b.id] : [])));
+  const fresh = entry.blockers.filter((b) => !known.has(b.id)).map((b) => b.id);
+  const ids = new Map<string, string>();
+  for (const b of sent) {
+    if (b.id) continue;
+    const id = fresh.shift();
+    if (id) ids.set(b.uid, id);
+  }
+  const onServer = new Set(entry.blockers.map((b) => b.id));
+  return {
+    ...draft,
+    blockers: draft.blockers.map((b) => {
+      const id = ids.get(b.uid);
+      if (id && !b.id) return { ...b, id };
+      // Saved while blank: the server deleted it, so it goes back as a new blocker.
+      if (b.id && !onServer.has(b.id)) {
+        const { id: _gone, ...rest } = b;
+        return rest;
+      }
+      return b;
+    }),
   };
 }
 

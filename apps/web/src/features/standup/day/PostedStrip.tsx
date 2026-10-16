@@ -35,7 +35,7 @@ export function PostedStrip({ yourTurn }: { yourTurn: boolean }) {
             : t('standup.day.dueBy', { time: postBy })}
         </span>
       </div>
-      <ul className="m-0 flex list-none flex-wrap gap-4 p-0">
+      <ul className="m-0 flex list-none flex-wrap gap-4 p-0 max-sm:gap-x-2 max-sm:gap-y-3">
         {day.members.map((m) => (
           <StripMember key={m.user.id} member={m} />
         ))}

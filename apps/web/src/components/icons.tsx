@@ -51,6 +51,8 @@ export const PanelOpenIcon = make(
     <path d="m14 9 3 3-3 3" />
   </>,
 );
+/** Phone shell: opens the sidebar sheet (not in the designs). */
+export const MenuIcon = make(<path d="M4 6h16M4 12h16M4 18h16" />);
 export const SearchIcon = make(
   <>
     <circle cx="11" cy="11" r="7" />
