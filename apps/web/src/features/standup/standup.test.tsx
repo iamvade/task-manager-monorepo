@@ -1,126 +1,19 @@
-import type { StandupGroup, StandupGroupMember, WorkspaceRole } from '@kite/shared';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { RouterProvider, createMemoryRouter } from 'react-router';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { AuthProvider } from '../../auth/AuthProvider';
 import i18n from '../../i18n';
-import { createQueryClient } from '../../queryClient';
-import { routes } from '../../router';
 import { useToastStore } from '../../stores/toast';
 import { useUiStore } from '../../stores/ui';
-import { ME, PROJECT, SIDEBAR, WORKSPACE_ID, mockApi } from '../../test/fixtures';
-import { at } from '../../test/tasks';
-
-const SARA = at(PROJECT.members, 1);
-const DORJ = at(PROJECT.members, 3);
-const MEMBERS = [
-  {
-    user: { ...ME.user },
-    role: 'owner',
-    title: 'Product manager',
-    capacityPoints: 15,
-    joinedAt: '2026-01-01T00:00:00.000Z',
-    absences: [],
-    deactivatedAt: null,
-  },
-  SARA,
+import { ME } from '../../test/fixtures';
+import {
+  DESIGN,
+  DESIGN_ID,
   DORJ,
-];
-
-const MOBILE_ID = '01890000-0000-7000-8000-000000000a01';
-const DESIGN_ID = '01890000-0000-7000-8000-000000000a02';
-const member = (m: (typeof MEMBERS)[number], position: string): StandupGroupMember =>
-  ({
-    user: {
-      id: m.user.id,
-      name: m.user.name,
-      initials: m.user.initials,
-      avatarColor: m.user.avatarColor,
-    },
-    title: m.title,
-    position,
-    absences: [],
-  }) as StandupGroupMember;
-const group = (overrides: Partial<StandupGroup>): StandupGroup => ({
-  id: MOBILE_ID,
-  workspaceId: WORKSPACE_ID,
-  name: 'Mobile team',
-  timezone: 'Asia/Ulaanbaatar',
-  days: [0, 1, 2, 3, 4],
-  postBy: '10:00',
-  reminderAt: '09:30',
-  meetingAt: '10:15',
-  facilitatorId: SARA.user.id,
-  speakingOrder: 'posting_order',
-  secondsPerPerson: 120,
-  totalMeetingMinutes: 15,
-  showBlockersFirst: true,
-  markLinkedTasksBlocked: true,
-  createdAt: '2026-09-01T02:00:00.000Z',
-  archivedAt: null,
-  members: [member(at(MEMBERS, 0), 'a0'), member(SARA, 'a1'), member(DORJ, 'a2')],
-  isMember: true,
-  canEdit: true,
-  today: '2026-10-08',
-  meetsToday: true,
-  myPosted: false,
-  hasPosts: true,
-  ...overrides,
-});
-
-const MOBILE = group({});
-const DESIGN = group({
-  id: DESIGN_ID,
-  name: 'Design team',
-  facilitatorId: ME.user.id,
-  hasPosts: false,
-  myPosted: true,
-  members: [member(at(MEMBERS, 0), 'a0'), member(SARA, 'a1')],
-});
-
-type Handler = (init?: RequestInit) => Response | Promise<Response>;
-
-function renderAt(
-  entry: string,
-  {
-    role = 'owner',
-    timezone = 'Asia/Ulaanbaatar',
-    groups = [DESIGN, MOBILE],
-    extra = {},
-  }: {
-    role?: WorkspaceRole;
-    timezone?: string;
-    groups?: StandupGroup[];
-    extra?: Record<string, Handler>;
-  } = {},
-) {
-  const me = {
-    ...ME,
-    preferences: { ...ME.preferences, locale: 'en', timezone },
-    workspaces: ME.workspaces.map((w) => ({ ...w, role })),
-  };
-  const fetchMock = mockApi({
-    'GET /api/v1/auth/me': () => Response.json(me),
-    [`GET /api/v1/workspaces/${WORKSPACE_ID}/sidebar`]: () => Response.json(SIDEBAR),
-    [`GET /api/v1/workspaces/${WORKSPACE_ID}/members`]: () => Response.json(MEMBERS),
-    [`GET /api/v1/workspaces/${WORKSPACE_ID}/standup-groups`]: () => Response.json(groups),
-    [`GET /api/v1/standup-groups/${MOBILE_ID}`]: () =>
-      Response.json(groups.find((g) => g.id === MOBILE_ID) ?? MOBILE),
-    [`GET /api/v1/standup-groups/${DESIGN_ID}`]: () =>
-      Response.json(groups.find((g) => g.id === DESIGN_ID) ?? DESIGN),
-    ...extra,
-  });
-  const router = createMemoryRouter(routes, { initialEntries: [entry] });
-  render(
-    <QueryClientProvider client={createQueryClient()}>
-      <AuthProvider>
-        <RouterProvider router={router} />
-      </AuthProvider>
-    </QueryClientProvider>,
-  );
-  return { fetchMock, router };
-}
+  MOBILE,
+  MOBILE_ID,
+  SARA,
+  group,
+  renderAt,
+} from '../../test/standup';
 
 describe('Standup', () => {
   beforeEach(async () => {

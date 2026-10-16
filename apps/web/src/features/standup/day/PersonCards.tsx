@@ -40,7 +40,7 @@ export function OutCard({ member }: { member: StandupDayMember }) {
     <div className="box-border flex items-center gap-3 rounded-[12px] border border-subtle bg-subtle p-4">
       <span
         aria-hidden="true"
-        className="flex size-9 flex-none items-center justify-center rounded-full bg-out-avatar text-[13px] font-semibold text-muted"
+        className="flex size-9 flex-none items-center justify-center rounded-full bg-out-avatar text-[13px] font-semibold text-3"
       >
         {member.user.initials}
       </span>

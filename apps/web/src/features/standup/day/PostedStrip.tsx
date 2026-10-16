@@ -84,7 +84,7 @@ function StripMember({ member: m }: { member: StandupDayMember }) {
               m.state === 'posted' && cn('pal-fill', paletteClass('avatar', m.user.avatarColor)),
               m.state === 'not_yet' &&
                 'border-[1.5px] border-dashed border-[color:var(--text-faint)] bg-surface text-3',
-              m.state === 'out' && 'bg-out-avatar text-muted',
+              m.state === 'out' && 'bg-out-avatar text-3',
             )}
           >
             {m.user.initials}
@@ -110,7 +110,7 @@ function StripMember({ member: m }: { member: StandupDayMember }) {
                 {m.isLate && <span className="text-warning"> · {t('standup.day.late')}</span>}
               </span>
             ) : m.state === 'out' ? (
-              <span className="rounded-[8px] bg-surface-2 px-1.5 font-semibold text-icon">
+              <span className="rounded-[8px] bg-surface-2 px-1.5 font-semibold text-3">
                 {t('standup.day.out')}
               </span>
             ) : (

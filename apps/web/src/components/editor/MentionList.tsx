@@ -82,7 +82,12 @@ export const MentionList = forwardRef<MentionListHandle, MentionListProps>(funct
         >
           <Avatar user={item} size={22} title={null} />
           <span className="flex-1 truncate text-[13px] font-medium">{shortName(item.name)}</span>
-          {item.hint && <span className="text-[12px] text-muted">{item.hint}</span>}
+          {/* Muted fails contrast on the accent-soft active row in dark mode. */}
+          {item.hint && (
+            <span className={cn('text-[12px]', index === active ? 'text-2' : 'text-muted')}>
+              {item.hint}
+            </span>
+          )}
         </button>
       ))}
     </div>
