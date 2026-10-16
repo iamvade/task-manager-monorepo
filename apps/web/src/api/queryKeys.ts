@@ -16,6 +16,9 @@ export const queryKeys = {
   standupGroup: (groupId: string) => ['standup-groups', groupId] as const,
   standupDay: (groupId: string, date: string) => ['standup-groups', groupId, 'days', date] as const,
   standupDays: (groupId: string) => ['standup-groups', groupId, 'days'] as const,
+  /** A day's live meeting (`date` is always a real date, never `today`). */
+  standupMeeting: (groupId: string, date: string) =>
+    ['standup-groups', groupId, 'meeting', date] as const,
   /** My Yesterday rows and Today chips (write modal); refreshed with the group. */
   standupSuggestions: (groupId: string, date: string) =>
     ['standup-groups', groupId, 'suggestions', date] as const,

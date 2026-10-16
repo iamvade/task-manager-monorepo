@@ -61,10 +61,8 @@ describe('Standup group page', () => {
       `/standup/${MOBILE_ID}/2026-10-07`,
     );
     expect(screen.getByRole('button', { name: 'Next day' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Start standup' })).toHaveAttribute(
-      'aria-disabled',
-      'true',
-    );
+    // Sara facilitates and is in today: only she starts the meeting.
+    expect(screen.queryByRole('button', { name: 'Start standup' })).toBeNull();
     // My placeholder card with the suggestions hint.
     expect(
       await screen.findByText('Suggestions from your activity yesterday are ready'),

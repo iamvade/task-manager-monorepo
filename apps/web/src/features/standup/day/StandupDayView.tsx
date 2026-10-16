@@ -16,6 +16,7 @@ import { DayContext, type DayView } from './DayContext';
 import { DayHeader } from './DayHeader';
 import { EntryCard } from './EntryCard';
 import { dayHref } from './links';
+import { MeetingSection } from './MeetingSection';
 import { MyPlaceholderCard, OutCard } from './PersonCards';
 import { loadWriteModal } from '../write/loadWriteModal';
 import { PostedStrip } from './PostedStrip';
@@ -167,6 +168,7 @@ export function StandupDayView({
             </p>
           )}
           <PostedStrip yourTurn={placeholder} />
+          <MeetingSection />
           {/* On a phone blockers always come first (one column, they're what needs help). */}
           {(data.group.showBlockersFirst || narrow) && <BlockersSection />}
           <section aria-labelledby="standup-updates" className="flex flex-col gap-3">

@@ -148,9 +148,9 @@ function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
   const sprints = useSprints(projectId ?? undefined);
   const create = useCreateTask(projectId ?? '');
 
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState<RichTextNode | null>(null);
-  const [descriptionEmpty, setDescriptionEmpty] = useState(true);
+  const [title, setTitle] = useState(defaults.title ?? '');
+  const [description, setDescription] = useState<RichTextNode | null>(defaults.description ?? null);
+  const [descriptionEmpty, setDescriptionEmpty] = useState(!defaults.description);
   /** Bumped to clear the editor after "Create more". */
   const [round, setRound] = useState(0);
   const [assigneeId, setAssigneeId] = useState<string | null>(defaults.assigneeId ?? null);
@@ -242,6 +242,13 @@ function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
         onSuccess: (task) => {
           setPending(false);
           setLastCreateProject(detail.id);
+          if (defaults.onCreated) {
+            defaults.onCreated(task);
+            onClose();
+            if (openAfter) openTask(task.key);
+            else toast({ message: t('create.created', { key: task.key }) });
+            return;
+          }
           if (openAfter) {
             onClose();
             openTask(task.key);

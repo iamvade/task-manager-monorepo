@@ -97,6 +97,15 @@ export const routes: RouteObject[] = [
                   { index: true, lazy: page(standupPages, (m) => m.StandupIndexPage) },
                   { path: ':groupId/:date?', lazy: page(standupPages, (m) => m.StandupGroupPage) },
                   {
+                    // Full screen: the shell drops its sidebar (`chrome: 'none'`).
+                    path: ':groupId/:date/live',
+                    handle: { chrome: 'none' },
+                    lazy: page(
+                      () => import('./features/standup/live/StandupLivePage'),
+                      (m) => m.StandupLivePage,
+                    ),
+                  },
+                  {
                     path: ':groupId/settings',
                     lazy: page(
                       () => import('./features/standup/StandupSettingsView'),
