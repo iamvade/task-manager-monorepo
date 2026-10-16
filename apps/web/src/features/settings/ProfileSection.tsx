@@ -2,12 +2,12 @@ import { AVATAR_COLORS, nameSchema } from '@kite/shared';
 import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSaveMe } from '../../api/useSaveMe';
-import { useCurrentWorkspace, useUpdateMember, useWorkspaceMembers } from '../../api/workspaces';
+import { useCurrentWorkspace } from '../../api/workspaces';
 import { useAuth } from '../../auth/useAuth';
 import { Avatar } from '../../components/ui/Avatar';
 import { ColorSwatches } from '../../components/ui/ColorSwatches';
 import { cn } from '../../lib/cn';
-import { AwayFields } from './MemberDialogs';
+import { AbsenceList } from './AbsenceList';
 import { SettingsRow, SettingsSection, settingsInput } from './SettingsRow';
 
 export function ProfileSection() {
@@ -100,25 +100,14 @@ export function ProfileSection() {
   );
 }
 
-/** "Out of office until" for the current workspace (badges in pickers and Workload). */
+/** Out of office: my absences (badges in pickers, the standup strip and Workload). */
 function OutOfOffice({ userId }: { userId: string }) {
   const { t } = useTranslation();
   const workspace = useCurrentWorkspace();
-  const members = useWorkspaceMembers(workspace?.id);
-  const update = useUpdateMember(workspace?.id ?? '');
-  const mine = members.data?.find((m) => m.user.id === userId);
-  if (!workspace || !mine) return null;
+  if (!workspace) return null;
   return (
     <SettingsRow label={t('members.away.label')} hint={t('members.away.hint')}>
-      <AwayFields
-        key={`${mine.awayUntil ?? ''}:${mine.awayNote ?? ''}`}
-        awayUntil={mine.awayUntil}
-        awayNote={mine.awayNote}
-        pending={update.isPending}
-        onSave={(value) => {
-          update.mutate({ userId, ...value });
-        }}
-      />
+      <AbsenceList workspaceId={workspace.id} userId={userId} />
     </SettingsRow>
   );
 }

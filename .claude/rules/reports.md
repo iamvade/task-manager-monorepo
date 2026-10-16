@@ -85,7 +85,7 @@ Tabs: Overview, Sprints, Workload, plus People (admins/owner) or My performance 
     - **Light** if load points ≤ capacity / 2.
     - **Balanced** otherwise.
     - Capacity C is the person's `workspace_members.capacity_points` (default 15): Heavy means > 18 and Light ≤ 7.5, i.e. the designed > 18 / ≤ 7. The capacity marker is drawn per row; "N pts over capacity / of room" in the expanded row uses load points too.
-  - **Away**: while `workspace_members.away_until` ≥ today the pill reads "Away until …" instead of the load (the load is still computed). Deactivated members are not listed.
+  - **Away**: while one of the person's `user_absences` covers today (`awayUntil` from `packages/shared`) the pill reads "Away until …" instead of the load (the load is still computed). Deactivated members are not listed.
 - **People / My performance** (period-bound unless noted):
   - **Cards and trends**:
     - **Completed**, **On-time** and **Cycle time** as above, for tasks the person was assigned when they were completed.

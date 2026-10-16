@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<title>Стэндап — шинэчлэл бичих</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#52525B;text-decoration:none}a:hover{color:#18181B}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit;color:inherit}
+.ghost:hover{background:#F4F4F5}
+.sug:hover{background:#FAFAFB}
+.ghost:focus-visible,.seg:focus-visible,.tchip:focus-visible,a:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid #6E56CF;outline-offset:1px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</helmet>
+
+<div lang="{{lang}}" style="position: relative; display: flex; min-height: 100vh; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 14px; line-height: 20px; color: #18181B; background: #FFFFFF; -webkit-font-smoothing: antialiased; overflow: hidden">
+
+  <!-- Background: Standup page, inactive -->
+  <div aria-hidden="true" style="flex: 0 0 248px; background: #F7F7F8; border-right: 1px solid #E6E6EA; padding: 12px 8px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px">
+    <div style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px"><span style="width: 24px; height: 24px; border-radius: 6px; background: {{accent}}"></span><span style="font-weight: 600">Kite Studio</span></div>
+    <span style="height: 32px; padding: 0 12px; display: flex; align-items: center; color: #3F3F46">{{L.myTasks}}</span>
+    <span style="height: 32px; padding: 0 12px; display: flex; align-items: center; border-radius: 8px; background: {{accentSoft}}; color: {{accent}}; font-weight: 600">{{L.standup}}</span>
+    <span style="height: 32px; padding: 0 12px; display: flex; align-items: center; color: #3F3F46">{{L.inbox}}</span>
+    <span style="height: 32px; padding: 0 12px; display: flex; align-items: center; color: #3F3F46">{{L.reports}}</span>
+  </div>
+  <div aria-hidden="true" style="flex: 1; display: flex; flex-direction: column">
+    <div style="height: 64px; border-bottom: 1px solid #E6E6EA; display: flex; align-items: center; padding: 0 24px; gap: 12px"><span style="font-weight: 600">{{L.groupName}}</span><span style="color: #52525B">{{L.date}}</span></div>
+    <div style="padding: 20px 24px; display: flex; flex-direction: column; gap: 16px">
+      <div style="height: 92px; border: 1px solid #E6E6EA; border-radius: 12px"></div>
+      <div style="height: 150px; border: 1px solid #F3D3CF; border-radius: 12px; background: #FFF8F7"></div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px"><div style="height: 300px; border: 1px solid #E6E6EA; border-radius: 12px"></div><div style="height: 300px; border: 1px solid #E6E6EA; border-radius: 12px"></div></div>
+    </div>
+  </div>
+  <a href="Standup.dc.html" aria-label="{{L.close}}" style="position: absolute; inset: 0; background: rgba(24, 24, 27, 0.32)"></a>
+
+  <!-- ===== MODAL ===== -->
+  <form role="dialog" aria-modal="true" aria-labelledby="sw-h" style="position: absolute; top: 56px; left: 50%; transform: translateX(-50%); width: 640px; max-width: calc(100% - 32px); box-sizing: border-box; margin: 0; background: #FFFFFF; border: 1px solid #E6E6EA; border-radius: 14px; box-shadow: 0 24px 64px rgba(24, 24, 27, 0.20); display: flex; flex-direction: column">
+
+    <div style="display: flex; align-items: center; gap: 12px; padding: 16px 16px 12px 20px; border-bottom: 1px solid #F1F1F3">
+      <span aria-hidden="true" style="width: 32px; height: 32px; border-radius: 16px; background: #E0E7FF; color: #3730A3; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">{{me.initials}}</span>
+      <div style="flex: 1; display: flex; flex-direction: column">
+        <h2 id="sw-h" style="margin: 0; font-size: 16px; font-weight: 600">{{L.title}}</h2>
+        <span style="font-size: 12px; color: #6B6B74">{{L.groupName}} · {{L.date}} · {{L.dueBy}}</span>
+      </div>
+      <div role="radiogroup" aria-label="{{L.language}}" style="display: flex; gap: 2px; padding: 2px; border-radius: 7px; background: #F4F4F5">
+        <sc-for list="{{langs}}" as="lg" hint-placeholder-count="2">
+          <button type="button" class="seg" role="radio" aria-checked="{{lg.active}}" onClick="{{lg.pick}}" lang="{{lg.code}}" title="{{lg.full}}" style="height: 24px; padding: 0 8px; border: 0; border-radius: 5px; font-size: 12px; font-weight: 600; {{lg.style}}">{{lg.short}}</button>
+        </sc-for>
+      </div>
+      <a href="Standup.dc.html" class="ghost" aria-label="{{L.close}}" style="display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 6px 0 8px; border-radius: 6px">
+        <kbd style="font-family: inherit; font-size: 11px; line-height: 16px; padding: 0 5px; border: 1px solid #E6E6EA; border-radius: 4px; color: #6B6B74">Esc</kbd>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+      </a>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 20px; padding: 16px 20px 20px">
+
+      <!-- Yesterday -->
+      <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 8px">
+        <legend style="padding: 0; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #3F3F46">
+          <span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 3px; background: #A1A1AA"></span>{{L.yesterday}}
+          <span style="font-weight: 400; color: #6B6B74">· {{L.suggested}}</span>
+        </legend>
+        <div style="display: flex; flex-direction: column; border: 1px solid #EFEFF2; border-radius: 10px; overflow: hidden">
+          <sc-for list="{{suggestions}}" as="sg" hint-placeholder-count="3">
+            <div class="sug" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 6px 6px 6px 12px; border-bottom: 1px solid #F4F4F5">
+              <span aria-hidden="true" style="flex: none; width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; {{sg.iconBg}}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{sg.icon}}"></path></svg>
+              </span>
+              <span style="flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px">
+                <span style="font-size: 12px; color: #6B6B74">{{sg.kind}}</span>
+                <a href="TaskDetail.dc.html" style="color: #18181B; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{sg.task}}</a>
+              </span>
+              <button type="button" class="ghost" onClick="{{sg.remove}}" aria-label="{{sg.removeLabel}}" style="flex: none; width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2.25" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+              </button>
+            </div>
+          </sc-for>
+          <label style="display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 12px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+            <span class="sr">{{L.addYesterday}}</span>
+            <input type="text" placeholder="{{L.addYesterday}}" style="flex: 1; border: 0; outline: none; background: transparent; font-size: 14px; padding: 0">
+          </label>
+        </div>
+        <sc-if value="{{hasRemoved}}" hint-placeholder-val="{{ false }}">
+          <button type="button" onClick="{{restore}}" style="align-self: flex-start; height: 24px; padding: 0; border: 0; background: transparent; font-size: 12px; font-weight: 500; color: {{accent}}">{{restoreLabel}}</button>
+        </sc-if>
+      </fieldset>
+
+      <!-- Today -->
+      <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 8px">
+        <legend style="padding: 0; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: {{accent}}">
+          <span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 3px; background: {{accent}}"></span>{{L.today}}
+          <span style="font-weight: 400; color: #6B6B74">· {{L.tapToAdd}}</span>
+        </legend>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px">
+          <sc-for list="{{todayChips}}" as="c" hint-placeholder-count="4">
+            <button type="button" class="tchip" aria-pressed="{{c.on}}" onClick="{{c.toggle}}" style="display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px 0 8px; border-radius: 15px; font-size: 13px; font-weight: 500; max-width: 300px; {{c.style}}">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{c.icon}}"></path></svg>
+              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{c.name}}</span>
+              <span style="flex: none; font-size: 11px; font-weight: 500; {{c.tagStyle}}">{{c.tag}}</span>
+            </button>
+          </sc-for>
+        </div>
+        <label style="display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 12px; border: 1px solid #E6E6EA; border-radius: 10px">
+          <span class="sr">{{L.addToday}}</span>
+          <input type="text" placeholder="{{L.addToday}}" style="flex: 1; border: 0; outline: none; background: transparent; font-size: 14px; padding: 0">
+        </label>
+      </fieldset>
+
+      <!-- Blockers -->
+      <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 8px">
+        <legend style="padding: 0; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #B42318">
+          <span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 3px; background: #DC2626"></span>{{L.blockers}}
+          <span style="font-weight: 400; color: #6B6B74">· {{L.optional}}</span>
+        </legend>
+        <div style="display: flex; flex-direction: column; gap: 8px; padding: 8px 8px 8px 12px; border: 1px solid #E6E6EA; border-radius: 10px">
+          <label style="display: flex; align-items: center">
+            <span class="sr">{{L.blockers}}</span>
+            <input type="text" placeholder="{{L.blockerPh}}" style="flex: 1; height: 28px; border: 0; outline: none; background: transparent; font-size: 14px; padding: 0">
+          </label>
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px">
+            <sc-if value="{{linked}}" hint-placeholder-val="{{ false }}">
+              <span style="display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 4px 0 8px; border: 1px solid #E6E6EA; border-radius: 6px; font-size: 12px">
+                <span style="width: 7px; height: 7px; border-radius: 4px; background: #0284C7"></span>{{L.linkedTask}}
+                <button type="button" onClick="{{toggleLink}}" aria-label="{{L.unlink}}" style="width: 20px; height: 20px; border: 0; border-radius: 4px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+              </span>
+            </sc-if>
+            <sc-if value="{{mentioned}}" hint-placeholder-val="{{ false }}">
+              <span style="display: inline-flex; align-items: center; gap: 4px; height: 26px; padding: 0 4px 0 3px; border-radius: 13px; background: {{accentSoft}}; color: {{accent}}; font-size: 12px; font-weight: 600">
+                <span style="width: 20px; height: 20px; border-radius: 10px; background: #CCFBF1; color: #115E59; font-size: 8px; display: flex; align-items: center; justify-content: center">{{L.batI}}</span>@{{L.batName}}
+                <button type="button" onClick="{{toggleMention}}" aria-label="{{L.unmention}}" style="width: 20px; height: 20px; border: 0; border-radius: 10px; background: transparent; color: inherit; display: flex; align-items: center; justify-content: center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+              </span>
+            </sc-if>
+            <span style="flex: 1"></span>
+            <button type="button" class="ghost" onClick="{{toggleLink}}" aria-pressed="{{linked}}" style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; font-size: 12px; font-weight: 500; color: #3F3F46">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"></path><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path></svg>{{L.linkTask}}
+            </button>
+            <button type="button" class="ghost" onClick="{{toggleMention}}" aria-pressed="{{mentioned}}" style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; font-size: 12px; font-weight: 500; color: #3F3F46">
+              <span aria-hidden="true" style="font-size: 13px">@</span>{{L.whoCanHelp}}
+            </button>
+          </div>
+        </div>
+      </fieldset>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 16px 12px 20px; border-top: 1px solid #EFEFF2; border-radius: 0 0 14px 14px; background: #FAFAFB">
+      <span style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #6B6B74">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>{{L.visibleTo}}
+      </span>
+      <span style="flex: 1"></span>
+      <button type="button" class="ghost" style="height: 32px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; font-size: 13px; font-weight: 500; color: #3F3F46">{{L.saveDraft}}</button>
+      <a href="Standup.dc.html" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px 0 12px; border-radius: 8px; background: {{accent}}; color: #FFFFFF; font-size: 13px; font-weight: 500">
+        {{L.post}}
+        <kbd style="font-family: inherit; font-size: 11px; line-height: 16px; padding: 0 5px; border-radius: 4px; background: rgba(255, 255, 255, 0.2); color: #FFFFFF">⌘ ↵</kbd>
+      </a>
+    </div>
+  </form>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"language":{"editor":"enum","default":"mn","options":["mn","en"]},"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"$preview":{"width":1440,"height":980}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: undefined, removed: {}, today: { t1: true, t2: true }, linked: false, mentioned: false };
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const lang = s.lang || this.props.language || 'mn';
+    const mn = lang === 'mn';
+    const pick = (pair) => (mn ? pair[0] : pair[1]);
+    const accent = this.props.accent ?? '#6E56CF';
+    const accentSoft = accent + '1A';
+    const STR = {
+      mn: {
+        myTasks: 'Миний ажлууд', standup: 'Стэндап', inbox: 'Мэдэгдэл', reports: 'Тайлан', language: 'Хэл',
+        groupName: 'Мобайл баг', date: 'Баасан, 10-р сарын 9', dueBy: '10:00-аас өмнө',
+        title: 'Таны стэндап', close: 'Хаах (Esc)',
+        yesterday: 'Өчигдөр', suggested: 'таны үйл ажиллагаанаас санал болгосон', addYesterday: 'Өөр зүйл нэмэх…',
+        today: 'Өнөөдөр', tapToAdd: 'дарж нэмнэ', addToday: 'Өнөөдөр өөр юу хийх вэ?',
+        blockers: 'Саад', optional: 'заавал биш', blockerPh: 'Юу таныг саатуулж байна вэ?',
+        linkTask: 'Ажил холбох', whoCanHelp: 'Хэн туслах вэ', linkedTask: 'Хадгалсан сагсны PRD бичих', unlink: 'Холбоосыг арилгах', unmention: 'Дурдалтыг арилгах',
+        batI: 'БО', batName: 'Бат О.',
+        visibleTo: 'Мобайл багийн 6 гишүүнд харагдана', saveDraft: 'Ноорог хадгалах', post: 'Нийтлэх'
+      },
+      en: {
+        myTasks: 'My Tasks', standup: 'Standup', inbox: 'Inbox', reports: 'Reports', language: 'Language',
+        groupName: 'Mobile team', date: 'Fri, Oct 9', dueBy: 'due by 10:00',
+        title: 'Your standup', close: 'Close (Esc)',
+        yesterday: 'Yesterday', suggested: 'suggested from your activity', addYesterday: 'Add something else…',
+        today: 'Today', tapToAdd: 'tap to add', addToday: 'Anything else today?',
+        blockers: 'Blockers', optional: 'optional', blockerPh: 'What’s slowing you down?',
+        linkTask: 'Link a task', whoCanHelp: 'Who can help', linkedTask: 'Write PRD: saved carts', unlink: 'Remove link', unmention: 'Remove mention',
+        batI: 'BO', batName: 'Bat O.',
+        visibleTo: 'Visible to the 6 people in Mobile team', saveDraft: 'Save draft', post: 'Post update'
+      }
+    };
+    const L = STR[lang] || STR.mn;
+    const langs = [{ code: 'mn', short: 'МН', full: 'Монгол' }, { code: 'en', short: 'EN', full: 'English' }].map((d) => ({
+      ...d, active: d.code === lang, pick: () => this.setState({ lang: d.code }),
+      style: d.code === lang ? 'background:#FFFFFF;color:#18181B;box-shadow:0 1px 2px rgba(24,24,27,0.08)' : 'background:transparent;color:#6B6B74'
+    }));
+
+    const KIND = {
+      done: [['Дуусгасан', 'Completed'], 'M5 12.5 9.5 17 19 7.5', 'background:#E8F5EC;color:#166534'],
+      review: [['Хяналтад шилжүүлсэн', 'Moved to review'], 'M5 12h14M13 6l6 6-6 6', 'background:' + accentSoft + ';color:' + accent],
+      comment: [['Сэтгэгдэл бичсэн', 'Commented on'], 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', 'background:#F1F1F3;color:#52525B']
+    };
+    const sugDefs = [
+      ['s1', 'done', ['Хуулийн хэлтэст промо кодын нөхцөлөөр хариулах', 'Reply to legal on promo-code terms']],
+      ['s2', 'review', ['Хадгалсан сагсны PRD бичих', 'Write PRD: saved carts']],
+      ['s3', 'comment', ['Төлбөрийн хуудас — респонсив байрлал', 'Checkout page — responsive layout']],
+      ['s4', 'done', ['Тэмүүлэнтэй таб самбарын хамрах хүрээг ярилцах', 'Tab bar scope check-in with Temuulen']]
+    ];
+    const removed = s.removed || {};
+    const suggestions = sugDefs.filter((d) => !removed[d[0]]).map(([id, k, task]) => ({
+      kind: pick(KIND[k][0]), icon: KIND[k][1], iconBg: KIND[k][2], task: pick(task),
+      removeLabel: (mn ? 'Хасах: ' : 'Remove: ') + pick(task),
+      remove: () => this.setState({ removed: { ...(this.state.removed || {}), [id]: true } })
+    }));
+    const nRemoved = sugDefs.length - suggestions.length;
+
+    const TAG = {
+      prog: [['Хийгдэж буй', 'In progress'], 'M12 3a9 9 0 1 0 9 9'],
+      due: [['Өнөөдөр дуусах', 'Due today'], 'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z'],
+      late: [['Хугацаа хэтэрсэн', 'Overdue'], 'M12 8v5M12 16h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z']
+    };
+    const chipDefs = [
+      ['t1', 'due', ['Хадгалсан сагсны PRD-г дуусгах', 'Finish PRD: saved carts']],
+      ['t2', 'late', ['Q4-ийн тэргүүлэх чиглэлийг батлах', 'Approve Q4 priorities']],
+      ['t3', 'prog', ['Танилцуулах урсгалыг шинэчлэх', 'Redesign onboarding flow']],
+      ['t4', 'due', ['Спринтийн тоймын тэмдэглэл', 'Sprint review notes']],
+      ['t5', 'prog', ['ТУЗ-д бэлдэх илтгэл', 'Board prep deck']]
+    ];
+    const tsel = s.today || {};
+    const todayChips = chipDefs.map(([id, k, name]) => {
+      const on = !!tsel[id];
+      return {
+        name: pick(name), tag: pick(TAG[k][0]), icon: on ? 'M5 12.5 9.5 17 19 7.5' : 'M12 5v14M5 12h14', on,
+        toggle: () => this.setState({ today: { ...(this.state.today || {}), [id]: !on } }),
+        style: on ? 'border:1px solid ' + accent + ';background:' + accentSoft + ';color:#18181B' : 'border:1px solid #E6E6EA;background:#FFFFFF;color:#3F3F46',
+        tagStyle: k === 'late' ? 'color:#B42318' : (k === 'due' ? 'color:#B45309' : 'color:#6B6B74')
+      };
+    });
+
+    return {
+      lang, L, langs, accent, accentSoft,
+      me: { initials: mn ? 'АБ' : 'AB' },
+      suggestions, hasRemoved: nRemoved > 0,
+      restoreLabel: mn ? nRemoved + ' хассан зүйлийг сэргээх' : 'Restore ' + nRemoved + ' removed',
+      restore: () => this.setState({ removed: {} }),
+      todayChips,
+      linked: !!s.linked, mentioned: !!s.mentioned,
+      toggleLink: () => this.setState({ linked: !this.state.linked }),
+      toggleMention: () => this.setState({ mentioned: !this.state.mentioned })
+    };
+  }
+}
+</script>
+</body>
+</html>

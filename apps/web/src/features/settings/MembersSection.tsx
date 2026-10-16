@@ -1,7 +1,7 @@
 import {
   MAX_CAPACITY_POINTS,
   emailSchema,
-  isAway,
+  currentAbsence,
   matchesName,
   type UpdateMember,
   type WorkspaceMember,
@@ -321,10 +321,8 @@ function MemberList({ workspaceId, canEdit }: { workspaceId: string; canEdit: bo
         }}
       />
       <AwayDialog
+        workspaceId={workspaceId}
         member={awayFor}
-        onSave={(value) => {
-          if (awayFor) update.mutate({ userId: awayFor.user.id, ...value });
-        }}
         onClose={() => {
           setAwayFor(null);
         }}
@@ -398,7 +396,7 @@ function MemberRow({
 }) {
   const { t } = useTranslation();
   const dates = useDates();
-  const away = isAway(member, dates.today);
+  const away = currentAbsence(member.absences, dates.today);
   const roleLabel = t(`settings.roles.${member.role}`);
   const online = useOnlineIds().has(member.user.id);
   return (
@@ -409,12 +407,12 @@ function MemberRow({
           {member.user.name}
           {isMe && <span className="font-normal text-muted"> {t('settings.members.you')}</span>}
           {online && <span className="sr-only"> · {t('shell.online')}</span>}
-          {away && member.awayUntil && (
+          {away && (
             <span
               className="ml-2 inline-flex h-5 items-center rounded-[10px] bg-chip px-2 text-[11px] font-medium text-2"
-              title={member.awayNote ?? undefined}
+              title={away.note ?? undefined}
             >
-              {t('members.away.badge', { date: dates.formatDate(member.awayUntil) })}
+              {t('members.away.badge', { date: dates.formatDate(away.until) })}
             </span>
           )}
         </span>

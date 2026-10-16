@@ -29,6 +29,8 @@ interface UiState {
   /** Expanded spaces in the sidebar tree; missing = collapsed. */
   openSpaces: Record<string, boolean>;
   lastWorkspaceId: string | null;
+  /** The standup group opened last (`/standup` goes there). */
+  lastStandupGroupId: string | null;
   /**
    * List groups the user collapsed or expanded, per list (`p:<projectId>` / `s:<spaceId>`) and
    * group (`status:<id>`, `assignee:<id>` …); missing = the group's default.
@@ -54,6 +56,7 @@ interface UiState {
   toggleSidebar: () => void;
   setSpaceOpen: (spaceId: string, open: boolean) => void;
   setLastWorkspace: (workspaceId: string) => void;
+  setLastStandupGroup: (groupId: string) => void;
   setGroupCollapsed: (list: string, group: string, collapsed: boolean) => void;
   openCreate: (defaults?: CreateDefaults) => void;
   closeCreate: () => void;
@@ -72,6 +75,7 @@ type UiData = Omit<
   | 'toggleSidebar'
   | 'setSpaceOpen'
   | 'setLastWorkspace'
+  | 'setLastStandupGroup'
   | 'setGroupCollapsed'
   | 'openCreate'
   | 'closeCreate'
@@ -89,6 +93,7 @@ export const initialUiState: UiData = {
   sidebarCollapsed: false,
   openSpaces: {},
   lastWorkspaceId: null,
+  lastStandupGroupId: null,
   collapsedGroups: {},
   createOpen: false,
   createDefaults: {},
@@ -120,6 +125,9 @@ export const useUiStore = create<UiState>()(
       },
       setLastWorkspace: (workspaceId) => {
         set({ lastWorkspaceId: workspaceId });
+      },
+      setLastStandupGroup: (groupId) => {
+        set({ lastStandupGroupId: groupId });
       },
       setGroupCollapsed: (list, group, collapsed) => {
         set((s) => ({
@@ -192,6 +200,7 @@ export const useUiStore = create<UiState>()(
         sidebarCollapsed: s.sidebarCollapsed,
         openSpaces: s.openSpaces,
         lastWorkspaceId: s.lastWorkspaceId,
+        lastStandupGroupId: s.lastStandupGroupId,
         collapsedGroups: s.collapsedGroups,
         createMore: s.createMore,
         lastCreateProjectId: s.lastCreateProjectId,

@@ -45,6 +45,7 @@ import {
 } from './data.js';
 import { createClock, type Clock } from './dates.js';
 import { buildHistory, planSprints, ubAt } from './history.js';
+import { buildStandups } from './standups.js';
 import { backfillReferences } from '../../tasks/references.js';
 
 export interface SeedOptions {
@@ -138,6 +139,13 @@ export async function runSeed(db: Db, options: SeedOptions): Promise<void> {
     // "Mentioned in": keys written in the seeded titles, descriptions and comments.
     await backfillReferences(tx);
     await tx.insert(schema.notifications).values(rows.notifications);
+    await tx.insert(schema.userAbsences).values(rows.absences);
+    await tx.insert(schema.standupGroups).values(rows.standupGroups);
+    await tx.insert(schema.standupGroupMembers).values(rows.standupGroupMembers);
+    await tx.insert(schema.standupEntries).values(rows.standupEntries);
+    await tx.insert(schema.standupBlockers).values(rows.standupBlockers);
+    await tx.insert(schema.standupReactions).values(rows.standupReactions);
+    await tx.insert(schema.standupReplies).values(rows.standupReplies);
   });
 
   console.log(
@@ -207,10 +215,6 @@ export function buildRows(
     title: p.title,
     capacityPoints: p.capacity,
     joinedAt: accountsCreated,
-    // Bayarmaa is on vacation this week (out-of-office badges, Workload "Away").
-    ...(ref === 'bay'
-      ? { awayUntil: addDays(clock.today, 6), awayNote: pick(['Амралт', 'Vacation']) }
-      : {}),
   }));
 
   // Spaces, projects, statuses, sprint, tags -----------------------------------------------------
@@ -739,8 +743,11 @@ export function buildRows(
     });
   }
 
+  const standups = buildStandups({ clock, pick, workspaceId, user, task });
+
   return {
     holidays,
+    ...standups,
     periods: [...periods, ...history.periods],
     memberships: [...memberships, ...history.memberships],
     users: users.map((u) => u.row),

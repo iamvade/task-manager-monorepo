@@ -31,9 +31,6 @@ export const workspaceMembers = pgTable(
      */
     deactivatedAt: timestamptz('deactivated_at'),
     deactivatedBy: uuid('deactivated_by').references(() => users.id, { onDelete: 'set null' }),
-    /** Out of office through this date (inclusive), with an optional note. */
-    awayUntil: date('away_until', { mode: 'string' }),
-    awayNote: text('away_note'),
   },
   (t) => [
     primaryKey({ columns: [t.workspaceId, t.userId] }),

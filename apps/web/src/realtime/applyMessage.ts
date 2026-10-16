@@ -8,6 +8,7 @@ import type {
   TaskStatusRef,
 } from '@kite/shared';
 import type { Query, QueryClient } from '@tanstack/react-query';
+import { refreshAfterAbsences } from '../api/absences';
 import { queryKeys } from '../api/queryKeys';
 import { TASK_MUTATION } from '../api/taskCache';
 import { useRealtimeStore, type EditedField } from '../stores/realtime';
@@ -168,6 +169,15 @@ export function createMessageHandler(queryClient: QueryClient) {
           mark(message.workspaceId, (p) => {
             p.tags = true;
           });
+          return;
+        case 'standup.groups.changed':
+          void queryClient.invalidateQueries({
+            queryKey: queryKeys.standupGroups(message.workspaceId),
+          });
+          void queryClient.invalidateQueries({ queryKey: ['standup-groups'] });
+          return;
+        case 'absences.changed':
+          void refreshAfterAbsences(queryClient, message.workspaceId);
           return;
         case 'notification.created':
           mark(message.workspaceId, (p) => {

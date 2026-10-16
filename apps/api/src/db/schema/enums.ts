@@ -5,6 +5,9 @@ import {
   NOTIFICATION_TYPES,
   PRIORITIES,
   SIZES,
+  SPEAKING_ORDERS,
+  STANDUP_ENTRY_STATUSES,
+  STANDUP_REACTIONS,
   STATUS_CATEGORIES,
   THEMES,
   WORKSPACE_ROLES,
@@ -20,3 +23,6 @@ export const taskSizeEnum = pgEnum('task_size', SIZES);
 export const statusCategoryEnum = pgEnum('status_category', STATUS_CATEGORIES);
 export const notificationTypeEnum = pgEnum('notification_type', NOTIFICATION_TYPES);
 export const notificationLevelEnum = pgEnum('notification_level', NOTIFICATION_LEVELS);
+export const speakingOrderEnum = pgEnum('speaking_order', SPEAKING_ORDERS);
+export const standupEntryStatusEnum = pgEnum('standup_entry_status', STANDUP_ENTRY_STATUSES);
+export const standupReactionEnum = pgEnum('standup_reaction', STANDUP_REACTIONS);

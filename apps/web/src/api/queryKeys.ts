@@ -7,6 +7,12 @@ export const queryKeys = {
   project: (projectId: string) => ['projects', projectId] as const,
   sprints: (projectId: string) => ['projects', projectId, 'sprints'] as const,
   tags: (workspaceId: string) => ['workspaces', workspaceId, 'tags'] as const,
+  /** A member's current and upcoming out-of-office periods. */
+  absences: (workspaceId: string, userId: string) =>
+    ['workspaces', workspaceId, 'absences', userId] as const,
+  absencesOf: (workspaceId: string) => ['workspaces', workspaceId, 'absences'] as const,
+  standupGroups: (workspaceId: string) => ['workspaces', workspaceId, 'standup-groups'] as const,
+  standupGroup: (groupId: string) => ['standup-groups', groupId] as const,
   archivedProjects: (workspaceId: string) =>
     ['workspaces', workspaceId, 'archived-projects'] as const,
   /** ⌘K results; under `workspaces` (task writes don't refresh it — results are short-lived). */

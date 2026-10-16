@@ -1,4 +1,4 @@
-import { isAway, type WorkspaceMember } from '@kite/shared';
+import { awayUntil, type WorkspaceMember } from '@kite/shared';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../auth/useAuth';
@@ -14,11 +14,10 @@ export function useMemberHint() {
   const { today, formatDate } = useDates();
   const meId = me?.user.id;
   return useCallback(
-    (member: Pick<WorkspaceMember, 'user' | 'title' | 'awayUntil'>): string | null => {
+    (member: Pick<WorkspaceMember, 'user' | 'title' | 'absences'>): string | null => {
       if (member.user.id === meId) return t('create.you');
-      if (isAway(member, today) && member.awayUntil) {
-        return t('picker.awayUntil', { date: formatDate(member.awayUntil) });
-      }
+      const until = awayUntil(member, today);
+      if (until) return t('picker.awayUntil', { date: formatDate(until) });
       return member.title;
     },
     [meId, t, today, formatDate],

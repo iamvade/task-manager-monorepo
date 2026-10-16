@@ -36,6 +36,7 @@ const viewRoutes = (level: 'project' | 'space'): RouteObject[] => [
 ];
 
 const reportsRoutes = () => import('./features/reports/ReportsRoutes');
+const standupPages = () => import('./features/standup/StandupPages');
 
 export const routes: RouteObject[] = [
   {
@@ -89,6 +90,20 @@ export const routes: RouteObject[] = [
                   () => import('./pages/SettingsPage'),
                   (m) => m.SettingsPage,
                 ),
+              },
+              {
+                path: '/standup',
+                children: [
+                  { index: true, lazy: page(standupPages, (m) => m.StandupIndexPage) },
+                  { path: ':groupId', lazy: page(standupPages, (m) => m.StandupGroupPage) },
+                  {
+                    path: ':groupId/settings',
+                    lazy: page(
+                      () => import('./features/standup/StandupSettingsView'),
+                      (m) => m.StandupSettingsPage,
+                    ),
+                  },
+                ],
               },
               {
                 path: '/t/:taskKey',

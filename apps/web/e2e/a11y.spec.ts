@@ -33,6 +33,9 @@ interface Ids {
   space: string;
   emptyProject: string;
   taskKey: string;
+  /** Mobile team (has posts) and Design team (empty state). */
+  mobileGroup: string;
+  designGroup: string;
 }
 
 async function lookup(page: Page): Promise<Ids> {
@@ -52,8 +55,22 @@ async function lookup(page: Page): Promise<Ids> {
   ).json()) as {
     key: string;
   }[];
-  if (!app || !portal || !space || !tasks[0]) throw new Error('seed data missing');
-  return { project: app.id, space: space.id, emptyProject: portal.id, taskKey: tasks[0].key };
+  const groups = (await (
+    await page.request.get(`/api/v1/workspaces/${ws}/standup-groups`)
+  ).json()) as { id: string; name: string }[];
+  const mobile = groups.find((g) => g.name === 'Mobile team');
+  const design = groups.find((g) => g.name === 'Design team');
+  if (!app || !portal || !space || !tasks[0] || !mobile || !design) {
+    throw new Error('seed data missing');
+  }
+  return {
+    project: app.id,
+    space: space.id,
+    emptyProject: portal.id,
+    taskKey: tasks[0].key,
+    mobileGroup: mobile.id,
+    designGroup: design.id,
+  };
 }
 
 const pages = (ids: Ids): [string, string][] => [
@@ -75,6 +92,9 @@ const pages = (ids: Ids): [string, string][] => [
   ['Reports · Workload', '/reports/workload'],
   ['Reports · People', '/reports/people'],
   ['Reports · empty', `/reports/overview?project=${ids.emptyProject}`],
+  ['Standup · group', `/standup/${ids.mobileGroup}`],
+  ['Standup · empty group', `/standup/${ids.designGroup}`],
+  ['Standup · settings', `/standup/${ids.mobileGroup}/settings`],
 ];
 
 test.describe('signed out', () => {
@@ -112,6 +132,7 @@ for (const scheme of ['light', 'dark'] as const) {
     });
 
     test('overlays', async ({ page }) => {
+      test.setTimeout(120_000);
       await page.goto('/my-tasks');
       const ids = await lookup(page);
 
@@ -180,6 +201,32 @@ for (const scheme of ['light', 'dark'] as const) {
         await page.goto(`/p/${ids.project}/list?sprint=none&task=APP-142`);
         await expect(page.getByRole('region', { name: 'Mentioned in' })).toBeVisible();
         await expectAccessible(page, `Drawer · Mentioned in (${scheme})`);
+        await page.keyboard.press('Escape');
+      });
+
+      await test.step('standup: group switcher, member menu, new group, time off', async () => {
+        await page.goto(`/standup/${ids.mobileGroup}`);
+        await page.getByRole('button', { name: /^Switch standup group/ }).click();
+        await expect(page.getByRole('listbox')).toBeVisible();
+        await expectAccessible(page, `Standup group switcher (${scheme})`);
+        await page.keyboard.press('Escape');
+
+        await page.goto(`/standup/${ids.mobileGroup}/settings`);
+        await page.getByRole('button', { name: 'Add members' }).click();
+        await expect(page.getByRole('listbox')).toBeVisible();
+        await expectAccessible(page, `Standup add members (${scheme})`);
+        await page.keyboard.press('Escape');
+
+        await page.getByRole('button', { name: 'New standup group' }).click();
+        await expect(page.getByRole('textbox', { name: 'Group name' }).last()).toBeVisible();
+        await expectAccessible(page, `New standup group (${scheme})`);
+        await page.keyboard.press('Escape');
+
+        await page.goto('/settings?tab=members');
+        await page.getByRole('button', { name: /^More actions for Mia/ }).click();
+        await page.getByRole('menuitem', { name: 'Set out of office…' }).click();
+        await expect(page.getByRole('dialog', { name: /^Out of office/ })).toBeVisible();
+        await expectAccessible(page, `Time off dialog (${scheme})`);
         await page.keyboard.press('Escape');
       });
 

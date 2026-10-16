@@ -96,7 +96,13 @@
     "themeLight": "Light",
     "themeDark": "Dark",
     "themeSystem": "System",
-    "loadError": "Couldn't load the sidebar."
+    "loadError": "Couldn't load the sidebar.",
+    "standup": "Standup",
+    "standupGroups": "Standup groups",
+    "notPostedToday": "You haven’t posted today",
+    "newStandupGroup": "New standup group",
+    "standupGroupName": "Group name",
+    "createStandupGroup": "Create group"
   },
   "header": {
     "breadcrumb": "Breadcrumb",
@@ -1472,13 +1478,21 @@
       "set": "Set out of office…",
       "titleOf": "Out of office: {{name}}",
       "label": "Out of office",
-      "hint": "Teammates see “Away” next to your name in pickers and Workload until this date.",
-      "until": "Away until",
+      "hint": "Teammates see “Away” next to your name in pickers, standups and Workload on these days.",
+      "until": "Until",
       "note": "Note (optional)",
       "notePlaceholder": "e.g. Vacation, back on Monday",
       "save": "Save",
-      "back": "I’m back",
-      "badge": "Away until {{date}}"
+      "badge": "Away until {{date}}",
+      "from": "From",
+      "none": "No time off planned.",
+      "add": "Add time off",
+      "addButton": "Add",
+      "edit": "Edit time off",
+      "editOf": "Edit time off: {{range}}",
+      "deleteOf": "Delete time off: {{range}}",
+      "deleted": "Time off {{range}} deleted",
+      "overlap": "This overlaps other time off."
     },
     "deactivate": {
       "action": "Deactivate…",
@@ -1501,6 +1515,129 @@
       "title_other": "Deactivated ({{count}})",
       "reactivate": "Reactivate",
       "back": "{{name}} is back in the workspace"
+    }
+  },
+  "standup": {
+    "switchGroup": "Switch standup group",
+    "groupSettings": "Group settings",
+    "weekdays": {
+      "mon": {
+        "short": "Mon",
+        "full": "Monday",
+        "range": "Mon"
+      },
+      "tue": {
+        "short": "Tue",
+        "full": "Tuesday",
+        "range": "Tue"
+      },
+      "wed": {
+        "short": "Wed",
+        "full": "Wednesday",
+        "range": "Wed"
+      },
+      "thu": {
+        "short": "Thu",
+        "full": "Thursday",
+        "range": "Thu"
+      },
+      "fri": {
+        "short": "Fri",
+        "full": "Friday",
+        "range": "Fri"
+      },
+      "sat": {
+        "short": "Sat",
+        "full": "Saturday",
+        "range": "Sat"
+      },
+      "sun": {
+        "short": "Sun",
+        "full": "Sunday",
+        "range": "Sun"
+      }
+    },
+    "daysRange": "{{from}}–{{to}}",
+    "zone": "{{city}} ({{offset}})",
+    "settings": {
+      "breadcrumb": "Breadcrumb",
+      "title": "Settings",
+      "cancel": "Cancel",
+      "save": "Save changes",
+      "saved": "Changes saved",
+      "general": "General",
+      "generalSub": "The group name is visible to all members.",
+      "nameLabel": "Group name",
+      "nameRequired": "Give the group a name.",
+      "members": "Members",
+      "membersSub_one": "{{count}} member · the facilitator starts the meeting",
+      "membersSub_other": "{{count}} members · the facilitator starts the meeting",
+      "facilitator": "Facilitator",
+      "addMember": "Add by name or email…",
+      "addMemberLabel": "Add members",
+      "removeMember": "Remove {{name}}",
+      "memberActions": "{{name}} — actions",
+      "makeFacilitator": "Make facilitator",
+      "removeFacilitator": "Remove as facilitator",
+      "noMembers": "No members yet.",
+      "schedule": "Schedule",
+      "scheduleSub": "When people post, get reminded and meet.",
+      "days": "Standup days",
+      "noDays": "Pick at least one day.",
+      "postBy": "Post by",
+      "reminder": "Reminder",
+      "noReminder": "No reminder",
+      "meetAt": "Meeting",
+      "noMeeting": "No meeting (async only)",
+      "timeOrder": "The reminder must be before “Post by”, and the meeting at or after it.",
+      "timezone": "Timezone",
+      "tzHint": "Members in other timezones see times in their own local time.",
+      "yourTime": "In your time ({{zone}}): {{times}}",
+      "yourPostBy": "post by {{time}}",
+      "yourReminder": "reminder {{time}}",
+      "yourMeeting": "meeting {{time}}",
+      "meeting": "Meeting mode",
+      "meetingSub": "Settings for the screen-shared meeting.",
+      "timePer": "Time per person",
+      "minutes": "{{count}} min",
+      "order": "Speaking order",
+      "orders": {
+        "posting_order": "Posting order",
+        "alphabetical": "Alphabetical",
+        "random": "Random"
+      },
+      "blockersFirst": "Show blockers first",
+      "blockersFirstHint": "Collects every blocker at the top of the group page.",
+      "markTasks": "Mark linked tasks as “Blocked”",
+      "markTasksHint": "Tasks linked to a blocker show a marker in List and Board.",
+      "readOnly": "Only workspace admins and the group’s facilitator can change these settings.",
+      "archive": "Archive group",
+      "archiveHint": "Hides the group from the sidebar. Its updates are kept.",
+      "archived": "“{{name}}” archived"
+    },
+    "empty": {
+      "newBadge": "New",
+      "title": "Start {{name}}’s first standup",
+      "body": "Everyone writes a short note on what they did yesterday, what’s next today and what’s in the way. Blockers rise to the top with the person who can help.",
+      "members_one": "{{count}} member",
+      "members_other": "{{count}} members",
+      "scheduleReminder": "{{days}} · reminder at {{time}} · {{zone}}",
+      "schedulePostBy": "{{days}} · post by {{time}} · {{zone}}",
+      "ctaWrite": "Write the first update",
+      "writeSoon": "Writing updates arrives in the next release.",
+      "ctaInvite": "Invite members",
+      "how": "How it works",
+      "step1": "Write",
+      "step1Desc": "A reminder at {{time}}. Suggestions from yesterday’s work are pre-filled.",
+      "step2": "Read & help",
+      "step2Desc": "Blockers show first. React or reply in a short thread.",
+      "step3": "Meet",
+      "step3Desc": "Optionally run “Start standup” to go through people one by one on screen.",
+      "noGroupsTitle": "Create a standup group",
+      "noGroupsBody": "A standup group is a team that posts a short daily update on its own schedule: what they did, what’s next and what’s in the way.",
+      "noGroupsMember": "Ask a workspace admin to create a group and add you.",
+      "comingSoon": "Today’s updates, blockers and the meeting view arrive in the next release.",
+      "notMember": "You’re not in this group."
     }
   }
 }

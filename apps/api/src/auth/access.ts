@@ -1,4 +1,4 @@
-import { canManageCreated, type WorkspaceRole } from '@kite/shared';
+import { canManageCreated, canManageStandupGroup, type WorkspaceRole } from '@kite/shared';
 import { and, eq } from 'drizzle-orm';
 import type { FastifyRequest } from 'fastify';
 import {
@@ -6,6 +6,8 @@ import {
   comments,
   projects,
   spaces,
+  standupGroups,
+  userAbsences,
   subtasks,
   tags,
   tasks,
@@ -262,4 +264,55 @@ export async function findTaskIdByKey(
     );
   }
   return first.id;
+}
+
+/**
+ * A standup group in a workspace the caller belongs to (every member sees every group); 404
+ * otherwise. `manage` also requires admin/owner or the group's facilitator (403).
+ */
+export async function loadStandupGroupAccess(
+  request: FastifyRequest,
+  groupId: string,
+  { manage = false } = {},
+) {
+  const { user } = requireAuth(request);
+  const [group] = await request.server.db
+    .select()
+    .from(standupGroups)
+    .where(eq(standupGroups.id, groupId))
+    .limit(1);
+  if (!group) throw httpError(404, 'NOT_FOUND', 'Standup group not found');
+  const role = await roleIn(request, group.workspaceId, 'Standup group');
+  if (manage && !canManageStandupGroup(role, group.facilitatorId, user.id)) {
+    throw httpError(403, 'FORBIDDEN', 'You do not have permission to do this');
+  }
+  return { group, role };
+}
+
+/**
+ * An absence of someone in `workspaceId` (404 otherwise, also when the caller isn't a member).
+ * Changing it is for the person themselves or the workspace's admins/owner (403).
+ */
+export async function loadAbsenceAccess(
+  request: FastifyRequest,
+  workspaceId: string,
+  absenceId: string,
+) {
+  const { user } = requireAuth(request);
+  const caller = await requireWorkspaceMember(request, workspaceId);
+  const [row] = await request.server.db
+    .select({ absence: userAbsences })
+    .from(userAbsences)
+    .innerJoin(
+      workspaceMembers,
+      and(
+        eq(workspaceMembers.userId, userAbsences.userId),
+        eq(workspaceMembers.workspaceId, workspaceId),
+      ),
+    )
+    .where(eq(userAbsences.id, absenceId))
+    .limit(1);
+  if (!row) throw httpError(404, 'NOT_FOUND', 'Absence not found');
+  if (row.absence.userId !== user.id) checkRole(caller.role, 'admin');
+  return row.absence;
 }

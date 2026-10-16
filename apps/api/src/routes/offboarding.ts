@@ -22,6 +22,7 @@ import {
 import { httpError } from '../errors.js';
 import { listMembers } from '../projects/members.js';
 import { revalidate } from '../realtime/plugin.js';
+import { handOverFacilitator } from '../standups/groups.js';
 import { mutateTasks } from '../tasks/mutation.js';
 import { applyTaskPatch, setTaskAssignees } from '../tasks/patch.js';
 import { requireMembers } from '../tasks/refs.js';
@@ -119,7 +120,7 @@ export const offboardingRoutes: FastifyPluginCallbackZod = (app, _opts, done) =>
         tags: ['Workspaces'],
         summary: 'Deactivate a member (offboarding)',
         description:
-          'Admin or owner. With `reassignTo` (an active member) the leaver is replaced by that person on their open tasks (as assignee and reviewer) and as project lead, with the usual activity rows; without it they are just removed from those. Then the membership is deactivated: no access to the workspace (404 everywhere, their sockets close), hidden from pickers, @mentions and Workload, their follows dropped; their history stays. 409 `DEACTIVATE_OWNER` for the owner, `DEACTIVATE_SELF` for yourself; 400 `INVALID_REFERENCE` for a bad `reassignTo`.',
+          'Admin or owner. With `reassignTo` (an active member) the leaver is replaced by that person on their open tasks (as assignee and reviewer) and as project lead and standup facilitator (joining those groups), with the usual activity rows; without it they are just removed from those. Then the membership is deactivated: no access to the workspace (404 everywhere, their sockets close), hidden from pickers, @mentions and Workload, their follows dropped; their history stays. 409 `DEACTIVATE_OWNER` for the owner, `DEACTIVATE_SELF` for yourself; 400 `INVALID_REFERENCE` for a bad `reassignTo`.',
         params,
         body: deactivateMemberSchema,
         response: {
@@ -184,6 +185,7 @@ export const offboardingRoutes: FastifyPluginCallbackZod = (app, _opts, done) =>
           .update(projects)
           .set({ leadId: reassignTo })
           .where(and(eq(projects.workspaceId, workspaceId), eq(projects.leadId, userId)));
+        await handOverFacilitator(tx, workspaceId, userId, reassignTo);
         await tx
           .delete(taskFollowers)
           .where(
