@@ -222,6 +222,33 @@ for (const scheme of ['light', 'dark'] as const) {
         await expectAccessible(page, `Standup group switcher (${scheme})`);
         await page.keyboard.press('Escape');
 
+        // The group page: reactions, the @-popup of a reply, the write modal, a past day.
+        await page.goto(`/standup/${ids.mobileGroup}`);
+        const card = page.getByRole('article').first();
+        await expect(card).toBeVisible();
+        const addReaction = card.getByRole('button', { name: 'Add reaction' });
+        if (await addReaction.count()) {
+          await addReaction.click();
+          await expectAccessible(page, `Standup add reaction (${scheme})`);
+          await page.keyboard.press('Escape');
+        }
+        await card.getByRole('combobox', { name: 'Reply' }).fill('@');
+        await expect(page.getByRole('listbox', { name: 'Mention suggestions' })).toBeVisible();
+        await expectAccessible(page, `Standup reply mentions (${scheme})`);
+        await card.getByRole('combobox', { name: 'Reply' }).fill('');
+        const write = page.getByRole('link', { name: /^(Write|Edit) update$/ }).first();
+        if (await write.count()) {
+          await write.click();
+          await expect(page.getByRole('dialog', { name: 'Your standup' })).toBeVisible();
+          await expect(page.getByRole('group', { name: /^Today/ })).toBeVisible();
+          await expectAccessible(page, `Standup write modal (${scheme})`);
+          // Nothing changed: closing saves no draft.
+          await page.keyboard.press('Escape');
+        }
+        await page.getByRole('link', { name: 'Previous day' }).click();
+        await expect(page.getByRole('heading', { name: 'Updates', exact: true })).toBeVisible();
+        await expectAccessible(page, `Standup past day (${scheme})`);
+
         await page.goto(`/standup/${ids.mobileGroup}/settings`);
         await page.getByRole('button', { name: 'Add members' }).click();
         await expect(page.getByRole('listbox')).toBeVisible();

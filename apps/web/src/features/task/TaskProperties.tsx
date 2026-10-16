@@ -8,6 +8,7 @@ import { useRecentEdit, type EditedField } from '../../stores/realtime';
 import { useAuth } from '../../auth/useAuth';
 import { useMoveTaskToProject, useSetAssignees, useSetTags, useUpdateTask } from '../../api/tasks';
 import {
+  BanIcon,
   BellIcon,
   CalendarIcon,
   ChevronDownIcon,
@@ -45,6 +46,7 @@ import { TagPicker } from '../pickers/TagPicker';
 import { sprintLabel } from '../../lib/sprint';
 import { SizeControl } from './SizeProperty';
 import { useTaskView } from './TaskContext';
+import { BlockedValue } from '../standup/BlockedMarker';
 
 /** One row of the 112px-label grid (36px, 14px icon + label in `--text-muted`). */
 function PropertyRow({
@@ -206,6 +208,11 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
         <EditedBy field="status" />
       </PropertyRow>
 
+      {task.blocked && task.status.category !== 'done' && (
+        <PropertyRow icon={<BanIcon size={14} />} label={t('task.blocked.label')}>
+          <BlockedValue blocked={task.blocked} />
+        </PropertyRow>
+      )}
       <PropertyRow icon={<PersonIcon size={14} />} label={t('drawer.assignees')}>
         {task.assignees.map((user) => (
           <span

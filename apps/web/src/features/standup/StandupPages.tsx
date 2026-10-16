@@ -1,18 +1,16 @@
-import { canCreateStandupGroup, type StandupGroup } from '@kite/shared';
+import { canCreateStandupGroup } from '@kite/shared';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, Navigate, useNavigate, useParams } from 'react-router';
+import { Navigate, useNavigate, useParams } from 'react-router';
 import { useCreateStandupGroup, useStandupGroup, useStandupGroups } from '../../api/standups';
 import { useCurrentWorkspace } from '../../api/workspaces';
 import { ErrorState } from '../../components/ErrorState';
-import { SlidersIcon } from '../../components/icons';
 import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { Skeleton } from '../../components/ui/Skeleton';
-import { Tooltip } from '../../components/ui/Tooltip';
 import { useUiStore } from '../../stores/ui';
+import { StandupDayView, WriteOverEmpty } from './day/StandupDayView';
 import { StandupEmptyView } from './StandupEmptyView';
-import { GroupSwitcher, StandupHeader } from './StandupHeader';
 import { useWorkspaceRole } from './useStandup';
 
 function Loading() {
@@ -85,9 +83,9 @@ function CreateFirstGroup({ workspaceId }: { workspaceId: string }) {
   );
 }
 
-/** `/standup/:groupId`: the empty state until someone posts; the group page comes next. */
+/** `/standup/:groupId/:date?`: the empty state until someone posts, then the group page. */
 export function StandupGroupPage() {
-  const { groupId } = useParams();
+  const { groupId, date } = useParams();
   const workspace = useCurrentWorkspace();
   const group = useStandupGroup(groupId);
   const groups = useStandupGroups(workspace?.id);
@@ -99,48 +97,13 @@ export function StandupGroupPage() {
 
   if (group.isPending) return <Loading />;
   if (group.isError) return <ErrorState error={group.error} />;
-  if (!group.data.hasPosts) {
-    return <StandupEmptyView group={group.data} groups={groups.data ?? []} />;
+  if (!group.data.hasPosts && date === undefined) {
+    return (
+      <>
+        <StandupEmptyView group={group.data} groups={groups.data ?? []} />
+        <WriteOverEmpty group={group.data} />
+      </>
+    );
   }
-  return <GroupPlaceholder group={group.data} groups={groups.data ?? []} />;
-}
-
-/** Header of the group page (Standup.dc.html) with a note until posts can be read here. */
-function GroupPlaceholder({
-  group,
-  groups,
-}: {
-  group: StandupGroup;
-  groups: readonly StandupGroup[];
-}) {
-  const { t } = useTranslation();
-  return (
-    <div className="flex min-h-full flex-col">
-      <StandupHeader
-        left={<GroupSwitcher group={group} groups={groups} />}
-        right={
-          <Tooltip content={t('standup.groupSettings')}>
-            {(props) => (
-              <Link
-                {...props}
-                to={`/standup/${group.id}/settings`}
-                aria-label={t('standup.groupSettings')}
-                className="flex size-9 items-center justify-center rounded-[8px] text-2 hover:bg-hover"
-              >
-                <SlidersIcon size={16} />
-              </Link>
-            )}
-          </Tooltip>
-        }
-      />
-      <EmptyState
-        title={group.name}
-        body={
-          group.isMember
-            ? t('standup.empty.comingSoon')
-            : `${t('standup.empty.notMember')} ${t('standup.empty.comingSoon')}`
-        }
-      />
-    </div>
-  );
+  return <StandupDayView group={group.data} groups={groups.data ?? []} date={date} />;
 }

@@ -17,6 +17,8 @@ Shadows: only the `--shadow-*` and `--ring-soft` tokens (`--shadow-float` is the
 
 Layout: sidebar 248px (min 220px), collapsible to a 56px icon rail. Top bar 56px + 40px view tabs. List rows 44px (comfortable) / 36px (compact). Task drawer 40% width, min 520px, from the right. Quick-create modal 600px wide, 112px from the top.
 
+Standup tokens: `--danger-card-divider` (blocker row dividers), `--blocked-card-border` (Board card of a blocked task, #F3C9C4), `--card-footer` (update card footer, #FCFCFD), `--out-avatar` (out-of-office avatar, #E4E4E7); classes `border-danger-divider`, `border-blocked`, `bg-card-footer`, `bg-out-avatar`.
+
 Token values (light/dark: backgrounds, surfaces, borders, text, accent and accent-ink per accent, danger/warning/success and their soft variants, `--on-danger` (text on a solid danger fill: white in light, dark ink in dark for contrast), chart colors) live in `apps/web/src/styles/tokens.css`; a value the designs don't draw is derived when needed.
 
 Implementation: raw values live in `apps/web/src/styles/tokens.css` (`:root` light, `:root[data-theme='dark']`); `index.css` maps them into Tailwind v4 property namespaces so classes read like the tokens: `bg-surface`, `bg-sidebar`, `bg-subtle`, `bg-hover`, `bg-chip`, `bg-accent-soft` · `text-default`, `text-2`, `text-3`, `text-muted`, `text-icon`, `text-faint`, `text-accent-ink`, `text-due-*` · `border-default`, `border-control`, `border-subtle`, `border-strong` · `shadow-popover` etc. Palette keys → `.pal-{avatar|space|project|tag}-{key}` + `.pal-fill` / `.pal-dot` (`styles/palette.css`). Base element styles sit in `@layer base` so utilities always win.

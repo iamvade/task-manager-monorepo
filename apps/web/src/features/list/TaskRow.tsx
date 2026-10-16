@@ -32,6 +32,7 @@ import { SizePicker } from '../pickers/SizePicker';
 import { StatusPicker } from '../pickers/StatusPicker';
 import { useSizeTitle } from '../task/sizeTitle';
 import { gridColumns, isDone, useListActions } from './ListContext';
+import { BlockedPill } from '../standup/BlockedMarker';
 
 interface TaskRowProps {
   task: TaskListItem;
@@ -262,6 +263,7 @@ export function TaskRow({
         >
           {task.title}
         </Link>
+        {task.blocked && !done && <BlockedPill blocked={task.blocked} />}
         {task.subtaskProgress.total > 0 && (
           <span
             className="flex flex-none items-center gap-1 text-[12px] text-muted"

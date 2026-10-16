@@ -488,6 +488,18 @@ Async daily standups per **standup group** (a team of workspace members with its
   - Order: my placeholder first, then posts with blockers, then the rest by post time, then out-of-office people. The design shows Tem 09:20, Dorj 09:41, Sara 09:05, Bat 09:12, Mia.
 - "…" menu (not drawn): for my own post, Edit / Delete / Copy link; for other people's posts, Copy link.
 
+**Built (2026-10-16, phase 3)** — decisions taken while building the group page, write modal, My Tasks card and markers:
+- Route `/standup/:groupId/:date?` (not `?date=`); ‹ › go to `prevDate` / `nextDate` (the bare route for today). On a weekend or holiday the page opens the latest standup day with "No standup today · next standup Mon, Oct 12" (`upcomingDate`).
+- "Due by 10:00 · meeting at 10:15" sits in the strip's left column as drawn. Standup times are 24h `HH:mm` in both languages (`formatClock`), in the viewer's zone.
+- Past days are read-only except replies: no Write / placeholder / Your turn, reaction pills show counts and who reacted but don't toggle, no Add reaction, the resolve checkbox is disabled; "Not yet" reads "No update". (The API still allows reactions and resolving there.)
+- Out of office avatar: #E4E4E7 with `--text-3` initials and no 70% opacity (the drawn #A1A1AA / opacity fail contrast); the strip's "Out" chip uses `--text-3`.
+- Blockers section rows add a "N replies" toggle with the blocker's thread and its own reply field (`blockerId`); entry cards keep all of the update's replies. Reaction pill tooltips name who reacted; "Add reaction" opens the three drawn reactions. Replies: own ones get Edit / Delete (Delete asks, like comments); the reply field has an @-popup of group members.
+- "…" menu: Copy link (`#entry-…`) for everyone, plus Edit update on my own post while editable (no Delete: the API has no entry delete).
+- "Start standup" is drawn but `aria-disabled` with a tooltip until live mode ships; non-members see the header and "Only members of this group can read its updates."
+- Write modal: opens over the page with `?write=1`; Yesterday pre-filled from suggestions (or my saved draft/post), Today chips start unselected (Q11 still open), several blockers ("Add another blocker"), Link a task = my suggested tasks, then ⌘K search; Who can help = the people picker over group members (me excluded). Esc / × / scrim save a draft when something changed (a posted update closes without saving). The shadow reuses `--shadow-modal`.
+- My Tasks: one card for every group still waiting for me (not one card per group); several groups list one block each (name, due/count line, avatar row, buttons).
+- Blocked markers: the Board row is plain text with a `title` (the card is the link; a nested link fails axe); List pill and drawer line link to the standup day. Mongolian tooltip avoids inflecting names: "{text} — Тэмүүлэн стэндапдаа бичсэн · 10-р сарын 9"; outside the group "Гацсан · «Мобайл баг» бүлгийн стэндапаас, …". New tokens: `--danger-card-divider` #F8E3E0, `--blocked-card-border` #F3C9C4, `--card-footer` #FCFCFD, `--out-avatar` #E4E4E7 (dark derived).
+
 ### 5.3 Write update — `StandupWrite.dc.html` (desktop modal)
 - Over the group page. Scrim rgba(24,24,27,.32) (click closes). `role=dialog` form, 640px, 56px from the top, radius 14, 1px border, shadow `0 24px 64px rgba(24,24,27,.20)` (stronger than `--shadow-modal`; add a token or reuse the modal one, TBD in build).
 - **Header** (padding 16 16 12 20, bottom border #F1F1F3): a 32px avatar, h2 16/600 "Your standup", 12px muted "Mobile team · Fri, Oct 9 · due by 10:00", and an Esc kbd + × ("Close (Esc)"). The design also puts an МН/EN switch here; that's a preview control, so leave it out.

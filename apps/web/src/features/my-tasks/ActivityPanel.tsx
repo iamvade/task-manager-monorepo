@@ -69,7 +69,7 @@ export function ActivityPanel({ items, onShowOlder, loadingOlder }: ActivityPane
   return (
     <aside
       aria-labelledby="recent-activity"
-      className="flex max-w-[360px] min-w-0 flex-[1_1_300px] flex-col overflow-hidden rounded-[12px] border border-default"
+      className="flex min-w-0 flex-col overflow-hidden rounded-[12px] border border-default"
     >
       <div className="flex h-12 items-center justify-between gap-3 border-b border-subtle px-4">
         <h2 id="recent-activity" className="m-0 truncate text-[14px] leading-5 font-semibold">

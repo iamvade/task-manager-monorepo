@@ -197,6 +197,22 @@ export const standupTodayItemViewSchema = standupTodayItemSchema
   .meta({ id: 'StandupTodayItemView' });
 export type StandupTodayItemView = z.infer<typeof standupTodayItemViewSchema>;
 
+export const standupReplySchema = z
+  .object({
+    id: z.uuid(),
+    entryId: z.uuid(),
+    /** Set when it answers one blocker of the update. */
+    blockerId: z.uuid().nullable(),
+    author: userRefSchema,
+    /** Plain text; `@Name` of each mentioned person appears in it. */
+    body: z.string(),
+    mentions: z.array(userRefSchema),
+    createdAt: z.iso.datetime(),
+    editedAt: z.iso.datetime().nullable(),
+  })
+  .meta({ id: 'StandupReply' });
+export type StandupReply = z.infer<typeof standupReplySchema>;
+
 export const standupBlockerSchema = z
   .object({
     id: z.uuid(),
@@ -213,6 +229,8 @@ export const standupBlockerSchema = z
     /** The caller may resolve or reopen it (author, helpers, facilitator, admins in the group). */
     canResolve: z.boolean(),
     createdAt: z.iso.datetime(),
+    /** Replies that answer this blocker, oldest first (also in the entry's `replies`). */
+    replies: z.array(standupReplySchema),
   })
   .meta({ id: 'StandupBlocker' });
 export type StandupBlocker = z.infer<typeof standupBlockerSchema>;
@@ -223,25 +241,11 @@ export const standupReactionSummarySchema = z
     count: z.number().int(),
     /** The caller reacted with it. */
     mine: z.boolean(),
+    /** Who reacted with it, earliest first. */
+    users: z.array(userRefSchema),
   })
   .meta({ id: 'StandupReactionSummary' });
 export type StandupReactionSummary = z.infer<typeof standupReactionSummarySchema>;
-
-export const standupReplySchema = z
-  .object({
-    id: z.uuid(),
-    entryId: z.uuid(),
-    /** Set when it answers one blocker of the update. */
-    blockerId: z.uuid().nullable(),
-    author: userRefSchema,
-    /** Plain text; `@Name` of each mentioned person appears in it. */
-    body: z.string(),
-    mentions: z.array(userRefSchema),
-    createdAt: z.iso.datetime(),
-    editedAt: z.iso.datetime().nullable(),
-  })
-  .meta({ id: 'StandupReply' });
-export type StandupReply = z.infer<typeof standupReplySchema>;
 
 export const standupEntrySchema = z
   .object({
@@ -295,6 +299,8 @@ export const standupDaySchema = z
     /** The standup days before and after `date` (`nextDate` is null past today). */
     prevDate: dateSchema.nullable(),
     nextDate: dateSchema.nullable(),
+    /** The first standup day on or after the group's today ("Next standup Mon, Oct 12"). */
+    upcomingDate: dateSchema.nullable(),
     /** The caller can still write or edit their update for this day. */
     editable: z.boolean(),
     /** The post-by and meeting times of that day as instants (null when no meeting). */

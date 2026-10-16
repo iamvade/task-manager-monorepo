@@ -5,7 +5,7 @@ import { paletteClass } from '../../lib/palette';
 interface ProjectDotProps {
   /** Palette key, `accent` (active sidebar project) or `inactive` (sidebar #C4C4CC). */
   color: PaletteKey | 'accent' | 'inactive';
-  size?: 6 | 8;
+  size?: 6 | 7 | 8;
 }
 
 export function ProjectDot({ color, size = 6 }: ProjectDotProps) {

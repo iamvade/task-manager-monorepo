@@ -95,7 +95,7 @@ export const routes: RouteObject[] = [
                 path: '/standup',
                 children: [
                   { index: true, lazy: page(standupPages, (m) => m.StandupIndexPage) },
-                  { path: ':groupId', lazy: page(standupPages, (m) => m.StandupGroupPage) },
+                  { path: ':groupId/:date?', lazy: page(standupPages, (m) => m.StandupGroupPage) },
                   {
                     path: ':groupId/settings',
                     lazy: page(

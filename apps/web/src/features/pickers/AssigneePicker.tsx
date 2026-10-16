@@ -26,6 +26,9 @@ interface AssigneePickerProps {
   noneLabel?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /** Wording for other uses (standup "Who can help"): the search field and the picked group. */
+  searchPlaceholder?: string;
+  pickedLabel?: string;
 }
 
 const toRef = ({ id, name, initials, avatarColor }: UserRef): UserRef => ({
@@ -54,6 +57,8 @@ export function AssigneePicker({
   noneLabel,
   open,
   onOpenChange,
+  searchPlaceholder,
+  pickedLabel,
 }: AssigneePickerProps) {
   const { t } = useTranslation();
   const { me } = useAuth();
@@ -114,7 +119,7 @@ export function AssigneePicker({
           getLabel={(m) => m?.user.name ?? none}
           label={t('picker.assigneeLabel')}
           search={{
-            placeholder: t('create.assignTo'),
+            placeholder: searchPlaceholder ?? t('create.assignTo'),
             // Across scripts: "Bat" finds Бат-Эрдэнэ, "Цогт" finds Tsogt.
             filter: (m, q) => matchesName(m?.user.name ?? none, q),
           }}
@@ -122,7 +127,7 @@ export function AssigneePicker({
             grouped
               ? (m) =>
                   m && pinned.has(m.user.id)
-                    ? t('picker.assigned')
+                    ? (pickedLabel ?? t('picker.assigned'))
                     : m && (m.user.id === meId || teamIds?.has(m.user.id))
                       ? t('picker.projectTeam')
                       : t('picker.others')

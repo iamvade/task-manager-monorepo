@@ -15,6 +15,10 @@ export const queryKeys = {
   /** A group's settings; prefix of its days, so one invalidation refreshes both. */
   standupGroup: (groupId: string) => ['standup-groups', groupId] as const,
   standupDay: (groupId: string, date: string) => ['standup-groups', groupId, 'days', date] as const,
+  standupDays: (groupId: string) => ['standup-groups', groupId, 'days'] as const,
+  /** My Yesterday rows and Today chips (write modal); refreshed with the group. */
+  standupSuggestions: (groupId: string, date: string) =>
+    ['standup-groups', groupId, 'suggestions', date] as const,
   archivedProjects: (workspaceId: string) =>
     ['workspaces', workspaceId, 'archived-projects'] as const,
   /** ⌘K results; under `workspaces` (task writes don't refresh it — results are short-lived). */

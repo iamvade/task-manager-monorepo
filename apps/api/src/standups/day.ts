@@ -121,6 +121,9 @@ export async function buildStandupDay(
     isStandupDay: meets,
     prevDate: previousStandupDay(group, date, holidays),
     nextDate: next && next <= today ? next : null,
+    upcomingDate: isStandupDay(group, today, holidays)
+      ? today
+      : nextStandupDay(group, today, holidays),
     editable: date === today && meets && group.archivedAt === null && dto.isMember,
     postByAt: postByInstant(group, date).toISOString(),
     meetingAt: group.meetingAt
