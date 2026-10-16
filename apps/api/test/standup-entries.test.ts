@@ -177,9 +177,9 @@ describe('standup entries', () => {
       ['Today blocker', '2026-10-08'],
     ]);
     expect(day.entries[0]?.reactions).toEqual([
-      { emoji: 'thumbs_up', count: 0, mine: false },
-      { emoji: 'eyes', count: 0, mine: false },
-      { emoji: 'heart', count: 0, mine: false },
+      { emoji: 'thumbs_up', count: 0, mine: false, users: [] },
+      { emoji: 'eyes', count: 0, mine: false, users: [] },
+      { emoji: 'heart', count: 0, mine: false, users: [] },
     ]);
 
     // Resolved earlier blockers no longer carry over; resolving is for the author, helpers,
@@ -279,10 +279,21 @@ describe('standup entries', () => {
     }
     const off = await w.anu.api('DELETE', `/standup-entries/${entry.id}/reactions/thumbs_up`);
     expect(off.json()).toEqual([
-      { emoji: 'thumbs_up', count: 1, mine: false },
-      { emoji: 'eyes', count: 0, mine: false },
-      { emoji: 'heart', count: 0, mine: false },
+      {
+        emoji: 'thumbs_up',
+        count: 1,
+        mine: false,
+        users: [expect.objectContaining({ id: w.dorj.user.id, name: 'Dorj Enkh' })],
+      },
+      { emoji: 'eyes', count: 0, mine: false, users: [] },
+      { emoji: 'heart', count: 0, mine: false, users: [] },
     ]);
+    clock.set('2026-10-08T01:05:00Z');
+    await w.sara.api('PUT', `/standup-entries/${entry.id}/reactions/thumbs_up`);
+    const pills = (await w.day()).entries[0]?.reactions[0];
+    // Who reacted, earliest first.
+    expect(pills?.users.map((u) => u.id)).toEqual([w.dorj.user.id, w.sara.user.id]);
+    await w.sara.api('DELETE', `/standup-entries/${entry.id}/reactions/thumbs_up`);
 
     const res = await w.dorj.api('POST', `/standup-entries/${entry.id}/replies`, {
       body: '@Anu @Oyun look',
@@ -310,6 +321,40 @@ describe('standup entries', () => {
       blockerId: '0190a0b0-0000-7000-8000-000000000000',
     });
     expect(errorCode(missing)).toBe('INVALID_BLOCKER');
+  });
+
+  it('threads blocker replies, also on later days while the blocker is open', async () => {
+    const w = await standupWorld(ctx);
+    clock.set('2026-10-08T01:00:00Z');
+    const entry = await w.post(w.sara.api, { blockers: [{ text: 'Waiting on icons' }] });
+    const blockerId = entry.blockers[0]?.id;
+    await w.dorj.api('POST', `/standup-entries/${entry.id}/replies`, { body: 'General' });
+    await w.dorj.api('POST', `/standup-entries/${entry.id}/replies`, {
+      body: 'On it',
+      blockerId,
+    });
+    const today = await w.day();
+    expect(today.blockers[0]?.replies.map((r) => r.body)).toEqual(['On it']);
+    expect(today.entries[0]?.blockers[0]?.replies.map((r) => r.body)).toEqual(['On it']);
+    expect(today.entries[0]?.replies.map((r) => r.body)).toEqual(['General', 'On it']);
+
+    clock.set('2026-10-09T01:00:00Z'); // Friday: carried over
+    const friday = await w.day();
+    expect(friday.blockers[0]).toMatchObject({ id: blockerId, date: '2026-10-08' });
+    expect(friday.blockers[0]?.replies.map((r) => r.body)).toEqual(['On it']);
+  });
+
+  it('names the upcoming standup day, also on a weekend', async () => {
+    const w = await standupWorld(ctx);
+    clock.set('2026-10-08T01:00:00Z');
+    expect((await w.day()).upcomingDate).toBe('2026-10-08');
+    clock.set('2026-10-10T03:00:00Z'); // Saturday
+    const saturday = await w.day();
+    expect(saturday).toMatchObject({
+      isStandupDay: false,
+      prevDate: '2026-10-09',
+      upcomingDate: '2026-10-12',
+    });
   });
 
   it('rejects writes in an archived group but still reads it', async () => {

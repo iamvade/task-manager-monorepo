@@ -307,7 +307,7 @@ export const standupEntryRoutes: FastifyPluginCallbackZod = (app, _opts, done) =
             clientId: clientIdOf(request),
           });
         }
-        return reactionSummary(app.db, entry.id, user.id);
+        return reactionSummary(app.db, group.workspaceId, entry.id, user.id);
       },
     });
   }

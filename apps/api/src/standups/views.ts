@@ -3,6 +3,7 @@ import {
   STANDUP_REACTIONS,
   type StandupBlocker,
   type StandupEntry,
+  type StandupReactionSummary,
   type StandupReply,
   type StandupTaskRef,
   type UserRef,
@@ -131,11 +132,14 @@ const missingUser = (id: string): UserRef => ({
 });
 const userOf = (refs: Refs, id: string) => refs.people.get(id)?.user ?? missingUser(id);
 
+type ReplyRow = typeof standupReplies.$inferSelect;
+
 function blockerView(
   { blocker, entry }: BlockerSource,
   refs: Refs,
   group: GroupRow,
   viewer: StandupViewer,
+  replies: readonly ReplyRow[],
 ): StandupBlocker {
   return {
     id: blocker.id,
@@ -149,8 +153,11 @@ function blockerView(
     resolvedBy: blocker.resolvedBy ? userOf(refs, blocker.resolvedBy) : null,
     canResolve: canResolveBlocker(blocker, entry.userId, group, viewer),
     createdAt: blocker.createdAt.toISOString(),
+    replies: replies.filter((r) => r.blockerId === blocker.id).map((r) => replyView(r, refs)),
   };
 }
+
+const replyPeople = (r: ReplyRow) => [r.authorId, ...r.mentionIds];
 
 const blockerPeople = ({ blocker, entry }: BlockerSource) => [
   entry.userId,
@@ -165,15 +172,29 @@ export async function blockerViews(
   sources: readonly BlockerSource[],
   viewer: StandupViewer,
 ): Promise<StandupBlocker[]> {
+  if (sources.length === 0) return [];
+  const replies = await db
+    .select()
+    .from(standupReplies)
+    .where(
+      inArray(
+        standupReplies.blockerId,
+        sources.map((s) => s.blocker.id),
+      ),
+    )
+    .orderBy(asc(standupReplies.createdAt), asc(standupReplies.id));
   const [people, taskRefs] = await Promise.all([
-    standupPeople(db, group.workspaceId, sources.flatMap(blockerPeople)),
+    standupPeople(db, group.workspaceId, [
+      ...sources.flatMap(blockerPeople),
+      ...replies.flatMap(replyPeople),
+    ]),
     standupTaskRefs(
       db,
       group.workspaceId,
       sources.flatMap((s) => (s.blocker.taskId ? [s.blocker.taskId] : [])),
     ),
   ]);
-  return sources.map((s) => blockerView(s, { people, tasks: taskRefs }, group, viewer));
+  return sources.map((s) => blockerView(s, { people, tasks: taskRefs }, group, viewer, replies));
 }
 
 /** Entry DTOs with their items, blockers, reactions and replies, in the order given. */
@@ -198,7 +219,8 @@ export async function entryViews(
         emoji: standupReactions.emoji,
       })
       .from(standupReactions)
-      .where(inArray(standupReactions.entryId, ids)),
+      .where(inArray(standupReactions.entryId, ids))
+      .orderBy(asc(standupReactions.createdAt), asc(standupReactions.userId)),
     db
       .select()
       .from(standupReplies)
@@ -218,7 +240,8 @@ export async function entryViews(
   const personIds = [
     ...entries.map((e) => e.userId),
     ...sources.flatMap(blockerPeople),
-    ...replies.flatMap((r) => [r.authorId, ...r.mentionIds]),
+    ...replies.flatMap(replyPeople),
+    ...reactions.map((r) => r.userId),
   ];
   const [people, taskRefs] = await Promise.all([
     standupPeople(db, group.workspaceId, personIds),
@@ -243,10 +266,15 @@ export async function entryViews(
       today: e.today.map((i) => ({ ...i, task: taskOf(i.taskId) })),
       blockers: sources
         .filter((s) => s.entry.id === e.id)
-        .map((s) => blockerView(s, refs, group, viewer)),
+        .map((s) => blockerView(s, refs, group, viewer, replies)),
       reactions: STANDUP_REACTIONS.map((emoji) => {
         const of = mine.filter((r) => r.emoji === emoji);
-        return { emoji, count: of.length, mine: of.some((r) => r.userId === viewer.userId) };
+        return {
+          emoji,
+          count: of.length,
+          mine: of.some((r) => r.userId === viewer.userId),
+          users: of.map((r) => userOf(refs, r.userId)),
+        };
       }),
       replies: replies
         .filter((r) => r.entryId === e.id)
@@ -255,7 +283,7 @@ export async function entryViews(
   });
 }
 
-function replyView(r: typeof standupReplies.$inferSelect, refs: Refs): StandupReply {
+function replyView(r: ReplyRow, refs: Refs): StandupReply {
   return {
     id: r.id,
     entryId: r.entryId,
@@ -272,20 +300,37 @@ function replyView(r: typeof standupReplies.$inferSelect, refs: Refs): StandupRe
 export async function replyDto(
   db: DbOrTx,
   workspaceId: string,
-  reply: typeof standupReplies.$inferSelect,
+  reply: ReplyRow,
 ): Promise<StandupReply> {
   const people = await standupPeople(db, workspaceId, [reply.authorId, ...reply.mentionIds]);
   return replyView(reply, { people, tasks: new Map() });
 }
 
 /** The reaction pills of one entry for `viewerId`. */
-export async function reactionSummary(db: DbOrTx, entryId: string, viewerId: string) {
+export async function reactionSummary(
+  db: DbOrTx,
+  workspaceId: string,
+  entryId: string,
+  viewerId: string,
+): Promise<StandupReactionSummary[]> {
   const rows = await db
     .select({ userId: standupReactions.userId, emoji: standupReactions.emoji })
     .from(standupReactions)
-    .where(eq(standupReactions.entryId, entryId));
+    .where(eq(standupReactions.entryId, entryId))
+    .orderBy(asc(standupReactions.createdAt), asc(standupReactions.userId));
+  const people = await standupPeople(
+    db,
+    workspaceId,
+    rows.map((r) => r.userId),
+  );
+  const refs: Refs = { people, tasks: new Map() };
   return STANDUP_REACTIONS.map((emoji) => {
     const of = rows.filter((r) => r.emoji === emoji);
-    return { emoji, count: of.length, mine: of.some((r) => r.userId === viewerId) };
+    return {
+      emoji,
+      count: of.length,
+      mine: of.some((r) => r.userId === viewerId),
+      users: of.map((r) => userOf(refs, r.userId)),
+    };
   });
 }
