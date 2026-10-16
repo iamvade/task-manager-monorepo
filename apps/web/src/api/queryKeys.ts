@@ -12,7 +12,9 @@ export const queryKeys = {
     ['workspaces', workspaceId, 'absences', userId] as const,
   absencesOf: (workspaceId: string) => ['workspaces', workspaceId, 'absences'] as const,
   standupGroups: (workspaceId: string) => ['workspaces', workspaceId, 'standup-groups'] as const,
+  /** A group's settings; prefix of its days, so one invalidation refreshes both. */
   standupGroup: (groupId: string) => ['standup-groups', groupId] as const,
+  standupDay: (groupId: string, date: string) => ['standup-groups', groupId, 'days', date] as const,
   archivedProjects: (workspaceId: string) =>
     ['workspaces', workspaceId, 'archived-projects'] as const,
   /** ⌘K results; under `workspaces` (task writes don't refresh it — results are short-lived). */

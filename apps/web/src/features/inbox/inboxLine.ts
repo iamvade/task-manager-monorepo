@@ -9,6 +9,12 @@ const FALLBACK: Record<Notification['type'], FeedKey> = {
   assigned: 'assigned',
   comment: 'commented',
   status: 'updated',
+  // Standup notifications use `standupLine` instead.
+  standup_help: 'updated',
+  standup_reply: 'updated',
+  standup_resolved: 'updated',
+  standup_reminder: 'updated',
+  standup_digest: 'updated',
 };
 
 /**
@@ -17,20 +23,25 @@ const FALLBACK: Record<Notification['type'], FeedKey> = {
  * The type wins over the activity for mentions and assignments, which is why I was notified.
  */
 export function inboxLine(n: Notification, formatters: Formatters): FeedLine {
-  const base = n.activity
-    ? feedLine(
-        {
-          activity: n.activity,
-          task: n.task,
-          project: n.project,
-          notificationType: n.type,
-          snippet: n.snippet,
-          unread: n.readAt === null,
-        },
-        formatters,
-      )
-    : { key: FALLBACK[n.type], values: { actor: '', task: '' } };
+  const base =
+    n.activity && n.task && n.project
+      ? feedLine(
+          {
+            activity: n.activity,
+            task: n.task,
+            project: n.project,
+            notificationType: n.type,
+            snippet: n.snippet,
+            unread: n.readAt === null,
+          },
+          formatters,
+        )
+      : { key: FALLBACK[n.type], values: { actor: '', task: '' } };
   const key = n.type === 'mention' || n.type === 'assigned' ? FALLBACK[n.type] : base.key;
-  const values = { ...base.values, actor: shortName(n.actor.name), task: n.task.key };
+  const values = {
+    ...base.values,
+    actor: n.actor ? shortName(n.actor.name) : '',
+    task: n.task?.key ?? '',
+  };
   return { key, values };
 }

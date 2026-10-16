@@ -1,6 +1,6 @@
 import { INBOX_TABS, inboxTabSchema, type InboxTab, type Notification } from '@kite/shared';
 import { useTranslation } from 'react-i18next';
-import { Link, useSearchParams } from 'react-router';
+import { Link, useNavigate, useSearchParams } from 'react-router';
 import {
   useArchiveNotification,
   useMarkAllNotificationsRead,
@@ -29,6 +29,7 @@ import { useOpenTask } from '../create/useOpenTask';
 import { PageHeader } from '../views/PageHeader';
 import { InboxEmpty } from './InboxEmpty';
 import { NotificationRow } from './NotificationRow';
+import { standupHref } from './standupLine';
 
 /** Inbox (EmptyInbox.dc.html): header, All / Mentions / Assigned to me / Archived, the rows. */
 export function InboxView() {
@@ -190,6 +191,7 @@ function InboxList({
 }: InboxListProps) {
   const { t } = useTranslation();
   const openTask = useOpenTask();
+  const navigate = useNavigate();
   const markRead = useMarkNotificationRead(workspaceId);
   const archive = useArchiveNotification(workspaceId);
   const unarchive = useUnarchiveNotification(workspaceId);
@@ -207,7 +209,8 @@ function InboxList({
             notification={n}
             onOpen={() => {
               if (isUnread(n)) markRead.mutate(n);
-              openTask(n.task.key);
+              if (n.task) openTask(n.task.key);
+              else if (n.standup) void navigate(standupHref(n.standup));
             }}
             onMarkRead={() => {
               markRead.mutate(n);
@@ -216,7 +219,9 @@ function InboxList({
               archive.mutate(n, {
                 onSuccess: () => {
                   toast({
-                    message: t('inbox.archived', { key: n.task.key }),
+                    message: n.task
+                      ? t('inbox.archived', { key: n.task.key })
+                      : t('inbox.archivedStandup'),
                     action: {
                       label: t('common.undo'),
                       onClick: () => {

@@ -764,7 +764,21 @@
       "archived": "No archived notifications"
     },
     "projectFilter": "Filter by project",
-    "allProjects": "All projects"
+    "allProjects": "All projects",
+    "standup": {
+      "help": "<b>{{actor}}</b> asked for your help with a blocker in {{group}}",
+      "reply": "<b>{{actor}}</b> replied to your standup update in {{group}}",
+      "replyBlocker": "<b>{{actor}}</b> replied to your blocker in {{group}}",
+      "resolved": "<b>{{actor}}</b> resolved your blocker in {{group}}",
+      "mention": "<b>{{actor}}</b> mentioned you in {{group}}’s standup",
+      "reminder": "Time to post your standup update for <b>{{group}}</b>",
+      "digest": "<b>{{group}}</b> standup: {{posted}} of {{expected}} have posted",
+      "notYet": "Not yet: {{names}}",
+      "openBlockers_one": "{{count}} open blocker",
+      "openBlockers_other": "{{count}} open blockers",
+      "meta": "{{time}} · {{group}}"
+    },
+    "archivedStandup": "Notification archived"
   },
   "palette": {
     "label": "Command palette",
@@ -887,6 +901,8 @@
       "commentHint": "New comments on tasks you follow.",
       "status": "Status changes",
       "statusHint": "A task you follow moves to another status.",
+      "standups": "Standups",
+      "standupsHint": "Reminders to post, someone needs your help with a blocker, replies on your update, your blocker resolved; the facilitator also gets a daily summary.",
       "perProject": "Per project",
       "perProjectHint": "Turn down projects you don’t need to follow closely: only mentions and assignments, or nothing at all.",
       "levelOf": "Notifications for {{project}}"

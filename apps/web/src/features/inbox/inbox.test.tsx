@@ -11,7 +11,7 @@ import { useToastStore } from '../../stores/toast';
 import { useUiStore } from '../../stores/ui';
 import { ME, SIDEBAR, WORKSPACE_ID, mockApi } from '../../test/fixtures';
 import { HOME, HOME_NOW } from '../../test/home';
-import { ARCHIVED, ASSIGNED, MENTION, STATUS, page } from '../../test/inbox';
+import { ARCHIVED, ASSIGNED, MENTION, STATUS, page, standupNotification } from '../../test/inbox';
 import { at } from '../../test/tasks';
 
 const EN_ME = { ...ME, preferences: { ...ME.preferences, locale: 'en' } };
@@ -202,5 +202,21 @@ describe('Inbox', () => {
     });
     expect(await screen.findByRole('list', { name: 'Archived' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Move to inbox' })).toBeInTheDocument();
+  });
+  it('shows standup notifications with the group and opens the group page', async () => {
+    const reply = standupNotification('standup_reply', { snippet: 'Sent the keys' });
+    const reminder = standupNotification('standup_reminder', { actor: null });
+    const { router } = renderInbox({}, () => page([reply, reminder], { unread: 2, archived: 0 }));
+    await screen.findByRole('list', { name: 'All' });
+    const [replyRow, reminderRow] = rows();
+    expect(replyRow).toHaveTextContent('Dorj E. replied to your standup update in Mobile team');
+    expect(replyRow).toHaveTextContent('“Sent the keys”');
+    expect(replyRow).toHaveTextContent('· Mobile team');
+    expect(reminderRow).toHaveTextContent('Time to post your standup update for Mobile team');
+    fireEvent.click(at(within(at(rows(), 0)).getAllByRole('button'), 0));
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe(`/standup/${reply.standup?.groupId}`);
+    });
+    expect(router.state.location.search).toBe('?date=2026-10-08');
   });
 });
