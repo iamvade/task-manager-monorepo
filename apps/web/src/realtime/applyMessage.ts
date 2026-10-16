@@ -29,6 +29,8 @@ interface Pending {
   home: boolean;
   sidebar: boolean;
   inbox: boolean;
+  /** A tag was created, renamed, recolored, merged or deleted. */
+  tags: boolean;
 }
 
 /**
@@ -79,6 +81,7 @@ export function createMessageHandler(queryClient: QueryClient) {
         home: false,
         sidebar: false,
         inbox: false,
+        tags: false,
       };
     }
     edit(pending);
@@ -94,7 +97,14 @@ export function createMessageHandler(queryClient: QueryClient) {
     const ws = p.workspaceId;
     if (p.inbox) void queryClient.invalidateQueries({ queryKey: queryKeys.notificationsOf(ws) });
     if (p.sidebar) void queryClient.invalidateQueries({ queryKey: queryKeys.sidebar(ws) });
+    if (p.tags) void queryClient.invalidateQueries({ queryKey: queryKeys.tags(ws) });
     if (busy()) return;
+    if (p.tags) {
+      // Chips on every list, open drawer and My Tasks show the tag's name and color.
+      void queryClient.invalidateQueries({ queryKey: queryKeys.taskLists });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.taskDetails });
+      p.home = true;
+    }
     if (p.projects.size > 0) {
       const spaces = spacesOf(queryClient, ws, p.projects);
       void queryClient.invalidateQueries({
@@ -153,6 +163,11 @@ export function createMessageHandler(queryClient: QueryClient) {
         case 'comment.changed':
         case 'subtask.changed':
           onTask(message);
+          return;
+        case 'tags.changed':
+          mark(message.workspaceId, (p) => {
+            p.tags = true;
+          });
           return;
         case 'notification.created':
           mark(message.workspaceId, (p) => {

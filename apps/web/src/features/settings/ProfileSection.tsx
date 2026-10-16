@@ -1,13 +1,12 @@
-import { AVATAR_COLORS, nameSchema, type AvatarColor } from '@kite/shared';
+import { AVATAR_COLORS, nameSchema } from '@kite/shared';
 import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSaveMe } from '../../api/useSaveMe';
 import { useCurrentWorkspace, useUpdateMember, useWorkspaceMembers } from '../../api/workspaces';
 import { useAuth } from '../../auth/useAuth';
-import { CheckIcon } from '../../components/icons';
 import { Avatar } from '../../components/ui/Avatar';
+import { ColorSwatches } from '../../components/ui/ColorSwatches';
 import { cn } from '../../lib/cn';
-import { paletteClass } from '../../lib/palette';
 import { AwayFields } from './MemberDialogs';
 import { SettingsRow, SettingsSection, settingsInput } from './SettingsRow';
 
@@ -83,8 +82,10 @@ export function ProfileSection() {
         labelId={colorLabelId}
       >
         <ColorSwatches
+          colors={AVATAR_COLORS}
+          family="avatar"
           labelledBy={colorLabelId}
-          initials={me.user.initials}
+          text={me.user.initials}
           value={me.user.avatarColor}
           onChange={(avatarColor) => {
             save({ avatarColor });
@@ -119,62 +120,5 @@ function OutOfOffice({ userId }: { userId: string }) {
         }}
       />
     </SettingsRow>
-  );
-}
-
-interface ColorSwatchesProps {
-  labelledBy: string;
-  initials: string;
-  value: string;
-  onChange: (color: AvatarColor) => void;
-}
-
-/** The 8 avatar colors as a radio group of initials chips; arrow keys move the choice. */
-function ColorSwatches({ labelledBy, initials, value, onChange }: ColorSwatchesProps) {
-  const { t } = useTranslation();
-  const move = (from: number, step: number) => {
-    const next = AVATAR_COLORS[(from + step + AVATAR_COLORS.length) % AVATAR_COLORS.length];
-    if (next) onChange(next);
-  };
-  return (
-    <div role="radiogroup" aria-labelledby={labelledBy} className="flex flex-wrap gap-1.5">
-      {AVATAR_COLORS.map((color, i) => {
-        const selected = color === value;
-        return (
-          <button
-            key={color}
-            type="button"
-            role="radio"
-            aria-checked={selected}
-            aria-label={t(`settings.colors.${color}`)}
-            title={t(`settings.colors.${color}`)}
-            tabIndex={selected ? 0 : -1}
-            onClick={() => {
-              onChange(color);
-            }}
-            onKeyDown={(e) => {
-              const step =
-                e.key === 'ArrowRight' || e.key === 'ArrowDown'
-                  ? 1
-                  : e.key === 'ArrowLeft' || e.key === 'ArrowUp'
-                    ? -1
-                    : 0;
-              if (!step) return;
-              e.preventDefault();
-              move(i, step);
-              const buttons = e.currentTarget.parentElement?.querySelectorAll('button');
-              buttons?.[(i + step + AVATAR_COLORS.length) % AVATAR_COLORS.length]?.focus();
-            }}
-            className={cn(
-              'pal-fill relative flex size-7 items-center justify-center rounded-full border-0 p-0 text-[10px] font-semibold',
-              paletteClass('avatar', color),
-              selected && 'outline-2 outline-offset-2 outline-accent-ink',
-            )}
-          >
-            {selected ? <CheckIcon size={14} strokeWidth={2.5} /> : initials}
-          </button>
-        );
-      })}
-    </div>
   );
 }
