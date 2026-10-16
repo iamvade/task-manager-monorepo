@@ -166,6 +166,16 @@ export const SMALL: ScenarioDef = {
     { name: 'Research', color: 'amber' },
     { name: 'Tech debt', color: 'neutral' },
   ],
+  standups: [
+    {
+      name: 'Nomad Labs daily',
+      members: ['nomin', 'temuulen', 'khulan', 'temuujin', 'oyunaa', 'saruul', 'enkhtuul'],
+      facilitator: 'nomin',
+      createdDaysAgo: 40,
+      postRate: 0.85,
+      mn: 0.9,
+    },
+  ],
   credentials: [
     ['owner', 'temuulen'],
     ['admin · busy lead', 'nomin'],

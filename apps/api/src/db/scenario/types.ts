@@ -1,4 +1,4 @@
-import type { AvatarColor, Locale, PaletteKey, WorkspaceRole } from '@kite/shared';
+import type { AvatarColor, Locale, PaletteKey, SpeakingOrder, WorkspaceRole } from '@kite/shared';
 
 /** How a person behaves in the generated history. */
 export type Archetype =
@@ -90,6 +90,28 @@ export interface TagDef {
   color: PaletteKey;
 }
 
+/** A standup group and how its people post (scenario/standups.ts builds ~3 weeks of it). */
+export interface StandupGroupDef {
+  name: string;
+  /** Person keys, in group order. */
+  members: string[];
+  facilitator: string | null;
+  /** `HH:mm` in Asia/Ulaanbaatar; null meeting = async only. */
+  postBy?: string;
+  reminderAt?: string | null;
+  meetingAt?: string | null;
+  speakingOrder?: SpeakingOrder;
+  secondsPerPerson?: 60 | 120 | 180;
+  totalMeetingMinutes?: number;
+  createdDaysAgo: number;
+  /** Share of present members who post on a past standup day (today: about half of that). */
+  postRate: number;
+  /** Share of Mongolian text. */
+  mn: number;
+  /** Members who joined after the group was created: key → days ago. */
+  joinedDaysAgo?: Record<string, number>;
+}
+
 export interface ScenarioDef {
   slug: string;
   name: string;
@@ -102,6 +124,8 @@ export interface ScenarioDef {
   tags: TagDef[];
   /** Tasks that get a 50+ comment thread. */
   hotThreads: number;
+  /** Standup groups (none = the scenario has no standups). */
+  standups: StandupGroupDef[];
   /** Who to print credentials for: label → person key. */
   credentials: [label: string, personKey: string][];
 }
