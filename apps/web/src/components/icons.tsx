@@ -325,3 +325,26 @@ export const LockIcon = make(
 export const MentionIcon = make(
   <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" />,
 );
+
+// Standup*.dc.html
+/** Chat bubble with two lines (the Standup nav item). */
+export const StandupIcon = make(
+  <>
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    <path d="M8 9h8M8 13h5" />
+  </>,
+);
+/** Two people (standup group switcher). */
+export const UsersIcon = make(
+  <>
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8" />
+  </>,
+);
+/** Sliders (Group settings). */
+export const SlidersIcon = make(
+  <path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6" />,
+);
+/** Pen (Write update). */
+export const PenIcon = make(<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />);

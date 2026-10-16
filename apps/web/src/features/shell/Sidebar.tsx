@@ -18,6 +18,7 @@ import { CountBadge } from '../../components/ui/CountBadge';
 import { IconButton } from '../../components/ui/IconButton';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { useUiStore } from '../../stores/ui';
+import { StandupGroupsSection, StandupNavItem } from '../standup/StandupNav';
 import { NavItem } from './NavItem';
 import { NewSpaceButton } from './NewSpaceButton';
 import { SidebarSearch } from './SidebarSearch';
@@ -66,6 +67,7 @@ export function Sidebar() {
             )
           }
         />
+        <StandupNavItem />
         <NavItem
           to="/inbox"
           icon={<InboxIcon size={16} />}
@@ -82,6 +84,8 @@ export function Sidebar() {
         />
         <NavItem to="/reports" icon={<ReportsIcon size={16} />} label={t('shell.reports')} />
       </div>
+
+      <StandupGroupsSection />
 
       <div className="flex flex-col gap-0.5">
         <div className="flex h-7 items-center justify-between pr-1 pl-3">

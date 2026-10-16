@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Link, NavLink } from 'react-router';
+import { useStandupGroups } from '../../api/standups';
 import { useCurrentWorkspace, useSidebar } from '../../api/workspaces';
 import {
   InboxIcon,
@@ -7,6 +8,7 @@ import {
   PanelOpenIcon,
   ReportsIcon,
   SearchIcon,
+  StandupIcon,
 } from '../../components/icons';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import { IconButton } from '../../components/ui/IconButton';
@@ -15,6 +17,7 @@ import { Tooltip } from '../../components/ui/Tooltip';
 import { WorkspaceTile } from '../../components/ui/WorkspaceTile';
 import { cn } from '../../lib/cn';
 import { useUiStore } from '../../stores/ui';
+import { waitingForMe } from '../standup/useStandup';
 
 const railButton = 'flex size-9 items-center justify-center rounded-[8px] text-3 hover:bg-hover';
 
@@ -23,6 +26,7 @@ export function SidebarRail() {
   const { t } = useTranslation();
   const workspace = useCurrentWorkspace();
   const sidebar = useSidebar(workspace?.id);
+  const standupGroups = useStandupGroups(workspace?.id);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
 
   const openPalette = useUiStore((s) => s.setPaletteOpen);
@@ -49,6 +53,13 @@ export function SidebarRail() {
       />
       <RailLink to="/my-tasks" label={t('shell.myTasks')}>
         <MyTasksIcon size={16} />
+      </RailLink>
+      <RailLink
+        to="/standup"
+        label={t('shell.standup')}
+        badge={waitingForMe(standupGroups.data).length > 0 ? t('shell.notPostedToday') : undefined}
+      >
+        <StandupIcon size={16} />
       </RailLink>
       <RailLink
         to="/inbox"

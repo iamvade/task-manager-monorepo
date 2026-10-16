@@ -5,6 +5,7 @@ import { useAuth } from '../../auth/useAuth';
 import { Avatar } from '../../components/ui/Avatar';
 import { Picker } from '../../components/ui/Picker';
 import { Popover, type TriggerProps } from '../../components/ui/Popover';
+import { cn } from '../../lib/cn';
 import { useMemberHint } from './useMemberHint';
 
 interface AssigneePickerProps {
@@ -133,12 +134,15 @@ export function AssigneePicker({
           }}
           onClose={close}
           footerHints
-          renderItem={(m) =>
+          renderItem={(m, { selected }) =>
             m ? (
               <>
                 <Avatar user={m.user} size={20} title={null} />
                 <span className="flex-1 truncate">{m.user.name}</span>
-                <span className="text-[12px] text-muted">{hintOf(m)}</span>
+                {/* Muted fails contrast on the accent-soft selected row in dark mode. */}
+                <span className={cn('text-[12px]', selected ? 'text-2' : 'text-muted')}>
+                  {hintOf(m)}
+                </span>
               </>
             ) : (
               <>

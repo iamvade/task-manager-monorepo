@@ -1,12 +1,11 @@
 import { ACCENTS, type Accent, type Density, type Locale, type Theme } from '@kite/shared';
-import { useId, useMemo } from 'react';
+import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSaveMe } from '../../api/useSaveMe';
 import { useAuth } from '../../auth/useAuth';
-import { CheckIcon, ChevronDownIcon } from '../../components/icons';
+import { CheckIcon } from '../../components/icons';
 import { useLanguage } from '../../components/useLanguage';
-import { Picker } from '../../components/ui/Picker';
-import { Popover } from '../../components/ui/Popover';
+import { TimezonePicker } from '../../components/TimezonePicker';
 import { SegmentedControl } from '../../components/ui/SegmentedControl';
 import { cn } from '../../lib/cn';
 import { SettingsRow, SettingsSection } from './SettingsRow';
@@ -163,72 +162,5 @@ function AccentSwatches({
         );
       })}
     </div>
-  );
-}
-
-interface Zone {
-  id: string;
-  /** "GMT+8". */
-  offset: string;
-}
-
-function zoneList(): Zone[] {
-  const now = new Date();
-  return Intl.supportedValuesOf('timeZone').map((id) => {
-    const part = new Intl.DateTimeFormat('en-US', { timeZone: id, timeZoneName: 'shortOffset' })
-      .formatToParts(now)
-      .find((p) => p.type === 'timeZoneName');
-    return { id, offset: part?.value ?? '' };
-  });
-}
-
-/** Searchable IANA time zone picker ("Asia/Ulaanbaatar · GMT+8"). */
-function TimezonePicker({ value, onChange }: { value: string; onChange: (tz: string) => void }) {
-  const { t } = useTranslation();
-  const zones = useMemo(() => zoneList(), []);
-  const current = zones.find((z) => z.id === value);
-  const label = t('settings.preferences.timezone');
-  return (
-    <Popover
-      label={label}
-      width={300}
-      elevation="lg"
-      placement="bottom-end"
-      trigger={(props) => (
-        <button
-          {...props}
-          type="button"
-          aria-label={`${label}: ${value}`}
-          className="inline-flex h-8 max-w-[260px] min-w-0 items-center gap-2 rounded-[8px] border border-control bg-control px-3 text-[13px] text-default hover:bg-hover"
-        >
-          <span className="truncate">{value.replaceAll('_', ' ')}</span>
-          {current && <span className="flex-none text-muted">{current.offset}</span>}
-          <ChevronDownIcon size={12} className="flex-none text-icon" />
-        </button>
-      )}
-    >
-      {(close) => (
-        <Picker<Zone>
-          items={zones}
-          value={value}
-          getKey={(z) => z.id}
-          getLabel={(z) => `${z.id.replaceAll('_', ' ')} ${z.offset}`}
-          renderItem={(z) => (
-            <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
-              <span className="truncate">{z.id.replaceAll('_', ' ')}</span>
-              <span className="flex-none text-[12px] text-muted">{z.offset}</span>
-            </span>
-          )}
-          onSelect={(z) => {
-            onChange(z.id);
-            close();
-          }}
-          onClose={close}
-          search={{ placeholder: t('settings.preferences.timezoneSearch') }}
-          emptyText={t('common.noResults')}
-          label={label}
-        />
-      )}
-    </Popover>
   );
 }

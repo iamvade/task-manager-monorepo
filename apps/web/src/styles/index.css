@@ -114,6 +114,8 @@
   --shadow-drag: 0 2px 4px rgba(24, 24, 27, 0.06), 0 16px 32px rgba(24, 24, 27, 0.14);
   --shadow-ring-soft: 0 0 0 3px var(--accent-soft);
   --shadow-tooltip: var(--tooltip-shadow);
+  /* StandupEmpty.dc.html: the front card of the illustration. */
+  --shadow-float: 0 4px 12px rgba(24, 24, 27, 0.06);
 }
 
 /* In the base layer so Tailwind utilities (text-*, outline-*) win over these defaults. */

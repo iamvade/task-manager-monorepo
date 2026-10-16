@@ -520,4 +520,45 @@ describe('Settings', () => {
       expect(screen.queryByRole('button', { name: /^Color of/ })).toBeNull();
     });
   });
+
+  it('lists, adds and deletes my time off on Profile', async () => {
+    const absence = {
+      id: '01890000-0000-7000-8000-000000000b01',
+      userId: ME.user.id,
+      startDate: '2026-10-20',
+      endDate: '2026-10-22',
+      note: 'Trip',
+    };
+    const posted: unknown[] = [];
+    const deleted: string[] = [];
+    renderSettings('/settings', {
+      [`GET /api/v1/workspaces/${WORKSPACE_ID}/members/${ME.user.id}/absences`]: () =>
+        Response.json([absence]),
+      [`POST /api/v1/workspaces/${WORKSPACE_ID}/members/${ME.user.id}/absences`]: (init) => {
+        posted.push(JSON.parse(init?.body as string));
+        return Response.json({ ...absence, id: '01890000-0000-7000-8000-000000000b02' });
+      },
+      [`DELETE /api/v1/workspaces/${WORKSPACE_ID}/absences/${absence.id}`]: () => {
+        deleted.push(absence.id);
+        return new Response(null, { status: 204 });
+      },
+    });
+    expect(await screen.findByText('Trip')).toBeVisible();
+    const form = screen.getByRole('form', { name: 'Add time off' });
+    fireEvent.change(within(form).getByLabelText('From'), { target: { value: '2026-11-02' } });
+    fireEvent.change(within(form).getByLabelText('Until'), { target: { value: '2026-11-03' } });
+    fireEvent.change(within(form).getByLabelText('Note (optional)'), {
+      target: { value: ' Conference ' },
+    });
+    fireEvent.click(within(form).getByRole('button', { name: 'Add' }));
+    await waitFor(() => {
+      expect(posted).toEqual([
+        { startDate: '2026-11-02', endDate: '2026-11-03', note: 'Conference' },
+      ]);
+    });
+    fireEvent.click(screen.getByRole('button', { name: /^Delete time off/ }));
+    await waitFor(() => {
+      expect(deleted).toEqual([absence.id]);
+    });
+  });
 });
