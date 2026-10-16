@@ -120,6 +120,13 @@
       "when": 1792133656156,
       "tag": "0016_standup_entries",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792142077255,
+      "tag": "0017_standup_meetings",
+      "breakpoints": true
     }
   ]
 }

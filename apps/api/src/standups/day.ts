@@ -16,6 +16,7 @@ import type { standupGroups } from '../db/schema/index.js';
 import { standupBlockers, standupEntries } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
 import { groupDtos } from './groups.js';
+import { dayMeetingView } from './meeting.js';
 import { hhmm, holidaySet, postByInstant } from './schedule.js';
 import { blockerViews, entryViews, type StandupViewer } from './views.js';
 
@@ -135,5 +136,6 @@ export async function buildStandupDay(
     entries: ordered,
     blockers: [...blockers.filter((b) => !b.resolvedAt), ...blockers.filter((b) => b.resolvedAt)],
     myEntry,
+    meeting: await dayMeetingView(db, group, date),
   };
 }

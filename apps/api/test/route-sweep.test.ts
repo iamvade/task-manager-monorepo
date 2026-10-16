@@ -214,6 +214,15 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       'PUT /standup-groups/{groupId}/days/{date}/entry': { status: 'draft' },
       'POST /standup-entries/{entryId}/replies': { body: 'Hi' },
       'PATCH /standup-replies/{replyId}': { body: 'Edited' },
+      'POST /standup-groups/{groupId}/days/{date}/meeting/advance': { toUserId: w.owner.id },
+      'PATCH /standup-groups/{groupId}/days/{date}/meeting': { notes: 'Notes' },
+      'POST /standup-groups/{groupId}/days/{date}/meeting/save-notes': {},
+      'POST /standup-groups/{groupId}/days/{date}/meeting/tasks': {
+        taskId: task.id,
+        sourceKind: 'today',
+        sourceEntryId: task.id,
+        sourceItemIndex: 0,
+      },
     };
   });
 

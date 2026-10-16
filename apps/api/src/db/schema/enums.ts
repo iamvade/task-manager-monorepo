@@ -1,6 +1,7 @@
 import {
   DENSITIES,
   LOCALES,
+  MEETING_TASK_SOURCES,
   NOTIFICATION_LEVELS,
   NOTIFICATION_TYPES,
   PRIORITIES,
@@ -26,3 +27,4 @@ export const notificationLevelEnum = pgEnum('notification_level', NOTIFICATION_L
 export const speakingOrderEnum = pgEnum('speaking_order', SPEAKING_ORDERS);
 export const standupEntryStatusEnum = pgEnum('standup_entry_status', STANDUP_ENTRY_STATUSES);
 export const standupReactionEnum = pgEnum('standup_reaction', STANDUP_REACTIONS);
+export const meetingTaskSourceEnum = pgEnum('meeting_task_source', MEETING_TASK_SOURCES);

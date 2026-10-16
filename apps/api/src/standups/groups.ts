@@ -161,14 +161,26 @@ export async function setGroupMembers(
   userIds: readonly string[],
 ): Promise<void> {
   const ordered = [...new Set(userIds)];
+  // People who stay keep their join time (earlier days list only who was in the group then).
+  const joined = new Map(
+    (
+      await tx
+        .select({ userId: standupGroupMembers.userId, addedAt: standupGroupMembers.addedAt })
+        .from(standupGroupMembers)
+        .where(eq(standupGroupMembers.groupId, groupId))
+    ).map((r) => [r.userId, r.addedAt]),
+  );
   await tx.delete(standupGroupMembers).where(eq(standupGroupMembers.groupId, groupId));
   if (ordered.length === 0) return;
   const keys = generateNKeysBetween(null, null, ordered.length);
-  await tx
-    .insert(standupGroupMembers)
-    .values(
-      ordered.map((userId, i) => ({ groupId, userId, position: keys[i] ?? positionAfter(null) })),
-    );
+  await tx.insert(standupGroupMembers).values(
+    ordered.map((userId, i) => ({
+      groupId,
+      userId,
+      position: keys[i] ?? positionAfter(null),
+      ...(joined.has(userId) ? { addedAt: joined.get(userId) } : {}),
+    })),
+  );
 }
 
 /** Appends `userId` to the group unless they're already in it. */

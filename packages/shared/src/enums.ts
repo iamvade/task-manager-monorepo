@@ -168,6 +168,11 @@ export const SPEAKING_ORDERS = ['posting_order', 'alphabetical', 'random'] as co
 export const speakingOrderSchema = z.enum(SPEAKING_ORDERS);
 export type SpeakingOrder = z.infer<typeof speakingOrderSchema>;
 
+/** Where a task made with "Create task" in a standup meeting came from. */
+export const MEETING_TASK_SOURCES = ['today', 'blocker'] as const;
+export const meetingTaskSourceSchema = z.enum(MEETING_TASK_SOURCES);
+export type MeetingTaskSource = z.infer<typeof meetingTaskSourceSchema>;
+
 export const STANDUP_ENTRY_STATUSES = ['draft', 'posted'] as const;
 export const standupEntryStatusSchema = z.enum(STANDUP_ENTRY_STATUSES);
 export type StandupEntryStatus = z.infer<typeof standupEntryStatusSchema>;
