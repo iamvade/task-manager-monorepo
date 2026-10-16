@@ -612,32 +612,36 @@ async function taskListPerf(
 
   const base = { sort: 'position', dir: 'asc', includeDone: true } as const;
   const variants: Record<string, { getSQL: () => SQL }> = {
-    'project list': projectTaskListQuery(db, project.id, base, TZ),
+    'project list': projectTaskListQuery(db, project.id, base, TZ, null),
     'project list, recent done': projectTaskListQuery(
       db,
       project.id,
       { ...base, doneSince: recent },
       TZ,
+      null,
     ),
     'project list, open only': projectTaskListQuery(
       db,
       project.id,
       { ...base, includeDone: false },
       TZ,
+      null,
     ),
     'project list by due date': projectTaskListQuery(
       db,
       project.id,
       { ...base, sort: 'dueDate' },
       TZ,
+      null,
     ),
     'project list, one assignee': projectTaskListQuery(
       db,
       project.id,
       { ...base, assigneeId: [someone] },
       TZ,
+      null,
     ),
-    'space list': spaceTaskListQuery(db, project.spaceId, base, TZ),
+    'space list': spaceTaskListQuery(db, project.spaceId, base, TZ, null),
   };
   let worst: { name: string; ms: number; plan: string } | null = null;
   for (const [name, query] of Object.entries(variants)) {

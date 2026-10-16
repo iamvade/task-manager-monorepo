@@ -26,7 +26,23 @@ export const WORKSPACE_ROLES = ['owner', 'admin', 'member'] as const;
 export const workspaceRoleSchema = z.enum(WORKSPACE_ROLES);
 export type WorkspaceRole = z.infer<typeof workspaceRoleSchema>;
 
-export const NOTIFICATION_TYPES = ['mention', 'assigned', 'comment', 'status'] as const;
+/**
+ * Notification types, highest priority first (one notification per recipient per event: the
+ * highest type they have enabled). The `standup_*` types are about a standup group, not a task:
+ * a helper named on a blocker, a reply on my update, my blocker resolved, the daily reminder and
+ * the facilitator's digest.
+ */
+export const NOTIFICATION_TYPES = [
+  'mention',
+  'assigned',
+  'comment',
+  'status',
+  'standup_help',
+  'standup_reply',
+  'standup_resolved',
+  'standup_reminder',
+  'standup_digest',
+] as const;
 export const notificationTypeSchema = z.enum(NOTIFICATION_TYPES);
 export type NotificationType = z.infer<typeof notificationTypeSchema>;
 
@@ -38,13 +54,28 @@ export const NOTIFICATION_LEVELS = ['all', 'direct', 'none'] as const;
 export const notificationLevelSchema = z.enum(NOTIFICATION_LEVELS);
 export type NotificationLevel = z.infer<typeof notificationLevelSchema>;
 
+/** The Settings → Notifications switches; every `standup_*` type follows `standups`. */
+export const NOTIFICATION_PREF_KEYS = [
+  'mention',
+  'assigned',
+  'comment',
+  'status',
+  'standups',
+] as const;
+export type NotificationPrefKey = (typeof NOTIFICATION_PREF_KEYS)[number];
+
 export const notificationPrefsSchema = z.object({
   mention: z.boolean(),
   assigned: z.boolean(),
   comment: z.boolean(),
   status: z.boolean(),
+  standups: z.boolean(),
 });
 export type NotificationPrefs = z.infer<typeof notificationPrefsSchema>;
+
+/** The switch that turns a notification type on or off. */
+export const prefKeyOf = (type: NotificationType): NotificationPrefKey =>
+  type.startsWith('standup_') ? 'standups' : (type as NotificationPrefKey);
 
 export const THEMES = ['light', 'dark', 'system'] as const;
 export const themeSchema = z.enum(THEMES);
@@ -145,3 +176,13 @@ export type StandupEntryStatus = z.infer<typeof standupEntryStatusSchema>;
 export const STANDUP_REACTIONS = ['thumbs_up', 'eyes', 'heart'] as const;
 export const standupReactionSchema = z.enum(STANDUP_REACTIONS);
 export type StandupReaction = z.infer<typeof standupReactionSchema>;
+
+/** Yesterday suggestions, strongest first (a task appears once, with its strongest kind). */
+export const STANDUP_SUGGESTION_KINDS = ['completed', 'review', 'commented'] as const;
+export const standupSuggestionKindSchema = z.enum(STANDUP_SUGGESTION_KINDS);
+export type StandupSuggestionKind = z.infer<typeof standupSuggestionKindSchema>;
+
+/** Today chips, strongest first. */
+export const STANDUP_TODAY_TAGS = ['overdue', 'due_today', 'in_progress'] as const;
+export const standupTodayTagSchema = z.enum(STANDUP_TODAY_TAGS);
+export type StandupTodayTag = z.infer<typeof standupTodayTagSchema>;

@@ -314,7 +314,7 @@ describe('notifications', () => {
 
       const all = await w.inbox(w.sara.api);
       // a1 got two (assigned, then comment), so newest first: a1 comment, m2, m1, a2, a1.
-      expect(all.items.map((n) => [n.task.title, n.type])).toEqual([
+      expect(all.items.map((n) => [n.task?.title, n.type])).toEqual([
         ['A1', 'comment'],
         ['M2', 'mention'],
         ['M1', 'mention'],
@@ -325,18 +325,18 @@ describe('notifications', () => {
       expect(all.nextCursor).toBeNull();
 
       const p1 = await w.inbox(w.sara.api, 'all', '&limit=2');
-      expect(p1.items.map((n) => n.task.title)).toEqual(['A1', 'M2']);
+      expect(p1.items.map((n) => n.task?.title)).toEqual(['A1', 'M2']);
       const p2 = await w.inbox(w.sara.api, 'all', `&limit=2&cursor=${p1.nextCursor}`);
-      expect(p2.items.map((n) => n.task.title)).toEqual(['M1', 'A2']);
+      expect(p2.items.map((n) => n.task?.title)).toEqual(['M1', 'A2']);
       const p3 = await w.inbox(w.sara.api, 'all', `&limit=2&cursor=${p2.nextCursor}`);
-      expect(p3.items.map((n) => n.task.title)).toEqual(['A1']);
+      expect(p3.items.map((n) => n.task?.title)).toEqual(['A1']);
       expect(p3.nextCursor).toBeNull();
 
-      expect((await w.inbox(w.sara.api, 'mentions')).items.map((n) => n.task.id)).toEqual([
+      expect((await w.inbox(w.sara.api, 'mentions')).items.map((n) => n.task?.id)).toEqual([
         m2.id,
         m1.id,
       ]);
-      expect((await w.inbox(w.sara.api, 'assigned')).items.map((n) => n.task.id)).toEqual([
+      expect((await w.inbox(w.sara.api, 'assigned')).items.map((n) => n.task?.id)).toEqual([
         a2.id,
         a1.id,
       ]);
@@ -379,7 +379,7 @@ describe('notifications', () => {
       const b = await w.createTask({ title: 'In other' }, other.id);
       for (const t of [a, b]) await w.comment(w.sara.api, t.id, doc('hi'));
       const page = await w.inbox(w.api, 'all', `&projectId=${other.id}`);
-      expect(page.items.map((n) => n.task.title)).toEqual(['In other']);
+      expect(page.items.map((n) => n.task?.title)).toEqual(['In other']);
       expect(page.counts.unread).toBe(2);
     });
 

@@ -102,7 +102,10 @@ export const standupEntries = pgTable(
     isLate: boolean('is_late').notNull().default(false),
     createdAt: createdAt(),
   },
-  (t) => [unique('standup_entries_group_id_user_id_date_unique').on(t.groupId, t.userId, t.date)],
+  (t) => [
+    unique('standup_entries_group_id_user_id_date_unique').on(t.groupId, t.userId, t.date),
+    index('standup_entries_group_id_date_idx').on(t.groupId, t.date),
+  ],
 );
 
 export const standupBlockers = pgTable(
@@ -126,6 +129,10 @@ export const standupBlockers = pgTable(
   (t) => [
     index('standup_blockers_entry_id_idx').on(t.entryId),
     index('standup_blockers_task_id_idx').on(t.taskId),
+    // The task "Blocked" marker reads open blockers by task.
+    index('standup_blockers_open_task_id_idx')
+      .on(t.taskId)
+      .where(sql`${t.resolvedAt} is null`),
   ],
 );
 
@@ -156,10 +163,35 @@ export const standupReplies = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     body: text('body').notNull(),
+    /** People picked from the @ popup (group members when written). */
+    mentionIds: uuid('mention_ids')
+      .array()
+      .notNull()
+      .default(sql`'{}'::uuid[]`),
     createdAt: createdAt(),
     editedAt: timestamptz('edited_at'),
   },
   (t) => [index('standup_replies_entry_id_idx').on(t.entryId)],
+);
+
+/**
+ * Reminders and digests already sent (or skipped): one row per group, person, standup day and
+ * kind, so the scheduler never sends one twice, across restarts too.
+ */
+export const standupNotices = pgTable(
+  'standup_notices',
+  {
+    groupId: uuid('group_id')
+      .notNull()
+      .references(() => standupGroups.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    date: date('date', { mode: 'string' }).notNull(),
+    kind: text('kind').$type<'reminder' | 'digest'>().notNull(),
+    sentAt: timestamptz('sent_at').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.groupId, t.userId, t.date, t.kind] })],
 );
 
 /** A screen-shared meeting for one standup day. */

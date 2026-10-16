@@ -16,6 +16,7 @@ import { registerErrorHandlers } from './errors.js';
 import { EventBus } from './events/bus.js';
 import { loggerOptions } from './logging.js';
 import { scheduleArchiveJob } from './notifications/archive-job.js';
+import { scheduleStandupNotices } from './standups/notices-job.js';
 import { registerNotifier } from './notifications/notifier.js';
 import { registerRealtime } from './realtime/plugin.js';
 import { ReportCache } from './reports/cache.js';
@@ -37,6 +38,7 @@ import { sprintRoutes } from './routes/sprints.js';
 import { statusRoutes } from './routes/statuses.js';
 import { subtaskRoutes } from './routes/subtasks.js';
 import { absenceRoutes } from './routes/absences.js';
+import { standupEntryRoutes } from './routes/standup-entries.js';
 import { standupGroupRoutes } from './routes/standup-groups.js';
 import { tagRoutes } from './routes/tags.js';
 import { taskActivityRoutes } from './routes/task-activity.js';
@@ -107,6 +109,7 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
   await registerRealtime(app);
   registerNotifier(app);
   scheduleArchiveJob(app);
+  scheduleStandupNotices(app);
   if (docsEnabled(config)) await registerDocs(app);
 
   await app.register(
@@ -123,6 +126,7 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
       await api.register(tagRoutes);
       await api.register(absenceRoutes);
       await api.register(standupGroupRoutes);
+      await api.register(standupEntryRoutes);
       await api.register(statusRoutes);
       await api.register(sprintRoutes);
       await api.register(templateRoutes);

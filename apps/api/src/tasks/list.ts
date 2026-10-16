@@ -5,6 +5,7 @@ import {
   type TaskListItem,
   type TaskListQuery,
   type Tag,
+  type TaskBlocked,
   type UserRef,
 } from '@kite/shared';
 import {
@@ -57,7 +58,29 @@ const commentCountSql = sql<number>`(
 const attachmentCountSql = sql<number>`(
   select count(*)::int from attachments a where a.task_id = ${tasks.id})`;
 
-const listColumns = {
+/**
+ * The "Blocked" marker: the newest open blocker linked to the task in a posted standup update of
+ * a non-archived group with "Mark linked tasks as Blocked" on. Its text and author are only shown
+ * to the group's members (`viewerId`); everyone else gets the group name. A blocker the viewer
+ * can read wins over a newer one they can't.
+ */
+const blockedSql = (viewerId: string | null) => sql<TaskBlocked | null>`(
+  select json_build_object(
+    'groupId', g.id, 'groupName', g.name, 'date', e.date,
+    'text', case when gm.user_id is not null then b.text end,
+    'fromUser', case when gm.user_id is not null then json_build_object(
+      'id', u.id, 'name', u.name, 'initials', u.initials, 'avatarColor', u.avatar_color) end)
+  from standup_blockers b
+  join standup_entries e on e.id = b.entry_id and e.status = 'posted'
+  join standup_groups g on g.id = e.group_id
+    and g.mark_linked_tasks_blocked and g.archived_at is null
+  join users u on u.id = e.user_id
+  left join standup_group_members gm on gm.group_id = g.id and gm.user_id = ${viewerId}
+  where b.task_id = ${tasks.id} and b.resolved_at is null
+  order by (gm.user_id is null), e.date desc, b.created_at desc, b.id desc
+  limit 1)`;
+
+const listColumns = (viewerId: string | null) => ({
   task: {
     id: tasks.id,
     number: tasks.number,
@@ -91,7 +114,8 @@ const listColumns = {
   subtaskProgress: subtaskProgressSql,
   commentCount: commentCountSql,
   attachmentCount: attachmentCountSql,
-};
+  blocked: blockedSql(viewerId),
+});
 
 /**
  * Filter conditions shared by the project- and space-level lists. `timezone` is the caller's:
@@ -176,9 +200,9 @@ function taskOrder({ sort, dir }: Pick<TaskListQuery, 'sort' | 'dir'>, spaceLeve
 
 type ListRow = Awaited<ReturnType<typeof selectTaskList>>[number];
 
-function selectTaskList(db: DbOrTx, where: SQL[], order: SQL[]) {
+function selectTaskList(db: DbOrTx, where: SQL[], order: SQL[], viewerId: string | null) {
   return db
-    .select(listColumns)
+    .select(listColumns(viewerId))
     .from(tasks)
     .innerJoin(projects, eq(projects.id, tasks.projectId))
     .innerJoin(statuses, eq(statuses.id, tasks.statusId))
@@ -199,6 +223,7 @@ export const toTaskListItem = (row: ListRow): TaskListItem => ({
   subtaskProgress: row.subtaskProgress,
   commentCount: row.commentCount,
   attachmentCount: row.attachmentCount,
+  blocked: row.blocked,
 });
 
 /** The project list query, unexecuted (`pnpm db:perf` EXPLAINs it). */
@@ -207,9 +232,10 @@ export function projectTaskListQuery(
   projectId: string,
   query: TaskListQuery,
   timezone: string,
+  viewerId: string | null,
 ) {
   const where = [eq(tasks.projectId, projectId), ...taskFilters(db, query, timezone)];
-  return selectTaskList(db, where, taskOrder(query, false));
+  return selectTaskList(db, where, taskOrder(query, false), viewerId);
 }
 
 /** The space list query, unexecuted: every non-archived project of the space. */
@@ -218,6 +244,7 @@ export function spaceTaskListQuery(
   spaceId: string,
   query: SpaceTaskListQuery,
   timezone: string,
+  viewerId: string | null,
 ) {
   const where = [
     eq(projects.spaceId, spaceId),
@@ -225,7 +252,7 @@ export function spaceTaskListQuery(
     ...(query.projectId?.length ? [inArray(tasks.projectId, query.projectId)] : []),
     ...taskFilters(db, query, timezone),
   ];
-  return selectTaskList(db, where, taskOrder(query, true));
+  return selectTaskList(db, where, taskOrder(query, true), viewerId);
 }
 
 /** `GET /projects/:id/tasks`. */
@@ -234,8 +261,9 @@ export async function listProjectTasks(
   projectId: string,
   query: TaskListQuery,
   timezone: string,
+  viewerId: string,
 ) {
-  return (await projectTaskListQuery(db, projectId, query, timezone)).map(toTaskListItem);
+  return (await projectTaskListQuery(db, projectId, query, timezone, viewerId)).map(toTaskListItem);
 }
 
 /** `GET /spaces/:id/tasks`. */
@@ -244,12 +272,20 @@ export async function listSpaceTasks(
   spaceId: string,
   query: SpaceTaskListQuery,
   timezone: string,
+  viewerId: string,
 ) {
-  return (await spaceTaskListQuery(db, spaceId, query, timezone)).map(toTaskListItem);
+  return (await spaceTaskListQuery(db, spaceId, query, timezone, viewerId)).map(toTaskListItem);
 }
 
-/** One task as a list item, deleted or not (move/complete responses, the detail base). */
-export async function getTaskListItem(db: DbOrTx, taskId: string): Promise<TaskListItem | null> {
-  const [row] = await selectTaskList(db, [eq(tasks.id, taskId)], []);
+/**
+ * One task as a list item, deleted or not (move/complete responses, the detail base), as
+ * `viewerId` sees it (null = nobody's standup groups: the `blocked` marker's text is hidden).
+ */
+export async function getTaskListItem(
+  db: DbOrTx,
+  taskId: string,
+  viewerId: string | null,
+): Promise<TaskListItem | null> {
+  const [row] = await selectTaskList(db, [eq(tasks.id, taskId)], [], viewerId);
   return row ? toTaskListItem(row) : null;
 }

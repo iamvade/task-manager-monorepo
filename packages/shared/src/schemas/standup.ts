@@ -1,6 +1,14 @@
 import { z } from 'zod';
 import { dateSchema } from '../dates.js';
-import { speakingOrderSchema } from '../enums.js';
+import {
+  paletteKeySchema,
+  speakingOrderSchema,
+  standupEntryStatusSchema,
+  standupReactionSchema,
+  standupSuggestionKindSchema,
+  standupTodayTagSchema,
+  statusCategorySchema,
+} from '../enums.js';
 import { absenceRefSchema } from './absence.js';
 import { NOTHING_TO_UPDATE, nonEmptyPatch, userRefSchema } from './common.js';
 
@@ -155,3 +163,234 @@ export const standupTimesInOrder = (g: {
   reminderAt: string | null;
   meetingAt: string | null;
 }) => timeOrder(g);
+
+// ── Entries, blockers, reactions, replies ───────────────────────────────────────────────────
+
+/** A task linked from a standup item, blocker or suggestion. */
+export const standupTaskRefSchema = z
+  .object({
+    id: z.uuid(),
+    /** `APP-142`. */
+    key: z.string(),
+    title: z.string(),
+    project: z.object({
+      id: z.uuid(),
+      key: z.string(),
+      name: z.string(),
+      color: paletteKeySchema,
+    }),
+    statusCategory: statusCategorySchema,
+  })
+  .meta({ id: 'StandupTaskRef' });
+export type StandupTaskRef = z.infer<typeof standupTaskRefSchema>;
+
+export const standupYesterdayItemViewSchema = standupYesterdayItemSchema
+  .extend({
+    /** Null when no task is linked or the task was deleted (`text` still shows). */
+    task: standupTaskRefSchema.nullable(),
+  })
+  .meta({ id: 'StandupYesterdayItemView' });
+export type StandupYesterdayItemView = z.infer<typeof standupYesterdayItemViewSchema>;
+
+export const standupTodayItemViewSchema = standupTodayItemSchema
+  .extend({ task: standupTaskRefSchema.nullable() })
+  .meta({ id: 'StandupTodayItemView' });
+export type StandupTodayItemView = z.infer<typeof standupTodayItemViewSchema>;
+
+export const standupBlockerSchema = z
+  .object({
+    id: z.uuid(),
+    entryId: z.uuid(),
+    /** The standup day of the update it was posted in ("since Oct 8" on later days). */
+    date: dateSchema,
+    text: z.string(),
+    author: userRefSchema,
+    task: standupTaskRefSchema.nullable(),
+    /** "Can help" (group members). */
+    helpers: z.array(userRefSchema),
+    resolvedAt: z.iso.datetime().nullable(),
+    resolvedBy: userRefSchema.nullable(),
+    /** The caller may resolve or reopen it (author, helpers, facilitator, admins in the group). */
+    canResolve: z.boolean(),
+    createdAt: z.iso.datetime(),
+  })
+  .meta({ id: 'StandupBlocker' });
+export type StandupBlocker = z.infer<typeof standupBlockerSchema>;
+
+export const standupReactionSummarySchema = z
+  .object({
+    emoji: standupReactionSchema,
+    count: z.number().int(),
+    /** The caller reacted with it. */
+    mine: z.boolean(),
+  })
+  .meta({ id: 'StandupReactionSummary' });
+export type StandupReactionSummary = z.infer<typeof standupReactionSummarySchema>;
+
+export const standupReplySchema = z
+  .object({
+    id: z.uuid(),
+    entryId: z.uuid(),
+    /** Set when it answers one blocker of the update. */
+    blockerId: z.uuid().nullable(),
+    author: userRefSchema,
+    /** Plain text; `@Name` of each mentioned person appears in it. */
+    body: z.string(),
+    mentions: z.array(userRefSchema),
+    createdAt: z.iso.datetime(),
+    editedAt: z.iso.datetime().nullable(),
+  })
+  .meta({ id: 'StandupReply' });
+export type StandupReply = z.infer<typeof standupReplySchema>;
+
+export const standupEntrySchema = z
+  .object({
+    id: z.uuid(),
+    groupId: z.uuid(),
+    user: userRefSchema,
+    /** Workspace job title. */
+    title: z.string().nullable(),
+    date: dateSchema,
+    status: standupEntryStatusSchema,
+    postedAt: z.iso.datetime().nullable(),
+    editedAt: z.iso.datetime().nullable(),
+    /** Posted after the group's post-by time that day (shown for that day only). */
+    isLate: z.boolean(),
+    yesterday: z.array(standupYesterdayItemViewSchema),
+    today: z.array(standupTodayItemViewSchema),
+    /** In the order written. */
+    blockers: z.array(standupBlockerSchema),
+    /** All three reactions, in display order. */
+    reactions: z.array(standupReactionSummarySchema),
+    /** Oldest first. */
+    replies: z.array(standupReplySchema),
+  })
+  .meta({ id: 'StandupEntry' });
+export type StandupEntry = z.infer<typeof standupEntrySchema>;
+
+export const STANDUP_MEMBER_STATES = ['posted', 'not_yet', 'out'] as const;
+
+export const standupDayMemberSchema = z
+  .object({
+    user: userRefSchema,
+    title: z.string().nullable(),
+    /** `out` = out of office that day and hasn't posted (left out of the count). */
+    state: z.enum(STANDUP_MEMBER_STATES),
+    postedAt: z.iso.datetime().nullable(),
+    isLate: z.boolean(),
+    /** When out: the first standup day after the absence ("back Oct 12"). */
+    backOn: dateSchema.nullable(),
+  })
+  .meta({ id: 'StandupDayMember' });
+export type StandupDayMember = z.infer<typeof standupDayMemberSchema>;
+
+/** `GET /standup-groups/:id/days/:date`: everything the group page shows for one day. */
+export const standupDaySchema = z
+  .object({
+    group: standupGroupSchema,
+    date: dateSchema,
+    /** The group's local date now. */
+    today: dateSchema,
+    isStandupDay: z.boolean(),
+    /** The standup days before and after `date` (`nextDate` is null past today). */
+    prevDate: dateSchema.nullable(),
+    nextDate: dateSchema.nullable(),
+    /** The caller can still write or edit their update for this day. */
+    editable: z.boolean(),
+    /** The post-by and meeting times of that day as instants (null when no meeting). */
+    postByAt: z.iso.datetime(),
+    meetingAt: z.iso.datetime().nullable(),
+    /** Group members by position. */
+    members: z.array(standupDayMemberSchema),
+    /** Posted, among the members not out of office. */
+    postedCount: z.number().int(),
+    expectedCount: z.number().int(),
+    /** Posted updates: with open blockers first (when `showBlockersFirst`), then by post time. */
+    entries: z.array(standupEntrySchema),
+    /** Blockers of that day plus ones from earlier days still open; open first. */
+    blockers: z.array(standupBlockerSchema),
+    /** The caller's update for the day, draft or posted. */
+    myEntry: standupEntrySchema.nullable(),
+  })
+  .meta({ id: 'StandupDay' });
+export type StandupDay = z.infer<typeof standupDaySchema>;
+
+export const MAX_STANDUP_ITEMS = 20;
+export const MAX_STANDUP_BLOCKERS = 10;
+
+export const standupBlockerInputSchema = z
+  .object({
+    /** An existing blocker of this update (keeps its resolved state and replies); omit for new. */
+    id: z.uuid().optional(),
+    text: z.string().trim().min(1).max(500),
+    taskId: z.uuid().nullable().optional(),
+    /** Group members who can help (notified when first named). */
+    helperIds: z.array(z.uuid()).max(10).default([]),
+  })
+  .strict();
+export type StandupBlockerInput = z.input<typeof standupBlockerInputSchema>;
+
+/** `PUT /standup-groups/:id/days/:date/entry`: save the draft or post (the whole update). */
+export const saveStandupEntrySchema = z
+  .object({
+    /** `posted` publishes; a posted update can't go back to draft. */
+    status: standupEntryStatusSchema,
+    yesterday: z.array(standupYesterdayItemSchema).max(MAX_STANDUP_ITEMS).default([]),
+    today: z.array(standupTodayItemSchema).max(MAX_STANDUP_ITEMS).default([]),
+    blockers: z.array(standupBlockerInputSchema).max(MAX_STANDUP_BLOCKERS).default([]),
+  })
+  .strict()
+  .meta({ id: 'SaveStandupEntry' });
+export type SaveStandupEntry = z.input<typeof saveStandupEntrySchema>;
+
+/** A date in the URL: an ISO date or `today` (the group's local date). */
+export const standupDateParamSchema = z.union([dateSchema, z.literal('today')]);
+
+export const standupSuggestionsQuerySchema = z.object({
+  /** Defaults to the group's today. */
+  date: standupDateParamSchema.optional(),
+});
+
+/** `GET /standup-groups/:id/suggestions`: Yesterday rows and Today chips for the caller. */
+export const standupSuggestionsSchema = z
+  .object({
+    date: dateSchema,
+    /** The previous standup day (null when none in the last 31 days). */
+    previousDate: dateSchema.nullable(),
+    /** The window of activity: from the previous standup day's post-by time … */
+    since: z.iso.datetime(),
+    /** … until now (or the end of `date` for a past day). */
+    until: z.iso.datetime(),
+    /** One row per task with its strongest kind; newest first. */
+    yesterday: z.array(
+      z.object({
+        kind: standupSuggestionKindSchema,
+        task: standupTaskRefSchema,
+        at: z.iso.datetime(),
+      }),
+    ),
+    /** My open tasks: overdue, then due today, then in progress (each task once). */
+    today: z.array(z.object({ tag: standupTodayTagSchema, task: standupTaskRefSchema })),
+  })
+  .meta({ id: 'StandupSuggestions' });
+export type StandupSuggestions = z.infer<typeof standupSuggestionsSchema>;
+
+const replyBodySchema = z.string().trim().min(1).max(2000);
+
+export const createStandupReplySchema = z
+  .object({
+    body: replyBodySchema,
+    /** Answer one blocker of the update. */
+    blockerId: z.uuid().optional(),
+    /** People picked from the @ popup (group members only; others are dropped). */
+    mentionIds: z.array(z.uuid()).max(20).default([]),
+  })
+  .strict()
+  .meta({ id: 'CreateStandupReply' });
+export type CreateStandupReply = z.input<typeof createStandupReplySchema>;
+
+export const updateStandupReplySchema = z
+  .object({ body: replyBodySchema, mentionIds: z.array(z.uuid()).max(20).default([]) })
+  .strict()
+  .meta({ id: 'UpdateStandupReply' });
+export type UpdateStandupReply = z.input<typeof updateStandupReplySchema>;

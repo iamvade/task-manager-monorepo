@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { dateSchema } from '../dates.js';
 import { notificationLevelSchema, notificationTypeSchema } from '../enums.js';
 import { userRefSchema } from './common.js';
 import { historyEntrySchema } from './feed.js';
@@ -34,18 +35,51 @@ export const taskRefSchema = z
   .meta({ id: 'TaskRef' });
 export type TaskRef = z.infer<typeof taskRefSchema>;
 
+/** The standup a `standup_*` notification (or a mention in a standup reply) is about. */
+export const notificationStandupRefSchema = z
+  .object({
+    groupId: z.uuid(),
+    groupName: z.string(),
+    /** The standup day (opens `/standup/:groupId?date=`). */
+    date: dateSchema,
+    entryId: z.uuid().nullable(),
+    blockerId: z.uuid().nullable(),
+    /** Whose update it is about (replies, help, resolved). */
+    entryAuthor: userRefSchema.nullable(),
+  })
+  .meta({ id: 'NotificationStandupRef' });
+export type NotificationStandupRef = z.infer<typeof notificationStandupRefSchema>;
+
+/** What the facilitator's digest shows, as it was when it was sent. */
+export const standupDigestDataSchema = z
+  .object({
+    posted: z.array(userRefSchema),
+    notPosted: z.array(userRefSchema),
+    out: z.array(userRefSchema),
+    openBlockers: z.number().int(),
+  })
+  .meta({ id: 'StandupDigestData' });
+export type StandupDigestData = z.infer<typeof standupDigestDataSchema>;
+
 export const notificationSchema = z
   .object({
     id: z.uuid(),
     type: notificationTypeSchema,
-    task: taskRefSchema,
-    project: taskProjectRefSchema,
-    /** Who acted last (duplicates within 5 minutes collapse into the latest). */
-    actor: userRefSchema,
+    /** Null for standup notifications (then `standup` is set). */
+    task: taskRefSchema.nullable(),
+    project: taskProjectRefSchema.nullable(),
+    standup: notificationStandupRefSchema.nullable(),
+    /** Who acted last (duplicates within 5 minutes collapse into the latest); null for reminders and digests. */
+    actor: userRefSchema.nullable(),
     /** The activity line behind it ("moved … to In Review"); null when it can't be shown. */
     activity: historyEntrySchema.nullable(),
-    /** Comment text (mentions, comments) or description text (description mentions), truncated. */
+    /**
+     * Comment text (mentions, comments), description text (description mentions), the reply
+     * (standup replies and mentions in them) or the blocker (help, resolved), truncated.
+     */
     snippet: z.string().nullable(),
+    /** The digest's contents (`standup_digest` only). */
+    digest: standupDigestDataSchema.nullable(),
     readAt: z.iso.datetime().nullable(),
     archivedAt: z.iso.datetime().nullable(),
     createdAt: z.iso.datetime(),

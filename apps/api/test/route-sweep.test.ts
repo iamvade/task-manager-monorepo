@@ -2,6 +2,7 @@ import { inviteSchema, notificationPageSchema, subtaskSchema } from '@kite/share
 import type { InjectOptions } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { apiClient, createUser, createWorkspace, errorCode, login, ORIGIN } from './fixtures.js';
+import { standupBlockers, standupEntries, standupReplies } from '../src/db/schema/index.js';
 import { createTestApp } from './helpers.js';
 import { taskWorld } from './task-setup.js';
 
@@ -96,6 +97,26 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
     const group = (
       await w.api('POST', `/workspaces/${w.ws.id}/standup-groups`, { name: 'Mobile' })
     ).json<{ id: string }>();
+    const [entry] = await ctx.db
+      .insert(standupEntries)
+      .values({
+        groupId: group.id,
+        userId: w.owner.id,
+        date: '2026-10-08',
+        status: 'posted',
+        postedAt: new Date('2026-10-08T01:00:00Z'),
+      })
+      .returning();
+    if (!entry) throw new Error('expected a standup entry');
+    const [blocker] = await ctx.db
+      .insert(standupBlockers)
+      .values({ entryId: entry.id, text: 'Waiting', taskId: task.id })
+      .returning();
+    const [standupReply] = await ctx.db
+      .insert(standupReplies)
+      .values({ entryId: entry.id, authorId: w.owner.id, body: 'On it' })
+      .returning();
+    if (!blocker || !standupReply) throw new Error('expected a blocker and a reply');
     const absence = (
       await w.api('POST', `/workspaces/${w.ws.id}/members/${w.owner.id}/absences`, {
         startDate: '2026-10-08',
@@ -121,6 +142,11 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       attachmentId: attachment.id,
       notificationId: notification.id,
       groupId: group.id,
+      date: '2026-10-08',
+      entryId: entry.id,
+      blockerId: blocker.id,
+      replyId: standupReply.id,
+      emoji: 'eyes',
       absenceId: absence.id,
       token: 'not-a-real-token',
     };
@@ -185,6 +211,9 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
         endDate: '2026-11-02',
       },
       'PATCH /workspaces/{workspaceId}/absences/{absenceId}': { note: 'Trip' },
+      'PUT /standup-groups/{groupId}/days/{date}/entry': { status: 'draft' },
+      'POST /standup-entries/{entryId}/replies': { body: 'Hi' },
+      'PATCH /standup-replies/{replyId}': { body: 'Edited' },
     };
   });
 
