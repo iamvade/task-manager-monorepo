@@ -14,6 +14,7 @@ describe('structural API access control', () => {
     | 'emptySpace'
     | 'project'
     | 'tag'
+    | 'otherTag'
     | 'member'
     | 'outsider'
     | 'otherSpace'
@@ -62,6 +63,9 @@ describe('structural API access control', () => {
     ids.tag = tagSchema.parse(
       (await owners('POST', `/workspaces/${ws.id}/tags`, { name: 'UX', color: 'violet' })).json(),
     ).id;
+    ids.otherTag = tagSchema.parse(
+      (await owners('POST', `/workspaces/${ws.id}/tags`, { name: 'UI', color: 'blue' })).json(),
+    ).id;
 
     const outsiders = as('outsider');
     ids.otherSpace = spaceSchema.parse(
@@ -106,6 +110,7 @@ describe('structural API access control', () => {
     ['GET', `/workspaces/${ids.ws}/tags`],
     ['POST', `/workspaces/${ids.ws}/tags`, { name: 'New tag', color: 'blue' }],
     ['PATCH', `/tags/${ids.tag}`, { color: 'green' }],
+    ['POST', `/tags/${ids.tag}/merge`, { intoTagId: ids.otherTag }],
     ['DELETE', `/tags/${ids.tag}`],
     ['GET', `/projects/${ids.project}/statuses`],
     ['GET', `/projects/${ids.project}/sprints`],
@@ -152,7 +157,9 @@ describe('structural API access control', () => {
     const member = as('member');
     const everyday = calls().filter(
       ([method, path]) =>
-        !(method === 'DELETE' && (path.startsWith('/spaces') || path.startsWith('/tags'))) &&
+        !(method === 'DELETE' && path.startsWith('/spaces')) &&
+        // Tags: everyone reads them, only admins and owners manage them.
+        !(method !== 'GET' && (path.startsWith('/tags') || path.endsWith('/tags'))) &&
         !path.endsWith('/archive') &&
         !path.endsWith('/unarchive'),
     );
@@ -169,15 +176,18 @@ describe('structural API access control', () => {
       ['DELETE', `/spaces/${ids.emptySpace}`],
       ['POST', `/projects/${ids.project}/archive`],
       ['POST', `/projects/${ids.project}/unarchive`],
-      ['DELETE', `/tags/${ids.tag}`],
+      ['POST', `/workspaces/${ids.ws}/tags`, { name: 'New tag', color: 'blue' }],
+      ['PATCH', `/tags/${ids.tag}`, { color: 'green' }],
+      ['POST', `/tags/${ids.tag}/merge`, { intoTagId: ids.otherTag }],
+      ['DELETE', `/tags/${ids.otherTag}`],
     ];
-    for (const [method, path] of adminOnly) {
-      const res = await member(method, path);
+    for (const [method, path, body] of adminOnly) {
+      const res = await member(method, path, body);
       expect(res.statusCode, `${method} ${path}`).toBe(403);
       expect(errorCode(res)).toBe('FORBIDDEN');
     }
-    for (const [method, path] of adminOnly) {
-      const res = await admin(method, path);
+    for (const [method, path, body] of adminOnly) {
+      const res = await admin(method, path, body);
       expect(res.statusCode, `${method} ${path}`).toBeLessThan(300);
     }
   });

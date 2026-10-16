@@ -25,3 +25,12 @@ export const updateTagSchema = z
   .refine(nonEmptyPatch, NOTHING_TO_UPDATE)
   .meta({ id: 'UpdateTag' });
 export type UpdateTag = z.infer<typeof updateTagSchema>;
+
+/** A tag with how many live (not deleted) tasks carry it: Settings → Tags. */
+export const tagWithUsageSchema = tagSchema
+  .extend({ taskCount: z.number().int().nonnegative() })
+  .meta({ id: 'TagWithUsage' });
+export type TagWithUsage = z.infer<typeof tagWithUsageSchema>;
+
+export const mergeTagSchema = z.object({ intoTagId: z.uuid() }).meta({ id: 'MergeTag' });
+export type MergeTag = z.infer<typeof mergeTagSchema>;

@@ -65,6 +65,13 @@ export const realtimeServerMessageSchema = z.discriminatedUnion('type', [
     notificationId: z.uuid(),
     notificationType: notificationTypeSchema,
   }),
+  /** A workspace tag was created, renamed, recolored, merged or deleted: refetch tags and tasks. */
+  z.object({
+    type: z.literal('tags.changed'),
+    workspaceId: z.uuid(),
+    actorId: z.uuid(),
+    at: z.iso.datetime(),
+  }),
   /** Reply to `subscribe`: who is online and who is viewing which task. */
   z.object({
     type: z.literal('ready'),

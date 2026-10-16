@@ -11,3 +11,8 @@ export function canManageCreated(
 ): boolean {
   return role !== 'member' || (createdById !== null && createdById === userId);
 }
+
+/** Creating, renaming, recoloring, merging and deleting workspace tags: admins and owners. */
+export function canManageTags(role: WorkspaceRole): boolean {
+  return role !== 'member';
+}

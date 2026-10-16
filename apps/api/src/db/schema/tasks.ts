@@ -1,4 +1,5 @@
 import type { PaletteKey, RichTextNode } from '@kite/shared';
+import { sql } from 'drizzle-orm';
 import {
   boolean,
   date,
@@ -95,7 +96,10 @@ export const tags = pgTable(
     name: text('name').notNull(),
     color: text('color').$type<PaletteKey>().notNull(),
   },
-  (t) => [unique('tags_workspace_id_name_unique').on(t.workspaceId, t.name)],
+  // Names are unique per workspace regardless of case (`Bug` and `bug` are one tag).
+  (t) => [
+    uniqueIndex('tags_workspace_id_lower_name_unique').on(t.workspaceId, sql`lower(${t.name})`),
+  ],
 );
 
 export const taskTags = pgTable(
