@@ -393,6 +393,23 @@ describe('project list', () => {
     expect(screen.queryByRole('option', { name: /шошго үүсгэх/ })).toBeNull();
   });
 
+  it('offers no "Create tag" to plain members', async () => {
+    api(() => ({
+      'GET /api/v1/auth/me': () =>
+        Response.json({ ...ME, workspaces: ME.workspaces.map((w) => ({ ...w, role: 'member' })) }),
+    }));
+    renderAt(LIST);
+    await screen.findByRole('table');
+    fireEvent.click(
+      screen.getByRole('button', { name: '«Audit current navigation patterns» — шошго' }),
+    );
+    const search = await screen.findByRole('combobox', { name: 'Шошго хайх' });
+    fireEvent.change(search, { target: { value: 'Brand' } });
+    await waitFor(() => {
+      expect(screen.queryByRole('option', { name: /шошго үүсгэх/ })).toBeNull();
+    });
+  });
+
   it('replaces every assignee with "Reassign…" from the row menu', async () => {
     const sent: unknown[] = [];
     api((st) => {

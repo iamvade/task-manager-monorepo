@@ -139,6 +139,7 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       'POST /projects/{projectId}/move': {},
       'POST /workspaces/{workspaceId}/tags': { name: 'New', color: 'blue' },
       'PATCH /tags/{tagId}': { color: 'green' },
+      'POST /tags/{tagId}/merge': { intoTagId: tag.id },
       'POST /projects/{projectId}/sprints': {
         name: 'S1',
         startDate: '2026-10-05',

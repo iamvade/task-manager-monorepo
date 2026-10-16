@@ -151,7 +151,13 @@ export function listHandlers(tasks: () => TaskListItem[] = makeTasks) {
     [`GET /api/v1/projects/${PROJECT_ID}/tasks`]: () => Response.json(tasks()),
     [`GET /api/v1/projects/${PROJECT_ID}/sprints`]: () => Response.json([PROJECT.activeSprint]),
     [`GET /api/v1/workspaces/${WORKSPACE_ID}/members`]: () => Response.json(PROJECT.members),
-    [`GET /api/v1/workspaces/${WORKSPACE_ID}/tags`]: () => Response.json(TAGS),
+    [`GET /api/v1/workspaces/${WORKSPACE_ID}/tags`]: () =>
+      Response.json(
+        TAGS.map((tag) => ({
+          ...tag,
+          taskCount: tasks().filter((t) => t.tags.some((x) => x.id === tag.id)).length,
+        })),
+      ),
     [`GET /api/v1/workspaces/${WORKSPACE_ID}/notification-levels`]: () => Response.json([]),
   };
 }

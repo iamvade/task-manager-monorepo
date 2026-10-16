@@ -1,4 +1,4 @@
-import { PALETTE_KEYS, nameSearchKey, type PaletteKey, type Tag } from '@kite/shared';
+import { canManageTags, nameSearchKey, type Tag } from '@kite/shared';
 import { useState, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ApiError } from '../../api/client';
@@ -9,6 +9,7 @@ import { Picker } from '../../components/ui/Picker';
 import { Popover, type TriggerProps } from '../../components/ui/Popover';
 import { TagChip } from '../../components/ui/TagChip';
 import { reportError } from '../../lib/mutationErrors';
+import { colorFor } from '../../lib/palette';
 
 interface TagPickerProps {
   value: readonly Tag[];
@@ -22,16 +23,10 @@ interface TagPickerProps {
 const CREATE = 'create';
 type Row = { kind: 'tag'; tag: Tag } | { kind: 'create'; name: string };
 
-/** A stable color per name, so the same new tag gets the same color everywhere. */
-function colorFor(name: string): PaletteKey {
-  let hash = 0;
-  for (const ch of name.toLowerCase()) hash = (hash * 31 + (ch.codePointAt(0) ?? 0)) >>> 0;
-  return PALETTE_KEYS[hash % PALETTE_KEYS.length] ?? 'neutral';
-}
-
 /**
- * Multi-select workspace tags with search; options show the tag chip. ⌫ removes all. A query no
- * tag has exactly offers "Create tag “…”" first (not designed); the new tag is selected.
+ * Multi-select workspace tags with search; options show the tag chip. ⌫ removes all. For admins
+ * and owners, a query no tag has exactly offers "Create tag “…”" first (not designed); the new
+ * tag is selected. Members pick from the existing tags (Settings → Tags lists them).
  */
 export function TagPicker({ value, tags, onChange, trigger, label }: TagPickerProps) {
   const { t } = useTranslation();
@@ -44,8 +39,9 @@ export function TagPicker({ value, tags, onChange, trigger, label }: TagPickerPr
   const key = nameSearchKey(name);
   const matches = tags.filter((tag) => nameSearchKey(tag.name).includes(key));
   const exact = tags.some((tag) => tag.name.toLowerCase() === name.toLowerCase());
+  const canCreate = workspace ? canManageTags(workspace.role) : false;
   const rows: Row[] = [
-    ...(name && !exact && workspace ? [{ kind: 'create', name } as const] : []),
+    ...(name && !exact && canCreate ? [{ kind: 'create', name } as const] : []),
     ...matches.map((tag) => ({ kind: 'tag', tag }) as const),
   ];
 

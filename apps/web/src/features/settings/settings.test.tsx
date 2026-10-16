@@ -379,4 +379,146 @@ describe('Settings', () => {
       expect(await screen.findByText('No archived projects')).toBeInTheDocument();
     });
   });
+
+  describe('Tags', () => {
+    const TAG_LIST = [
+      { id: '01890000-0000-7000-8000-000000000a01', name: 'Bug', color: 'rose', taskCount: 3 },
+      { id: '01890000-0000-7000-8000-000000000a02', name: 'bugs', color: 'blue', taskCount: 1 },
+      { id: '01890000-0000-7000-8000-000000000a03', name: 'Research', color: 'teal', taskCount: 0 },
+    ];
+    const tagsGet = {
+      [`GET /api/v1/workspaces/${WORKSPACE_ID}/tags`]: () => Response.json(TAG_LIST),
+    };
+    const rowOf = async (name: string) => {
+      const item = (await screen.findAllByRole('listitem')).find(
+        (li) => within(li).queryByText(name, { exact: true }) !== null,
+      );
+      if (!item) throw new Error(`no row ${name}`);
+      return item;
+    };
+
+    it('lists tags with usage, searches and sorts by use', async () => {
+      renderSettings('/settings?tab=tags', tagsGet);
+      expect(await screen.findByText('3 tasks')).toBeVisible();
+      expect(screen.getByText('1 task')).toBeVisible();
+      const search = screen.getByRole('searchbox', { name: 'Search tags' });
+      fireEvent.change(search, { target: { value: 'res' } });
+      expect(screen.queryByText('Bug')).toBeNull();
+      expect(screen.getByText('Research')).toBeVisible();
+      fireEvent.change(search, { target: { value: '' } });
+      fireEvent.click(screen.getByRole('radio', { name: 'Most used' }));
+      const counts = screen.getAllByText(/^\d+ tasks?$/).map((el) => el.textContent);
+      expect(counts).toEqual(['3 tasks', '1 task', '0 tasks']);
+    });
+
+    it('creates, renames and recolors a tag', async () => {
+      const { fetchMock } = renderSettings('/settings?tab=tags', {
+        ...tagsGet,
+        [`POST /api/v1/workspaces/${WORKSPACE_ID}/tags`]: (init) =>
+          Response.json(
+            {
+              id: '01890000-0000-7000-8000-000000000a09',
+              ...(JSON.parse(init?.body as string) as object),
+            },
+            { status: 201 },
+          ),
+        'PATCH /api/v1/tags/01890000-0000-7000-8000-000000000a03': (init) =>
+          Response.json({ ...at(TAG_LIST, 2), ...(JSON.parse(init?.body as string) as object) }),
+      });
+      fireEvent.click(await screen.findByRole('button', { name: 'New tag' }));
+      fireEvent.change(screen.getByRole('textbox', { name: 'Tag name' }), {
+        target: { value: 'Ops' },
+      });
+      fireEvent.click(screen.getByRole('radio', { name: 'Gray' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Create' }));
+      await waitFor(() => {
+        expect(bodies(fetchMock, 'POST')).toEqual([{ name: 'Ops', color: 'neutral' }]);
+      });
+
+      const research = await rowOf('Research');
+      fireEvent.click(within(research).getByRole('button', { name: 'Actions for Research' }));
+      fireEvent.click(await screen.findByRole('menuitem', { name: 'Rename' }));
+      fireEvent.change(screen.getByRole('textbox', { name: 'Rename Research' }), {
+        target: { value: 'Discovery' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+      fireEvent.click(
+        await screen.findByRole('button', { name: /^Color of (Research|Discovery): Teal$/ }),
+      );
+      fireEvent.click(await screen.findByRole('radio', { name: 'Amber' }));
+      await waitFor(() => {
+        expect(bodies(fetchMock, 'PATCH')).toEqual([{ name: 'Discovery' }, { color: 'amber' }]);
+      });
+    });
+
+    it('shows a taken name next to the field', async () => {
+      renderSettings('/settings?tab=tags', {
+        ...tagsGet,
+        [`POST /api/v1/workspaces/${WORKSPACE_ID}/tags`]: () =>
+          Response.json({ error: { code: 'TAG_EXISTS', message: 'taken' } }, { status: 409 }),
+      });
+      fireEvent.click(await screen.findByRole('button', { name: 'New tag' }));
+      fireEvent.change(screen.getByRole('textbox', { name: 'Tag name' }), {
+        target: { value: 'BUG' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Create' }));
+      expect(await screen.findByRole('alert')).toHaveTextContent(
+        'A tag named “BUG” already exists',
+      );
+    });
+
+    it('merges a tag into another after confirming', async () => {
+      const { fetchMock } = renderSettings('/settings?tab=tags', {
+        ...tagsGet,
+        'POST /api/v1/tags/01890000-0000-7000-8000-000000000a02/merge': () =>
+          Response.json({ ...at(TAG_LIST, 0), taskCount: 4 }),
+      });
+      const bugs = await rowOf('bugs');
+      fireEvent.click(within(bugs).getByRole('button', { name: 'Actions for bugs' }));
+      fireEvent.click(await screen.findByRole('menuitem', { name: 'Merge into…' }));
+      const dialog = await screen.findByRole('dialog', { name: 'Merge “bugs”' });
+      expect(within(dialog).getByRole('button', { name: 'Merge' })).toBeDisabled();
+      fireEvent.click(within(dialog).getByRole('button', { name: 'Merge into' }));
+      fireEvent.click(await screen.findByRole('option', { name: /^Bug/ }));
+      expect(dialog).toHaveTextContent('Tasks tagged “bugs” get “Bug” instead');
+      fireEvent.click(within(dialog).getByRole('button', { name: 'Merge' }));
+      await waitFor(() => {
+        expect(bodies(fetchMock, 'POST')).toEqual([
+          { intoTagId: '01890000-0000-7000-8000-000000000a01' },
+        ]);
+      });
+      expect(await screen.findByText('“bugs” merged into “Bug”')).toBeVisible();
+    });
+
+    it('asks before deleting, with how many tasks lose it', async () => {
+      const { fetchMock } = renderSettings('/settings?tab=tags', {
+        ...tagsGet,
+        'DELETE /api/v1/tags/01890000-0000-7000-8000-000000000a01': () =>
+          new Response(null, { status: 204 }),
+      });
+      const bug = await rowOf('Bug');
+      fireEvent.click(within(bug).getByRole('button', { name: 'Actions for Bug' }));
+      fireEvent.click(await screen.findByRole('menuitem', { name: 'Delete' }));
+      const dialog = await screen.findByRole('dialog', { name: 'Delete “Bug”?' });
+      expect(dialog).toHaveTextContent('It will be removed from 3 tasks.');
+      fireEvent.click(within(dialog).getByRole('button', { name: 'Delete' }));
+      await waitFor(() => {
+        expect(fetchMock.mock.calls.filter(([, init]) => init?.method === 'DELETE')).toHaveLength(
+          1,
+        );
+      });
+      expect(await screen.findByText('Tag “Bug” deleted')).toBeVisible();
+    });
+
+    it('shows plain members the list without controls', async () => {
+      renderSettings('/settings?tab=tags', tagsGet, 'member');
+      expect(
+        await screen.findByText('Only admins and owners can create, edit, merge or delete tags.'),
+      ).toBeVisible();
+      expect(await screen.findByText('3 tasks')).toBeVisible();
+      expect(screen.queryByRole('button', { name: 'New tag' })).toBeNull();
+      expect(screen.queryByRole('button', { name: /^Actions for/ })).toBeNull();
+      expect(screen.queryByRole('button', { name: /^Color of/ })).toBeNull();
+    });
+  });
 });

@@ -61,6 +61,7 @@ const pages = (ids: Ids): [string, string][] => [
   ['Inbox', '/inbox'],
   ['Settings', '/settings'],
   ['Settings · members', '/settings?tab=members'],
+  ['Settings · tags', '/settings?tab=tags'],
   ['Settings · archived', '/settings?tab=archived'],
   ['Task page', `/t/${ids.taskKey}`],
   ['Project list', `/p/${ids.project}/list`],
@@ -182,6 +183,32 @@ for (const scheme of ['light', 'dark'] as const) {
         await page.keyboard.press('Escape');
       });
 
+      await test.step('tags: new tag form, merge and delete dialogs', async () => {
+        await page.goto('/settings?tab=tags');
+        await page.getByRole('button', { name: 'New tag' }).click();
+        await page.getByRole('textbox', { name: 'Tag name' }).fill('Ops');
+        await expectAccessible(page, `New tag form (${scheme})`);
+        await page.getByRole('button', { name: 'Cancel' }).click();
+
+        await page.getByRole('button', { name: 'Actions for UX' }).click();
+        await page.getByRole('menuitem', { name: 'Merge into…' }).click();
+        const merge = page.getByRole('dialog', { name: 'Merge “UX”' });
+        await merge.getByRole('button', { name: 'Merge into' }).click();
+        await page.getByRole('option', { name: /^UI/ }).click();
+        await expect(merge.getByText(/Tasks tagged “UX” get “UI” instead/)).toBeVisible();
+        await expectAccessible(page, `Merge tag dialog (${scheme})`);
+        await merge.getByRole('button', { name: 'Cancel' }).click();
+        await expect(merge).toBeHidden();
+
+        await page.getByRole('button', { name: 'Actions for UX' }).click();
+        await page.getByRole('menuitem', { name: 'Delete' }).click();
+        const remove = page.getByRole('dialog', { name: 'Delete “UX”?' });
+        await expect(remove.getByText(/removed from \d+ tasks?/)).toBeVisible();
+        await expectAccessible(page, `Delete tag dialog (${scheme})`);
+        await remove.getByRole('button', { name: 'Cancel' }).click();
+        await expect(remove).toBeHidden();
+      });
+
       await test.step('deactivate dialog', async () => {
         await page.goto('/settings?tab=members');
         await page.getByRole('button', { name: 'More actions for Dorj E.' }).click();
@@ -198,6 +225,12 @@ for (const scheme of ['light', 'dark'] as const) {
 
 test.describe('member', () => {
   test.use({ storageState: MEMBER.state });
+
+  test('Settings · tags (read-only)', async ({ page }) => {
+    await page.goto('/settings?tab=tags');
+    await expect(page.getByText(/Only admins and owners can create/)).toBeVisible();
+    await expectAccessible(page, 'Settings · tags (member)');
+  });
 
   test('My performance', async ({ page }) => {
     await page.goto('/reports/me');

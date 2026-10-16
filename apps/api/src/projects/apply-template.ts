@@ -78,20 +78,16 @@ export async function applyTemplate(
       await tx
         .insert(tags)
         .values(template.tags.map((t) => ({ workspaceId: project.workspaceId, ...t })))
-        .onConflictDoNothing({ target: [tags.workspaceId, tags.name] });
+        // An existing tag of the same name in any case is reused (names are case-insensitive).
+        .onConflictDoNothing();
+      const wanted = template.tags.map((t) => t.name.toLowerCase());
       const rows = await tx
         .select({ id: tags.id, name: tags.name })
         .from(tags)
         .where(
-          and(
-            eq(tags.workspaceId, project.workspaceId),
-            inArray(
-              tags.name,
-              template.tags.map((t) => t.name),
-            ),
-          ),
+          and(eq(tags.workspaceId, project.workspaceId), inArray(sql`lower(${tags.name})`, wanted)),
         );
-      tagIdByName = new Map(rows.map((r) => [r.name, r.id]));
+      tagIdByName = new Map(rows.map((r) => [r.name.toLowerCase(), r.id]));
     }
 
     const [lastSprint] = await tx
@@ -171,7 +167,7 @@ export async function applyTemplate(
 
     const tagRows = template.tasks.flatMap((def, i) =>
       (def.tags ?? []).map((name) => {
-        const tagId = tagIdByName.get(name);
+        const tagId = tagIdByName.get(name.toLowerCase());
         if (!tagId) throw new Error(`Template ${templateId} uses unknown tag ${name}`);
         return { taskId: taskId(i), tagId };
       }),
