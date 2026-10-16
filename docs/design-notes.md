@@ -516,6 +516,7 @@ Async daily standups per **standup group** (a team of workspace members with its
      In the build both open pickers: the task picker (search, my tasks first) and the member picker (group members first, away hints).
 - **Footer** (#FAFAFB, top border #EFEFF2, radius 0 0 14 14): a users icon + "Visible to the 6 people in Mobile team" (12px muted; counts the group's active members, me included), a spacer, **Save draft** (ghost 32px) and **Post update** (primary 32px + "⌘ ↵" kbd on white 20%).
 - Not drawn: each section takes several free-text items (Enter adds a row, ⌫ on an empty row removes it). Yesterday rows that I add by hand can link a task. Several blockers are allowed, each with its own link and helper. Editing a posted update opens the same modal with "Save changes". Esc closes and saves the draft.
+- Built (2026-10-16): a draft autosaves 2 s after a change (never just for opening; never for a posted update, whose "Save changes" stays explicit). A 12px muted status ("Saving…" / "Draft saved 09:41" / "Couldn't save the draft") sits left of Save draft. Reopening a draft offers the suggestions removed earlier under "Restore N removed". The "Visible to N people" line stays in the footer as drawn.
 
 ### 5.4 Write update · mobile — `StandupWriteMobile.dc.html` (390×844)
 Full screen, base 15/22. Top bar 56px: a 44px × button, a centered "Your standup" 16/600 + "Mobile team · Fri, Oct 9" 12px muted (mn "Баасан, 10/9"), and a 44px language cycle (preview control, omit). The body scrolls (padding 16 16 24, gap 22) with the same three sections:
@@ -524,6 +525,8 @@ Full screen, base 15/22. Top bar 56px: a 44px × button, a centered "Your standu
 - Blockers input min 44px, then **Link a task** / **Who can help** as two equal 44px outline buttons (radius 10) that show the chosen value when set ("PRD: saved carts", "@Bat O.") in accent-soft.
 - Sticky footer: **Post update** 48px, radius 12, 16/600, then the visible-to line centered. There's no Save draft on mobile, so drafts autosave.
 Use this layout under ~640px width.
+- Built (2026-10-16) under 640px, same URL (`?write=1`, also the reminder notification's link). Deviations: inputs are 16px (design 15px) so iOS Safari doesn't zoom on focus; the panel follows `visualViewport`, so the sticky footer sits above the keyboard; the footer line reads "Draft saved 09:41 · Visible to…" once a draft has saved; Link a task / Who can help show the choice ("@Bat O. +1" for several) and are cleared from their pickers ("Remove link" row; untick the person). Today chips keep their tag for screen readers only.
+- Phone shell (not drawn): a 56px bar (menu button + workspace name) replaces the sidebar, which opens as a sheet from the left. The standup group page uses 16px gutters, a wrapping header, no "Start standup", and always shows Blockers first. The rest of the app stays desktop-first.
 
 ### 5.5 Live meeting — `StandupLive.dc.html`
 - Full screen without the app shell. Page #FAFAFB, base 16/24.

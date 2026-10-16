@@ -305,6 +305,36 @@ for (const scheme of ['light', 'dark'] as const) {
         await expect(dialog).toBeHidden();
       });
     });
+
+    test('phone (390×844)', async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.goto('/my-tasks');
+      const ids = await lookup(page);
+
+      await page.getByRole('button', { name: 'Open navigation' }).click();
+      await expect(page.getByRole('dialog', { name: 'Workspace' })).toBeVisible();
+      await expectAccessible(page, `Phone navigation (${scheme})`);
+      await page.keyboard.press('Escape');
+
+      await page.goto(`/standup/${ids.mobileGroup}`);
+      await expect(page.getByRole('region', { name: 'Who has posted' })).toBeVisible();
+      await expectAccessible(page, `Phone standup group (${scheme})`);
+
+      // The write page from the reminder link (Design team: Anu hasn't posted there).
+      await page.goto(`/standup/${ids.designGroup}?write=1`);
+      const dialog = page.getByRole('dialog', { name: 'Your standup' });
+      // No dialog on days without a standup.
+      const open = await dialog
+        .waitFor({ timeout: 5000 })
+        .then(() => true)
+        .catch(() => false);
+      if (open) {
+        await expect(dialog.getByRole('group', { name: /^Today/ })).toBeVisible();
+        await expectAccessible(page, `Phone write page (${scheme})`);
+        // Nothing changed: closing saves no draft.
+        await dialog.getByRole('button', { name: 'Close', exact: true }).click();
+      }
+    });
   });
 }
 

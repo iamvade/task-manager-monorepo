@@ -6,11 +6,14 @@ import { ChevronDownIcon, UsersIcon } from '../../components/icons';
 import { Picker } from '../../components/ui/Picker';
 import { Popover } from '../../components/ui/Popover';
 
-/** Standup page header (Standup*.dc.html): min 64px, padding 12/24, bottom border. */
+/**
+ * Standup page header (Standup*.dc.html): min 64px, padding 12/24, bottom border. On a phone
+ * (under 640px) the gutters are 16px and the left side wraps.
+ */
 export function StandupHeader({ left, right }: { left: ReactNode; right?: ReactNode }) {
   return (
-    <header className="box-border flex min-h-16 flex-wrap items-center justify-between gap-3 border-b border-default px-6 py-3">
-      <div className="flex min-w-0 items-center gap-3">{left}</div>
+    <header className="box-border flex min-h-16 flex-wrap items-center justify-between gap-3 border-b border-default px-6 py-3 max-sm:px-4">
+      <div className="flex min-w-0 flex-wrap items-center gap-3 max-sm:gap-2">{left}</div>
       {right && <div className="flex flex-wrap items-center gap-2">{right}</div>}
     </header>
   );

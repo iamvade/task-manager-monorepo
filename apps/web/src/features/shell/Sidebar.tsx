@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
 import { useCurrentWorkspace, useSidebar } from '../../api/workspaces';
 import {
+  CloseIcon,
   GlobeIcon,
   InboxIcon,
   MyTasksIcon,
@@ -27,8 +28,11 @@ import { useShellLocation } from './useShellLocation';
 import { SidebarUser } from './UserMenu';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 
-/** Expanded sidebar (Main.dc.html): 248px (min 220), --bg-sidebar, gap 16, padding 12/8. */
-export function Sidebar() {
+/**
+ * Expanded sidebar (Main.dc.html): 248px (min 220), --bg-sidebar, gap 16, padding 12/8.
+ * In the phone sheet, `onClose` replaces "Collapse sidebar" with closing the sheet.
+ */
+export function Sidebar({ onClose }: { onClose?: () => void } = {}) {
   const { t } = useTranslation();
   const workspace = useCurrentWorkspace();
   const sidebar = useSidebar(workspace?.id);
@@ -41,12 +45,21 @@ export function Sidebar() {
     >
       <div className="flex items-center gap-2 px-1">
         <WorkspaceSwitcher />
-        <IconButton
-          label={t('shell.collapse')}
-          size={32}
-          onClick={toggleSidebar}
-          icon={<PanelCloseIcon size={16} />}
-        />
+        {onClose ? (
+          <IconButton
+            label={t('shell.closeNavigation')}
+            size={32}
+            onClick={onClose}
+            icon={<CloseIcon size={16} />}
+          />
+        ) : (
+          <IconButton
+            label={t('shell.collapse')}
+            size={32}
+            onClick={toggleSidebar}
+            icon={<PanelCloseIcon size={16} />}
+          />
+        )}
       </div>
 
       <SidebarSearch />

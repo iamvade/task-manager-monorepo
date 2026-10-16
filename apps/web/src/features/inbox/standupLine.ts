@@ -1,4 +1,5 @@
 import { shortName, type Notification } from '@kite/shared';
+import { dayHref, writeHref } from '../standup/day/links';
 
 /** i18n key under `inbox.standup` of a standup notification's sentence. */
 export type StandupLineKey =
@@ -38,6 +39,12 @@ export function standupLine(n: Notification): StandupLine | null {
   }
 }
 
-/** Where a standup notification leads: the group's page on that day. */
-export const standupHref = (standup: NonNullable<Notification['standup']>) =>
-  `/standup/${standup.groupId}?date=${standup.date}`;
+/**
+ * Where a standup notification leads: a reminder straight to writing my update (the
+ * full-screen page on a phone), anything else to the group's page on that day.
+ */
+export function standupHref(n: Notification): string | null {
+  if (!n.standup) return null;
+  if (n.type === 'standup_reminder') return writeHref(n.standup.groupId);
+  return dayHref(n.standup.groupId, n.standup.date);
+}

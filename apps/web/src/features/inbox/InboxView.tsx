@@ -210,7 +210,10 @@ function InboxList({
             onOpen={() => {
               if (isUnread(n)) markRead.mutate(n);
               if (n.task) openTask(n.task.key);
-              else if (n.standup) void navigate(standupHref(n.standup));
+              else {
+                const href = standupHref(n);
+                if (href) void navigate(href);
+              }
             }}
             onMarkRead={() => {
               markRead.mutate(n);

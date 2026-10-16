@@ -11,6 +11,7 @@ import {
 } from '@floating-ui/react';
 import type { MutableRefObject, ReactNode } from 'react';
 import { cn } from '../../lib/cn';
+import { useVisualViewport } from '../../lib/useVisualViewport';
 import { WithFloatingTree } from './floatingTree';
 
 interface ModalProps {
@@ -26,6 +27,11 @@ interface ModalProps {
   top?: number;
   /** Element (or tabbable index) focused on open. */
   initialFocus?: number | MutableRefObject<HTMLElement | null>;
+  /**
+   * Phone layout: the panel fills the visible viewport (no radius, border or shadow) and
+   * shrinks with the on-screen keyboard, so a bottom bar stays in view. Ignores width/top.
+   */
+  fullScreen?: boolean;
   className?: string;
 }
 
@@ -56,8 +62,10 @@ function ModalPanel({
   width = 600,
   top = 112,
   initialFocus = 0,
+  fullScreen = false,
   className,
 }: ModalProps) {
+  const viewport = useVisualViewport(open && fullScreen);
   const nodeId = useFloatingNodeId();
   const { context } = useFloating({
     nodeId,
@@ -85,9 +93,15 @@ function ModalPanel({
               aria-modal="true"
               aria-labelledby={labelledBy}
               aria-label={labelledBy ? undefined : label}
-              style={{ top, width }}
+              style={
+                fullScreen
+                  ? { top: viewport?.offsetTop ?? 0, height: viewport?.height ?? '100%' }
+                  : { top, width }
+              }
               className={cn(
-                'absolute left-1/2 box-border flex max-w-[calc(100%-32px)] -translate-x-1/2 flex-col rounded-[14px] border border-default bg-surface text-default shadow-modal outline-none',
+                fullScreen
+                  ? 'absolute inset-x-0 box-border flex flex-col bg-surface text-default outline-none'
+                  : 'absolute left-1/2 box-border flex max-w-[calc(100%-32px)] -translate-x-1/2 flex-col rounded-[14px] border border-default bg-surface text-default shadow-modal outline-none',
                 className,
               )}
               {...getFloatingProps()}
