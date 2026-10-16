@@ -9,6 +9,7 @@ import {
   type SidebarProject,
 } from '@kite/shared';
 import { and, asc, count, eq, isNull, ne } from 'drizzle-orm';
+import { notificationsIn } from '../notifications/list.js';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { requireWorkspaceMember } from '../auth/access.js';
@@ -94,15 +95,12 @@ export const workspaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         db
           .select({ n: count() })
           .from(notifications)
-          .innerJoin(tasks, eq(tasks.id, notifications.taskId))
-          .innerJoin(projects, eq(projects.id, tasks.projectId))
           .where(
             and(
               eq(notifications.userId, user.id),
-              eq(projects.workspaceId, workspaceId),
+              notificationsIn(workspaceId),
               isNull(notifications.readAt),
               isNull(notifications.archivedAt),
-              isNull(tasks.deletedAt),
             ),
           ),
       ]);

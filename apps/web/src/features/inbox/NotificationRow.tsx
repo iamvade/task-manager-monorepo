@@ -1,13 +1,14 @@
-import type { Notification } from '@kite/shared';
+import { shortName, type Notification } from '@kite/shared';
 import { Trans, useTranslation } from 'react-i18next';
 import { useAuth } from '../../auth/useAuth';
-import { ArchiveIcon, CheckCheckIcon, UnarchiveIcon } from '../../components/icons';
+import { ArchiveIcon, CheckCheckIcon, StandupIcon, UnarchiveIcon } from '../../components/icons';
 import { Avatar } from '../../components/ui/Avatar';
 import { IconButton } from '../../components/ui/IconButton';
 import { Tooltip } from '../../components/ui/Tooltip';
 import { useDates } from '../../lib/useDates';
 import { useFeedTime } from '../my-tasks/useFeedTime';
 import { inboxLine } from './inboxLine';
+import { standupLine } from './standupLine';
 
 interface NotificationRowProps {
   notification: Notification;
@@ -34,7 +35,20 @@ export function NotificationRow({
   const dates = useDates();
   const time = useFeedTime();
   const line = inboxLine(n, { t, formatDate: dates.formatDate, meId: me?.user.id });
+  const standup = standupLine(n);
   const unread = n.readAt === null && n.archivedAt === null;
+  const digest = n.type === 'standup_digest' ? n.digest : null;
+  const quote = digest
+    ? [
+        digest.notPosted.length > 0 &&
+          t('inbox.standup.notYet', {
+            names: digest.notPosted.map((u) => shortName(u.name)).join(', '),
+          }),
+        t('inbox.standup.openBlockers', { count: digest.openBlockers }),
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : n.snippet;
 
   return (
     <li className="group relative flex border-b border-subtle hover:bg-subtle has-[:focus-visible]:bg-subtle">
@@ -43,25 +57,47 @@ export function NotificationRow({
         onClick={onOpen}
         className="flex min-w-0 flex-1 gap-2.5 border-0 bg-transparent py-2.5 pr-2 pl-6 text-left focus-visible:-outline-offset-2"
       >
-        <Avatar user={n.actor} size={24} title={null} />
+        {n.actor ? (
+          <Avatar user={n.actor} size={24} title={null} />
+        ) : (
+          <span
+            aria-hidden="true"
+            className="flex size-6 flex-none items-center justify-center rounded-full bg-accent-soft text-accent-ink"
+          >
+            <StandupIcon size={14} />
+          </span>
+        )}
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="line-clamp-2 text-[13px] leading-[18px] text-2">
-            <Trans
-              i18nKey={`myTasks.feed.${line.key}`}
-              values={line.values}
-              components={{
-                b: <strong className="font-semibold text-default" />,
-                task: <TaskName title={n.task.title} />,
-              }}
-            />
+            {standup ? (
+              <Trans
+                i18nKey={`inbox.standup.${standup.key}`}
+                values={standup.values}
+                components={{ b: <strong className="font-semibold text-default" /> }}
+              />
+            ) : (
+              <Trans
+                i18nKey={`myTasks.feed.${line.key}`}
+                values={line.values}
+                components={{
+                  b: <strong className="font-semibold text-default" />,
+                  task: <TaskName title={n.task?.title ?? ''} />,
+                }}
+              />
+            )}
           </span>
-          {n.snippet && (
+          {quote && (
             <span className="mt-0.5 truncate rounded-[6px] bg-sidebar px-2 py-1.5 text-[12px] leading-[18px] text-2">
-              “{n.snippet}”
+              {digest ? quote : `“${quote}”`}
             </span>
           )}
           <span className="truncate text-[12px] text-muted">
-            {t('myTasks.feed.meta', { time: time(n.createdAt), project: n.project.name })}
+            {n.standup
+              ? t('inbox.standup.meta', { time: time(n.createdAt), group: n.standup.groupName })
+              : t('myTasks.feed.meta', {
+                  time: time(n.createdAt),
+                  project: n.project?.name ?? '',
+                })}
           </span>
         </span>
       </button>

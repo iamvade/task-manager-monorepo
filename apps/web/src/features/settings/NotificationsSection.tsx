@@ -1,4 +1,4 @@
-import { NOTIFICATION_LEVELS, NOTIFICATION_TYPES } from '@kite/shared';
+import { NOTIFICATION_LEVELS, NOTIFICATION_PREF_KEYS } from '@kite/shared';
 import { useTranslation } from 'react-i18next';
 import { useNotificationLevels, useSetNotificationLevel } from '../../api/notifications';
 import { useCurrentWorkspace, useSidebar } from '../../api/workspaces';
@@ -10,7 +10,10 @@ import { useAuth } from '../../auth/useAuth';
 import { Switch } from '../../components/ui/Switch';
 import { SettingsSection } from './SettingsRow';
 
-/** Per-type toggles of `notification_prefs` (checked when notifications fan out). */
+/**
+ * The switches of `notification_prefs` (checked when notifications fan out): one per task
+ * notification type, plus Standups for everything standup groups send.
+ */
 export function NotificationsSection() {
   const { t } = useTranslation();
   const { me } = useAuth();
@@ -23,15 +26,15 @@ export function NotificationsSection() {
       title={t('settings.tabs.notifications')}
       description={t('settings.notifications.intro')}
     >
-      {NOTIFICATION_TYPES.map((type) => (
-        <div key={type} className="border-t border-subtle py-3.5">
+      {NOTIFICATION_PREF_KEYS.map((key) => (
+        <div key={key} className="border-t border-subtle py-3.5">
           <Switch
-            checked={prefs[type]}
+            checked={prefs[key]}
             onChange={(on) => {
-              save({ notificationPrefs: { [type]: on } });
+              save({ notificationPrefs: { [key]: on } });
             }}
-            label={t(`settings.notifications.${type}`)}
-            hint={t(`settings.notifications.${type}Hint`)}
+            label={t(`settings.notifications.${key}`)}
+            hint={t(`settings.notifications.${key}Hint`)}
             placement="end"
           />
         </div>

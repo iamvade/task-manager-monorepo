@@ -6,7 +6,11 @@ import {
   comments,
   projects,
   spaces,
+  standupBlockers,
+  standupEntries,
+  standupGroupMembers,
   standupGroups,
+  standupReplies,
   userAbsences,
   subtasks,
   tags,
@@ -268,12 +272,14 @@ export async function findTaskIdByKey(
 
 /**
  * A standup group in a workspace the caller belongs to (every member sees every group); 404
- * otherwise. `manage` also requires admin/owner or the group's facilitator (403).
+ * otherwise. `manage` also requires admin/owner or the group's facilitator (403). `member`
+ * requires being in the group: standup content (updates, blockers, reactions, replies) is for
+ * the group's members only, admins included (403).
  */
 export async function loadStandupGroupAccess(
   request: FastifyRequest,
   groupId: string,
-  { manage = false } = {},
+  { manage = false, member = false } = {},
 ) {
   const { user } = requireAuth(request);
   const [group] = await request.server.db
@@ -286,7 +292,58 @@ export async function loadStandupGroupAccess(
   if (manage && !canManageStandupGroup(role, group.facilitatorId, user.id)) {
     throw httpError(403, 'FORBIDDEN', 'You do not have permission to do this');
   }
+  if (member) await requireStandupGroupMember(request, group.id);
   return { group, role };
+}
+
+async function requireStandupGroupMember(request: FastifyRequest, groupId: string) {
+  const { user } = requireAuth(request);
+  const [row] = await request.server.db
+    .select({ userId: standupGroupMembers.userId })
+    .from(standupGroupMembers)
+    .where(and(eq(standupGroupMembers.groupId, groupId), eq(standupGroupMembers.userId, user.id)))
+    .limit(1);
+  if (!row) throw httpError(403, 'FORBIDDEN', 'Only members of this standup group can see it');
+}
+
+/** A standup update and its group, for group members (404 / 403 as `loadStandupGroupAccess`). */
+export async function loadStandupEntryAccess(request: FastifyRequest, entryId: string) {
+  const [entry] = await request.server.db
+    .select()
+    .from(standupEntries)
+    .where(eq(standupEntries.id, entryId))
+    .limit(1);
+  if (!entry) throw httpError(404, 'NOT_FOUND', 'Standup update not found');
+  const { user } = requireAuth(request);
+  // Someone else's draft doesn't exist for the caller.
+  if (entry.status !== 'posted' && entry.userId !== user.id) {
+    throw httpError(404, 'NOT_FOUND', 'Standup update not found');
+  }
+  const access = await loadStandupGroupAccess(request, entry.groupId, { member: true });
+  return { ...access, entry };
+}
+
+/** A blocker of a posted update, for group members. */
+export async function loadStandupBlockerAccess(request: FastifyRequest, blockerId: string) {
+  const [row] = await request.server.db
+    .select({ blocker: standupBlockers, entryId: standupEntries.id })
+    .from(standupBlockers)
+    .innerJoin(standupEntries, eq(standupEntries.id, standupBlockers.entryId))
+    .where(and(eq(standupBlockers.id, blockerId), eq(standupEntries.status, 'posted')))
+    .limit(1);
+  if (!row) throw httpError(404, 'NOT_FOUND', 'Blocker not found');
+  return { ...(await loadStandupEntryAccess(request, row.entryId)), blocker: row.blocker };
+}
+
+/** A reply on a standup update, for group members. */
+export async function loadStandupReplyAccess(request: FastifyRequest, replyId: string) {
+  const [reply] = await request.server.db
+    .select()
+    .from(standupReplies)
+    .where(eq(standupReplies.id, replyId))
+    .limit(1);
+  if (!reply) throw httpError(404, 'NOT_FOUND', 'Reply not found');
+  return { ...(await loadStandupEntryAccess(request, reply.entryId)), reply };
 }
 
 /**

@@ -54,14 +54,25 @@ export const realtimeTaskMessageSchema = z.discriminatedUnion('type', [
 ]);
 export type RealtimeTaskMessage = z.infer<typeof realtimeTaskMessageSchema>;
 
+export const STANDUP_MESSAGE_TYPES = [
+  'standup.entry_posted',
+  'standup.entry_updated',
+  'standup.blocker_changed',
+  'standup.reaction',
+  'standup.reply',
+] as const;
+export type StandupMessageType = (typeof STANDUP_MESSAGE_TYPES)[number];
+
 export const realtimeServerMessageSchema = z.discriminatedUnion('type', [
   ...realtimeTaskMessageSchema.options,
   /** Sent to the recipient only. */
   z.object({
     type: z.literal('notification.created'),
     workspaceId: z.uuid(),
-    taskId: z.uuid(),
-    actorId: z.uuid(),
+    /** Null for standup notifications. */
+    taskId: z.uuid().nullable(),
+    groupId: z.uuid().nullable(),
+    actorId: z.uuid().nullable(),
     notificationId: z.uuid(),
     notificationType: notificationTypeSchema,
   }),
@@ -77,6 +88,27 @@ export const realtimeServerMessageSchema = z.discriminatedUnion('type', [
     type: z.literal('standup.groups.changed'),
     workspaceId: z.uuid(),
     actorId: z.uuid(),
+    at: z.iso.datetime(),
+  }),
+  /**
+   * A standup day changed: sent to the group's members only (never the content: refetch the day).
+   * `entry_posted` / `entry_updated`: an update was posted or edited; `blocker_changed`: a blocker
+   * was resolved or reopened; `reaction` / `reply`: a reaction or a reply changed.
+   */
+  z.object({
+    type: z.enum(STANDUP_MESSAGE_TYPES),
+    workspaceId: z.uuid(),
+    groupId: z.uuid(),
+    date: z.iso.date(),
+    entryId: z.uuid(),
+    actorId: z.uuid(),
+    at: z.iso.datetime(),
+  }),
+  /** Standup blockers on these tasks opened or closed: refetch their `blocked` marker. */
+  z.object({
+    type: z.literal('tasks.blocked.changed'),
+    workspaceId: z.uuid(),
+    taskIds: z.array(z.uuid()),
     at: z.iso.datetime(),
   }),
   /** Someone's out-of-office periods changed: refetch members, pickers and Workload. */

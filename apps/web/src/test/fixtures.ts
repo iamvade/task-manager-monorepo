@@ -19,7 +19,13 @@ export const ME = {
     theme: 'light',
     accent: '#6E56CF',
     density: 'comfortable',
-    notificationPrefs: { mention: true, assigned: true, comment: true, status: true },
+    notificationPrefs: {
+      mention: true,
+      assigned: true,
+      comment: true,
+      status: true,
+      standups: true,
+    },
   },
   workspaces: [
     { id: WORKSPACE_ID, name: 'Kite Studio', slug: 'kite-studio', role: 'owner', title: null },

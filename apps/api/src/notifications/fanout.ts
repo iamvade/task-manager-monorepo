@@ -1,6 +1,7 @@
 import {
   NOTIFICATION_TYPES,
   activityPayloadSchemas,
+  prefKeyOf,
   type NotificationPrefs,
   type NotificationType,
 } from '@kite/shared';
@@ -105,5 +106,8 @@ export function pickCandidate(
   candidates: readonly Candidate[],
   prefs: NotificationPrefs,
 ): Candidate | undefined {
-  return candidates.filter((c) => prefs[c.type]).sort((a, b) => RANK[a.type] - RANK[b.type])[0];
+  // A switch missing from older stored prefs counts as on.
+  return candidates
+    .filter((c) => prefs[prefKeyOf(c.type)])
+    .sort((a, b) => RANK[a.type] - RANK[b.type])[0];
 }

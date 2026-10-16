@@ -1,8 +1,21 @@
 import type { InboxTab, Notification, NotificationPage } from '@kite/shared';
-import { and, desc, eq, isNotNull, isNull, sql, type SQL } from 'drizzle-orm';
+import { and, desc, eq, isNotNull, isNull, or, sql, type SQL } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import type { FastifyBaseLogger } from 'fastify';
 import type { DbOrTx } from '../db/client.js';
-import { activity, comments, notifications, projects, tasks, users } from '../db/schema/index.js';
+import {
+  activity,
+  comments,
+  notifications,
+  projects,
+  standupBlockers,
+  standupEntries,
+  standupGroupMembers,
+  standupGroups,
+  standupReplies,
+  tasks,
+  users,
+} from '../db/schema/index.js';
 import { toHistoryEntry } from '../tasks/feed.js';
 import { userRefColumns } from '../tasks/user-ref.js';
 import { afterCursor, page } from './cursor.js';
@@ -12,6 +25,7 @@ import {
   snippetFor,
   taskRefColumns,
   toTaskRef,
+  truncate,
 } from './display.js';
 
 /** Tasks of the workspace that are not in the trash. */
@@ -21,12 +35,30 @@ export const liveTasksOf = (workspaceId: string) =>
     join ${projects} on ${projects.id} = ${tasks.projectId}
     where ${projects.workspaceId} = ${workspaceId} and ${tasks.deletedAt} is null)`;
 
+/**
+ * Standup notifications of the workspace's groups, while the recipient is still in the group
+ * (standup content is for the group's members).
+ */
+const standupsOf = (workspaceId: string) =>
+  sql`exists (
+    select 1 from ${standupGroups}
+    join ${standupGroupMembers} on ${standupGroupMembers.groupId} = ${standupGroups.id}
+    where ${standupGroups.id} = ${notifications.standupGroupId}
+      and ${standupGroups.workspaceId} = ${workspaceId}
+      and ${standupGroupMembers.userId} = ${notifications.userId})`;
+
+/** A recipient's notifications that belong to the workspace: live tasks and standup groups. */
+export const notificationsIn = (workspaceId: string) =>
+  or(liveTasksOf(workspaceId), standupsOf(workspaceId));
+
 const TAB_FILTER: Record<InboxTab, SQL | undefined> = {
   all: isNull(notifications.archivedAt),
   mentions: and(isNull(notifications.archivedAt), eq(notifications.type, 'mention')),
   assigned: and(isNull(notifications.archivedAt), eq(notifications.type, 'assigned')),
   archived: isNotNull(notifications.archivedAt),
 };
+
+const entryAuthors = alias(users, 'entry_author');
 
 export async function listNotifications(
   db: DbOrTx,
@@ -40,7 +72,7 @@ export async function listNotifications(
     projectId?: string | undefined;
   },
 ): Promise<NotificationPage> {
-  const mine = and(eq(notifications.userId, userId), liveTasksOf(query.workspaceId));
+  const mine = and(eq(notifications.userId, userId), notificationsIn(query.workspaceId));
 
   const [rows, [counts]] = await Promise.all([
     db
@@ -56,13 +88,27 @@ export async function listNotifications(
           createdAt: activity.createdAt,
         },
         commentText: comments.bodyText,
+        groupName: standupGroups.name,
+        entryAuthor: {
+          id: entryAuthors.id,
+          name: entryAuthors.name,
+          initials: entryAuthors.initials,
+          avatarColor: entryAuthors.avatarColor,
+        },
+        replyBody: standupReplies.body,
+        blockerText: standupBlockers.text,
       })
       .from(notifications)
-      .innerJoin(tasks, eq(tasks.id, notifications.taskId))
-      .innerJoin(projects, eq(projects.id, tasks.projectId))
-      .innerJoin(users, eq(users.id, notifications.actorId))
+      .leftJoin(tasks, eq(tasks.id, notifications.taskId))
+      .leftJoin(projects, eq(projects.id, tasks.projectId))
+      .leftJoin(users, eq(users.id, notifications.actorId))
       .leftJoin(activity, eq(activity.id, notifications.activityId))
       .leftJoin(comments, commentOfActivity)
+      .leftJoin(standupGroups, eq(standupGroups.id, notifications.standupGroupId))
+      .leftJoin(standupEntries, eq(standupEntries.id, notifications.standupEntryId))
+      .leftJoin(entryAuthors, eq(entryAuthors.id, standupEntries.userId))
+      .leftJoin(standupReplies, eq(standupReplies.id, notifications.standupReplyId))
+      .leftJoin(standupBlockers, eq(standupBlockers.id, notifications.standupBlockerId))
       .where(
         and(
           mine,
@@ -89,20 +135,40 @@ export async function listNotifications(
   return {
     items: items.map((r): Notification => {
       const n = r.notification;
+      const standup =
+        n.standupGroupId && n.standupDate
+          ? {
+              groupId: n.standupGroupId,
+              groupName: r.groupName ?? '',
+              date: n.standupDate,
+              entryId: n.standupEntryId,
+              blockerId: n.standupBlockerId,
+              entryAuthor: r.entryAuthor,
+            }
+          : null;
+      const task = r.task && r.project ? toTaskRef(r.task, r.project) : null;
       return {
         id: n.id,
         type: n.type,
-        task: toTaskRef(r.task, r.project),
-        project: r.project,
+        task,
+        project: task ? r.project : null,
+        standup,
         actor: r.actor,
         // The notifier always stores the activity's own actor, so `actor` is its actor too.
-        activity: r.activity ? toHistoryEntry(r.activity, r.actor, log) : null,
-        snippet: snippetFor(
-          r.activity?.type,
-          r.commentText,
-          r.task.descriptionText,
-          n.type === 'mention',
-        ),
+        activity: r.activity && r.actor ? toHistoryEntry(r.activity, r.actor, log) : null,
+        snippet: standup
+          ? r.replyBody
+            ? truncate(r.replyBody)
+            : r.blockerText
+              ? truncate(r.blockerText)
+              : null
+          : snippetFor(
+              r.activity?.type,
+              r.commentText,
+              r.task?.descriptionText ?? '',
+              n.type === 'mention',
+            ),
+        digest: n.type === 'standup_digest' ? n.data : null,
         readAt: n.readAt?.toISOString() ?? null,
         archivedAt: n.archivedAt?.toISOString() ?? null,
         createdAt: n.createdAt.toISOString(),

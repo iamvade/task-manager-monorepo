@@ -32,6 +32,8 @@ interface Pending {
   inbox: boolean;
   /** A tag was created, renamed, recolored, merged or deleted. */
   tags: boolean;
+  /** Standup blockers changed the "Blocked" marker of tasks in unknown projects. */
+  allLists: boolean;
 }
 
 /**
@@ -83,6 +85,7 @@ export function createMessageHandler(queryClient: QueryClient) {
         sidebar: false,
         inbox: false,
         tags: false,
+        allLists: false,
       };
     }
     edit(pending);
@@ -106,6 +109,7 @@ export function createMessageHandler(queryClient: QueryClient) {
       void queryClient.invalidateQueries({ queryKey: queryKeys.taskDetails });
       p.home = true;
     }
+    if (p.allLists) void queryClient.invalidateQueries({ queryKey: queryKeys.taskLists });
     if (p.projects.size > 0) {
       const spaces = spacesOf(queryClient, ws, p.projects);
       void queryClient.invalidateQueries({
@@ -175,6 +179,23 @@ export function createMessageHandler(queryClient: QueryClient) {
             queryKey: queryKeys.standupGroups(message.workspaceId),
           });
           void queryClient.invalidateQueries({ queryKey: ['standup-groups'] });
+          return;
+        case 'standup.entry_posted':
+        case 'standup.entry_updated':
+        case 'standup.blocker_changed':
+        case 'standup.reaction':
+        case 'standup.reply':
+          // The group's day (and its posted counts in the sidebar and My Tasks).
+          void queryClient.invalidateQueries({ queryKey: queryKeys.standupGroup(message.groupId) });
+          void queryClient.invalidateQueries({
+            queryKey: queryKeys.standupGroups(message.workspaceId),
+          });
+          return;
+        case 'tasks.blocked.changed':
+          mark(message.workspaceId, (p) => {
+            p.allLists = true;
+            for (const id of message.taskIds) p.tasks.add(id);
+          });
           return;
         case 'absences.changed':
           void refreshAfterAbsences(queryClient, message.workspaceId);

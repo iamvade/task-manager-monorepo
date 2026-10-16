@@ -70,6 +70,20 @@ export const taskStatusRefSchema = statusSchema
   .meta({ id: 'TaskStatusRef' });
 export type TaskStatusRef = z.infer<typeof taskStatusRefSchema>;
 
+/** The marker on a task linked to an open standup blocker (List, Board, drawer). */
+export const taskBlockedSchema = z
+  .object({
+    groupId: z.uuid(),
+    groupName: z.string(),
+    /** The standup day of the blocker. */
+    date: dateSchema,
+    /** Null for people outside the group (they see "Blocked · from {group}'s standup"). */
+    text: z.string().nullable(),
+    fromUser: userRefSchema.nullable(),
+  })
+  .meta({ id: 'TaskBlocked' });
+export type TaskBlocked = z.infer<typeof taskBlockedSchema>;
+
 /** A row in List/Board/Calendar. */
 export const taskListItemSchema = z
   .object({
@@ -100,6 +114,11 @@ export const taskListItemSchema = z
     subtaskProgress: z.object({ done: z.number().int(), total: z.number().int() }),
     commentCount: z.number().int(),
     attachmentCount: z.number().int(),
+    /**
+     * Linked to an open blocker in a standup group with "Mark linked tasks as Blocked" on (the
+     * newest one the caller can read wins); null otherwise. Shown on done tasks too: the UI hides it.
+     */
+    blocked: taskBlockedSchema.nullable(),
   })
   .meta({ id: 'TaskListItem' });
 export type TaskListItem = z.infer<typeof taskListItemSchema>;

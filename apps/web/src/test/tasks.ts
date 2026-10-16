@@ -97,6 +97,7 @@ export function makeTask(
     subtaskProgress: { done: fields.subtasks?.[0] ?? 0, total: fields.subtasks?.[1] ?? 0 },
     commentCount: fields.comments ?? 0,
     attachmentCount: 0,
+    blocked: null,
   });
 }
 

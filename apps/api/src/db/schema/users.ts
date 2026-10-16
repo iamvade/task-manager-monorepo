@@ -18,7 +18,7 @@ export const users = pgTable('users', {
   notificationPrefs: jsonb('notification_prefs')
     .$type<NotificationPrefs>()
     .notNull()
-    .default({ mention: true, assigned: true, comment: true, status: true }),
+    .default({ mention: true, assigned: true, comment: true, status: true, standups: true }),
   createdAt: createdAt(),
 });
 

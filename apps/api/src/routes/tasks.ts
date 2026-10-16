@@ -84,8 +84,11 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     return { projectId: access.project.id, actorId: user.id, clientId: clientIdOf(request) };
   }
 
-  const listItem = async (taskId: string) => {
-    const item = await getTaskListItem(app.db, taskId);
+  /** The caller (whose standup groups decide what the `blocked` marker shows). */
+  const viewerOf = (request: FastifyRequest) => requireAuth(request).user.id;
+
+  const listItem = async (taskId: string, viewerId: string) => {
+    const item = await getTaskListItem(app.db, taskId, viewerId);
     if (!item) throw httpError(404, 'NOT_FOUND', 'Task not found');
     return item;
   };
@@ -106,7 +109,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     async (request) => {
       const { project } = await loadProjectAccess(request, request.params.projectId);
       const { user } = requireAuth(request);
-      return listProjectTasks(app.db, project.id, request.query, user.timezone);
+      return listProjectTasks(app.db, project.id, request.query, user.timezone, user.id);
     },
   );
 
@@ -126,7 +129,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     async (request) => {
       const { space } = await loadSpaceAccess(request, request.params.spaceId);
       const { user } = requireAuth(request);
-      return listSpaceTasks(app.db, space.id, request.query, user.timezone);
+      return listSpaceTasks(app.db, space.id, request.query, user.timezone, user.id);
     },
   );
 
@@ -154,7 +157,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         if (!key) throw httpError(404, 'NOT_FOUND', 'Task not found');
         taskId = await findTaskIdByKey(request, key, request.query.workspaceId);
       }
-      return buildTaskDetail(app.db, taskId);
+      return buildTaskDetail(app.db, taskId, viewerOf(request));
     },
   );
 
@@ -260,7 +263,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           return task.id;
         },
       );
-      return reply.code(201).send(await buildTaskDetail(app.db, taskId));
+      return reply.code(201).send(await buildTaskDetail(app.db, taskId, viewerOf(request)));
     },
   );
 
@@ -285,7 +288,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       await mutateTasks(app, scope, async (m) => {
         await applyTaskPatch(m, await m.lockTask(request.params.taskId), body);
       });
-      return buildTaskDetail(app.db, request.params.taskId);
+      return buildTaskDetail(app.db, request.params.taskId, viewerOf(request));
     },
   );
 
@@ -333,7 +336,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         await tx.update(tasks).set(patch).where(eq(tasks.id, task.id));
         m.emit('task.moved', task.id, { move: { statusId: to.id, position } });
       });
-      return listItem(request.params.taskId);
+      return listItem(request.params.taskId, viewerOf(request));
     },
   );
 
@@ -357,7 +360,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       await mutateTasks(app, scope, async (m) => {
         await setTaskAssignees(m, await m.lockTask(request.params.taskId), request.body.userIds);
       });
-      return listItem(request.params.taskId);
+      return listItem(request.params.taskId, viewerOf(request));
     },
   );
 
@@ -413,7 +416,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         await tx.update(tasks).set({ updatedAt: m.now }).where(eq(tasks.id, task.id));
         m.emit('task.updated', task.id);
       });
-      return listItem(request.params.taskId);
+      return listItem(request.params.taskId, viewerOf(request));
     },
   );
 
@@ -477,7 +480,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           .where(eq(tasks.id, task.id));
         m.emit('task.updated', task.id);
       });
-      return listItem(request.params.taskId);
+      return listItem(request.params.taskId, viewerOf(request));
     },
   );
 
@@ -511,8 +514,8 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     const { user } = requireAuth(request);
     return { projectId: project.id, actorId: user.id, clientId: clientIdOf(request) };
   }
-  const listItems = async (ids: readonly string[]) =>
-    (await Promise.all(ids.map((id) => getTaskListItem(app.db, id)))).flatMap((t) =>
+  const listItems = async (ids: readonly string[], viewerId: string) =>
+    (await Promise.all(ids.map((id) => getTaskListItem(app.db, id, viewerId)))).flatMap((t) =>
       t ? [t] : [],
     );
 
@@ -539,7 +542,10 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           if (assigneeIds) await setTaskAssignees(m, task, assigneeIds);
         }
       });
-      return listItems(request.body.updates.map((u) => u.id));
+      return listItems(
+        request.body.updates.map((u) => u.id),
+        viewerOf(request),
+      );
     },
   );
 
@@ -603,7 +609,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         m.log(task.id, 'task.restored', {});
         m.emit('task.restored', task.id);
       });
-      return buildTaskDetail(app.db, request.params.taskId);
+      return buildTaskDetail(app.db, request.params.taskId, viewerOf(request));
     },
   );
 
@@ -727,7 +733,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         m.emit('task.created', copy.id, { assigneeIds, mentionedUserIds: mentioned });
         return copy.id;
       });
-      return reply.code(201).send(await buildTaskDetail(app.db, copyId));
+      return reply.code(201).send(await buildTaskDetail(app.db, copyId, viewerOf(request)));
     },
   );
 
@@ -800,7 +806,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         });
         m.emit('task.updated', task.id);
       });
-      return buildTaskDetail(app.db, request.params.taskId);
+      return buildTaskDetail(app.db, request.params.taskId, viewerOf(request));
     },
   );
   done();

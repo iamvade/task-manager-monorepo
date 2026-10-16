@@ -21,7 +21,7 @@ const doc = (...parts: Part[]): RichTextNode => ({
   ],
 });
 
-const ALL_ON = { mention: true, assigned: true, comment: true, status: true };
+const ALL_ON = { mention: true, assigned: true, comment: true, status: true, standups: true };
 
 describe('pickCandidate', () => {
   const c = (type: Candidate['type']): Candidate => ({ type, activityId: null });
@@ -34,10 +34,16 @@ describe('pickCandidate', () => {
       'comment',
     );
     expect(
-      pickCandidate(all, { mention: false, assigned: false, comment: false, status: true })?.type,
+      pickCandidate(all, { ...ALL_ON, mention: false, assigned: false, comment: false })?.type,
     ).toBe('status');
     expect(
-      pickCandidate(all, { mention: false, assigned: false, comment: false, status: false }),
+      pickCandidate(all, {
+        ...ALL_ON,
+        mention: false,
+        assigned: false,
+        comment: false,
+        status: false,
+      }),
     ).toBeUndefined();
     expect(pickCandidate([], ALL_ON)).toBeUndefined();
   });

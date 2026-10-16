@@ -74,5 +74,6 @@ export function buildOptimisticTask(
     subtaskProgress: { done: 0, total: 0 },
     commentCount: 0,
     attachmentCount: 0,
+    blocked: null,
   };
 }

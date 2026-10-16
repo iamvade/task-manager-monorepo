@@ -14,7 +14,7 @@ import { loadProjectAccess, requireWorkspaceMember } from '../auth/access.js';
 import { requireAuth } from '../auth/plugin.js';
 import { notifications, projectNotificationLevels, projects } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
-import { listNotifications, liveTasksOf } from '../notifications/list.js';
+import { listNotifications, notificationsIn } from '../notifications/list.js';
 
 const err = apiErrorSchema;
 const params = z.object({ notificationId: z.uuid() });
@@ -133,7 +133,7 @@ export const notificationRoutes: FastifyPluginCallbackZod = (app, _opts, done) =
             eq(notifications.userId, user.id),
             isNull(notifications.readAt),
             isNull(notifications.archivedAt),
-            liveTasksOf(workspaceId),
+            notificationsIn(workspaceId),
           ),
         )
         .returning({ id: notifications.id });

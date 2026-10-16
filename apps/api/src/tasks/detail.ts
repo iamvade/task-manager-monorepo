@@ -23,9 +23,13 @@ import { userRefColumns } from './user-ref.js';
  * Body of `GET /tasks/:ref` (deleted tasks included). Runs its queries in parallel, so pass the
  * pool, not a transaction.
  */
-export async function buildTaskDetail(db: Db, taskId: string): Promise<TaskDetail> {
+export async function buildTaskDetail(
+  db: Db,
+  taskId: string,
+  viewerId: string | null,
+): Promise<TaskDetail> {
   const [item, [row], subtaskRows, attachmentRows, followers, refs] = await Promise.all([
-    getTaskListItem(db, taskId),
+    getTaskListItem(db, taskId, viewerId),
     db
       .select({
         description: tasks.description,

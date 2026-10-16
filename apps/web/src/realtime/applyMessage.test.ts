@@ -144,12 +144,45 @@ describe('createMessageHandler', () => {
     expect(s.stale(queryKeys.sidebar(WORKSPACE_ID))).toBe(true);
   });
 
+  it('refetches every task list when standup blockers change a "Blocked" marker', () => {
+    const s = setup();
+    s.handler.handle({
+      type: 'tasks.blocked.changed',
+      workspaceId: WORKSPACE_ID,
+      taskIds: [at(s.tasks, 0).id],
+      at: '2026-10-08T03:00:00.000Z',
+    });
+    vi.advanceTimersByTime(COALESCE_MS);
+    for (const key of [s.projectList, s.spaceList, s.otherSpace]) expect(s.stale(key)).toBe(true);
+  });
+
+  it('refetches the standup group (and its days) on standup changes', () => {
+    const s = setup();
+    const group = '01890000-0000-7000-8000-00000000c001';
+    const day = queryKeys.standupDay(group, '2026-10-08');
+    s.queryClient.setQueryData(day, {});
+    s.queryClient.setQueryData(queryKeys.standupGroups(WORKSPACE_ID), []);
+    s.handler.handle({
+      type: 'standup.reply',
+      workspaceId: WORKSPACE_ID,
+      groupId: group,
+      date: '2026-10-08',
+      entryId: '01890000-0000-7000-8000-00000000c002',
+      actorId: SARA,
+      at: '2026-10-08T03:00:00.000Z',
+    });
+    expect(s.stale(day)).toBe(true);
+    expect(s.stale(queryKeys.standupGroups(WORKSPACE_ID))).toBe(true);
+    expect(s.stale(s.projectList)).toBe(false);
+  });
+
   it('refreshes the inbox and badge on a new notification', () => {
     const s = setup();
     s.handler.handle({
       type: 'notification.created',
       workspaceId: WORKSPACE_ID,
       taskId: at(s.tasks, 0).id,
+      groupId: null,
       actorId: SARA,
       notificationId: '01890000-0000-7000-8000-00000000a001',
       notificationType: 'mention',

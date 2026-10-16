@@ -1,19 +1,14 @@
-import { and, desc, eq, gt, inArray, isNull } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import type { NotificationType } from '@kite/shared';
 import type { FastifyInstance } from 'fastify';
 import type { Db } from '../db/client.js';
-import {
-  notifications,
-  projectNotificationLevels,
-  users,
-  workspaceMembers,
-} from '../db/schema/index.js';
+import { projectNotificationLevels, users, workspaceMembers } from '../db/schema/index.js';
 import type { DomainEvent } from '../events/bus.js';
 import { candidatesFor, pickCandidate } from './fanout.js';
 import { activeMember } from '../auth/membership.js';
+import { publishNotified, writeNotifications, type Notified } from './deliver.js';
 
-/** An unread notification of the same type on the same task this recent absorbs the new one. */
-export const COLLAPSE_WINDOW_MS = 5 * 60_000;
+export { COLLAPSE_WINDOW_MS, type Notified } from './deliver.js';
 
 /** What a project set to "direct" still sends: @mentions and new assignments. */
 const DIRECT_TYPES: ReadonlySet<NotificationType> = new Set(['mention', 'assigned']);
@@ -28,32 +23,13 @@ export function registerNotifier(app: FastifyInstance): void {
   app.events.on('*', (event) => {
     const run = queue.then(async () => {
       // Pushed only after the notifications committed; collapsed ones read as new (bumped).
-      for (const n of await notify(app.db, event)) {
-        app.realtime.broadcaster.publish({
-          to: { userId: n.userId, workspaceId: event.workspaceId },
-          message: {
-            type: 'notification.created',
-            workspaceId: event.workspaceId,
-            taskId: event.taskId,
-            actorId: event.actorId,
-            notificationId: n.id,
-            notificationType: n.type,
-          },
-        });
-      }
+      publishNotified(app, event.workspaceId, await notify(app.db, event));
     });
     queue = run.catch(() => undefined);
     // Returned so the bus logs failures and `events.idle()` waits for it.
     return run;
   });
 }
-
-export interface Notified {
-  id: string;
-  userId: string;
-  type: NotificationType;
-}
-
 /** Creates (or collapses into) notifications for one event; returns them once committed. */
 export async function notify(db: Db, event: DomainEvent): Promise<Notified[]> {
   const candidates = await candidatesFor(db, event);
@@ -96,39 +72,17 @@ export async function notify(db: Db, event: DomainEvent): Promise<Notified[]> {
   });
   if (picks.length === 0) return [];
 
-  const since = new Date(event.at.getTime() - COLLAPSE_WINDOW_MS);
-  return db.transaction(async (tx) => {
-    const notified: Notified[] = [];
-    for (const pick of picks) {
-      const [existing] = await tx
-        .select({ id: notifications.id })
-        .from(notifications)
-        .where(
-          and(
-            eq(notifications.userId, pick.userId),
-            eq(notifications.taskId, event.taskId),
-            eq(notifications.type, pick.type),
-            isNull(notifications.readAt),
-            isNull(notifications.archivedAt),
-            gt(notifications.createdAt, since),
-          ),
-        )
-        .orderBy(desc(notifications.createdAt))
-        .limit(1)
-        .for('update');
-      const latest = { actorId: event.actorId, activityId: pick.activityId, createdAt: event.at };
-      let id = existing?.id;
-      if (id) {
-        await tx.update(notifications).set(latest).where(eq(notifications.id, id));
-      } else {
-        const [row] = await tx
-          .insert(notifications)
-          .values({ userId: pick.userId, type: pick.type, taskId: event.taskId, ...latest })
-          .returning({ id: notifications.id });
-        id = row?.id;
-      }
-      if (id) notified.push({ id, userId: pick.userId, type: pick.type });
-    }
-    return notified;
-  });
+  return db.transaction((tx) =>
+    writeNotifications(
+      tx,
+      picks.map((pick) => ({
+        userId: pick.userId,
+        type: pick.type,
+        subject: { taskId: event.taskId },
+        actorId: event.actorId,
+        activityId: pick.activityId,
+        at: event.at,
+      })),
+    ),
+  );
 }
