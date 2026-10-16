@@ -501,6 +501,18 @@ Rows reuse the `myTasks.feed.*` sentences with the task key in `<task>` (the tit
 | `errors.network` | Can’t reach the server. Check your connection and try again. | Сервертэй холбогдож чадсангүй. Холболтоо шалгаад дахин оролдоно уу. |
 | `common.completed` | {{key}} completed | {{key}} дууслаа |
 
+## Standup write: phone + autosave (derived, 2026-10-16)
+
+`suggestedShort`, `addTodayShort` and `closeShort` come from `StandupWriteMobile.dc.html` `STR.mn`; the rest is drafted.
+
+| key | en | mn (draft) |
+|---|---|---|
+| `standup.write.saving` | Saving… | Хадгалж байна… |
+| `standup.write.autosaved` | Draft saved {{time}} | Ноорог хадгалагдсан {{time}} |
+| `standup.write.saveFailed` | Couldn’t save the draft | Ноорог хадгалагдсангүй |
+| `shell.openNavigation` | Open navigation | Цэс нээх |
+| `shell.closeNavigation` | Close navigation | Цэс хаах |
+
 ## Open questions
 
 1. **Unscheduled**: drafted "Огноогүй" (no date) rather than "Хуваарьгүй"; the hint uses "…хуваарьт оруулна уу". Pick one term.

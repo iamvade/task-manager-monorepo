@@ -396,7 +396,7 @@ export function TodayFieldset({ draft, setDraft, variant = 'desktop' }: SectionP
                       mobile && 'sr-only',
                     )}
                   >
-                    {mobile ? `, ${t(`standup.write.tag.${tag}`)}` : t(`standup.write.tag.${tag}`)}
+                    {t(`standup.write.tag.${tag}`)}
                   </span>
                 )}
               </button>
