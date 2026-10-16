@@ -232,6 +232,7 @@
     "comments_other": "{{count}} сэтгэгдэл",
     "setAssignee": "«{{name}}» — хариуцагч",
     "setDue": "«{{name}}» — дуусах огноо",
+    "setStatus": "«{{name}}» — төлөв: {{status}}",
     "setPriority": "«{{name}}» — ач холбогдол",
     "setSize": "«{{name}}» — хэмжээ",
     "setTags": "«{{name}}» — шошго",

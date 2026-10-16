@@ -184,59 +184,86 @@ describe('project list', () => {
     expect(await screen.findByText(audit.title)).toBeInTheDocument();
   });
 
-  it('completes a task optimistically and rolls back on error', async () => {
+  it('sets the status from the row marker: optimistic, Undo for Done, rollback on error', async () => {
+    useToastStore.setState({ toasts: [] });
     let fail = false;
-    const { fetchMock, state } = api((st) => {
+    const patches: unknown[] = [];
+    const moves: unknown[] = [];
+    const { state } = api((st) => {
       const audit = at(st.tasks, 0);
+      const set = (statusId: string) => {
+        const status = st.project.statuses.find((s) => s.id === statusId) ?? audit.status;
+        const next = {
+          ...audit,
+          status: { id: status.id, name: status.name, category: status.category, color: null },
+          position: 'z0',
+          completedAt: status.category === 'done' ? '2026-10-08T03:00:00.000Z' : null,
+        };
+        st.tasks = st.tasks.map((t) => (t.id === audit.id ? next : t));
+        return next;
+      };
       return {
-        [`POST /api/v1/tasks/${audit.id}/complete`]: () => {
+        [`PATCH /api/v1/tasks/${audit.id}`]: (init) => {
+          patches.push(body(init));
           if (fail)
             return Response.json({ error: { code: 'BOOM', message: 'x' } }, { status: 500 });
-          const done = statusOf('done');
-          const next = {
-            ...audit,
-            status: { ...audit.status, id: done.id, category: 'done' as const },
-            position: 'z0',
-            completedAt: '2026-10-08T03:00:00.000Z',
-          };
-          st.tasks = st.tasks.map((t) => (t.id === audit.id ? next : t));
-          return Response.json(next);
+          const { statusId } = body(init) as { statusId: string };
+          return Response.json(detail(set(statusId)));
+        },
+        [`POST /api/v1/tasks/${audit.id}/move`]: (init) => {
+          moves.push(body(init));
+          const { statusId } = body(init) as { statusId: string };
+          return Response.json(set(statusId));
         },
       };
     });
     const title = at(state.tasks, 0).title;
+    const key = at(state.tasks, 0).key;
     renderAt(LIST);
 
-    fireEvent.click(
-      await screen.findByRole('checkbox', { name: `«${title}» ажлыг дууссан гэж тэмдэглэх` }),
-    );
-    // Moves into the (collapsed) Done group.
-    await waitFor(() => {
-      expect(within(group('Хийх')).queryByText(title)).not.toBeInTheDocument();
-    });
-    expect(toggleOf('Дууссан')).toHaveTextContent('2');
-    expect(
-      fetchMock.mock.calls.find(([url]) => href(url).endsWith('/complete'))?.[1],
-    ).toMatchObject({ method: 'POST', body: JSON.stringify({ done: true }) });
-
-    // A failing toggle puts the row back where it was.
-    fail = true;
-    fireEvent.click(toggleOf('Дууссан'));
-    const checkbox = await screen.findByRole('checkbox', {
-      name: `«${title}» ажлыг дуусаагүй болгох`,
-    });
-    fireEvent.click(checkbox);
-    await waitFor(() => {
-      expect(fetchMock.mock.calls.filter(([url]) => href(url).endsWith('/complete'))).toHaveLength(
-        2,
+    const pick = async (from: string, to: string) => {
+      fireEvent.click(await screen.findByRole('button', { name: `«${title}» — төлөв: ${from}` }));
+      const listbox = await screen.findByRole('listbox');
+      // The current status is highlighted.
+      expect(within(listbox).getByRole('option', { name: from })).toHaveAttribute(
+        'aria-selected',
+        'true',
       );
+      fireEvent.click(within(listbox).getByRole('option', { name: to }));
+    };
+
+    // In Progress: the row moves, no toast.
+    await pick('Хийх', 'Хийгдэж буй');
+    await waitFor(() => {
+      expect(within(group('Хийгдэж буй')).getByText(title)).toBeInTheDocument();
+    });
+    expect(patches).toEqual([{ statusId: statusOf('in_progress').id }]);
+    expect(screen.queryByText(`${key} дууслаа`)).toBeNull();
+
+    // Done: into the (collapsed) Done group, with Undo back to where it was.
+    await pick('Хийгдэж буй', 'Дууссан');
+    await waitFor(() => {
+      expect(within(group('Хийгдэж буй')).queryByText(title)).not.toBeInTheDocument();
+    });
+    const toast = await screen.findByText(`${key} дууслаа`);
+    fireEvent.click(
+      within(toast.closest('[role="status"]') ?? toast).getByRole('button', { name: 'Буцаах' }),
+    );
+    await waitFor(() => {
+      expect(moves).toMatchObject([{ statusId: statusOf('in_progress').id }]);
     });
     await waitFor(() => {
-      expect(
-        within(group('Дууссан')).getByRole('checkbox', {
-          name: `«${title}» ажлыг дуусаагүй болгох`,
-        }),
-      ).toBeChecked();
+      expect(within(group('Хийгдэж буй')).getByText(title)).toBeInTheDocument();
+    });
+
+    // A failing change puts the row back.
+    fail = true;
+    await pick('Хийгдэж буй', 'Хянагдаж буй');
+    await waitFor(() => {
+      expect(patches).toHaveLength(3);
+    });
+    await waitFor(() => {
+      expect(within(group('Хийгдэж буй')).getByText(title)).toBeInTheDocument();
     });
   });
 
@@ -624,5 +651,26 @@ describe('space list', () => {
     await act(async () => {
       await Promise.resolve();
     });
+  });
+
+  it("loads the task's project statuses for the row status picker", async () => {
+    const { fetchMock, state } = api((st) => ({
+      [`GET /api/v1/spaces/${SPACE_ID}/tasks`]: () => Response.json(st.tasks),
+    }));
+    const title = at(state.tasks, 0).title;
+    renderAt(`/s/${SPACE_ID}/list`);
+
+    const marker = await screen.findByRole('button', { name: `«${title}» — төлөв: Хийх` });
+    const projectCalls = () =>
+      fetchMock.mock.calls.filter(([url]) => href(url).endsWith(`/projects/${PROJECT_ID}`));
+    expect(projectCalls()).toHaveLength(0);
+    fireEvent.click(marker);
+    const listbox = await screen.findByRole('listbox');
+    await waitFor(() => {
+      expect(within(listbox).getAllByRole('option')).toHaveLength(
+        PROJECT_WITH_STATUSES.statuses.length,
+      );
+    });
+    expect(projectCalls()).toHaveLength(1);
   });
 });

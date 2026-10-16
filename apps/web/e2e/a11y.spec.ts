@@ -197,6 +197,17 @@ for (const scheme of ['light', 'dark'] as const) {
         await brief.click();
       });
 
+      await test.step('row status picker', async () => {
+        await page
+          .getByRole('button', { name: /^Status of / })
+          .first()
+          .click();
+        await expect(page.getByRole('listbox')).toBeVisible();
+        await expectAccessible(page, `Row status picker (${scheme})`);
+        await page.keyboard.press('Escape');
+        await expect(page.getByRole('listbox')).toBeHidden();
+      });
+
       await test.step('drawer with followers and Mentioned in', async () => {
         await page.goto(`/p/${ids.project}/list?sprint=none&task=APP-142`);
         await expect(page.getByRole('region', { name: 'Mentioned in' })).toBeVisible();

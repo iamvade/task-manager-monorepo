@@ -1,4 +1,12 @@
-import type { Priority, Size, Tag, TaskListItem, UserRef, WorkspaceMember } from '@kite/shared';
+import type {
+  Priority,
+  Size,
+  Status,
+  Tag,
+  TaskListItem,
+  UserRef,
+  WorkspaceMember,
+} from '@kite/shared';
 import { createContext, useContext } from 'react';
 
 /** Data and actions every row of one List needs (provided by TaskTable). */
@@ -9,11 +17,14 @@ export interface ListActions {
   /** Project team ids (assignee picker suggestions); empty on the space list. */
   teamIds: ReadonlySet<string>;
   tags: readonly Tag[];
+  /** Project list: the project's statuses (row status picker). Null on the space list. */
+  statuses: readonly Status[] | null;
   /** `?task=KEY` added to the current URL. */
   taskHref: (task: TaskListItem) => string;
   open: (task: TaskListItem) => void;
   select: (task: TaskListItem) => void;
   toggleComplete: (task: TaskListItem) => void;
+  setStatus: (task: TaskListItem, status: Status) => void;
   remove: (task: TaskListItem) => void;
   copyLink: (task: TaskListItem) => void;
   setAssignees: (task: TaskListItem, users: UserRef[]) => void;
@@ -45,7 +56,7 @@ export function useListActions(): ListActions {
 export const isDone = (task: Pick<TaskListItem, 'status'>) => task.status.category === 'done';
 
 /**
- * Main.dc.html grid: [select (project list, not designed)] · checkbox · name · assignee · due · priority · [size] · tags · more. Size is
+ * Main.dc.html grid: [select (project list, not designed)] · status (the design's checkbox) · name · assignee · due · priority · [size] · tags · more. Size is
  * optional (not in the designs) and sits next to priority.
  */
 export const gridColumns = (showSize: boolean, selectable = false) =>
