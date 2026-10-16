@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<title>Стэндап — Мобайл баг</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#52525B;text-decoration:none}a:hover{color:#18181B}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit;color:inherit}
+.nav:hover{background:#EDEDF0}
+.ghost:hover{background:#F4F4F5}
+.chip:hover{border-color:#C4C4CC;background:#FAFAFB}
+.ghost:focus-visible,.nav:focus-visible,.seg:focus-visible,.chip:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #6E56CF;outline-offset:1px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</helmet>
+
+<div lang="{{lang}}" style="display: flex; flex-wrap: wrap; min-height: 100vh; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 14px; line-height: 20px; color: #18181B; background: #FFFFFF; -webkit-font-smoothing: antialiased">
+
+  <!-- ============ SIDEBAR ============ -->
+  <nav aria-label="{{L.workspace}}" style="flex: 1 1 248px; max-width: 248px; min-width: 220px; box-sizing: border-box; background: #F7F7F8; border-right: 1px solid #E6E6EA; display: flex; flex-direction: column; gap: 16px; padding: 12px 8px">
+    <div style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px">
+      <span style="width: 24px; height: 24px; border-radius: 6px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">K</span>
+      <span style="flex: 1; font-weight: 600">Kite Studio</span>
+    </div>
+    <div style="padding: 0 4px">
+      <label style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <span class="sr">{{L.search}}</span>
+        <input type="search" placeholder="{{L.search}}" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-size: 13px; padding: 0">
+        <kbd style="font-family: inherit; font-size: 11px; color: #6B6B74; border: 1px solid #E6E6EA; border-radius: 4px; padding: 0 4px; line-height: 16px">⌘K</kbd>
+      </label>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <a class="nav" href="MyTasks.dc.html" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12 2.5 2.5 4.5-5"></path></svg>
+        <span style="flex: 1; font-weight: 500">{{L.myTasks}}</span><span style="font-size: 12px; color: #6B6B74">7</span>
+      </a>
+      <a class="nav" href="#" aria-current="page" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; background: {{accentSoft}}; color: {{accent}}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M8 9h8M8 13h5"></path></svg>
+        <span style="flex: 1; font-weight: 600">{{L.standup}}</span>
+        <span aria-label="{{L.notPostedYet}}" style="width: 8px; height: 8px; border-radius: 4px; background: {{accent}}"></span>
+      </a>
+      <a class="nav" href="EmptyInbox.dc.html" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+        <span style="flex: 1; font-weight: 500">{{L.inbox}}</span>
+        <span style="min-width: 20px; height: 18px; padding: 0 6px; box-sizing: border-box; border-radius: 9px; background: {{accent}}; color: #FFFFFF; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">3</span>
+      </a>
+      <a class="nav" href="Reports.dc.html" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M8 17v-5M13 17V8M18 17v-9"></path></svg>
+        <span style="flex: 1; font-weight: 500">{{L.reports}}</span>
+      </a>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <span style="height: 28px; padding: 0 12px; display: flex; align-items: center; font-size: 12px; font-weight: 500; color: #6B6B74">{{L.groups}}</span>
+      <sc-for list="{{groupsNav}}" as="g" hint-placeholder-count="3">
+        <a class="nav" href="{{g.href}}" style="display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; border-radius: 8px; font-size: 13px; {{g.style}}">
+          <span style="width: 6px; height: 6px; border-radius: 3px; {{g.dot}}"></span>{{g.name}}
+        </a>
+      </sc-for>
+      <span style="height: 28px; margin-top: 8px; padding: 0 12px; display: flex; align-items: center; font-size: 12px; font-weight: 500; color: #6B6B74">{{L.spaces}}</span>
+      <sc-for list="{{spaces}}" as="sp" hint-placeholder-count="3">
+        <span style="display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; color: #3F3F46; font-weight: 500">
+          <span style="width: 18px; height: 18px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; {{sp.badge}}">{{sp.initial}}</span>{{sp.name}}
+        </span>
+      </sc-for>
+    </div>
+    <div style="margin-top: auto; display: flex; flex-direction: column; gap: 2px; border-top: 1px solid #E6E6EA; padding-top: 8px">
+      <div style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px 0 12px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3F3F46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path></svg>
+        <span id="lang-label" style="flex: 1; font-weight: 500; color: #3F3F46">{{L.language}}</span>
+        <div role="radiogroup" aria-labelledby="lang-label" style="display: flex; gap: 2px; padding: 2px; border-radius: 7px; background: #EDEDF0">
+          <sc-for list="{{langs}}" as="lg" hint-placeholder-count="2">
+            <button class="seg" role="radio" aria-checked="{{lg.active}}" onClick="{{lg.pick}}" lang="{{lg.code}}" title="{{lg.full}}" style="height: 24px; padding: 0 8px; border: 0; border-radius: 5px; font-size: 12px; font-weight: 600; {{lg.style}}">{{lg.short}}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px">
+        <span style="width: 24px; height: 24px; border-radius: 12px; background: #E0E7FF; color: #3730A3; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">{{me.initials}}</span>
+        <span style="flex: 1; font-size: 13px; font-weight: 500">{{me.full}}</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ MAIN ============ -->
+  <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+
+    <header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; min-height: 64px; padding: 12px 24px; box-sizing: border-box; border-bottom: 1px solid #E6E6EA">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
+        <button class="ghost" aria-haspopup="listbox" style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-size: 14px; font-weight: 600">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"></path></svg>
+          {{L.groupName}}
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+        </button>
+        <div style="display: flex; align-items: center; gap: 2px">
+          <button class="ghost" aria-label="{{L.prevDay}}" style="width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+          <span style="min-width: 168px; text-align: center; font-size: 14px; font-weight: 500">{{L.dateLabel}}</span>
+          <button disabled="disabled" aria-label="{{L.nextDay}}" style="width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center; cursor: not-allowed; opacity: 0.4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+          <span style="height: 22px; padding: 0 8px; border-radius: 11px; background: #F1F1F3; color: #52525B; font-size: 12px; font-weight: 500; display: flex; align-items: center">{{L.today}}</span>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px">
+        <a href="StandupSettings.dc.html" class="ghost" aria-label="{{L.settings}}" style="width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"></path></svg>
+        </a>
+        <a href="StandupWrite.dc.html" style="display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-size: 13px; font-weight: 500; color: #18181B">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>
+          {{L.writeUpdate}}
+        </a>
+        <a href="StandupLive.dc.html" style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: 8px; background: {{accent}}; color: #FFFFFF; font-size: 13px; font-weight: 500">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#FFFFFF" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"></path></svg>
+          {{L.startStandup}}
+        </a>
+      </div>
+    </header>
+
+    <div style="display: flex; flex-direction: column; gap: 24px; padding: 20px 24px 48px; max-width: 1120px; width: 100%; box-sizing: border-box">
+
+      <!-- Who has posted -->
+      <section aria-label="{{L.whoPosted}}" style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px 24px; padding: 14px 16px; border: 1px solid #E6E6EA; border-radius: 12px">
+        <div style="display: flex; flex-direction: column; gap: 2px; min-width: 160px">
+          <span style="font-size: 14px; font-weight: 600">{{L.postedCount}}</span>
+          <span style="font-size: 12px; color: #6B6B74">{{L.dueBy}}</span>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 16px">
+          <sc-for list="{{strip}}" as="p" hint-placeholder-count="6">
+            <span title="{{p.title}}" style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 64px">
+              <span style="position: relative; width: 36px; height: 36px; box-sizing: border-box; border-radius: 18px; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{p.avatarStyle}}">
+                {{p.initials}}
+                <sc-if value="{{p.posted}}" hint-placeholder-val="{{ true }}">
+                  <span aria-hidden="true" style="position: absolute; right: -2px; bottom: -2px; width: 14px; height: 14px; border-radius: 7px; background: #16A34A; box-shadow: 0 0 0 2px #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg></span>
+                </sc-if>
+              </span>
+              <span style="font-size: 12px; line-height: 14px; text-align: center; {{p.nameStyle}}">{{p.short}}</span>
+              <span style="font-size: 11px; line-height: 14px; {{p.stateStyle}}">{{p.state}}</span>
+            </span>
+          </sc-for>
+        </div>
+        <span style="flex: 1"></span>
+        <a href="StandupWrite.dc.html" style="display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 8px; background: {{accentSoft}}; color: {{accent}}; font-size: 13px; font-weight: 600">{{L.yourTurn}}</a>
+      </section>
+
+      <!-- Blockers -->
+      <section aria-labelledby="bl-h" style="display: flex; flex-direction: column; gap: 10px">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B42318" stroke-width="2.25" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m5.6 5.6 12.8 12.8"></path></svg>
+          <h2 id="bl-h" style="margin: 0; font-size: 15px; font-weight: 600">{{L.blockers}}</h2>
+          <span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 10px; background: #FDECEC; color: #B42318; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center">{{openBlockers}}</span>
+        </div>
+        <div style="display: flex; flex-direction: column; border: 1px solid #F3D3CF; border-radius: 12px; overflow: hidden">
+          <sc-for list="{{blockers}}" as="b" hint-placeholder-count="2">
+            <div style="display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-bottom: 1px solid #F8E3E0; {{b.rowStyle}}">
+              <input type="checkbox" checked="{{b.resolved}}" onChange="{{b.toggle}}" aria-label="{{b.checkLabel}}" style="flex: none; width: 18px; height: 18px; margin: 2px 0 0; accent-color: #16A34A; cursor: pointer">
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px">
+                <span style="font-size: 14px; line-height: 20px; font-weight: 500; {{b.textStyle}}">{{b.text}}</span>
+                <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: 12px; color: #52525B">
+                  <span style="display: flex; align-items: center; gap: 6px">
+                    <span style="width: 20px; height: 20px; border-radius: 10px; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{b.byAvatar}}">{{b.byInitials}}</span>{{b.byLine}}
+                  </span>
+                  <a class="chip" href="TaskDetail.dc.html" style="display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border: 1px solid #E6E6EA; border-radius: 6px; background: #FFFFFF; color: #18181B; max-width: 320px">
+                    <span style="flex: none; width: 8px; height: 8px; border-radius: 4px; {{b.projDot}}"></span>
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{b.task}}</span>
+                  </a>
+                  <span style="display: flex; align-items: center; gap: 6px">
+                    {{L.canHelp}}
+                    <a href="#" style="display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 7px 0 2px; border-radius: 11px; background: {{accentSoft}}; color: {{accent}}; font-weight: 600">
+                      <span style="width: 18px; height: 18px; border-radius: 9px; font-size: 8px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{b.helpAvatar}}">{{b.helpInitials}}</span>@{{b.helpName}}
+                    </a>
+                  </span>
+                </div>
+              </div>
+              <sc-if value="{{b.resolved}}" hint-placeholder-val="{{ false }}">
+                <span style="flex: none; height: 22px; padding: 0 8px; border-radius: 11px; background: #E8F5EC; color: #166534; font-size: 12px; font-weight: 600; display: flex; align-items: center">{{L.resolved}}</span>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <!-- Person cards -->
+      <section aria-labelledby="up-h" style="display: flex; flex-direction: column; gap: 12px">
+        <h2 id="up-h" style="margin: 0; font-size: 15px; font-weight: 600">{{L.updates}}</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); gap: 16px; align-items: start">
+
+          <!-- You: not posted yet -->
+          <div style="display: flex; align-items: center; gap: 12px; padding: 16px; border: 1.5px dashed #D4D4D8; border-radius: 12px; background: #FAFAFB">
+            <span style="flex: none; width: 36px; height: 36px; border-radius: 18px; background: #E0E7FF; color: #3730A3; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center">{{me.initials}}</span>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-weight: 600">{{L.youNotYet}}</span>
+              <span style="font-size: 12px; color: #6B6B74">{{L.youHint}}</span>
+            </div>
+            <a href="StandupWrite.dc.html" style="flex: none; display: flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 8px; background: {{accent}}; color: #FFFFFF; font-size: 13px; font-weight: 500">{{L.writeUpdate}}</a>
+          </div>
+
+          <sc-for list="{{posts}}" as="p" hint-placeholder-count="4">
+            <article aria-label="{{p.name}}" style="display: flex; flex-direction: column; border: 1px solid #E6E6EA; border-radius: 12px; overflow: hidden">
+              <header style="display: flex; align-items: center; gap: 10px; padding: 14px 16px 10px">
+                <span style="flex: none; width: 36px; height: 36px; border-radius: 18px; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{p.avatar}}">{{p.initials}}</span>
+                <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                  <span style="font-weight: 600">{{p.name}}</span>
+                  <span style="font-size: 12px; color: #6B6B74">{{p.role}} · {{p.postedAt}}</span>
+                </div>
+                <button class="ghost" aria-label="{{L.more}}" style="width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="#71717A" aria-hidden="true"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg></button>
+              </header>
+              <div style="display: flex; flex-direction: column; gap: 12px; padding: 0 16px 14px">
+                <sc-for list="{{p.sections}}" as="sec" hint-placeholder-count="3">
+                  <div style="display: flex; flex-direction: column; gap: 6px">
+                    <span style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; {{sec.labelStyle}}">
+                      <span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 3px; {{sec.dot}}"></span>{{sec.label}}
+                    </span>
+                    <sc-for list="{{sec.items}}" as="it" hint-placeholder-count="2">
+                      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; padding-left: 12px; font-size: 14px; line-height: 20px; {{it.style}}">
+                        <span>{{it.text}}</span>
+                        <sc-if value="{{it.hasTask}}" hint-placeholder-val="{{ false }}">
+                          <a class="chip" href="TaskDetail.dc.html" style="display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 7px; border: 1px solid #E6E6EA; border-radius: 6px; background: #FFFFFF; color: #3F3F46; font-size: 12px; max-width: 260px">
+                            <span style="flex: none; width: 7px; height: 7px; border-radius: 4px; {{it.projDot}}"></span>
+                            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{it.task}}</span>
+                          </a>
+                        </sc-if>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-for>
+              </div>
+              <footer style="display: flex; flex-direction: column; gap: 10px; padding: 10px 16px 14px; border-top: 1px solid #F1F1F3; background: #FCFCFD">
+                <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px">
+                  <sc-for list="{{p.reactions}}" as="r" hint-placeholder-count="2">
+                    <button aria-pressed="{{r.on}}" onClick="{{r.toggle}}" aria-label="{{r.aria}}" style="display: inline-flex; align-items: center; gap: 4px; height: 26px; padding: 0 8px; border-radius: 13px; font-size: 12px; font-weight: 600; {{r.style}}">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{r.icon}}"></path></svg>{{r.count}}
+                    </button>
+                  </sc-for>
+                  <button class="ghost" aria-label="{{L.addReaction}}" style="width: 26px; height: 26px; border: 1px dashed #D4D4D8; border-radius: 13px; background: transparent; display: flex; align-items: center; justify-content: center">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"></path></svg>
+                  </button>
+                </div>
+                <sc-for list="{{p.replies}}" as="rp" hint-placeholder-count="1">
+                  <div style="display: flex; align-items: flex-start; gap: 8px">
+                    <span style="flex: none; width: 22px; height: 22px; border-radius: 11px; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{rp.avatar}}">{{rp.initials}}</span>
+                    <div style="display: flex; flex-direction: column; font-size: 13px; line-height: 18px">
+                      <span><strong style="font-weight: 600">{{rp.name}}</strong> <span style="color: #6B6B74; font-size: 12px">{{rp.time}}</span></span>
+                      <span style="color: #3F3F46">{{rp.text}}</span>
+                    </div>
+                  </div>
+                </sc-for>
+                <label style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF">
+                  <span class="sr">{{L.reply}}</span>
+                  <input type="text" placeholder="{{p.replyPlaceholder}}" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-size: 13px; padding: 0">
+                </label>
+              </footer>
+            </article>
+          </sc-for>
+
+          <!-- Out of office -->
+          <div style="display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid #EFEFF2; border-radius: 12px; background: #FAFAFB">
+            <span style="flex: none; width: 36px; height: 36px; border-radius: 18px; background: #E4E4E7; color: #6B6B74; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center">{{L.miaInitials}}</span>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-weight: 600; color: #52525B">{{L.miaName}}</span>
+              <span style="font-size: 12px; color: #6B6B74">{{L.outUntil}}</span>
+            </div>
+            <span style="height: 22px; padding: 0 8px; border-radius: 11px; background: #E4E4E7; color: #52525B; font-size: 12px; font-weight: 600; display: flex; align-items: center">{{L.out}}</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"language":{"editor":"enum","default":"mn","options":["mn","en"]},"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"$preview":{"width":1440,"height":1640}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: undefined, resolved: {}, reacted: {} };
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const lang = s.lang || this.props.language || 'mn';
+    const mn = lang === 'mn';
+    const pick = (pair) => (mn ? pair[0] : pair[1]);
+    const accent = this.props.accent ?? '#6E56CF';
+    const accentSoft = accent + '1A';
+
+    const STR = {
+      mn: {
+        workspace: 'Ажлын орчин', search: 'Хайх', myTasks: 'Миний ажлууд', standup: 'Стэндап', inbox: 'Мэдэгдэл', reports: 'Тайлан',
+        groups: 'Стэндап бүлэг', spaces: 'Орон зай', language: 'Хэл', notPostedYet: 'Та өнөөдөр бичээгүй',
+        groupName: 'Мобайл баг', prevDay: 'Өмнөх өдөр', nextDay: 'Дараагийн өдөр', dateLabel: 'Баасан, 10-р сарын 9', today: 'Өнөөдөр',
+        settings: 'Бүлгийн тохиргоо', writeUpdate: 'Шинэчлэл бичих', startStandup: 'Стэндап эхлүүлэх',
+        whoPosted: 'Хэн бичсэн бэ', postedCount: '5-аас 4 нь бичсэн', dueBy: '10:00 цагаас өмнө · уулзалт 10:15-д', yourTurn: 'Таны ээлж',
+        posted: 'Бичсэн', waiting: 'Хүлээгдэж буй', out: 'Чөлөө',
+        blockers: 'Саад тотгор', canHelp: 'Туслах:', resolved: 'Шийдсэн',
+        updates: 'Өнөөдрийн шинэчлэл', youNotYet: 'Та одоохондоо бичээгүй байна', youHint: 'Өчигдрийн ажлаас тань санал болгосон зүйлс бэлэн байна',
+        more: 'Бусад үйлдэл', reply: 'Хариулах', addReaction: 'Хариу үйлдэл нэмэх',
+        miaName: 'Мишээл Л.', miaInitials: 'МЛ', outUntil: 'Ажлаас гадуур · 10-р сарын 12 хүртэл'
+      },
+      en: {
+        workspace: 'Workspace', search: 'Search', myTasks: 'My Tasks', standup: 'Standup', inbox: 'Inbox', reports: 'Reports',
+        groups: 'Standup groups', spaces: 'Spaces', language: 'Language', notPostedYet: 'You haven’t posted today',
+        groupName: 'Mobile team', prevDay: 'Previous day', nextDay: 'Next day', dateLabel: 'Friday, Oct 9', today: 'Today',
+        settings: 'Group settings', writeUpdate: 'Write update', startStandup: 'Start standup',
+        whoPosted: 'Who has posted', postedCount: '4 of 5 have posted', dueBy: 'Due by 10:00 · meeting at 10:15', yourTurn: 'Your turn',
+        posted: 'Posted', waiting: 'Not yet', out: 'Out',
+        blockers: 'Blockers', canHelp: 'Can help:', resolved: 'Resolved',
+        updates: 'Today’s updates', youNotYet: 'You haven’t posted yet', youHint: 'Suggestions from your activity yesterday are ready',
+        more: 'More actions', reply: 'Reply', addReaction: 'Add reaction',
+        miaName: 'Mia L.', miaInitials: 'ML', outUntil: 'Out of office · back Oct 12'
+      }
+    };
+    const L = STR[lang] || STR.mn;
+    const segOn = 'background:#FFFFFF;color:#18181B;box-shadow:0 1px 2px rgba(24,24,27,0.08)';
+    const langs = [{ code: 'mn', short: 'МН', full: 'Монгол' }, { code: 'en', short: 'EN', full: 'English' }].map((d) => ({
+      ...d, active: d.code === lang, pick: () => this.setState({ lang: d.code }), style: d.code === lang ? segOn : 'background:transparent;color:#6B6B74'
+    }));
+    const me = { initials: mn ? 'АБ' : 'AB', full: mn ? 'Ану Болд' : 'Anu Bold' };
+    const groupsNav = [[['Мобайл баг', 'Mobile team'], '#', true], [['Дизайн баг', 'Design team'], 'StandupEmpty.dc.html'], [['Бүтээгдэхүүн', 'Product'], '#']].map((g) => ({
+      name: pick(g[0]), href: g[1],
+      style: g[2] ? 'background:#EDEDF0;color:#18181B;font-weight:500' : 'color:#3F3F46',
+      dot: g[2] ? 'background:' + accent : 'background:#C4C4CC'
+    }));
+    const spaces = [
+      { name: ['Бүтээгдэхүүн', 'Product'], initial: ['Б', 'P'], badge: 'background:#EDE9FE;color:#5B21B6' },
+      { name: ['Инженерчлэл', 'Engineering'], initial: ['И', 'E'], badge: 'background:#DCFCE7;color:#166534' },
+      { name: ['Дизайн', 'Design'], initial: ['Д', 'D'], badge: 'background:#FFE4E6;color:#9F1239' }
+    ].map((x) => ({ name: pick(x.name), initial: pick(x.initial), badge: x.badge }));
+
+    const P = {
+      anu: { n: ['Ану Б.', 'Anu B.'], s: ['Ану', 'Anu'], i: ['АБ', 'AB'], role: ['Бүтээгдэхүүний менежер', 'Product manager'], av: 'background:#E0E7FF;color:#3730A3' },
+      sara: { n: ['Сараа К.', 'Sara K.'], s: ['Сараа', 'Sara'], i: ['СК', 'SK'], role: ['Дизайнер', 'Product designer'], av: 'background:#FFE4E6;color:#9F1239' },
+      bat: { n: ['Бат О.', 'Bat O.'], s: ['Бат', 'Bat'], i: ['БО', 'BO'], role: ['Инженерийн ахлагч', 'Engineering lead'], av: 'background:#CCFBF1;color:#115E59' },
+      tem: { n: ['Тэмүүлэн Г.', 'Temuulen G.'], s: ['Тэмүүлэн', 'Temuulen'], i: ['ТГ', 'TG'], role: ['Мобайл хөгжүүлэгч', 'Mobile engineer'], av: 'background:#DCFCE7;color:#166534' },
+      dorj: { n: ['Дорж Э.', 'Dorj E.'], s: ['Дорж', 'Dorj'], i: ['ДЭ', 'DE'], role: ['Фронтенд хөгжүүлэгч', 'Frontend engineer'], av: 'background:#FEF3C7;color:#92400E' },
+      mia: { n: ['Мишээл Л.', 'Mia L.'], s: ['Мишээл', 'Mia'], i: ['МЛ', 'ML'], role: ['UX судлаач', 'UX researcher'], av: 'background:#E0F2FE;color:#075985' }
+    };
+    const proj = { ar: '#7C5CE0', co: '#0284C7' };
+
+    const strip = [['sara', 'posted', '09:05'], ['bat', 'posted', '09:12'], ['tem', 'posted', '09:20'], ['dorj', 'posted', '09:41'], ['anu', 'waiting'], ['mia', 'out']].map(([id, st, t]) => {
+      const p = P[id];
+      const out = st === 'out', posted = st === 'posted';
+      return {
+        initials: pick(p.i), short: id === 'anu' ? (mn ? 'Та' : 'You') : pick(p.s), posted,
+        title: pick(p.n) + ' · ' + (posted ? L.posted + ' ' + t : (out ? L.out : L.waiting)),
+        avatarStyle: out ? 'background:#E4E4E7;color:#A1A1AA;opacity:0.7' : (posted ? p.av : 'background:#FFFFFF;color:#52525B;border:1.5px dashed #A1A1AA'),
+        nameStyle: out ? 'color:#A1A1AA' : 'color:#3F3F46',
+        state: posted ? t : (out ? L.out : L.waiting),
+        stateStyle: out ? 'color:#71717A;font-weight:600;background:#F1F1F3;padding:0 6px;border-radius:8px' : (posted ? 'color:#6B6B74' : 'color:' + accent + ';font-weight:600')
+      };
+    });
+
+    const res = s.resolved || {};
+    const blockerDefs = [
+      { id: 'b1', by: 'tem', time: '09:20', text: ['Таб самбарыг гаргахын тулд эцсийн таб дүрс тэмдгийг хүлээж байна', 'Waiting on final tab icons to ship the tab bar'], task: ['Шинэ доод таб самбар хэрэгжүүлэх', 'Implement new bottom tab bar'], p: 'ar', help: 'sara' },
+      { id: 'b2', by: 'dorj', time: '09:41', text: ['Төлбөрийн үйлчилгээ үзүүлэгчийн sandbox API түлхүүрийн хугацаа дууссан', 'Payment provider sandbox API keys have expired'], task: ['Төлбөрийн үйлчилгээ үзүүлэгчийн хяналт', 'Payment provider review'], p: 'co', help: 'bat' }
+    ];
+    let openBlockers = 0;
+    const blockers = blockerDefs.map((b) => {
+      const done = !!res[b.id];
+      if (!done) openBlockers += 1;
+      const text = pick(b.text);
+      return {
+        text, resolved: done,
+        toggle: () => this.setState({ resolved: { ...(this.state.resolved || {}), [b.id]: !done } }),
+        checkLabel: (mn ? 'Шийдсэн гэж тэмдэглэх: ' : 'Mark resolved: ') + text,
+        rowStyle: done ? 'background:#FAFAFB' : 'background:#FFF8F7',
+        textStyle: done ? 'color:#A1A1AA;text-decoration:line-through' : 'color:#18181B',
+        byInitials: pick(P[b.by].i), byAvatar: P[b.by].av, byLine: pick(P[b.by].n) + ' · ' + b.time,
+        task: pick(b.task), projDot: 'background:' + proj[b.p],
+        helpInitials: pick(P[b.help].i), helpAvatar: P[b.help].av, helpName: pick(P[b.help].n)
+      };
+    });
+
+    const I = (text, task, p) => ({ text: pick(text), hasTask: !!task, task: task ? pick(task) : '', projDot: 'background:' + (proj[p] || '#C4C4CC'), style: 'color:#27272A' });
+    const NONE = { text: mn ? 'Саад алга' : 'No blockers', hasTask: false, task: '', projDot: '', style: 'color:#A1A1AA' };
+    const SEC = {
+      y: [['Өчигдөр', 'Yesterday'], 'background:#A1A1AA', 'color:#52525B'],
+      t: [['Өнөөдөр', 'Today'], 'background:' + accent, 'color:' + accent],
+      b: [['Саад', 'Blockers'], 'background:#DC2626', 'color:#B42318']
+    };
+    const sec = (k, items) => ({ label: pick(SEC[k][0]), dot: SEC[k][1], labelStyle: SEC[k][2], items });
+    const reacted = s.reacted || {};
+    const RX = {
+      up: 'M7 10v12M15 5.9 14 10h5.8a2 2 0 0 1 2 2.3l-1.4 8a2 2 0 0 1-2 1.7H7V10l4-8a3 3 0 0 1 4 3.9z',
+      eyes: 'M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+      heart: 'M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7z'
+    };
+    const RXN = { up: ['Зөвшөөрч байна', 'Thumbs up'], eyes: ['Харж байна', 'Looking'], heart: ['Таалагдлаа', 'Love'] };
+    const rx = (postId, list) => list.map(([k, n]) => {
+      const key = postId + ':' + k;
+      const on = !!reacted[key];
+      return {
+        on, count: String(n + (on ? 1 : 0)), icon: RX[k],
+        aria: pick(RXN[k]) + ', ' + (n + (on ? 1 : 0)),
+        toggle: () => this.setState({ reacted: { ...(this.state.reacted || {}), [key]: !on } }),
+        style: on ? 'border:1px solid ' + accent + ';background:' + accentSoft + ';color:' + accent : 'border:1px solid #E6E6EA;background:#FFFFFF;color:#52525B'
+      };
+    });
+    const R = (who, time, text) => ({ initials: pick(P[who].i), avatar: P[who].av, name: pick(P[who].n), time, text: pick(text) });
+
+    const T_TAB = ['Шинэ доод таб самбар хэрэгжүүлэх', 'Implement new bottom tab bar'];
+    const T_ICON = ['Дүрс тэмдгийн багц шинэчлэх', 'Icon set refresh (48 icons)'];
+    const T_CARD = ['Бүтээгдэхүүний картын компонент v2', 'Product card component v2'];
+    const T_COPY = ['Танилцуулгын текстийг хянах', 'Review onboarding copy'];
+    const T_CHK = ['Төлбөрийн хуудас — респонсив байрлал', 'Checkout page — responsive layout'];
+    const T_QA = ['iOS Safari ба Android дээр QA', 'QA on iOS Safari and Android'];
+    const T_PROMO = ['Промо кодын онцгой тохиолдлын засвар', 'Promo code edge-case fix'];
+    const T_PAY = ['Төлбөрийн үйлчилгээ үзүүлэгчийн хяналт', 'Payment provider review'];
+
+    const postDefs = [
+      { id: 'tem', at: '09:20', sections: [
+          sec('y', [I(['Навигаци болон тэмдэглэгээний тоо ажиллаж байна', 'Navigation and badge counts are working'], T_TAB, 'ar')]),
+          sec('t', [I(['Таб солих анимаци', 'Tab switch animations'], T_TAB, 'ar'), I(['Deep link-ийн тест бичих', 'Write tests for deep links'])]),
+          sec('b', [I(['Эцсийн таб дүрс тэмдгийг хүлээж байна · @Сараа', 'Waiting on final tab icons · @Sara'], T_TAB, 'ar')])
+        ], rx: [['up', 3], ['eyes', 1]],
+        replies: [R('sara', '09:24', ['Дүрс тэмдгүүд өнөөдөр 14:00 гэхэд бэлэн болно, мэдэгдье.', 'Icons will be ready by 2pm today — I’ll ping you.']), R('tem', '09:25', ['Гоё, баярлалаа!', 'Perfect, thanks!'])] },
+      { id: 'dorj', at: '09:41', sections: [
+          sec('y', [I(['Промо кодын урт кодын асуудлыг зассан', 'Fixed long promo codes overflowing'], T_PROMO, 'co'), I(['Батын sticky bar-ын саналыг хэрэгжүүлсэн', 'Addressed Bat’s review on the sticky bar'], T_CHK, 'ar')]),
+          sec('t', [I(['Буцаан олголтын урсгалыг турших', 'Test the refund flow'], T_PAY, 'co')]),
+          sec('b', [I(['Sandbox API түлхүүрийн хугацаа дууссан · @Бат', 'Sandbox API keys expired · @Bat'], T_PAY, 'co')])
+        ], rx: [['up', 2]],
+        replies: [R('bat', '09:45', ['Шинэ түлхүүр хүсчихлээ, үдээс өмнө ирэх байх.', 'Requested new keys — should land before noon.'])] },
+      { id: 'sara', at: '09:05', sections: [
+          sec('y', [I(['Hover төлвүүдийг дуусгасан', 'Finished the hover states'], T_CARD, 'ar'), I(['48-аас 36 дүрс бэлэн', '36 of 48 icons done'], T_ICON, 'ar')]),
+          sec('t', [I(['Үлдсэн 12 дүрсийг дуусгаад Тэмүүлэнд өгөх', 'Finish the last 12 icons and hand off to Temuulen'], T_ICON, 'ar'), I(['Танилцуулгын текстийн v3-ийг Анутай хянах', 'Review onboarding copy v3 with Anu'], T_COPY, 'ar')]),
+          sec('b', [NONE])
+        ], rx: [['up', 2], ['heart', 1]], replies: [] },
+      { id: 'bat', at: '09:12', sections: [
+          sec('y', [I(['4 PR хянаж, төлбөрийн хуудасны засварыг нэгтгэсэн', 'Reviewed 4 PRs, merged the checkout layout fixes'], T_CHK, 'ar')]),
+          sec('t', [I(['iOS Safari, Android дээр QA хийх', 'QA on iOS Safari and Android'], T_QA, 'ar'), I(['Дорж, Тэмүүлэнтэй 1:1', '1:1s with Dorj and Temuulen'])]),
+          sec('b', [NONE])
+        ], rx: [['up', 1]], replies: [] }
+    ];
+    const posts = postDefs.map((d) => ({
+      name: pick(P[d.id].n), initials: pick(P[d.id].i), avatar: P[d.id].av, role: pick(P[d.id].role),
+      postedAt: (mn ? d.at + '-д бичсэн' : 'posted ' + d.at),
+      sections: d.sections, reactions: rx(d.id, d.rx), replies: d.replies,
+      replyPlaceholder: mn ? pick(P[d.id].s) + '-д хариулах…' : 'Reply to ' + pick(P[d.id].s) + '…'
+    }));
+
+    return { lang, L, langs, me, accent, accentSoft, groupsNav, spaces, strip, blockers, openBlockers: String(openBlockers), posts };
+  }
+}
+</script>
+</body>
+</html>

@@ -23,6 +23,7 @@ Extracted from `design/*.dc.html` in Phase 0 (2026-10-08). The designs are the v
 | Reports: Overview UI (2026-10-12) | Workload is open to every member (tab shown to all); People ↔ My performance redirect by role. Aging shows 6 rows; "View all" expands in place (`?aging=all` → API `agingLimit=all`). The throughput "insight" is the figure's aria-label summary (none is drawn). Custom period = From/To popover under the segmented control (not drawn). No Sparkline (no design uses one). Empty state names the scope (project, else space, else workspace); "Go to project" only for a project. Mongolian "N-аас/-оос" suffixes come from `mnFrom()`. |
 | Reports: Sprints & Workload UI (2026-10-12) | Neither tab uses the "< 5 completed" gate (they aren't about history); Sprints shows "No sprints in {project} yet" / "No projects to report on", Workload "No one to show". Sprints: the project filter has no "All" row and shows the API's default project until one is picked; picking a sprint writes `?project=&sprint=`, changing the scope clears `sprint`. Future sprint banner: "Starts {date} · N working days". **Replan** (not drawn; only the chip is): a 28px outline button in the empty right slot of the Carried-over header plus an accent link at the end of the burndown insight, current/future sprints only → `/p/:id/list?sprint=…&status=<open status ids>`; tasks move out through the drawer's Sprint picker. Workload: one bar scale for all rows = max(25, the largest open size or capacity × 1.2, rounded up to 5), ticks every 5 (every 10 above 40); the capacity marker is drawn per row at that person's capacity; when capacities differ the team line and footnote drop "(15 points)". Sort lives in `?sort=overdue`; expanded rows are local. Each expanded task row ends with a 24px person icon button ("Reassign APP-142") opening the assignee picker (toggle, like everywhere); bars move optimistically and roll back on error. "+ Assign work" opens quick create with that assignee (and the filtered project). Unsized tasks show "—" in the size chip. Sprint cards are their own component (gap 6, padding 14 16), not StatCard. |
 | Reports: People & My performance UI (2026-10-12) | Workload stays open to members; the e2e test checks People → My performance instead. Stat cards compare with the previous period only (as drawn); the team median is the dashed line in the two trends. "as reviewer" goes in the review card's line ("9 reviews as reviewer · previous: 2.1"). Both tabs use the `< 5 completed` gate. The partial current week keeps the solid dot and adds "This week is still in progress" to the tooltip; a week without a cycle time breaks the line (an isolated week is a 6px point). Not drawn: "No mentions this period", "None answered yet", "No one yet", "No open tasks", "No due dates this period"; reply time "<1h" under an hour and days from 24h. The open-tasks due column is 168px, not 120/140, because "10-р сарын 10 · хэтэрсэн" needs it. Helping tiles auto-fit (≥150px) instead of a fixed 3-column grid so long Mongolian labels wrap inside. The person picker lists every workspace member (40px two-line options, `Picker tall`); the URL carries the person (`/reports/people/:userId`), and no id means the caller. Charts: every figure has an sr-only data table besides its summary sentence. Route tabs use roving tabindex with ←/→/Home/End. |
+| Standups (2026-10-16) | Standup content (posts, items, blockers, replies, reactions, posting times, late marker, meeting notes) is **never** used in Reports or any performance metric. The rest of the feature is a proposal: §5. |
 | Accessibility contrast (2026-10-12) | axe (WCAG AA) flagged three drawn colors; changed with sign-off: accent ink in light mode is the accent nudged darker (#6E56CF → #6C55CC, #2F6FEB → #2A63D2, #0F766E → #0F756D) so accent text on accent-soft over the sidebar reaches 4.5:1; done due dates use the muted tone (#6B6B74 / dark #8E8E98, drawn #A1A1AA / #5E5E68); out-of-month calendar day numbers and done My Tasks titles use `--text-muted` instead of `--text-faint`; done calendar pills keep the strike-through at full color instead of 65% opacity. |
 
 ## 1. Screens
@@ -446,6 +447,167 @@ Checked every screen in mn/en × light/dark at 1440px, plus 1024px and 820px con
   - *Drawer viewers*: other people with the same task open, a 24px stack (max 3, surface ring, online dots) between the breadcrumb and Mark complete; hover/aria "Also viewing: Sara K." / "Мөн харж байна: Sara K.". Hidden when nobody else is there.
 - **Undo**: task delete, task complete (List, drawer, My Tasks) and archive notification. "Mark all as read" has no undo (no mark-unread endpoint).
 - **Mongolian copy** for Inbox additions, Settings and error toasts is drafted (see `docs/i18n-review.md`).
+
+## 5. Standups (proposed 2026-10-16, not built)
+
+Async daily standups per **standup group** (a team of workspace members with its own schedule), with an optional screen-shared meeting mode. Design files: `Standup`, `StandupWrite`, `StandupWriteMobile`, `StandupLive`, `StandupEmpty`, `StandupSettings` (plus the standup card in `MyTasks` and the "Blocked" marker in `Main` / `Board`). Design "today" is **Fri Oct 9 2026** (the seed's today is Thu Oct 8, as in Reports). Every file has `STR.mn`, so the Mongolian copy comes from the designs. No dark variant is drawn: derive it from the tokens. Status: the screen notes below are what the designs show. The data model, API and the "yesterday" rule in §5.8–5.10 are **proposals waiting for answers** (§5.11).
+
+**Rule: standup content is never used in Reports or in any performance metric.** That covers posts, items, blockers, replies, reactions, posting times, the late marker and meeting notes. No report, export, Workload or People view reads the standup tables, and nothing counts a person's posts, late posts or blockers over time. The "who has posted" strip and the late marker only show one day.
+
+### 5.1 Shell additions
+- **Sidebar**: a new nav item **Standup** (chat-bubble icon `M21 15a2 2 0 0 1-2 2H7l-4 4V5…` + two lines) between My Tasks and Inbox. Active: accent-soft bg, accent text, 600. While I haven't posted today in a group that meets today, it shows an 8px accent dot (aria "You haven't posted today"). Add it to the rail too.
+- A sidebar section **Standup groups** (12/500 muted heading, 28px) above Spaces: 30px rows, 13px, a 6px dot (accent when active, #C4C4CC otherwise). The active group gets `#EDEDF0` + `--text` 500 (the neutral selected style, not accent-soft, because the Standup nav item above already carries the accent).
+- **My Tasks** (right column, above Recent activity; the column becomes a flex stack with gap 16): a **standup card**. Padding 16, radius 12, 1px border. A 36px accent-soft icon tile (radius 10) with the chat icon, h2 14/600 "Post your standup update", 12/18 muted "Mobile team · due by 10:00 · 4 of 5 have posted". Then an avatar row: 24px avatars of the people who posted (2px white ring, −6px overlap) + a dashed 24px "AB" for me + "You" in 12px muted, with aria-label "Posted: Sara, Bat, Temuulen, Dorj. Not yet: you.". Buttons: **Write update** (primary 32px → write modal) and **See team updates** (ghost → group page). States that aren't drawn: hidden on days without a standup and for people in no group; after posting it reads "You posted at 09:30 · 5 of 5 have posted" with only "See team updates"; with several groups, one card per group that's still waiting for me.
+- **List "Blocked" pill** (`Main`): in the name cell after the title, before subtasks. 20px tall, padding 0 7, radius 10, danger-soft (#FDECEC / #B42318), 12/600, 12px ban icon (circle + diagonal) + "Blocked" / "Гацсан". It links to the standup page, and its title is "Waiting on final tab icons — from Temuulen's standup". Hidden on done tasks.
+- **Board "Blocked" row** (`Board`): a row under the title: flex, gap 6, padding 6 8, radius 6, danger-soft, 12/16 500, ban icon, "**Blocked** · waiting on final tab icons" (600 on "Blocked"), title "From Temuulen's standup, Oct 9". The card border becomes #F3C9C4.
+- Both markers show only while the group has **Mark linked tasks as "Blocked"** on and the blocker is open (see §5.11 Q3 for who sees the text).
+
+### 5.2 Group page — `Standup.dc.html`
+- **Header** (min 64px, padding 12 24): a group switcher (36px outline button: accent users icon, name 14/600, chevron; `aria-haspopup=listbox`). Day navigation: 32px ghost ‹, the date at 14/500 with min-width 168 ("Friday, Oct 9" / "Баасан, 10-р сарын 9"), and › (disabled at today, 40% opacity). A "Today" pill (22px, #F1F1F3, 12/500) shows when viewing today. Right side: a 36px icon link to **Group settings** (sliders icon), **Write update** (outline 36px, pen icon) and **Start standup** (primary, play icon → live mode).
+- Content: max-width 1120, padding 20 24 48, gap 24.
+- **Who has posted** strip (1px border, radius 12, padding 14 16, wrap). Left (min 160): "4 of 5 have posted" 14/600 + "Due by 10:00 · meeting at 10:15" 12px muted. The count leaves out people who are out of office. One 64px column per member:
+  - 36px avatar. Posted = their palette avatar plus a 14px green check badge (#16A34A, 2px white ring) at the bottom right.
+  - Not posted = white avatar with a 1.5px dashed #A1A1AA border.
+  - Out of office = #E4E4E7 / #A1A1AA at 70% opacity.
+  - Under the avatar: the first name ("You" for me), 12/14, then a state line at 11/14. Posted shows the time, e.g. "09:05", muted. Not posted shows "Not yet" in accent 600. Out of office shows an "Out" chip (#F1F1F3, #71717A 600, radius 8).
+  - Tooltip: "Sara K. · Posted 09:05".
+  - Then a spacer and **Your turn** (accent-soft, accent 600, 32px). It shows only while I haven't posted, and opens the write modal.
+- **Late marker** (not drawn): a post after the "post by" time keeps its time but adds "· late" in `--warning` (strip: "10:08 · late"; card meta: "posted 10:08 · late"; tooltip "Posted 10:08, after 10:00"). It doesn't change the order or the count. In `StandupLive`, Anu posted at 10:08, after the 10:00 deadline, which is the case this covers.
+- **Blockers** section (only when "Show blockers first" is on): a 16px red ban icon, h2 15/600 "Blockers" and a 20px danger-soft count of open blockers. The list sits in a box (1px #F3D3CF, radius 12). Each row has padding 14 16, a #F8E3E0 divider, #FFF8F7 bg (#FAFAFB once resolved), and:
+  - an 18px native checkbox (accent-color #16A34A) labelled "Mark resolved: {text}";
+  - the text at 14/20 500 (resolved: muted, struck through; use `--text-muted`, not the drawn #A1A1AA);
+  - a 12px meta row: 20px avatar + "Temuulen G. · 09:20", a 24px task chip (outline, radius 6, 8px project dot, title, max 320, opens the drawer), and "Can help:" followed by an accent-soft pill (22px, 18px avatar, "@Sara K.");
+  - a green "Resolved" chip (#E8F5EC / #166534) at the right once resolved.
+- **Today's updates** (h2 15/600): a grid `repeat(auto-fill, minmax(440px, 1fr))`, gap 16, align start.
+  - **Me, not posted**: a dashed card (1.5px #D4D4D8, #FAFAFB, padding 16). 36px avatar, "You haven't posted yet" 600, "Suggestions from your activity yesterday are ready" 12px muted, and Write update (primary 32px).
+  - **Posts** (`article`, 1px border, radius 12):
+    - header (padding 14 16 10): 36px avatar, name 600, "Mobile engineer · posted 09:20" 12px muted, 28px "…" ("More actions");
+    - body (padding 0 16 14, gap 12): three sections, each a 12/600 label with a 6px dot. **Yesterday** has a #A1A1AA dot and a #52525B label, **Today** is accent, and **Blockers** has a #DC2626 dot and a #B42318 label. Items are 14/20 with a 12px indent, then an optional 22px task chip (7px project dot, 12px, max 260). An empty Blockers section reads "No blockers" in muted;
+    - footer (#FCFCFD, top border #F1F1F3, padding 10 16 14, gap 10): reaction pills, replies and the reply field. Reaction pills are 26px, radius 13, 12/600, with a 13px icon and a count: thumbs up, eyes ("Looking"), heart ("Love"). Mine are on (`aria-pressed`, accent border + accent-soft + accent) and off is outline #52525B; aria "Thumbs up, 3". After them sits a 26px dashed circle "Add reaction" (smiley). Each reply is a 22px avatar, the name in bold + time in 12px muted, then the text at 13/18 #3F3F46. Last is the reply field (32px, radius 8, placeholder "Reply to Temuulen…").
+  - **Out of office** card (1px #EFEFF2, #FAFAFB, padding 16): grey 36px avatar, the name in #52525B 600, "Out of office · back Oct 12" 12px muted, and an "Out" chip. "Back" is the first standup day after `away_until`.
+  - Order: my placeholder first, then posts with blockers, then the rest by post time, then out-of-office people. The design shows Tem 09:20, Dorj 09:41, Sara 09:05, Bat 09:12, Mia.
+- "…" menu (not drawn): for my own post, Edit / Delete / Copy link; for other people's posts, Copy link.
+
+### 5.3 Write update — `StandupWrite.dc.html` (desktop modal)
+- Over the group page. Scrim rgba(24,24,27,.32) (click closes). `role=dialog` form, 640px, 56px from the top, radius 14, 1px border, shadow `0 24px 64px rgba(24,24,27,.20)` (stronger than `--shadow-modal`; add a token or reuse the modal one, TBD in build).
+- **Header** (padding 16 16 12 20, bottom border #F1F1F3): a 32px avatar, h2 16/600 "Your standup", 12px muted "Mobile team · Fri, Oct 9 · due by 10:00", and an Esc kbd + × ("Close (Esc)"). The design also puts an МН/EN switch here; that's a preview control, so leave it out.
+- Body: padding 16 20 20, gap 20, three `fieldset`s whose legends are 13/600 with a 6px dot and a muted hint:
+  1. **Yesterday · suggested from your activity**: a list in a box (1px #EFEFF2, radius 10). Rows are min 40px with a #F4F4F5 divider. Each has a 22px kind tile (radius 6), the kind in 12px muted, the task title as a link (500, ellipsis) and a 28px × ("Remove: {title}"). The three kinds:
+     - **Completed**: green check on #E8F5EC / #166534;
+     - **Moved to review**: arrow on accent-soft / accent;
+     - **Commented on**: bubble on #F1F1F3 / #52525B.
+     After the rows comes a 40px "+ Add something else…" input. When anything has been removed, a 12/500 accent text button "Restore 2 removed" sits under the box and brings them all back.
+  2. **Today · tap to add**: wrapping chips (30px, radius 15, 13/500, max 300) for my open tasks. Each chip has a 12px icon (+ when off, ✓ when on), the title and a tag at 11/500: **In progress** (muted), **Due today** (#B45309) or **Overdue** (#B42318). On = accent border, accent-soft background, `--text`, `aria-pressed`. Below is a 40px input "Anything else today?".
+  3. **Blockers · optional**: a box (1px border, radius 10, padding 8 8 8 12) holding a 28px input "What's slowing you down?" and a row of attachment chips plus two 28px ghost buttons:
+     - **Link a task** (link icon) adds a 26px outline chip: project dot, task title, 20px × "Remove link";
+     - **Who can help** (@) adds an accent-soft pill: 20px avatar + "@Bat O.", × "Remove mention".
+     In the build both open pickers: the task picker (search, my tasks first) and the member picker (group members first, away hints).
+- **Footer** (#FAFAFB, top border #EFEFF2, radius 0 0 14 14): a users icon + "Visible to the 6 people in Mobile team" (12px muted; counts the group's active members, me included), a spacer, **Save draft** (ghost 32px) and **Post update** (primary 32px + "⌘ ↵" kbd on white 20%).
+- Not drawn: each section takes several free-text items (Enter adds a row, ⌫ on an empty row removes it). Yesterday rows that I add by hand can link a task. Several blockers are allowed, each with its own link and helper. Editing a posted update opens the same modal with "Save changes". Esc closes and saves the draft.
+
+### 5.4 Write update · mobile — `StandupWriteMobile.dc.html` (390×844)
+Full screen, base 15/22. Top bar 56px: a 44px × button, a centered "Your standup" 16/600 + "Mobile team · Fri, Oct 9" 12px muted (mn "Баасан, 10/9"), and a 44px language cycle (preview control, omit). The body scrolls (padding 16 16 24, gap 22) with the same three sections:
+- suggestion rows min 52px, the kind on line 1 (12/16 muted) and the title on line 2 (14/20 500), a 44px ×;
+- Today chips min 40px, radius 20, 14/500, text wraps, **no tag label**, gap 8; input "Anything else?" min 48px, radius 12;
+- Blockers input min 44px, then **Link a task** / **Who can help** as two equal 44px outline buttons (radius 10) that show the chosen value when set ("PRD: saved carts", "@Bat O.") in accent-soft.
+- Sticky footer: **Post update** 48px, radius 12, 16/600, then the visible-to line centered. There's no Save draft on mobile, so drafts autosave.
+Use this layout under ~640px width.
+
+### 5.5 Live meeting — `StandupLive.dc.html`
+- Full screen without the app shell. Page #FAFAFB, base 16/24.
+- **Top bar** (64px, white, bottom border):
+  - left (min 240): a 10px #DC2626 dot with a 4px #FDECEC ring ("live"), "Mobile team · Standup" 15/600 and "Friday, Oct 9 · 10:15" 12px muted;
+  - center: the **speaking order** `nav` with one dot per speaker plus their first name (11/14). The current speaker is 16px accent with a 4px accent-soft ring, 600 name, `aria-current=step`, aria "… — speaking now". Done speakers are 12px solid accent ("— done"). Upcoming speakers are 12px with a 2px #C4C4CC ring. Clicking a dot jumps to that person. Out-of-office people come last: 12px hatched, name struck through in faint (use muted), not clickable, aria "Mia L. — out of office";
+  - right: "Total time" 12px muted over **"06:12 / 15:00"** (15/600 tabular; the target is 400 muted), and **End meeting** (outline 36px). The language segmented control is a preview control again.
+- **Speaker panel** (white, radius 16, padding 28 32, gap 20):
+  - a 72px avatar, h1 34/40 600 −0.01em name (`aria-live=polite`) and "Mobile engineer · posted 09:20" 15px #52525B;
+  - on the right, the person's timer "01:24" at 40/44 tabular. It turns #B45309 past the limit. Under it a 200×6 bar (accent; #D97706 once over) and "2 minutes per person" 13px muted;
+  - three boxes (grid auto-fit min 240, gap 20, padding 18, radius 12). **Yesterday** is #FAFAFB / #F1F1F3. **Today** is accent at 5% with an accent 15% border. **Blockers** is #FFF8F7 / #F3D3CF. Each has an h2 15/600 with an 8px dot. Items are 20/28 with a 26px task chip and, on Today and Blockers items only, a **Create task** button (28px, 1px dashed accent, accent 13/600, "+"). Once a task exists it reads **Created** with a ✓, a solid border and accent-soft (`aria-pressed`). An empty Blockers box reads "No blockers";
+  - footer (top border): **Previous** (48px outline, radius 10, 15/500; muted + `aria-disabled` on the first speaker), "Up next: Dorj E." with ← → kbds (14px muted, "Last person" on the last), and **Next** (48px accent 15/600; reads **Finish** on the last).
+- **Notes** aside (340–400px, white, radius 16, padding 20):
+  - "Meeting notes" h2 with a 7-row textarea (14/21, radius 10, resizable);
+  - "Tasks created" with a count badge, then cards (1px #EFEFF2, radius 10, padding 10 12) that open the task drawer: an accent plus-square icon, the title 500, "From Temuulen's blocker · App Redesign" 12px muted (or "…'s plan"), and the assignee's 22px avatar. Empty: a dashed box "Use “Create task” on a blocker or item to add it here.";
+  - **Save notes to standup** (40px outline, at the bottom).
+- Keyboard: ←/→ previous/next. The timer counts only while the person is current and keeps its time if you come back. The order follows the group setting (posting order in the design: Sara 09:05, Bat 09:12, Tem 09:20, Dorj 09:41, Anu 10:08). People who didn't post come after those who did; out-of-office people come last and are skipped.
+
+### 5.6 Empty group — `StandupEmpty.dc.html`
+- For a group with no posted update yet (Design team). The header has the group switcher (no icon) + a green "New" pill (#E8F5EC / #166534) and an outline "Group settings" button.
+- Centered (max 600, padding 56 24 48, gap 24):
+  - an illustration of three ghost speech cards, the middle one dashed accent on accent-soft;
+  - h1 20/28 "Start Design team's first standup" and the body (14/22 #52525B);
+  - a 30px avatar stack + "4 members" + a schedule chip (24px, #F4F4F5) "Mon–Fri · reminder at 09:30 · Ulaanbaatar (UTC+8)";
+  - **Write the first update** (primary 40px) and **Invite members** (outline 40px → group settings, members);
+  - "How it works": three cards (#FAFAFB, radius 10, padding 12) with a 24px accent-soft number. 1 Write ("A reminder at 09:30. Suggestions from yesterday's work are pre-filled."), 2 Read & help ("Blockers show first. React or reply in a short thread."), 3 Meet ("Optionally run “Start standup”…").
+- Not drawn: **no groups at all** (Standup nav when I'm in no group). Use the same layout with "Create a standup group" (primary).
+
+### 5.7 Group settings — `StandupSettings.dc.html`
+- Breadcrumb "Standup › Mobile team › **Settings**". The header holds Cancel (ghost) and **Save changes** (primary 36px), so it's an explicit save form, not autosave.
+- Form: max 840, padding 8 24 48. Each section is a grid `240px | 1fr`, gap 24, padding 24 0, with a bottom divider. Left: h2 15/600 + a 13px muted line.
+  1. **General** ("The group name is visible to all members."): Group name, a 38px input.
+  2. **Members** ("6 members · the facilitator starts the meeting"): a list (radius 10). Rows are min 48px: 28px avatar, name 500, job title 12px muted, a "Facilitator" accent-soft chip, and a 32px × ("Remove Bat O."). After the rows, a 44px "+ Add by name or email…" input. How to make someone facilitator isn't drawn: use a row "…" menu (Make facilitator / Remove facilitator).
+  3. **Schedule** ("When people post, get reminded and meet."):
+     - **Standup days**: seven toggle buttons Mon–Sun (min 48 × 36, radius 8, 13/600; on = accent border + accent-soft + accent; `aria-pressed`; titles carry the full weekday). Default Mon–Fri;
+     - three selects (auto-fit min 180): **Post by** (09:30 / **10:00** / 10:30 / 11:00), **Reminder** (**09:30** / 09:00 / No reminder) and **Meeting** (**10:15** / 10:30 / No meeting (async only));
+     - **Timezone** (Ulaanbaatar (UTC+8) / Seoul (UTC+9) / UTC) with the hint "Members in other timezones see times in their own local time." In the build: the full zone picker from Settings and 15-minute steps for the times.
+  4. **Meeting mode** ("Settings for the screen-shared meeting."):
+     - **Time per person**: segmented 1 / **2** / 3 min;
+     - **Speaking order**: segmented **Posting order** / Alphabetical / Random;
+     - checkboxes (18px, accent): **Show blockers first** ("Collects every blocker at the top of the group page.", on) and **Mark linked tasks as “Blocked”** ("Tasks linked to a blocker show a marker in List and Board.", on).
+- Not drawn: creating a group (a "+" next to the sidebar "Standup groups" heading opens a name-only popover like New space), deleting or archiving a group (danger zone at the bottom), and validation (reminder before post by, post by before the meeting, at least one day).
+
+### 5.8 Proposed data model
+All tables get `workspace_id` (denormalized, as with projects) so every query can be scoped by membership.
+- `standup_groups`: id, workspace_id, name, `days` (smallint bitmask, ISO Mon=bit 0 … Sun=bit 6; default Mon–Fri), `post_by` (time), `reminder_at` (time, null = no reminder), `meeting_at` (time, null = async only), `timezone` (default `Asia/Ulaanbaatar`), `seconds_per_person` (60/120/180), `speaking_order` (`posted`|`alpha`|`random`), `blockers_first` bool, `mark_linked_tasks` bool, created_by, created_at, archived_at?.
+- `standup_group_members`: group_id, user_id, `facilitator` bool, joined_at. Workspace deactivation hides a person (like `activeMember`).
+- `standup_days`: id, group_id, `date` (the group's local date; unique per group), `notes` (text) + notes_updated_by/at, meeting_started_at?, meeting_started_by?, meeting_ended_at?. Created lazily by the first draft, post or meeting.
+- `standup_entries`: id, standup_day_id, user_id (unique per day), `posted_at` (null = draft, which only the author sees), updated_at, `edited_at`, `dismissed` (jsonb list of removed suggestions `{kind, taskId}`). "Late" is derived from `posted_at` > the day's `post_by` in the group's zone and isn't stored.
+- `standup_items`: id, entry_id, `section` (`yesterday`|`today`|`blocker`), position (fractional), `text`, `task_id?` (set null on delete), `source` (`manual`|`completed`|`review`|`comment`|`in_progress`|`due_today`|`overdue`). Blockers only: `helper_id?`, `resolved_at?`, `resolved_by?`. Live mode: `created_task_id?`.
+- `standup_reactions`: entry_id, user_id, `kind` (`thumbs_up`|`eyes`|`heart`, maybe more, see §5.11 Q10), PK all three.
+- `standup_replies`: id, entry_id, author_id, body (the comment rich-text subset: paragraphs + mentions), created_at, edited_at?, deleted_at?.
+- **Out of office**: reuses `workspace_members.away_until` / `away_note` (already general: pickers, @-suggestions, drawer, Workload). Proposed addition: `away_from` (date, null = now), so leave can be planned ahead.
+- **Not touched**: `activity`, `task_references`, the task `updated_at` and Reports. Linking a task in a standup writes no task activity and no "Mentioned in" row.
+
+### 5.9 Proposed API (`/api/v1`, OpenAPI tag `Standups`)
+- `GET /workspaces/:wid/standup-groups`: my groups with today's state (`meetsToday`, `postBy`, `posted`, `postedCount`/`expectedCount`), used by the sidebar, the nav dot and the My Tasks card. Admins also get groups they aren't in, with name, members and schedule only.
+- `POST /workspaces/:wid/standup-groups` · `GET|PATCH|DELETE /standup-groups/:id` (settings) · `PUT|DELETE /standup-groups/:id/members/:userId` (`{ facilitator }`).
+- `GET /standup-groups/:id/days/:date` (`today` allowed): the day's strip (members, posted time, late, away + back date), posted entries with items, reactions (counts + mine) and replies, the blockers list (open blockers from earlier days included, see §5.11 Q4), notes, meeting state, plus `prevDate`/`nextDate` (standup days only).
+- `GET /standup-groups/:id/days/:date/compose`: my draft, the Yesterday suggestions (minus dismissed), the Today chips, the "yesterday" range and the visible-to count.
+- `PUT …/days/:date/entry` saves the draft (items + dismissed). `POST …/entry/post` publishes it. Edit after posting: `PUT` on a posted entry sets `edited_at`. `DELETE` removes my entry.
+- `POST|DELETE /standup-items/:id/resolved` (author, helper, facilitator) · `PUT|DELETE /standup-entries/:id/reactions/:kind` · `POST /standup-entries/:id/replies` · `PATCH|DELETE /standup-replies/:id`.
+- Meeting: `POST …/days/:date/meeting/start|end` (facilitator, see §5.11 Q5), `PUT …/days/:date/notes`. "Create task" uses the normal create route with `standupItemId`, which sets `created_task_id`.
+- Task DTOs in List/Board get `blocker: { text, authorName, date, groupId } | null`, only when the group has `mark_linked_tasks` on and the item is open (redaction: §5.11 Q3).
+- Realtime: `standup.changed { groupId, date }` is sent **only to the group's members' sockets** (not the workspace broadcast) and refetches the day. `tasks.blocked.changed { taskIds }` refetches task lists.
+- Jobs (in process, one API instance): the reminder at `reminder_at` in the group's zone for members who haven't posted and aren't away, on standup days only.
+
+### 5.10 "Yesterday" (proposed)
+- A **standup day** of a group is a date (in the group's timezone) whose weekday is in `days` and which isn't in `workspace_holidays`.
+- **Today** T is the group's local date. **Yesterday** P is the latest standup day before T, searching at most 31 days back. Examples:
+  - Mon Oct 12 → Fri Oct 9 (Mon–Fri group);
+  - a Mon/Wed/Fri group: Wed → Mon, Mon → Fri;
+  - Wed Nov 11 → Mon Nov 9 (Tue Nov 10 is Chinggis Khaan's Birthday);
+  - Fri Nov 27 → Wed Nov 25 (Thu Nov 26 is Republic Day).
+- **Suggestion window**: from the start of P to the start of T, in the group's zone. It covers P plus any non-standup days after it (weekend work shows on Monday). The next window starts where this one ends, so nothing appears twice or gets lost. If I didn't post on P (forgot, away), the window reaches back to the day after my last posted entry, at most 7 days. The legend then adds "since Wed, Oct 7".
+- The label stays **Yesterday** / **Өчигдөр** (it names the question). When P isn't the calendar day before T, the hint names the day: "Yesterday · Fri, Oct 9 · suggested from your activity".
+- Suggestions come from my own activity rows in the window. **Completed** is `status.changed` into a done category. **Moved to review** is `status.changed` into review. **Commented on** is `comment.added`. Each task appears once, with the strongest kind (completed > review > comment). Deleted tasks and tasks no longer in done/review are skipped.
+- **Today chips** come from my open assigned tasks on T: **Overdue** (due < T), **Due today**, then **In progress** (category `in_progress`). Each task appears once, with the strongest tag. At most 8, then "+N more". "Today" here is the group's date, not my own zone. None are pre-selected (the design's pre-selected chips only show the on state; see §5.11 Q11).
+- **On a non-standup day** the page opens the latest standup day. Write is disabled with "Next standup Mon, Oct 12". The nav dot and the My Tasks card are off.
+- **Expected count** = active group members not away on T. "Back Oct 12" = the first standup day after `away_until`.
+
+### 5.11 Open questions
+1. **Read access.** Proposal (your default): only group members read entries, blockers, replies and notes. Workspace admins/owners manage every group's settings and members but see no content unless they're members. Search, ⌘K and notifications follow the same rule.
+2. **Out of office.** It's already a general feature (`away_until` / `away_note`). Add `away_from` for planned leave?
+3. **The "Blocked" marker outside the group.** Tasks are visible to everyone, but blocker text is group-only. Options: (a) everyone sees "Blocked" and the tooltip text only for group members (others see "Blocked · from Mobile team's standup"); (b) only group members see the marker; (c) turning the setting on publishes the text to everyone. Proposal: (a).
+4. **Blocker lifetime.** Does an unresolved blocker stay in the Blockers list on later days (with "since Oct 8") until resolved? Proposal: yes. Who can resolve: the author, the helper and facilitators. Should a blocker resolve itself when the linked task is done?
+5. **Groups and facilitators.** Who creates groups (any member, who becomes facilitator? admins only?), and can more than one person be facilitator? Who can start the meeting: facilitators only, or any member?
+6. **Notifications.** New types for "you can help" (helper picked), replies and @mentions in replies, and the reminder? `notifications.task_id` is NOT NULL today, so they need a nullable task + `standup_entry_id`, plus prefs toggles. Reactions should not notify (proposal).
+7. **Editing and late posting.** Can people edit a posted update all day? Can someone post for a past day (proposal: no; past days are read-only except replies, reactions and resolving)?
+8. **Live meeting state.** It's a screen share, so state is local to the facilitator's screen and only start/end, notes and created tasks are saved. Do you want others to follow along live (synced speaker)? And where does "/ 15:00" come from? It isn't a setting; 5 speakers × 2 min = 10:00. Proposal: a 15-minute timebox from the meeting time, or a new "Meeting length" setting.
+9. **"Create task"** creates instantly (project = the linked task's project, assignee = the speaker), or opens quick create prefilled? Proposal: quick create prefilled, because a project is needed.
+10. **Reactions.** Only the three drawn (thumbs up, eyes, heart), or does "Add reaction" open a bigger fixed set?
+11. **Today chips.** Pre-select overdue / due today, or nothing?
+12. **"Add by name or email"**: workspace members only, or does an unknown email create a workspace invite?
+13. **Retention.** Keep standups forever (readable through ‹ day navigation), or only N weeks?
+14. **Dark mode and the МН/EN switches inside the modal and live mode**: derive the dark mode; drop the switches (preview-only)?
 
 ## Appendix A — Visual reference
 

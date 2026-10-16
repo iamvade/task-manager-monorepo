@@ -23,6 +23,14 @@ The visual source of truth is the `design/` folder (exported from Claude Design)
 | `design/ReportsMine.dc.html` | **Reports · My performance** (member's own view) |
 | `design/ReportsEmpty.dc.html` | Reports **empty** state (not enough history) |
 | `design/ReportsLoading.dc.html` | Reports **loading** skeletons |
+| `design/Standup.dc.html` | **Standup** group page (who has posted, blockers, updates with reactions and replies, out of office) |
+| `design/StandupWrite.dc.html` | **Write standup** modal (suggested Yesterday, Today chips, blockers with linked task + helper) |
+| `design/StandupWriteMobile.dc.html` | Write standup on a **phone** (390px) |
+| `design/StandupLive.dc.html` | Standup **live meeting** mode (speaking order, timers, notes, tasks created) |
+| `design/StandupEmpty.dc.html` | Standup group **empty** state |
+| `design/StandupSettings.dc.html` | Standup **group settings** (members, facilitator, schedule, meeting mode) |
+
+`MyTasks.dc.html` (standup card), `Main.dc.html` and `Board.dc.html` ("Blocked" marker) were updated for Standups.
 
 ## Stack
 
@@ -83,6 +91,16 @@ Font, type scale, radii, shadows, layout sizes and how tokens map to Tailwind cl
 
 Reports API, permissions, periods and metric definitions: `.claude/rules/reports.md` (loads with the reports code, schemas, seed and tests). Screen notes: `docs/design-notes.md` §1.10–1.18.
 
+## Standups
+
+Async daily standups per standup group (members, schedule, optional screen-shared meeting). Screen notes, proposed data model, API, the "yesterday" rule and open questions: `docs/design-notes.md` §5. **Status: designed, not built. The data model and API there are proposals until the open questions (§5.11) are answered.**
+
+Fixed rules:
+- **Standup content is never used in Reports or in any performance metric.** That covers posts, items, blockers, replies, reactions, posting times, the late marker and meeting notes. No report, export, Workload or People view reads the standup tables, and nothing aggregates a person's posts, late posts or blockers over time.
+- Linking a task from a standup writes no task `activity`, no `task_references` row and doesn't touch `tasks.updated_at`.
+- "Yesterday" is the group's previous standup day: the latest date before today (in the group's timezone) whose weekday is a group standup day and which isn't a `workspace_holidays` date.
+- Out of office reuses `workspace_members.away_until` / `away_note`. It isn't a standup-only field.
+
 ## Routes (web)
 
 - `/login`, `/invite/:token`
@@ -93,4 +111,5 @@ Reports API, permissions, periods and metric definitions: `.claude/rules/reports
 - `/t/:taskKey` (task as full page)
 - `/settings` (profile, language, theme, accent, density, notifications, members, tags, archived projects; admins also edit members' job titles and capacity, manage tags, and restore archived projects)
 - `/reports` → `/reports/overview` · `/reports/sprints` · `/reports/workload` · `/reports/people` (admins/owner) · `/reports/me` (members: "My performance"). Period, scope, sprint, person and sort live in the URL.
+- Proposed (Standups, not built): `/standup` → my last group · `/standup/:groupId` (`?date=YYYY-MM-DD`, write modal `?write=1`) · `/standup/:groupId/live` (full screen, no shell) · `/standup/:groupId/settings`
 - Global: ⌘K palette, `C` = new task modal, `G` then `I` = Inbox, `Esc` closes drawer/modal.

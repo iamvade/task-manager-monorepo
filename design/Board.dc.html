@@ -220,6 +220,12 @@ input{font:inherit;color:inherit}
                         <span style="flex: 1; font-size: 14px; font-weight: 500; line-height: 20px; {{c.titleStyle}}">{{c.title}}</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="{{c.priority}} priority" style="flex: none; margin-top: 3px; {{c.flagStyle}}"><path d="M4 22V4"></path><path d="M4 4h12l-2 4 2 4H4"></path></svg>
                       </div>
+                      <sc-if value="{{c.blocked}}" hint-placeholder-val="{{ false }}">
+                        <span title="From Temuulen’s standup, Oct 9" style="display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 6px; background: #FDECEC; color: #B42318; font-size: 12px; line-height: 16px; font-weight: 500">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="9"></circle><path d="m5.6 5.6 12.8 12.8"></path></svg>
+                          <span><strong style="font-weight: 600">Blocked</strong> · {{c.blockedText}}</span>
+                        </span>
+                      </sc-if>
                       <div style="display: flex; flex-wrap: wrap; gap: 4px">
                         <sc-for list="{{c.tags}}" as="tag" hint-placeholder-count="2">
                           <span style="height: 22px; padding: 0 8px; border-radius: 6px; font-size: 12px; font-weight: 500; display: flex; align-items: center; white-space: nowrap; {{tag.style}}">{{tag.label}}</span>
@@ -348,7 +354,8 @@ class Component extends DCLogic {
         subPct: b ? Math.round((a / b) * 100) : 0,
         barStyle: a === b ? 'background:#16A34A' : 'background:' + accent,
         people: t.ppl.map((k) => people[k]),
-        cardStyle: t.ghost ? 'opacity:0.4;border-style:dashed;box-shadow:none' : ''
+        blocked: !!t.blocked, blockedText: t.blocked || '',
+        cardStyle: t.ghost ? 'opacity:0.4;border-style:dashed;box-shadow:none' : (t.blocked ? 'border-color:#F3C9C4' : '')
       };
     };
     const drop = { isCard: false, isDrop: true };
@@ -362,7 +369,7 @@ class Component extends DCLogic {
         card({ title: 'Empty states for search results', pr: 'Medium', tags: ['UI'], due: 'Oct 23', ppl: ['sara'] })
       ]},
       { label: 'In Progress', head: 'background:#FDF0DC', lab: 'color:#92400E', dot: 'border:2px solid #D97706;background:linear-gradient(90deg,#D97706 50%,transparent 50%)', cards: [
-        card({ title: 'Implement new bottom tab bar', pr: 'Urgent', tags: ['iOS', 'Android'], due: 'Oct 10', sub: '1/4', ppl: ['tem', 'dorj'] }),
+        card({ title: 'Implement new bottom tab bar', pr: 'Urgent', tags: ['iOS', 'Android'], due: 'Oct 10', sub: '1/4', ppl: ['tem', 'dorj'], blocked: 'waiting on final tab icons' }),
         card({ title: 'Product card component v2', pr: 'High', tags: ['Design system', 'UI'], due: 'Tomorrow', sub: '3/5', ppl: ['sara', 'tem'] }),
         card({ title: 'Redesign onboarding flow (3 screens)', pr: 'High', tags: ['Onboarding', 'UX', 'Research'], due: 'Oct 12', sub: '2/3', ppl: ['anu', 'sara'] }),
         card({ title: 'Update analytics events for checkout', pr: 'Medium', tags: ['Analytics', 'Frontend'], due: 'Oct 15', sub: '2/5', ppl: ['oyu'], ghost: true })

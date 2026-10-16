@@ -263,6 +263,12 @@ input{font:inherit;color:inherit}
                     </span>
                     <span role="cell" style="display: flex; align-items: center; gap: 8px; min-width: 0; padding-right: 16px">
                       <a href="{{t.href}}" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; {{t.nameStyle}}">{{t.name}}</a>
+                      <sc-if value="{{t.blocked}}" hint-placeholder-val="{{ false }}">
+                        <a href="Standup.dc.html" title="{{t.blockedTitle}}" style="flex: none; display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 7px; border-radius: 10px; background: #FDECEC; color: #B42318; font-size: 12px; font-weight: 600">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m5.6 5.6 12.8 12.8"></path></svg>
+                          {{t.blockedLabel}}
+                        </a>
+                      </sc-if>
                       <sc-if value="{{t.hasSub}}" hint-placeholder-val="{{ false }}">
                         <span style="flex: none; display: flex; align-items: center; gap: 4px; font-size: 12px; color: #6B6B74">
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3v12a3 3 0 0 0 3 3h9"></path><path d="m15 15 3 3-3 3"></path></svg>
@@ -437,7 +443,7 @@ class Component extends DCLogic {
       ]},
       { id: 'progress', label: ['Хийгдэж буй', 'In Progress'], dot: 'border:2px solid #D97706;background:linear-gradient(90deg,#D97706 50%,transparent 50%)', tasks: [
         { id: 't6', n: ['Бүтээгдэхүүний картын компонент v2', 'Product card component v2'], p: 'sara', dueWord: TOMORROW, dk: 'soon', pr: 'high', tags: ['ds', 'ui'], sub: '3/5', comments: 4 },
-        { id: 't7', n: ['Шинэ доод таб самбар хэрэгжүүлэх', 'Implement new bottom tab bar'], p: 'tem', due: [10, 10], dk: 'soon', pr: 'urgent', tags: ['ios', 'android'], sub: '1/4' },
+        { id: 't7', n: ['Шинэ доод таб самбар хэрэгжүүлэх', 'Implement new bottom tab bar'], p: 'tem', due: [10, 10], dk: 'soon', pr: 'urgent', tags: ['ios', 'android'], sub: '1/4', blocked: ['Эцсийн таб дүрс тэмдгийг хүлээж байна — Тэмүүлэнгийн стэндапаас', 'Waiting on final tab icons — from Temuulen’s standup'] },
         { id: 't8', n: ['Танилцуулах урсгалыг шинэчлэх (3 дэлгэц)', 'Redesign onboarding flow (3 screens)'], p: 'anu', due: [10, 12], dk: 'later', pr: 'high', tags: ['onboarding', 'ux'], comments: 7 },
         { id: 't9', n: ['Төлбөрийн хэсгийн аналитик эвентүүдийг шинэчлэх', 'Update analytics events for checkout'], p: 'oyu', due: [10, 15], dk: 'later', pr: 'medium', tags: ['analytics'] }
       ]},
@@ -478,7 +484,8 @@ class Component extends DCLogic {
           flagStyle: prioDefs[t.pr][1],
           tags: t.tags.map((k) => ({ label: pick(tagDefs[k][0]), style: tagDefs[k][1] })),
           hasSub: !!t.sub, sub: t.sub || '',
-          hasComments: !!t.comments, comments: t.comments || 0
+          hasComments: !!t.comments, comments: t.comments || 0,
+          blocked: !!t.blocked && !done, blockedLabel: mn ? 'Гацсан' : 'Blocked', blockedTitle: t.blocked ? pick(t.blocked) : ''
         };
       });
       return {

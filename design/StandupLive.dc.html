@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<title>Стэндап — уулзалт</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#FAFAFB}
+a{color:#52525B;text-decoration:none}a:hover{color:#18181B}
+button{font:inherit;color:inherit;cursor:pointer}
+input,textarea{font:inherit;color:inherit}
+.ghost:hover{background:#F4F4F5}
+.mk:hover{background:#EFEBFD}
+.ghost:focus-visible,.seg:focus-visible,.mk:focus-visible,.dot:focus-visible,a:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid #6E56CF;outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</helmet>
+
+<div lang="{{lang}}" style="display: flex; flex-direction: column; min-height: 100vh; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 16px; line-height: 24px; color: #18181B; background: #FAFAFB; -webkit-font-smoothing: antialiased">
+
+  <!-- Top bar -->
+  <header style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; min-height: 64px; padding: 10px 24px; box-sizing: border-box; background: #FFFFFF; border-bottom: 1px solid #E6E6EA">
+    <div style="display: flex; align-items: center; gap: 10px; min-width: 240px">
+      <span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 5px; background: #DC2626; box-shadow: 0 0 0 4px #FDECEC"></span>
+      <div style="display: flex; flex-direction: column">
+        <span style="font-size: 15px; font-weight: 600">{{L.title}}</span>
+        <span style="font-size: 12px; line-height: 16px; color: #6B6B74">{{L.sub}}</span>
+      </div>
+    </div>
+    <nav aria-label="{{L.speakers}}" style="flex: 1; display: flex; justify-content: center; align-items: center; gap: 10px">
+      <sc-for list="{{dots}}" as="d" hint-placeholder-count="6">
+        <button class="dot" onClick="{{d.go}}" aria-label="{{d.aria}}" aria-current="{{d.current}}" style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 2px 4px; border: 0; border-radius: 8px; background: transparent">
+          <span aria-hidden="true" style="box-sizing: border-box; border-radius: 50%; {{d.style}}"></span>
+          <span style="font-size: 11px; line-height: 14px; {{d.labelStyle}}">{{d.label}}</span>
+        </button>
+      </sc-for>
+    </nav>
+    <div style="display: flex; align-items: center; gap: 12px">
+      <span style="display: flex; flex-direction: column; align-items: flex-end">
+        <span style="font-size: 12px; line-height: 16px; color: #6B6B74">{{L.total}}</span>
+        <span style="font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums">06:12 <span style="font-weight: 400; color: #6B6B74">/ 15:00</span></span>
+      </span>
+      <div role="radiogroup" aria-label="{{L.language}}" style="display: flex; gap: 2px; padding: 2px; border-radius: 7px; background: #F4F4F5">
+        <sc-for list="{{langs}}" as="lg" hint-placeholder-count="2">
+          <button class="seg" role="radio" aria-checked="{{lg.active}}" onClick="{{lg.pick}}" lang="{{lg.code}}" title="{{lg.full}}" style="height: 26px; padding: 0 8px; border: 0; border-radius: 5px; font-size: 12px; font-weight: 600; {{lg.style}}">{{lg.short}}</button>
+        </sc-for>
+      </div>
+      <a href="Standup.dc.html" style="display: flex; align-items: center; height: 36px; padding: 0 14px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-size: 14px; font-weight: 500; color: #18181B">{{L.end}}</a>
+    </div>
+  </header>
+
+  <div style="flex: 1; display: flex; flex-wrap: wrap; gap: 20px; padding: 20px 24px 24px">
+
+    <!-- Speaker -->
+    <main style="flex: 999 1 640px; min-width: 0; display: flex; flex-direction: column; gap: 20px; padding: 28px 32px; background: #FFFFFF; border: 1px solid #E6E6EA; border-radius: 16px">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 20px">
+        <span aria-hidden="true" style="width: 72px; height: 72px; border-radius: 36px; font-size: 24px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{cur.avatar}}">{{cur.initials}}</span>
+        <div style="flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 2px">
+          <h1 aria-live="polite" style="margin: 0; font-size: 34px; line-height: 40px; font-weight: 600; letter-spacing: -0.01em">{{cur.name}}</h1>
+          <span style="font-size: 15px; color: #52525B">{{cur.role}} · {{cur.posted}}</span>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px; min-width: 200px">
+          <span style="font-size: 40px; line-height: 44px; font-weight: 600; font-variant-numeric: tabular-nums; {{cur.timerStyle}}">{{cur.timer}}</span>
+          <div aria-hidden="true" style="width: 200px; height: 6px; border-radius: 3px; background: #EFEFF2; display: flex; overflow: hidden">
+            <span style="height: 6px; border-radius: 3px; {{cur.barStyle}}"></span>
+          </div>
+          <span style="font-size: 13px; color: #6B6B74">{{L.perPerson}}</span>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px">
+        <sc-for list="{{cur.sections}}" as="sec" hint-placeholder-count="3">
+          <section style="display: flex; flex-direction: column; gap: 12px; padding: 18px; border-radius: 12px; {{sec.box}}">
+            <h2 style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; {{sec.labelStyle}}">
+              <span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 4px; {{sec.dot}}"></span>{{sec.label}}
+            </h2>
+            <sc-for list="{{sec.items}}" as="it" hint-placeholder-count="2">
+              <div style="display: flex; flex-direction: column; gap: 6px">
+                <span style="font-size: 20px; line-height: 28px; {{it.style}}">{{it.text}}</span>
+                <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px">
+                  <sc-if value="{{it.hasTask}}" hint-placeholder-val="{{ false }}">
+                    <a href="TaskDetail.dc.html" style="display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 8px; border: 1px solid #E6E6EA; border-radius: 6px; background: #FFFFFF; font-size: 13px; color: #3F3F46">
+                      <span style="width: 7px; height: 7px; border-radius: 4px; {{it.projDot}}"></span>{{it.task}}
+                    </a>
+                  </sc-if>
+                  <sc-if value="{{it.canCreate}}" hint-placeholder-val="{{ false }}">
+                    <button class="mk" onClick="{{it.create}}" aria-pressed="{{it.created}}" style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px dashed {{accent}}; border-radius: 6px; background: transparent; color: {{accent}}; font-size: 13px; font-weight: 600; {{it.createStyle}}">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{it.createIcon}}"></path></svg>{{it.createLabel}}
+                    </button>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </section>
+        </sc-for>
+      </div>
+
+      <div style="margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding-top: 16px; border-top: 1px solid #F1F1F3">
+        <button onClick="{{prev}}" aria-disabled="{{atStart}}" style="display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 18px; border: 1px solid #E6E6EA; border-radius: 10px; background: #FFFFFF; font-size: 15px; font-weight: 500; {{prevStyle}}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>{{L.prev}}
+        </button>
+        <span style="flex: 1; text-align: center; font-size: 14px; color: #6B6B74">{{upNext}} · <kbd style="font-family: inherit; font-size: 12px; padding: 0 5px; border: 1px solid #E6E6EA; border-bottom-width: 2px; border-radius: 4px">←</kbd> <kbd style="font-family: inherit; font-size: 12px; padding: 0 5px; border: 1px solid #E6E6EA; border-bottom-width: 2px; border-radius: 4px">→</kbd></span>
+        <button onClick="{{next}}" style="display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 22px; border: 0; border-radius: 10px; background: {{accent}}; color: #FFFFFF; font-size: 15px; font-weight: 600">
+          {{nextLabel}}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+        </button>
+      </div>
+    </main>
+
+    <!-- Notes -->
+    <aside aria-labelledby="notes-h" style="flex: 1 1 340px; max-width: 400px; min-width: 0; display: flex; flex-direction: column; gap: 16px; padding: 20px; background: #FFFFFF; border: 1px solid #E6E6EA; border-radius: 16px; font-size: 14px; line-height: 20px">
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <h2 id="notes-h" style="margin: 0; font-size: 15px; font-weight: 600">{{L.notes}}</h2>
+        <label for="notes" class="sr">{{L.notes}}</label>
+        <textarea id="notes" rows="7" style="resize: vertical; padding: 10px 12px; border: 1px solid #E6E6EA; border-radius: 10px; outline: none; font-size: 14px; line-height: 21px; color: #27272A">{{L.notesText}}</textarea>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <h3 style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #3F3F46">{{L.actions}}
+          <span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 10px; background: #F1F1F3; color: #52525B; font-size: 12px; display: flex; align-items: center; justify-content: center">{{actionCount}}</span>
+        </h3>
+        <sc-for list="{{actions}}" as="a" hint-placeholder-count="2">
+          <a href="TaskDetail.dc.html" style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid #EFEFF2; border-radius: 10px; color: #18181B">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 2px"><rect x="3" y="3" width="18" height="18" rx="4"></rect><path d="M12 8v8M8 12h8"></path></svg>
+            <span style="flex: 1; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-weight: 500">{{a.title}}</span>
+              <span style="font-size: 12px; color: #6B6B74">{{a.meta}}</span>
+            </span>
+            <span style="flex: none; width: 22px; height: 22px; border-radius: 11px; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{a.avatar}}">{{a.initials}}</span>
+          </a>
+        </sc-for>
+        <sc-if value="{{noActions}}" hint-placeholder-val="{{ false }}">
+          <p style="margin: 0; padding: 12px; border: 1px dashed #E4E4E7; border-radius: 10px; font-size: 13px; color: #6B6B74">{{L.noActions}}</p>
+        </sc-if>
+      </div>
+      <button style="margin-top: auto; height: 40px; border: 1px solid #E6E6EA; border-radius: 10px; background: #FFFFFF; font-size: 14px; font-weight: 500">{{L.saveNotes}}</button>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"language":{"editor":"enum","default":"mn","options":["mn","en"]},"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: undefined, idx: 2, created: { 'tem:b0': true } };
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const lang = s.lang || this.props.language || 'mn';
+    const mn = lang === 'mn';
+    const pick = (pair) => (mn ? pair[0] : pair[1]);
+    const accent = this.props.accent ?? '#6E56CF';
+    const accentSoft = accent + '1A';
+    const L = mn ? {
+      title: 'Мобайл баг · Стэндап', sub: 'Баасан, 10-р сарын 9 · 10:15', speakers: 'Ярих дараалал', total: 'Нийт хугацаа', language: 'Хэл', end: 'Уулзалтыг дуусгах',
+      perPerson: 'Нэг хүнд 2 минут', prev: 'Өмнөх', next: 'Дараагийн', finish: 'Дуусгах', upNext: 'Дараа нь', last: 'Сүүлийн хүн',
+      notes: 'Уулзалтын тэмдэглэл', actions: 'Үүсгэсэн ажлууд', noActions: 'Саад эсвэл ажлын мөр дээрх “Ажил үүсгэх”-ийг дарж энд нэмнэ.', saveNotes: 'Тэмдэглэлийг стэндапт хадгалах',
+      notesText: '• Сараа дүрс тэмдгүүдийг 14:00 гэхэд өгнө\n• Бат шинэ sandbox түлхүүр хүссэн\n• Даваа гарагт гаргалтын бэлэн байдлыг дахин ярих',
+      out: 'Чөлөө', posted: '-д бичсэн', create: 'Ажил үүсгэх', createdL: 'Үүсгэсэн'
+    } : {
+      title: 'Mobile team · Standup', sub: 'Friday, Oct 9 · 10:15', speakers: 'Speaking order', total: 'Total time', language: 'Language', end: 'End meeting',
+      perPerson: '2 minutes per person', prev: 'Previous', next: 'Next', finish: 'Finish', upNext: 'Up next', last: 'Last person',
+      notes: 'Meeting notes', actions: 'Tasks created', noActions: 'Use “Create task” on a blocker or item to add it here.', saveNotes: 'Save notes to standup',
+      notesText: '• Sara hands off icons by 2pm\n• Bat requested new sandbox keys\n• Revisit launch readiness on Monday',
+      out: 'Out', posted: 'posted ', create: 'Create task', createdL: 'Created'
+    };
+    const langs = [{ code: 'mn', short: 'МН', full: 'Монгол' }, { code: 'en', short: 'EN', full: 'English' }].map((d) => ({
+      ...d, active: d.code === lang, pick: () => this.setState({ lang: d.code }),
+      style: d.code === lang ? 'background:#FFFFFF;color:#18181B;box-shadow:0 1px 2px rgba(24,24,27,0.08)' : 'background:transparent;color:#6B6B74'
+    }));
+
+    const proj = { ar: '#7C5CE0', co: '#0284C7', q4: '#D97706' };
+    const I = (text, task, p) => ({ text, task, p });
+    const people = [
+      { id: 'sara', n: ['Сараа К.', 'Sara K.'], s: ['Сараа', 'Sara'], i: ['СК', 'SK'], role: ['Дизайнер', 'Product designer'], av: 'background:#FFE4E6;color:#9F1239', at: '09:05', used: '01:48',
+        y: [I(['Hover төлвүүдийг дуусгасан', 'Finished the hover states'], ['Бүтээгдэхүүний картын компонент v2', 'Product card component v2'], 'ar')],
+        t: [I(['Үлдсэн 12 дүрсийг дуусгах', 'Finish the last 12 icons'], ['Дүрс тэмдгийн багц шинэчлэх', 'Icon set refresh'], 'ar')], b: [] },
+      { id: 'bat', n: ['Бат О.', 'Bat O.'], s: ['Бат', 'Bat'], i: ['БО', 'BO'], role: ['Инженерийн ахлагч', 'Engineering lead'], av: 'background:#CCFBF1;color:#115E59', at: '09:12', used: '02:10',
+        y: [I(['4 PR хянаж, засваруудыг нэгтгэсэн', 'Reviewed 4 PRs, merged the fixes'], ['Төлбөрийн хуудас — респонсив', 'Checkout page — responsive'], 'ar')],
+        t: [I(['iOS, Android дээр QA', 'QA on iOS and Android'], ['iOS Safari ба Android дээр QA', 'QA on iOS Safari and Android'], 'ar')], b: [] },
+      { id: 'tem', n: ['Тэмүүлэн Г.', 'Temuulen G.'], s: ['Тэмүүлэн', 'Temuulen'], i: ['ТГ', 'TG'], role: ['Мобайл хөгжүүлэгч', 'Mobile engineer'], av: 'background:#DCFCE7;color:#166534', at: '09:20', used: '01:24', running: true,
+        y: [I(['Навигаци ба тэмдэглэгээний тоо ажиллаж байна', 'Navigation and badge counts are working'], ['Шинэ доод таб самбар', 'New bottom tab bar'], 'ar')],
+        t: [I(['Таб солих анимаци', 'Tab switch animations']), I(['Deep link-ийн тест бичих', 'Write tests for deep links'])],
+        b: [I(['Эцсийн таб дүрс тэмдгийг хүлээж байна — Сараа туслана', 'Waiting on final tab icons — Sara can help'], ['Шинэ доод таб самбар', 'New bottom tab bar'], 'ar')] },
+      { id: 'dorj', n: ['Дорж Э.', 'Dorj E.'], s: ['Дорж', 'Dorj'], i: ['ДЭ', 'DE'], role: ['Фронтенд хөгжүүлэгч', 'Frontend engineer'], av: 'background:#FEF3C7;color:#92400E', at: '09:41', used: '00:00',
+        y: [I(['Промо кодын урт кодын асуудлыг зассан', 'Fixed long promo codes overflowing'], ['Промо кодын засвар', 'Promo code edge-case fix'], 'co')],
+        t: [I(['Буцаан олголтын урсгалыг турших', 'Test the refund flow'], ['Төлбөрийн үйлчилгээ үзүүлэгчийн хяналт', 'Payment provider review'], 'co')],
+        b: [I(['Sandbox API түлхүүрийн хугацаа дууссан — Бат туслана', 'Sandbox API keys expired — Bat can help'], ['Төлбөрийн үйлчилгээ үзүүлэгчийн хяналт', 'Payment provider review'], 'co')] },
+      { id: 'anu', n: ['Ану Б.', 'Anu B.'], s: ['Ану', 'Anu'], i: ['АБ', 'AB'], role: ['Бүтээгдэхүүний менежер', 'Product manager'], av: 'background:#E0E7FF;color:#3730A3', at: '10:08', used: '00:00',
+        y: [I(['PRD-г хяналтад шилжүүлсэн', 'Moved the PRD to review'], ['Хадгалсан сагсны PRD', 'PRD: saved carts'], 'co')],
+        t: [I(['Q4-ийн тэргүүлэх чиглэлийг батлах', 'Approve Q4 priorities'], ['Q4-ийн тэргүүлэх чиглэл', 'Q4 priorities'], 'q4')], b: [] }
+    ];
+    const n = people.length;
+    const idx = Math.max(0, Math.min(n - 1, s.idx === undefined ? 2 : s.idx));
+    const created = s.created || {};
+
+    const dots = people.map((p, i) => {
+      const cur = i === idx, done = i < idx;
+      return {
+        label: pick(p.s), current: cur ? 'step' : 'false',
+        aria: pick(p.n) + (cur ? (mn ? ' — одоо ярьж байна' : ' — speaking now') : (done ? (mn ? ' — ярьсан' : ' — done') : '')),
+        go: () => this.setState({ idx: i }),
+        style: cur ? 'width:16px;height:16px;background:' + accent + ';box-shadow:0 0 0 4px ' + accentSoft : (done ? 'width:12px;height:12px;background:' + accent : 'width:12px;height:12px;border:2px solid #C4C4CC'),
+        labelStyle: cur ? 'color:#18181B;font-weight:600' : 'color:#6B6B74'
+      };
+    }).concat([{
+      label: mn ? 'Мишээл' : 'Mia', current: 'false', aria: (mn ? 'Мишээл Л. — чөлөөтэй' : 'Mia L. — out of office'), go: () => {},
+      style: 'width:12px;height:12px;background:repeating-linear-gradient(135deg,#E4E4E7 0 2px,#FFFFFF 2px 4px);border:1px solid #D4D4D8',
+      labelStyle: 'color:#A1A1AA;text-decoration:line-through'
+    }]);
+
+    const P = people[idx];
+    const SEC = {
+      y: [['Өчигдөр', 'Yesterday'], 'background:#A1A1AA', 'color:#52525B', 'background:#FAFAFB;border:1px solid #F1F1F3'],
+      t: [['Өнөөдөр', 'Today'], 'background:' + accent, 'color:' + accent, 'background:' + accentSoft.replace('1A', '0D') + ';border:1px solid ' + accent + '26'],
+      b: [['Саад', 'Blockers'], 'background:#DC2626', 'color:#B42318', 'background:#FFF8F7;border:1px solid #F3D3CF']
+    };
+    const mkItems = (k, arr) => {
+      if (!arr.length) return [{ text: mn ? 'Саад алга' : 'No blockers', style: 'color:#A1A1AA', hasTask: false, task: '', projDot: '', canCreate: false, created: false, create: () => {}, createLabel: '', createIcon: '', createStyle: '' }];
+      return arr.map((it, j) => {
+        const key = P.id + ':' + k + j;
+        const isCreated = !!created[key];
+        return {
+          text: pick(it.text), style: 'color:#18181B',
+          hasTask: !!it.task, task: it.task ? pick(it.task) : '', projDot: 'background:' + (proj[it.p] || '#C4C4CC'),
+          canCreate: k !== 'y', created: isCreated,
+          create: () => this.setState({ created: { ...(this.state.created || {}), [key]: !isCreated } }),
+          createLabel: isCreated ? L.createdL : L.create,
+          createIcon: isCreated ? 'M5 12.5 9.5 17 19 7.5' : 'M12 5v14M5 12h14',
+          createStyle: isCreated ? 'border-style:solid;background:' + accentSoft : ''
+        };
+      });
+    };
+    const sections = ['y', 't', 'b'].map((k) => ({ label: pick(SEC[k][0]), dot: SEC[k][1], labelStyle: SEC[k][2], box: SEC[k][3], items: mkItems(k, P[k]) }));
+    const usedSec = P.used.split(':').reduce((a, b) => a * 60 + Number(b), 0);
+    const cur = {
+      name: pick(P.n), initials: pick(P.i), avatar: P.av, role: pick(P.role),
+      posted: mn ? P.at + L.posted : L.posted + P.at,
+      timer: P.used, timerStyle: usedSec > 120 ? 'color:#B45309' : 'color:#18181B',
+      barStyle: 'width:' + Math.min(100, usedSec / 120 * 100).toFixed(0) + '%;background:' + (usedSec > 120 ? '#D97706' : accent),
+      sections
+    };
+
+    // Action items from created state
+    const actions = [];
+    people.forEach((p) => ['t', 'b'].forEach((k) => p[k].forEach((it, j) => {
+      if (created[p.id + ':' + k + j]) actions.push({
+        title: pick(it.text).split(' — ')[0],
+        meta: (mn ? pick(p.s) + '-ын ' + (k === 'b' ? 'саадаас' : 'төлөвлөгөөнөөс') : 'From ' + pick(p.s) + '’s ' + (k === 'b' ? 'blocker' : 'plan')) + ' · ' + (mn ? 'Апп шинэчлэл' : 'App Redesign'),
+        initials: pick(p.i), avatar: p.av
+      });
+    })));
+
+    const atEnd = idx === n - 1;
+    return {
+      lang, L, langs, accent, dots, cur,
+      atStart: idx === 0 ? 'true' : 'false',
+      prev: () => this.setState({ idx: Math.max(0, idx - 1) }),
+      next: () => this.setState({ idx: Math.min(n - 1, idx + 1) }),
+      prevStyle: idx === 0 ? 'color:#A1A1AA;cursor:not-allowed' : 'color:#18181B',
+      nextLabel: atEnd ? L.finish : L.next,
+      upNext: atEnd ? L.last : L.upNext + ': ' + pick(people[idx + 1].n),
+      actions, actionCount: String(actions.length), noActions: actions.length === 0
+    };
+  }
+}
+</script>
+</body>
+</html>
