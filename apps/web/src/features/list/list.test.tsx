@@ -503,7 +503,19 @@ describe('project list', () => {
       [`GET /api/v1/workspaces/${WORKSPACE_ID}/members`]: () =>
         Response.json(
           PROJECT_WITH_STATUSES.members.map((m) =>
-            m.user.name === 'Sara K.' ? { ...m, awayUntil: '2026-10-20', awayNote: null } : m,
+            m.user.name === 'Sara K.'
+              ? {
+                  ...m,
+                  absences: [
+                    {
+                      id: '01990000-0000-7000-8000-0000000000a1',
+                      startDate: '2026-10-01',
+                      endDate: '2026-10-20',
+                      note: null,
+                    },
+                  ],
+                }
+              : m,
           ),
         ),
     }));

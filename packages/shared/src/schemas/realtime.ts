@@ -72,6 +72,21 @@ export const realtimeServerMessageSchema = z.discriminatedUnion('type', [
     actorId: z.uuid(),
     at: z.iso.datetime(),
   }),
+  /** A standup group was created, edited, archived or restored, or its members changed. */
+  z.object({
+    type: z.literal('standup.groups.changed'),
+    workspaceId: z.uuid(),
+    actorId: z.uuid(),
+    at: z.iso.datetime(),
+  }),
+  /** Someone's out-of-office periods changed: refetch members, pickers and Workload. */
+  z.object({
+    type: z.literal('absences.changed'),
+    workspaceId: z.uuid(),
+    userId: z.uuid(),
+    actorId: z.uuid(),
+    at: z.iso.datetime(),
+  }),
   /** Reply to `subscribe`: who is online and who is viewing which task. */
   z.object({
     type: z.literal('ready'),

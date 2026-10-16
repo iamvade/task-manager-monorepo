@@ -7,4 +7,6 @@ export * from './tasks.js';
 export * from './comments.js';
 export * from './activity.js';
 export * from './history.js';
+export * from './standups.js';
+export * from './absences.js';
 export * from './relations.js';

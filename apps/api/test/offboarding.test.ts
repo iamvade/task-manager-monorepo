@@ -5,7 +5,7 @@ import { errorCode } from './fixtures.js';
 import { createTestApp } from './helpers.js';
 import { taskWorld } from './task-setup.js';
 
-describe('member offboarding and out-of-office', () => {
+describe('member offboarding', () => {
   let ctx: Awaited<ReturnType<typeof createTestApp>>;
 
   beforeAll(async () => {
@@ -123,26 +123,27 @@ describe('member offboarding and out-of-office', () => {
     expect(project.json()).toMatchObject({ leadId: null });
   });
 
-  it('lets members set only their own out-of-office', async () => {
+  it('hands the facilitator role to the successor', async () => {
     const w = await world();
-    const self = await w.dorj.api('PATCH', `${w.base}/${w.dorj.user.id}`, {
-      awayUntil: '2026-10-20',
-      awayNote: 'Vacation',
+    const group = (
+      await w.api('POST', `/workspaces/${w.ws.id}/standup-groups`, {
+        name: 'Mobile',
+        memberIds: [w.owner.id, w.dorj.user.id],
+      })
+    ).json<{ id: string }>();
+    let res = await w.api('PATCH', `/standup-groups/${group.id}`, {
+      facilitatorId: w.dorj.user.id,
     });
-    expect(self.statusCode, self.body).toBe(200);
-    expect(workspaceMemberSchema.parse(self.json())).toMatchObject({
-      awayUntil: '2026-10-20',
-      awayNote: 'Vacation',
+    expect(res.statusCode, res.body).toBe(200);
+    res = await w.api('POST', `${w.base}/${w.dorj.user.id}/deactivate`, {
+      reassignTo: w.sara.user.id,
     });
-    expect(
-      (await w.dorj.api('PATCH', `${w.base}/${w.dorj.user.id}`, { title: 'Boss' })).statusCode,
-    ).toBe(403);
-    expect(
-      (await w.dorj.api('PATCH', `${w.base}/${w.sara.user.id}`, { awayUntil: '2026-10-20' }))
-        .statusCode,
-    ).toBe(403);
-    // Admins may set anyone's; null = back.
-    const admin = await w.api('PATCH', `${w.base}/${w.dorj.user.id}`, { awayUntil: null });
-    expect(workspaceMemberSchema.parse(admin.json()).awayUntil).toBeNull();
+    expect(res.statusCode, res.body).toBe(200);
+    const after = (await w.api('GET', `/standup-groups/${group.id}`)).json<{
+      facilitatorId: string;
+      members: { user: { id: string } }[];
+    }>();
+    expect(after.facilitatorId).toBe(w.sara.user.id);
+    expect(after.members.map((m) => m.user.id)).toEqual([w.owner.id, w.sara.user.id]);
   });
 });

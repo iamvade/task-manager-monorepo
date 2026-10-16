@@ -1,6 +1,6 @@
 import {
   WORKLOAD_BUCKETS,
-  isAway,
+  awayUntil,
   type UserRef,
   type WorkloadPerson,
   type WorkloadTask,
@@ -236,7 +236,7 @@ function WorkloadRow({
           <CapacityPill
             load={person.load}
             capacity={person.capacity}
-            awayUntil={isAway(person, today) ? person.awayUntil : null}
+            awayUntil={awayUntil(person, today)}
           />
         </span>
       </button>

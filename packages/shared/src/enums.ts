@@ -131,3 +131,17 @@ export const DEFAULT_STATUS_CATEGORIES = [
 export const TEMPLATE_IDS = ['product-launch', 'sprint-planning', 'bug-triage'] as const;
 export const templateIdSchema = z.enum(TEMPLATE_IDS);
 export type TemplateId = z.infer<typeof templateIdSchema>;
+
+/** Standup group meeting: who speaks first. */
+export const SPEAKING_ORDERS = ['posting_order', 'alphabetical', 'random'] as const;
+export const speakingOrderSchema = z.enum(SPEAKING_ORDERS);
+export type SpeakingOrder = z.infer<typeof speakingOrderSchema>;
+
+export const STANDUP_ENTRY_STATUSES = ['draft', 'posted'] as const;
+export const standupEntryStatusSchema = z.enum(STANDUP_ENTRY_STATUSES);
+export type StandupEntryStatus = z.infer<typeof standupEntryStatusSchema>;
+
+/** The reactions drawn in Standup.dc.html (thumbs up, eyes "Looking", heart "Love"). */
+export const STANDUP_REACTIONS = ['thumbs_up', 'eyes', 'heart'] as const;
+export const standupReactionSchema = z.enum(STANDUP_REACTIONS);
+export type StandupReaction = z.infer<typeof standupReactionSchema>;

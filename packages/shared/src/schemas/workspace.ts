@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { dateSchema } from '../dates.js';
 import { paletteKeySchema, workspaceRoleSchema } from '../enums.js';
+import { absenceRefSchema } from './absence.js';
 import { NOTHING_TO_UPDATE, nonEmptyPatch, userRefSchema } from './common.js';
 
 /** A workspace member with their role and job title (pickers, member lists, settings). */
@@ -13,9 +13,8 @@ export const workspaceMemberSchema = z
     /** Points this person can take on over the next 2 weeks (Workload capacity marker). */
     capacityPoints: z.number().int(),
     joinedAt: z.iso.datetime(),
-    /** Out of office through this date (inclusive); see `isAway`. */
-    awayUntil: dateSchema.nullable(),
-    awayNote: z.string().nullable(),
+    /** Current and upcoming out-of-office periods, by start date; see `isAway` / `currentAbsence`. */
+    absences: z.array(absenceRefSchema),
     /** Set on deactivated members (Settings → Members with `include=deactivated` only). */
     deactivatedAt: z.iso.datetime().nullable(),
   })
@@ -38,27 +37,12 @@ export const updateMemberSchema = z
       .nullable()
       .transform((t) => (t === '' ? null : t)),
     capacityPoints: z.number().int().min(0).max(MAX_CAPACITY_POINTS),
-    /** Out of office through this date; null = back. Members may set their own. */
-    awayUntil: dateSchema.nullable(),
-    awayNote: z
-      .string()
-      .trim()
-      .max(80)
-      .nullable()
-      .transform((t) => (t === '' ? null : t)),
   })
   .partial()
   .strict()
   .refine(nonEmptyPatch, NOTHING_TO_UPDATE)
   .meta({ id: 'UpdateMember' });
 export type UpdateMember = z.input<typeof updateMemberSchema>;
-
-/** Fields a member may change on their own membership (the rest is for admins). */
-export const SELF_MEMBER_FIELDS = ['awayUntil', 'awayNote'] as const;
-
-/** Whether a member is out of office on `today` (`YYYY-MM-DD`, the viewer's day). */
-export const isAway = (member: { awayUntil: string | null }, today: string) =>
-  member.awayUntil !== null && member.awayUntil >= today;
 
 /** `POST /workspaces/:id/members/:userId/deactivate`: who takes over their open work, if anyone. */
 export const deactivateMemberSchema = z

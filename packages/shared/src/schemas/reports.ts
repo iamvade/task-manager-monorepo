@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { dateSchema, daysBetween } from '../dates.js';
 import { prioritySchema, sizeSchema, statusCategorySchema, workspaceRoleSchema } from '../enums.js';
 import { MAX_REPORT_DAYS, REPORT_PERIODS, SPRINT_PACES, WORKLOAD_LOADS } from '../reports.js';
+import { absenceRefSchema } from './absence.js';
 import { userRefSchema } from './common.js';
 import { taskProjectRefSchema, taskStatusRefSchema } from './task.js';
 
@@ -371,9 +372,8 @@ export const workloadPersonSchema = z
     title: z.string().nullable(),
     capacity: z.number().int(),
     openTasks: z.number().int(),
-    /** Out of office through this date (Workload shows "Away until …" instead of the load). */
-    awayUntil: dateSchema.nullable(),
-    awayNote: z.string().nullable(),
+    /** Current and upcoming absences (Workload shows "Away until …" instead of the load). */
+    absences: z.array(absenceRefSchema),
     /** All open points. */
     points: z.number().int(),
     /** Points of the `counted` tasks: what `load` compares with capacity. */

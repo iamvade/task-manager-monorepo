@@ -16,3 +16,17 @@ export function canManageCreated(
 export function canManageTags(role: WorkspaceRole): boolean {
   return role !== 'member';
 }
+
+/** Creating standup groups: admins and owners. */
+export function canCreateStandupGroup(role: WorkspaceRole): boolean {
+  return role !== 'member';
+}
+
+/** Editing a standup group's settings and members: admins, owners and the group's facilitator. */
+export function canManageStandupGroup(
+  role: WorkspaceRole,
+  facilitatorId: string | null,
+  userId: string,
+): boolean {
+  return role !== 'member' || (facilitatorId !== null && facilitatorId === userId);
+}

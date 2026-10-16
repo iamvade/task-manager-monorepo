@@ -4,13 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { useMemberHandover, useSetMemberActive } from '../../api/workspaces';
 import { Avatar } from '../../components/ui/Avatar';
 import { Button } from '../../components/ui/Button';
-import { DateField } from '../../components/ui/DateField';
 import { Modal } from '../../components/ui/Modal';
 import { Skeleton } from '../../components/ui/Skeleton';
-import { useDates } from '../../lib/useDates';
 import { toast } from '../../stores/toast';
 import { AssigneePicker } from '../pickers/AssigneePicker';
-import { settingsInput } from './SettingsRow';
+import { AbsenceList } from './AbsenceList';
 
 /**
  * Settings → Members "Deactivate…" (not designed): what the leaver hands over (open tasks,
@@ -124,100 +122,31 @@ export function DeactivateDialog({
   );
 }
 
-/** Date + note for out-of-office (Settings → Profile, and admins' "Set away…"). */
-export function AwayFields({
-  awayUntil,
-  awayNote,
-  onSave,
-  pending,
-}: {
-  awayUntil: string | null;
-  awayNote: string | null;
-  onSave: (value: { awayUntil: string | null; awayNote: string | null }) => void;
-  pending?: boolean;
-}) {
-  const { t } = useTranslation();
-  const { today } = useDates();
-  const id = useId();
-  const [until, setUntil] = useState(awayUntil ?? '');
-  const [note, setNote] = useState(awayNote ?? '');
-  const valid = until === '' || until >= today;
-  return (
-    <form
-      className="flex flex-wrap items-end gap-2"
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (!valid) return;
-        onSave({ awayUntil: until || null, awayNote: until ? note.trim() || null : null });
-      }}
-    >
-      <DateField
-        id={`${id}-until`}
-        label={t('members.away.until')}
-        value={until}
-        min={today}
-        onChange={setUntil}
-      />
-      <label className="flex min-w-[200px] flex-1 flex-col gap-1 text-[12px] text-muted">
-        {t('members.away.note')}
-        <input
-          value={note}
-          maxLength={80}
-          placeholder={t('members.away.notePlaceholder')}
-          onChange={(e) => {
-            setNote(e.target.value);
-          }}
-          className={settingsInput}
-        />
-      </label>
-      <Button type="submit" disabled={!valid || pending}>
-        {t('members.away.save')}
-      </Button>
-      {awayUntil && (
-        <Button
-          variant="ghost"
-          disabled={pending}
-          onClick={() => {
-            setUntil('');
-            setNote('');
-            onSave({ awayUntil: null, awayNote: null });
-          }}
-        >
-          {t('members.away.back')}
-        </Button>
-      )}
-    </form>
-  );
-}
-
-/** Admins' "Set away…" for someone else. */
+/** Admins' "Set out of office…" for someone else: their absences. */
 export function AwayDialog({
+  workspaceId,
   member,
-  onSave,
   onClose,
 }: {
+  workspaceId: string;
   member: WorkspaceMember | null;
-  onSave: (value: { awayUntil: string | null; awayNote: string | null }) => void;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
   const headingId = useId();
   return (
-    <Modal open={member !== null} onClose={onClose} labelledBy={headingId} width={520}>
+    <Modal open={member !== null} onClose={onClose} labelledBy={headingId} width={640}>
       <div className="flex flex-col gap-4 p-5">
-        <h2 id={headingId} className="m-0 text-[16px] leading-[22px] font-semibold">
-          {t('members.away.titleOf', { name: member?.user.name ?? '' })}
-        </h2>
+        <div className="flex items-center justify-between gap-2">
+          <h2 id={headingId} className="m-0 text-[16px] leading-[22px] font-semibold">
+            {t('members.away.titleOf', { name: member?.user.name ?? '' })}
+          </h2>
+          <Button variant="ghost" onClick={onClose}>
+            {t('common.close')}
+          </Button>
+        </div>
         {member && (
-          <AwayFields
-            key={member.user.id}
-            awayUntil={member.awayUntil}
-            awayNote={member.awayNote}
-            onSave={(value) => {
-              onSave(value);
-              onClose();
-            }}
-          />
+          <AbsenceList key={member.user.id} workspaceId={workspaceId} userId={member.user.id} />
         )}
       </div>
     </Modal>

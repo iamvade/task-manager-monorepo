@@ -1,6 +1,7 @@
 import type { WorkspaceMember } from '@kite/shared';
 import { and, asc, eq, type SQL } from 'drizzle-orm';
 import type { DbOrTx } from '../db/client.js';
+import { upcomingAbsences } from '../absences/query.js';
 import { activeMember } from '../auth/membership.js';
 import { projectMembers, users, workspaceMembers } from '../db/schema/index.js';
 
@@ -24,8 +25,6 @@ export async function listMembers(
       title: workspaceMembers.title,
       capacityPoints: workspaceMembers.capacityPoints,
       joinedAt: workspaceMembers.joinedAt,
-      awayUntil: workspaceMembers.awayUntil,
-      awayNote: workspaceMembers.awayNote,
       deactivatedAt: workspaceMembers.deactivatedAt,
     })
     .from(workspaceMembers)
@@ -41,16 +40,17 @@ export async function listMembers(
       )
     : base;
   const rows = await query.where(and(...conditions)).orderBy(asc(users.name));
-  return rows.map(
-    ({ role, title, capacityPoints, joinedAt, awayUntil, awayNote, deactivatedAt, ...user }) => ({
-      user,
-      role,
-      title,
-      capacityPoints,
-      joinedAt: joinedAt.toISOString(),
-      awayUntil,
-      awayNote,
-      deactivatedAt: deactivatedAt?.toISOString() ?? null,
-    }),
+  const absences = await upcomingAbsences(
+    db,
+    rows.map((r) => r.id),
   );
+  return rows.map(({ role, title, capacityPoints, joinedAt, deactivatedAt, ...user }) => ({
+    user,
+    role,
+    title,
+    capacityPoints,
+    joinedAt: joinedAt.toISOString(),
+    absences: absences.get(user.id) ?? [],
+    deactivatedAt: deactivatedAt?.toISOString() ?? null,
+  }));
 }

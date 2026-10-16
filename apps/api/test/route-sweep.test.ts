@@ -93,6 +93,15 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
     const notification = inbox.items[0];
     if (!notification) throw new Error('expected a notification for the owner');
     const other = await w.newProject('Other');
+    const group = (
+      await w.api('POST', `/workspaces/${w.ws.id}/standup-groups`, { name: 'Mobile' })
+    ).json<{ id: string }>();
+    const absence = (
+      await w.api('POST', `/workspaces/${w.ws.id}/members/${w.owner.id}/absences`, {
+        startDate: '2026-10-08',
+        endDate: '2026-10-09',
+      })
+    ).json<{ id: string }>();
 
     const outsider = await createUser(ctx.db);
     await createWorkspace(ctx.db, outsider.id);
@@ -111,6 +120,8 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       commentId: comment.id,
       attachmentId: attachment.id,
       notificationId: notification.id,
+      groupId: group.id,
+      absenceId: absence.id,
       token: 'not-a-real-token',
     };
 
@@ -166,6 +177,14 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       'POST /projects/{projectId}/tasks/batch': { updates: [{ id: task.id, priority: 'low' }] },
       'POST /projects/{projectId}/tasks/batch-delete': { ids: [task.id] },
       'POST /projects/{projectId}/tasks/batch-restore': { ids: [task.id] },
+      'POST /workspaces/{workspaceId}/standup-groups': { name: 'Design' },
+      'PATCH /standup-groups/{groupId}': { name: 'Renamed' },
+      'POST /standup-groups/{groupId}/members/{userId}/move': {},
+      'POST /workspaces/{workspaceId}/members/{userId}/absences': {
+        startDate: '2026-11-01',
+        endDate: '2026-11-02',
+      },
+      'PATCH /workspaces/{workspaceId}/absences/{absenceId}': { note: 'Trip' },
     };
   });
 

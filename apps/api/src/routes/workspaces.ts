@@ -1,5 +1,4 @@
 import {
-  SELF_MEMBER_FIELDS,
   apiErrorSchema,
   memberListQuerySchema,
   projectKeySuggestionQuerySchema,
@@ -162,7 +161,7 @@ export const workspaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Workspaces'],
         summary: 'Update a member',
         description:
-          'Admin or owner. Role (another member between `admin` and `member`), job title (blank clears it), capacity points for the next 2 weeks (Workload) and out-of-office (`awayUntil` date, `awayNote`). Role changes answer 409 `OWNER_ROLE` for the owner (ownership can’t change here) and 409 `OWN_ROLE` for your own membership; title and capacity can be set for anyone, yourself included. A plain member may only set their own `awayUntil` / `awayNote` (403 otherwise).',
+          'Admin or owner. Role (another member between `admin` and `member`), job title (blank clears it), and capacity points for the next 2 weeks (Workload). Role changes answer 409 `OWNER_ROLE` for the owner (ownership can’t change here) and 409 `OWN_ROLE` for your own membership; title and capacity can be set for anyone, yourself included. Out of office has its own routes (`…/members/:userId/absences`).',
         params: params.extend({ userId: z.uuid() }),
         body: updateMemberSchema,
         response: { 200: workspaceMemberSchema, 400: err, 401: err, 403: err, 404: err, 409: err },
@@ -170,15 +169,7 @@ export const workspaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     },
     async (request) => {
       const { workspaceId, userId } = request.params;
-      // Members may set their own out-of-office; everything else is for admins.
-      const selfAway =
-        userId === requireAuth(request).user.id &&
-        Object.keys(request.body).every((k) => SELF_MEMBER_FIELDS.some((f) => f === k));
-      const caller = await requireWorkspaceMember(
-        request,
-        workspaceId,
-        selfAway ? 'member' : 'admin',
-      );
+      const caller = await requireWorkspaceMember(request, workspaceId, 'admin');
       const [target] = await app.db
         .select({ role: workspaceMembers.role })
         .from(workspaceMembers)
@@ -191,7 +182,7 @@ export const workspaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         )
         .limit(1);
       if (!target) throw httpError(404, 'NOT_FOUND', 'Member not found');
-      const { role, title, capacityPoints, awayUntil, awayNote } = request.body;
+      const { role, title, capacityPoints } = request.body;
       if (role !== undefined && userId === caller.userId) {
         throw httpError(409, 'OWN_ROLE', 'You can’t change your own role');
       }
@@ -200,11 +191,11 @@ export const workspaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       }
       await app.db
         .update(workspaceMembers)
-        .set({ role, title, capacityPoints, awayUntil, awayNote })
+        .set({ role, title, capacityPoints })
         .where(
           and(eq(workspaceMembers.workspaceId, workspaceId), eq(workspaceMembers.userId, userId)),
         );
-      // Title, capacity and away show in Workload and People.
+      // Title and capacity show in Workload and People.
       app.reportCache.invalidate(workspaceId);
       const [member] = await listMembers(app.db, workspaceId, { userId });
       if (!member) throw httpError(404, 'NOT_FOUND', 'Member not found');
