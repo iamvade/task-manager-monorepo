@@ -298,7 +298,7 @@ From `docs/review/FIX_PLAN.md` phase 3; existing tokens and components only.
 - **Reports · People / My performance**: "Completed in this period" / "What you completed" list built like the open-tasks list (completed date, cycle time, priority), 5 rows then "Show all N"; the Completed card is a button that opens it.
 - **List filters**: "Created by" field (Me + members). **My Tasks**: "Requested by me" section (collapsed, no add row; rows show up to two assignee avatars before the space badge).
 - **Project brief**: a 40px strip under the header (chevron, "Project brief", first line of the brief in muted text, lead picker on the right); expanded, the description editor (max 760px) with Saving/Saved like a task.
-- **Members**: row "⋯" menu (Set out of office… / Deactivate…), "Away until Oct 20" chip (`--chip`, 11/500) after the name; the deactivate dialog (480px: counts, "Hand their open work to" picker, Cancel / danger "Deactivate"); a "Deactivated (N)" list with Reactivate. Profile gets an "Out of office" row (date + note, Save / I'm back). Pickers' hint and @-suggestions read "Away until …"; drawer assignee chips add a muted "away"; Workload's pill becomes a dashed-outline "Away until …".
+- **Members**: row "⋯" menu (Set out of office… / Deactivate…), "Away until Oct 20" chip (`--chip`, 11/500) after the name; the deactivate dialog (480px: counts, "Hand their open work to" picker, Cancel / danger "Deactivate"); a "Deactivated (N)" list with Reactivate. Profile gets an "Out of office" row: since 2026-10-16 a list of dated periods (`user_absences`: from, until, note; add / edit / delete with Undo), the same list in the admins' "Set out of office…" dialog. Pickers' hint and @-suggestions read "Away until …"; drawer assignee chips add a muted "away"; Workload's pill becomes a dashed-outline "Away until …".
 - **⌘K**: a Comments group (author avatar, snippet with the match in 600, key) and a "Show more tasks" row (accent-ink).
 - **Danger buttons in dark mode** use `--on-danger` (dark ink) on `--danger` (#f87171): white was 2.8:1.
 
@@ -448,7 +448,7 @@ Checked every screen in mn/en × light/dark at 1440px, plus 1024px and 820px con
 - **Undo**: task delete, task complete (List, drawer, My Tasks) and archive notification. "Mark all as read" has no undo (no mark-unread endpoint).
 - **Mongolian copy** for Inbox additions, Settings and error toasts is drafted (see `docs/i18n-review.md`).
 
-## 5. Standups (proposed 2026-10-16, not built)
+## 5. Standups (proposed 2026-10-16; phase 1 built 2026-10-16)
 
 Async daily standups per **standup group** (a team of workspace members with its own schedule), with an optional screen-shared meeting mode. Design files: `Standup`, `StandupWrite`, `StandupWriteMobile`, `StandupLive`, `StandupEmpty`, `StandupSettings` (plus the standup card in `MyTasks` and the "Blocked" marker in `Main` / `Board`). Design "today" is **Fri Oct 9 2026** (the seed's today is Thu Oct 8, as in Reports). Every file has `STR.mn`, so the Mongolian copy comes from the designs. No dark variant is drawn: derive it from the tokens. Status: the screen notes below are what the designs show. The data model, API and the "yesterday" rule in §5.8–5.10 are **proposals waiting for answers** (§5.11).
 
@@ -555,17 +555,15 @@ Use this layout under ~640px width.
      - checkboxes (18px, accent): **Show blockers first** ("Collects every blocker at the top of the group page.", on) and **Mark linked tasks as “Blocked”** ("Tasks linked to a blocker show a marker in List and Board.", on).
 - Not drawn: creating a group (a "+" next to the sidebar "Standup groups" heading opens a name-only popover like New space), deleting or archiving a group (danger zone at the bottom), and validation (reminder before post by, post by before the meeting, at least one day).
 
-### 5.8 Proposed data model
-All tables get `workspace_id` (denormalized, as with projects) so every query can be scoped by membership.
-- `standup_groups`: id, workspace_id, name, `days` (smallint bitmask, ISO Mon=bit 0 … Sun=bit 6; default Mon–Fri), `post_by` (time), `reminder_at` (time, null = no reminder), `meeting_at` (time, null = async only), `timezone` (default `Asia/Ulaanbaatar`), `seconds_per_person` (60/120/180), `speaking_order` (`posted`|`alpha`|`random`), `blockers_first` bool, `mark_linked_tasks` bool, created_by, created_at, archived_at?.
-- `standup_group_members`: group_id, user_id, `facilitator` bool, joined_at. Workspace deactivation hides a person (like `activeMember`).
-- `standup_days`: id, group_id, `date` (the group's local date; unique per group), `notes` (text) + notes_updated_by/at, meeting_started_at?, meeting_started_by?, meeting_ended_at?. Created lazily by the first draft, post or meeting.
-- `standup_entries`: id, standup_day_id, user_id (unique per day), `posted_at` (null = draft, which only the author sees), updated_at, `edited_at`, `dismissed` (jsonb list of removed suggestions `{kind, taskId}`). "Late" is derived from `posted_at` > the day's `post_by` in the group's zone and isn't stored.
-- `standup_items`: id, entry_id, `section` (`yesterday`|`today`|`blocker`), position (fractional), `text`, `task_id?` (set null on delete), `source` (`manual`|`completed`|`review`|`comment`|`in_progress`|`due_today`|`overdue`). Blockers only: `helper_id?`, `resolved_at?`, `resolved_by?`. Live mode: `created_task_id?`.
-- `standup_reactions`: entry_id, user_id, `kind` (`thumbs_up`|`eyes`|`heart`, maybe more, see §5.11 Q10), PK all three.
-- `standup_replies`: id, entry_id, author_id, body (the comment rich-text subset: paragraphs + mentions), created_at, edited_at?, deleted_at?.
-- **Out of office**: reuses `workspace_members.away_until` / `away_note` (already general: pickers, @-suggestions, drawer, Workload). Proposed addition: `away_from` (date, null = now), so leave can be planned ahead.
-- **Not touched**: `activity`, `task_references`, the task `updated_at` and Reports. Linking a task in a standup writes no task activity and no "Mentioned in" row.
+### 5.8 Data model (built 2026-10-16, phase 1)
+Decided by the user's spec, replacing the earlier proposal (no `standup_days` / `standup_items`): see CLAUDE.md "Data model" for the tables. Notes:
+- Items are jsonb lists on `standup_entries` (`yesterday`: `{kind: completed|review|commented|text, taskId?, text}`, `today`: `{kind: task|text, taskId?, text}`); blockers are rows (`standup_blockers`, several helpers); meetings are `standup_meetings` (+ `standup_meeting_tasks`).
+- `is_late` is stored (posted after `post_by`) but only ever shown for that day.
+- One facilitator per group (`standup_groups.facilitator_id`).
+- **Out of office** is the new general `user_absences` table (dated periods with a note), replacing `workspace_members.away_until/away_note` (answers Q2).
+- **Not touched**: `activity`, `task_references`, the task `updated_at` and Reports.
+
+Built UI: the Standup nav item + dot and the "Standup groups" section (admins' "+" name popover → the new group's settings), the empty state (StandupEmpty.dc.html; "Write the first update" is drawn but `aria-disabled` until posting ships), the no-groups state (admins get a name field + "Create a standup group"), a placeholder header for groups with posts, and the settings page (StandupSettings.dc.html, explicit Save; row "⋯" Make/Remove facilitator; "Add by name or email" opens the member picker, workspace members only (Q12); native selects on 15-minute steps; the shared `TimezonePicker`; when my zone differs, a line "In your time (Seoul (UTC+9)): post by 11:00 · …"; an "Archive group" section with Undo). Times in the empty state's schedule chip are shown in the viewer's zone.
 
 ### 5.9 Proposed API (`/api/v1`, OpenAPI tag `Standups`)
 - `GET /workspaces/:wid/standup-groups`: my groups with today's state (`meetsToday`, `postBy`, `posted`, `postedCount`/`expectedCount`), used by the sidebar, the nav dot and the My Tasks card. Admins also get groups they aren't in, with name, members and schedule only.
@@ -594,18 +592,18 @@ All tables get `workspace_id` (denormalized, as with projects) so every query ca
 - **Expected count** = active group members not away on T. "Back Oct 12" = the first standup day after `away_until`.
 
 ### 5.11 Open questions
-1. **Read access.** Proposal (your default): only group members read entries, blockers, replies and notes. Workspace admins/owners manage every group's settings and members but see no content unless they're members. Search, ⌘K and notifications follow the same rule.
-2. **Out of office.** It's already a general feature (`away_until` / `away_note`). Add `away_from` for planned leave?
+1. **Read access.** Groups themselves (list, settings, empty state) are visible to the whole workspace (decided 2026-10-16). Content still open. Proposal (your default): only group members read entries, blockers, replies and notes. Workspace admins/owners manage every group's settings and members but see no content unless they're members. Search, ⌘K and notifications follow the same rule.
+2. ~~Out of office~~ **Answered**: a new general `user_absences` table (start, end, note) replaces `away_until` / `away_note`.
 3. **The "Blocked" marker outside the group.** Tasks are visible to everyone, but blocker text is group-only. Options: (a) everyone sees "Blocked" and the tooltip text only for group members (others see "Blocked · from Mobile team's standup"); (b) only group members see the marker; (c) turning the setting on publishes the text to everyone. Proposal: (a).
 4. **Blocker lifetime.** Does an unresolved blocker stay in the Blockers list on later days (with "since Oct 8") until resolved? Proposal: yes. Who can resolve: the author, the helper and facilitators. Should a blocker resolve itself when the linked task is done?
-5. **Groups and facilitators.** Who creates groups (any member, who becomes facilitator? admins only?), and can more than one person be facilitator? Who can start the meeting: facilitators only, or any member?
+5. **Answered (partly)**: admins/owners create groups; one facilitator per group; admins and the facilitator edit settings. Still open: who starts the meeting. Was: Who creates groups (any member, who becomes facilitator? admins only?), and can more than one person be facilitator? Who can start the meeting: facilitators only, or any member?
 6. **Notifications.** New types for "you can help" (helper picked), replies and @mentions in replies, and the reminder? `notifications.task_id` is NOT NULL today, so they need a nullable task + `standup_entry_id`, plus prefs toggles. Reactions should not notify (proposal).
 7. **Editing and late posting.** Can people edit a posted update all day? Can someone post for a past day (proposal: no; past days are read-only except replies, reactions and resolving)?
-8. **Live meeting state.** It's a screen share, so state is local to the facilitator's screen and only start/end, notes and created tasks are saved. Do you want others to follow along live (synced speaker)? And where does "/ 15:00" come from? It isn't a setting; 5 speakers × 2 min = 10:00. Proposal: a 15-minute timebox from the meeting time, or a new "Meeting length" setting.
+8. **Live meeting state.** It's a screen share, so state is local to the facilitator's screen and only start/end, notes and created tasks are saved. Do you want others to follow along live (synced speaker)? "/ 15:00" is **answered**: a `total_meeting_minutes` group setting (default 15; not in the settings design yet, so not editable in the UI). Syncing others live is still open.
 9. **"Create task"** creates instantly (project = the linked task's project, assignee = the speaker), or opens quick create prefilled? Proposal: quick create prefilled, because a project is needed.
-10. **Reactions.** Only the three drawn (thumbs up, eyes, heart), or does "Add reaction" open a bigger fixed set?
+10. **Answered**: only the three drawn. Was: Only the three drawn (thumbs up, eyes, heart), or does "Add reaction" open a bigger fixed set?
 11. **Today chips.** Pre-select overdue / due today, or nothing?
-12. **"Add by name or email"**: workspace members only, or does an unknown email create a workspace invite?
+12. **Answered (default)**: workspace members only. Was: workspace members only, or does an unknown email create a workspace invite?
 13. **Retention.** Keep standups forever (readable through ‹ day navigation), or only N weeks?
 14. **Dark mode and the МН/EN switches inside the modal and live mode**: derive the dark mode; drop the switches (preview-only)?
 
