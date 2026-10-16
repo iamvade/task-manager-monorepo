@@ -14,6 +14,7 @@ import { toast } from '../../stores/toast';
 import { useUiStore } from '../../stores/ui';
 import { PageHeader } from '../views/PageHeader';
 import { ActivityPanel } from './ActivityPanel';
+import { StandupCard } from './StandupCard';
 import { Greeting } from './Greeting';
 import { StatCards } from './StatCards';
 import { MY_TASKS_LIST_ID, sectionElementId } from './sections';
@@ -195,18 +196,21 @@ function HomeBody({ workspaceId, home }: { workspaceId: string; home: Home }) {
           </div>
         </div>
       </div>
-      <ActivityPanel
-        items={feed}
-        loadingOlder={older.isFetching}
-        onShowOlder={
-          hasOlder
-            ? () => {
-                if (olderFrom === null) setOlderFrom(home.activity.nextCursor);
-                else void older.fetchNextPage();
-              }
-            : undefined
-        }
-      />
+      <div className="flex max-w-[360px] min-w-0 flex-[1_1_300px] flex-col gap-4">
+        <StandupCard workspaceId={workspaceId} />
+        <ActivityPanel
+          items={feed}
+          loadingOlder={older.isFetching}
+          onShowOlder={
+            hasOlder
+              ? () => {
+                  if (olderFrom === null) setOlderFrom(home.activity.nextCursor);
+                  else void older.fetchNextPage();
+                }
+              : undefined
+          }
+        />
+      </div>
     </div>
   );
 }

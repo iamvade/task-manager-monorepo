@@ -10,6 +10,7 @@ import { ProjectDot } from '../../components/ui/ProjectDot';
 import { TagChip } from '../../components/ui/TagChip';
 import { cn } from '../../lib/cn';
 import { useDates } from '../../lib/useDates';
+import { BlockedRow } from '../standup/BlockedMarker';
 
 const MAX_TAGS = 2;
 
@@ -60,6 +61,7 @@ export const TaskCard = forwardRef<HTMLElement, TaskCardProps>(function TaskCard
   const shownTags = task.tags.slice(0, MAX_TAGS);
   const moreTags = task.tags.length - shownTags.length;
   const { done: subDone, total: subTotal } = task.subtaskProgress;
+  const blocked = done ? null : task.blocked;
 
   const body = (
     <>
@@ -91,6 +93,7 @@ export const TaskCard = forwardRef<HTMLElement, TaskCardProps>(function TaskCard
           />
         </span>
       </span>
+      {blocked && <BlockedRow blocked={blocked} />}
       {task.tags.length > 0 && (
         <span className="flex flex-wrap gap-1">
           {shownTags.map((tag) => (
@@ -135,7 +138,11 @@ export const TaskCard = forwardRef<HTMLElement, TaskCardProps>(function TaskCard
   const classes = cn(
     'box-border flex flex-col gap-2.5 rounded-[10px] border bg-surface p-3 text-default outline-none',
     state === 'idle' &&
-      'border-default hover:border-strong focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--accent-ink)]',
+      cn(
+        // Board.dc.html: a blocked card's border turns #F3C9C4.
+        blocked ? 'border-blocked' : 'border-default',
+        'hover:border-strong focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--accent-ink)]',
+      ),
     state === 'ghost' && 'border-dashed border-default opacity-40 shadow-none',
     state === 'overlay' && 'rotate-[2.5deg] cursor-grabbing border-accent shadow-drag',
     className,

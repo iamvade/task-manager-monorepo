@@ -55,8 +55,10 @@ export function PostedStrip({ yourTurn }: { yourTurn: boolean }) {
 
 function StripMember({ member: m }: { member: StandupDayMember }) {
   const { t } = useTranslation();
-  const { me, clock, postBy } = useDayView();
+  const { me, day, clock, postBy } = useDayView();
   const mine = m.user.id === me.id;
+  // On a past day "not yet" can't change any more.
+  const notYet = day.date === day.today ? t('standup.day.notYet') : t('standup.day.noUpdate');
   const time = m.postedAt ? clock(m.postedAt) : null;
   const state =
     m.state === 'posted' && time
@@ -65,7 +67,7 @@ function StripMember({ member: m }: { member: StandupDayMember }) {
         : t('standup.day.postedTitle', { time })
       : m.state === 'out'
         ? t('standup.day.out')
-        : t('standup.day.notYet');
+        : notYet;
   return (
     <Tooltip content={`${m.user.name} · ${state}`}>
       {(props) => (
@@ -112,7 +114,14 @@ function StripMember({ member: m }: { member: StandupDayMember }) {
                 {t('standup.day.out')}
               </span>
             ) : (
-              <span className="font-semibold text-accent-ink">{t('standup.day.notYet')}</span>
+              <span
+                className={cn(
+                  'font-semibold',
+                  day.date === day.today ? 'text-accent-ink' : 'text-muted',
+                )}
+              >
+                {notYet}
+              </span>
             )}
           </span>
         </li>

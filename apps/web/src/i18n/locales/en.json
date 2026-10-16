@@ -559,6 +559,12 @@
       "hoursAgo_one": "{{count}}h ago",
       "hoursAgo_other": "{{count}}h ago",
       "yesterday": "Yesterday"
+    },
+    "standup": {
+      "title": "Post your standup update",
+      "postedBy": "Posted: {{names}}.",
+      "notYetYou": "Not yet: you.",
+      "seeTeam": "See team updates"
     }
   },
   "calendar": {
@@ -1721,7 +1727,9 @@
       "reactionCount": "{{reaction}}, {{count}}",
       "reactedBy": "{{reaction}}: {{names}}",
       "membersOnly": "Only members of this group can read its updates.",
-      "noStandupToday": "No standup today · next standup {{date}}"
+      "noStandupToday": "No standup today · next standup {{date}}",
+      "noUpdate": "No update",
+      "replyOwn": "Reply…"
     },
     "write": {
       "title": "Your standup",
@@ -1780,6 +1788,16 @@
         "INVALID_HELPER": "Only other members of the group can help.",
         "INVALID_TASK": "A linked task no longer exists."
       }
+    }
+  },
+  "task": {
+    "blocked": {
+      "label": "Blocked",
+      "tooltip": "{{text}} — from {{name}}’s standup, {{date}}",
+      "redacted": "Blocked · from {{group}}’s standup, {{date}}",
+      "source": "From {{name}}’s standup, {{date}}",
+      "sourceGroup": "From {{group}}’s standup, {{date}}",
+      "fromGroup": "from {{group}}’s standup"
     }
   }
 }

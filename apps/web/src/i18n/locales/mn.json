@@ -559,6 +559,12 @@
       "hoursAgo_one": "{{count}} цагийн өмнө",
       "hoursAgo_other": "{{count}} цагийн өмнө",
       "yesterday": "Өчигдөр"
+    },
+    "standup": {
+      "title": "Стэндапын шинэчлэлээ бичнэ үү",
+      "postedBy": "Бичсэн: {{names}}.",
+      "notYetYou": "Бичээгүй: та.",
+      "seeTeam": "Багийн шинэчлэлийг харах"
     }
   },
   "calendar": {
@@ -1721,7 +1727,9 @@
       "reactionCount": "{{reaction}}, {{count}}",
       "reactedBy": "{{reaction}}: {{names}}",
       "membersOnly": "Энэ бүлгийн шинэчлэлийг зөвхөн гишүүд нь уншина.",
-      "noStandupToday": "Өнөөдөр стэндап байхгүй · дараагийнх {{date}}"
+      "noStandupToday": "Өнөөдөр стэндап байхгүй · дараагийнх {{date}}",
+      "noUpdate": "Бичээгүй",
+      "replyOwn": "Хариулах…"
     },
     "write": {
       "title": "Таны стэндап",
@@ -1780,6 +1788,16 @@
         "INVALID_HELPER": "Зөвхөн бүлгийн бусад гишүүд туслах боломжтой.",
         "INVALID_TASK": "Холбосон ажил устсан байна."
       }
+    }
+  },
+  "task": {
+    "blocked": {
+      "label": "Гацсан",
+      "tooltip": "{{text}} — {{name}} стэндапдаа бичсэн · {{date}}",
+      "redacted": "Гацсан · «{{group}}» бүлгийн стэндапаас, {{date}}",
+      "source": "{{name}} стэндапдаа бичсэн · {{date}}",
+      "sourceGroup": "«{{group}}» бүлгийн стэндапаас · {{date}}",
+      "fromGroup": "«{{group}}» бүлгийн стэндапаас"
     }
   }
 }

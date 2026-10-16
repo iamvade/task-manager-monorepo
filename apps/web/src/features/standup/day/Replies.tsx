@@ -130,13 +130,15 @@ export function ReplyField({
   to: UserRef;
 }) {
   const { t } = useTranslation();
-  const { day } = useDayView();
+  const { day, me } = useDayView();
   const create = useCreateReply(day.group.id);
   const name = firstName(to);
+  const placeholder =
+    to.id === me.id ? t('standup.day.replyOwn') : t('standup.day.replyTo', { name });
   return (
     <ReplyInput
       label={t('standup.day.reply')}
-      placeholder={t('standup.day.replyTo', { name })}
+      placeholder={placeholder}
       pending={create.isPending}
       onSubmit={(body, mentionIds) =>
         create.mutateAsync({
