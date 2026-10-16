@@ -1,0 +1,26 @@
+# Override for a server without a domain: plain HTTP on http://$DOMAIN:$HTTP_PORT, where DOMAIN
+# is the server's IP (or host name) and HTTP_PORT a free port (80/443 may belong to another
+# web server). In .env:
+#   COMPOSE_FILE=docker-compose.prod.yml:docker-compose.http.yml
+#   DOMAIN=203.0.113.10
+#   HTTP_PORT=8080
+#   ACME_EMAIL=unused@example.com   (required by the prod file, not used here)
+# No HTTPS: passwords and session cookies travel unencrypted.
+
+x-http-origin: &http-origin
+  WEB_ORIGIN: http://${DOMAIN}:${HTTP_PORT:-8080}
+
+services:
+  migrate:
+    environment: *http-origin
+
+  api:
+    environment: *http-origin
+
+  web:
+    ports: !override
+      - '${HTTP_PORT:-8080}:80'
+    volumes:
+      - ./docker/caddy/Caddyfile.http:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config

@@ -1,0 +1,37 @@
+# Plain-HTTP variant of Caddyfile for a server without a domain (http://<ip>:<port>), used by
+# docker-compose.http.yml. No certificates, no HSTS; the realtime socket is ws:// instead of wss://.
+# Passwords and session cookies travel unencrypted: use on a trusted network or behind a VPN.
+{
+	auto_https off
+}
+
+:80 {
+	encode zstd gzip
+	header -Server
+
+	handle /api/* {
+		request_body {
+			max_size 30MB
+		}
+		reverse_proxy api:3000
+	}
+
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+
+		header {
+			X-Content-Type-Options "nosniff"
+			X-Frame-Options "DENY"
+			Referrer-Policy "strict-origin-when-cross-origin"
+			Cross-Origin-Opener-Policy "same-origin"
+			Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+			Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' ws://{host}; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+		}
+		@assets path /assets/*
+		header @assets Cache-Control "public, max-age=31536000, immutable"
+		@other not path /assets/*
+		header @other Cache-Control "no-cache"
+	}
+}
