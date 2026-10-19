@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<title>Санал хүсэлт — FB-1042</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#52525B;text-decoration:none}a:hover{color:#18181B}
+button{font:inherit;color:inherit;cursor:pointer}
+input,textarea{font:inherit;color:inherit}
+.ghost:hover{background:#F4F4F5}
+.opt:hover{background:#F4F4F5}
+.thumb:hover{border-color:#A1A1AA}
+.file:hover{border-color:#C4C4CC;background:#FAFAFB}
+.ghost:focus-visible,.seg:focus-visible,.opt:focus-visible,.thumb:focus-visible,.file:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid #6E56CF;outline-offset:1px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</helmet>
+
+<div lang="{{lang}}" style="position: relative; display: flex; min-height: 100vh; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 14px; line-height: 20px; color: #18181B; background: #FFFFFF; -webkit-font-smoothing: antialiased; overflow: hidden">
+
+  <!-- Background: Feedback inbox, inactive -->
+  <div aria-hidden="true" style="flex: 0 0 248px; background: #F7F7F8; border-right: 1px solid #E6E6EA; padding: 12px 8px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px">
+    <div style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px"><span style="width: 24px; height: 24px; border-radius: 6px; background: {{accent}}"></span><span style="font-weight: 600">Kite Studio</span></div>
+    <span style="height: 32px; padding: 0 12px; display: flex; align-items: center; color: #3F3F46">{{L.myTasks}}</span>
+    <span style="height: 32px; padding: 0 12px; display: flex; align-items: center; color: #3F3F46">{{L.standup}}</span>
+    <span style="height: 32px; padding: 0 12px; display: flex; align-items: center; color: #3F3F46">{{L.inbox}}</span>
+    <span style="height: 32px; padding: 0 12px; display: flex; align-items: center; border-radius: 8px; background: {{accentSoft}}; color: {{accent}}; font-weight: 600">{{L.feedback}}</span>
+    <span style="height: 32px; padding: 0 12px; display: flex; align-items: center; color: #3F3F46">{{L.reports}}</span>
+  </div>
+  <div aria-hidden="true" style="flex: 1; display: flex; flex-direction: column">
+    <div style="height: 64px; border-bottom: 1px solid #E6E6EA; display: flex; align-items: center; padding: 0 24px; font-weight: 600">{{L.feedback}}</div>
+    <div style="padding: 16px 24px; display: flex; flex-direction: column">
+      <sc-for list="{{bgRows}}" as="b" hint-placeholder-count="10">
+        <div style="display: flex; align-items: center; gap: 16px; height: 60px; border-bottom: 1px solid #EFEFF2; padding: 0 8px; {{b.style}}">
+          <span style="width: 70px; height: 20px; border-radius: 6px; {{b.badge}}"></span>
+          <span style="flex: 1; display: flex; flex-direction: column; gap: 6px"><span style="height: 8px; border-radius: 4px; background: #D4D4D8; {{b.w}}"></span><span style="height: 6px; width: 40%; border-radius: 3px; background: #EFEFF2"></span></span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  <a href="Feedback.dc.html" aria-label="{{L.closePanel}}" style="position: absolute; inset: 0; background: rgba(24, 24, 27, 0.28)"></a>
+
+  <!-- ================= PANEL ================= -->
+  <aside role="dialog" aria-modal="true" aria-labelledby="fb-title" style="position: absolute; top: 0; right: 0; bottom: 0; width: 66%; min-width: min(880px, 100%); max-width: 100%; box-sizing: border-box; background: #FFFFFF; border-left: 1px solid #E6E6EA; box-shadow: -12px 0 32px rgba(24, 24, 27, 0.10); display: flex; flex-direction: column; overflow-y: auto">
+
+    <!-- Panel header -->
+    <div style="position: sticky; top: 0; z-index: 4; display: flex; align-items: center; gap: 8px; height: 56px; padding: 0 16px 0 24px; background: #FFFFFF; border-bottom: 1px solid #E6E6EA; flex: none">
+      <nav aria-label="{{L.location}}" style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; font-size: 13px; color: #52525B">
+        <a href="Feedback.dc.html" style="color: #52525B">{{L.feedback}}</a>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+        <span style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #6B6B74">FB-1042</span>
+      </nav>
+      <div role="radiogroup" aria-label="{{L.language}}" style="display: flex; gap: 2px; padding: 2px; border-radius: 7px; background: #F4F4F5">
+        <sc-for list="{{langs}}" as="lg" hint-placeholder-count="2">
+          <button class="seg" role="radio" aria-checked="{{lg.active}}" onClick="{{lg.pick}}" lang="{{lg.code}}" title="{{lg.full}}" style="height: 24px; padding: 0 8px; border: 0; border-radius: 5px; font-size: 12px; font-weight: 600; {{lg.style}}">{{lg.short}}</button>
+        </sc-for>
+      </div>
+      <button class="ghost" aria-label="{{L.prevItem}}" style="width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"></path></svg></button>
+      <button class="ghost" aria-label="{{L.nextItem}}" style="width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+      <button class="ghost" aria-label="{{L.copyLink}}" style="width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"></path><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path></svg></button>
+      <div style="width: 1px; height: 20px; background: #E6E6EA"></div>
+      <a href="Feedback.dc.html" class="ghost" aria-label="{{L.closePanel}}" style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></a>
+    </div>
+
+    <div style="flex: 1; display: flex; flex-wrap: wrap; align-items: stretch">
+
+      <!-- ===== Main ===== -->
+      <div style="flex: 999 1 460px; min-width: 0; display: flex; flex-direction: column; gap: 28px; padding: 24px 28px 32px">
+
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px">
+            <span style="display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 8px; border-radius: 6px; background: #FDECEC; color: #B42318; font-size: 12px; font-weight: 600">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2l1.9 1.9M16 2l-1.9 1.9M9 7.1V6a3 3 0 1 1 6 0v1.1M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6zM12 20v-9M6 13H2M22 13h-4"></path></svg>{{L.bug}}
+            </span>
+            <span style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #6B6B74">FB-1042</span>
+            <span style="font-size: 12px; color: #6B6B74">· {{L.via}}</span>
+          </div>
+          <h1 id="fb-title" style="margin: 0; font-size: 22px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em">{{L.title}}</h1>
+          <div style="display: flex; flex-direction: column; gap: 10px; font-size: 15px; line-height: 24px; color: #27272A">
+            <p style="margin: 0">{{L.p1}}</p>
+            <ol style="margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 2px">
+              <li>{{L.s1}}</li><li>{{L.s2}}</li><li>{{L.s3}}</li>
+            </ol>
+            <p style="margin: 0">{{L.p2}}</p>
+          </div>
+        </div>
+
+        <!-- Attachments -->
+        <section aria-labelledby="att-h" style="display: flex; flex-direction: column; gap: 10px">
+          <h2 id="att-h" style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #3F3F46">{{L.attachments}} <span style="font-weight: 400; color: #6B6B74">4</span></h2>
+          <div style="display: flex; flex-wrap: wrap; gap: 10px">
+            <sc-for list="{{images}}" as="im" hint-placeholder-count="2">
+              <button class="thumb" onClick="{{im.open}}" aria-label="{{im.aria}}" style="display: flex; flex-direction: column; width: 148px; padding: 0; border: 1px solid #E6E6EA; border-radius: 10px; background: #FFFFFF; overflow: hidden; text-align: left">
+                <span aria-hidden="true" style="height: 112px; background: #F4F4F5; display: flex; align-items: center; justify-content: center">
+                  <span style="width: 54px; height: 96px; box-sizing: border-box; padding: 6px 5px; border-radius: 8px; background: #FFFFFF; border: 1px solid #E6E6EA; display: flex; flex-direction: column; gap: 4px">
+                    <span style="height: 4px; width: 60%; border-radius: 2px; background: #D4D4D8"></span>
+                    <span style="height: 18px; border-radius: 3px; {{im.block}}"></span>
+                    <span style="height: 4px; border-radius: 2px; background: #EFEFF2"></span>
+                    <span style="height: 4px; width: 70%; border-radius: 2px; background: #EFEFF2"></span>
+                    <span style="margin-top: auto; height: 10px; border-radius: 3px; {{im.btn}}"></span>
+                  </span>
+                </span>
+                <span style="display: flex; flex-direction: column; padding: 6px 8px">
+                  <span style="font-size: 12px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{im.name}}</span>
+                  <span style="font-size: 11px; color: #6B6B74">{{im.size}}</span>
+                </span>
+              </button>
+            </sc-for>
+            <div style="display: flex; flex-direction: column; gap: 8px; justify-content: flex-start">
+              <sc-for list="{{files}}" as="f" hint-placeholder-count="2">
+                <a class="file" href="#" download="download" aria-label="{{f.aria}}" style="display: flex; align-items: center; gap: 10px; width: 240px; padding: 8px 10px; box-sizing: border-box; border: 1px solid #E6E6EA; border-radius: 10px; color: #18181B">
+                  <span aria-hidden="true" style="flex: none; width: 32px; height: 32px; border-radius: 8px; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; {{f.iconStyle}}">{{f.ext}}</span>
+                  <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                    <span style="font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{f.name}}</span>
+                    <span style="font-size: 12px; color: #6B6B74">{{f.size}}</span>
+                  </span>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"></path></svg>
+                </a>
+              </sc-for>
+            </div>
+          </div>
+        </section>
+
+        <!-- Submitter -->
+        <section aria-labelledby="sub-h" style="display: flex; flex-direction: column; gap: 10px">
+          <h2 id="sub-h" style="margin: 0; font-size: 13px; font-weight: 600; color: #3F3F46">{{L.submitter}}</h2>
+          <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px; padding: 14px 16px; border: 1px solid #E6E6EA; border-radius: 12px">
+            <span aria-hidden="true" style="flex: none; width: 40px; height: 40px; border-radius: 20px; background: #FCE7F3; color: #9D174D; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center">{{L.subInitials}}</span>
+            <div style="flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 6px">
+              <span style="font-size: 15px; font-weight: 600">{{L.subName}}</span>
+              <span style="display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px">
+                <a href="mailto:enkhjin.d@gmail.com" style="display: inline-flex; align-items: center; gap: 6px; color: {{accent}}">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4zM22 6l-10 7L2 6"></path></svg>enkhjin.d@gmail.com
+                </a>
+                <a href="tel:+97699112233" style="display: inline-flex; align-items: center; gap: 6px; color: #3F3F46">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"></path></svg>+976 9911 2233
+                </a>
+              </span>
+              <span style="font-size: 12px; color: #6B6B74">{{L.submittedAt}} · {{L.device}}</span>
+            </div>
+            <a href="mailto:enkhjin.d@gmail.com" style="flex: none; display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border: 1px solid #E6E6EA; border-radius: 8px; font-size: 13px; font-weight: 500; color: #3F3F46">{{L.reply}}</a>
+          </div>
+        </section>
+
+        <!-- Internal notes & activity -->
+        <section aria-labelledby="act-h" style="display: flex; flex-direction: column; gap: 12px; border-top: 1px solid #E6E6EA; padding-top: 20px">
+          <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px">
+            <h2 id="act-h" style="margin: 0; font-size: 13px; font-weight: 600; color: #3F3F46">{{L.activity}}</h2>
+            <span style="display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: 11px; background: #FEF3E2; color: #92400E; font-size: 12px; font-weight: 500">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>{{L.internalOnly}}
+            </span>
+          </div>
+          <ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px">
+            <sc-for list="{{log}}" as="e" hint-placeholder-count="5">
+              <li style="display: flex; flex-direction: column">
+                <sc-if value="{{e.isEvent}}" hint-placeholder-val="{{ true }}">
+                  <div style="display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; font-size: 13px; line-height: 20px; color: #52525B">
+                    <span aria-hidden="true" style="flex: none; width: 22px; height: 20px; display: flex; align-items: center; justify-content: center"><span style="width: 8px; height: 8px; border-radius: 4px; {{e.mark}}"></span></span>
+                    <span style="flex: 1"><strong style="font-weight: 600; color: #18181B">{{e.who}}</strong> {{e.text}}</span>
+                    <time style="flex: none; font-size: 12px; color: #6B6B74">{{e.time}}</time>
+                  </div>
+                </sc-if>
+                <sc-if value="{{e.isNote}}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; align-items: flex-start; gap: 10px; padding: 8px 0">
+                    <span style="flex: none; width: 22px; height: 22px; border-radius: 11px; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{e.avatar}}">{{e.initials}}</span>
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 10px; background: #FFFBF3; border: 1px solid #F5E6CC">
+                      <span style="font-size: 13px"><strong style="font-weight: 600">{{e.who}}</strong> <span style="font-size: 12px; color: #6B6B74">{{e.time}}</span></span>
+                      <span style="font-size: 14px; line-height: 21px; color: #27272A">{{e.text}}</span>
+                    </div>
+                  </div>
+                </sc-if>
+              </li>
+            </sc-for>
+          </ol>
+          <div style="display: flex; align-items: flex-start; gap: 10px">
+            <span aria-hidden="true" style="flex: none; width: 22px; height: 22px; border-radius: 11px; background: #E0E7FF; color: #3730A3; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center">{{L.meI}}</span>
+            <div style="flex: 1; display: flex; flex-direction: column; border: 1px solid #E6E6EA; border-radius: 10px">
+              <label for="note" class="sr">{{L.notePh}}</label>
+              <textarea id="note" rows="2" placeholder="{{L.notePh}}" style="border: 0; outline: none; resize: none; padding: 10px 12px 4px; background: transparent; font-size: 14px; line-height: 21px"></textarea>
+              <div style="display: flex; align-items: center; gap: 8px; padding: 4px 6px 6px 12px">
+                <span style="flex: 1; display: flex; align-items: center; gap: 6px; font-size: 12px; color: #6B6B74">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>{{L.noteHint}}
+                </span>
+                <button style="height: 30px; padding: 0 12px; border: 0; border-radius: 8px; background: {{accent}}; color: #FFFFFF; font-size: 13px; font-weight: 500">{{L.addNote}}</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ===== Actions ===== -->
+      <div style="flex: 1 1 300px; max-width: 360px; min-width: 0; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px; padding: 24px 20px 32px; background: #FAFAFB; border-left: 1px solid #EFEFF2">
+
+        <!-- Status -->
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <span id="st-l" style="font-size: 12px; font-weight: 500; color: #6B6B74">{{L.status}}</span>
+          <div style="position: relative">
+            <button onClick="{{toggleStatus}}" aria-haspopup="listbox" aria-expanded="{{statusOpen}}" aria-labelledby="st-l" style="display: flex; align-items: center; gap: 8px; width: 100%; height: 38px; padding: 0 12px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-weight: 500; text-align: left">
+              <span aria-hidden="true" style="width: 10px; height: 10px; box-sizing: border-box; border-radius: 5px; {{status.dot}}"></span>
+              <span style="flex: 1">{{status.label}}</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+            </button>
+            <sc-if value="{{statusOpen}}" hint-placeholder-val="{{ false }}">
+              <div role="listbox" style="position: absolute; top: 42px; left: 0; right: 0; z-index: 5; padding: 4px; background: #FFFFFF; border: 1px solid #E6E6EA; border-radius: 10px; box-shadow: 0 12px 32px rgba(24, 24, 27, 0.14); display: flex; flex-direction: column">
+                <sc-for list="{{statusOptions}}" as="o" hint-placeholder-count="4">
+                  <button role="option" class="opt" aria-selected="{{o.selected}}" onClick="{{o.pick}}" style="display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; text-align: left">
+                    <span aria-hidden="true" style="width: 10px; height: 10px; box-sizing: border-box; border-radius: 5px; {{o.dot}}"></span><span style="flex: 1">{{o.label}}</span>
+                    <sc-if value="{{o.selected}}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+
+        <!-- Linked task -->
+        <section aria-labelledby="lt-h" style="display: flex; flex-direction: column; gap: 10px">
+          <h2 id="lt-h" style="margin: 0; font-size: 12px; font-weight: 500; color: #6B6B74">{{L.linkedTask}}</h2>
+
+          <sc-if value="{{isUnlinked}}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <p style="margin: 0 0 4px; font-size: 13px; color: #52525B">{{L.notLinked}}</p>
+              <a href="FeedbackCreateTask.dc.html" style="display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px; border-radius: 8px; background: {{accent}}; color: #FFFFFF; font-size: 13px; font-weight: 500">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>{{L.createFrom}}
+              </a>
+              <button onClick="{{togglePicker}}" aria-expanded="{{pickerOpen}}" style="display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-size: 13px; font-weight: 500; text-align: left; {{pickerBtnStyle}}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"></path><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path></svg>{{L.linkExisting}}
+              </button>
+            </div>
+          </sc-if>
+
+          <!-- Task picker -->
+          <sc-if value="{{showPicker}}" hint-placeholder-val="{{ true }}">
+            <div role="dialog" aria-label="{{L.linkExisting}}" style="display: flex; flex-direction: column; background: #FFFFFF; border: 1px solid #E6E6EA; border-radius: 12px; box-shadow: 0 12px 32px rgba(24, 24, 27, 0.12); overflow: hidden">
+              <label style="display: flex; align-items: center; gap: 8px; height: 42px; padding: 0 12px; border-bottom: 1px solid #EFEFF2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                <span class="sr">{{L.searchTasks}}</span>
+                <input type="search" value="{{query}}" onChange="{{onQuery}}" placeholder="{{L.searchTasks}}" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-size: 13px; padding: 0">
+              </label>
+              <sc-if value="{{hasSuggested}}" hint-placeholder-val="{{ true }}">
+                <span style="padding: 8px 12px 2px; font-size: 11px; font-weight: 600; color: #6B6B74">{{L.suggested}}</span>
+              </sc-if>
+              <div role="listbox" aria-label="{{L.tasks}}" style="display: flex; flex-direction: column; padding: 4px">
+                <sc-for list="{{pickerTasks}}" as="t" hint-placeholder-count="5">
+                  <button role="option" class="opt" onClick="{{t.pick}}" style="display: flex; align-items: center; gap: 8px; padding: 7px 8px; border: 0; border-radius: 6px; background: transparent; text-align: left; {{t.rowStyle}}">
+                    <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                      <span style="font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{t.name}}</span>
+                      <span style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: #6B6B74">
+                        <span style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace">{{t.id}}</span>·
+                        <span aria-hidden="true" style="width: 8px; height: 8px; box-sizing: border-box; border-radius: 4px; {{t.statusDot}}"></span>{{t.status}}
+                      </span>
+                    </span>
+                    <span title="{{t.assignee}}" style="flex: none; width: 22px; height: 22px; border-radius: 11px; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{t.avatar}}">{{t.initials}}</span>
+                  </button>
+                </sc-for>
+                <sc-if value="{{noResults}}" hint-placeholder-val="{{ false }}">
+                  <span style="padding: 12px 8px; font-size: 13px; color: #6B6B74">{{L.noResults}}</span>
+                </sc-if>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; height: 30px; padding: 0 12px; border-top: 1px solid #EFEFF2; background: #FAFAFB; font-size: 11px; color: #6B6B74">
+                <span>↑↓ {{L.navigate}}</span><span>↵ {{L.link}}</span><span>Esc {{L.closeW}}</span>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- Linked task card -->
+          <sc-if value="{{isLinked}}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 10px; padding: 12px; background: #FFFFFF; border: 1px solid #E6E6EA; border-radius: 12px">
+              <div style="display: flex; align-items: flex-start; gap: 8px">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 2px"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12 2.5 2.5 4.5-5"></path></svg>
+                <span style="flex: 1; display: flex; flex-direction: column; gap: 2px">
+                  <span style="font-weight: 600; line-height: 20px">{{task.name}}</span>
+                  <span style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #6B6B74">{{task.id}} · {{L.project}}</span>
+                </span>
+              </div>
+              <div style="display: grid; grid-template-columns: 76px minmax(0, 1fr); row-gap: 6px; font-size: 13px">
+                <span style="color: #6B6B74">{{L.taskStatus}}</span>
+                <span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 10px; height: 10px; box-sizing: border-box; border-radius: 5px; {{task.statusDot}}"></span>{{task.status}}</span>
+                <span style="color: #6B6B74">{{L.due}}</span>
+                <span style="{{task.dueStyle}}">{{task.due}}</span>
+              </div>
+              <div style="display: flex; gap: 6px">
+                <a href="TaskDetail.dc.html" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; height: 32px; border: 1px solid #E6E6EA; border-radius: 8px; font-size: 13px; font-weight: 500; color: #18181B">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M10 14 21 3M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"></path></svg>{{L.openTask}}
+                </a>
+                <button onClick="{{unlink}}" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; height: 32px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-size: 13px; font-weight: 500; color: #B42318">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18.8 13.4 1.7-1.7a5 5 0 0 0-7-7l-1.7 1.7M5.2 10.6l-1.7 1.7a5 5 0 0 0 7 7l1.7-1.7M8 2v3M2 8h3M16 22v-3M22 16h-3"></path></svg>{{L.unlink}}
+                </button>
+              </div>
+            </div>
+          </sc-if>
+        </section>
+
+        <!-- Assignee -->
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <span id="as-l" style="font-size: 12px; font-weight: 500; color: #6B6B74">{{L.assignee}}</span>
+          <div style="position: relative">
+            <button onClick="{{toggleAssignee}}" aria-haspopup="listbox" aria-expanded="{{assigneeOpen}}" aria-labelledby="as-l" aria-disabled="{{assigneeDisabled}}" style="display: flex; align-items: center; gap: 8px; width: 100%; height: 38px; padding: 0 12px 0 8px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-weight: 500; text-align: left; {{assigneeBtnStyle}}">
+              <span aria-hidden="true" style="width: 24px; height: 24px; box-sizing: border-box; border-radius: 12px; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{assignee.avatar}}">{{assignee.initials}}</span>
+              <span style="flex: 1">{{assignee.name}}</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+            </button>
+            <sc-if value="{{assigneeOpen}}" hint-placeholder-val="{{ false }}">
+              <div role="listbox" style="position: absolute; top: 42px; left: 0; right: 0; z-index: 5; padding: 4px; background: #FFFFFF; border: 1px solid #E6E6EA; border-radius: 10px; box-shadow: 0 12px 32px rgba(24, 24, 27, 0.14); display: flex; flex-direction: column">
+                <sc-for list="{{assigneeOptions}}" as="o" hint-placeholder-count="5">
+                  <button role="option" class="opt" aria-selected="{{o.selected}}" onClick="{{o.pick}}" style="display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; text-align: left">
+                    <span style="width: 22px; height: 22px; border-radius: 11px; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{o.avatar}}">{{o.initials}}</span>
+                    <span style="flex: 1; font-size: 13px">{{o.name}}</span>
+                    <sc-if value="{{o.selected}}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+          <span style="font-size: 12px; line-height: 16px; color: #6B6B74">{{assigneeHint}}</span>
+        </div>
+
+        <!-- Details -->
+        <dl style="margin: 0; display: grid; grid-template-columns: 96px minmax(0, 1fr); row-gap: 8px; font-size: 13px; padding-top: 16px; border-top: 1px solid #EFEFF2">
+          <dt style="color: #6B6B74">{{L.type}}</dt><dd style="margin: 0">{{L.bug}}</dd>
+          <dt style="color: #6B6B74">{{L.source}}</dt><dd style="margin: 0">{{L.publicPage}}</dd>
+          <dt style="color: #6B6B74">{{L.received}}</dt><dd style="margin: 0">{{L.receivedVal}}</dd>
+        </dl>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= LIGHTBOX ================= -->
+  <sc-if value="{{lightboxOpen}}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-modal="true" aria-label="{{lb.aria}}" style="position: absolute; inset: 0; z-index: 20; background: rgba(9, 9, 11, 0.88); display: flex; flex-direction: column; color: #FFFFFF">
+      <div style="display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 16px 0 24px">
+        <span style="flex: 1; display: flex; flex-direction: column">
+          <span style="font-size: 14px; font-weight: 600">{{lb.name}}</span>
+          <span style="font-size: 12px; color: #A1A1AA">{{lb.meta}}</span>
+        </span>
+        <a href="#" download="download" style="display: flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 8px; background: rgba(255,255,255,0.12); color: #FFFFFF; font-size: 13px; font-weight: 500">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"></path></svg>{{L.download}}
+        </a>
+        <button onClick="{{closeLightbox}}" aria-label="{{L.closeW}}" style="width: 36px; height: 36px; border: 0; border-radius: 8px; background: rgba(255,255,255,0.12); color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 24px; padding: 16px">
+        <button onClick="{{lbPrev}}" aria-label="{{L.prevImg}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: rgba(255,255,255,0.12); color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+        <div aria-hidden="true" style="width: 300px; height: 600px; box-sizing: border-box; padding: 28px 22px; border-radius: 36px; background: #FFFFFF; display: flex; flex-direction: column; gap: 14px; color: #18181B">
+          <span style="height: 10px; width: 50%; border-radius: 5px; background: #D4D4D8"></span>
+          <span style="height: 90px; border-radius: 12px; {{lb.block}}"></span>
+          <span style="height: 10px; border-radius: 5px; background: #EFEFF2"></span>
+          <span style="height: 10px; width: 80%; border-radius: 5px; background: #EFEFF2"></span>
+          <span style="height: 44px; border-radius: 10px; border: 1px solid #E6E6EA"></span>
+          <span style="height: 44px; border-radius: 10px; border: 1px solid #E6E6EA"></span>
+          <span style="margin-top: auto; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; {{lb.btn}}">{{lb.btnText}}</span>
+        </div>
+        <button onClick="{{lbNext}}" aria-label="{{L.nextImg}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: rgba(255,255,255,0.12); color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+      </div>
+      <div style="height: 48px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #A1A1AA">{{lb.counter}}</div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"scene":{"editor":"enum","default":"picker","options":["unlinked","picker","linked","lightbox"]},"language":{"editor":"enum","default":"mn","options":["mn","en"]},"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"$preview":{"width":1440,"height":1320}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: undefined, mode: undefined, status: undefined, statusOpen: false, assigneeOpen: false, linkedId: 'APP-171', assignee: undefined, query: '', lightbox: undefined, assigneeChanged: false };
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const lang = s.lang || this.props.language || 'mn';
+    const mn = lang === 'mn';
+    const pick = (pair) => (mn ? pair[0] : pair[1]);
+    const accent = this.props.accent ?? '#6E56CF';
+    const accentSoft = accent + '1A';
+    const scene = this.props.scene || 'picker';
+    const mode = s.mode || (scene === 'lightbox' ? 'unlinked' : scene);
+
+    const L = mn ? {
+      myTasks: 'Миний ажлууд', standup: 'Стэндап', inbox: 'Мэдэгдэл', feedback: 'Санал хүсэлт', reports: 'Тайлан', language: 'Хэл',
+      location: 'Байршил', closePanel: 'Хаах', prevItem: 'Өмнөх санал хүсэлт', nextItem: 'Дараагийн санал хүсэлт', copyLink: 'Холбоос хуулах',
+      bug: 'Алдаа', via: 'нийтийн хуудсаар ирсэн',
+      title: 'Төлбөр төлөх алхам дээр апп гацаж байна',
+      p1: 'Сагсандаа 3 бараа нэмээд төлбөр төлөх гэтэл апп гацчихлаа. Ингэж давтагдаж байна:',
+      s1: 'Сагс → “Захиалах” дарах', s2: 'Хадгалсан Visa картаа сонгох', s3: '“Төлөх” дарах — дэлгэц хөдлөхгүй, 30 секундын дараа апп хаагдана',
+      p2: 'Картаас мөнгө хасагдсан эсэхийг мэдэхгүй байна. Дэлгэцийн зураг, бичлэг хавсаргалаа. Wi-Fi болон 4G хоёулан дээр ижил.',
+      attachments: 'Хавсралт', submitter: 'Илгээгч', subName: 'Энхжин Д.', subInitials: 'ЭД',
+      submittedAt: '10-р сарын 19, 13:42-д илгээсэн', device: 'iPhone 13 · iOS 17.4 · Апп 4.1.2', reply: 'Имэйлээр хариулах',
+      activity: 'Дотоод тэмдэглэл ба түүх', internalOnly: 'Зөвхөн багт харагдана', notePh: 'Дотоод тэмдэглэл бичих… @ ашиглан дурдана', noteHint: 'Илгээгчид харагдахгүй', addNote: 'Нэмэх', meI: 'АБ',
+      status: 'Төлөв', linkedTask: 'Холбосон ажил', notLinked: 'Энэ санал хүсэлт одоогоор ажилтай холбогдоогүй.',
+      createFrom: 'Санал хүсэлтээс ажил үүсгэх', linkExisting: 'Одоо байгаа ажилд холбох',
+      searchTasks: 'Нэр эсвэл ID-аар хайх (APP-…)', suggested: 'Ижил төстэй ажлууд', tasks: 'Ажлууд', noResults: 'Тохирох ажил олдсонгүй',
+      navigate: 'сонгох', link: 'холбох', closeW: 'хаах',
+      project: 'Апп шинэчлэл', taskStatus: 'Төлөв', due: 'Дуусах', openTask: 'Ажлыг нээх', unlink: 'Салгах',
+      assignee: 'Хариуцагч', type: 'Төрөл', source: 'Эх сурвалж', publicPage: 'Нийтийн хуудас', received: 'Хүлээн авсан', receivedVal: '10-р сарын 19, 13:42',
+      download: 'Татах', prevImg: 'Өмнөх зураг', nextImg: 'Дараагийн зураг'
+    } : {
+      myTasks: 'My Tasks', standup: 'Standup', inbox: 'Inbox', feedback: 'Feedback', reports: 'Reports', language: 'Language',
+      location: 'Location', closePanel: 'Close', prevItem: 'Previous feedback', nextItem: 'Next feedback', copyLink: 'Copy link',
+      bug: 'Bug', via: 'via public page',
+      title: 'App freezes on the payment step',
+      p1: 'I added 3 items to my cart and the app froze when I tried to pay. It happens every time:',
+      s1: 'Cart → tap “Checkout”', s2: 'Choose my saved Visa card', s3: 'Tap “Pay” — the screen stops responding and the app closes after ~30 seconds',
+      p2: 'I don’t know if my card was charged. I attached screenshots and a screen recording. Same on Wi-Fi and 4G.',
+      attachments: 'Attachments', submitter: 'Submitted by', subName: 'Enkhjin D.', subInitials: 'ED',
+      submittedAt: 'Submitted Oct 19, 13:42', device: 'iPhone 13 · iOS 17.4 · App 4.1.2', reply: 'Reply by email',
+      activity: 'Internal notes & activity', internalOnly: 'Visible to your team only', notePh: 'Write an internal note… use @ to mention', noteHint: 'Not visible to the submitter', addNote: 'Add note', meI: 'AB',
+      status: 'Status', linkedTask: 'Linked task', notLinked: 'This feedback isn’t linked to a task yet.',
+      createFrom: 'Create task from feedback', linkExisting: 'Link to existing task',
+      searchTasks: 'Search by name or ID (APP-…)', suggested: 'Similar tasks', tasks: 'Tasks', noResults: 'No matching tasks',
+      navigate: 'navigate', link: 'link', closeW: 'close',
+      project: 'App Redesign', taskStatus: 'Status', due: 'Due', openTask: 'Open task', unlink: 'Unlink',
+      assignee: 'Assignee', type: 'Type', source: 'Source', publicPage: 'Public page', received: 'Received', receivedVal: 'Oct 19, 13:42',
+      download: 'Download', prevImg: 'Previous image', nextImg: 'Next image'
+    };
+    const langs = [{ code: 'mn', short: 'МН', full: 'Монгол' }, { code: 'en', short: 'EN', full: 'English' }].map((d) => ({
+      ...d, active: d.code === lang, pick: () => this.setState({ lang: d.code }),
+      style: d.code === lang ? 'background:#FFFFFF;color:#18181B;box-shadow:0 1px 2px rgba(24,24,27,0.08)' : 'background:transparent;color:#6B6B74'
+    }));
+
+    const PEOPLE = {
+      dorj: [['Дорж Э.', 'Dorj E.'], ['ДЭ', 'DE'], 'background:#FEF3C7;color:#92400E'],
+      tem: [['Тэмүүлэн Г.', 'Temuulen G.'], ['ТГ', 'TG'], 'background:#DCFCE7;color:#166534'],
+      sara: [['Сараа К.', 'Sara K.'], ['СК', 'SK'], 'background:#FFE4E6;color:#9F1239'],
+      anu: [['Ану Б.', 'Anu B.'], ['АБ', 'AB'], 'background:#E0E7FF;color:#3730A3'],
+      bat: [['Бат О.', 'Bat O.'], ['БО', 'BO'], 'background:#CCFBF1;color:#115E59']
+    };
+    const TST = {
+      todo: [['Хийх', 'To Do'], 'border:2px solid #A1A1AA'],
+      progress: [['Хийгдэж буй', 'In Progress'], 'border:2px solid #D97706;background:linear-gradient(90deg,#D97706 50%,transparent 50%)'],
+      review: [['Хянагдаж буй', 'In Review'], 'border:2px solid ' + accent + ';background:' + accent + '33']
+    };
+    const TASKS = [
+      { id: 'APP-171', n: ['iOS дээр төлбөрийн алхам гацах', 'Payment step freezes on iOS'], st: 'todo', who: 'dorj', due: [['10-р сарын 21', 'Oct 21'], 'normal'], sug: true },
+      { id: 'APP-142', n: ['Төлбөрийн хуудас — респонсив байрлал', 'Checkout page — responsive layout'], st: 'review', who: 'dorj', due: [['10-р сарын 8 · хэтэрсэн', 'Oct 8 · overdue'], 'late'], sug: true },
+      { id: 'APP-160', n: ['Төлбөрийн үйлчилгээ үзүүлэгчийн хяналт', 'Payment provider review'], st: 'review', who: 'dorj', due: [['10-р сарын 3 · хэтэрсэн', 'Oct 3 · overdue'], 'late'] },
+      { id: 'APP-118', n: ['Шинэ доод таб самбар хэрэгжүүлэх', 'Implement new bottom tab bar'], st: 'progress', who: 'tem', due: [['10-р сарын 10', 'Oct 10'], 'normal'] },
+      { id: 'APP-155', n: ['Хадгалсан сагсны PRD бичих', 'Write PRD: saved carts'], st: 'progress', who: 'anu', due: [['10-р сарын 9', 'Oct 9'], 'normal'] },
+      { id: 'APP-133', n: ['Бүтээгдэхүүний картын компонент v2', 'Product card component v2'], st: 'progress', who: 'sara', due: [['10-р сарын 10', 'Oct 10'], 'normal'] }
+    ];
+
+    const FST = {
+      new: [['Шинэ', 'New'], 'background:' + accent],
+      review: [['Хянаж буй', 'In review'], 'border:2px solid #D97706;background:linear-gradient(90deg,#D97706 50%,transparent 50%)'],
+      linked: [['Ажилтай холбосон', 'Linked to task'], 'border:2px solid #0284C7;background:#0284C733'],
+      closed: [['Хаасан', 'Closed'], 'background:#A1A1AA']
+    };
+    const isLinked = mode === 'linked';
+    const statusKey = s.status || (isLinked ? 'linked' : 'new');
+    const status = { label: pick(FST[statusKey][0]), dot: FST[statusKey][1] };
+    const statusOptions = Object.keys(FST).map((k) => ({
+      label: pick(FST[k][0]), dot: FST[k][1], selected: k === statusKey,
+      pick: () => this.setState({ status: k, statusOpen: false })
+    }));
+
+    const linkedTask = TASKS.find((t) => t.id === s.linkedId) || TASKS[0];
+    const assigneeKey = s.assignee || linkedTask.who;
+    const task = {
+      id: linkedTask.id, name: pick(linkedTask.n),
+      status: pick(TST[linkedTask.st][0]), statusDot: TST[linkedTask.st][1],
+      due: pick(linkedTask.due[0]), dueStyle: linkedTask.due[1] === 'late' ? 'color:#C42B1C;font-weight:500' : 'color:#18181B'
+    };
+    const A = PEOPLE[assigneeKey];
+    const assignee = isLinked
+      ? { name: pick(A[0]), initials: pick(A[1]), avatar: A[2] }
+      : { name: mn ? 'Хариуцагчгүй' : 'Unassigned', initials: '–', avatar: 'border:1.5px dashed #C4C4CC;color:#A1A1AA;background:#FFFFFF' };
+    const assigneeOptions = Object.keys(PEOPLE).map((k) => ({
+      name: pick(PEOPLE[k][0]), initials: pick(PEOPLE[k][1]), avatar: PEOPLE[k][2], selected: k === assigneeKey,
+      pick: () => this.setState({ assignee: k, assigneeOpen: false, assigneeChanged: true })
+    }));
+
+    const q = (s.query || '').toLowerCase().trim();
+    const matches = TASKS.filter((t) => !q || t.id.toLowerCase().includes(q) || pick(t.n).toLowerCase().includes(q));
+    const pickerTasks = matches.map((t) => ({
+      id: t.id, name: pick(t.n), status: pick(TST[t.st][0]), statusDot: TST[t.st][1],
+      assignee: pick(PEOPLE[t.who][0]), initials: pick(PEOPLE[t.who][1]), avatar: PEOPLE[t.who][2],
+      rowStyle: t.sug && !q ? 'background:' + accentSoft : '',
+      pick: () => this.setState({ mode: 'linked', linkedId: t.id, status: 'linked', assignee: undefined, assigneeChanged: false, query: '' })
+    }));
+
+    const images = [
+      { name: 'IMG_2041.png', size: '1.2 MB', block: 'background:#E8F1FD', btn: 'background:' + accent, btnText: mn ? 'Төлөх ₮248,000' : 'Pay ₮248,000' },
+      { name: 'IMG_2042.png', size: '980 KB', block: 'background:#FDECEC', btn: 'background:#D4D4D8', btnText: mn ? 'Түр хүлээнэ үү…' : 'Please wait…' }
+    ].map((im, i) => ({
+      ...im, aria: (mn ? 'Томруулж харах: ' : 'Open preview: ') + im.name,
+      open: () => this.setState({ lightbox: i })
+    }));
+    const files = [
+      { name: 'screen-recording.mov', size: '4.2 MB', ext: 'MOV', iconStyle: 'background:#F3E8FF;color:#6B21A8' },
+      { name: 'device-log.txt', size: '12 KB', ext: 'TXT', iconStyle: 'background:#F1F1F3;color:#3F3F46' }
+    ].map((f) => ({ ...f, aria: (mn ? 'Татах: ' : 'Download ') + f.name + ', ' + f.size }));
+
+    const lbIndex = s.lightbox !== undefined ? s.lightbox : (scene === 'lightbox' ? 1 : null);
+    const lbImg = lbIndex === null ? images[0] : images[lbIndex];
+    const lb = {
+      name: lbImg.name, meta: lbImg.size + ' · ' + pick(['Энхжин Д. хавсаргасан', 'Attached by Enkhjin D.']),
+      aria: (mn ? 'Зураг: ' : 'Image: ') + lbImg.name, block: lbImg.block, btn: lbImg.btn + ';color:#FFFFFF', btnText: lbImg.btnText,
+      counter: lbIndex === null ? '' : (lbIndex + 1) + ' / ' + images.length
+    };
+
+    const E = (who, text, time, mark) => ({ isEvent: true, isNote: false, who, text, time, mark: mark || 'background:#C4C4CC' });
+    const N = (pk, text, time) => ({ isEvent: false, isNote: true, who: pick(PEOPLE[pk][0]), initials: pick(PEOPLE[pk][1]), avatar: PEOPLE[pk][2], text, time });
+    const log = [
+      E(pick(['Энхжин Д.', 'Enkhjin D.']), pick(['нийтийн хуудсаар илгээсэн', 'submitted via the public page']), '13:42'),
+      E(pick(['Систем', 'System']), pick(['өмнө нь ирсэн 1 ижил төстэй мэдээллийг олсон (FB-1031)', 'found 1 similar report (FB-1031)']), '13:42'),
+      N('bat', pick(['@Дорж — гацах асуудал APP-171-тэй ижил байх. Төлбөр давхар хасагдсан эсэхийг шалгаарай.', '@Dorj — this looks like APP-171. Please check whether the card was charged twice.']), '14:05')
+    ];
+    if (isLinked) {
+      log.push(E(pick(['Ану Б.', 'Anu B.']), pick([linkedTask.id + ' ажилтай холбож, төлөвийг “Ажилтай холбосон” болгосон', 'linked this to ' + linkedTask.id + ' and set status to “Linked to task”']), pick(['Одоо', 'Just now']), 'background:#0284C7'));
+      if (s.assigneeChanged) log.push(E(pick(['Ану Б.', 'Anu B.']), pick(['хариуцагчийг ' + pick(A[0]) + ' болгосон · ' + linkedTask.id + ' шинэчлэгдсэн', 'set assignee to ' + pick(A[0]) + ' · ' + linkedTask.id + ' updated']), pick(['Одоо', 'Just now']), 'background:' + accent));
+    }
+
+    const pickerOpen = mode === 'picker';
+    const bgRows = [72, 55, 66, 48, 70, 60, 52, 68, 58, 62].map((w, i) => ({
+      w: 'width:' + w + '%', badge: ['background:#FDECEC', 'background:#E8F1FD', 'background:#E3F4F1', 'background:#FDECEC', 'background:#F1F1F3'][i % 5],
+      style: i < 5 ? 'background:#FCFBFF' : ''
+    }));
+
+    return {
+      lang, L, langs, accent, accentSoft, bgRows,
+      status, statusOptions, statusOpen: !!s.statusOpen,
+      toggleStatus: () => this.setState({ statusOpen: !this.state.statusOpen, assigneeOpen: false }),
+      isUnlinked: !isLinked, isLinked, pickerOpen, showPicker: pickerOpen,
+      pickerBtnStyle: pickerOpen ? 'border-color:' + accent + ';color:' + accent + ';background:' + accentSoft : 'color:#18181B',
+      togglePicker: () => this.setState({ mode: pickerOpen ? 'unlinked' : 'picker' }),
+      query: s.query || '', onQuery: (e) => this.setState({ query: e && e.target ? e.target.value : '' }),
+      hasSuggested: !q, pickerTasks, noResults: pickerTasks.length === 0,
+      task, unlink: () => this.setState({ mode: 'unlinked', status: 'review', assignee: undefined, assigneeChanged: false }),
+      assignee, assigneeOptions, assigneeOpen: !!s.assigneeOpen && isLinked,
+      assigneeDisabled: isLinked ? 'false' : 'true',
+      assigneeBtnStyle: isLinked ? '' : 'color:#A1A1AA;cursor:not-allowed;background:#F7F7F8',
+      toggleAssignee: () => { if (isLinked) this.setState({ assigneeOpen: !this.state.assigneeOpen, statusOpen: false }); },
+      assigneeHint: isLinked
+        ? (mn ? 'Энд солиход ' + linkedTask.id + ' ажлын хариуцагч мөн шинэчлэгдэнэ.' : 'Changing this also updates the assignee on ' + linkedTask.id + '.')
+        : (mn ? 'Ажилтай холбосны дараа хариуцагч сонгоно.' : 'Link a task to choose an assignee.'),
+      images, files, log,
+      lightboxOpen: lbIndex !== null, lb,
+      closeLightbox: () => this.setState({ lightbox: null }),
+      lbPrev: () => this.setState({ lightbox: ((lbIndex || 0) + images.length - 1) % images.length }),
+      lbNext: () => this.setState({ lightbox: ((lbIndex || 0) + 1) % images.length })
+    };
+  }
+}
+</script>
+</body>
+</html>

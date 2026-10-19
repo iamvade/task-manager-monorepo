@@ -66,6 +66,7 @@ export const SIDEBAR = {
   favorites: [],
   myTasksCount: 7,
   inboxUnreadCount: 3,
+  feedbackUnreadCount: 0,
 };
 
 const member = (n: number, name: string, initials: string, avatarColor: string) => ({

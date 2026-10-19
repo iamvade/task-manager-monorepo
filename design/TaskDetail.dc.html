@@ -308,6 +308,65 @@ input,textarea{font:inherit;color:inherit}
         </div>
       </section>
 
+      <!-- Linked feedback (secondary) -->
+      <section aria-labelledby="lf-h" style="display: flex; flex-direction: column; gap: 8px">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <h3 id="lf-h" style="margin: 0; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #3F3F46">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"></path><path d="M15 9a3 3 0 0 1 0 6M18 6a7 7 0 0 1 0 12"></path></svg>
+            Linked feedback
+          </h3>
+          <sc-if value="{{fbMany}}" hint-placeholder-val="{{ true }}">
+            <span style="height: 20px; padding: 0 8px; border-radius: 10px; background: #F1F1F3; color: #3F3F46; font-size: 12px; font-weight: 500; display: flex; align-items: center">{{fbCountLabel}}</span>
+          </sc-if>
+          <span style="flex: 1"></span>
+          <button class="ghost" onClick="{{toggleFbPicker}}" aria-expanded="{{fbPickerOpen}}" style="display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; font-size: 12px; font-weight: 500; color: #3F3F46">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+            Link feedback
+          </button>
+        </div>
+
+        <sc-if value="{{fbPickerOpen}}" hint-placeholder-val="{{ false }}">
+          <div role="dialog" aria-label="Link feedback" style="display: flex; flex-direction: column; border: 1px solid #E6E6EA; border-radius: 10px; background: #FFFFFF; box-shadow: 0 8px 24px rgba(24, 24, 27, 0.10); overflow: hidden">
+            <label style="display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 10px; border-bottom: 1px solid #EFEFF2">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+              <span class="sr">Search unlinked feedback</span>
+              <input type="search" value="{{fbQuery}}" onChange="{{onFbQuery}}" placeholder="Search unlinked feedback by title, ID or submitter…" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-size: 13px; padding: 0">
+            </label>
+            <div role="listbox" aria-label="Unlinked feedback" style="display: flex; flex-direction: column; padding: 4px; max-height: 240px; overflow-y: auto">
+              <sc-for list="{{fbOptions}}" as="o" hint-placeholder-count="4">
+                <button role="option" class="ghost" onClick="{{o.pick}}" style="display: flex; align-items: center; gap: 8px; padding: 7px 8px; border: 0; border-radius: 6px; background: transparent; text-align: left">
+                  <span style="flex: none; display: inline-flex; align-items: center; height: 20px; padding: 0 6px; border-radius: 5px; font-size: 11px; font-weight: 600; {{o.typeStyle}}">{{o.type}}</span>
+                  <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                    <span style="font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{o.title}}</span>
+                    <span style="font-size: 11px; color: #6B6B74">{{o.id}} · {{o.from}} · {{o.date}}</span>
+                  </span>
+                </button>
+              </sc-for>
+              <sc-if value="{{fbNoResults}}" hint-placeholder-val="{{ false }}">
+                <span style="padding: 10px 8px; font-size: 13px; color: #6B6B74">No unlinked feedback matches.</span>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <sc-for list="{{fbShown}}" as="f" hint-placeholder-count="3">
+            <a href="FeedbackDetail.dc.html" class="ghost" style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid #EFEFF2; border-radius: 8px; background: #FAFAFB; color: #18181B">
+              <span style="flex: none; display: inline-flex; align-items: center; height: 20px; padding: 0 6px; border-radius: 5px; font-size: 11px; font-weight: 600; {{f.typeStyle}}">{{f.type}}</span>
+              <span style="flex: 1; min-width: 0; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{f.title}}</span>
+              <span style="flex: none; font-size: 12px; color: #6B6B74; white-space: nowrap">{{f.from}} · {{f.date}}</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="m9 6 6 6-6 6"></path></svg>
+            </a>
+          </sc-for>
+          <sc-if value="{{fbHasMore}}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{toggleFbAll}}" style="align-self: flex-start; height: 26px; padding: 0 2px; border: 0; background: transparent; font-size: 12px; font-weight: 500; color: #52525B">{{fbMoreLabel}}</button>
+          </sc-if>
+          <sc-if value="{{fbEmpty}}" hint-placeholder-val="{{ false }}">
+            <span style="font-size: 13px; color: #6B6B74">No feedback linked yet.</span>
+          </sc-if>
+        </div>
+      </section>
+
       <!-- Activity -->
       <section aria-labelledby="act-h" style="display: flex; flex-direction: column; gap: 12px; border-top: 1px solid #E6E6EA; padding-top: 20px">
         <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
@@ -392,7 +451,7 @@ input,textarea{font:inherit;color:inherit}
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { statusOpen: false, status: 'review', sub: {}, tab: 'all', size: 'L' };
+    this.state = { statusOpen: false, status: 'review', sub: {}, tab: 'all', size: 'L', fbLinked: ['FB-1044', 'FB-1037', 'FB-1030', 'FB-1028'], fbPicker: false, fbQuery: '', fbAll: false };
   }
 
   renderVals() {
@@ -504,7 +563,45 @@ class Component extends DCLogic {
     }));
     const sizeHint = '= ' + sizeCur[1] + (sizeCur[1] === 1 ? ' point' : ' points') + ' · used in Workload and Throughput reports';
 
+    const FB_TYPES = {
+      bug: ['Bug', 'background:#FDECEC;color:#B42318'],
+      feature: ['Feature', 'background:#E8F1FD;color:#1D4ED8'],
+      feedback: ['Feedback', 'background:#E3F4F1;color:#0F766E'],
+      other: ['Other', 'background:#F1F1F3;color:#3F3F46']
+    };
+    const FB = [
+      { id: 'FB-1044', t: 'bug', title: 'Pay button hidden behind keyboard on iPhone SE', from: 'Tsetseg B.', date: 'Today' },
+      { id: 'FB-1037', t: 'bug', title: 'Order summary overlaps the card form on small phones', from: 'Batzorig M.', date: 'Oct 17' },
+      { id: 'FB-1030', t: 'feedback', title: 'Checkout is hard to read on my tablet', from: 'Oyun-Erdene D.', date: 'Oct 14' },
+      { id: 'FB-1028', t: 'bug', title: 'Have to scroll sideways to see the total', from: 'Gerel S.', date: 'Oct 12' },
+      { id: 'FB-1042', t: 'bug', title: 'App freezes on the payment step', from: 'Enkhjin D.', date: 'Oct 19' },
+      { id: 'FB-1041', t: 'bug', title: 'Promo codes longer than 24 characters get cut off', from: 'Temuujin N.', date: 'Oct 18' },
+      { id: 'FB-1043', t: 'feature', title: 'Please add QPay as a payment option', from: 'Batbayar Ts.', date: 'Oct 19' },
+      { id: 'FB-1034', t: 'bug', title: 'Search shows a blank screen for typos', from: 'Bilguun T.', date: 'Oct 15' },
+      { id: 'FB-1035', t: 'other', title: 'Can I get a company invoice?', from: 'Oyunaa G.', date: 'Oct 18' }
+    ];
+    const linkedIds = s.fbLinked || [];
+    const fbLinked = linkedIds.map((id) => FB.find((f) => f.id === id)).filter(Boolean).map((f) => ({
+      id: f.id, title: f.title, from: f.from, date: f.date, type: FB_TYPES[f.t][0], typeStyle: FB_TYPES[f.t][1]
+    }));
+    const showAll = !!s.fbAll;
+    const fbShown = showAll ? fbLinked : fbLinked.slice(0, 3);
+    const fq = (s.fbQuery || '').toLowerCase().trim();
+    const fbOptions = FB.filter((f) => linkedIds.indexOf(f.id) === -1)
+      .filter((f) => !fq || (f.title + ' ' + f.id + ' ' + f.from).toLowerCase().includes(fq))
+      .map((f) => ({
+        id: f.id, title: f.title, from: f.from, date: f.date, type: FB_TYPES[f.t][0], typeStyle: FB_TYPES[f.t][1],
+        pick: () => this.setState({ fbLinked: [f.id].concat(this.state.fbLinked || []), fbPicker: false, fbQuery: '' })
+      }));
+
     return {
+      fbShown, fbOptions, fbNoResults: fbOptions.length === 0,
+      fbMany: fbLinked.length > 1, fbCountLabel: 'Reported by ' + fbLinked.length + ' users',
+      fbEmpty: fbLinked.length === 0,
+      fbHasMore: fbLinked.length > 3, fbMoreLabel: showAll ? 'Show less' : 'Show ' + (fbLinked.length - 3) + ' more',
+      toggleFbAll: () => this.setState({ fbAll: !this.state.fbAll }),
+      fbPickerOpen: !!s.fbPicker, toggleFbPicker: () => this.setState({ fbPicker: !this.state.fbPicker }),
+      fbQuery: s.fbQuery || '', onFbQuery: (e) => this.setState({ fbQuery: e && e.target ? e.target.value : '' }),
       sizes, sizeHint,
       accent, accentSoft,
       statusOpen: !!s.statusOpen,

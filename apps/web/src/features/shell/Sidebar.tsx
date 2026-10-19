@@ -6,6 +6,7 @@ import { useCurrentWorkspace, useSidebar } from '../../api/workspaces';
 import {
   CloseIcon,
   GlobeIcon,
+  FeedbackIcon,
   InboxIcon,
   MyTasksIcon,
   PanelCloseIcon,
@@ -91,6 +92,20 @@ export function Sidebar({ onClose }: { onClose?: () => void } = {}) {
                 tone="accent"
                 value={sidebar.data.inboxUnreadCount}
                 label={t('shell.unread', { count: sidebar.data.inboxUnreadCount })}
+              />
+            ) : null
+          }
+        />
+        <NavItem
+          to="/feedback"
+          icon={<FeedbackIcon size={16} />}
+          label={t('shell.feedback')}
+          trailing={
+            sidebar.data && sidebar.data.feedbackUnreadCount > 0 ? (
+              <CountBadge
+                tone="accent"
+                value={sidebar.data.feedbackUnreadCount}
+                label={t('shell.feedbackNew', { count: sidebar.data.feedbackUnreadCount })}
               />
             ) : null
           }

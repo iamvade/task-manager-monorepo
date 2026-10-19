@@ -1,4 +1,5 @@
 import { date, index, integer, pgTable, primaryKey, text, uuid } from 'drizzle-orm/pg-core';
+import { FEEDBACK_SEQ_START } from '@kite/shared';
 import { citext, createdAt, id, timestamptz } from './columns.js';
 import { workspaceRoleEnum } from './enums.js';
 import { users } from './users.js';
@@ -7,6 +8,8 @@ export const workspaces = pgTable('workspaces', {
   id: id(),
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),
+  /** Last feedback number handed out (`FB-1001` is the first); bumped under the row lock. */
+  feedbackSeq: integer('feedback_seq').notNull().default(FEEDBACK_SEQ_START),
   createdAt: createdAt(),
 });
 

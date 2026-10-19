@@ -57,6 +57,14 @@ export const routes: RouteObject[] = [
         ],
       },
       {
+        // The public feedback form: no account, no shell.
+        path: '/feedback/:slug',
+        lazy: page(
+          () => import('./features/feedback/public/PublicFeedbackPage'),
+          (m) => m.PublicFeedbackPage,
+        ),
+      },
+      {
         path: '/invite/:token',
         lazy: page(
           () => import('./pages/InviteAcceptPage'),
@@ -82,6 +90,13 @@ export const routes: RouteObject[] = [
                 lazy: page(
                   () => import('./pages/InboxPage'),
                   (m) => m.InboxPage,
+                ),
+              },
+              {
+                path: '/feedback',
+                lazy: page(
+                  () => import('./features/feedback/inbox/FeedbackPage'),
+                  (m) => m.FeedbackPage,
                 ),
               },
               {

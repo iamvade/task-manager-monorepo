@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { dateSchema } from '../dates.js';
 import { paletteKeySchema, prioritySchema, sizeSchema, statusCategorySchema } from '../enums.js';
+import { feedbackReportRefSchema } from '../feedback.js';
 import { richTextDocSchema, richTextNodeSchema } from '../rich-text.js';
 import { NOTHING_TO_UPDATE, moveSchema, nonEmptyPatch, userRefSchema } from './common.js';
 import { projectSummarySchema, sprintSchema, statusSchema } from './project.js';
@@ -170,6 +171,8 @@ export const taskDetailSchema = taskListItemSchema
         createdAt: z.iso.datetime(),
       }),
     ),
+    /** Customer feedback linked to this task ("Linked feedback"), newest first. */
+    linkedFeedback: z.array(feedbackReportRefSchema),
   })
   .meta({ id: 'TaskDetail' });
 export type TaskDetail = z.infer<typeof taskDetailSchema>;

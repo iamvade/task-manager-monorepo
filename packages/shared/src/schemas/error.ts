@@ -6,6 +6,8 @@ export const apiErrorSchema = z
     error: z.object({
       code: z.string(),
       message: z.string(),
+      /** Per-field error codes, when a form can show them next to its fields. */
+      fields: z.record(z.string(), z.string()).optional(),
     }),
   })
   .meta({ id: 'ApiError' });

@@ -57,6 +57,7 @@ const detail = (task: TaskListItem) => ({
   attachments: [],
   followers: [],
   mentionedIn: [],
+  linkedFeedback: [],
   deletedAt: null,
 });
 

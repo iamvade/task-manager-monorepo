@@ -141,3 +141,26 @@ export const richTextDocSchema = z.preprocess(
   },
   richTextNodeSchema.refine((node) => node.type === 'doc', 'Expected a `doc` node'),
 );
+
+/**
+ * A TipTap document from plain text: a paragraph per blank-line-separated block, line breaks as
+ * `hardBreak`. Null for blank text.
+ */
+export function plainToRichText(text: string): RichTextNode | null {
+  const blocks = text
+    .replace(/\r\n?/g, '\n')
+    .split(/\n\s*\n/)
+    .map((b) => b.replace(/^\n+|\s+$/g, ''))
+    .filter((b) => b.trim() !== '');
+  if (blocks.length === 0) return null;
+  return {
+    type: 'doc',
+    content: blocks.map((block) => ({
+      type: 'paragraph',
+      content: block.split('\n').flatMap((line, i): RichTextNode[] => [
+        ...(i > 0 ? [{ type: 'hardBreak' }] : []),
+        ...(line ? [{ type: 'text', text: line }] : []),
+      ]),
+    })),
+  };
+}

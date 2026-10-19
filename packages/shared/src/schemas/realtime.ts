@@ -135,6 +135,18 @@ export const realtimeServerMessageSchema = z.discriminatedUnion('type', [
     taskIds: z.array(z.uuid()),
     at: z.iso.datetime(),
   }),
+  /**
+   * Feedback arrived or was triaged (status, link, notes, read): refetch the inbox, the sidebar
+   * count and, for `taskIds`, those tasks' "Linked feedback". `actorId` is null for a public
+   * submission.
+   */
+  z.object({
+    type: z.literal('feedback.changed'),
+    workspaceId: z.uuid(),
+    actorId: z.uuid().nullable(),
+    taskIds: z.array(z.uuid()),
+    at: z.iso.datetime(),
+  }),
   /** Someone's out-of-office periods changed: refetch members, pickers and Workload. */
   z.object({
     type: z.literal('absences.changed'),

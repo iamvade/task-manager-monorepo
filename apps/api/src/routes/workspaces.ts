@@ -24,6 +24,7 @@ import {
   taskAssignees,
   tasks,
   workspaceMembers,
+  feedback,
 } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
 import { pickProjectKey } from '../projects/keys.js';
@@ -51,7 +52,7 @@ export const workspaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Workspaces'],
         summary: 'Sidebar',
         description:
-          'Spaces with their non-archived projects (by position), favorites, open tasks assigned to me and unread inbox count, in one request.',
+          'Spaces with their non-archived projects (by position), favorites, open tasks assigned to me, unread inbox count and unread new feedback, in one request.',
         params,
         response: { 200: sidebarResponseSchema, 401: err, 404: err },
       },
@@ -62,48 +63,59 @@ export const workspaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       const { user } = requireAuth(request);
       const db = app.db;
 
-      const [spaceRows, projectRows, favoriteRows, [myTasks], [inbox]] = await Promise.all([
-        db
-          .select()
-          .from(spaces)
-          .where(eq(spaces.workspaceId, workspaceId))
-          .orderBy(asc(spaces.position)),
-        db
-          .select()
-          .from(projects)
-          .where(and(eq(projects.workspaceId, workspaceId), isNull(projects.archivedAt)))
-          .orderBy(asc(projects.position)),
-        db
-          .select({ projectId: favorites.projectId })
-          .from(favorites)
-          .where(eq(favorites.userId, user.id)),
-        db
-          .select({ n: count() })
-          .from(taskAssignees)
-          .innerJoin(tasks, eq(tasks.id, taskAssignees.taskId))
-          .innerJoin(projects, eq(projects.id, tasks.projectId))
-          .innerJoin(statuses, eq(statuses.id, tasks.statusId))
-          .where(
-            and(
-              eq(taskAssignees.userId, user.id),
-              eq(projects.workspaceId, workspaceId),
-              isNull(projects.archivedAt),
-              isNull(tasks.deletedAt),
-              ne(statuses.category, 'done'),
+      const [spaceRows, projectRows, favoriteRows, [myTasks], [inbox], [newFeedback]] =
+        await Promise.all([
+          db
+            .select()
+            .from(spaces)
+            .where(eq(spaces.workspaceId, workspaceId))
+            .orderBy(asc(spaces.position)),
+          db
+            .select()
+            .from(projects)
+            .where(and(eq(projects.workspaceId, workspaceId), isNull(projects.archivedAt)))
+            .orderBy(asc(projects.position)),
+          db
+            .select({ projectId: favorites.projectId })
+            .from(favorites)
+            .where(eq(favorites.userId, user.id)),
+          db
+            .select({ n: count() })
+            .from(taskAssignees)
+            .innerJoin(tasks, eq(tasks.id, taskAssignees.taskId))
+            .innerJoin(projects, eq(projects.id, tasks.projectId))
+            .innerJoin(statuses, eq(statuses.id, tasks.statusId))
+            .where(
+              and(
+                eq(taskAssignees.userId, user.id),
+                eq(projects.workspaceId, workspaceId),
+                isNull(projects.archivedAt),
+                isNull(tasks.deletedAt),
+                ne(statuses.category, 'done'),
+              ),
             ),
-          ),
-        db
-          .select({ n: count() })
-          .from(notifications)
-          .where(
-            and(
-              eq(notifications.userId, user.id),
-              notificationsIn(workspaceId),
-              isNull(notifications.readAt),
-              isNull(notifications.archivedAt),
+          db
+            .select({ n: count() })
+            .from(notifications)
+            .where(
+              and(
+                eq(notifications.userId, user.id),
+                notificationsIn(workspaceId),
+                isNull(notifications.readAt),
+                isNull(notifications.archivedAt),
+              ),
             ),
-          ),
-      ]);
+          db
+            .select({ n: count() })
+            .from(feedback)
+            .where(
+              and(
+                eq(feedback.workspaceId, workspaceId),
+                eq(feedback.status, 'new'),
+                eq(feedback.isRead, false),
+              ),
+            ),
+        ]);
 
       const favoriteIds = new Set(favoriteRows.map((f) => f.projectId));
       return {
@@ -122,6 +134,7 @@ export const workspaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           .map(toSidebarProject),
         myTasksCount: myTasks?.n ?? 0,
         inboxUnreadCount: inbox?.n ?? 0,
+        feedbackUnreadCount: newFeedback?.n ?? 0,
       };
     },
   );

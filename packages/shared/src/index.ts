@@ -28,3 +28,5 @@ export * from './schemas/reports.js';
 export * from './standup.js';
 export * from './schemas/absence.js';
 export * from './schemas/standup.js';
+export * from './feedback.js';
+export * from './schemas/feedback.js';

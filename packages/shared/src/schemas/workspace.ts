@@ -106,6 +106,8 @@ export const sidebarResponseSchema = z
     myTasksCount: z.number().int(),
     /** Unread, unarchived notifications. */
     inboxUnreadCount: z.number().int(),
+    /** Feedback with status New that nobody has opened yet. */
+    feedbackUnreadCount: z.number().int(),
   })
   .meta({ id: 'Sidebar' });
 export type SidebarResponse = z.infer<typeof sidebarResponseSchema>;

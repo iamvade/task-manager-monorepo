@@ -1,5 +1,8 @@
 import {
   DENSITIES,
+  FEEDBACK_ACTIVITY_KINDS,
+  FEEDBACK_STATUSES,
+  FEEDBACK_TYPES,
   LOCALES,
   MEETING_TASK_SOURCES,
   NOTIFICATION_LEVELS,
@@ -28,3 +31,6 @@ export const speakingOrderEnum = pgEnum('speaking_order', SPEAKING_ORDERS);
 export const standupEntryStatusEnum = pgEnum('standup_entry_status', STANDUP_ENTRY_STATUSES);
 export const standupReactionEnum = pgEnum('standup_reaction', STANDUP_REACTIONS);
 export const meetingTaskSourceEnum = pgEnum('meeting_task_source', MEETING_TASK_SOURCES);
+export const feedbackTypeEnum = pgEnum('feedback_type', FEEDBACK_TYPES);
+export const feedbackStatusEnum = pgEnum('feedback_status', FEEDBACK_STATUSES);
+export const feedbackActivityKindEnum = pgEnum('feedback_activity_kind', FEEDBACK_ACTIVITY_KINDS);

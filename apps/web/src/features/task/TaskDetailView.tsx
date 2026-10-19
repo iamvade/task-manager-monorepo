@@ -27,6 +27,7 @@ import { TaskTitle } from './TaskTitle';
 import { reportError } from '../../lib/mutationErrors';
 import { useViewingTask } from '../../realtime/context';
 import { useMemberHint } from '../pickers/useMemberHint';
+import { LinkedFeedback } from './LinkedFeedback';
 import { MentionedIn } from './MentionedIn';
 
 // React 18's types don't know `inert`; the attribute itself works in every current browser.
@@ -221,6 +222,7 @@ function LoadedTask({
           <SubtaskList />
           <AttachmentSection />
           <MentionedIn />
+          <LinkedFeedback />
           <ActivitySection />
         </div>
         {!view.readOnly && (

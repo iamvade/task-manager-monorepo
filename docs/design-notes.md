@@ -637,6 +637,27 @@ Built UI: the Standup nav item + dot and the "Standup groups" section (admins' "
 13. **Retention.** Keep standups forever (readable through ‹ day navigation), or only N weeks?
 14. **Dark mode and the МН/EN switches inside the modal and live mode**: derive the dark mode; drop the switches (preview-only)?
 
+## 6. Feedback (built 2026-10-19)
+
+Customer feedback: a public form (no account) and the team's inbox, linked to tasks. Behavior and API: CLAUDE.md "Feedback".
+
+### 6.1 Decisions
+- Public URL `/feedback/:slug` (workspace slug, as `kitestudio.app/feedback/kite` in the design). Every active member sees and triages the inbox (submitter emails/phones included).
+- No language selector on any feedback page: the designs' МН/EN toggles are preview-only.
+- No email service: "Reply by email" and "Notify all" are `mailto:` (BCC); "Email the submitter when the task is done" is stored with a TODO hook.
+- Similarity: "Similar tasks" in the link picker (trigram on titles) and a "found N similar reports" log row at submit; no automatic linking.
+- Left out (not specified): Privacy/Terms links and "Back to {workspace}" on the success screen; QR download and Embed in the empty state ("Preview the page" opens the form). Notes are plain text (no @mentions).
+- Device line is "device · OS · browser" from the user agent (a web form can't know an app version such as the design's "App 4.1.2").
+- The panel's assignee is the linked task's assignee (single picker, replaces the task's assignees), disabled until linked.
+- The public form uploads each file as soon as it's picked (per-file progress); sending waits for running uploads. 10 MB per file, images/video/PDF only (the design's note), checked by content on the server.
+
+### 6.2 Screens
+- **Inbox** (`Feedback.dc.html`): header search + public link pill, type tabs as route tabs (`UnderlineTabs` with a count), status chips (`aria-pressed`), the table (8 columns, 1080px min, scrolls sideways), unread rows tinted with a dot and bold title/date, the dark selection bar replacing the header row (`--selection-bar-*` tokens), "1–50 of N" with ← →.
+- **Detail** (`FeedbackDetail.dc.html`, `FeedbackDuplicates.dc.html`): `Drawer` `size="wide"` (66%, min 880px). Duplicates banner (`--fb-banner-*`), "First report" pill on the earliest, the linked reports list in the side column. Image attachments open the task `ImageViewer` (generalized). Notes cards `--fb-note-*`, "team only" pill `--fb-internal-*`.
+- **Create task** (`FeedbackCreateTask.dc.html`): 680px `Modal`, project defaults to the first project (its To Do status), priority High for bugs, attachments all checked.
+- **Task drawer** (`TaskDetail.dc.html`): "Linked feedback" after "Mentioned in"; Mongolian copy written by us (the design is English only).
+- **Public form** (`PublicFeedback.dc.html`): see `features/feedback/public/`; error summary and field error tokens `--form-error-*`, `--field-error-*`.
+
 ## Appendix A — Visual reference
 
 ### A.1 Palette keys (light → dark; "—" = not drawn, derive)

@@ -51,6 +51,19 @@ export const queryKeys = {
   notificationsOf: (workspaceId: string) => ['notifications', workspaceId] as const,
   notifications: (workspaceId: string, tab: string, projectId?: string) =>
     ['notifications', workspaceId, tab, projectId ?? null] as const,
+  /** Prefix of the feedback inbox of a workspace (lists and item panels). */
+  feedbackOf: (workspaceId: string) => ['feedback', workspaceId] as const,
+  feedbackList: (workspaceId: string, query: object) =>
+    ['feedback', workspaceId, 'list', query] as const,
+  /** One item by ref (`FB-1042`) or id. */
+  feedbackItem: (workspaceId: string, ref: string) =>
+    ['feedback', workspaceId, 'item', ref] as const,
+  feedbackSuggestions: (feedbackId: string) => ['feedback-suggestions', feedbackId] as const,
+  /** Unlinked feedback a task can link (task drawer picker). */
+  feedbackOptionsAll: ['feedback-options'] as const,
+  feedbackOptions: (taskId: string, q: string) => ['feedback-options', taskId, q] as const,
+  /** The public form's workspace name and limits (no session). */
+  publicFeedbackForm: (slug: string) => ['public-feedback', slug] as const,
   /** My per-project notification levels (Settings → Notifications, project menu). */
   notificationLevels: (workspaceId: string) =>
     ['workspaces', workspaceId, 'notification-levels'] as const,

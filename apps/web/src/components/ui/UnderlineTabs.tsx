@@ -6,6 +6,8 @@ export interface UnderlineTab {
   value: string;
   label: string;
   icon?: ReactNode;
+  /** After the label, e.g. a count. */
+  trailing?: ReactNode;
   to: string;
 }
 
@@ -78,6 +80,7 @@ export function UnderlineTabs({ items, value, label }: UnderlineTabsProps) {
           >
             {item.icon}
             {item.label}
+            {item.trailing}
           </NavLink>
         );
       })}

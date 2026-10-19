@@ -10,7 +10,6 @@ import {
   moveTaskSchema,
   moveTaskToProjectSchema,
   parseTaskKey,
-  richTextToPlain,
   setTaskAssigneesSchema,
   setTaskTagsSchema,
   spaceTaskListQuerySchema,
@@ -46,6 +45,8 @@ import {
 import { httpError } from '../errors.js';
 import { listStatuses } from '../projects/statuses.js';
 import { buildTaskDetail } from '../tasks/detail.js';
+import { createTask } from '../tasks/create.js';
+import { relinkFeedbackOfTasks, unlinkFeedbackOfTasks } from '../feedback/link.js';
 import { follow, workspaceMemberIds } from '../tasks/followers.js';
 import { getTaskListItem, listProjectTasks, listSpaceTasks } from '../tasks/list.js';
 import { mutateTasks } from '../tasks/mutation.js';
@@ -54,12 +55,9 @@ import { syncReferences } from '../tasks/references.js';
 import { clientIdOf } from '../realtime/client-id.js';
 import {
   endOfStatus,
-  requireMembers,
-  requireSprintIn,
   sprintCovers,
   requireStatusIn,
   requireTags,
-  startOfStatus,
   statusSnapshot,
 } from '../tasks/refs.js';
 import { setSprint, startInSprint } from '../tasks/sprint.js';
@@ -184,85 +182,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       const taskId = await mutateTasks(
         app,
         { projectId: project.id, actorId: user.id, clientId: clientIdOf(request) },
-        async (m) => {
-          const { tx } = m;
-          const workspaceId = m.project.workspaceId;
-          const statusRows = await listStatuses(tx, project.id);
-          const status = body.statusId
-            ? await requireStatusIn(tx, project.id, body.statusId)
-            : (statusRows.find((s) => s.category === 'todo') ?? statusRows[0]);
-          if (!status) throw new Error(`Project ${project.id} has no statuses`);
-          const sprint = body.sprintId
-            ? await requireSprintIn(tx, project.id, body.sprintId)
-            : null;
-          const reviewer = status.category === 'review' ? await projectLead(tx, m.project) : null;
-          const assignees = await requireMembers(tx, workspaceId, body.assigneeIds ?? []);
-          const tagRows = await requireTags(tx, workspaceId, body.tagIds ?? []);
-
-          // The project row is locked, so this number is ours.
-          const number = m.project.taskSeq + 1;
-          await tx.update(projects).set({ taskSeq: number }).where(eq(projects.id, project.id));
-          const description = body.description ?? null;
-          const task = one(
-            await tx
-              .insert(tasks)
-              .values({
-                projectId: project.id,
-                number,
-                statusId: status.id,
-                sprintId: body.sprintId ?? null,
-                title: body.title,
-                description,
-                descriptionText: description ? richTextToPlain(description) : '',
-                priority: body.priority ?? 'none',
-                size: body.size ?? null,
-                reviewerId: reviewer?.id ?? null,
-                startDate: body.startDate ?? null,
-                dueDate: body.dueDate ?? null,
-                position:
-                  body.position === 'top'
-                    ? await startOfStatus(tx, status.id)
-                    : await endOfStatus(tx, status.id),
-                createdBy: user.id,
-                completedAt: status.category === 'done' ? m.now : null,
-                createdAt: m.now,
-                updatedAt: m.now,
-              })
-              .returning({ id: tasks.id }),
-            'task',
-          );
-          if (assignees.length > 0) {
-            await tx
-              .insert(taskAssignees)
-              .values(assignees.map((a) => ({ taskId: task.id, userId: a.id })));
-          }
-          if (tagRows.length > 0) {
-            await tx
-              .insert(taskTags)
-              .values(tagRows.map((t) => ({ taskId: task.id, tagId: t.id })));
-          }
-          const mentioned = await workspaceMemberIds(
-            tx,
-            workspaceId,
-            extractMentionIds(description),
-          );
-          await follow(tx, task.id, [user.id, ...assignees.map((a) => a.id), ...mentioned]);
-          await syncReferences(
-            tx,
-            { taskId: task.id, workspaceId },
-            `${body.title}\n${description ? richTextToPlain(description) : ''}`,
-          );
-
-          m.log(task.id, 'task.created', { status: statusSnapshot(status) });
-          await openStatusPeriods(tx, [{ taskId: task.id, status, at: m.now, actorId: user.id }]);
-          if (sprint) await startInSprint(m, task.id, sprint);
-          if (reviewer) m.log(task.id, 'reviewer.changed', { from: null, to: reviewer });
-          m.emit('task.created', task.id, {
-            assigneeIds: assignees.map((a) => a.id),
-            mentionedUserIds: mentioned,
-          });
-          return task.id;
-        },
+        (m) => createTask(m, body),
       );
       return reply.code(201).send(await buildTaskDetail(app.db, taskId, viewerOf(request)));
     },
@@ -502,6 +422,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       await mutateTasks(app, scope, async (m) => {
         const task = await m.lockTask(request.params.taskId);
         await m.tx.update(tasks).set({ deletedAt: m.now }).where(eq(tasks.id, task.id));
+        await unlinkFeedbackOfTasks(m.tx, m.actorId, m.now, [task.id]);
         m.log(task.id, 'task.deleted', {});
         m.emit('task.deleted', task.id);
       });
@@ -574,10 +495,12 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
             const task = await m.lockTask(id, { includeDeleted: action === 'restore' });
             if (action === 'delete') {
               await m.tx.update(tasks).set({ deletedAt: m.now }).where(eq(tasks.id, task.id));
+              await unlinkFeedbackOfTasks(m.tx, m.actorId, m.now, [task.id]);
               m.log(task.id, 'task.deleted', {});
               m.emit('task.deleted', task.id);
             } else if (task.deletedAt) {
               await m.tx.update(tasks).set({ deletedAt: null }).where(eq(tasks.id, task.id));
+              await relinkFeedbackOfTasks(m.tx, m.actorId, m.now, [task.id]);
               m.log(task.id, 'task.restored', {});
               m.emit('task.restored', task.id);
             }
@@ -607,6 +530,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         const task = await m.lockTask(request.params.taskId, { includeDeleted: true });
         if (!task.deletedAt) throw httpError(409, 'TASK_NOT_DELETED', 'The task is not deleted');
         await m.tx.update(tasks).set({ deletedAt: null }).where(eq(tasks.id, task.id));
+        await relinkFeedbackOfTasks(m.tx, m.actorId, m.now, [task.id]);
         m.log(task.id, 'task.restored', {});
         m.emit('task.restored', task.id);
       });
