@@ -1,4 +1,9 @@
-import { weekdayIndex, type SprintDetail, type StatusCategory } from '@kite/shared';
+import {
+  STATUS_CATEGORIES,
+  weekdayIndex,
+  type SprintDetail,
+  type StatusCategory,
+} from '@kite/shared';
 
 /** "24%" (0 when there is nothing to divide by). */
 export function percent(part: number, whole: number): string {
@@ -58,4 +63,31 @@ export function replanHref(
   const open = statuses?.filter((s) => s.category !== 'done').map((s) => s.id) ?? [];
   if (open.length) params.set('status', open.join(','));
   return `/p/${projectId}/list?${params.toString().replace(/%2C/g, ',')}`;
+}
+
+/**
+ * Replan for a sprint spanning projects: the space List filtered to the sprint's open tasks
+ * (status categories, as the space List filters).
+ */
+export function replanSpaceHref(spaceId: string, sprintId: string): string {
+  const open = STATUS_CATEGORIES.filter((c) => c !== 'done').join(',');
+  return `/s/${spaceId}/list?sprint=${sprintId}&status=${open}`;
+}
+
+/**
+ * Where Replan goes: the one project in view (narrowed, or the sprint has one), else the space
+ * of its projects; across spaces, the space holding most of the carried tasks.
+ */
+export function replanTarget(
+  sprint: Pick<SprintDetail, 'projects' | 'carried'>,
+  projectId: string | undefined,
+): { projectId: string } | { spaceId: string } | null {
+  const only = projectId ?? (sprint.projects.length === 1 ? sprint.projects[0]?.id : undefined);
+  if (only) return { projectId: only };
+  const spaces = [...new Set(sprint.projects.map((p) => p.spaceId))];
+  if (spaces.length <= 1) return spaces[0] ? { spaceId: spaces[0] } : null;
+  const carriedIn = (spaceId: string) =>
+    sprint.carried.filter((t) => t.project.spaceId === spaceId).length;
+  const [busiest] = [...spaces].sort((a, b) => carriedIn(b) - carriedIn(a));
+  return busiest ? { spaceId: busiest } : null;
 }

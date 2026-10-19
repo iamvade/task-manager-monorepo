@@ -76,8 +76,9 @@ try {
   const sprint = (
     await db.execute<{ number: number; start: string; end: string }>(sql`
       select number, to_char(start_date, 'YYYY-MM-DD') as start, to_char(end_date, 'YYYY-MM-DD') as "end"
-      from sprints where project_id = ${project.id} and start_date <= ${today} and end_date >= ${today}
-      order by start_date desc limit 1`)
+      from sprints s join sprint_projects sp on sp.sprint_id = s.id and sp.project_id = ${project.id}
+      where s.start_date <= ${today} and s.end_date >= ${today}
+      order by s.start_date desc limit 1`)
   ).rows[0];
   if (sprint) {
     const total = workingDaysBetween(sprint.start, sprint.end, holidays);

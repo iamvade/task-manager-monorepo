@@ -31,6 +31,13 @@ const STATUSES = [
     position: 'a2',
   },
 ];
+const PROJECT_REF_OF = (n: number, key: string, name: string) => ({
+  id: `01890000-0000-7000-8000-0000000000${String(20 + n)}`,
+  spaceId: SPACE_ID,
+  key,
+  name,
+  color: 'violet' as const,
+});
 const projectApi = {
   [`GET /api/v1/projects/${PROJECT_ID}`]: () => Response.json({ ...PROJECT, statuses: STATUSES }),
 };
@@ -49,12 +56,15 @@ describe('Reports · Sprints', () => {
 
   it('shows the current sprint: banner, cards, charts and the carried-over table', async () => {
     const { fetchMock, router } = renderReports('/reports/sprints', {
-      extra: { [SPRINTS_API]: () => Response.json(sprintsReport()), ...projectApi },
+      extra: {
+        [SPRINTS_API]: () => Response.json(sprintsReport({ project: null })),
+        ...projectApi,
+      },
     });
     expect(
       await screen.findByRole('heading', { name: 'Sprint 14 · Oct 5 – Oct 23' }),
     ).toBeInTheDocument();
-    // No project in the URL: the API picks one.
+    // No scope in the URL: the whole workspace's current sprint.
     expect(requested(fetchMock, '/reports/sprints?')).toBe(false);
     expect(screen.getByText('Day 4 of 15 working days · 11 days left')).toBeInTheDocument();
 
@@ -96,9 +106,9 @@ describe('Reports · Sprints', () => {
 
     expect(screen.getByRole('link', { name: 'Export CSV' })).toHaveAttribute(
       'href',
-      `/api/v1/workspaces/${WORKSPACE_ID}/reports/sprints.csv?projectId=${PROJECT_ID}&sprintId=${SPRINTS[5]?.id ?? ''}`,
+      `/api/v1/workspaces/${WORKSPACE_ID}/reports/sprints.csv?sprintId=${SPRINTS[5]?.id ?? ''}`,
     );
-    expect(screen.getByRole('button', { name: /Project:/ })).toHaveTextContent('App Redesign');
+    expect(screen.getByRole('button', { name: /Project:/ })).toHaveTextContent('All');
 
     // Rows open the drawer.
     fireEvent.click(at(rows, 1));
@@ -125,7 +135,7 @@ describe('Reports · Sprints', () => {
     expect(router.state.location.pathname).toBe('/reports/sprints');
   });
 
-  it('picking a sprint pins the project and sprint in the URL; a past sprint reads differently', async () => {
+  it('picking a sprint keeps the scope and pins the sprint in the URL; a past sprint reads differently', async () => {
     const past = SPRINTS[4];
     if (!past) throw new Error('fixture');
     const pastDetail = sprintDetail({
@@ -148,7 +158,7 @@ describe('Reports · Sprints', () => {
     const { fetchMock, router } = renderReports('/reports/sprints', {
       extra: {
         [SPRINTS_API]: () => Response.json(sprintsReport()),
-        [`${SPRINTS_API}?projectId=${PROJECT_ID}&spaceId=${SPACE_ID}&sprintId=${past.id}`]: () =>
+        [`${SPRINTS_API}?sprintId=${past.id}`]: () =>
           Response.json(sprintsReport({ sprint: pastDetail })),
         ...projectApi,
       },
@@ -168,7 +178,7 @@ describe('Reports · Sprints', () => {
       expect(requested(fetchMock, `sprintId=${past.id}`)).toBe(true);
     });
     const search = new URLSearchParams(router.state.location.search);
-    expect(search.get('project')).toBe(PROJECT_ID);
+    expect(search.get('project')).toBeNull();
     expect(search.get('sprint')).toBe(past.id);
 
     expect(await screen.findByText('Completed sprint · 15 working days')).toBeInTheDocument();
@@ -179,6 +189,52 @@ describe('Reports · Sprints', () => {
     expect(screen.getByRole('heading', { name: 'Sprint 13 burndown' })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Replan' })).toBeNull();
     expect(screen.queryByText('≈ 12')).toBeNull();
+  });
+
+  it('a shared sprint stays picked while narrowing to one of its projects; Replan opens the space', async () => {
+    const CHECKOUT = { ...PROJECT_REF_OF(1, 'CHE', 'Checkout v2') };
+    const current = SPRINTS[5];
+    if (!current) throw new Error('fixture');
+    const shared = { ...current, projects: [...current.projects, CHECKOUT] };
+    const detail = sprintDetail({ ...shared });
+    const { router } = renderReports(`/reports/sprints?sprint=${current.id}`, {
+      extra: {
+        [`${SPRINTS_API}?sprintId=${current.id}`]: () =>
+          Response.json(sprintsReport({ project: null, sprint: detail })),
+        [`${SPRINTS_API}?projectId=${CHECKOUT.id}&spaceId=${SPACE_ID}&sprintId=${current.id}`]:
+          () =>
+            Response.json(
+              sprintsReport({ project: CHECKOUT, sprint: sprintDetail({ ...current }) }),
+            ),
+        [`GET /api/v1/workspaces/${WORKSPACE_ID}/sprints`]: () =>
+          Response.json([
+            {
+              id: current.id,
+              number: current.number,
+              name: null,
+              startDate: current.startDate,
+              endDate: current.endDate,
+              projectIds: [PROJECT_ID, CHECKOUT.id],
+              createdBy: null,
+              taskCount: 42,
+            },
+          ]),
+        ...projectApi,
+      },
+    });
+    const [replan] = await screen.findAllByRole('link', { name: 'Replan' });
+    expect(replan).toHaveAttribute(
+      'href',
+      `/s/${SPACE_ID}/list?sprint=${current.id}&status=todo,in_progress,review`,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /Project:/ }));
+    fireEvent.click(await screen.findByRole('option', { name: /Checkout v2/ }));
+    await waitFor(() => {
+      const search = new URLSearchParams(router.state.location.search);
+      expect(search.get('project')).toBe(CHECKOUT.id);
+      expect(search.get('sprint')).toBe(current.id);
+    });
   });
 
   it('shows an empty state for a project without sprints', async () => {

@@ -258,14 +258,15 @@ describe('task drawer', () => {
     const patches: unknown[] = [];
     const sprint = {
       id: '01890000-0000-7000-8000-000000000031',
-      projectId: PROJECT_ID,
       number: 2,
       name: 'Polish',
       startDate: '2026-10-26',
       endDate: '2026-11-12',
+      projectIds: [PROJECT_ID],
+      createdBy: null,
     };
     api(state, (s) => ({
-      [`POST /api/v1/projects/${PROJECT_ID}/sprints`]: (init) => {
+      [`POST /api/v1/workspaces/${WORKSPACE_ID}/sprints`]: (init) => {
         created.push(body(init));
         return Response.json(sprint, { status: 201 });
       },
@@ -293,7 +294,9 @@ describe('task drawer', () => {
     await waitFor(() => {
       expect(patches).toEqual([{ sprintId: sprint.id }]);
     });
-    expect(created).toEqual([{ name: 'Polish', startDate: '2026-10-26', endDate: '2026-11-12' }]);
+    expect(created).toEqual([
+      { name: 'Polish', startDate: '2026-10-26', endDate: '2026-11-12', projectIds: [PROJECT_ID] },
+    ]);
     expect(screen.queryByRole('dialog', { name: 'New sprint' })).toBeNull();
   });
 

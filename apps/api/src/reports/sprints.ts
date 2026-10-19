@@ -10,9 +10,9 @@ import {
   type SprintsReport,
   type StatusCategory,
 } from '@kite/shared';
-import { and, eq, sql, type SQL } from 'drizzle-orm';
+import { eq, sql, type SQL } from 'drizzle-orm';
 import type { DbOrTx } from '../db/client.js';
-import { projects, workspaceHolidays } from '../db/schema/index.js';
+import { workspaceHolidays } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
 import { loadHistory, scopeDto, scopedProjectIds, type ReportContext } from './scope.js';
 import { dayStart, doneAt, isoTs, rows, textArray } from './sql.js';
@@ -26,7 +26,13 @@ interface SprintRow extends Record<string, unknown> {
   name: string | null;
   start_date: string;
   end_date: string;
+  /** Its non-archived projects in the scope. */
+  project_ids: string[];
 }
+
+/** Condition: sprint task row `t` belongs to a project in scope (shared sprints span projects). */
+const inScope = (ctx: ReportContext, t: string) =>
+  sql`${sql.raw(t)}.project_id in ${scopedProjectIds(ctx)}`;
 
 /** Working days of a sprint, in order. */
 function workingDays(start: string, end: string, holidays: ReadonlySet<string>): string[] {
@@ -52,20 +58,20 @@ const membershipLeftSql = (m: string, sprintAlias: string, timezone: string) =>
   sql`least(coalesce(${sql.raw(m)}.removed_at, 'infinity'::timestamptz), ${sprintEndSql(sprintAlias, timezone)})`;
 
 /**
- * The project's sprint numbers per sprint, as of `at[i]`: committed (open at the start),
+ * Each sprint's numbers for the scope's tasks, as of `at[i]`: committed (open at the start),
  * added after the start, and members done at the cutoff (end of sprint, or now).
  */
-const totalsQuery = (ids: string[], starts: string[], cutoffs: string[]) => sql`
+const totalsQuery = (ctx: ReportContext, ids: string[], starts: string[], cutoffs: string[]) => sql`
   select x.id::text as id,
     (select count(distinct sm.task_id) from sprint_memberships sm
-      join tasks t on t.id = sm.task_id and t.deleted_at is null
+      join tasks t on t.id = sm.task_id and t.deleted_at is null and ${inScope(ctx, 't')}
       where sm.sprint_id = x.id and sm.added_at <= x.start_at
         and (sm.removed_at is null or sm.removed_at > x.start_at))::int as committed,
     (select count(distinct sm.task_id) from sprint_memberships sm
-      join tasks t on t.id = sm.task_id and t.deleted_at is null
+      join tasks t on t.id = sm.task_id and t.deleted_at is null and ${inScope(ctx, 't')}
       where sm.sprint_id = x.id and sm.added_at > x.start_at and sm.added_at <= x.cutoff)::int as added,
     (select count(distinct sm.task_id) from sprint_memberships sm
-      join tasks t on t.id = sm.task_id and t.deleted_at is null
+      join tasks t on t.id = sm.task_id and t.deleted_at is null and ${inScope(ctx, 't')}
       where sm.sprint_id = x.id and sm.added_at <= x.cutoff
         and (sm.removed_at is null or sm.removed_at >= x.cutoff)
         and ${doneAt('t', sql`x.cutoff`)})::int as completed
@@ -73,12 +79,12 @@ const totalsQuery = (ids: string[], starts: string[], cutoffs: string[]) => sql`
     as x(id, start_at, cutoff)`;
 
 /** Open sprint tasks at each burndown point, and tasks added since the previous point. */
-const burndownQuery = (sprintId: string, startIso: string, ats: string[]) => {
+const burndownQuery = (ctx: ReportContext, sprintId: string, startIso: string, ats: string[]) => {
   const prevs = ats.map((_, i) => ats[Math.max(0, i - 1)] ?? startIso);
   return sql`
     with m as (
       select sm.task_id, sm.added_at, sm.removed_at from sprint_memberships sm
-      join tasks t on t.id = sm.task_id and t.deleted_at is null
+      join tasks t on t.id = sm.task_id and t.deleted_at is null and ${inScope(ctx, 't')}
       where sm.sprint_id = ${sprintId}
     )
     select x.idx::int as idx,
@@ -95,23 +101,24 @@ const burndownQuery = (sprintId: string, startIso: string, ats: string[]) => {
 /**
  * Tasks in sprint `n`'s scope (committed or added by the cutoff) that left sprint `prev`
  * unfinished: not done when their membership there ended, or at the sprint's end if it was
- * still open then. `times` = how many earlier sprints of the project the task left that way.
+ * still open then. `times` = how many of the `earlier` sprints (the related ones before `n`)
+ * the task left that way.
  * A task moved to the next sprint on the last afternoon, or after the next one started, counts
  * (`setSprint` closes and opens memberships at the same instant, so "open at the end" never
  * matches a replan done inside a sprint).
  */
 export const carriedQuery = (
   ctx: ReportContext,
-  projectId: string,
   sprint: SprintRow,
   prev: SprintRow,
+  earlier: readonly SprintRow[],
   cutoffIso: string,
 ) => {
   const startAt = dayStart(sprint.start_date, ctx.timezone);
   return sql`
     with members as (
       select distinct sm.task_id from sprint_memberships sm
-      join tasks t on t.id = sm.task_id and t.deleted_at is null
+      join tasks t on t.id = sm.task_id and t.deleted_at is null and ${inScope(ctx, 't')}
       where sm.sprint_id = ${sprint.id}
         and ((sm.added_at <= ${startAt} and (sm.removed_at is null or sm.removed_at > ${startAt}))
           or (sm.added_at > ${startAt} and sm.added_at <= ${cutoffIso}::timestamptz))
@@ -123,7 +130,7 @@ export const carriedQuery = (
       join sprints es on es.id = em.sprint_id
       join tasks et on et.id = em.task_id
       where em.task_id in (select task_id from members)
-        and es.project_id = ${projectId} and es.number < ${sprint.number}
+        and es.id = any(${textArray(earlier.map((e) => e.id))}::uuid[])
         and em.added_at < ${sprintEndSql('es', ctx.timezone)}
         and (em.removed_at is null or em.removed_at > ${sprintStartSql('es', ctx.timezone)})
         and not ${doneAt('et', membershipLeftSql('em', 'es', ctx.timezone))}
@@ -146,7 +153,7 @@ const carriedOutQuery = (ctx: ReportContext, sprint: SprintRow, next: SprintRow)
   const endAt = dayStart(addDays(sprint.end_date, 1), ctx.timezone);
   return sql`
     select count(distinct sm.task_id)::int as n from sprint_memberships sm
-    join tasks t on t.id = sm.task_id and t.deleted_at is null
+    join tasks t on t.id = sm.task_id and t.deleted_at is null and ${inScope(ctx, 't')}
     where sm.sprint_id = ${sprint.id} and sm.added_at < ${endAt}
       and (sm.removed_at is null or sm.removed_at > ${startAt})
       and not ${doneAt('t', sql`least(coalesce(sm.removed_at, 'infinity'::timestamptz), ${endAt})`)}
@@ -158,10 +165,11 @@ const carriedOutQuery = (ctx: ReportContext, sprint: SprintRow, next: SprintRow)
  * Current sprint: the status category its open tasks have waited longest in, by the median
  * time in their current (open) status period.
  */
-const waitingQuery = (sprintId: string, nowIso: string) => sql`
+const waitingQuery = (ctx: ReportContext, sprintId: string, nowIso: string) => sql`
   select tsp.category
   from sprint_memberships sm
   join tasks t on t.id = sm.task_id and t.deleted_at is null and t.completed_at is null
+    and ${inScope(ctx, 't')}
   join task_status_periods tsp on tsp.task_id = t.id and tsp.exited_at is null
   where sm.sprint_id = ${sprintId} and sm.removed_at is null and tsp.category <> 'done'
   group by tsp.category
@@ -172,8 +180,13 @@ const waitingQuery = (sprintId: string, nowIso: string) => sql`
 
 export type CarriedRow = ReportTaskRow & { times: number };
 
-/** Every task of a sprint (committed or added) with its flags at the cutoff (the CSV). */
-export const sprintTasksQuery = (sprintId: string, startIso: string, cutoffIso: string) => sql`
+/** Every scoped task of a sprint (committed or added) with its flags at the cutoff (the CSV). */
+export const sprintTasksQuery = (
+  ctx: ReportContext,
+  sprintId: string,
+  startIso: string,
+  cutoffIso: string,
+) => sql`
   with mem as (
     select sm.task_id,
       bool_or(sm.added_at <= ${startIso}::timestamptz
@@ -187,7 +200,7 @@ export const sprintTasksQuery = (sprintId: string, startIso: string, cutoffIso: 
   select ${reportTaskColumns}, mem.committed, mem.added,
     ${doneAt('t', sql`${cutoffIso}::timestamptz`)} as done
   from mem
-  join tasks t on t.id = mem.task_id and t.deleted_at is null
+  join tasks t on t.id = mem.task_id and t.deleted_at is null and ${inScope(ctx, 't')}
   ${reportTaskJoins}
   where mem.committed or mem.added
   order by p.key, t.number`;
@@ -200,45 +213,60 @@ export const toCarried = (r: CarriedRow): CarriedTask => ({
   replan: r.times >= REPLAN_TIMES,
 });
 
+interface ProjectRef { id: string; spaceId: string; key: string; name: string; color: PaletteKey }
+
 export interface SprintPlan {
-  project: { id: string; spaceId: string; key: string; name: string; color: PaletteKey };
+  /** The `projectId` filter, if any. */
+  project: ProjectRef | null;
   sprints: ReportSprintRef[];
   selected: SprintRow | null;
   rows: SprintRow[];
   holidays: Set<string>;
 }
 
-/** The project, its sprints (newest first) and the selected one; 404 for a foreign sprintId. */
+/**
+ * The sprints covering a project in scope (newest first) and the selected one; 404 for a sprint
+ * that covers none.
+ */
 export async function planSprints(
   db: DbOrTx,
   ctx: ReportContext,
-  projectId: string,
   sprintId: string | undefined,
 ): Promise<SprintPlan> {
-  const [project] = await db
-    .select({
-      id: projects.id,
-      spaceId: projects.spaceId,
-      key: projects.key,
-      name: projects.name,
-      color: projects.color,
-    })
-    .from(projects)
-    .where(and(eq(projects.id, projectId), eq(projects.workspaceId, ctx.workspaceId)))
-    .limit(1);
-  if (!project) throw httpError(404, 'NOT_FOUND', 'Project not found');
-
-  const [sprintRows, holidayRows] = await Promise.all([
+  const scoped = scopedProjectIds(ctx);
+  const [sprintRows, projectRows, holidayRows] = await Promise.all([
     rows<SprintRow>(
       db,
-      sql`select id, number, name, start_date::text as start_date, end_date::text as end_date
-        from sprints where project_id = ${projectId} order by number desc`,
+      sql`select s.id, s.number, s.name, s.start_date::text as start_date,
+          s.end_date::text as end_date,
+          array(select x.project_id::text from sprint_projects x
+            where x.sprint_id = s.id and x.project_id in ${scoped}) as project_ids
+        from sprints s
+        where s.workspace_id = ${ctx.workspaceId}
+          and exists (select 1 from sprint_projects x
+            where x.sprint_id = s.id and x.project_id in ${scoped})
+        order by s.start_date desc, s.number desc`,
+    ),
+    rows<{ id: string; space_id: string; key: string; name: string; color: PaletteKey }>(
+      db,
+      sql`select p.id, p.space_id, p.key, p.name, p.color from projects p
+        join spaces sp on sp.id = p.space_id
+        where p.workspace_id = ${ctx.workspaceId}
+          and (p.id in ${scoped} ${ctx.projectId ? sql`or p.id = ${ctx.projectId}` : sql``})
+        order by sp.position, p.position, p.id`,
     ),
     db
       .select({ date: workspaceHolidays.date })
       .from(workspaceHolidays)
       .where(eq(workspaceHolidays.workspaceId, ctx.workspaceId)),
   ]);
+  const refs = projectRows.map((p): ProjectRef => ({
+    id: p.id,
+    spaceId: p.space_id,
+    key: p.key,
+    name: p.name,
+    color: p.color,
+  }));
   const isCurrent = (s: SprintRow) => s.start_date <= ctx.today && ctx.today <= s.end_date;
   const selected = sprintId
     ? sprintRows.find((s) => s.id === sprintId)
@@ -247,22 +275,40 @@ export async function planSprints(
       sprintRows[0]);
   if (sprintId && !selected) throw httpError(404, 'NOT_FOUND', 'Sprint not found');
   return {
-    project,
+    project: refs.find((p) => p.id === ctx.projectId) ?? null,
     rows: sprintRows,
     selected: selected ?? null,
     holidays: new Set(holidayRows.map((h) => h.date)),
-    sprints: sprintRows.map((s) => toRef(s, isCurrent(s))),
+    sprints: sprintRows.map((s) => toRef(s, isCurrent(s), refs)),
   };
 }
 
-const toRef = (s: SprintRow, current: boolean): ReportSprintRef => ({
+const toRef = (
+  s: SprintRow,
+  current: boolean,
+  projects: readonly ProjectRef[],
+): ReportSprintRef => ({
   id: s.id,
   number: s.number,
   name: s.name,
   startDate: s.start_date,
   endDate: s.end_date,
   current,
+  projects: projects.filter((p) => s.project_ids.includes(p.id)),
 });
+
+/**
+ * The sprints compared with `s` (recent chart, previous / next, times carried): those sharing a
+ * project in scope with it, oldest first.
+ */
+function relatedSprints(rows: readonly SprintRow[], s: SprintRow): SprintRow[] {
+  const mine = new Set(s.project_ids);
+  return rows
+    .filter((r) => r.id === s.id || r.project_ids.some((id) => mine.has(id)))
+    .sort((a, b) =>
+      a.start_date === b.start_date ? a.number - b.number : a.start_date < b.start_date ? -1 : 1,
+    );
+}
 
 /** When a sprint's numbers are read: its end when past, now when current, its start if future. */
 function cutoffIso(ctx: ReportContext, s: SprintRow, startIso: string, endIso: string): string {
@@ -286,7 +332,7 @@ async function midnights(db: DbOrTx, timezone: string, dates: string[]): Promise
 export async function sprintQueries(db: DbOrTx, ctx: ReportContext, plan: SprintPlan) {
   const s = plan.selected;
   if (!s) return null;
-  const ordered = [...plan.rows].sort((a, b) => a.number - b.number);
+  const ordered = relatedSprints(plan.rows, s);
   const index = ordered.findIndex((x) => x.id === s.id);
   const prev = index > 0 ? (ordered[index - 1] ?? null) : null;
   const next = ordered[index + 1] ?? null;
@@ -323,60 +369,33 @@ export async function sprintQueries(db: DbOrTx, ctx: ReportContext, plan: Sprint
     cutoffIso: selectedCutoff,
     queries: {
       totals: totalsQuery(
+        ctx,
         recent.map((r) => r.id),
         starts,
         cutoffs,
       ),
-      burndown: burndownQuery(s.id, selectedStart, points),
-      carried: prev ? carriedQuery(ctx, plan.project.id, s, prev, selectedCutoff) : null,
+      burndown: burndownQuery(ctx, s.id, selectedStart, points),
+      carried: prev ? carriedQuery(ctx, s, prev, ordered.slice(0, index), selectedCutoff) : null,
       carriedOut: next && ctx.today > s.end_date ? carriedOutQuery(ctx, s, next) : null,
       waiting:
-        s.start_date <= ctx.today && ctx.today <= s.end_date ? waitingQuery(s.id, nowIso) : null,
+        s.start_date <= ctx.today && ctx.today <= s.end_date
+          ? waitingQuery(ctx, s.id, nowIso)
+          : null,
     } satisfies Record<string, SQL | null>,
   };
-}
-
-/**
- * The project the Sprints tab opens on: the first non-archived project in scope (space order,
- * then project order) that has a sprint, else the first project in scope; null without any.
- */
-export async function defaultSprintProject(db: DbOrTx, ctx: ReportContext): Promise<string | null> {
-  const [row] = await rows<{ id: string }>(
-    db,
-    sql`select p.id from projects p join spaces sp on sp.id = p.space_id
-      where p.id in ${scopedProjectIds(ctx)}
-      order by exists (select 1 from sprints x where x.project_id = p.id) desc,
-        sp.position, p.position, p.id
-      limit 1`,
-  );
-  return row?.id ?? null;
 }
 
 export async function buildSprints(
   db: DbOrTx,
   ctx: ReportContext,
-  projectId: string | null,
   sprintId: string | undefined,
 ): Promise<Omit<SprintsReport, 'generatedAt'>> {
-  const meta = { today: ctx.today, timezone: ctx.timezone, scope: scopeDto(ctx) };
-  if (!projectId) {
-    return {
-      ...meta,
-      history: await loadHistory(db, ctx),
-      project: null,
-      sprints: [],
-      sprint: null,
-    };
-  }
-  // History counts the shown project, whichever way it was chosen.
-  const projectCtx = { ...ctx, projectId };
-  const plan = await planSprints(db, projectCtx, projectId, sprintId);
-  const [history, detail] = await Promise.all([
-    loadHistory(db, projectCtx),
-    sprintDetail(db, projectCtx, plan),
-  ]);
+  const plan = await planSprints(db, ctx, sprintId);
+  const [history, detail] = await Promise.all([loadHistory(db, ctx), sprintDetail(db, ctx, plan)]);
   return {
-    ...meta,
+    today: ctx.today,
+    timezone: ctx.timezone,
+    scope: scopeDto(ctx),
     history,
     project: plan.project,
     sprints: plan.sprints,
@@ -438,7 +457,7 @@ async function sprintDetail(
 
   const carriedTasks = carried.map(toCarried);
   return {
-    ...toRef(s, state === 'current'),
+    ...(refOf(s) ?? toRef(s, state === 'current', [])),
     state,
     workingDays: { total, elapsed, left: total - elapsed },
     committed,
@@ -454,7 +473,7 @@ async function sprintDetail(
     pace,
     waitingMost: waiting[0]?.category ?? null,
     recent: recent.map((r) => {
-      const ref = refOf(r) ?? toRef(r, false);
+      const ref = refOf(r) ?? toRef(r, false, []);
       const t = totalsOf(r.id);
       return { ...ref, committed: t.committed, added: t.added, completed: t.completed };
     }),

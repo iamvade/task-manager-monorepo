@@ -212,11 +212,12 @@ export function TaskTable({
       };
     }
     // Space list: groups are status categories, people or priorities across projects.
+    // The filtered sprint applies when it covers the project picked in quick create.
     const [field, value] = group.key.split(':');
-    if (field === 'category') return { statusCategory: value as Status['category'] };
-    if (field === 'assignee' && value && value !== 'none') return { assigneeId: value };
-    if (field === 'priority') return { priority: value as TaskListItem['priority'] };
-    return {};
+    if (field === 'category') return { statusCategory: value as Status['category'], ...sprint };
+    if (field === 'assignee' && value && value !== 'none') return { assigneeId: value, ...sprint };
+    if (field === 'priority') return { priority: value as TaskListItem['priority'], ...sprint };
+    return sprint;
   }
 
   function createIn(group: TaskGroup, title: string) {

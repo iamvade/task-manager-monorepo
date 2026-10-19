@@ -9,7 +9,15 @@ import { createQueryClient } from '../../queryClient';
 import { routes } from '../../router';
 import { useToastStore } from '../../stores/toast';
 import { useUiStore } from '../../stores/ui';
-import { ME, PROJECT, SIDEBAR, SPACE_ID, WORKSPACE_ID, mockApi } from '../../test/fixtures';
+import {
+  ME,
+  PROJECT,
+  PROJECT_ID,
+  SIDEBAR,
+  SPACE_ID,
+  WORKSPACE_ID,
+  mockApi,
+} from '../../test/fixtures';
 import { at } from '../../test/tasks';
 
 const meAs = (role: WorkspaceRole) => ({
@@ -518,6 +526,121 @@ describe('Settings', () => {
       expect(screen.queryByRole('button', { name: 'New tag' })).toBeNull();
       expect(screen.queryByRole('button', { name: /^Actions for/ })).toBeNull();
       expect(screen.queryByRole('button', { name: /^Color of/ })).toBeNull();
+    });
+  });
+
+  describe('Sprints', () => {
+    const CHECKOUT_ID = '01890000-0000-7000-8000-000000000021';
+    const sprint = (n: number, start: string, end: string, extra: object = {}) => ({
+      id: `01890000-0000-7000-8000-000000000b0${String(n)}`,
+      number: n,
+      name: null,
+      startDate: start,
+      endDate: end,
+      projectIds: [PROJECT_ID],
+      createdBy: null,
+      taskCount: 0,
+      ...extra,
+    });
+    const SPRINT_LIST = [
+      sprint(1, '2026-09-21', '2026-10-02', { taskCount: 12 }),
+      sprint(2, '2026-10-05', '2026-10-16', {
+        projectIds: [PROJECT_ID, CHECKOUT_ID],
+        taskCount: 9,
+      }),
+      sprint(3, '2026-10-19', '2026-10-30'),
+    ];
+    const sprintsGet = {
+      [`GET /api/v1/workspaces/${WORKSPACE_ID}/sprints`]: () => Response.json(SPRINT_LIST),
+    };
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date('2026-10-08T04:00:00Z'));
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('groups sprints into current, upcoming and past, with their projects', async () => {
+      renderSettings('/settings?tab=sprints', sprintsGet);
+      const current = await screen.findByRole('region', { name: 'Current' });
+      expect(within(current).getByText('Sprint 2')).toBeVisible();
+      // The group heading and the pill.
+      expect(within(current).getAllByText('Current')).toHaveLength(2);
+      const projects = within(current).getByRole('list', { name: 'Projects in Sprint 2' });
+      expect(
+        within(projects)
+          .getAllByRole('listitem')
+          .map((li) => li.textContent),
+      ).toEqual(['App Redesign', 'Checkout v2']);
+      expect(within(current).getByText('9 tasks')).toBeVisible();
+      expect(
+        within(screen.getByRole('region', { name: 'Upcoming' })).getByText('Sprint 3'),
+      ).toBeVisible();
+      expect(
+        within(screen.getByRole('region', { name: 'Past' })).getByText('Sprint 1'),
+      ).toBeVisible();
+    });
+
+    it('adds a project to a sprint and deletes an unused one', async () => {
+      const { fetchMock } = renderSettings('/settings?tab=sprints', {
+        ...sprintsGet,
+        [`PATCH /api/v1/sprints/${SPRINT_LIST[2]?.id ?? ''}`]: (init) =>
+          Response.json({ ...SPRINT_LIST[2], ...(JSON.parse(init?.body as string) as object) }),
+        [`DELETE /api/v1/sprints/${SPRINT_LIST[2]?.id ?? ''}`]: () =>
+          new Response(null, { status: 204 }),
+      });
+      fireEvent.click(await screen.findByRole('button', { name: 'Actions for Sprint 3' }));
+      fireEvent.click(await screen.findByRole('menuitem', { name: 'Edit sprint' }));
+      const dialog = await screen.findByRole('dialog', { name: 'Edit sprint' });
+      fireEvent.click(within(dialog).getByRole('checkbox', { name: 'Checkout v2' }));
+      fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
+      await waitFor(() => {
+        expect(bodies(fetchMock, 'PATCH')).toEqual([
+          {
+            name: null,
+            startDate: '2026-10-19',
+            endDate: '2026-10-30',
+            projectIds: [PROJECT_ID, CHECKOUT_ID],
+          },
+        ]);
+      });
+
+      // Sprints with tasks can't be deleted.
+      fireEvent.click(screen.getByRole('button', { name: 'Actions for Sprint 2' }));
+      expect(await screen.findByRole('menuitem', { name: 'Delete' })).toBeDisabled();
+      fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Actions for Sprint 3' }));
+      fireEvent.click(await screen.findByRole('menuitem', { name: 'Delete' }));
+      fireEvent.click(
+        within(await screen.findByRole('dialog', { name: 'Delete Sprint 3?' })).getByRole(
+          'button',
+          { name: 'Delete' },
+        ),
+      );
+      await waitFor(() => {
+        expect(fetchMock).toHaveBeenCalledWith(
+          `/api/v1/sprints/${SPRINT_LIST[2]?.id ?? ''}`,
+          expect.objectContaining({ method: 'DELETE' }),
+        );
+      });
+    });
+
+    it('shows members the menu only on sprints they created', async () => {
+      const mine = { ...SPRINT_LIST[2], createdBy: ME.user.id };
+      renderSettings(
+        '/settings?tab=sprints',
+        {
+          [`GET /api/v1/workspaces/${WORKSPACE_ID}/sprints`]: () =>
+            Response.json([SPRINT_LIST[0], SPRINT_LIST[1], mine]),
+        },
+        'member',
+      );
+      expect(await screen.findByRole('button', { name: 'Actions for Sprint 3' })).toBeVisible();
+      expect(screen.queryByRole('button', { name: 'Actions for Sprint 2' })).toBeNull();
+      expect(screen.getByRole('button', { name: 'New sprint' })).toBeEnabled();
     });
   });
 

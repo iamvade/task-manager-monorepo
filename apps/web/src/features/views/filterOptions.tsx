@@ -7,9 +7,10 @@ import {
 } from '@kite/shared';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSprints } from '../../api/projects';
+import { useParams } from 'react-router';
+import { useProjectSprints } from '../../api/sprints';
 import { useTags } from '../../api/tags';
-import { useWorkspaceMembers } from '../../api/workspaces';
+import { useSidebar, useWorkspaceMembers } from '../../api/workspaces';
 import { useAuth } from '../../auth/useAuth';
 import { sprintLabel } from '../../lib/sprint';
 import { Avatar } from '../../components/ui/Avatar';
@@ -37,7 +38,7 @@ export interface FilterOptions {
   creator: FilterOption[];
   priority: FilterOption[];
   tag: FilterOption[];
-  /** Project only (sprints belong to one project). */
+  /** Sprints covering the project (space views: any project of the space). */
   sprint: FilterOption[];
 }
 
@@ -50,7 +51,8 @@ const withIcon = (icon: ReactNode, label: string) => (
 
 /**
  * Values the Filter menu offers and the chips name: a project's statuses (space list: the four
- * categories), Me / Unassigned / members, priorities, workspace tags, the project's sprints.
+ * categories), Me / Unassigned / members, priorities, workspace tags, the sprints covering the
+ * project (space views: any of the space's projects).
  */
 export function useFilterOptions(
   project: ProjectDetail | null,
@@ -61,7 +63,14 @@ export function useFilterOptions(
   const dates = useDates();
   const members = useWorkspaceMembers(workspaceId);
   const tags = useTags(workspaceId);
-  const sprints = useSprints(project?.id);
+  const { spaceId } = useParams<{ spaceId?: string }>();
+  const space = useSidebar(project ? undefined : workspaceId).data?.spaces.find(
+    (s) => s.id === spaceId,
+  );
+  const sprints = useProjectSprints(
+    workspaceId,
+    project ? project.id : space?.projects.map((p) => p.id),
+  );
 
   const status: FilterOption[] = project
     ? project.statuses.map((s) => {
@@ -117,20 +126,18 @@ export function useFilterOptions(
     content: <TagChip name={x.name} color={x.color} />,
   }));
 
-  const sprint: FilterOption[] = project
-    ? (sprints.data ?? []).map((s) => ({
-        key: s.id,
-        label: dates.formatRange(s.startDate, s.endDate),
-        content: (
-          <>
-            <span className="truncate">{sprintLabel(t, s)}</span>
-            <span className="ml-auto flex-none text-[12px] text-muted">
-              {dates.formatRange(s.startDate, s.endDate)}
-            </span>
-          </>
-        ),
-      }))
-    : [];
+  const sprint: FilterOption[] = (sprints.data ?? []).map((s) => ({
+    key: s.id,
+    label: dates.formatRange(s.startDate, s.endDate),
+    content: (
+      <>
+        <span className="truncate">{sprintLabel(t, s)}</span>
+        <span className="ml-auto flex-none text-[12px] text-muted">
+          {dates.formatRange(s.startDate, s.endDate)}
+        </span>
+      </>
+    ),
+  }));
 
   const creator = assignee.filter((o) => o.key !== UNASSIGNED);
 

@@ -63,29 +63,20 @@ export type OverviewReportQuery = z.infer<typeof overviewReportQuerySchema>;
 export const workloadReportQuerySchema = z.object(scopeFields);
 export type WorkloadReportQuery = z.infer<typeof workloadReportQuerySchema>;
 
-export const sprintsReportQuerySchema = z
-  .object({
-    /**
-     * Default: the first project in scope (space order, then project order) that has a sprint,
-     * else the first project in scope.
-     */
-    projectId: z.uuid().optional(),
-    /** Narrows the default project to one space. */
-    spaceId: z.uuid().optional(),
-    /** Default: the current sprint, else the latest started, else the newest. Needs projectId. */
-    sprintId: z.uuid().optional(),
-  })
-  .refine((q) => !q.sprintId || q.projectId, {
-    message: 'sprintId needs projectId',
-    path: ['sprintId'],
-  });
-export type SprintsReportQuery = z.infer<typeof sprintsReportQuerySchema>;
-
-/** The CSV always names the project (the page knows it from the report). */
-export const sprintsExportQuerySchema = z.object({
-  projectId: z.uuid(),
+/**
+ * Sprints are shared by projects: the scope (`spaceId`, `projectId`) picks which sprints are
+ * listed (those covering a project in scope) and narrows the numbers to tasks of those projects.
+ */
+export const sprintsReportQuerySchema = z.object({
+  spaceId: z.uuid().optional(),
+  projectId: z.uuid().optional(),
+  /** Default: the current sprint, else the latest started, else the newest. */
   sprintId: z.uuid().optional(),
 });
+export type SprintsReportQuery = z.infer<typeof sprintsReportQuerySchema>;
+
+/** Same scope and default sprint as the page. */
+export const sprintsExportQuerySchema = sprintsReportQuerySchema;
 
 export const personReportQuerySchema = z.object(periodFields).superRefine(checkCustomPeriod);
 export type PersonReportQuery = z.infer<typeof personReportQuerySchema>;
@@ -252,6 +243,8 @@ export const sprintRefSchema = z
     endDate: dateSchema,
     /** Today falls inside the sprint. */
     current: z.boolean(),
+    /** Its non-archived projects in the scope, by space then project position. */
+    projects: z.array(taskProjectRefSchema),
   })
   .meta({ id: 'ReportSprintRef' });
 export type ReportSprintRef = z.infer<typeof sprintRefSchema>;
@@ -279,7 +272,7 @@ export const burndownPointSchema = z
 
 export const carriedTaskSchema = reportTaskSchema
   .extend({
-    /** Earlier sprints of the project this task left unfinished. */
+    /** Earlier related sprints (sharing a project in scope) this task left unfinished. */
     timesCarried: z.number().int(),
     /** Carried REPLAN_TIMES or more. */
     replan: z.boolean(),
@@ -318,7 +311,7 @@ export const sprintDetailSchema = sprintRefSchema
      * their current status); null otherwise or when nothing is open.
      */
     waitingMost: statusCategorySchema.exclude(['done']).nullable(),
-    /** Up to 6 sprints ending with this one, oldest first. */
+    /** Up to 6 related sprints (sharing a project in scope) ending with this one, oldest first. */
     recent: z.array(sprintTotalsSchema),
     /** Tasks carried over from the previous sprint, most-carried first. */
     carried: z.array(carriedTaskSchema),
@@ -329,11 +322,11 @@ export type SprintDetail = z.infer<typeof sprintDetailSchema>;
 export const sprintsReportSchema = z
   .object({
     ...reportMeta,
-    /** The requested project, else the default one; null when the scope has no projects. */
+    /** The `projectId` filter, if any. */
     project: taskProjectRefSchema.nullable(),
-    /** Newest first. */
+    /** Sprints covering a project in scope, newest first. */
     sprints: z.array(sprintRefSchema),
-    /** Null when the project has no sprints. */
+    /** Null when no sprint covers a project in scope. */
     sprint: sprintDetailSchema.nullable(),
   })
   .meta({ id: 'SprintsReport' });

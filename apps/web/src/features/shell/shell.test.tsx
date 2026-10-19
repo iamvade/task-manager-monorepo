@@ -261,7 +261,9 @@ describe('app shell', () => {
   it('creates a sprint from the project options menu', async () => {
     const posted: unknown[] = [];
     api({
-      [`POST /api/v1/projects/${PROJECT_ID}/sprints`]: (init) => {
+      [`GET /api/v1/workspaces/${WORKSPACE_ID}/sprints`]: () =>
+        Response.json([{ ...PROJECT_WITH_STATUSES.activeSprint, taskCount: 0 }]),
+      [`POST /api/v1/workspaces/${WORKSPACE_ID}/sprints`]: (init) => {
         posted.push(body(init));
         return Response.json(
           {
@@ -300,7 +302,9 @@ describe('app shell', () => {
     await waitFor(() => {
       expect(screen.queryByRole('dialog', { name: 'Шинэ спринт' })).toBeNull();
     });
-    expect(posted).toEqual([{ startDate: '2026-10-26', endDate: '2026-11-06' }]);
+    expect(posted).toEqual([
+      { startDate: '2026-10-26', endDate: '2026-11-06', projectIds: [PROJECT_ID] },
+    ]);
   });
   it('archives a project from its options menu, with Undo', async () => {
     useToastStore.setState({ toasts: [] });

@@ -8,6 +8,7 @@ import {
   comments,
   projects,
   sprintMemberships,
+  sprintProjects,
   sprints,
   statuses,
   taskAssignees,
@@ -127,16 +128,31 @@ export async function timelineTask(db: Db, input: TimelineTask) {
   });
 }
 
+/** A workspace sprint covering `projectIds` (the workspace is the first project's). */
 export async function insertSprint(
   db: Db,
-  projectId: string,
+  projectIds: string | readonly string[],
   number: number,
   startDate: string,
   endDate: string,
+  name: string | null = null,
 ) {
-  return one(
-    await db.insert(sprints).values({ projectId, number, startDate, endDate }).returning(),
+  const ids = typeof projectIds === 'string' ? [projectIds] : projectIds;
+  const [first] = await db
+    .select({ workspaceId: projects.workspaceId })
+    .from(projects)
+    .where(eq(projects.id, ids[0] ?? ''));
+  if (!first) throw new Error('insertSprint: unknown project');
+  const sprint = one(
+    await db
+      .insert(sprints)
+      .values({ workspaceId: first.workspaceId, number, name, startDate, endDate })
+      .returning(),
   );
+  await db
+    .insert(sprintProjects)
+    .values(ids.map((projectId) => ({ sprintId: sprint.id, projectId })));
+  return sprint;
 }
 
 export async function insertHoliday(db: Db, workspaceId: string, date: string) {

@@ -117,6 +117,7 @@ export async function runSeed(db: Db, options: SeedOptions): Promise<void> {
     await tx.insert(schema.projectMembers).values(rows.projectMembers);
     await tx.insert(schema.statuses).values(rows.statuses);
     await tx.insert(schema.sprints).values(rows.sprints);
+    await tx.insert(schema.sprintProjects).values(rows.sprintProjects);
     await tx.insert(schema.tags).values(rows.tags);
     await insert(schema.tasks, rows.tasks);
     await insert(schema.taskStatusPeriods, rows.periods);
@@ -289,7 +290,7 @@ export function buildRows(
     category: row.category,
   });
 
-  // App Redesign Sprints 9–14 (unnamed: "Sprint 14"); today is day 4 of the current one.
+  // Product Sprints 9–14 (unnamed: "Sprint 14"); today is day 4 of the current one.
   const sprintWindows = planSprints(clock.today, holidayDates, SPRINTS).map((w) => ({
     ...w,
     id: uuidv7(),
@@ -298,12 +299,21 @@ export function buildRows(
     (w) =>
       ({
         id: w.id,
-        projectId: project(SPRINTS.project).row.id,
+        workspaceId,
         number: w.number,
         name: null,
         startDate: w.start,
         endDate: w.end,
+        createdBy: user(project(SPRINTS.project).def.lead).id,
       }) satisfies Row<typeof schema.sprints>,
+  );
+  const sprintProjects = sprintWindows.flatMap((w) =>
+    SPRINTS.projects.map(
+      (ref) =>
+        ({ sprintId: w.id, projectId: project(ref).row.id }) satisfies Row<
+          typeof schema.sprintProjects
+        >,
+    ),
   );
   const sprintWindow = (n: number) =>
     must(
@@ -763,6 +773,7 @@ export function buildRows(
     projectMembers,
     statuses,
     sprints,
+    sprintProjects,
     tags: tags.map((t) => t.row),
     tasks: [...tasks.map((t) => t.row), ...history.tasks.map(({ projectRef: _, ...row }) => row)],
     assignees: [...assignees, ...history.assignees],

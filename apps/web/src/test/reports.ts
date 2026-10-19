@@ -121,6 +121,7 @@ export const SPRINTS = [9, 10, 11, 12, 13, 14].map((n) => {
     startDate: n === 14 ? '2026-10-05' : start.toISOString().slice(0, 10),
     endDate: n === 14 ? '2026-10-23' : end.toISOString().slice(0, 10),
     current: n === 14,
+    projects: [PROJECT_REF],
   };
 });
 

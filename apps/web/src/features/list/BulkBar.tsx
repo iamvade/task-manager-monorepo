@@ -8,7 +8,7 @@ import type {
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBatchDelete, useBatchRestore, useBatchUpdate } from '../../api/batch';
-import { useSprints } from '../../api/projects';
+import { useProjectSprints } from '../../api/sprints';
 import {
   CalendarIcon,
   CloseIcon,
@@ -78,7 +78,7 @@ interface BulkBarProps {
  */
 export function BulkBar({ project, tasks, members, teamIds, onClear }: BulkBarProps) {
   const { t } = useTranslation();
-  const sprints = useSprints(project.id);
+  const sprints = useProjectSprints(project.workspaceId, project.id);
   const update = useBatchUpdate(project.id);
   const remove = useBatchDelete(project.id);
   const restore = useBatchRestore(project.id);

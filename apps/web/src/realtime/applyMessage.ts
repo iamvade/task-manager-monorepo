@@ -11,6 +11,7 @@ import type { Query, QueryClient } from '@tanstack/react-query';
 import { refreshAfterAbsences } from '../api/absences';
 import { setMeeting } from '../api/standups';
 import { queryKeys } from '../api/queryKeys';
+import { refreshAfterSprintChange } from '../api/sprints';
 import { TASK_MUTATION } from '../api/taskCache';
 import { useRealtimeStore, type EditedField } from '../stores/realtime';
 
@@ -174,6 +175,9 @@ export function createMessageHandler(queryClient: QueryClient) {
           mark(message.workspaceId, (p) => {
             p.tags = true;
           });
+          return;
+        case 'sprints.changed':
+          refreshAfterSprintChange(queryClient, message.workspaceId);
           return;
         case 'standup.groups.changed':
           void queryClient.invalidateQueries({

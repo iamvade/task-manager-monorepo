@@ -3,21 +3,19 @@ import { and, count, desc, eq, gte, isNull, lte } from 'drizzle-orm';
 import type { UserRow } from '../auth/plugin.js';
 import type { Db } from '../db/client.js';
 import { one } from '../db/rows.js';
-import { favorites, spaces, sprints, tasks, type projects } from '../db/schema/index.js';
+import {
+  favorites,
+  spaces,
+  sprintProjects,
+  sprints,
+  tasks,
+  type projects,
+} from '../db/schema/index.js';
+import { sprintDto } from '../sprints/query.js';
 import { listMembers } from './members.js';
 import { listStatuses, toStatusDto } from './statuses.js';
 
 type ProjectRow = typeof projects.$inferSelect;
-type SprintRow = typeof sprints.$inferSelect;
-
-export const toSprintDto = (s: SprintRow) => ({
-  id: s.id,
-  projectId: s.projectId,
-  number: s.number,
-  name: s.name,
-  startDate: s.startDate,
-  endDate: s.endDate,
-});
 
 /**
  * Body of `GET /projects/:id`, as seen by `user` (favorite flag, "today" for the sprint). Runs its
@@ -43,16 +41,14 @@ export async function buildProjectDetail(
       .where(and(eq(favorites.userId, user.id), eq(favorites.projectId, project.id)))
       .limit(1),
     db
-      .select()
+      .select({ sprint: sprints })
       .from(sprints)
-      .where(
-        and(
-          eq(sprints.projectId, project.id),
-          lte(sprints.startDate, today),
-          gte(sprints.endDate, today),
-        ),
+      .innerJoin(
+        sprintProjects,
+        and(eq(sprintProjects.sprintId, sprints.id), eq(sprintProjects.projectId, project.id)),
       )
-      .orderBy(desc(sprints.startDate))
+      .where(and(lte(sprints.startDate, today), gte(sprints.endDate, today)))
+      .orderBy(desc(sprints.startDate), desc(sprints.number))
       .limit(1),
     db
       .select({ statusId: tasks.statusId, count: count() })
@@ -67,7 +63,8 @@ export async function buildProjectDetail(
     count: countByStatus.get(s.id) ?? 0,
   }));
   const doneIds = new Set(statusRows.filter((s) => s.category === 'done').map((s) => s.id));
-  const [sprint] = activeSprint;
+  const [active] = activeSprint;
+  const sprint = active ? await sprintDto(db, active.sprint) : null;
 
   return {
     id: project.id,
@@ -86,7 +83,7 @@ export async function buildProjectDetail(
     description: project.description ?? null,
     statuses: statusRows.map(toStatusDto),
     members,
-    activeSprint: sprint ? toSprintDto(sprint) : null,
+    activeSprint: sprint,
     taskCounts,
     taskCount: taskCounts.reduce((sum, c) => sum + c.count, 0),
     doneCount: taskCounts.filter((c) => doneIds.has(c.statusId)).reduce((s, c) => s + c.count, 0),

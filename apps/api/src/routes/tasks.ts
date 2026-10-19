@@ -56,6 +56,7 @@ import {
   endOfStatus,
   requireMembers,
   requireSprintIn,
+  sprintCovers,
   requireStatusIn,
   requireTags,
   startOfStatus,
@@ -745,7 +746,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Tasks'],
         summary: 'Move a task to another project',
         description:
-          'Into another project of the same workspace (400 `INVALID_REFERENCE` for another workspace, an archived project or the same project; 404 when the caller cannot see it). The task takes the next number there (new key; the old key stops resolving), the first status of the same category (else the first To Do) at its end, and loses its sprint (`sprint.changed`). Assignees, tags, subtasks, comments, attachments, followers, history and the reviewer move with it. Logs `project.changed`.',
+          'Into another project of the same workspace (400 `INVALID_REFERENCE` for another workspace, an archived project or the same project; 404 when the caller cannot see it). The task takes the next number there (new key; the old key stops resolving), the first status of the same category (else the first To Do) at its end, and keeps its sprint when the sprint covers that project, else loses it (`sprint.changed`). Assignees, tags, subtasks, comments, attachments, followers, history and the reviewer move with it. Logs `project.changed`.',
         params: taskParams,
         body: moveTaskToProjectSchema,
         response: { 200: taskDetailSchema, 400: err, 401: err, 404: err },
@@ -780,7 +781,9 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         await tx.update(projects).set({ taskSeq: number }).where(eq(projects.id, to.id));
         const isDone = status.category === 'done';
         await switchStatusAcrossProjects(m, task, status);
-        const sprintPatch = await setSprint(m, task, null);
+        // A shared sprint covering the new project keeps the task.
+        const keepSprint = task.sprintId !== null && (await sprintCovers(tx, task.sprintId, to.id));
+        const sprintPatch = keepSprint ? {} : await setSprint(m, task, null);
         await tx
           .update(tasks)
           .set({

@@ -26,16 +26,15 @@ export async function sprintsExport(
   db: DbOrTx,
   ctx: ReportContext,
   locale: Locale,
-  projectId: string,
   sprintId: string | undefined,
 ) {
-  const plan = await planSprints(db, ctx, projectId, sprintId);
+  const plan = await planSprints(db, ctx, sprintId);
   const prepared = await sprintQueries(db, ctx, plan);
   if (!prepared) return sprintCsv(locale, []);
   const [tasks, carried] = await Promise.all([
     rows<SprintTaskRow>(
       db,
-      sprintTasksQuery(prepared.sprint.id, prepared.startIso, prepared.cutoffIso),
+      sprintTasksQuery(ctx, prepared.sprint.id, prepared.startIso, prepared.cutoffIso),
     ),
     prepared.queries.carried ? rows<CarriedRow>(db, prepared.queries.carried) : [],
   ]);

@@ -2,7 +2,15 @@ import type { StatusSnapshot } from '@kite/shared';
 import { and, eq, inArray, max, min } from 'drizzle-orm';
 import type { DbOrTx } from '../db/client.js';
 import { positionAfter, positionBefore } from '../db/position.js';
-import { sprints, statuses, tags, tasks, users, workspaceMembers } from '../db/schema/index.js';
+import {
+  sprintProjects,
+  sprints,
+  statuses,
+  tags,
+  tasks,
+  users,
+  workspaceMembers,
+} from '../db/schema/index.js';
 import { httpError } from '../errors.js';
 import { activeMember } from '../auth/membership.js';
 
@@ -32,13 +40,32 @@ export async function requireStatusIn(db: DbOrTx, projectId: string, statusId: s
   return status;
 }
 
+/** Whether the sprint covers the project (share-locked like `requireSprintIn`). */
+export async function sprintCovers(db: DbOrTx, sprintId: string, projectId: string) {
+  const rows = await db
+    .select({ id: sprintProjects.sprintId })
+    .from(sprintProjects)
+    .where(and(eq(sprintProjects.sprintId, sprintId), eq(sprintProjects.projectId, projectId)))
+    .for('share');
+  return rows.length > 0;
+}
+
+/**
+ * A sprint covering the project. Share-locks it, so an edit removing the project (or a delete)
+ * waits for the transaction putting the task in.
+ */
 export async function requireSprintIn(db: DbOrTx, projectId: string, sprintId: string) {
-  const [sprint] = await db
-    .select()
+  const [row] = await db
+    .select({ sprint: sprints })
     .from(sprints)
-    .where(and(eq(sprints.id, sprintId), eq(sprints.projectId, projectId)));
-  if (!sprint) throw invalidReference('Sprint');
-  return sprint;
+    .innerJoin(
+      sprintProjects,
+      and(eq(sprintProjects.sprintId, sprints.id), eq(sprintProjects.projectId, projectId)),
+    )
+    .where(eq(sprints.id, sprintId))
+    .for('share');
+  if (!row) throw invalidReference('Sprint');
+  return row.sprint;
 }
 
 /** Users by id, all of whom must be members of the workspace; by name. */

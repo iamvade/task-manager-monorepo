@@ -82,6 +82,7 @@ const pages = (ids: Ids): [string, string][] => [
   ['Settings', '/settings'],
   ['Settings · members', '/settings?tab=members'],
   ['Settings · tags', '/settings?tab=tags'],
+  ['Settings · sprints', '/settings?tab=sprints'],
   ['Settings · archived', '/settings?tab=archived'],
   ['Task page', `/t/${ids.taskKey}`],
   ['Project list', `/p/${ids.project}/list`],
@@ -271,6 +272,16 @@ for (const scheme of ['light', 'dark'] as const) {
         await expect(page.getByRole('dialog', { name: /^Out of office/ })).toBeVisible();
         await expectAccessible(page, `Time off dialog (${scheme})`);
         await page.keyboard.press('Escape');
+      });
+
+      await test.step('sprints: edit dialog', async () => {
+        await page.goto('/settings?tab=sprints');
+        await page.getByRole('button', { name: 'Actions for Sprint 14' }).click();
+        await page.getByRole('menuitem', { name: 'Edit sprint' }).click();
+        await expect(page.getByRole('dialog', { name: 'Edit sprint' })).toBeVisible();
+        await expectAccessible(page, `Edit sprint dialog (${scheme})`);
+        await page.keyboard.press('Escape');
+        await expect(page.getByRole('dialog', { name: 'Edit sprint' })).toBeHidden();
       });
 
       await test.step('tags: new tag form, merge and delete dialogs', async () => {

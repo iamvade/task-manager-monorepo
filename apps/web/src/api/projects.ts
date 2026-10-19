@@ -2,9 +2,7 @@ import {
   applyTemplateResponseSchema,
   archivedProjectSchema,
   projectDetailSchema,
-  sprintSchema,
   type CreateProject,
-  type CreateSprint,
   type ProjectDetail,
   type TemplateId,
   type UpdateProject,
@@ -24,14 +22,6 @@ export function useProject(projectId: string | undefined) {
   });
 }
 
-export function useSprints(projectId: string | undefined) {
-  return useQuery({
-    queryKey: queryKeys.sprints(projectId ?? ''),
-    queryFn: () => apiFetch(`/projects/${projectId ?? ''}/sprints`, z.array(sprintSchema)),
-    enabled: Boolean(projectId),
-  });
-}
-
 /** Sidebar "+" on a space: a project with the server's key, color and default statuses. */
 export function useCreateProject(workspaceId: string) {
   const queryClient = useQueryClient();
@@ -44,23 +34,6 @@ export function useCreateProject(workspaceId: string) {
       queryClient.setQueryData(queryKeys.project(detail.id), detail);
       return queryClient.invalidateQueries({ queryKey: queryKeys.sidebar(workspaceId) });
     },
-  });
-}
-
-/** New sprint (project menu, sprint picker): the next number of the project. */
-export function useCreateSprint(project: Pick<ProjectDetail, 'id' | 'workspaceId'>) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    // The sprint form shows errors inline.
-    meta: { errorToast: false },
-    mutationFn: (body: CreateSprint) =>
-      apiSend(`/projects/${project.id}/sprints`, sprintSchema, 'POST', body),
-    onSuccess: () =>
-      Promise.all([
-        // Covers the sprints list and the project's active sprint.
-        queryClient.invalidateQueries({ queryKey: queryKeys.project(project.id) }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.reportsOf(project.workspaceId) }),
-      ]),
   });
 }
 

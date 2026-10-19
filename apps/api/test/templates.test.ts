@@ -11,6 +11,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   activity,
   projects,
+  sprintProjects,
   sprints,
   tags,
   taskFollowers,
@@ -23,6 +24,16 @@ import { createTestApp } from './helpers.js';
 
 describe('POST /projects/:id/from-template', () => {
   let ctx: Awaited<ReturnType<typeof createTestApp>>;
+
+  /** Sprints covering the project. */
+  const sprintsOf = async (projectId: string) =>
+    (
+      await ctx.db
+        .select({ sprint: sprints })
+        .from(sprints)
+        .innerJoin(sprintProjects, eq(sprintProjects.sprintId, sprints.id))
+        .where(eq(sprintProjects.projectId, projectId))
+    ).map((r) => r.sprint);
 
   beforeAll(async () => {
     ctx = await createTestApp();
@@ -106,7 +117,7 @@ describe('POST /projects/:id/from-template', () => {
     expect(body.createdCount).toBe(12);
 
     const today = todayInZone(owner.timezone);
-    const sprintRows = await ctx.db.select().from(sprints).where(eq(sprints.projectId, project.id));
+    const sprintRows = await sprintsOf(project.id);
     expect(sprintRows).toHaveLength(1);
     const [sprint] = sprintRows;
     expect(sprint).toMatchObject({
@@ -168,7 +179,7 @@ describe('POST /projects/:id/from-template', () => {
     await api('POST', `/projects/${project.id}/from-template`, { templateId: 'sprint-planning' });
     const [first] = await projectTasks(project.id);
     expect(first?.title).toBe('Спринт төлөвлөлтийн уулзалт');
-    const [sprint] = await ctx.db.select().from(sprints).where(eq(sprints.projectId, project.id));
+    const [sprint] = await sprintsOf(project.id);
     expect(sprint?.name).toBe('Спринт 1');
   });
 

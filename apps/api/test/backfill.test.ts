@@ -132,7 +132,8 @@ describe('report data backfill', () => {
   it('opens missing sprint memberships at the last sprint.changed', async () => {
     const { api, project, createTask } = await taskWorld(ctx);
     const sprint = (
-      await api('POST', `/projects/${project.id}/sprints`, {
+      await api('POST', `/workspaces/${project.workspaceId}/sprints`, {
+        projectIds: [project.id],
         startDate: '2026-10-06',
         endDate: '2026-10-24',
       })

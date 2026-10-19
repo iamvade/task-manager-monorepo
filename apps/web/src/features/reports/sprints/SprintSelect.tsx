@@ -25,7 +25,8 @@ export function CurrentPill() {
 
 /**
  * Sprint selector (ReportsSprints.dc.html toolbar): 32px outline button with ↻, the sprint name
- * (600), its range and a "Current" pill; a 288px listbox of the project's sprints, newest first.
+ * (600), its range and a "Current" pill; a 288px listbox of the sprints in scope, newest first
+ * (project keys under the name when a sprint is shared by several projects).
  */
 export function SprintSelect({ sprints, value, onChange }: SprintSelectProps) {
   const { t } = useTranslation();
@@ -67,7 +68,14 @@ export function SprintSelect({ sprints, value, onChange }: SprintSelectProps) {
           onClose={close}
           renderItem={(s) => (
             <>
-              <span className="min-w-[72px] font-semibold">{sprintLabel(t, s)}</span>
+              <span className="flex min-w-[72px] flex-col">
+                <span className="font-semibold">{sprintLabel(t, s)}</span>
+                {s.projects.length > 1 && (
+                  <span className="truncate text-[11px] text-muted">
+                    {s.projects.map((p) => p.key).join(' · ')}
+                  </span>
+                )}
+              </span>
               <span className="flex-1 truncate text-muted">
                 {formatRange(s.startDate, s.endDate)}
               </span>

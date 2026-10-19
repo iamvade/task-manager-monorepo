@@ -327,6 +327,7 @@ export function Board({ scope, boardKey, label, tasks, project, members }: Board
                         : {
                             statusCategory:
                               column.marker.kind === 'status' ? column.marker.category : 'todo',
+                            ...(view.sprintId ? { sprintId: view.sprintId } : {}),
                           },
                     );
                   }}

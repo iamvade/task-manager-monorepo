@@ -32,6 +32,7 @@ import {
   projects,
   spaces,
   sprintMemberships,
+  sprintProjects,
   sprints,
   statuses,
   subtasks,
@@ -192,30 +193,30 @@ async function generate(database: Db) {
         ),
       );
 
-    // Two-week sprints, Monday → Friday of the next week; the last one holds today.
+    // Two-week workspace sprints shared by every project, Monday → Friday of the next week; the
+    // last one holds today.
     const currentStart = startOfWeek(today);
-    const sprintRows = projectRows.flatMap((p) =>
-      Array.from({ length: SPRINTS }, (_, k) => {
-        const start = addDays(currentStart, -(SPRINTS - 1 - k) * 14);
-        return {
-          id: uuidv7(),
-          projectId: p.id,
-          number: k + 1,
-          startDate: start,
-          endDate: addDays(start, 11),
-        };
-      }),
-    );
+    const sprintRows = Array.from({ length: SPRINTS }, (_, k) => {
+      const start = addDays(currentStart, -(SPRINTS - 1 - k) * 14);
+      return {
+        id: uuidv7(),
+        workspaceId,
+        number: k + 1,
+        startDate: start,
+        endDate: addDays(start, 11),
+      };
+    });
     await tx.insert(sprints).values(sprintRows);
-    const sprintsOf = (projectId: string) =>
-      sprintRows
-        .filter((s) => s.projectId === projectId)
-        .map((s) => ({
-          ...s,
-          planning: localMidnight(addDays(s.startDate, -2)) + 16 * HOUR,
-          endAt: localMidnight(addDays(s.endDate, 1)),
-        }));
-    const sprintCache = new Map(projectRows.map((p) => [p.id, sprintsOf(p.id)]));
+    await tx
+      .insert(sprintProjects)
+      .values(
+        sprintRows.flatMap((s) => projectRows.map((p) => ({ sprintId: s.id, projectId: p.id }))),
+      );
+    const chain = sprintRows.map((s) => ({
+      ...s,
+      planning: localMidnight(addDays(s.startDate, -2)) + 16 * HOUR,
+      endAt: localMidnight(addDays(s.endDate, 1)),
+    }));
 
     const taskRows: (typeof tasks.$inferInsert)[] = [];
     const assigneeRows: (typeof taskAssignees.$inferInsert)[] = [];
@@ -263,7 +264,6 @@ async function generate(database: Db) {
       // Sprint chain: the sprint running when the task appeared, carried while unfinished.
       let sprintId: string | null = null;
       if (chance(0.7)) {
-        const chain = sprintCache.get(project.id) ?? [];
         let k = chain.findIndex((s) => s.endAt > createdAt);
         let added = k >= 0 && (chain[k]?.planning ?? 0) < createdAt ? createdAt + 5 * 60_000 : null;
         while (k >= 0 && k < chain.length) {
@@ -499,7 +499,8 @@ async function main() {
     'overview (workspace)': 'overview',
     'overview (quarter)': 'overview?period=quarter',
     'overview (project)': `overview?projectId=${project.id}`,
-    sprints: `sprints?projectId=${project.id}`,
+    sprints: 'sprints',
+    'sprints (project)': `sprints?projectId=${project.id}`,
     workload: 'workload',
     'people (owner)': 'people/me',
     'people (member)': `people/${member.id}`,
@@ -553,12 +554,7 @@ async function main() {
     const { weekEnd: _, ...q } = workloadQueries(ctx);
     queries = q;
   } else if (slowest === 'sprints') {
-    const pctx = { ...ctx, projectId: project.id };
-    const prepared = await sprintQueries(
-      db,
-      pctx,
-      await planSprints(db, pctx, project.id, undefined),
-    );
+    const prepared = await sprintQueries(db, ctx, await planSprints(db, ctx, undefined));
     queries = prepared?.queries ?? {};
   } else {
     queries = overviewQueries(
