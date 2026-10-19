@@ -62,6 +62,11 @@ input{font:inherit;color:inherit}
         <span style="flex: 1; font-weight: 500">{{L.inbox}}</span>
         <span style="min-width: 20px; height: 18px; padding: 0 6px; box-sizing: border-box; border-radius: 9px; background: {{accent}}; color: #FFFFFF; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">3</span>
       </a>
+      <a class="nav" href="Feedback.dc.html" aria-label="{{L.feedbackAria}}" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"></path><path d="M15 9a3 3 0 0 1 0 6M18 6a7 7 0 0 1 0 12"></path></svg>
+        <span style="flex: 1; font-weight: 500">{{L.feedback}}</span>
+        <span style="min-width: 20px; height: 18px; padding: 0 6px; box-sizing: border-box; border-radius: 9px; background: {{accent}}; color: #FFFFFF; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">5</span>
+      </a>
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 2px">
@@ -136,6 +141,10 @@ input{font:inherit;color:inherit}
     <button class="ghost" aria-label="{{L.inbox}}" style="width: 36px; height: 36px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
     </button>
+    <a href="Feedback.dc.html" class="ghost" aria-label="{{L.feedbackAria}}" style="position: relative; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"></path><path d="M15 9a3 3 0 0 1 0 6M18 6a7 7 0 0 1 0 12"></path></svg>
+      <span aria-hidden="true" style="position: absolute; top: 3px; right: 2px; min-width: 16px; height: 16px; padding: 0 4px; box-sizing: border-box; border-radius: 8px; background: {{accent}}; color: #FFFFFF; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 2px #F7F7F8">5</span>
+    </a>
     <div style="width: 24px; height: 1px; background: #E6E6EA; margin: 4px 0"></div>
     <sc-for list="{{spaces}}" as="sp" hint-placeholder-count="3">
       <button class="ghost" aria-label="{{sp.name}}" style="width: 36px; height: 36px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center">
@@ -357,7 +366,7 @@ class Component extends DCLogic {
     const STR = {
       mn: {
         workspace: 'Ажлын орчин', search: 'Хайх', collapse: 'Хажуу самбарыг хураах', expand: 'Хажуу самбарыг дэлгэх',
-        myTasks: 'Миний ажлууд', inbox: 'Мэдэгдэл', spaces: 'Орон зай', newSpace: 'Шинэ орон зай',
+        myTasks: 'Миний ажлууд', inbox: 'Мэдэгдэл', feedback: 'Санал хүсэлт', feedbackAria: 'Санал хүсэлт, 5 шинэ', spaces: 'Орон зай', newSpace: 'Шинэ орон зай',
         language: 'Хэл', invite: 'Хамт олноо урих', settings: 'Тохиргоо', online: 'Онлайн',
         breadcrumb: 'Байршил', product: 'Бүтээгдэхүүн', productInitial: 'Б', project: 'Апп шинэчлэл',
         favorite: 'Дуртайд нэмэх', members: 'Төслийн 7 гишүүн', share: 'Хуваалцах', projectOptions: 'Төслийн сонголтууд',
@@ -370,7 +379,7 @@ class Component extends DCLogic {
       },
       en: {
         workspace: 'Workspace', search: 'Search', collapse: 'Collapse sidebar', expand: 'Expand sidebar',
-        myTasks: 'My Tasks', inbox: 'Inbox', spaces: 'Spaces', newSpace: 'New space',
+        myTasks: 'My Tasks', inbox: 'Inbox', feedback: 'Feedback', feedbackAria: 'Feedback, 5 new', spaces: 'Spaces', newSpace: 'New space',
         language: 'Language', invite: 'Invite teammates', settings: 'Settings', online: 'Online',
         breadcrumb: 'Breadcrumb', product: 'Product', productInitial: 'P', project: 'App Redesign',
         favorite: 'Add to favorites', members: '7 project members', share: 'Share', projectOptions: 'Project options',

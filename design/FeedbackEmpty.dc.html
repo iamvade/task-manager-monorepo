@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<title>Санал хүсэлт — хоосон</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#52525B;text-decoration:none}a:hover{color:#18181B}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit;color:inherit}
+.nav:hover{background:#EDEDF0}
+.ghost:hover{background:#F4F4F5}
+.ghost:focus-visible,.nav:focus-visible,.seg:focus-visible,a:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid #6E56CF;outline-offset:1px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</helmet>
+
+<div lang="{{lang}}" style="display: flex; flex-wrap: wrap; min-height: 100vh; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 14px; line-height: 20px; color: #18181B; background: #FFFFFF; -webkit-font-smoothing: antialiased">
+
+  <!-- SIDEBAR -->
+  <nav aria-label="{{L.workspace}}" style="flex: 1 1 248px; max-width: 248px; min-width: 220px; box-sizing: border-box; background: #F7F7F8; border-right: 1px solid #E6E6EA; display: flex; flex-direction: column; gap: 16px; padding: 12px 8px">
+    <div style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px">
+      <span style="width: 24px; height: 24px; border-radius: 6px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">K</span>
+      <span style="flex: 1; font-weight: 600">Kite Studio</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <a class="nav" href="MyTasks.dc.html" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12 2.5 2.5 4.5-5"></path></svg>
+        <span style="flex: 1; font-weight: 500">{{L.myTasks}}</span>
+      </a>
+      <a class="nav" href="Standup.dc.html" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M8 9h8M8 13h5"></path></svg>
+        <span style="flex: 1; font-weight: 500">{{L.standup}}</span>
+      </a>
+      <a class="nav" href="EmptyInbox.dc.html" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+        <span style="flex: 1; font-weight: 500">{{L.inbox}}</span>
+      </a>
+      <a class="nav" href="Feedback.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; background: {{accentSoft}}; color: {{accent}}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"></path><path d="M15 9a3 3 0 0 1 0 6M18 6a7 7 0 0 1 0 12"></path></svg>
+        <span style="flex: 1; font-weight: 600">{{L.feedback}}</span>
+      </a>
+      <a class="nav" href="Reports.dc.html" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M8 17v-5M13 17V8M18 17v-9"></path></svg>
+        <span style="flex: 1; font-weight: 500">{{L.reports}}</span>
+      </a>
+    </div>
+    <div style="margin-top: auto; display: flex; flex-direction: column; gap: 2px; border-top: 1px solid #E6E6EA; padding-top: 8px">
+      <div style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px 0 12px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3F3F46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path></svg>
+        <span id="lang-label" style="flex: 1; font-weight: 500; color: #3F3F46">{{L.language}}</span>
+        <div role="radiogroup" aria-labelledby="lang-label" style="display: flex; gap: 2px; padding: 2px; border-radius: 7px; background: #EDEDF0">
+          <sc-for list="{{langs}}" as="lg" hint-placeholder-count="2">
+            <button class="seg" role="radio" aria-checked="{{lg.active}}" onClick="{{lg.pick}}" lang="{{lg.code}}" title="{{lg.full}}" style="height: 24px; padding: 0 8px; border: 0; border-radius: 5px; font-size: 12px; font-weight: 600; {{lg.style}}">{{lg.short}}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px">
+        <span style="width: 24px; height: 24px; border-radius: 12px; background: #E0E7FF; color: #3730A3; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">{{me.initials}}</span>
+        <span style="flex: 1; font-size: 13px; font-weight: 500">{{me.full}}</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+    <header style="display: flex; flex-direction: column; border-bottom: 1px solid #E6E6EA">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; min-height: 64px; padding: 12px 24px; box-sizing: border-box">
+        <h1 style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"></path><path d="M15 9a3 3 0 0 1 0 6M18 6a7 7 0 0 1 0 12"></path></svg>
+          {{L.feedback}}
+        </h1>
+        <span style="flex: 1"></span>
+        <label style="display: flex; align-items: center; gap: 8px; width: 320px; max-width: 100%; height: 36px; padding: 0 10px; border: 1px solid #EFEFF2; border-radius: 8px; background: #FAFAFB">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+          <span class="sr">{{L.searchFeedback}}</span>
+          <input type="search" disabled="disabled" placeholder="{{L.searchFeedback}}" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-size: 13px; padding: 0">
+        </label>
+        <button onClick="{{copyLink}}" aria-live="polite" style="display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border: 1px solid #E6E6EA; border-radius: 8px; font-size: 13px; font-weight: 500; {{copyStyle}}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{copyIcon}}"></path></svg>{{copyLabel}}
+        </button>
+      </div>
+      <div role="tablist" aria-label="{{L.typeFilter}}" style="display: flex; flex-wrap: wrap; gap: 4px; padding: 0 24px">
+        <sc-for list="{{typeTabs}}" as="tb" hint-placeholder-count="5">
+          <span role="tab" aria-selected="{{tb.active}}" style="display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 10px; font-size: 13px; font-weight: 500; {{tb.style}}">
+            {{tb.label}}
+            <span style="min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px; background: #F4F4F5; color: #A1A1AA; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">0</span>
+          </span>
+        </sc-for>
+      </div>
+    </header>
+
+    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; padding: 56px 24px 48px">
+      <div style="width: 100%; max-width: 600px; display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center">
+
+        <!-- Illustration: public form card feeding an inbox -->
+        <div aria-hidden="true" style="position: relative; width: 320px; height: 150px">
+          <div style="position: absolute; left: 0; top: 0; width: 196px; padding: 12px; box-sizing: border-box; border: 1px solid #E6E6EA; border-radius: 12px; background: #FFFFFF; display: flex; flex-direction: column; gap: 8px; text-align: left; box-shadow: 0 4px 12px rgba(24,24,27,0.06)">
+            <span style="display: flex; gap: 4px">
+              <span style="height: 16px; padding: 0 6px; border-radius: 4px; background: #FDECEC; color: #B42318; font-size: 9px; font-weight: 600; display: flex; align-items: center">{{L.bug}}</span>
+              <span style="height: 16px; padding: 0 6px; border-radius: 4px; background: #E8F1FD; color: #1D4ED8; font-size: 9px; font-weight: 600; display: flex; align-items: center">{{L.idea}}</span>
+              <span style="height: 16px; padding: 0 6px; border-radius: 4px; background: #E3F4F1; color: #0F766E; font-size: 9px; font-weight: 600; display: flex; align-items: center">{{L.fb}}</span>
+            </span>
+            <span style="height: 22px; border: 1px solid #E6E6EA; border-radius: 5px"></span>
+            <span style="height: 34px; border: 1px solid #E6E6EA; border-radius: 5px"></span>
+            <span style="align-self: flex-end; width: 56px; height: 18px; border-radius: 5px; background: {{accent}}"></span>
+          </div>
+          <svg width="60" height="40" viewBox="0 0 60 40" fill="none" style="position: absolute; left: 186px; top: 64px"><path d="M2 8c20 0 30 10 50 24" stroke="#C4C4CC" stroke-width="2" stroke-dasharray="4 4" stroke-linecap="round"></path><path d="m46 26 8 7-10 2" stroke="#C4C4CC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <div style="position: absolute; right: 0; bottom: 0; width: 84px; height: 84px; border-radius: 20px; background: {{accentSoft}}; display: flex; align-items: center; justify-content: center">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"></path><path d="M15 9a3 3 0 0 1 0 6M18 6a7 7 0 0 1 0 12"></path></svg>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <h2 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">{{L.title}}</h2>
+          <p style="margin: 0; font-size: 14px; line-height: 22px; color: #52525B">{{L.body}}</p>
+        </div>
+
+        <!-- Link box -->
+        <div style="width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 8px; text-align: left">
+          <label for="pub-url" style="font-size: 12px; font-weight: 500; color: #52525B">{{L.linkLabel}}</label>
+          <div style="display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 12px; border: 1px solid #E6E6EA; border-radius: 10px; background: #FAFAFB">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"></path><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path></svg>
+            <input id="pub-url" type="text" readonly="readonly" value="https://kitestudio.app/feedback/kite" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-size: 13px; padding: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: #27272A">
+            <button onClick="{{copyLink}}" style="flex: none; display: flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border: 0; border-radius: 8px; color: #FFFFFF; font-size: 13px; font-weight: 600; {{bigCopyStyle}}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{copyIcon}}"></path></svg>{{bigCopyLabel}}
+            </button>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px">
+            <a href="#" style="display: inline-flex; align-items: center; gap: 6px; color: {{accent}}; font-weight: 500">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M10 14 21 3M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"></path></svg>{{L.preview}}
+            </a>
+            <a href="#" style="display: inline-flex; align-items: center; gap: 6px; color: #3F3F46; font-weight: 500">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM18 18h3v3h-3z"></path></svg>{{L.qr}}
+            </a>
+            <a href="#" style="display: inline-flex; align-items: center; gap: 6px; color: #3F3F46; font-weight: 500">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"></path></svg>{{L.embed}}
+            </a>
+          </div>
+        </div>
+
+        <!-- Where to share -->
+        <div style="width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 12px; padding-top: 24px; border-top: 1px solid #EFEFF2">
+          <span style="font-size: 12px; font-weight: 500; color: #6B6B74">{{L.where}}</span>
+          <ul style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; text-align: left">
+            <sc-for list="{{ideas}}" as="i" hint-placeholder-count="3">
+              <li style="display: flex; flex-direction: column; gap: 6px; padding: 12px; border: 1px solid #EFEFF2; border-radius: 10px; background: #FAFAFB">
+                <span aria-hidden="true" style="width: 28px; height: 28px; border-radius: 8px; background: {{accentSoft}}; color: {{accent}}; display: flex; align-items: center; justify-content: center">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{i.icon}}"></path></svg>
+                </span>
+                <span style="font-size: 13px; font-weight: 600">{{i.title}}</span>
+                <span style="font-size: 12px; line-height: 16px; color: #6B6B74">{{i.desc}}</span>
+              </li>
+            </sc-for>
+          </ul>
+        </div>
+
+        <a href="Feedback.dc.html" style="font-size: 12px; color: #6B6B74">{{L.seeFilled}}</a>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"language":{"editor":"enum","default":"mn","options":["mn","en"]},"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: undefined, copied: false };
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const lang = s.lang || this.props.language || 'mn';
+    const mn = lang === 'mn';
+    const pick = (pair) => (mn ? pair[0] : pair[1]);
+    const accent = this.props.accent ?? '#6E56CF';
+    const accentSoft = accent + '1A';
+    const L = mn ? {
+      workspace: 'Ажлын орчин', myTasks: 'Миний ажлууд', standup: 'Стэндап', inbox: 'Мэдэгдэл', feedback: 'Санал хүсэлт', reports: 'Тайлан', language: 'Хэл',
+      searchFeedback: 'Санал хүсэлт, илгээгчээр хайх…', copy: 'Нийтийн холбоос хуулах', copied: 'Хуулсан', typeFilter: 'Төрлөөр шүүх',
+      bug: 'Алдаа', idea: 'Санаа', fb: 'Санал',
+      title: 'Санал хүсэлт хараахан ирээгүй байна',
+      body: 'Хэрэглэгчидтэйгээ нийтийн холбоосоо хуваалцаарай. Тэд алдаа мэдээлж, шинэ санаа илгээх боломжтой — бүртгэл шаардахгүй. Ирсэн бүхэн энд гарч, ажилтай шууд холбож болно.',
+      linkLabel: 'Нийтийн илгээх хуудас', bigCopy: 'Хуулах', preview: 'Хуудсыг урьдчилан харах', qr: 'QR код татах', embed: 'Вэбсайтад суулгах',
+      where: 'Хаана хуваалцах вэ', seeFilled: 'Санал хүсэлттэй үед ямар харагдахыг үзэх'
+    } : {
+      workspace: 'Workspace', myTasks: 'My Tasks', standup: 'Standup', inbox: 'Inbox', feedback: 'Feedback', reports: 'Reports', language: 'Language',
+      searchFeedback: 'Search feedback or submitters…', copy: 'Copy public link', copied: 'Copied', typeFilter: 'Filter by type',
+      bug: 'Bug', idea: 'Idea', fb: 'Feedback',
+      title: 'No feedback yet',
+      body: 'Share your public link with customers. They can report bugs and suggest ideas — no account needed. Everything lands here, ready to link to a task.',
+      linkLabel: 'Public submission page', bigCopy: 'Copy', preview: 'Preview the page', qr: 'Download QR code', embed: 'Embed on your site',
+      where: 'Where to share it', seeFilled: 'See what this looks like with feedback'
+    };
+    const langs = [{ code: 'mn', short: 'МН', full: 'Монгол' }, { code: 'en', short: 'EN', full: 'English' }].map((d) => ({
+      ...d, active: d.code === lang, pick: () => this.setState({ lang: d.code }),
+      style: d.code === lang ? 'background:#FFFFFF;color:#18181B;box-shadow:0 1px 2px rgba(24,24,27,0.08)' : 'background:transparent;color:#6B6B74'
+    }));
+    const typeTabs = [['Бүгд', 'All'], ['Алдаа', 'Bug'], ['Шинэ боломж', 'Feature request'], ['Санал', 'Feedback'], ['Бусад', 'Other']].map((lb, i) => ({
+      label: pick(lb), active: i === 0, style: i === 0 ? 'color:#18181B;box-shadow:inset 0 -2px 0 ' + accent : 'color:#A1A1AA'
+    }));
+    const ideas = [
+      [['Апп доторх тусламж цэс', 'In-app help menu'], ['“Санал илгээх” товчийг тохиргоо эсвэл профайл дээр нэмэх', 'Add a “Send feedback” item to settings or the profile screen'], 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01'],
+      [['Захиалгын имэйл', 'Order emails'], ['Захиалга баталгаажсан имэйлийн доод хэсэгт холбоос оруулах', 'Put the link in the footer of order confirmation emails'], 'M4 4h16v16H4zM22 6l-10 7L2 6'],
+      [['Дэлгүүр, хүргэлт', 'Store & delivery'], ['QR кодыг баглаа боодол эсвэл тасалбар дээр хэвлэх', 'Print the QR code on packaging or receipts'], 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM18 18h3v3h-3z']
+    ].map((d) => ({ title: pick(d[0]), desc: pick(d[1]), icon: d[2] }));
+    const copied = !!s.copied;
+    const copyLink = () => {
+      try { if (navigator.clipboard) navigator.clipboard.writeText('https://kitestudio.app/feedback/kite'); } catch (e) {}
+      this.setState({ copied: true });
+    };
+    return {
+      lang, L, langs, accent, accentSoft, typeTabs, ideas, copyLink,
+      me: { initials: mn ? 'АБ' : 'AB', full: mn ? 'Ану Болд' : 'Anu Bold' },
+      copyLabel: copied ? L.copied : L.copy,
+      copyIcon: copied ? 'M5 12.5 9.5 17 19 7.5' : 'M8 8h12v12H8zM4 16V4h12',
+      copyStyle: copied ? 'background:#E8F5EC;color:#166534' : 'background:#FFFFFF;color:#18181B',
+      bigCopyLabel: copied ? L.copied : L.bigCopy,
+      bigCopyStyle: copied ? 'background:#16A34A' : 'background:' + accent
+    };
+  }
+}
+</script>
+</body>
+</html>

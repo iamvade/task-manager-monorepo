@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<title>Санал хүсэлт</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#52525B;text-decoration:none}a:hover{color:#18181B}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit;color:inherit}
+.nav:hover{background:#EDEDF0}
+.ghost:hover{background:#F4F4F5}
+.frow:hover{background:#FAFAFB}
+.chip:hover{border-color:#C4C4CC}
+.ghost:focus-visible,.nav:focus-visible,.seg:focus-visible,.chip:focus-visible,a:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid #6E56CF;outline-offset:1px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</helmet>
+
+<div lang="{{lang}}" style="display: flex; flex-wrap: wrap; min-height: 100vh; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 14px; line-height: 20px; color: #18181B; background: #FFFFFF; -webkit-font-smoothing: antialiased">
+
+  <!-- ============ SIDEBAR ============ -->
+  <nav aria-label="{{L.workspace}}" style="flex: 1 1 248px; max-width: 248px; min-width: 220px; box-sizing: border-box; background: #F7F7F8; border-right: 1px solid #E6E6EA; display: flex; flex-direction: column; gap: 16px; padding: 12px 8px">
+    <div style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px">
+      <span style="width: 24px; height: 24px; border-radius: 6px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">K</span>
+      <span style="flex: 1; font-weight: 600">Kite Studio</span>
+    </div>
+    <div style="padding: 0 4px">
+      <label style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <span class="sr">{{L.search}}</span>
+        <input type="search" placeholder="{{L.search}}" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-size: 13px; padding: 0">
+        <kbd style="font-family: inherit; font-size: 11px; color: #6B6B74; border: 1px solid #E6E6EA; border-radius: 4px; padding: 0 4px; line-height: 16px">⌘K</kbd>
+      </label>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <a class="nav" href="MyTasks.dc.html" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12 2.5 2.5 4.5-5"></path></svg>
+        <span style="flex: 1; font-weight: 500">{{L.myTasks}}</span><span style="font-size: 12px; color: #6B6B74">7</span>
+      </a>
+      <a class="nav" href="Standup.dc.html" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M8 9h8M8 13h5"></path></svg>
+        <span style="flex: 1; font-weight: 500">{{L.standup}}</span>
+      </a>
+      <a class="nav" href="EmptyInbox.dc.html" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+        <span style="flex: 1; font-weight: 500">{{L.inbox}}</span>
+        <span style="min-width: 20px; height: 18px; padding: 0 6px; box-sizing: border-box; border-radius: 9px; background: {{accent}}; color: #FFFFFF; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">3</span>
+      </a>
+      <a class="nav" href="#" aria-current="page" aria-label="{{feedbackAria}}" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; background: {{accentSoft}}; color: {{accent}}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"></path><path d="M15 9a3 3 0 0 1 0 6M18 6a7 7 0 0 1 0 12"></path></svg>
+        <span style="flex: 1; font-weight: 600">{{L.feedback}}</span>
+        <sc-if value="{{hasUnread}}" hint-placeholder-val="{{ true }}">
+          <span style="min-width: 20px; height: 18px; padding: 0 6px; box-sizing: border-box; border-radius: 9px; background: {{accent}}; color: #FFFFFF; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">{{unreadCount}}</span>
+        </sc-if>
+      </a>
+      <a class="nav" href="Reports.dc.html" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; color: #3F3F46">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M8 17v-5M13 17V8M18 17v-9"></path></svg>
+        <span style="flex: 1; font-weight: 500">{{L.reports}}</span>
+      </a>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <span style="height: 28px; padding: 0 12px; display: flex; align-items: center; font-size: 12px; font-weight: 500; color: #6B6B74">{{L.spaces}}</span>
+      <sc-for list="{{spaces}}" as="sp" hint-placeholder-count="3">
+        <span style="display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; color: #3F3F46; font-weight: 500">
+          <span style="width: 18px; height: 18px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; {{sp.badge}}">{{sp.initial}}</span>{{sp.name}}
+        </span>
+      </sc-for>
+    </div>
+    <div style="margin-top: auto; display: flex; flex-direction: column; gap: 2px; border-top: 1px solid #E6E6EA; padding-top: 8px">
+      <div style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px 0 12px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3F3F46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path></svg>
+        <span id="lang-label" style="flex: 1; font-weight: 500; color: #3F3F46">{{L.language}}</span>
+        <div role="radiogroup" aria-labelledby="lang-label" style="display: flex; gap: 2px; padding: 2px; border-radius: 7px; background: #EDEDF0">
+          <sc-for list="{{langs}}" as="lg" hint-placeholder-count="2">
+            <button class="seg" role="radio" aria-checked="{{lg.active}}" onClick="{{lg.pick}}" lang="{{lg.code}}" title="{{lg.full}}" style="height: 24px; padding: 0 8px; border: 0; border-radius: 5px; font-size: 12px; font-weight: 600; {{lg.style}}">{{lg.short}}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px">
+        <span style="width: 24px; height: 24px; border-radius: 12px; background: #E0E7FF; color: #3730A3; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">{{me.initials}}</span>
+        <span style="flex: 1; font-size: 13px; font-weight: 500">{{me.full}}</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ MAIN ============ -->
+  <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+
+    <header style="display: flex; flex-direction: column; border-bottom: 1px solid #E6E6EA">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; min-height: 64px; padding: 12px 24px; box-sizing: border-box">
+        <h1 style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"></path><path d="M15 9a3 3 0 0 1 0 6M18 6a7 7 0 0 1 0 12"></path></svg>
+          {{L.feedback}}
+        </h1>
+        <span style="flex: 1"></span>
+        <label style="display: flex; align-items: center; gap: 8px; width: 320px; max-width: 100%; height: 36px; padding: 0 10px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+          <span class="sr">{{L.searchFeedback}}</span>
+          <input type="search" placeholder="{{L.searchFeedback}}" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-size: 13px; padding: 0">
+        </label>
+        <div style="display: flex; align-items: center; height: 36px; border: 1px solid #E6E6EA; border-radius: 8px; overflow: hidden">
+          <span title="{{publicUrl}}" style="max-width: 200px; padding: 0 10px; font-size: 12px; color: #6B6B74; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: ui-monospace, SFMono-Regular, Menlo, monospace">{{publicUrl}}</span>
+          <button onClick="{{copyLink}}" aria-live="polite" style="display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border: 0; border-left: 1px solid #E6E6EA; font-size: 13px; font-weight: 500; {{copyStyle}}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{copyIcon}}"></path></svg>
+            {{copyLabel}}
+          </button>
+        </div>
+      </div>
+
+      <!-- Type tabs -->
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px; padding: 0 24px">
+        <div role="tablist" aria-label="{{L.typeFilter}}" style="display: flex; flex-wrap: wrap; gap: 4px">
+          <sc-for list="{{typeTabs}}" as="tb" hint-placeholder-count="5">
+            <button role="tab" aria-selected="{{tb.active}}" onClick="{{tb.pick}}" style="display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 10px; border: 0; background: transparent; font-size: 13px; font-weight: 500; {{tb.style}}">
+              <sc-if value="{{tb.hasDot}}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 2px; {{tb.dot}}"></span></sc-if>
+              {{tb.label}}
+              <span style="min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px; background: #F1F1F3; color: #52525B; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">{{tb.count}}</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </header>
+
+    <!-- Status filter -->
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 24px 0">
+      <span style="font-size: 12px; color: #6B6B74">{{L.status}}</span>
+      <sc-for list="{{statusChips}}" as="sc" hint-placeholder-count="4">
+        <button class="chip" aria-pressed="{{sc.on}}" onClick="{{sc.toggle}}" style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 14px; font-size: 12px; font-weight: 500; {{sc.style}}">
+          <span aria-hidden="true" style="width: 8px; height: 8px; box-sizing: border-box; border-radius: 4px; {{sc.dot}}"></span>{{sc.label}}
+          <span style="color: #6B6B74; font-weight: 400">{{sc.count}}</span>
+        </button>
+      </sc-for>
+      <sc-if value="{{hasStatusFilter}}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{clearStatus}}" style="height: 28px; padding: 0 8px; border: 0; background: transparent; font-size: 12px; font-weight: 500; color: {{accent}}">{{L.clear}}</button>
+      </sc-if>
+      <span style="flex: 1"></span>
+      <span style="font-size: 12px; color: #6B6B74">{{summary}}</span>
+    </div>
+
+    <!-- Table -->
+    <div style="padding: 12px 24px 32px; overflow-x: auto">
+      <div role="table" aria-label="{{L.feedback}}" style="min-width: 1080px">
+
+        <!-- Bulk action bar replaces the header when rows are selected -->
+        <sc-if value="{{hasSelection}}" hint-placeholder-val="{{ true }}">
+          <div role="toolbar" aria-label="{{L.bulk}}" style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 8px; border-radius: 10px; background: #18181B; color: #FFFFFF">
+            <input type="checkbox" checked="{{allSelected}}" onChange="{{toggleAll}}" aria-label="{{L.selectAll}}" style="width: 16px; height: 16px; margin: 0 12px 0 4px; accent-color: {{accent}}">
+            <span style="font-size: 13px; font-weight: 600; min-width: 96px">{{selectedLabel}}</span>
+            <span style="width: 1px; height: 20px; background: #3F3F46"></span>
+            <div style="position: relative">
+              <button onClick="{{toggleStatusMenu}}" aria-haspopup="menu" aria-expanded="{{statusMenuOpen}}" style="display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border: 0; border-radius: 6px; background: #27272A; color: #FFFFFF; font-size: 13px; font-weight: 500">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"></path></svg>
+                {{L.changeStatus}}
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+              </button>
+              <sc-if value="{{statusMenuOpen}}" hint-placeholder-val="{{ false }}">
+                <div role="menu" style="position: absolute; top: 36px; left: 0; z-index: 5; width: 200px; padding: 4px; background: #FFFFFF; color: #18181B; border: 1px solid #E6E6EA; border-radius: 10px; box-shadow: 0 12px 32px rgba(24, 24, 27, 0.16); display: flex; flex-direction: column">
+                  <sc-for list="{{statusMenu}}" as="m" hint-placeholder-count="4">
+                    <button role="menuitem" class="ghost" onClick="{{m.apply}}" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; font-size: 13px; text-align: left">
+                      <span aria-hidden="true" style="width: 10px; height: 10px; box-sizing: border-box; border-radius: 5px; {{m.dot}}"></span>{{m.label}}
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+            <a href="CreateTask.dc.html" style="display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 6px; background: #27272A; color: #FFFFFF; font-size: 13px; font-weight: 500">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"></path><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path></svg>{{L.linkTask}}
+            </a>
+            <button onClick="{{closeSelected}}" style="display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border: 0; border-radius: 6px; background: #27272A; color: #FFFFFF; font-size: 13px; font-weight: 500">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"></path></svg>{{L.close}}
+            </button>
+            <span style="flex: 1"></span>
+            <button onClick="{{clearSelection}}" style="height: 30px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; color: #D4D4D8; font-size: 13px">{{L.cancelSel}}</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{noSelection}}" hint-placeholder-val="{{ false }}">
+          <div role="row" style="display: grid; grid-template-columns: 40px 148px minmax(0, 1fr) 28px 200px 220px 132px 96px; align-items: center; height: 44px; padding: 0 8px; border-bottom: 1px solid #E6E6EA; font-size: 12px; font-weight: 500; color: #6B6B74">
+            <span role="columnheader" style="display: flex; justify-content: center"><input type="checkbox" checked="{{allSelected}}" onChange="{{toggleAll}}" aria-label="{{L.selectAll}}" style="width: 16px; height: 16px; margin: 0; accent-color: {{accent}}"></span>
+            <span role="columnheader">{{L.colType}}</span>
+            <span role="columnheader">{{L.colTitle}}</span>
+            <span role="columnheader"><span class="sr">{{L.colAttach}}</span></span>
+            <span role="columnheader">{{L.colFrom}}</span>
+            <span role="columnheader">{{L.colTask}}</span>
+            <span role="columnheader">{{L.colStatus}}</span>
+            <span role="columnheader" style="text-align: right">{{L.colDate}}</span>
+          </div>
+        </sc-if>
+
+        <sc-for list="{{rows}}" as="r" hint-placeholder-count="10">
+          <div class="frow" role="row" style="display: grid; grid-template-columns: 40px 148px minmax(0, 1fr) 28px 200px 220px 132px 96px; align-items: center; min-height: 60px; padding: 0 8px; border-bottom: 1px solid #EFEFF2; {{r.rowStyle}}">
+            <span role="cell" style="position: relative; display: flex; align-items: center; justify-content: center">
+              <sc-if value="{{r.unread}}" hint-placeholder-val="{{ false }}">
+                <span aria-hidden="true" style="position: absolute; left: -4px; width: 6px; height: 6px; border-radius: 3px; background: {{accent}}"></span>
+              </sc-if>
+              <input type="checkbox" checked="{{r.selected}}" onChange="{{r.toggle}}" aria-label="{{r.checkLabel}}" style="width: 16px; height: 16px; margin: 0; accent-color: {{accent}}; cursor: pointer">
+            </span>
+            <span role="cell">
+              <span style="display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 8px; border-radius: 6px; font-size: 12px; font-weight: 600; white-space: nowrap; {{r.typeStyle}}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{r.typeIcon}}"></path></svg>{{r.typeLabel}}
+              </span>
+            </span>
+            <span role="cell" style="min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 8px 16px 8px 0">
+              <a href="{{r.href}}" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; {{r.titleStyle}}">{{r.title}}</a>
+              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; line-height: 16px; color: #6B6B74">{{r.preview}}</span>
+            </span>
+            <span role="cell" style="display: flex; justify-content: center">
+              <sc-if value="{{r.attach}}" hint-placeholder-val="{{ false }}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="{{r.attachLabel}}"><path d="m21.4 11.1-8.5 8.5a6 6 0 0 1-8.5-8.5l8.5-8.5a4 4 0 0 1 5.7 5.7l-8.5 8.5a2 2 0 0 1-2.8-2.8l7.8-7.8"></path></svg>
+              </sc-if>
+            </span>
+            <span role="cell" style="min-width: 0; display: flex; flex-direction: column; padding-right: 12px">
+              <span style="font-size: 13px; color: #18181B; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{r.from}}</span>
+              <span style="font-size: 12px; line-height: 16px; color: #6B6B74; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{r.email}}</span>
+            </span>
+            <span role="cell" style="min-width: 0; padding-right: 12px">
+              <sc-if value="{{r.linked}}" hint-placeholder-val="{{ false }}">
+                <a class="chip" href="TaskDetail.dc.html" style="display: inline-flex; align-items: center; gap: 6px; max-width: 100%; height: 26px; padding: 0 4px 0 8px; box-sizing: border-box; border: 1px solid #E6E6EA; border-radius: 6px; background: #FFFFFF; color: #18181B; font-size: 12px">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12 2.5 2.5 4.5-5"></path></svg>
+                  <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{r.task}}</span>
+                  <span title="{{r.assignee}}" style="flex: none; width: 18px; height: 18px; border-radius: 9px; font-size: 8px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{r.assigneeStyle}}">{{r.assigneeI}}</span>
+                </a>
+              </sc-if>
+              <sc-if value="{{r.unlinked}}" hint-placeholder-val="{{ true }}">
+                <span style="font-size: 12px; color: #A1A1AA">—</span>
+              </sc-if>
+            </span>
+            <span role="cell" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #3F3F46">
+              <span aria-hidden="true" style="width: 10px; height: 10px; box-sizing: border-box; border-radius: 5px; {{r.statusDot}}"></span>{{r.status}}
+            </span>
+            <span role="cell" title="{{r.dateFull}}" style="text-align: right; font-size: 12px; white-space: nowrap; {{r.dateStyle}}">{{r.date}}</span>
+          </div>
+        </sc-for>
+
+        <sc-if value="{{noRows}}" hint-placeholder-val="{{ false }}">
+          <div style="padding: 48px 16px; text-align: center; color: #6B6B74; font-size: 13px">{{L.noMatch}}</div>
+        </sc-if>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; height: 44px; font-size: 12px; color: #6B6B74">
+          <span>{{footer}}</span>
+          <a href="FeedbackEmpty.dc.html" style="color: #6B6B74">{{L.seeEmpty}}</a>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"language":{"editor":"enum","default":"mn","options":["mn","en"]},"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: undefined, type: 'all', statuses: {}, selected: { f2: true, f4: true }, read: {}, overrides: {}, copied: false, statusMenuOpen: false };
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const lang = s.lang || this.props.language || 'mn';
+    const mn = lang === 'mn';
+    const pick = (pair) => (mn ? pair[0] : pair[1]);
+    const accent = this.props.accent ?? '#6E56CF';
+    const accentSoft = accent + '1A';
+    const L = mn ? {
+      workspace: 'Ажлын орчин', search: 'Хайх', myTasks: 'Миний ажлууд', standup: 'Стэндап', inbox: 'Мэдэгдэл', feedback: 'Санал хүсэлт', reports: 'Тайлан', spaces: 'Орон зай', language: 'Хэл',
+      searchFeedback: 'Санал хүсэлт, илгээгчээр хайх…', copy: 'Нийтийн холбоос хуулах', copied: 'Хуулсан', typeFilter: 'Төрлөөр шүүх',
+      all: 'Бүгд', status: 'Төлөв:', clear: 'Цэвэрлэх', bulk: 'Сонгосон мөрийн үйлдэл', selectAll: 'Бүгдийг сонгох',
+      changeStatus: 'Төлөв өөрчлөх', linkTask: 'Ажилд холбох', close: 'Хаах', cancelSel: 'Сонголтыг цуцлах',
+      colType: 'Төрөл', colTitle: 'Гарчиг', colAttach: 'Хавсралт', colFrom: 'Илгээгч', colTask: 'Холбосон ажил', colStatus: 'Төлөв', colDate: 'Илгээсэн',
+      noMatch: 'Энэ шүүлтүүрт тохирох санал хүсэлт алга.', seeEmpty: 'Хоосон төлөвийг харах', hasAttach: 'Хавсралттай'
+    } : {
+      workspace: 'Workspace', search: 'Search', myTasks: 'My Tasks', standup: 'Standup', inbox: 'Inbox', feedback: 'Feedback', reports: 'Reports', spaces: 'Spaces', language: 'Language',
+      searchFeedback: 'Search feedback or submitters…', copy: 'Copy public link', copied: 'Copied', typeFilter: 'Filter by type',
+      all: 'All', status: 'Status:', clear: 'Clear', bulk: 'Actions for selected rows', selectAll: 'Select all',
+      changeStatus: 'Change status', linkTask: 'Link to task', close: 'Close', cancelSel: 'Clear selection',
+      colType: 'Type', colTitle: 'Title', colAttach: 'Attachment', colFrom: 'Submitted by', colTask: 'Linked task', colStatus: 'Status', colDate: 'Submitted',
+      noMatch: 'No feedback matches these filters.', seeEmpty: 'See empty state', hasAttach: 'Has attachment'
+    };
+    const langs = [{ code: 'mn', short: 'МН', full: 'Монгол' }, { code: 'en', short: 'EN', full: 'English' }].map((d) => ({
+      ...d, active: d.code === lang, pick: () => this.setState({ lang: d.code }),
+      style: d.code === lang ? 'background:#FFFFFF;color:#18181B;box-shadow:0 1px 2px rgba(24,24,27,0.08)' : 'background:transparent;color:#6B6B74'
+    }));
+    const spaces = [
+      { name: ['Бүтээгдэхүүн', 'Product'], initial: ['Б', 'P'], badge: 'background:#EDE9FE;color:#5B21B6' },
+      { name: ['Инженерчлэл', 'Engineering'], initial: ['И', 'E'], badge: 'background:#DCFCE7;color:#166534' },
+      { name: ['Дизайн', 'Design'], initial: ['Д', 'D'], badge: 'background:#FFE4E6;color:#9F1239' }
+    ].map((x) => ({ name: pick(x.name), initial: pick(x.initial), badge: x.badge }));
+
+    const TYPES = {
+      bug: { label: ['Алдаа', 'Bug'], style: 'background:#FDECEC;color:#B42318', dot: 'background:#DC2626', icon: 'M8 2l1.9 1.9M16 2l-1.9 1.9M9 7.1V6a3 3 0 1 1 6 0v1.1M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6zM12 20v-9M6 13H2M22 13h-4' },
+      feature: { label: ['Шинэ боломж', 'Feature request'], style: 'background:#E8F1FD;color:#1D4ED8', dot: 'background:#2563EB', icon: 'M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z' },
+      feedback: { label: ['Санал', 'Feedback'], style: 'background:#E3F4F1;color:#0F766E', dot: 'background:#0D9488', icon: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z' },
+      other: { label: ['Бусад', 'Other'], style: 'background:#F1F1F3;color:#3F3F46', dot: 'background:#8B8B94', icon: 'M12 12h.01M19 12h.01M5 12h.01' }
+    };
+    const STATUSES = {
+      new: { label: ['Шинэ', 'New'], dot: 'background:' + accent },
+      review: { label: ['Хянаж буй', 'In review'], dot: 'border:2px solid #D97706;background:linear-gradient(90deg,#D97706 50%,transparent 50%)' },
+      linked: { label: ['Ажилтай холбосон', 'Linked to task'], dot: 'border:2px solid #0284C7;background:#0284C733' },
+      closed: { label: ['Хаасан', 'Closed'], dot: 'background:#A1A1AA' }
+    };
+    const PEOPLE = {
+      tem: [['Тэмүүлэн Г.', 'Temuulen G.'], ['ТГ', 'TG'], 'background:#DCFCE7;color:#166534'],
+      anu: [['Ану Б.', 'Anu B.'], ['АБ', 'AB'], 'background:#E0E7FF;color:#3730A3'],
+      sara: [['Сараа К.', 'Sara K.'], ['СК', 'SK'], 'background:#FFE4E6;color:#9F1239'],
+      dorj: [['Дорж Э.', 'Dorj E.'], ['ДЭ', 'DE'], 'background:#FEF3C7;color:#92400E']
+    };
+    const F = (id, type, status, unread, title, preview, attach, from, email, date, task, who) => ({ id, type, status, unread, title, preview, attach, from, email, date, task, who });
+    const data = [
+      F('f1', 'bug', 'new', true, ['Төлбөр төлөх алхам дээр апп гацаж байна', 'App freezes on the payment step'], ['iPhone 13, iOS 17. Карт сонгоод “Төлөх” дарахад дэлгэц хөдлөхгүй болж байна.', 'iPhone 13, iOS 17. After choosing a card and tapping “Pay” the screen stops responding.'], true, ['Энхжин Д.', 'Enkhjin D.'], 'enkhjin.d@gmail.com', [['2 цагийн өмнө', '2h ago'], ['10-р сарын 19, 13:42', 'Oct 19, 13:42']]),
+      F('f2', 'feature', 'new', true, ['QPay-ээр төлөх боломж нэмээч', 'Please add QPay as a payment option'], ['Ихэнх найзууд маань QPay ашигладаг. Карт байхгүй үед их хэрэгтэй.', 'Most of my friends use QPay — really useful when you don’t have a card.'], false, ['Батбаяр Ц.', 'Batbayar Ts.'], 'batbayar@mail.mn', [['3 цагийн өмнө', '3h ago'], ['10-р сарын 19, 12:10', 'Oct 19, 12:10']]),
+      F('f3', 'feedback', 'new', true, ['Шинэ нүүр хуудас их гоё болсон', 'Love the new home page'], ['Бүтээгдэхүүнүүд илүү том, ойлгомжтой харагдаж байна. Баярлалаа!', 'Products look bigger and clearer now. Thank you!'], false, ['Сарнай Б.', 'Sarnai B.'], 'sarnai.b@gmail.com', [['Өнөөдөр 09:15', 'Today 09:15'], ['10-р сарын 19, 09:15', 'Oct 19, 09:15']]),
+      F('f4', 'bug', 'new', true, ['24-өөс урт промо код таслагдаж байна', 'Promo codes longer than 24 characters get cut off'], ['Түнш компанийн код оруулахад сүүлийн тэмдэгтүүд харагдахгүй байна.', 'When I enter a partner code the last characters don’t show.'], true, ['Тэмүүжин Н.', 'Temuujin N.'], 'temuujin.n@yahoo.com', [['Өчигдөр', 'Yesterday'], ['10-р сарын 18, 18:02', 'Oct 18, 18:02']]),
+      F('f5', 'other', 'new', true, ['Байгууллагын нэхэмжлэх авч болох уу?', 'Can I get a company invoice?'], ['Компанийн нэрээр худалдан авалт хийсэн, НӨАТ-ын баримт хэрэгтэй.', 'I bought on behalf of my company and need a VAT receipt.'], false, ['Оюунаа Г.', 'Oyunaa G.'], 'oyunaa@company.mn', [['Өчигдөр', 'Yesterday'], ['10-р сарын 18, 11:30', 'Oct 18, 11:30']]),
+      F('f6', 'bug', 'linked', false, ['Сагсны тоо шинэчлэгдэхгүй байна', 'Cart badge count doesn’t update'], ['Бараа нэмсний дараа доод цэсний тоо хуучнаараа үлдэж байна.', 'After adding an item the number on the bottom bar stays the same.'], true, ['Ганбат Ж.', 'Ganbat J.'], 'ganbat.j@gmail.com', [['10-р сарын 16', 'Oct 16'], ['10-р сарын 16, 15:20', 'Oct 16, 15:20']], ['Шинэ доод таб самбар хэрэгжүүлэх', 'Implement new bottom tab bar'], 'tem'),
+      F('f7', 'feature', 'linked', false, ['Сагсаа дараа нь үргэлжлүүлэх', 'Save my cart for later'], ['Утсаараа нэмсэн барааг компьютер дээрээ үргэлжлүүлэн авмаар байна.', 'I want to add on my phone and finish on my laptop.'], false, ['Номин А.', 'Nomin A.'], 'nomin.a@gmail.com', [['10-р сарын 15', 'Oct 15'], ['10-р сарын 15, 10:05', 'Oct 15, 10:05']], ['Хадгалсан сагсны PRD бичих', 'Write PRD: saved carts'], 'anu'),
+      F('f8', 'bug', 'review', false, ['Үсгийн алдаатай хайлтад хоосон дэлгэц гарч байна', 'Search shows a blank screen for typos'], ['“гуталл” гэж хайхад юу ч гарахгүй, буцах товч ч алга.', 'Searching “shooes” shows nothing, not even a back button.'], true, ['Билгүүн Т.', 'Bilguun T.'], 'bilguun.t@gmail.com', [['10-р сарын 15', 'Oct 15'], ['10-р сарын 15, 08:44', 'Oct 15, 08:44']]),
+      F('f9', 'feature', 'review', false, ['Бараан горим хэрэгтэй байна', 'Dark mode, please'], ['Шөнө дэлгэц хэт гэрэлтэй байна.', 'The screen is too bright at night.'], false, ['Хулан М.', 'Khulan M.'], 'khulan.m@gmail.com', [['10-р сарын 14', 'Oct 14'], ['10-р сарын 14, 22:31', 'Oct 14, 22:31']]),
+      F('f10', 'feedback', 'linked', false, ['Бүтээгдэхүүний зураг жижиг байна', 'Product photos feel small'], ['Жагсаалтад зургийг томруулж харах боломжгүй байна.', 'There’s no way to see a bigger photo from the list.'], false, ['Түвшин Э.', 'Tuvshin E.'], 'tuvshin.e@gmail.com', [['10-р сарын 13', 'Oct 13'], ['10-р сарын 13, 14:00', 'Oct 13, 14:00']], ['Бүтээгдэхүүний картын компонент v2', 'Product card component v2'], 'sara'),
+      F('f11', 'feature', 'linked', false, ['Хүргэлтийн явцыг харах', 'Let me track my delivery'], ['Захиалга хаана явааг газрын зураг дээр харж болох уу?', 'Can I see where my order is on a map?'], false, ['Мөнх-Эрдэнэ С.', 'Munkh-Erdene S.'], 'munkh.s@gmail.com', [['10-р сарын 12', 'Oct 12'], ['10-р сарын 12, 17:45', 'Oct 12, 17:45']], ['Хүргэлт хянах дэлгэц', 'Delivery tracking screen'], 'dorj'),
+      F('f12', 'bug', 'closed', false, ['Нэвтрэх код ирэхгүй байна', 'Login code never arrives'], ['Unitel дугаар дээр SMS ирээгүй. Одоо зассан байна, баярлалаа.', 'No SMS on my Unitel number. It works now, thanks.'], false, ['Золбоо Х.', 'Zolboo Kh.'], 'zolboo.kh@gmail.com', [['10-р сарын 10', 'Oct 10'], ['10-р сарын 10, 09:12', 'Oct 10, 09:12']]),
+      F('f13', 'feedback', 'closed', false, ['Төлбөр хийх хурдан болсон', 'Checkout feels much faster now'], ['Өмнөхөөсөө хоёр алхам цөөхөн болсон нь их таалагдлаа.', 'Love that there are two fewer steps than before.'], false, ['Ариунаа Б.', 'Ariunaa B.'], 'ariunaa@gmail.com', [['10-р сарын 9', 'Oct 9'], ['10-р сарын 9, 16:30', 'Oct 9, 16:30']]),
+      F('f14', 'other', 'closed', false, ['Ажлын байрны зар байна уу?', 'Are you hiring?'], ['Танай багт дизайнераар орох сонирхолтой байна.', 'I’d love to join your team as a designer.'], false, ['Энэрэл О.', 'Enerel O.'], 'enerel.o@gmail.com', [['10-р сарын 8', 'Oct 8'], ['10-р сарын 8, 11:11', 'Oct 8, 11:11']])
+    ];
+
+    const ov = s.overrides || {};
+    const readMap = s.read || {};
+    const items = data.map((d) => ({ ...d, status: ov[d.id] || d.status, unread: d.unread && !readMap[d.id] && !ov[d.id] }));
+    const unread = items.filter((d) => d.unread).length;
+    const type = s.type || 'all';
+    const stSel = s.statuses || {};
+    const anyStatus = Object.keys(stSel).some((k) => stSel[k]);
+
+    const byType = (t) => items.filter((d) => t === 'all' || d.type === t);
+    const typeTabs = ['all', 'bug', 'feature', 'feedback', 'other'].map((t) => ({
+      label: t === 'all' ? L.all : pick(TYPES[t].label), count: String(byType(t).length), active: type === t,
+      hasDot: t !== 'all', dot: t === 'all' ? '' : TYPES[t].dot,
+      pick: () => this.setState({ type: t }),
+      style: type === t ? 'color:#18181B;box-shadow:inset 0 -2px 0 ' + accent : 'color:#6B6B74;box-shadow:none'
+    }));
+    const statusChips = Object.keys(STATUSES).map((k) => {
+      const on = !!stSel[k];
+      return {
+        label: pick(STATUSES[k].label), dot: STATUSES[k].dot, on,
+        count: String(byType(type).filter((d) => d.status === k).length),
+        toggle: () => this.setState({ statuses: { ...(this.state.statuses || {}), [k]: !on } }),
+        style: on ? 'border:1px solid ' + accent + ';background:' + accentSoft + ';color:#18181B' : 'border:1px solid #E6E6EA;background:#FFFFFF;color:#3F3F46'
+      };
+    });
+    const visible = byType(type).filter((d) => !anyStatus || stSel[d.status]);
+    const sel = s.selected || {};
+    const selectedVisible = visible.filter((d) => sel[d.id]);
+    const allSelected = visible.length > 0 && selectedVisible.length === visible.length;
+
+    const rows = visible.map((d) => {
+      const selected = !!sel[d.id];
+      const T = TYPES[d.type];
+      const linked = d.status === 'linked' && !!d.task;
+      const p = d.who ? PEOPLE[d.who] : null;
+      return {
+        unread: d.unread, selected,
+        toggle: () => this.setState({ selected: { ...(this.state.selected || {}), [d.id]: !selected } }),
+        checkLabel: (mn ? 'Сонгох: ' : 'Select: ') + pick(d.title),
+        rowStyle: selected ? 'background:' + accentSoft : (d.unread ? 'background:#FCFBFF' : ''),
+        typeLabel: pick(T.label), typeStyle: T.style, typeIcon: T.icon,
+        title: pick(d.title), preview: pick(d.preview),
+        href: d.id === 'f6' ? 'FeedbackDuplicates.dc.html' : 'FeedbackDetail.dc.html',
+        titleStyle: d.unread ? 'font-weight:600;color:#18181B' : 'font-weight:400;color:#27272A',
+        attach: d.attach, attachLabel: L.hasAttach,
+        from: pick(d.from), email: d.email,
+        linked, unlinked: !linked,
+        task: d.task ? pick(d.task) : '', assignee: p ? pick(p[0]) : '', assigneeI: p ? pick(p[1]) : '', assigneeStyle: p ? p[2] : '',
+        status: pick(STATUSES[d.status].label), statusDot: STATUSES[d.status].dot,
+        date: pick(d.date[0]), dateFull: pick(d.date[1]),
+        dateStyle: d.unread ? 'color:#18181B;font-weight:600' : 'color:#6B6B74'
+      };
+    });
+
+    const ids = selectedVisible.map((d) => d.id);
+    const applyStatus = (k) => () => {
+      const next = { ...(this.state.overrides || {}) };
+      ids.forEach((id) => { next[id] = k; });
+      this.setState({ overrides: next, selected: {}, statusMenuOpen: false });
+    };
+
+    const copied = !!s.copied;
+    const publicUrl = 'kitestudio.app/feedback/kite';
+    return {
+      lang, L, langs, spaces, accent, accentSoft,
+      me: { initials: mn ? 'АБ' : 'AB', full: mn ? 'Ану Болд' : 'Anu Bold' },
+      unreadCount: String(unread), hasUnread: unread > 0,
+      feedbackAria: (mn ? 'Санал хүсэлт, ' + unread + ' шинэ' : 'Feedback, ' + unread + ' new'),
+      publicUrl,
+      copyLabel: copied ? L.copied : L.copy,
+      copyIcon: copied ? 'M5 12.5 9.5 17 19 7.5' : 'M8 8h12v12H8zM4 16V4h12',
+      copyStyle: copied ? 'background:#E8F5EC;color:#166534' : 'background:#FFFFFF;color:#18181B',
+      copyLink: () => {
+        try { if (navigator.clipboard) navigator.clipboard.writeText('https://' + publicUrl); } catch (e) {}
+        this.setState({ copied: true });
+      },
+      typeTabs, statusChips, hasStatusFilter: anyStatus,
+      clearStatus: () => this.setState({ statuses: {} }),
+      summary: mn ? visible.length + ' санал хүсэлт · ' + unread + ' уншаагүй' : visible.length + ' items · ' + unread + ' unread',
+      rows, noRows: rows.length === 0,
+      hasSelection: ids.length > 0, noSelection: ids.length === 0,
+      selectedLabel: mn ? ids.length + ' сонгосон' : ids.length + ' selected',
+      allSelected,
+      toggleAll: () => {
+        const next = {};
+        if (!allSelected) visible.forEach((d) => { next[d.id] = true; });
+        this.setState({ selected: next });
+      },
+      clearSelection: () => this.setState({ selected: {}, statusMenuOpen: false }),
+      statusMenuOpen: !!s.statusMenuOpen,
+      toggleStatusMenu: () => this.setState({ statusMenuOpen: !this.state.statusMenuOpen }),
+      statusMenu: Object.keys(STATUSES).map((k) => ({ label: pick(STATUSES[k].label), dot: STATUSES[k].dot, apply: applyStatus(k) })),
+      closeSelected: applyStatus('closed'),
+      footer: mn ? '1–' + rows.length + ' / ' + items.length : '1–' + rows.length + ' of ' + items.length
+    };
+  }
+}
+</script>
+</body>
+</html>

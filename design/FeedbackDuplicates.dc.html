@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<title>Санал хүсэлт — FB-1036, давхардсан мэдээлэл</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#52525B;text-decoration:none}a:hover{color:#18181B}
+button{font:inherit;color:inherit;cursor:pointer}
+input,textarea{font:inherit;color:inherit}
+.ghost:hover{background:#F4F4F5}
+.opt:hover{background:#F4F4F5}
+.dup:hover{background:#FAFAFB}
+.ghost:focus-visible,.seg:focus-visible,.opt:focus-visible,.dup:focus-visible,a:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid #6E56CF;outline-offset:1px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</helmet>
+
+<div lang="{{lang}}" style="position: relative; display: flex; min-height: 100vh; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 14px; line-height: 20px; color: #18181B; background: #FFFFFF; -webkit-font-smoothing: antialiased; overflow: hidden">
+
+  <!-- Background -->
+  <div aria-hidden="true" style="flex: 0 0 248px; background: #F7F7F8; border-right: 1px solid #E6E6EA; padding: 12px 8px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px">
+    <div style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px"><span style="width: 24px; height: 24px; border-radius: 6px; background: {{accent}}"></span><span style="font-weight: 600">Kite Studio</span></div>
+    <span style="height: 32px; padding: 0 12px; display: flex; align-items: center; color: #3F3F46">{{L.myTasks}}</span>
+    <span style="height: 32px; padding: 0 12px; display: flex; align-items: center; color: #3F3F46">{{L.standup}}</span>
+    <span style="height: 32px; padding: 0 12px; display: flex; align-items: center; color: #3F3F46">{{L.inbox}}</span>
+    <span style="height: 32px; padding: 0 12px; display: flex; align-items: center; border-radius: 8px; background: {{accentSoft}}; color: {{accent}}; font-weight: 600">{{L.feedback}}</span>
+  </div>
+  <div aria-hidden="true" style="flex: 1; display: flex; flex-direction: column"><div style="height: 64px; border-bottom: 1px solid #E6E6EA"></div></div>
+  <a href="Feedback.dc.html" aria-label="{{L.closePanel}}" style="position: absolute; inset: 0; background: rgba(24, 24, 27, 0.28)"></a>
+
+  <!-- PANEL -->
+  <aside role="dialog" aria-modal="true" aria-labelledby="fb-title" style="position: absolute; top: 0; right: 0; bottom: 0; width: 66%; min-width: min(880px, 100%); max-width: 100%; box-sizing: border-box; background: #FFFFFF; border-left: 1px solid #E6E6EA; box-shadow: -12px 0 32px rgba(24, 24, 27, 0.10); display: flex; flex-direction: column; overflow-y: auto">
+
+    <div style="position: sticky; top: 0; z-index: 4; display: flex; align-items: center; gap: 8px; height: 56px; padding: 0 16px 0 24px; background: #FFFFFF; border-bottom: 1px solid #E6E6EA; flex: none">
+      <nav aria-label="{{L.location}}" style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; font-size: 13px; color: #52525B">
+        <a href="Feedback.dc.html" style="color: #52525B">{{L.feedback}}</a>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+        <span style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #6B6B74">FB-1036</span>
+      </nav>
+      <div role="radiogroup" aria-label="{{L.language}}" style="display: flex; gap: 2px; padding: 2px; border-radius: 7px; background: #F4F4F5">
+        <sc-for list="{{langs}}" as="lg" hint-placeholder-count="2">
+          <button class="seg" role="radio" aria-checked="{{lg.active}}" onClick="{{lg.pick}}" lang="{{lg.code}}" title="{{lg.full}}" style="height: 24px; padding: 0 8px; border: 0; border-radius: 5px; font-size: 12px; font-weight: 600; {{lg.style}}">{{lg.short}}</button>
+        </sc-for>
+      </div>
+      <div style="width: 1px; height: 20px; background: #E6E6EA"></div>
+      <a href="Feedback.dc.html" class="ghost" aria-label="{{L.closePanel}}" style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></a>
+    </div>
+
+    <div style="flex: 1; display: flex; flex-wrap: wrap; align-items: stretch">
+
+      <!-- Main -->
+      <div style="flex: 999 1 460px; min-width: 0; display: flex; flex-direction: column; gap: 24px; padding: 24px 28px 32px">
+
+        <!-- Duplicate banner -->
+        <div role="note" style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid #BFDBFE; border-radius: 10px; background: #EFF6FF">
+          <div aria-hidden="true" style="display: flex">
+            <sc-for list="{{reporters}}" as="r" hint-placeholder-count="3">
+              <span style="width: 24px; height: 24px; margin-right: -6px; border-radius: 12px; border: 2px solid #EFF6FF; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{r.av}}">{{r.i}}</span>
+            </sc-for>
+          </div>
+          <span style="flex: 1; padding-left: 6px; font-size: 13px; color: #1E3A8A">{{L.banner}}</span>
+          <a href="#dups" style="font-size: 13px; font-weight: 600; color: #1D4ED8">{{L.seeAll}}</a>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px">
+            <span style="display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 8px; border-radius: 6px; background: #FDECEC; color: #B42318; font-size: 12px; font-weight: 600">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2l1.9 1.9M16 2l-1.9 1.9M9 7.1V6a3 3 0 1 1 6 0v1.1M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6zM12 20v-9M6 13H2M22 13h-4"></path></svg>{{L.bug}}
+            </span>
+            <span style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #6B6B74">FB-1036</span>
+            <span style="height: 22px; padding: 0 8px; border-radius: 11px; background: #F1F1F3; color: #3F3F46; font-size: 12px; font-weight: 600; display: flex; align-items: center">{{L.firstReport}}</span>
+          </div>
+          <h1 id="fb-title" style="margin: 0; font-size: 22px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em">{{L.title}}</h1>
+          <p style="margin: 0; font-size: 15px; line-height: 24px; color: #27272A">{{L.body}}</p>
+        </div>
+
+        <section aria-labelledby="att-h" style="display: flex; flex-direction: column; gap: 10px">
+          <h2 id="att-h" style="margin: 0; font-size: 13px; font-weight: 600; color: #3F3F46">{{L.attachments}} <span style="font-weight: 400; color: #6B6B74">1</span></h2>
+          <button aria-label="{{L.openImg}}" style="display: flex; flex-direction: column; width: 148px; padding: 0; border: 1px solid #E6E6EA; border-radius: 10px; background: #FFFFFF; overflow: hidden; text-align: left">
+            <span aria-hidden="true" style="height: 112px; background: #F4F4F5; display: flex; align-items: center; justify-content: center">
+              <span style="width: 54px; height: 96px; box-sizing: border-box; padding: 6px 5px; border-radius: 8px; background: #FFFFFF; border: 1px solid #E6E6EA; display: flex; flex-direction: column; gap: 4px">
+                <span style="height: 4px; width: 60%; border-radius: 2px; background: #D4D4D8"></span>
+                <span style="height: 30px; border-radius: 3px; background: #F1F1F3"></span>
+                <span style="margin-top: auto; display: flex; justify-content: space-around"><span style="width: 6px; height: 6px; border-radius: 3px; background: #D4D4D8"></span><span style="width: 6px; height: 6px; border-radius: 3px; background: #DC2626"></span><span style="width: 6px; height: 6px; border-radius: 3px; background: #D4D4D8"></span></span>
+              </span>
+            </span>
+            <span style="display: flex; flex-direction: column; padding: 6px 8px"><span style="font-size: 12px; font-weight: 500">cart-badge.jpg</span><span style="font-size: 11px; color: #6B6B74">640 KB</span></span>
+          </button>
+        </section>
+
+        <section aria-labelledby="sub-h" style="display: flex; flex-direction: column; gap: 10px">
+          <h2 id="sub-h" style="margin: 0; font-size: 13px; font-weight: 600; color: #3F3F46">{{L.submitter}}</h2>
+          <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px; padding: 14px 16px; border: 1px solid #E6E6EA; border-radius: 12px">
+            <span aria-hidden="true" style="flex: none; width: 40px; height: 40px; border-radius: 20px; background: #E0F2FE; color: #075985; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center">{{L.subI}}</span>
+            <div style="flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 6px">
+              <span style="font-size: 15px; font-weight: 600">{{L.subName}}</span>
+              <a href="mailto:ganbat.j@gmail.com" style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: {{accent}}">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4zM22 6l-10 7L2 6"></path></svg>ganbat.j@gmail.com
+              </a>
+              <span style="font-size: 12px; color: #6B6B74">{{L.submittedAt}} · {{L.noPhone}}</span>
+            </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="act-h" style="display: flex; flex-direction: column; gap: 12px; border-top: 1px solid #E6E6EA; padding-top: 20px">
+          <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px">
+            <h2 id="act-h" style="margin: 0; font-size: 13px; font-weight: 600; color: #3F3F46">{{L.activity}}</h2>
+            <span style="display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: 11px; background: #FEF3E2; color: #92400E; font-size: 12px; font-weight: 500">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>{{L.internalOnly}}
+            </span>
+          </div>
+          <ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px">
+            <sc-for list="{{log}}" as="e" hint-placeholder-count="6">
+              <li style="display: flex; flex-direction: column">
+                <sc-if value="{{e.isEvent}}" hint-placeholder-val="{{ true }}">
+                  <div style="display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; font-size: 13px; line-height: 20px; color: #52525B">
+                    <span aria-hidden="true" style="flex: none; width: 22px; height: 20px; display: flex; align-items: center; justify-content: center"><span style="width: 8px; height: 8px; border-radius: 4px; {{e.mark}}"></span></span>
+                    <span style="flex: 1"><strong style="font-weight: 600; color: #18181B">{{e.who}}</strong> {{e.text}}</span>
+                    <time style="flex: none; font-size: 12px; color: #6B6B74">{{e.time}}</time>
+                  </div>
+                </sc-if>
+                <sc-if value="{{e.isNote}}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; align-items: flex-start; gap: 10px; padding: 8px 0">
+                    <span style="flex: none; width: 22px; height: 22px; border-radius: 11px; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{e.avatar}}">{{e.initials}}</span>
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 10px; background: #FFFBF3; border: 1px solid #F5E6CC">
+                      <span style="font-size: 13px"><strong style="font-weight: 600">{{e.who}}</strong> <span style="font-size: 12px; color: #6B6B74">{{e.time}}</span></span>
+                      <span style="font-size: 14px; line-height: 21px; color: #27272A">{{e.text}}</span>
+                    </div>
+                  </div>
+                </sc-if>
+              </li>
+            </sc-for>
+          </ol>
+          <div style="display: flex; flex-direction: column; border: 1px solid #E6E6EA; border-radius: 10px">
+            <label for="note" class="sr">{{L.notePh}}</label>
+            <textarea id="note" rows="2" placeholder="{{L.notePh}}" style="border: 0; outline: none; resize: none; padding: 10px 12px 4px; background: transparent; font-size: 14px"></textarea>
+            <div style="display: flex; align-items: center; gap: 8px; padding: 4px 6px 6px 12px">
+              <span style="flex: 1; font-size: 12px; color: #6B6B74">{{L.noteHint}}</span>
+              <button style="height: 30px; padding: 0 12px; border: 0; border-radius: 8px; background: {{accent}}; color: #FFFFFF; font-size: 13px; font-weight: 500">{{L.addNote}}</button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Actions -->
+      <div style="flex: 1 1 300px; max-width: 360px; min-width: 0; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px; padding: 24px 20px 32px; background: #FAFAFB; border-left: 1px solid #EFEFF2">
+
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <span style="font-size: 12px; font-weight: 500; color: #6B6B74">{{L.status}}</span>
+          <button aria-haspopup="listbox" style="display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-weight: 500; text-align: left">
+            <span aria-hidden="true" style="width: 10px; height: 10px; box-sizing: border-box; border-radius: 5px; border: 2px solid #0284C7; background: #0284C733"></span>
+            <span style="flex: 1">{{L.linkedStatus}}</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+          </button>
+        </div>
+
+        <section aria-labelledby="lt-h" style="display: flex; flex-direction: column; gap: 10px">
+          <h2 id="lt-h" style="margin: 0; font-size: 12px; font-weight: 500; color: #6B6B74">{{L.linkedTask}}</h2>
+          <div style="display: flex; flex-direction: column; gap: 10px; padding: 12px; background: #FFFFFF; border: 1px solid #E6E6EA; border-radius: 12px">
+            <div style="display: flex; align-items: flex-start; gap: 8px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 2px"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12 2.5 2.5 4.5-5"></path></svg>
+              <span style="flex: 1; display: flex; flex-direction: column; gap: 2px">
+                <span style="font-weight: 600; line-height: 20px">{{L.taskName}}</span>
+                <span style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #6B6B74">APP-118 · {{L.project}}</span>
+              </span>
+            </div>
+            <div style="display: grid; grid-template-columns: 76px minmax(0, 1fr); row-gap: 6px; font-size: 13px">
+              <span style="color: #6B6B74">{{L.taskStatus}}</span>
+              <span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 10px; height: 10px; box-sizing: border-box; border-radius: 5px; border: 2px solid #D97706; background: linear-gradient(90deg,#D97706 50%,transparent 50%)"></span>{{L.inProgress}}</span>
+              <span style="color: #6B6B74">{{L.due}}</span>
+              <span>{{L.dueVal}}</span>
+              <span style="color: #6B6B74">{{L.reports}}</span>
+              <span style="font-weight: 600">{{dupCount}}</span>
+            </div>
+            <div style="display: flex; gap: 6px">
+              <a href="TaskDetail.dc.html" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; height: 32px; border: 1px solid #E6E6EA; border-radius: 8px; font-size: 13px; font-weight: 500; color: #18181B">{{L.openTask}}</a>
+              <a href="FeedbackDetail.dc.html" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; height: 32px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-size: 13px; font-weight: 500; color: #B42318">{{L.unlink}}</a>
+            </div>
+          </div>
+        </section>
+
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <span id="as-l" style="font-size: 12px; font-weight: 500; color: #6B6B74">{{L.assignee}}</span>
+          <div style="position: relative">
+            <button onClick="{{toggleAssignee}}" aria-haspopup="listbox" aria-expanded="{{assigneeOpen}}" aria-labelledby="as-l" style="display: flex; align-items: center; gap: 8px; width: 100%; height: 38px; padding: 0 12px 0 8px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-weight: 500; text-align: left">
+              <span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 12px; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{assignee.avatar}}">{{assignee.initials}}</span>
+              <span style="flex: 1">{{assignee.name}}</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71717A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+            </button>
+            <sc-if value="{{assigneeOpen}}" hint-placeholder-val="{{ false }}">
+              <div role="listbox" style="position: absolute; top: 42px; left: 0; right: 0; z-index: 5; padding: 4px; background: #FFFFFF; border: 1px solid #E6E6EA; border-radius: 10px; box-shadow: 0 12px 32px rgba(24, 24, 27, 0.14); display: flex; flex-direction: column">
+                <sc-for list="{{assigneeOptions}}" as="o" hint-placeholder-count="5">
+                  <button role="option" class="opt" aria-selected="{{o.selected}}" onClick="{{o.pick}}" style="display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; text-align: left">
+                    <span style="width: 22px; height: 22px; border-radius: 11px; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{o.avatar}}">{{o.initials}}</span>
+                    <span style="flex: 1; font-size: 13px">{{o.name}}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+          <span style="font-size: 12px; line-height: 16px; color: #6B6B74">{{L.assigneeHint}}</span>
+        </div>
+
+        <!-- All feedback linked to this task -->
+        <section id="dups" aria-labelledby="dup-h" style="display: flex; flex-direction: column; gap: 8px; padding-top: 16px; border-top: 1px solid #EFEFF2">
+          <h2 id="dup-h" style="margin: 0; font-size: 12px; font-weight: 500; color: #6B6B74">{{L.allLinked}}</h2>
+          <div style="display: flex; flex-direction: column; border: 1px solid #E6E6EA; border-radius: 10px; background: #FFFFFF; overflow: hidden">
+            <sc-for list="{{dups}}" as="d" hint-placeholder-count="3">
+              <div class="dup" style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-bottom: 1px solid #F4F4F5; {{d.rowStyle}}">
+                <span aria-hidden="true" style="flex: none; width: 24px; height: 24px; border-radius: 12px; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{d.av}}">{{d.i}}</span>
+                <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
+                  <a href="{{d.href}}" style="font-size: 13px; font-weight: 500; color: #18181B; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{d.title}}</a>
+                  <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 11px; color: #6B6B74">
+                    <span style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace">{{d.id}}</span>· {{d.name}} · {{d.date}}
+                  </span>
+                </span>
+                <span style="flex: none; height: 20px; padding: 0 7px; border-radius: 10px; font-size: 11px; font-weight: 600; display: flex; align-items: center; {{d.tagStyle}}">{{d.tag}}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display: flex; gap: 6px">
+            <button style="flex: 1; height: 32px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-size: 12px; font-weight: 500">{{L.notifyAll}}</button>
+            <button style="flex: 1; height: 32px; border: 1px solid #E6E6EA; border-radius: 8px; background: #FFFFFF; font-size: 12px; font-weight: 500">{{L.closeAll}}</button>
+          </div>
+          <span style="font-size: 12px; line-height: 16px; color: #6B6B74">{{L.dupHint}}</span>
+        </section>
+      </div>
+    </div>
+  </aside>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"language":{"editor":"enum","default":"mn","options":["mn","en"]},"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"$preview":{"width":1440,"height":1320}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: undefined, assignee: 'tem', assigneeOpen: false };
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const lang = s.lang || this.props.language || 'mn';
+    const mn = lang === 'mn';
+    const pick = (pair) => (mn ? pair[0] : pair[1]);
+    const accent = this.props.accent ?? '#6E56CF';
+    const accentSoft = accent + '1A';
+    const L = mn ? {
+      myTasks: 'Миний ажлууд', standup: 'Стэндап', inbox: 'Мэдэгдэл', feedback: 'Санал хүсэлт', language: 'Хэл', location: 'Байршил', closePanel: 'Хаах',
+      banner: '3 хүн энэ асуудлыг мэдээлсэн. Бүгд APP-118 ажилд холбогдсон.', seeAll: 'Бүгдийг харах',
+      bug: 'Алдаа', firstReport: 'Анхны мэдээлэл',
+      title: 'Сагсны тоо шинэчлэгдэхгүй байна',
+      body: 'Бараа нэмсний дараа доод цэсний сагсны тоо хуучнаараа үлдэж байна. Апп-аа хааж нээхэд л зөв тоо гарч ирдэг. Android 14, Samsung A54.',
+      attachments: 'Хавсралт', openImg: 'Томруулж харах: cart-badge.jpg', submitter: 'Илгээгч', subName: 'Ганбат Ж.', subI: 'ГЖ',
+      submittedAt: '10-р сарын 16, 15:20-д илгээсэн', noPhone: 'утас өгөөгүй',
+      activity: 'Дотоод тэмдэглэл ба түүх', internalOnly: 'Зөвхөн багт харагдана', notePh: 'Дотоод тэмдэглэл бичих…', noteHint: 'Илгээгчид харагдахгүй', addNote: 'Нэмэх',
+      status: 'Төлөв', linkedStatus: 'Ажилтай холбосон', linkedTask: 'Холбосон ажил',
+      taskName: 'Шинэ доод таб самбар хэрэгжүүлэх', project: 'Апп шинэчлэл', taskStatus: 'Төлөв', inProgress: 'Хийгдэж буй', due: 'Дуусах', dueVal: '10-р сарын 10', reports: 'Мэдээлэл',
+      openTask: 'Ажлыг нээх', unlink: 'Салгах', assignee: 'Хариуцагч', assigneeHint: 'Энд солиход APP-118 ажлын хариуцагч мөн шинэчлэгдэнэ.',
+      allLinked: 'Энэ ажилд холбогдсон санал хүсэлт', notifyAll: 'Бүгдэд мэдэгдэх', closeAll: 'Бүгдийг хаах',
+      dupHint: 'Ажил дуусахад холбогдсон бүх санал хүсэлтийг нэг дор хааж, илгээгчдэд мэдэгдэж болно.'
+    } : {
+      myTasks: 'My Tasks', standup: 'Standup', inbox: 'Inbox', feedback: 'Feedback', language: 'Language', location: 'Location', closePanel: 'Close',
+      banner: '3 people reported this. All reports are linked to APP-118.', seeAll: 'See all',
+      bug: 'Bug', firstReport: 'First report',
+      title: 'Cart badge count doesn’t update',
+      body: 'After adding an item, the cart number on the bottom bar stays the same. It only shows the right number after I close and reopen the app. Android 14, Samsung A54.',
+      attachments: 'Attachments', openImg: 'Open preview: cart-badge.jpg', submitter: 'Submitted by', subName: 'Ganbat J.', subI: 'GJ',
+      submittedAt: 'Submitted Oct 16, 15:20', noPhone: 'no phone provided',
+      activity: 'Internal notes & activity', internalOnly: 'Visible to your team only', notePh: 'Write an internal note…', noteHint: 'Not visible to the submitter', addNote: 'Add note',
+      status: 'Status', linkedStatus: 'Linked to task', linkedTask: 'Linked task',
+      taskName: 'Implement new bottom tab bar', project: 'App Redesign', taskStatus: 'Status', inProgress: 'In Progress', due: 'Due', dueVal: 'Oct 10', reports: 'Reports',
+      openTask: 'Open task', unlink: 'Unlink', assignee: 'Assignee', assigneeHint: 'Changing this also updates the assignee on APP-118.',
+      allLinked: 'Feedback linked to this task', notifyAll: 'Notify all', closeAll: 'Close all',
+      dupHint: 'When the task is done, close every linked report and notify all submitters at once.'
+    };
+    const langs = [{ code: 'mn', short: 'МН', full: 'Монгол' }, { code: 'en', short: 'EN', full: 'English' }].map((d) => ({
+      ...d, active: d.code === lang, pick: () => this.setState({ lang: d.code }),
+      style: d.code === lang ? 'background:#FFFFFF;color:#18181B;box-shadow:0 1px 2px rgba(24,24,27,0.08)' : 'background:transparent;color:#6B6B74'
+    }));
+    const PEOPLE = {
+      tem: [['Тэмүүлэн Г.', 'Temuulen G.'], ['ТГ', 'TG'], 'background:#DCFCE7;color:#166534'],
+      dorj: [['Дорж Э.', 'Dorj E.'], ['ДЭ', 'DE'], 'background:#FEF3C7;color:#92400E'],
+      sara: [['Сараа К.', 'Sara K.'], ['СК', 'SK'], 'background:#FFE4E6;color:#9F1239'],
+      anu: [['Ану Б.', 'Anu B.'], ['АБ', 'AB'], 'background:#E0E7FF;color:#3730A3'],
+      bat: [['Бат О.', 'Bat O.'], ['БО', 'BO'], 'background:#CCFBF1;color:#115E59']
+    };
+    const ak = s.assignee || 'tem';
+    const A = PEOPLE[ak];
+    const assignee = { name: pick(A[0]), initials: pick(A[1]), avatar: A[2] };
+    const assigneeOptions = Object.keys(PEOPLE).map((k) => ({
+      name: pick(PEOPLE[k][0]), initials: pick(PEOPLE[k][1]), avatar: PEOPLE[k][2], selected: k === ak,
+      pick: () => this.setState({ assignee: k, assigneeOpen: false })
+    }));
+    const dupDefs = [
+      { id: 'FB-1036', t: ['Сагсны тоо шинэчлэгдэхгүй байна', 'Cart badge count doesn’t update'], n: ['Ганбат Ж.', 'Ganbat J.'], i: ['ГЖ', 'GJ'], av: 'background:#E0F2FE;color:#075985', d: ['10/16', 'Oct 16'], tag: ['Энэ', 'This one'], tagStyle: 'background:' + accentSoft + ';color:' + accent, cur: true },
+      { id: 'FB-1039', t: ['Сагсанд нэмсэн ч тоо 0 хэвээр', 'Cart number stays at 0 after adding'], n: ['Сүхбат П.', 'Sukhbat P.'], i: ['СП', 'SP'], av: 'background:#FEF3C7;color:#92400E', d: ['10/17', 'Oct 17'], tag: ['Давхардал', 'Duplicate'], tagStyle: 'background:#F1F1F3;color:#52525B' },
+      { id: 'FB-1045', t: ['Бараа хасахад доод цэсний тоо буруу', 'Bottom bar count wrong after removing an item'], n: ['Анужин Т.', 'Anujin T.'], i: ['АТ', 'AT'], av: 'background:#FCE7F3;color:#9D174D', d: ['Өнөөдөр', 'Today'], tag: ['Давхардал', 'Duplicate'], tagStyle: 'background:#F1F1F3;color:#52525B' }
+    ];
+    const dups = dupDefs.map((d) => ({
+      id: d.id, title: pick(d.t), name: pick(d.n), i: pick(d.i), av: d.av, date: pick(d.d), tag: pick(d.tag), tagStyle: d.tagStyle,
+      href: d.cur ? '#' : 'FeedbackDetail.dc.html', rowStyle: d.cur ? 'background:#FCFBFF' : ''
+    }));
+    const reporters = dupDefs.map((d) => ({ i: pick(d.i), av: d.av }));
+    const E = (who, text, time, mark) => ({ isEvent: true, isNote: false, who: pick(who), text: pick(text), time: pick(time), mark: mark || 'background:#C4C4CC' });
+    const N = (pk, text, time) => ({ isEvent: false, isNote: true, who: pick(PEOPLE[pk][0]), initials: pick(PEOPLE[pk][1]), avatar: PEOPLE[pk][2], text: pick(text), time: pick(time) });
+    const log = [
+      E(['Ганбат Ж.', 'Ganbat J.'], ['нийтийн хуудсаар илгээсэн', 'submitted via the public page'], ['10/16 15:20', 'Oct 16 15:20']),
+      E(['Ану Б.', 'Anu B.'], ['төлөвийг “Шинэ” → “Хянаж буй” болгосон', 'changed status from “New” to “In review”'], ['10/16 16:02', 'Oct 16 16:02'], 'background:#D97706'),
+      E(['Бат О.', 'Bat O.'], ['APP-118 ажилтай холбосон', 'linked this to APP-118'], ['10/16 16:30', 'Oct 16 16:30'], 'background:#0284C7'),
+      E(['Бат О.', 'Bat O.'], ['FB-1039-ийг давхардал гэж холбосон', 'linked FB-1039 as a duplicate'], ['10/17 10:12', 'Oct 17 10:12'], 'background:#0284C7'),
+      N('tem', ['Badge-ийн тоо state-ээс биш кэшээс уншиж байна. Таб самбарын PR-т хамт засна.', 'The badge reads from cache instead of state. Fixing it in the tab bar PR.'], ['10/17 11:40', 'Oct 17 11:40']),
+      E(['Систем', 'System'], ['FB-1045-ийг ижил төстэй гэж олж, автоматаар холбосон', 'found FB-1045 as similar and linked it automatically'], ['Өнөөдөр 09:05', 'Today 09:05'], 'background:' + accent)
+    ];
+    return {
+      lang, L, langs, accent, accentSoft, assignee, assigneeOptions, dups, reporters, log,
+      dupCount: mn ? '3 санал хүсэлт' : '3 feedback items',
+      assigneeOpen: !!s.assigneeOpen,
+      toggleAssignee: () => this.setState({ assigneeOpen: !this.state.assigneeOpen })
+    };
+  }
+}
+</script>
+</body>
+</html>
