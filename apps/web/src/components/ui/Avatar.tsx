@@ -2,7 +2,7 @@ import type { UserRef } from '@kite/shared';
 import { cn } from '../../lib/cn';
 import { paletteClass } from '../../lib/palette';
 
-export type AvatarSize = 20 | 22 | 24 | 26 | 28 | 30 | 32 | 36 | 40 | 44;
+export type AvatarSize = 20 | 22 | 24 | 26 | 28 | 30 | 32 | 36 | 40 | 44 | 72;
 
 type AvatarUser = Pick<UserRef, 'name' | 'initials' | 'avatarColor'>;
 
@@ -12,7 +12,7 @@ interface AvatarProps {
   /** 2px border in the page background (`surface` on cards), for overlapping stacks. */
   ring?: boolean | 'surface';
   /** Initials font size; the designs use 10px except the sidebar footer (11px). */
-  textSize?: 10 | 11 | 13 | 14 | 15;
+  textSize?: 9 | 10 | 11 | 13 | 14 | 15 | 24;
   /** Hover title; defaults to the name. Pass `null` when the name is shown next to it. */
   title?: string | null;
   /** Green presence dot at the bottom right, ringed like the avatar. */

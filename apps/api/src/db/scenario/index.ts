@@ -90,6 +90,16 @@ export async function runScenario(
     );
     await insert(schema.activity, rows.activity);
     await insert(schema.notifications, rows.notifications);
+    await insert(schema.userAbsences, rows.absences);
+    await insert(schema.standupGroups, rows.standupGroups);
+    await insert(schema.standupGroupMembers, rows.standupGroupMembers);
+    await insert(schema.standupEntries, rows.standupEntries);
+    await insert(schema.standupBlockers, rows.standupBlockers);
+    await insert(schema.standupReactions, rows.standupReactions);
+    await insert(schema.standupReplies, rows.standupReplies);
+    await insert(schema.standupMeetings, rows.standupMeetings);
+    await insert(schema.standupNotices, rows.standupNotices);
+    await insert(schema.notifications, rows.standupNotifications);
   });
   await db.execute(sql`analyze`);
 
@@ -136,6 +146,11 @@ function printSummary(
       `  ${n(rows.comments.length)} comments (${n(threads.filter((c) => c >= 50).length)} threads with 50+, ` +
         `longest ${Math.max(0, ...threads)}), ${n(rows.activity.length)} activity rows, ` +
         `${n(rows.periods.length)} status periods, ${n(rows.notifications.length)} notifications`,
+      `  ${n(rows.standupGroups.length)} standup groups ` +
+        `(largest ${Math.max(0, ...rows.standupGroups.map((g) => rows.standupGroupMembers.filter((m) => m.groupId === g.id).length))} people), ` +
+        `${n(rows.standupEntries.length)} updates, ${n(rows.standupBlockers.length)} blockers ` +
+        `(${n(rows.standupBlockers.filter((b) => !b.resolvedAt).length)} open), ` +
+        `${n(rows.standupMeetings.length)} past meetings, ${n(rows.absences.length)} out-of-office periods`,
     ].join('\n'),
   );
 

@@ -1,7 +1,15 @@
 import type { AvatarColor, PaletteKey } from '@kite/shared';
 import { createRng } from './random.js';
 import { FEMALE_NAMES, FOREIGN_NAMES, MALE_NAMES, PATRONYMICS, transliterate } from './text.js';
-import type { PersonDef, ProjectDef, ScenarioDef, SpaceDef, TagDef, Topic } from './types.js';
+import type {
+  PersonDef,
+  ProjectDef,
+  ScenarioDef,
+  SpaceDef,
+  StandupGroupDef,
+  TagDef,
+  Topic,
+} from './types.js';
 
 // "Altai Group": 120 people in 8 departments, 10 spaces, 60 projects (5 archived), ~25k tasks
 // over a year. Engineering spaces run two-week sprints. Planted edge cases: three Bat-Erdenes,
@@ -456,6 +464,74 @@ const REGULAR = PEOPLE.find(
     /^p\d/.test(x.key) && x.archetype === 'normal' && !isLeft(x.key) && /[А-Яа-яӨөҮү]/.test(x.name),
 );
 
+// Standups ------------------------------------------------------------------------------------
+
+const current = (d: Dept) => dept(d).filter((key) => !isLeft(key));
+const ENG = current('eng').filter((key) => key !== 'cto');
+const squad = (from: number) => ENG.slice(from, from + 8);
+const SQUADS: [string, number][] = [
+  ['Төлбөрийн баг', 0],
+  ['Mobile squad', 8],
+  ['Платформын баг', 16],
+];
+
+const STANDUPS: StandupGroupDef[] = [
+  ...SQUADS.map(([name, from]): StandupGroupDef => ({
+    name,
+    members: squad(from),
+    facilitator: squad(from)[0] ?? null,
+    createdDaysAgo: 60,
+    postRate: 0.8,
+    mn: name === 'Mobile squad' ? 0.4 : 0.85,
+  })),
+  {
+    name: 'Бүтээгдэхүүн ба дизайн',
+    members: [
+      'pmo',
+      ...current('product')
+        .filter((k) => k !== 'pmo')
+        .slice(0, 4),
+      ...current('design').slice(0, 5),
+    ],
+    facilitator: 'pmo',
+    meetingAt: '09:45',
+    postBy: '09:30',
+    reminderAt: '09:00',
+    speakingOrder: 'alphabetical',
+    createdDaysAgo: 45,
+    postRate: 0.7,
+    mn: 0.9,
+  },
+  {
+    // Async only; Irmuun joined yesterday (mid-week).
+    name: 'Харилцагчийн үйлчилгээ',
+    members: [
+      'bayarmaa',
+      ...current('support')
+        .filter((k) => k !== 'bayarmaa')
+        .slice(0, 6),
+      'irmuun',
+    ],
+    facilitator: 'bayarmaa',
+    meetingAt: null,
+    createdDaysAgo: 30,
+    postRate: 0.6,
+    mn: 1,
+    joinedDaysAgo: { irmuun: 1 },
+  },
+  {
+    // Too big for one standup: the page nudges admins to split it.
+    name: 'Engineering all-hands',
+    members: ['cto', ...ENG.slice(0, 29)],
+    facilitator: 'cto',
+    secondsPerPerson: 60,
+    totalMeetingMinutes: 20,
+    createdDaysAgo: 25,
+    postRate: 0.65,
+    mn: 0.75,
+  },
+];
+
 export const LARGE: ScenarioDef = {
   slug: 'altai-group',
   name: 'Altai Group',
@@ -466,6 +542,7 @@ export const LARGE: ScenarioDef = {
   spaces: SPACES,
   projects: PROJECTS,
   tags: TAGS,
+  standups: STANDUPS,
   credentials: [
     ['owner', 'ceo'],
     ['admin · CTO, in 28 projects', 'cto'],

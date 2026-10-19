@@ -16,7 +16,12 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { createdAt, id, position, timestamptz } from './columns.js';
-import { speakingOrderEnum, standupEntryStatusEnum, standupReactionEnum } from './enums.js';
+import {
+  meetingTaskSourceEnum,
+  speakingOrderEnum,
+  standupEntryStatusEnum,
+  standupReactionEnum,
+} from './enums.js';
 import { tasks } from './tasks.js';
 import { users } from './users.js';
 import { workspaces } from './workspaces.js';
@@ -73,6 +78,8 @@ export const standupGroupMembers = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     position: position('position').notNull(),
+    /** When they joined the group (earlier days don't list them). */
+    addedAt: timestamptz('added_at').notNull().defaultNow(),
   },
   (t) => [
     primaryKey({ columns: [t.groupId, t.userId] }),
@@ -194,7 +201,11 @@ export const standupNotices = pgTable(
   (t) => [primaryKey({ columns: [t.groupId, t.userId, t.date, t.kind] })],
 );
 
-/** A screen-shared meeting for one standup day. */
+/**
+ * A screen-shared meeting for one standup day. Live state is kept here (not on the
+ * facilitator's screen), so followers, reloads and other tabs agree: the current speaker,
+ * when their current turn started and the seconds everyone spoke so far. Never read by Reports.
+ */
 export const standupMeetings = pgTable(
   'standup_meetings',
   {
@@ -203,23 +214,33 @@ export const standupMeetings = pgTable(
       .notNull()
       .references(() => standupGroups.id, { onDelete: 'cascade' }),
     date: date('date', { mode: 'string' }).notNull(),
+    /** Who started (drives) it. */
     facilitatorId: uuid('facilitator_id').references(() => users.id, { onDelete: 'set null' }),
     startedAt: timestamptz('started_at'),
     endedAt: timestamptz('ended_at'),
-    /** Meeting notes (plain paragraphs). */
-    notes: jsonb('notes').$type<unknown>(),
-    /** User ids in the order they spoke. */
+    /** Meeting notes (plain text, autosaved). */
+    notes: text('notes'),
+    /** "Save notes to standup": the notes and created tasks show on the day page from then on. */
+    notesSavedAt: timestamptz('notes_saved_at'),
+    /** Every group member in speaking order, fixed at start (out of office last). */
     speakingOrder: uuid('speaking_order')
       .array()
       .notNull()
       .default(sql`'{}'::uuid[]`),
-    /** Seconds each person spoke, by user id. */
+    /** The person speaking now (null before start and after the end). */
+    currentUserId: uuid('current_user_id').references(() => users.id, { onDelete: 'set null' }),
+    /** When the current person's running turn started (their time = durations + now − this). */
+    currentStartedAt: timestamptz('current_started_at'),
+    /** Seconds each person spoke in finished turns, by user id. */
     durations: jsonb('durations').$type<Record<string, number>>().notNull().default({}),
+    /** Wall-clock length, stored at the end. */
+    totalSeconds: integer('total_seconds'),
+    updatedAt: timestamptz('updated_at').notNull().defaultNow(),
   },
   (t) => [unique('standup_meetings_group_id_date_unique').on(t.groupId, t.date)],
 );
 
-/** Tasks created with "Create task" during a meeting. */
+/** Tasks created with "Create task" during a meeting, and the item they came from. */
 export const standupMeetingTasks = pgTable(
   'standup_meeting_tasks',
   {
@@ -229,6 +250,23 @@ export const standupMeetingTasks = pgTable(
     taskId: uuid('task_id')
       .notNull()
       .references(() => tasks.id, { onDelete: 'cascade' }),
+    /** Whose update it came from. */
+    sourceUserId: uuid('source_user_id').references(() => users.id, { onDelete: 'set null' }),
+    sourceKind: meetingTaskSourceEnum('source_kind').notNull(),
+    sourceEntryId: uuid('source_entry_id').references(() => standupEntries.id, {
+      onDelete: 'set null',
+    }),
+    /** `blocker`: the blocker. */
+    sourceBlockerId: uuid('source_blocker_id').references(() => standupBlockers.id, {
+      onDelete: 'set null',
+    }),
+    /** `today`: the item's index in the update's Today list. */
+    sourceItemIndex: smallint('source_item_index'),
+    createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+    createdAt: createdAt(),
   },
-  (t) => [primaryKey({ columns: [t.meetingId, t.taskId] })],
+  (t) => [
+    primaryKey({ columns: [t.meetingId, t.taskId] }),
+    index('standup_meeting_tasks_task_id_idx').on(t.taskId),
+  ],
 );

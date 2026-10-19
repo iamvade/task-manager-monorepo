@@ -10,6 +10,8 @@ import { useDayView } from './DayContext';
 import { ReplyField, ReplyThread } from './Replies';
 import { TaskChip } from './TaskChip';
 
+const BLOCKERS_SHOWN = 6;
+
 /**
  * Blockers (Standup.dc.html, when "Show blockers first" is on): open ones first, earlier days'
  * open ones included ("since Oct 8"). The checkbox resolves on the group's today only.
@@ -17,8 +19,13 @@ import { TaskChip } from './TaskChip';
 export function BlockersSection() {
   const { t } = useTranslation();
   const { day } = useDayView();
+  // A big group's carried-over blockers would push every update down the page: the first few,
+  // then "Show N more".
+  const [all, setAll] = useState(false);
   const open = day.blockers.filter((b) => !b.resolvedAt).length;
   if (day.blockers.length === 0) return null;
+  const shown = all ? day.blockers : day.blockers.slice(0, BLOCKERS_SHOWN);
+  const hidden = day.blockers.length - shown.length;
   return (
     <section aria-labelledby="standup-blockers" className="flex flex-col gap-2.5">
       <div className="flex items-center gap-2">
@@ -34,10 +41,21 @@ export function BlockersSection() {
         </span>
       </div>
       <ul className="m-0 flex list-none flex-col overflow-hidden rounded-[12px] border border-danger-card p-0">
-        {day.blockers.map((b) => (
+        {shown.map((b) => (
           <BlockerRow key={b.id} blocker={b} />
         ))}
       </ul>
+      {hidden > 0 && (
+        <button
+          type="button"
+          onClick={() => {
+            setAll(true);
+          }}
+          className="self-start border-0 bg-transparent p-0 text-[13px] font-medium text-accent-ink hover:underline"
+        >
+          {t('standup.day.moreBlockers', { count: hidden })}
+        </button>
+      )}
     </section>
   );
 }

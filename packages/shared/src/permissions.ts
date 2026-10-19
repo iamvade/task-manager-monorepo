@@ -30,3 +30,17 @@ export function canManageStandupGroup(
 ): boolean {
   return role !== 'member' || (facilitatorId !== null && facilitatorId === userId);
 }
+
+/**
+ * Starting and driving a standup meeting (caller is in the group): the facilitator; when the
+ * group has none or they're out of office that day, admins and owners in the group.
+ */
+export function canDriveMeeting(
+  role: WorkspaceRole,
+  facilitatorId: string | null,
+  facilitatorOut: boolean,
+  userId: string,
+): boolean {
+  if (facilitatorId !== null && facilitatorId === userId) return true;
+  return (facilitatorId === null || facilitatorOut) && role !== 'member';
+}

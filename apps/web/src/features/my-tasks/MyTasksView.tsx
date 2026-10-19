@@ -14,6 +14,7 @@ import { toast } from '../../stores/toast';
 import { useUiStore } from '../../stores/ui';
 import { PageHeader } from '../views/PageHeader';
 import { ActivityPanel } from './ActivityPanel';
+import { useIsNarrow } from '../../lib/useMediaQuery';
 import { StandupCard } from './StandupCard';
 import { Greeting } from './Greeting';
 import { StatCards } from './StatCards';
@@ -70,6 +71,7 @@ function HomeBody({ workspaceId, home }: { workspaceId: string; home: Home }) {
   const openCreate = useUiStore((s) => s.openCreate);
   const setGroupCollapsed = useUiStore((s) => s.setGroupCollapsed);
   const complete = useCompleteMyTask(workspaceId);
+  const narrow = useIsNarrow();
   // Rows completed here stay on screen (struck through) after refetches drop them.
   const [kept, setKept] = useState<Record<string, KeptRow>>({});
   const [olderFrom, setOlderFrom] = useState<string | null>(null);
@@ -169,6 +171,8 @@ function HomeBody({ workspaceId, home }: { workspaceId: string; home: Home }) {
     <div className="flex flex-wrap items-start gap-6 px-6 pt-6 pb-10">
       <div className="flex min-w-0 flex-[999_1_560px] flex-col gap-6">
         <Greeting today={today} />
+        {/* On a phone the side column comes after every task section: the standup card first. */}
+        {narrow && <StandupCard workspaceId={workspaceId} />}
         <StatCards
           home={home}
           onShow={(id) => {
@@ -197,7 +201,7 @@ function HomeBody({ workspaceId, home }: { workspaceId: string; home: Home }) {
         </div>
       </div>
       <div className="flex max-w-[360px] min-w-0 flex-[1_1_300px] flex-col gap-4">
-        <StandupCard workspaceId={workspaceId} />
+        {!narrow && <StandupCard workspaceId={workspaceId} />}
         <ActivityPanel
           items={feed}
           loadingOlder={older.isFetching}

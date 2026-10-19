@@ -1,4 +1,4 @@
-import type { Priority, StatusCategory } from '@kite/shared';
+import type { Priority, RichTextNode, StatusCategory, TaskDetail } from '@kite/shared';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -16,6 +16,14 @@ export interface CreateDefaults {
   dueDate?: string;
   /** The sprint the view is filtered to (project views). */
   sprintId?: string;
+  /** Prefilled title and description (standup meeting "Create task"). */
+  title?: string;
+  description?: RichTextNode;
+  /**
+   * Called with the saved task instead of the form's own follow-up ("Create more" is ignored).
+   * Kept in memory only (`createDefaults` isn't persisted).
+   */
+  onCreated?: (task: TaskDetail) => void;
 }
 
 export interface ListColumns {

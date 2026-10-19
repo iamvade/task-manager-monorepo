@@ -317,6 +317,20 @@ export function YesterdayFieldset({ draft, setDraft, variant = 'desktop' }: Sect
           }}
         />
       </div>
+      {draft.more.length > 0 && (
+        <button
+          type="button"
+          onClick={() => {
+            setDraft((d) => ({ ...d, yesterday: [...d.yesterday, ...d.more], more: [] }));
+          }}
+          className={cn(
+            'self-start border-0 bg-transparent p-0 text-[12px] font-medium text-accent-ink hover:underline',
+            mobile ? 'min-h-11' : 'h-6',
+          )}
+        >
+          {t('standup.write.moreSuggestions', { count: draft.more.length })}
+        </button>
+      )}
       {draft.removed.length > 0 && (
         <button
           type="button"

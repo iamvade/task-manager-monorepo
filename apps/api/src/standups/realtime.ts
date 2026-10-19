@@ -1,4 +1,4 @@
-import type { StandupMessageType } from '@kite/shared';
+import type { StandupMeeting, StandupMessageType } from '@kite/shared';
 import type { FastifyInstance } from 'fastify';
 import type { standupGroups } from '../db/schema/index.js';
 import { activeGroupMemberIds } from './schedule.js';
@@ -50,6 +50,37 @@ export function publishBlockedChanged(
       workspaceId,
       taskIds: [...new Set(taskIds)],
       at: app.clock().toISOString(),
+    },
+  });
+}
+
+/**
+ * The day's meeting changed (started, moved on, ended, notes or tasks): the whole meeting goes to
+ * the group's members so followers update at once. The acting tab already has it.
+ */
+export async function publishMeeting(
+  app: FastifyInstance,
+  group: GroupRow,
+  change: {
+    date: string;
+    meeting: StandupMeeting;
+    actorId: string;
+    clientId?: string | undefined;
+  },
+): Promise<void> {
+  const userIds = await activeGroupMemberIds(app.db, group);
+  if (userIds.length === 0) return;
+  app.realtime.broadcaster.publish({
+    to: { workspaceId: group.workspaceId, userIds },
+    exceptClientId: change.clientId,
+    message: {
+      type: 'standup.meeting_changed',
+      workspaceId: group.workspaceId,
+      groupId: group.id,
+      date: change.date,
+      actorId: change.actorId,
+      at: app.clock().toISOString(),
+      meeting: change.meeting,
     },
   });
 }

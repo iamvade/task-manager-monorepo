@@ -18,6 +18,7 @@ import { uuidv7 } from 'uuidv7';
 import { MN_PUBLIC_HOLIDAYS_2026 } from '../holidays.js';
 import type * as schema from '../schema/index.js';
 import { createRng } from './random.js';
+import { buildStandups } from './standups.js';
 import {
   COMMENTS,
   CRITERIA,
@@ -310,7 +311,27 @@ export function buildScenario(
     }
   }
 
+  const standups = buildStandups(def, {
+    workspaceId,
+    ownerId: owner.id,
+    now,
+    people: people
+      .filter((p) => p.member)
+      .map((p) => ({
+        key: p.def.key,
+        id: p.id,
+        joinedAt: p.joinedAt,
+        leftAt: p.leftAt,
+        vacation: p.vacation,
+      })),
+    tasks,
+    assignees,
+    statuses,
+    holidays: new Set(holidays.map((h) => h.date)),
+  });
+
   return {
+    ...standups,
     workspace: {
       id: workspaceId,
       name: def.name,

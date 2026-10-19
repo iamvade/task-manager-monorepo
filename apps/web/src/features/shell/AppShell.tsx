@@ -1,6 +1,6 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Outlet } from 'react-router';
+import { Outlet, useMatches } from 'react-router';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
 import { cn } from '../../lib/cn';
 import { Toaster } from '../../components/ui/Toaster';
@@ -80,9 +80,15 @@ function SkipLink() {
   );
 }
 
+/** A route with `handle: { chrome: 'none' }` (standup live mode) renders without the sidebar. */
+function useBareRoute() {
+  return useMatches().some((m) => (m.handle as { chrome?: string } | undefined)?.chrome === 'none');
+}
+
 export function AppShell() {
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
   const narrow = useIsNarrow();
+  const bare = useBareRoute();
   useGlobalShortcuts();
   usePreloadOverlays();
 
@@ -96,7 +102,7 @@ export function AppShell() {
         )}
       >
         <SkipLink />
-        {narrow ? <MobileNavBar /> : collapsed ? <SidebarRail /> : <Sidebar />}
+        {bare ? null : narrow ? <MobileNavBar /> : collapsed ? <SidebarRail /> : <Sidebar />}
         <div className="relative flex min-w-0 flex-1">
           <main id="main" tabIndex={-1} className="flex min-w-0 flex-1 flex-col overflow-auto">
             <ErrorBoundary>

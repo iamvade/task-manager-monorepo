@@ -35,6 +35,8 @@ interface Ids {
   taskKey: string;
   /** Mobile team (has posts) and Design team (empty state). */
   mobileGroup: string;
+  /** The group's local date (live mode's URL). */
+  mobileToday: string;
   designGroup: string;
 }
 
@@ -57,7 +59,7 @@ async function lookup(page: Page): Promise<Ids> {
   }[];
   const groups = (await (
     await page.request.get(`/api/v1/workspaces/${ws}/standup-groups`)
-  ).json()) as { id: string; name: string }[];
+  ).json()) as { id: string; name: string; today: string }[];
   const mobile = groups.find((g) => g.name === 'Mobile team');
   const design = groups.find((g) => g.name === 'Design team');
   if (!app || !portal || !space || !tasks[0] || !mobile || !design) {
@@ -69,6 +71,7 @@ async function lookup(page: Page): Promise<Ids> {
     emptyProject: portal.id,
     taskKey: tasks[0].key,
     mobileGroup: mobile.id,
+    mobileToday: mobile.today,
     designGroup: design.id,
   };
 }
@@ -95,6 +98,8 @@ const pages = (ids: Ids): [string, string][] => [
   ['Standup · group', `/standup/${ids.mobileGroup}`],
   ['Standup · empty group', `/standup/${ids.designGroup}`],
   ['Standup · settings', `/standup/${ids.mobileGroup}/settings`],
+  // Anu follows (Bat facilitates); the running meeting is checked in standup-live.spec.ts.
+  ['Standup · live', `/standup/${ids.mobileGroup}/${ids.mobileToday}/live`],
 ];
 
 test.describe('signed out', () => {

@@ -39,6 +39,13 @@ export function EntryCard({ entry }: { entry: StandupEntry }) {
     { text: t('standup.day.postedAt', { time: posted }), late: false },
     { text: entry.isLate ? t('standup.day.late') : null, late: true },
     { text: entry.editedAt ? t('standup.day.edited') : null, late: false },
+    // Their earlier updates stay readable after they leave the group.
+    {
+      text: day.members.some((m) => m.user.id === entry.user.id)
+        ? null
+        : t('standup.day.leftGroup'),
+      late: false,
+    },
   ].filter((part) => part.text);
 
   const copyLink = async () => {
@@ -73,7 +80,7 @@ export function EntryCard({ entry }: { entry: StandupEntry }) {
         <Avatar user={entry.user} size={36} textSize={13} title={null} />
         <div className="flex min-w-0 flex-1 flex-col">
           <span className="truncate font-semibold">{name}</span>
-          <span className="truncate text-[12px] text-muted">
+          <span className="text-[12px] break-words text-muted">
             {meta.map((part, i) => (
               <span key={String(i)} className={part.late ? 'text-warning' : undefined}>
                 {i > 0 && ' · '}

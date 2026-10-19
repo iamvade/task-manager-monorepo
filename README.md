@@ -78,6 +78,37 @@ Docs are on by default everywhere except `NODE_ENV=production`. Set `API_DOCS=tr
 
 The metric definitions are in `CLAUDE.md` under "Reports".
 
+## Standups
+
+`/standup` holds async daily standups per **standup group**. A group is a team with its own days, post-by time, reminder and an optional meeting time. Every workspace member sees the groups. Only a group's members read and write its updates.
+
+- **Groups.**
+  - Admins and owners create groups.
+  - Admins, owners and the group's one facilitator edit the settings and members (`/standup/:groupId/settings`).
+  - Above 12 people, the group page and settings suggest splitting the group.
+- **Writing.** "Write update" (`?write=1`) prefills Yesterday from your own activity since the previous standup day: the five strongest rows, with the rest behind "Show N more". Today offers chips for your overdue, due-today and in-progress tasks. Blockers take a linked task and the people who can help.
+  - Drafts autosave.
+  - Under 640px the same link opens a full-screen phone page.
+  - Updates can be edited until the day ends in the group's time zone.
+- **Reading.** The group page shows:
+  - who has posted, is late or out of office;
+  - open blockers first, including earlier days' blockers until someone resolves them;
+  - reactions and replies.
+    Past days are read-only, except that replies, reactions and resolving still work. A linked task shows "Blocked" in List, Board and the drawer.
+- **Live meeting** (`/standup/:groupId/:date/live`, desktop, only when the group has a meeting time). The facilitator presses **Start standup**. If the group has no facilitator, or the facilitator is out that day, admins and owners in the group can start it. Then:
+  - The meeting goes through people in the group's speaking order: posting order, alphabetical or random. People out of office are listed but skipped.
+  - Previous / Next or ← → move between people. Each person has a timer, and the total runs against the meeting length; both turn warm when over time, with no sounds.
+  - "Create task" on a Today item or blocker opens quick create prefilled with the title, the speaker as assignee, and a link back to the standup.
+  - Notes autosave. **Save notes to standup** puts the notes and the created tasks on that day's page as "Meeting notes".
+  - Everyone else in the group who opens the page (**Join live**) follows the facilitator's screen read-only. The live state lives on the server (`standup_meetings`), so reloads and late joiners agree.
+- **Notifications.**
+  - A reminder goes out between the reminder time and post-by to people who haven't posted. While a group waits for your update, the Inbox also pins a "write your update" row.
+  - The facilitator gets a digest after post-by.
+  - People named as helpers are notified, as are authors whose blockers get resolved or replied to. One Settings switch, "Standups", covers all of these.
+- **Privacy rule.** Standup content and timing are never used in Reports or in any performance metric. That covers posts, blockers, replies, reactions, posting times, the late marker, meeting notes and per-person speaking times. No report, export, Workload or People view reads the standup tables.
+
+The API is under the OpenAPI tag "Standups". Design notes are in `docs/design-notes.md` §5. Rules and endpoints are in `CLAUDE.md` under "Standups". A field test of a full standup morning is in `docs/review/STANDUP.md`.
+
 ## Realtime
 
 Each browser tab opens one WebSocket, `GET /api/v1/ws?client=<tab id>`. The socket is authenticated by the session cookie, and its `Origin` must be `WEB_ORIGIN`. The tab subscribes to its workspace. After every committed change the API pushes a small typed message, defined by `realtimeServerMessageSchema` in `packages/shared`. A message carries only ids, the actor and the minimal changed data, and the web app patches or refetches the affected TanStack Query caches. The tab sends the same id as `X-Kite-Client` on its requests, so it never receives its own changes back. Presence (who is online, who is viewing which task) is kept only in the API's memory.
@@ -131,7 +162,14 @@ Docker Compose on one server: Caddy (automatic HTTPS, serves the SPA and proxies
 - **small** — "Nomad Labs" (`@nomadlabs.test`): 7 people, 2 spaces, 4 projects, ~300 tasks over 3 months. A busy lead, a designer who mostly comments, an overloaded developer, someone on vacation with tasks still assigned, a new joiner from last week.
 - **large** — "Altai Group" (`@altaigroup.test`, ~45 s): 120 people in 8 departments plus 9 who left (still assignees, one still a project lead), 10 spaces, 60 projects (5 archived, 4 with 1,000+ tasks), ~25k tasks over a year, 300+ tags, two-week sprints in the engineering spaces only. Mixed Mongolian/English names with shared first names (three Bat-Erdenes, two Sarangerels with the same short name, two Anus) and long Mongolian project and task names; a few people sit in 20+ projects.
 
-Both have mostly small tasks, a few 50+ comment threads, tasks without an assignee or due date, and a pile of stale tasks nobody touches. Code: `apps/api/src/db/scenario/`.
+Both have mostly small tasks, a few 50+ comment threads, tasks without an assignee or due date, and a pile of stale tasks nobody touches.
+
+Both also have standups: about three working weeks of updates linked to people's real tasks, blockers (some still open, some with helpers), reactions, replies, past meetings with saved notes, and today partly posted with reminders. People on vacation are out of office.
+
+- Nomad Labs has one group of all 7.
+- Altai Group has three 8-person squads, a Product & design group, an async support group where a newcomer joined yesterday, and a 30-person "Engineering all-hands" to show what happens when a group is too big.
+
+Code: `apps/api/src/db/scenario/` (standups in `standups.ts`).
 
 API tests run against `TEST_DATABASE_URL` (the `kite_test` database); migrations are applied to it automatically before the suite.
 
@@ -149,3 +187,6 @@ Install the browser once with `pnpm --filter @kite/web exec playwright install c
 - A member's access to Workload and the People → My performance redirect.
 - The People person picker.
 - Partner Portal's not-enough-history state.
+- Writing a standup on a desktop and at 390×844 (autosaved draft, chips, a linked blocker that shows "Blocked" in List and Board), reacting and replying.
+- A live meeting with two browsers: Bat drives, Anu follows; arrow keys, Create task from a blocker, notes, Save notes, End; then the day page's Meeting notes.
+- axe on every screen and overlay (`a11y.spec.ts`), the skip link and the drawer's focus trap.

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { dateSchema } from '../dates.js';
 import {
+  meetingTaskSourceSchema,
   paletteKeySchema,
   speakingOrderSchema,
   standupEntryStatusSchema,
@@ -15,6 +16,8 @@ import { NOTHING_TO_UPDATE, nonEmptyPatch, userRefSchema } from './common.js';
 /** Seconds per speaker in the meeting (1 / 2 / 3 min). */
 export const SECONDS_PER_PERSON = [60, 120, 180] as const;
 export const MAX_STANDUP_MEMBERS = 50;
+/** Above this many active members, admins and the facilitator are nudged to split the group. */
+export const STANDUP_SPLIT_THRESHOLD = 12;
 
 /** A wall-clock time in the group's zone, `HH:mm` on a 15-minute step. */
 export const standupTimeSchema = z
@@ -288,6 +291,151 @@ export const standupDayMemberSchema = z
   .meta({ id: 'StandupDayMember' });
 export type StandupDayMember = z.infer<typeof standupDayMemberSchema>;
 
+// ── Meetings ────────────────────────────────────────────────────────────────────────────────
+
+/** A task made with "Create task" in a meeting, and the item it came from. */
+export const standupMeetingTaskSchema = z
+  .object({
+    task: standupTaskRefSchema,
+    /** The task's first assignee. */
+    assignee: userRefSchema.nullable(),
+    source: z.object({
+      /** Whose update it came from (null when that account is gone). */
+      user: userRefSchema.nullable(),
+      kind: meetingTaskSourceSchema,
+      entryId: z.uuid().nullable(),
+      blockerId: z.uuid().nullable(),
+      /** `today`: the item's index in the update's Today list. */
+      itemIndex: z.number().int().nullable(),
+    }),
+    createdAt: z.iso.datetime(),
+  })
+  .meta({ id: 'StandupMeetingTask' });
+export type StandupMeetingTask = z.infer<typeof standupMeetingTaskSchema>;
+
+export const standupMeetingSpeakerSchema = z
+  .object({
+    user: userRefSchema,
+    title: z.string().nullable(),
+    /** As of the meeting's day; `out` people are listed last and skipped. */
+    state: z.enum(['posted', 'not_yet', 'out']),
+    postedAt: z.iso.datetime().nullable(),
+    /** Their posted update that day. */
+    entryId: z.uuid().nullable(),
+  })
+  .meta({ id: 'StandupMeetingSpeaker' });
+export type StandupMeetingSpeaker = z.infer<typeof standupMeetingSpeakerSchema>;
+
+/**
+ * A standup day's meeting. The live state is the server's: the current person's time is
+ * `durations[currentUserId] + (now − currentStartedAt)`, the total the sum of `durations` plus
+ * that running turn. Timing is shown in live mode only and never feeds Reports.
+ */
+export const standupMeetingSchema = z
+  .object({
+    id: z.uuid(),
+    groupId: z.uuid(),
+    date: dateSchema,
+    /** Who started it (drives it). */
+    facilitator: userRefSchema.nullable(),
+    startedAt: z.iso.datetime().nullable(),
+    endedAt: z.iso.datetime().nullable(),
+    /** Everyone in speaking order, fixed at start; out of office last. */
+    order: z.array(standupMeetingSpeakerSchema),
+    currentUserId: z.uuid().nullable(),
+    currentStartedAt: z.iso.datetime().nullable(),
+    /** Seconds of finished turns, by user id. */
+    durations: z.record(z.string(), z.number()),
+    /** Wall-clock length, set at the end. */
+    totalSeconds: z.number().int().nullable(),
+    notes: z.string(),
+    /** When the notes were last saved to the standup page (null = not shown there). */
+    notesSavedAt: z.iso.datetime().nullable(),
+    /** Oldest first. */
+    tasks: z.array(standupMeetingTaskSchema),
+  })
+  .meta({ id: 'StandupMeeting' });
+export type StandupMeeting = z.infer<typeof standupMeetingSchema>;
+
+/** `GET …/days/:date/meeting` and every meeting write. */
+export const standupMeetingStateSchema = z
+  .object({
+    /** Null until someone starts it. */
+    meeting: standupMeetingSchema.nullable(),
+    /**
+     * The caller may start and drive it: the facilitator, or (when the group has none or they're
+     * out of office that day) admins and owners in the group. Everyone else in the group follows.
+     */
+    canDrive: z.boolean(),
+    /** For the client's clock offset. */
+    serverNow: z.iso.datetime(),
+  })
+  .meta({ id: 'StandupMeetingState' });
+export type StandupMeetingState = z.infer<typeof standupMeetingStateSchema>;
+
+export const advanceStandupMeetingSchema = z
+  .object({ toUserId: z.uuid() })
+  .strict()
+  .meta({ id: 'AdvanceStandupMeeting' });
+export type AdvanceStandupMeeting = z.infer<typeof advanceStandupMeetingSchema>;
+
+export const MAX_MEETING_NOTES = 20_000;
+const meetingNotesSchema = z.string().max(MAX_MEETING_NOTES);
+
+export const updateStandupMeetingSchema = z
+  .object({ notes: meetingNotesSchema })
+  .strict()
+  .meta({ id: 'UpdateStandupMeeting' });
+export type UpdateStandupMeeting = z.infer<typeof updateStandupMeetingSchema>;
+
+/** "Save notes to standup" (optionally with the latest text, so nothing waits on autosave). */
+export const saveStandupMeetingNotesSchema = z
+  .object({ notes: meetingNotesSchema.optional() })
+  .strict()
+  .meta({ id: 'SaveStandupMeetingNotes' });
+export type SaveStandupMeetingNotes = z.infer<typeof saveStandupMeetingNotesSchema>;
+
+export const addStandupMeetingTaskSchema = z
+  .object({
+    taskId: z.uuid(),
+    sourceKind: meetingTaskSourceSchema,
+    /** The posted update of that day it came from. */
+    sourceEntryId: z.uuid(),
+    /** `blocker`: one of that update's blockers. */
+    sourceBlockerId: z.uuid().optional(),
+    /** `today`: the item's index in the update's Today list. */
+    sourceItemIndex: z.number().int().min(0).max(100).optional(),
+  })
+  .strict()
+  .refine((b) => (b.sourceKind === 'blocker') === (b.sourceBlockerId !== undefined), {
+    message: 'A blocker source needs sourceBlockerId (and only it)',
+    path: ['sourceBlockerId'],
+  })
+  .refine((b) => (b.sourceKind === 'today') === (b.sourceItemIndex !== undefined), {
+    message: 'A Today source needs sourceItemIndex (and only it)',
+    path: ['sourceItemIndex'],
+  })
+  .meta({ id: 'AddStandupMeetingTask' });
+export type AddStandupMeetingTask = z.infer<typeof addStandupMeetingTaskSchema>;
+
+/** The meeting as the day page shows it. */
+export const standupDayMeetingSchema = z
+  .object({
+    id: z.uuid(),
+    facilitator: userRefSchema.nullable(),
+    startedAt: z.iso.datetime().nullable(),
+    endedAt: z.iso.datetime().nullable(),
+    /** Started and not ended ("Join live"). */
+    live: z.boolean(),
+    totalSeconds: z.number().int().nullable(),
+    /** The saved notes and tasks (null / empty until "Save notes to standup"). */
+    notesSavedAt: z.iso.datetime().nullable(),
+    notes: z.string().nullable(),
+    tasks: z.array(standupMeetingTaskSchema),
+  })
+  .meta({ id: 'StandupDayMeeting' });
+export type StandupDayMeeting = z.infer<typeof standupDayMeetingSchema>;
+
 /** `GET /standup-groups/:id/days/:date`: everything the group page shows for one day. */
 export const standupDaySchema = z
   .object({
@@ -317,6 +465,8 @@ export const standupDaySchema = z
     blockers: z.array(standupBlockerSchema),
     /** The caller's update for the day, draft or posted. */
     myEntry: standupEntrySchema.nullable(),
+    /** That day's meeting, once started. */
+    meeting: standupDayMeetingSchema.nullable(),
   })
   .meta({ id: 'StandupDay' });
 export type StandupDay = z.infer<typeof standupDaySchema>;
