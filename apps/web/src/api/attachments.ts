@@ -8,6 +8,17 @@ import { TASK_MUTATION, bumpCount, patchTask, restoreTask, settle } from './task
 export const attachmentUrl = (id: string, { inline = false } = {}) =>
   `/api/v1/attachments/${id}/download${inline ? '?inline=true' : ''}`;
 
+/** PNG/JPEG/GIF/WebP: the server streams these inline, so the drawer previews them. */
+export const PREVIEWABLE = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp']);
+
+/** Saves the file under its original name. */
+export function downloadAttachment(attachment: Attachment) {
+  const link = document.createElement('a');
+  link.href = attachmentUrl(attachment.id);
+  link.download = attachment.filename;
+  link.click();
+}
+
 const uploadKey = (taskId: string) => [...TASK_MUTATION, 'upload', taskId] as const;
 
 /**

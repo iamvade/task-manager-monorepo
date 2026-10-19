@@ -1,9 +1,16 @@
 import { shortName, type Attachment } from '@kite/shared';
-import { useRef, useState } from 'react';
+import { useRef, useState, type MouseEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { attachmentUrl, useDeleteAttachment, usePendingUploads } from '../../../api/attachments';
+import {
+  PREVIEWABLE,
+  attachmentUrl,
+  downloadAttachment,
+  useDeleteAttachment,
+  usePendingUploads,
+} from '../../../api/attachments';
 import {
   DownloadIcon,
+  EyeIcon,
   MoreIcon,
   PaperclipIcon,
   TrashIcon,
@@ -14,8 +21,11 @@ import { Menu } from '../../../components/ui/Menu';
 import { cn } from '../../../lib/cn';
 import { useRelativeTime } from '../../../lib/useRelativeTime';
 import { canModerate, useTaskView } from '../TaskContext';
+import { ImageViewer } from './ImageViewer';
 
-const PREVIEWABLE = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp']);
+/** A plain left click; ⌘/Ctrl/Shift/middle clicks keep the link's default (new tab, window). */
+const plainClick = (event: MouseEvent) =>
+  event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
 
 const extension = (filename: string) => {
   const dot = filename.lastIndexOf('.');
@@ -73,14 +83,20 @@ function TypeBadge({ filename }: { filename: string }) {
   );
 }
 
-function AttachmentCard({ attachment }: { attachment: Attachment }) {
+function AttachmentCard({
+  attachment,
+  onPreview,
+}: {
+  attachment: Attachment;
+  /** Images only: opens the preview. */
+  onPreview?: () => void;
+}) {
   const { t } = useTranslation();
   const { task, me, role } = useTaskView();
   const { size } = useRelativeTime();
   const remove = useDeleteAttachment();
-  const image = PREVIEWABLE.has(attachment.mime);
+  const image = onPreview !== undefined;
   const canDelete = attachment.uploader.id === me.id || canModerate(role);
-  const href = attachmentUrl(attachment.id);
   const meta = t('drawer.attachmentMeta', {
     size: size(attachment.size),
     name: shortName(attachment.uploader.name),
@@ -96,8 +112,19 @@ function AttachmentCard({ attachment }: { attachment: Attachment }) {
   return (
     <div className="group/att relative min-w-0">
       <a
-        href={href}
-        download={attachment.filename}
+        {...(onPreview
+          ? {
+              href: attachmentUrl(attachment.id, { inline: true }),
+              target: '_blank',
+              rel: 'noopener',
+              'aria-haspopup': 'dialog' as const,
+              onClick: (event: MouseEvent) => {
+                if (!plainClick(event)) return;
+                event.preventDefault();
+                onPreview();
+              },
+            }
+          : { href: attachmentUrl(attachment.id), download: attachment.filename })}
         title={attachment.filename}
         className={cn(
           'flex overflow-hidden rounded-[10px] border border-default text-default hover:border-strong',
@@ -122,15 +149,22 @@ function AttachmentCard({ attachment }: { attachment: Attachment }) {
           placement="bottom-end"
           width={180}
           items={[
+            ...(onPreview
+              ? [
+                  {
+                    id: 'open',
+                    label: t('drawer.openPreview'),
+                    icon: <EyeIcon size={14} />,
+                    onSelect: onPreview,
+                  },
+                ]
+              : []),
             {
               id: 'download',
               label: t('drawer.download'),
               icon: <DownloadIcon size={14} />,
               onSelect: () => {
-                const link = document.createElement('a');
-                link.href = href;
-                link.download = attachment.filename;
-                link.click();
+                downloadAttachment(attachment);
               },
             },
             ...(canDelete
@@ -153,7 +187,7 @@ function AttachmentCard({ attachment }: { attachment: Attachment }) {
               label={t('drawer.attachmentOptions', { name: attachment.filename })}
               size={24}
               icon={<MoreIcon size={14} />}
-              className="bg-surface shadow-segment"
+              className="bg-surface! shadow-segment enabled:hover:bg-hover!"
             />
           )}
         />
@@ -181,7 +215,8 @@ function PendingCard({ file }: { file: File }) {
 /**
  * Attachments (TaskDetail.dc.html): "Attachments 3" + Attach, a 2-column grid of image cards
  * (88px preview) and file cards (36px type badge), then the dashed "Drop files or browse" cell.
- * Cards download on click; the "…" menu has Download / Delete.
+ * Image cards open a preview (`ImageViewer`; ⌘-click opens the image in a new tab), other
+ * cards download on click; the "…" menu has Open (images) / Download / Delete.
  */
 export function AttachmentSection() {
   const { t } = useTranslation();
@@ -189,6 +224,10 @@ export function AttachmentSection() {
   const pending = usePendingUploads(task.id);
   const input = useRef<HTMLInputElement>(null);
   const browse = () => input.current?.click();
+  const [previewId, setPreviewId] = useState<string | null>(null);
+  const images = task.attachments.filter((a) => PREVIEWABLE.has(a.mime));
+  // -1 once the previewed image is deleted (here or by someone else): the viewer closes.
+  const previewIndex = images.findIndex((a) => a.id === previewId);
 
   return (
     <section aria-labelledby="att-h" className="flex flex-col gap-2">
@@ -222,7 +261,17 @@ export function AttachmentSection() {
       />
       <div className="grid grid-cols-2 gap-2">
         {task.attachments.map((attachment) => (
-          <AttachmentCard key={attachment.id} attachment={attachment} />
+          <AttachmentCard
+            key={attachment.id}
+            attachment={attachment}
+            onPreview={
+              PREVIEWABLE.has(attachment.mime)
+                ? () => {
+                    setPreviewId(attachment.id);
+                  }
+                : undefined
+            }
+          />
         ))}
         {pending.map((file, i) => (
           <PendingCard key={`${file.name}-${i}`} file={file} />
@@ -238,6 +287,18 @@ export function AttachmentSection() {
           </span>
         </button>
       </div>
+      {previewIndex >= 0 && (
+        <ImageViewer
+          images={images}
+          index={previewIndex}
+          onIndexChange={(i) => {
+            setPreviewId(images[i]?.id ?? null);
+          }}
+          onClose={() => {
+            setPreviewId(null);
+          }}
+        />
+      )}
     </section>
   );
 }

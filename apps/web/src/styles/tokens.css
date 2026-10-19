@@ -113,6 +113,7 @@
   /* Scrims */
   --scrim-drawer: rgba(24, 24, 27, 0.28);
   --scrim-modal: rgba(24, 24, 27, 0.32);
+  --scrim-lightbox: rgba(24, 24, 27, 0.88);
 
   /* Reports (Reports.dc.html; dark from ReportsDark.dc.html, design-notes A.2b) */
   --panel: #ffffff;
@@ -250,6 +251,7 @@
 
   --scrim-drawer: rgba(0, 0, 0, 0.5);
   --scrim-modal: rgba(0, 0, 0, 0.56);
+  --scrim-lightbox: rgba(0, 0, 0, 0.88);
 
   --panel: #161618;
   --table-row-border: #222227;

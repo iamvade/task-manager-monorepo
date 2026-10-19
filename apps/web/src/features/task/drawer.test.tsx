@@ -1,4 +1,5 @@
 import type {
+  Attachment,
   Comment,
   FeedItem,
   RichTextNode,
@@ -727,6 +728,93 @@ describe('task drawer', () => {
     });
     // Closing replaces the history entry, so Back goes to the previous screen (F-26).
     expect(router.state.historyAction).toBe('REPLACE');
+  });
+
+  describe('attachments', () => {
+    const file = (n: number, filename: string, mime: string): Attachment => ({
+      id: `01890000-0000-7000-8000-a000000000${String(n).padStart(2, '0')}`,
+      filename,
+      mime,
+      size: 248_000,
+      uploader: ref(DORJ),
+      createdAt: '2026-10-06T03:00:00.000Z',
+    });
+    const attachments = [
+      file(1, 'checkout-mobile-360.png', 'image/png'),
+      file(2, 'QA-checklist-checkout.pdf', 'application/pdf'),
+      file(3, 'checkout-tablet-768.png', 'image/png'),
+    ];
+    const card = (root: HTMLElement, name: string) => {
+      const link = within(root).getByText(name).closest('a');
+      if (!link) throw new Error(`no card ${name}`);
+      return link;
+    };
+
+    it('opens images in a preview that steps with the arrow keys; other files download', async () => {
+      const { state } = setup({ attachments, attachmentCount: 3 });
+      api(state);
+      renderAt(`${LIST}&task=APP-135`);
+      const dialog = await drawer();
+      const view = within(dialog);
+      await view.findByText('checkout-mobile-360.png');
+
+      const pdf = card(dialog, 'QA-checklist-checkout.pdf');
+      expect(pdf).toHaveAttribute('download', 'QA-checklist-checkout.pdf');
+      const mobile = card(dialog, 'checkout-mobile-360.png');
+      expect(mobile).not.toHaveAttribute('download');
+      expect(mobile.getAttribute('href')).toMatch(/\?inline=true$/);
+
+      act(() => {
+        mobile.focus();
+      });
+      fireEvent.click(mobile);
+      const preview = await screen.findByRole('dialog', {
+        name: 'Preview of checkout-mobile-360.png',
+      });
+      const img = within(preview).getByRole('img', { name: 'checkout-mobile-360.png' });
+      expect(img.getAttribute('src')).toBe(
+        `/api/v1/attachments/${at(attachments, 0).id}/download?inline=true`,
+      );
+      expect(within(preview).getByText('1 / 2')).toBeInTheDocument();
+
+      fireEvent.keyDown(preview, { key: 'ArrowRight' });
+      expect(
+        await screen.findByRole('dialog', { name: 'Preview of checkout-tablet-768.png' }),
+      ).toBeInTheDocument();
+      expect(screen.getByText('2 / 2')).toBeInTheDocument();
+      fireEvent.keyDown(screen.getByRole('dialog', { name: /^Preview of/ }), { key: 'ArrowRight' });
+      expect(
+        await screen.findByRole('dialog', { name: 'Preview of checkout-mobile-360.png' }),
+      ).toBeInTheDocument();
+
+      // Esc closes the preview only; focus goes back to the card.
+      fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
+      await waitFor(() => {
+        expect(screen.queryByRole('dialog', { name: /^Preview of/ })).toBeNull();
+      });
+      expect(screen.getByRole('dialog', { name: 'Task APP-135' })).toBeInTheDocument();
+      await waitFor(() => {
+        expect(card(dialog, 'checkout-mobile-360.png')).toHaveFocus();
+      });
+    });
+
+    it('offers a download when the image cannot be shown', async () => {
+      const { state } = setup({ attachments, attachmentCount: 3 });
+      api(state);
+      renderAt(`${LIST}&task=APP-135`);
+      const dialog = await drawer();
+      const view = within(dialog);
+      await view.findByText('checkout-tablet-768.png');
+      fireEvent.click(card(dialog, 'checkout-tablet-768.png'));
+      const preview = await screen.findByRole('dialog', {
+        name: 'Preview of checkout-tablet-768.png',
+      });
+      fireEvent.error(within(preview).getByRole('img', { name: 'checkout-tablet-768.png' }));
+      expect(
+        await within(preview).findByText("This image can't be shown. Download it instead."),
+      ).toBeInTheDocument();
+      expect(within(preview).getAllByRole('button', { name: 'Download' })).toHaveLength(2);
+    });
   });
 
   it('shows the task as a full page at /t/:key', async () => {
