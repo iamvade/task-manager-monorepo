@@ -1,14 +1,14 @@
-import type { MyTask } from '@kite/shared';
+import type { MyTask, TaskStatusRef } from '@kite/shared';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import type { SectionId } from '../../api/homeCache';
 import { Avatar } from '../../components/ui/Avatar';
-import { Checkbox } from '../../components/ui/Checkbox';
 import { PriorityFlag } from '../../components/ui/PriorityFlag';
 import { SpaceBadge } from '../../components/ui/SpaceBadge';
 import { cn } from '../../lib/cn';
 import { DUE_TONE_CLASS, type DueTone } from '../../lib/dates';
 import { useDates } from '../../lib/useDates';
+import { StatusButton } from '../pickers/StatusButton';
 
 /** Due date color per section (MyTasks.dc.html): the section decides, not the date. */
 const SECTION_TONE: Record<SectionId, DueTone> = {
@@ -23,14 +23,15 @@ const SECTION_TONE: Record<SectionId, DueTone> = {
 interface MyTaskRowProps {
   task: MyTask;
   section: SectionId;
-  onToggle: (task: MyTask, done: boolean) => void;
+  onStatusChange: (task: MyTask, status: TaskStatusRef) => void;
 }
 
 /**
- * One My Tasks row, 44px: checkbox · title (opens the drawer) · space badge + project · due ·
- * priority. A completed row stays in place, struck through.
+ * One My Tasks row, 44px: status marker (like the List, in place of the design's checkbox) ·
+ * title (opens the drawer) · space badge + project · due · priority. A completed row stays in
+ * place, struck through.
  */
-export function MyTaskRow({ task, section, onToggle }: MyTaskRowProps) {
+export function MyTaskRow({ task, section, onStatusChange }: MyTaskRowProps) {
   const { t } = useTranslation();
   const dates = useDates();
 
@@ -46,12 +47,16 @@ export function MyTaskRow({ task, section, onToggle }: MyTaskRowProps) {
       className="grid h-11 grid-cols-[32px_minmax(0,1fr)_168px_100px_88px] items-center border-b border-subtle pr-2 hover:bg-subtle"
     >
       <span role="cell" className="flex justify-center">
-        <Checkbox
-          checked={task.done}
-          onChange={(done) => {
-            onToggle(task, done);
+        <StatusButton
+          status={task.status}
+          projectId={task.project.id}
+          label={t('table.setStatus', {
+            name: task.title,
+            status: task.status.name ?? t(`status.${task.status.category}`),
+          })}
+          onChange={({ id, name, category, color }) => {
+            onStatusChange(task, { id, name, category, color });
           }}
-          label={t('table.markComplete', { name: task.title })}
         />
       </span>
       <span role="cell" className="flex min-w-0 pr-4">

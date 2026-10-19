@@ -1,7 +1,13 @@
-import { addDays, type ActivityFeedItem, type Home, type MyTask } from '@kite/shared';
+import {
+  addDays,
+  type ActivityFeedItem,
+  type Home,
+  type MyTask,
+  type TaskStatusRef,
+} from '@kite/shared';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useCompleteMyTask, useHome, useOlderActivity } from '../../api/home';
+import { useHome, useOlderActivity, useSetMyTaskStatus } from '../../api/home';
 import { SECTION_IDS, withRow, type KeptRow, type SectionId } from '../../api/homeCache';
 import { useCurrentWorkspace } from '../../api/workspaces';
 import { useAuth } from '../../auth/useAuth';
@@ -70,7 +76,7 @@ function HomeBody({ workspaceId, home }: { workspaceId: string; home: Home }) {
   const dates = useDates();
   const openCreate = useUiStore((s) => s.openCreate);
   const setGroupCollapsed = useUiStore((s) => s.setGroupCollapsed);
-  const complete = useCompleteMyTask(workspaceId);
+  const setStatus = useSetMyTaskStatus(workspaceId);
   const narrow = useIsNarrow();
   // Rows completed here stay on screen (struck through) after refetches drop them.
   const [kept, setKept] = useState<Record<string, KeptRow>>({});
@@ -82,37 +88,46 @@ function HomeBody({ workspaceId, home }: { workspaceId: string; home: Home }) {
   const tomorrow = addDays(today, 1);
   const sunday = addDays(home.weekStart, 6);
 
-  const toggle = (section: SectionId) => (task: MyTask, done: boolean) => {
+  const changeStatus = (section: SectionId) => (task: MyTask, status: TaskStatusRef) => {
+    if (status.id === task.status.id) return;
+    const done = status.category === 'done';
+    const completing = done && !task.done;
     const row: KeptRow = {
       section,
       index: shown.sections[section].findIndex((t) => t.id === task.id),
-      task: { ...task, done, completedAt: done ? new Date().toISOString() : null },
+      task: {
+        ...task,
+        status,
+        done,
+        completedAt: done ? (task.completedAt ?? new Date().toISOString()) : null,
+      },
     };
     setKept(({ [task.id]: _, ...rest }) => (done ? { ...rest, [task.id]: row } : rest));
-    complete.mutate(
-      { taskId: task.id, done, kept: kept[task.id] },
+    setStatus.mutate(
+      { taskId: task.id, status, wasDone: task.done, kept: kept[task.id] },
       {
         onError: () => {
           setKept(({ [task.id]: _, ...rest }) => rest);
         },
       },
     );
-    if (done) {
+    if (completing) {
       toast({
         message: t('common.completed', { key: task.key }),
         action: {
           label: t('common.undo'),
-          // Through the latest render's toggle, which knows the kept (struck-through) row.
+          // Back to the status it had (its end); through the latest render's changeStatus,
+          // which knows the kept (struck-through) row.
           onClick: () => {
-            toggleRef.current(section)(row.task, false);
+            changeStatusRef.current(section)(row.task, task.status);
           },
         },
       });
     }
   };
-  const toggleRef = useRef(toggle);
+  const changeStatusRef = useRef(changeStatus);
   useEffect(() => {
-    toggleRef.current = toggle;
+    changeStatusRef.current = changeStatus;
   });
 
   const add = (dueDate?: string) => () => {
@@ -192,7 +207,7 @@ function HomeBody({ workspaceId, home }: { workspaceId: string; home: Home }) {
                   label={section.label}
                   hint={section.hint}
                   tasks={tasks}
-                  onToggle={toggle(id)}
+                  onStatusChange={changeStatus(id)}
                   onAdd={id === 'done' || id === 'requested' ? undefined : add(section.dueDate)}
                 />
               );
