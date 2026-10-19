@@ -1,4 +1,4 @@
-import type { MyTask } from '@kite/shared';
+import type { MyTask, TaskStatusRef } from '@kite/shared';
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { SectionId } from '../../api/homeCache';
@@ -15,7 +15,7 @@ interface TaskSectionProps {
   label: string;
   hint: string;
   tasks: MyTask[];
-  onToggle: (task: MyTask, done: boolean) => void;
+  onStatusChange: (task: MyTask, status: TaskStatusRef) => void;
   /** "+ Add task"; none under Done. */
   onAdd?: () => void;
 }
@@ -25,7 +25,7 @@ interface TaskSectionProps {
  * open tasks (Done: of done ones) and a hint; then the rows and "+ Add task". Done starts
  * collapsed (not designed).
  */
-export function TaskSection({ id, label, hint, tasks, onToggle, onAdd }: TaskSectionProps) {
+export function TaskSection({ id, label, hint, tasks, onStatusChange, onAdd }: TaskSectionProps) {
   const { t } = useTranslation();
   const bodyId = useId();
   const collapsed = useUiStore(
@@ -52,7 +52,7 @@ export function TaskSection({ id, label, hint, tasks, onToggle, onAdd }: TaskSec
         <div id={bodyId} className="flex flex-col">
           <div role="table" aria-label={label}>
             {tasks.map((task) => (
-              <MyTaskRow key={task.id} task={task} section={id} onToggle={onToggle} />
+              <MyTaskRow key={task.id} task={task} section={id} onStatusChange={onStatusChange} />
             ))}
           </div>
           {onAdd && (

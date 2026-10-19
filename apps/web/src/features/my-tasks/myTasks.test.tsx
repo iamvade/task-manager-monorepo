@@ -1,4 +1,4 @@
-import type { Home } from '@kite/shared';
+import type { Home, StatusCategory, TaskListItem } from '@kite/shared';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { RouterProvider, createMemoryRouter } from 'react-router';
@@ -11,8 +11,8 @@ import { useToastStore } from '../../stores/toast';
 import { useUiStore } from '../../stores/ui';
 import { ME, SIDEBAR, WORKSPACE_ID, mockApi } from '../../test/fixtures';
 import { HOME, HOME_NOW, OLDER_FEED, OVERDUE, TODAY, myTask } from '../../test/home';
-import { PROJECT } from '../../test/fixtures';
-import { at, makeTask } from '../../test/tasks';
+import { PROJECT, PROJECT_ID } from '../../test/fixtures';
+import { PROJECT_WITH_STATUSES, at, makeTask, statusOf } from '../../test/tasks';
 
 const EN_ME = { ...ME, preferences: { ...ME.preferences, locale: 'en' } };
 const DORJ = PROJECT.members.find((m) => m.user.initials === 'DE')?.user;
@@ -34,6 +34,7 @@ function renderHome(
     'GET /api/v1/auth/me': () => Response.json(EN_ME),
     [`GET /api/v1/workspaces/${WORKSPACE_ID}/sidebar`]: () => Response.json(SIDEBAR),
     'GET /api/v1/me/home': () => Response.json(home()),
+    [`GET /api/v1/projects/${PROJECT_ID}`]: () => Response.json(PROJECT_WITH_STATUSES),
     ...extra,
   });
   const router = createMemoryRouter(routes, { initialEntries: ['/my-tasks'] });
@@ -49,10 +50,34 @@ function renderHome(
 
 const card = (name: string) => screen.getByRole('group', { name });
 const section = (name: string) => screen.getByRole('region', { name });
-const checkbox = (title: string) =>
-  screen.getByRole('checkbox', { name: `Mark ${title} complete` });
+/** The row's status marker; its name ends with the current status. */
+const marker = (title: string) =>
+  screen.getByRole('button', { name: (name) => name.startsWith(`Status of ${title}: `) });
+async function pickStatus(title: string, status: string) {
+  fireEvent.click(marker(title));
+  const listbox = await screen.findByRole('listbox');
+  // The project's statuses load when the picker opens.
+  fireEvent.click(await within(listbox).findByRole('option', { name: status }));
+}
+const detail = (task: TaskListItem) => ({
+  ...task,
+  description: null,
+  descriptionText: '',
+  sprint: null,
+  reviewer: null,
+  creator: ME.user,
+  subtasks: [],
+  attachments: [],
+  followers: [],
+  mentionedIn: [],
+  deletedAt: null,
+});
+const patched = (title: string, category: StatusCategory) =>
+  Response.json(detail(makeTask(title, category)));
+const body = (init?: RequestInit): unknown =>
+  typeof init?.body === 'string' ? JSON.parse(init.body) : null;
 const completed = TODAY[0].title;
-const doneTask = () => Response.json(makeTask(completed, 'done'));
+const doneTask = () => patched(completed, 'done');
 
 describe('My Tasks', () => {
   beforeEach(async () => {
@@ -188,7 +213,7 @@ describe('My Tasks', () => {
     expect(within(section('This Week')).getByText('Fri, Oct 9 – Sun, Oct 11')).toBeInTheDocument();
     expect(within(section('Later')).getByText('After this week')).toBeInTheDocument();
 
-    const row = checkbox(OVERDUE[0].title).closest('[role="row"]');
+    const row = marker(OVERDUE[0].title).closest('[role="row"]');
     expect(row).toHaveTextContent('App Redesign');
     expect(row).toHaveTextContent('Oct 6');
     expect(row).toHaveTextContent('High');
@@ -211,28 +236,28 @@ describe('My Tasks', () => {
   it('completing a task updates the stat cards before the server answers', async () => {
     let answer: (res: Response) => void = () => undefined;
     const { fetchMock } = renderHome({
-      [`POST /api/v1/tasks/${TODAY[0].id}/complete`]: () =>
+      [`PATCH /api/v1/tasks/${TODAY[0].id}`]: () =>
         new Promise<Response>((resolve) => {
           answer = resolve;
         }),
     });
     await screen.findByRole('heading', { level: 1 });
 
-    fireEvent.click(checkbox(completed));
+    await pickStatus(completed, 'Done');
     await waitFor(() => {
       expect(card('Due today')).toHaveTextContent('2of 4 left');
     });
     expect(card('Due today')).not.toHaveTextContent('urgent');
     expect(card('Completed this week')).toHaveTextContent('8+4 vs last week');
-    expect(checkbox(completed)).toBeChecked();
+    expect(marker(completed)).toHaveAccessibleName(`Status of ${completed}: Done`);
     expect(within(section('Today')).getByRole('link', { name: completed })).toHaveClass(
       'line-through',
     );
     expect(within(section('Today')).getByRole('button', { name: /^Today/ })).toHaveTextContent(
       'Today2',
     );
-    const post = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST');
-    expect(JSON.parse(post?.[1]?.body as string)).toEqual({ done: true });
+    const patch = fetchMock.mock.calls.find(([, init]) => init?.method === 'PATCH');
+    expect(body(patch?.[1])).toEqual({ statusId: statusOf('done').id });
     answer(doneTask());
   });
 
@@ -240,7 +265,7 @@ describe('My Tasks', () => {
     let home = HOME;
     renderHome(
       {
-        [`POST /api/v1/tasks/${OVERDUE[0].id}/complete`]: () => {
+        [`PATCH /api/v1/tasks/${OVERDUE[0].id}`]: () => {
           // The server stops listing done overdue tasks.
           home = {
             ...HOME,
@@ -254,7 +279,7 @@ describe('My Tasks', () => {
     );
     await screen.findByRole('heading', { level: 1 });
 
-    fireEvent.click(checkbox(OVERDUE[0].title));
+    await pickStatus(OVERDUE[0].title, 'Done');
     await waitFor(() => {
       expect(card('Overdue')).toHaveTextContent('1oldest is 1 day late');
     });
@@ -264,46 +289,84 @@ describe('My Tasks', () => {
     });
     const rows = within(section('Overdue')).getAllByRole('row');
     expect(rows).toHaveLength(2);
-    expect(within(at(rows, 0)).getByRole('checkbox')).toBeChecked();
+    expect(within(at(rows, 0)).getByRole('button', { name: /^Status of / })).toHaveAccessibleName(
+      `Status of ${OVERDUE[0].title}: Done`,
+    );
   });
 
   it('undoes a completion from the toast', async () => {
     const { fetchMock } = renderHome({
-      [`POST /api/v1/tasks/${TODAY[0].id}/complete`]: (init) =>
-        Response.json(
-          makeTask(
-            completed,
-            (JSON.parse(init?.body as string) as { done: boolean }).done ? 'done' : 'todo',
-          ),
+      [`PATCH /api/v1/tasks/${TODAY[0].id}`]: (init) =>
+        patched(
+          completed,
+          (body(init) as { statusId: string }).statusId === statusOf('done').id ? 'done' : 'todo',
         ),
     });
     await screen.findByRole('heading', { level: 1 });
 
-    fireEvent.click(checkbox(completed));
+    await pickStatus(completed, 'Done');
     expect(await screen.findByText(`${TODAY[0].key} completed`)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
     await waitFor(() => {
-      expect(checkbox(completed)).not.toBeChecked();
+      expect(marker(completed)).toHaveAccessibleName(`Status of ${completed}: To Do`);
     });
-    const bodies = fetchMock.mock.calls
-      .filter(([, init]) => init?.method === 'POST')
-      .map(([, init]) => JSON.parse(init?.body as string) as unknown);
+    const bodies = () =>
+      fetchMock.mock.calls
+        .filter(([, init]) => init?.method === 'PATCH')
+        .map(([, init]) => body(init));
     await waitFor(() => {
-      expect(bodies).toEqual([{ done: true }, { done: false }]);
+      expect(bodies()).toEqual([
+        { statusId: statusOf('done').id },
+        { statusId: statusOf('todo').id },
+      ]);
     });
+  });
+
+  it('changes a status without completing: no toast, stat cards stay', async () => {
+    let home = HOME;
+    const { fetchMock } = renderHome(
+      {
+        [`PATCH /api/v1/tasks/${TODAY[0].id}`]: () => {
+          const s = statusOf('in_progress');
+          const status = { id: s.id, name: null, category: s.category, color: null };
+          home = {
+            ...HOME,
+            sections: {
+              ...HOME.sections,
+              today: HOME.sections.today.map((t) => (t.id === TODAY[0].id ? { ...t, status } : t)),
+            },
+          };
+          return patched(completed, 'in_progress');
+        },
+      },
+      () => home,
+    );
+    await screen.findByRole('heading', { level: 1 });
+
+    await pickStatus(completed, 'In Progress');
+    await waitFor(() => {
+      expect(marker(completed)).toHaveAccessibleName(`Status of ${completed}: In Progress`);
+    });
+    expect(within(section('Today')).getByRole('link', { name: completed })).not.toHaveClass(
+      'line-through',
+    );
+    expect(card('Due today')).toHaveTextContent('3of 4 left · 1 urgent');
+    expect(screen.queryByText(`${TODAY[0].key} completed`)).toBeNull();
+    const patch = fetchMock.mock.calls.find(([, init]) => init?.method === 'PATCH');
+    expect(body(patch?.[1])).toEqual({ statusId: statusOf('in_progress').id });
   });
 
   it('rolls back when completing fails', async () => {
     renderHome({
-      [`POST /api/v1/tasks/${TODAY[0].id}/complete`]: () =>
+      [`PATCH /api/v1/tasks/${TODAY[0].id}`]: () =>
         Response.json({ error: { code: 'INTERNAL', message: 'boom' } }, { status: 500 }),
     });
     await screen.findByRole('heading', { level: 1 });
 
-    fireEvent.click(checkbox(completed));
+    await pickStatus(completed, 'Done');
     expect(await screen.findByText('Something went wrong. Please try again.')).toBeInTheDocument();
     await waitFor(() => {
-      expect(checkbox(completed)).not.toBeChecked();
+      expect(marker(completed)).toHaveAccessibleName(`Status of ${completed}: To Do`);
     });
     expect(card('Due today')).toHaveTextContent('3of 4 left · 1 urgent');
     expect(card('Completed this week')).toHaveTextContent('7+3 vs last week');

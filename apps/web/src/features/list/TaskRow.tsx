@@ -2,7 +2,6 @@ import type { TaskListItem } from '@kite/shared';
 import { useState, type HTMLAttributes, type MouseEvent, type ReactNode, type Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { useProject } from '../../api/projects';
 import { isTempTask } from '../../api/tasks';
 import {
   CalendarIcon,
@@ -21,7 +20,6 @@ import { Menu } from '../../components/ui/Menu';
 import type { TriggerProps } from '../../components/ui/Popover';
 import { PriorityFlag } from '../../components/ui/PriorityFlag';
 import { ProjectDot } from '../../components/ui/ProjectDot';
-import { StatusDot } from '../../components/ui/StatusDot';
 import { TagChip } from '../../components/ui/TagChip';
 import { cn } from '../../lib/cn';
 import { AssigneePicker } from '../pickers/AssigneePicker';
@@ -29,7 +27,7 @@ import { DuePicker } from '../pickers/DuePicker';
 import { PriorityPicker } from '../pickers/PriorityPicker';
 import { TagPicker } from '../pickers/TagPicker';
 import { SizePicker } from '../pickers/SizePicker';
-import { StatusPicker } from '../pickers/StatusPicker';
+import { StatusButton } from '../pickers/StatusButton';
 import { useSizeTitle } from '../task/sizeTitle';
 import { gridColumns, isDone, useListActions } from './ListContext';
 import { BlockedPill } from '../standup/BlockedMarker';
@@ -112,46 +110,17 @@ function EmptyHint({ icon }: { icon: ReactNode }) {
 function StatusCell({ task, inert }: { task: TaskListItem; inert: boolean }) {
   const { t } = useTranslation();
   const actions = useListActions();
-  const [wanted, setWanted] = useState(false);
-  const project = useProject(!actions.statuses && wanted ? task.project.id : undefined);
   const name = task.status.name ?? t(`status.${task.status.category}`);
-  const label = t('table.setStatus', { name: task.title, status: name });
-
-  if (inert) return <StatusDot category={task.status.category} size={16} label={label} />;
-  const loaded = actions.statuses ?? project.data?.statuses ?? null;
-  const statuses = loaded ?? [task.status];
-  const want = () => {
-    setWanted(true);
-  };
   return (
-    <StatusPicker
-      value={task.status.id}
-      statuses={statuses}
-      label={label}
-      onOpenChange={(open) => {
-        if (open) want();
-      }}
+    <StatusButton
+      status={task.status}
+      projectId={task.project.id}
+      statuses={actions.statuses}
+      label={t('table.setStatus', { name: task.title, status: name })}
+      inert={inert}
       onChange={(status) => {
-        const full = loaded?.find((s) => s.id === status.id);
-        if (full) actions.setStatus(task, full);
+        actions.setStatus(task, status);
       }}
-      trigger={(props, open) => (
-        <button
-          type="button"
-          aria-label={label}
-          aria-haspopup="listbox"
-          aria-expanded={open}
-          {...props}
-          onPointerEnter={want}
-          onFocus={want}
-          className={cn(
-            'flex size-7 items-center justify-center rounded-[6px] border-0 bg-transparent p-0 hover:bg-hover',
-            open && 'bg-hover',
-          )}
-        >
-          <StatusDot category={task.status.category} size={16} />
-        </button>
-      )}
     />
   );
 }

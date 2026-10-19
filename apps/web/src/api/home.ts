@@ -1,12 +1,13 @@
 import {
   activityPageSchema,
   homeSchema,
-  taskListItemSchema,
+  taskDetailSchema,
   type Home,
   type SidebarResponse,
+  type TaskStatusRef,
 } from '@kite/shared';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { applyCompletion, withRow, type KeptRow } from './homeCache';
+import { applyStatus, withRow, type KeptRow } from './homeCache';
 import { apiFetch, apiSend, toQuery } from './client';
 import { queryKeys } from './queryKeys';
 import { TASK_MUTATION, settle } from './taskCache';
@@ -34,34 +35,37 @@ export function useOlderActivity(workspaceId: string | undefined, startCursor: s
   });
 }
 
-interface CompleteMyTaskVars {
+interface SetMyTaskStatusVars {
   taskId: string;
-  done: boolean;
-  /** The row as shown, when the page kept it after the server dropped it (unticking it). */
+  status: TaskStatusRef;
+  /** Done before this change (the sidebar count moves only when it flips). */
+  wasDone: boolean;
+  /** The row as shown, when the page kept it after the server dropped it (reopening it). */
   kept?: KeptRow;
 }
 
 /**
- * My Tasks checkbox: `POST /tasks/:id/complete`. The row, the stat cards and the sidebar count
- * move right away; errors roll them back.
+ * My Tasks status marker: `PATCH /tasks/:id` like the List and the drawer. The row, the stat
+ * cards and the sidebar count move right away; errors roll them back.
  */
-export function useCompleteMyTask(workspaceId: string) {
+export function useSetMyTaskStatus(workspaceId: string) {
   const queryClient = useQueryClient();
   const homeKey = queryKeys.home(workspaceId);
   const sidebarKey = queryKeys.sidebar(workspaceId);
   return useMutation({
     mutationKey: TASK_MUTATION,
-    mutationFn: ({ taskId, done }: CompleteMyTaskVars) =>
-      apiSend(`/tasks/${taskId}/complete`, taskListItemSchema, 'POST', { done }),
-    onMutate: async ({ taskId, done, kept }) => {
+    mutationFn: ({ taskId, status }: SetMyTaskStatusVars) =>
+      apiSend(`/tasks/${taskId}`, taskDetailSchema, 'PATCH', { statusId: status.id }),
+    onMutate: async ({ taskId, status, wasDone, kept }) => {
       await queryClient.cancelQueries({ queryKey: homeKey, exact: true });
       const home = queryClient.getQueryData<Home>(homeKey);
       const sidebar = queryClient.getQueryData<SidebarResponse>(sidebarKey);
+      const done = status.category === 'done';
       if (home) {
         const base = kept ? withRow(home, kept) : home;
-        queryClient.setQueryData(homeKey, applyCompletion(base, taskId, done, new Date()));
+        queryClient.setQueryData(homeKey, applyStatus(base, taskId, status, new Date()));
       }
-      if (sidebar) {
+      if (sidebar && done !== wasDone) {
         queryClient.setQueryData(sidebarKey, {
           ...sidebar,
           myTasksCount: Math.max(0, sidebar.myTasksCount + (done ? -1 : 1)),

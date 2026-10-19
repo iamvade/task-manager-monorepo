@@ -1,4 +1,10 @@
-import { daysBetween, weekdayIndex, type Home, type MyTask } from '@kite/shared';
+import {
+  daysBetween,
+  weekdayIndex,
+  type Home,
+  type MyTask,
+  type TaskStatusRef,
+} from '@kite/shared';
 import { todayFor } from '../lib/dates';
 
 export type SectionId = keyof Home['sections'];
@@ -85,4 +91,21 @@ export function applyCompletion(home: Home, taskId: string, done: boolean, now: 
   };
 
   return { ...home, sections, stats: { dueToday, completedThisWeek: completed, overdue } };
+}
+
+/**
+ * My Tasks after the row's status picker: the row's status, and when it crosses into or out of
+ * Done, everything `applyCompletion` moves.
+ */
+export function applyStatus(home: Home, taskId: string, status: TaskStatusRef, now: Date): Home {
+  const section = sectionOf(home, taskId);
+  if (!section) return home;
+  const withStatus: Home = {
+    ...home,
+    sections: {
+      ...home.sections,
+      [section]: home.sections[section].map((t) => (t.id === taskId ? { ...t, status } : t)),
+    },
+  };
+  return applyCompletion(withStatus, taskId, status.category === 'done', now);
 }
