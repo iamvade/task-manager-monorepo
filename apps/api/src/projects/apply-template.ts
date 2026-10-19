@@ -11,18 +11,10 @@ import { generateNKeysBetween } from 'fractional-indexing';
 import type { FastifyInstance } from 'fastify';
 import { uuidv7 } from 'uuidv7';
 import type { UserRow } from '../auth/plugin.js';
-import { one } from '../db/rows.js';
-import {
-  activity,
-  projects,
-  sprints,
-  tags,
-  taskFollowers,
-  taskTags,
-  tasks,
-} from '../db/schema/index.js';
+import { activity, projects, tags, taskFollowers, taskTags, tasks } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
-import { statusSnapshot } from '../tasks/refs.js';
+import { insertSprint } from '../sprints/query.js';
+import { sprintSnapshot, statusSnapshot } from '../tasks/refs.js';
 import { openSprintMemberships } from '../tasks/sprint.js';
 import { openStatusPeriods, projectLead } from '../tasks/status.js';
 import { buildProjectDetail } from './detail.js';
@@ -90,24 +82,16 @@ export async function applyTemplate(
       tagIdByName = new Map(rows.map((r) => [r.name.toLowerCase(), r.id]));
     }
 
-    const [lastSprint] = await tx
-      .select({ number: max(sprints.number) })
-      .from(sprints)
-      .where(eq(sprints.projectId, projectId));
+    // A new workspace sprint covering just this project.
     const sprint = template.sprint
-      ? one(
-          await tx
-            .insert(sprints)
-            .values({
-              projectId,
-              number: (lastSprint?.number ?? 0) + 1,
-              name: pick(template.sprint.name),
-              startDate: today,
-              endDate: addDays(today, template.sprint.days - 1),
-            })
-            .returning(),
-          'sprint',
-        )
+      ? await insertSprint(tx, {
+          workspaceId: project.workspaceId,
+          name: pick(template.sprint.name),
+          startDate: today,
+          endDate: addDays(today, template.sprint.days - 1),
+          projectIds: [projectId],
+          createdBy: user.id,
+        })
       : undefined;
 
     // Append after any soft-deleted tasks so positions never collide.
@@ -209,7 +193,7 @@ export async function applyTemplate(
         ? [
             row(i, 'sprint.changed', {
               from: null,
-              to: { id: sprint.id, name: sprint.name, number: sprint.number },
+              to: sprintSnapshot(sprint),
             } satisfies ActivityPayload<'sprint.changed'>),
           ]
         : []),

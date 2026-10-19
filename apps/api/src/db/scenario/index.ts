@@ -71,6 +71,7 @@ export async function runScenario(
     await insert(schema.favorites, rows.favorites);
     await insert(schema.statuses, rows.statuses);
     await insert(schema.sprints, rows.sprints);
+    await insert(schema.sprintProjects, rows.sprintProjects);
     await insert(schema.tags, rows.tags);
     await insert(schema.tasks, rows.tasks);
     await insert(schema.taskStatusPeriods, rows.periods);

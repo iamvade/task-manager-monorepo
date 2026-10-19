@@ -233,31 +233,106 @@ describe('GET /workspaces/:id/reports/sprints', () => {
     expect(past?.waitingMost).toBeNull();
   });
 
-  it('without projectId shows the first project in scope that has sprints', async () => {
-    const t = await taskWorld(ctx, 'Default Owner');
-    // The first project (by position) has no sprints; a later one does.
-    const later = await t.newProject('Later');
-    await insertSprint(ctx.db, later.id, 1, '2026-10-12', '2026-10-23');
-    const r = await sprints(t, '');
-    expect(r.project?.id).toBe(later.id);
-    expect(r.sprint?.number).toBe(1);
-    expect(r.scope.projectId).toBeNull();
+  describe('a sprint shared by several projects', () => {
+    let t: Awaited<ReturnType<typeof taskWorld>>;
+    let b: Awaited<ReturnType<typeof t.newProject>>;
+    let c: Awaited<ReturnType<typeof t.newProject>>;
+    let s1: Awaited<ReturnType<typeof insertSprint>>;
+    let s2: Awaited<ReturnType<typeof insertSprint>>;
+    let other: Awaited<ReturnType<typeof insertSprint>>;
+    let otherSpace: string;
 
-    // A space without sprint projects falls back to its first project.
-    const space = await createSpace(ctx.db, t.ws.id);
-    const plain = await t.newProject('Plain', space.id);
-    const inSpace = await sprints(t, `spaceId=${space.id}`);
-    expect(inSpace.project?.id).toBe(plain.id);
-    expect(inSpace.sprint).toBeNull();
+    beforeAll(async () => {
+      t = await taskWorld(ctx, 'Shared Owner');
+      const a = t.project.id;
+      b = await t.newProject('B');
+      otherSpace = (await createSpace(ctx.db, t.ws.id)).id;
+      c = await t.newProject('C', otherSpace);
+      // S1 covers A; S2 covers A and B; another team's sprint covers C, at the same time.
+      s1 = await insertSprint(ctx.db, a, 1, '2026-09-28', '2026-10-09');
+      s2 = await insertSprint(ctx.db, [a, b.id], 2, '2026-10-12', '2026-10-23');
+      other = await insertSprint(ctx.db, c.id, 3, '2026-10-12', '2026-10-23');
+      const [, , p3, p4] = PLAN as [string, string, string, string];
+      // A: carried from S1 into S2.
+      await timelineTask(ctx.db, {
+        projectId: a,
+        createdBy: t.owner.id,
+        title: 'A carried',
+        timeline: [['todo', '2026-09-20T00:00:00Z']],
+        sprints: [
+          { sprintId: s1.id, added: p3, removed: p4 },
+          { sprintId: s2.id, added: p4 },
+        ],
+      });
+      // B: committed to S2, done Oct 13.
+      await timelineTask(ctx.db, {
+        projectId: b.id,
+        createdBy: t.owner.id,
+        title: 'B done',
+        timeline: [
+          ['todo', '2026-10-09T00:00:00Z'],
+          ['done', '2026-10-13T02:00:00Z'],
+        ],
+        sprints: [{ sprintId: s2.id, added: p4 }],
+      });
+      // C: in the other team's sprint.
+      await timelineTask(ctx.db, {
+        projectId: c.id,
+        createdBy: t.owner.id,
+        title: 'C open',
+        timeline: [['todo', '2026-10-09T00:00:00Z']],
+        sprints: [{ sprintId: other.id, added: p4 }],
+      });
+    });
 
-    // An empty space has nothing to show.
-    const empty = await createSpace(ctx.db, t.ws.id);
-    const none = await sprints(t, `spaceId=${empty.id}`);
-    expect(none).toMatchObject({ project: null, sprints: [], sprint: null });
+    it('counts every project of the sprint without a project filter', async () => {
+      const r = await sprints(t, `sprintId=${s2.id}`);
+      expect(r.project).toBeNull();
+      expect(r.sprints.map((s) => s.number)).toEqual([3, 2, 1]);
+      expect(r.sprint).toMatchObject({ number: 2, committed: 2, completed: 1, carriedIn: 1 });
+      expect(r.sprint?.projects.map((p) => p.id)).toEqual([t.project.id, b.id]);
+      // Recent and previous sprints share a project with it; the other team's doesn't.
+      expect(r.sprint?.recent.map((x) => [x.number, x.committed])).toEqual([
+        [1, 1],
+        [2, 2],
+      ]);
+      expect(r.sprint?.previousSprint?.number).toBe(1);
+      expect(r.sprint?.carried.map((x) => x.title)).toEqual(['A carried']);
+    });
 
-    // sprintId alone is rejected.
-    const res = await t.api('GET', `/workspaces/${t.ws.id}/reports/sprints?sprintId=${fx.s3.id}`);
-    expect(res.statusCode).toBe(400);
+    it('narrows the numbers to one project', async () => {
+      const r = await sprints(t, `projectId=${b.id}`);
+      expect(r.project?.id).toBe(b.id);
+      expect(r.sprints.map((s) => s.number)).toEqual([2]);
+      expect(r.sprint).toMatchObject({ number: 2, committed: 1, completed: 1, carriedIn: 0 });
+      expect(r.sprint?.projects.map((p) => p.id)).toEqual([b.id]);
+      expect(r.sprint?.previousSprint).toBeNull();
+      expect(r.sprint?.recent.map((x) => x.number)).toEqual([2]);
+    });
+
+    it('lists only the sprints covering a project of the space', async () => {
+      const r = await sprints(t, `spaceId=${otherSpace}`);
+      expect(r.sprints.map((s) => s.number)).toEqual([3]);
+      expect(r.sprint).toMatchObject({ number: 3, committed: 1, completed: 0 });
+    });
+
+    it('404s a sprint covering no project in scope', async () => {
+      const res = await t.api(
+        'GET',
+        `/workspaces/${t.ws.id}/reports/sprints?projectId=${b.id}&sprintId=${other.id}`,
+      );
+      expect(res.statusCode).toBe(404);
+    });
+
+    it('exports the scoped tasks of the sprint', async () => {
+      const res = await t.api(
+        'GET',
+        `/workspaces/${t.ws.id}/reports/sprints.csv?projectId=${b.id}&sprintId=${s2.id}`,
+      );
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toContain('B done');
+      expect(res.body).not.toContain('A carried');
+    });
   });
 
   it('a project without sprints has no sprint', async () => {

@@ -12,7 +12,7 @@ import {
   users,
 } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
-import { toSprintDto } from '../projects/detail.js';
+import { sprintDto } from '../sprints/query.js';
 import { listAttachments } from './attachments.js';
 import { listFollowers } from './followers.js';
 import { getTaskListItem } from './list.js';
@@ -48,15 +48,18 @@ export async function buildTaskDetail(
     mentionedIn(db, taskId),
   ]);
   if (!item || !row) throw httpError(404, 'NOT_FOUND', 'Task not found');
-  const [reviewer] = item.reviewerId
-    ? await db.select(userRefColumns).from(users).where(eq(users.id, item.reviewerId))
-    : [];
+  const [[reviewer], sprint] = await Promise.all([
+    item.reviewerId
+      ? db.select(userRefColumns).from(users).where(eq(users.id, item.reviewerId))
+      : [],
+    row.sprint ? sprintDto(db, row.sprint) : null,
+  ]);
 
   return {
     ...item,
     description: row.description,
     descriptionText: row.descriptionText,
-    sprint: row.sprint ? toSprintDto(row.sprint) : null,
+    sprint,
     reviewer: reviewer ?? null,
     creator: row.creator,
     subtasks: subtaskRows,

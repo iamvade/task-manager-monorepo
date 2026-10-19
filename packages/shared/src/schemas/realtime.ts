@@ -84,6 +84,16 @@ export const realtimeServerMessageSchema = z.discriminatedUnion('type', [
     actorId: z.uuid(),
     at: z.iso.datetime(),
   }),
+  /**
+   * A sprint was created, edited (name, dates, projects) or deleted: refetch sprints, projects
+   * (active sprint), tasks and reports.
+   */
+  z.object({
+    type: z.literal('sprints.changed'),
+    workspaceId: z.uuid(),
+    actorId: z.uuid(),
+    at: z.iso.datetime(),
+  }),
   /** A standup group was created, edited, archived or restored, or its members changed. */
   z.object({
     type: z.literal('standup.groups.changed'),

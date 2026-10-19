@@ -239,10 +239,19 @@ export const PROJECTS = {
 export type ProjectRef = keyof typeof PROJECTS;
 
 /**
- * App Redesign runs Sprints 9–14 of 15 working days each; Sprint 14 is current and today is its
- * day 4 (ReportsSprints.dc.html). Dates are computed from today in working days (history.ts).
+ * Product runs Sprints 9–14 of 15 working days each, shared by App Redesign, Checkout v2 and Q4
+ * Roadmap; Sprint 14 is current and today is its day 4 (ReportsSprints.dc.html). Only App
+ * Redesign's tasks (`project`) are in them. Dates are computed from today in working days
+ * (history.ts).
  */
-export const SPRINTS = { project: 'app', first: 9, current: 14, days: 15, dayToday: 4 } as const;
+export const SPRINTS = {
+  project: 'app',
+  projects: ['app', 'checkout', 'q4'],
+  first: 9,
+  current: 14,
+  days: 15,
+  dayToday: 4,
+} as const;
 
 // ---------------------------------------------------------------------------------------- tags
 

@@ -127,6 +127,13 @@
       "when": 1792142077255,
       "tag": "0017_standup_meetings",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1792382080607,
+      "tag": "0018_shared_sprints",
+      "breakpoints": true
     }
   ]
 }

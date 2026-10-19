@@ -5,6 +5,7 @@ import { one } from '../src/db/rows.js';
 import { sprints, statuses, tags } from '../src/db/schema/index.js';
 import { addMember, createUser, errorCode } from './fixtures.js';
 import { createTestApp } from './helpers.js';
+import { insertSprint } from './report-fixtures.js';
 import { taskWorld } from './task-setup.js';
 
 describe('updating tasks', () => {
@@ -21,17 +22,13 @@ describe('updating tasks', () => {
   it('writes one activity row per changed field with display snapshots', async () => {
     const world = await taskWorld(ctx);
     const { api, owner, project, status, createTask, activities } = world;
-    const sprint = one(
-      await ctx.db
-        .insert(sprints)
-        .values({
-          projectId: project.id,
-          number: 1,
-          name: 'Oct 6 – Oct 24',
-          startDate: '2026-10-06',
-          endDate: '2026-10-24',
-        })
-        .returning(),
+    const sprint = await insertSprint(
+      ctx.db,
+      project.id,
+      1,
+      '2026-10-06',
+      '2026-10-24',
+      'Oct 6 – Oct 24',
     );
     const task = await createTask({ title: 'Old', priority: 'high', dueDate: '2026-10-14' });
     const description = {
@@ -235,18 +232,7 @@ describe('updating tasks', () => {
 
   it('keeps a task readable after its sprint is deleted', async () => {
     const { api, project, createTask } = await taskWorld(ctx);
-    const sprint = one(
-      await ctx.db
-        .insert(sprints)
-        .values({
-          projectId: project.id,
-          number: 1,
-          name: 'S',
-          startDate: '2026-10-01',
-          endDate: '2026-10-10',
-        })
-        .returning(),
-    );
+    const sprint = await insertSprint(ctx.db, project.id, 1, '2026-10-01', '2026-10-10', 'S');
     const task = await createTask({ title: 'T', sprintId: sprint.id });
     await ctx.db.delete(sprints).where(eq(sprints.id, sprint.id));
     const detail = taskDetailSchema.parse((await api('GET', `/tasks/${task.id}`)).json());

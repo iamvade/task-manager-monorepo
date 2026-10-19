@@ -113,11 +113,11 @@ describe('structural API access control', () => {
     ['POST', `/tags/${ids.tag}/merge`, { intoTagId: ids.otherTag }],
     ['DELETE', `/tags/${ids.tag}`],
     ['GET', `/projects/${ids.project}/statuses`],
-    ['GET', `/projects/${ids.project}/sprints`],
+    ['GET', `/workspaces/${ids.ws}/sprints`],
     [
       'POST',
-      `/projects/${ids.project}/sprints`,
-      { name: 'S1', startDate: '2026-10-05', endDate: '2026-10-16' },
+      `/workspaces/${ids.ws}/sprints`,
+      { name: 'S1', startDate: '2026-10-05', endDate: '2026-10-16', projectIds: [ids.project] },
     ],
     ['POST', `/projects/${ids.project}/from-template`, { templateId: 'bug-triage' }],
   ];

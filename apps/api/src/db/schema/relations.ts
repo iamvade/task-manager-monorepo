@@ -1,7 +1,15 @@
 import { relations } from 'drizzle-orm';
 import { activity, notifications } from './activity.js';
 import { attachments, comments } from './comments.js';
-import { favorites, projectMembers, projects, spaces, sprints, statuses } from './projects.js';
+import {
+  favorites,
+  projectMembers,
+  projects,
+  spaces,
+  sprintProjects,
+  sprints,
+  statuses,
+} from './projects.js';
 import { subtasks, tags, taskAssignees, taskFollowers, taskTags, tasks } from './tasks.js';
 import { sessions, users } from './users.js';
 import { invites, workspaceHolidays, workspaceMembers, workspaces } from './workspaces.js';
@@ -24,6 +32,7 @@ export const workspacesRelations = relations(workspaces, ({ many }) => ({
   spaces: many(spaces),
   projects: many(projects),
   tags: many(tags),
+  sprints: many(sprints),
   holidays: many(workspaceHolidays),
 }));
 
@@ -58,7 +67,7 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
   members: many(projectMembers),
   favorites: many(favorites),
   statuses: many(statuses),
-  sprints: many(sprints),
+  sprints: many(sprintProjects),
   tasks: many(tasks),
 }));
 
@@ -78,9 +87,15 @@ export const statusesRelations = relations(statuses, ({ one, many }) => ({
 }));
 
 export const sprintsRelations = relations(sprints, ({ one, many }) => ({
-  project: one(projects, { fields: [sprints.projectId], references: [projects.id] }),
+  workspace: one(workspaces, { fields: [sprints.workspaceId], references: [workspaces.id] }),
+  projects: many(sprintProjects),
   tasks: many(tasks),
   memberships: many(sprintMemberships),
+}));
+
+export const sprintProjectsRelations = relations(sprintProjects, ({ one }) => ({
+  sprint: one(sprints, { fields: [sprintProjects.sprintId], references: [sprints.id] }),
+  project: one(projects, { fields: [sprintProjects.projectId], references: [projects.id] }),
 }));
 
 export const tasksRelations = relations(tasks, ({ one, many }) => ({

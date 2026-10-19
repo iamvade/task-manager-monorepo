@@ -6,6 +6,7 @@ import {
   comments,
   projects,
   spaces,
+  sprints,
   standupBlockers,
   standupEntries,
   standupGroupMembers,
@@ -150,6 +151,19 @@ export async function loadTagAccess(
   const role = await roleIn(request, tag.workspaceId, 'Tag');
   checkRole(role, minRole);
   return { tag, role };
+}
+
+/** A sprint in a workspace the caller belongs to; 404 otherwise. */
+export async function loadSprintAccess(request: FastifyRequest, sprintId: string) {
+  requireAuth(request);
+  const [sprint] = await request.server.db
+    .select()
+    .from(sprints)
+    .where(eq(sprints.id, sprintId))
+    .limit(1);
+  if (!sprint) throw httpError(404, 'NOT_FOUND', 'Sprint not found');
+  const role = await roleIn(request, sprint.workspaceId, 'Sprint');
+  return { sprint, role };
 }
 
 /**

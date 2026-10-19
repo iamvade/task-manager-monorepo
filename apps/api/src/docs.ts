@@ -32,7 +32,7 @@ const tags = [
   { name: 'Project members', description: "A project's team (not an access boundary)" },
   { name: 'Tags', description: 'Workspace tags' },
   { name: 'Statuses', description: 'Workflow statuses of a project' },
-  { name: 'Sprints', description: 'Project sprints' },
+  { name: 'Sprints', description: 'Workspace sprints shared by projects' },
   { name: 'Templates', description: 'Fill an empty project from a template' },
   { name: 'Tasks', description: 'Tasks: lists, detail, edits, moves and the trash' },
   { name: 'Subtasks', description: 'Checklist items of a task' },

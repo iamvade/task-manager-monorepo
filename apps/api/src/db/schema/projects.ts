@@ -1,5 +1,7 @@
 import type { PaletteKey, RichTextNode } from '@kite/shared';
+import { sql } from 'drizzle-orm';
 import {
+  check,
   date,
   foreignKey,
   index,
@@ -135,19 +137,45 @@ export const statuses = pgTable(
   (t) => [index('statuses_project_id_position_idx').on(t.projectId, t.position)],
 );
 
+/**
+ * A workspace sprint, shared by the projects in `sprint_projects`; tasks of those projects can be
+ * in it.
+ */
 export const sprints = pgTable(
   'sprints',
   {
     id: id(),
-    projectId: uuid('project_id')
+    workspaceId: uuid('workspace_id')
       .notNull()
-      .references(() => projects.id, { onDelete: 'cascade' }),
-    /** Per-project sequence ("Sprint 14"), allocated under the project lock. */
+      .references(() => workspaces.id, { onDelete: 'cascade' }),
+    /** Per-workspace sequence ("Sprint 14"), allocated under the workspace lock. */
     number: integer('number').notNull(),
     /** Null = "Sprint {number}", translated. */
     name: text('name'),
     startDate: date('start_date', { mode: 'string' }).notNull(),
     endDate: date('end_date', { mode: 'string' }).notNull(),
+    /** May edit and delete the sprint, like an admin. Null for sprints made before 0018. */
+    createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
   },
-  (t) => [unique('sprints_project_id_number_unique').on(t.projectId, t.number)],
+  (t) => [
+    unique('sprints_workspace_id_number_unique').on(t.workspaceId, t.number),
+    check('sprints_dates_check', sql`${t.endDate} >= ${t.startDate}`),
+  ],
+);
+
+/** The projects a sprint covers (at least one; kept by the API). */
+export const sprintProjects = pgTable(
+  'sprint_projects',
+  {
+    sprintId: uuid('sprint_id')
+      .notNull()
+      .references(() => sprints.id, { onDelete: 'cascade' }),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+  },
+  (t) => [
+    primaryKey({ columns: [t.sprintId, t.projectId] }),
+    index('sprint_projects_project_id_idx').on(t.projectId),
+  ],
 );

@@ -124,6 +124,14 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       })
     ).json<{ id: string }>();
 
+    const sprint = (
+      await w.api('POST', `/workspaces/${w.ws.id}/sprints`, {
+        startDate: '2026-10-05',
+        endDate: '2026-10-16',
+        projectIds: [w.project.id],
+      })
+    ).json<{ id: string }>();
+
     const outsider = await createUser(ctx.db);
     await createWorkspace(ctx.db, outsider.id);
     outsiderCookie = await login(ctx.app, outsider.email);
@@ -148,6 +156,7 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       replyId: standupReply.id,
       emoji: 'eyes',
       absenceId: absence.id,
+      sprintId: sprint.id,
       token: 'not-a-real-token',
     };
 
@@ -158,7 +167,6 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       'GET /me/notifications': `workspaceId=${ws}`,
       'GET /me/home': `workspaceId=${ws}`,
       'GET /me/activity': `workspaceId=${ws}`,
-      'GET /workspaces/{workspaceId}/reports/sprints.csv': `projectId=${w.project.id}`,
     };
 
     const todo = w.status('todo').id;
@@ -177,11 +185,13 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       'POST /workspaces/{workspaceId}/tags': { name: 'New', color: 'blue' },
       'PATCH /tags/{tagId}': { color: 'green' },
       'POST /tags/{tagId}/merge': { intoTagId: tag.id },
-      'POST /projects/{projectId}/sprints': {
+      'POST /workspaces/{workspaceId}/sprints': {
         name: 'S1',
         startDate: '2026-10-05',
         endDate: '2026-10-16',
+        projectIds: [w.project.id],
       },
+      'PATCH /sprints/{sprintId}': { name: 'Renamed' },
       'POST /projects/{projectId}/from-template': { templateId: 'bug-triage' },
       'POST /projects/{projectId}/tasks': { title: 'New' },
       'PATCH /tasks/{taskId}': { title: 'Edited' },

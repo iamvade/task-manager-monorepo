@@ -241,6 +241,9 @@ export function buildScenario(
   const projectMembers: Row<typeof schema.projectMembers>[] = [];
   const statuses: Row<typeof schema.statuses>[] = [];
   const sprints: Row<typeof schema.sprints>[] = [];
+  const sprintProjects: Row<typeof schema.sprintProjects>[] = [];
+  /** One workspace sprint chain shared by every project with sprints, by start date. */
+  const sprintIdByStart = new Map<string, string>();
   const tasks: (Row<typeof schema.tasks> & { id: string })[] = [];
   const assignees: Row<typeof schema.taskAssignees>[] = [];
   const taskTags: Row<typeof schema.taskTags>[] = [];
@@ -302,6 +305,22 @@ export function buildScenario(
     buildProject(pd);
   }
 
+  // Number the shared sprints by date ("Sprint 1" first), in their history snapshots too.
+  sprints.sort((a, b) => (a.startDate < b.startDate ? -1 : a.startDate > b.startDate ? 1 : 0));
+  const sprintNumber = new Map<string, number>();
+  sprints.forEach((row, i) => {
+    row.number = i + 1;
+    if (row.id) sprintNumber.set(row.id, i + 1);
+  });
+  for (const row of activity) {
+    if (row.type !== 'sprint.changed' || !row.payload) continue;
+    for (const side of [row.payload.from, row.payload.to]) {
+      if (side && typeof side === 'object' && 'id' in side && typeof side.id === 'string') {
+        Object.assign(side, { number: sprintNumber.get(side.id) ?? 0 });
+      }
+    }
+  }
+
   // Favorites: a couple of each member's live projects.
   for (const p of people.filter((x) => x.member)) {
     const mine = def.projects.filter((x) => !x.archivedDaysAgo && x.team.includes(p.def.key));
@@ -347,6 +366,7 @@ export function buildScenario(
     projectMembers,
     statuses,
     sprints,
+    sprintProjects,
     tags,
     tasks,
     assignees,
@@ -399,7 +419,8 @@ export function buildScenario(
       statuses.push({ id, projectId, category, position: statusKeys[i] ?? 'a0' });
     });
 
-    // Two-week sprints (Mon → Fri of the next week); the last one holds today.
+    // Two-week workspace sprints (Mon → Fri of the next week), shared by every project with
+    // sprints; the last one holds today.
     const projectSprints: Sprint[] = [];
     if (pd.sprints) {
       const anchor = '2026-01-05';
@@ -410,24 +431,24 @@ export function buildScenario(
       for (let s = current; localMidnight(addDays(s, 12)) > start; s = addDays(s, -14)) {
         starts.unshift(s);
       }
-      starts.forEach((s, i) => {
+      starts.forEach((s) => {
         const planningAt = Math.max(localMidnight(addDays(s, -3)) + 16 * HOUR, start + HOUR);
         if (planningAt >= end) return;
-        const sprint: Sprint = {
-          id: uuidv7(),
-          number: i + 1,
+        let id = sprintIdByStart.get(s);
+        if (!id) {
+          id = uuidv7();
+          sprintIdByStart.set(s, id);
+          // Numbered by date once every project is built.
+          sprints.push({ id, workspaceId, number: 0, startDate: s, endDate: addDays(s, 11) });
+        }
+        sprintProjects.push({ sprintId: id, projectId });
+        projectSprints.push({
+          id,
+          number: 0,
           startDate: s,
           endDate: addDays(s, 11),
           planningAt,
           endAt: localMidnight(addDays(s, 12)),
-        };
-        projectSprints.push(sprint);
-        sprints.push({
-          id: sprint.id,
-          projectId,
-          number: sprint.number,
-          startDate: sprint.startDate,
-          endDate: sprint.endDate,
         });
       });
     }

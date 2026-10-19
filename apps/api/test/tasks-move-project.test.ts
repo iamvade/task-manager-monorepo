@@ -23,7 +23,8 @@ describe('moving tasks to another project', () => {
     const other = await newProject('Checkout');
     await createTask({ title: 'Existing' }, other.id);
 
-    const sprintRes = await api('POST', `/projects/${project.id}/sprints`, {
+    const sprintRes = await api('POST', `/workspaces/${project.workspaceId}/sprints`, {
+      projectIds: [project.id],
       name: 'Sprint 14',
       startDate: '2026-10-06',
       endDate: '2026-10-24',

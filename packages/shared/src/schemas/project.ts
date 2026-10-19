@@ -51,16 +51,25 @@ export type Status = z.infer<typeof statusSchema>;
 export const sprintSchema = z
   .object({
     id: z.uuid(),
-    projectId: z.uuid(),
-    /** Per-project sequence ("Sprint 14"). */
+    /** Per-workspace sequence ("Sprint 14"). */
     number: z.number().int(),
     /** Null = "Sprint {number}", translated. */
     name: z.string().nullable(),
     startDate: dateSchema,
     endDate: dateSchema,
+    /** The projects whose tasks can be in the sprint (at least one). */
+    projectIds: z.array(z.uuid()),
+    /** May edit and delete it, like an admin (null for sprints made before shared sprints). */
+    createdBy: z.uuid().nullable(),
   })
   .meta({ id: 'Sprint' });
 export type Sprint = z.infer<typeof sprintSchema>;
+
+/** A sprint with how many live (not deleted) tasks are in it: Settings → Sprints. */
+export const sprintWithUsageSchema = sprintSchema
+  .extend({ taskCount: z.number().int().nonnegative() })
+  .meta({ id: 'SprintWithUsage' });
+export type SprintWithUsage = z.infer<typeof sprintWithUsageSchema>;
 
 /** `GET /projects/:id` — header, board columns and counts. */
 export const projectDetailSchema = projectSummarySchema
@@ -140,16 +149,42 @@ export const applyTemplateResponseSchema = z
   .meta({ id: 'ApplyTemplateResult' });
 export type ApplyTemplateResponse = z.infer<typeof applyTemplateResponseSchema>;
 
+const sprintProjectIdsSchema = z
+  .array(z.uuid())
+  .min(1)
+  .max(100)
+  .transform((ids) => [...new Set(ids)]);
+
+const sprintDatesInOrder = (s: { startDate?: string; endDate?: string }) =>
+  !s.startDate || !s.endDate || s.endDate >= s.startDate;
+const DATES_IN_ORDER = {
+  message: 'The end date must not be before the start date',
+  path: ['endDate'],
+};
+
 export const createSprintSchema = z
   .object({
     /** Without a name the sprint shows as "Sprint {number}". */
     name: z.string().trim().min(1).max(80).optional(),
     startDate: dateSchema,
     endDate: dateSchema,
+    projectIds: sprintProjectIdsSchema,
   })
-  .refine((s) => s.endDate >= s.startDate, {
-    message: 'The end date must not be before the start date',
-    path: ['endDate'],
-  })
+  .refine(sprintDatesInOrder, DATES_IN_ORDER)
   .meta({ id: 'CreateSprint' });
-export type CreateSprint = z.infer<typeof createSprintSchema>;
+export type CreateSprint = z.input<typeof createSprintSchema>;
+
+/** `name: null` goes back to "Sprint {number}". Both dates are checked against the stored ones. */
+export const updateSprintSchema = z
+  .object({
+    name: z.string().trim().min(1).max(80).nullable(),
+    startDate: dateSchema,
+    endDate: dateSchema,
+    projectIds: sprintProjectIdsSchema,
+  })
+  .partial()
+  .strict()
+  .refine(nonEmptyPatch, NOTHING_TO_UPDATE)
+  .refine(sprintDatesInOrder, DATES_IN_ORDER)
+  .meta({ id: 'UpdateSprint' });
+export type UpdateSprint = z.input<typeof updateSprintSchema>;

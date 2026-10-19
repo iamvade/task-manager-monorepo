@@ -2,18 +2,10 @@ import { taskListItemSchema } from '@kite/shared';
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { one } from '../src/db/rows.js';
-import {
-  attachments,
-  comments,
-  projects,
-  sprints,
-  subtasks,
-  tags,
-  tasks,
-} from '../src/db/schema/index.js';
+import { attachments, comments, projects, subtasks, tags, tasks } from '../src/db/schema/index.js';
 import { addMember, createSpace, createUser } from './fixtures.js';
 import { createTestApp } from './helpers.js';
+import { insertSprint } from './report-fixtures.js';
 import { taskWorld } from './task-setup.js';
 
 describe('listing tasks', () => {
@@ -40,18 +32,7 @@ describe('listing tasks', () => {
       .returning();
     researchId = research?.id ?? '';
     uxId = ux?.id ?? '';
-    sprintId = one(
-      await ctx.db
-        .insert(sprints)
-        .values({
-          projectId: project.id,
-          number: 1,
-          name: 'S',
-          startDate: '2026-10-06',
-          endDate: '2026-10-24',
-        })
-        .returning(),
-    ).id;
+    sprintId = (await insertSprint(ctx.db, project.id, 1, '2026-10-06', '2026-10-24', 'S')).id;
 
     // Created in this order; titles say what matters for the assertions.
     await createTask({

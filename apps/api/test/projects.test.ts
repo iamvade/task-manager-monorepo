@@ -166,7 +166,8 @@ describe('spaces, projects and the sidebar', () => {
     await ctx.db.update(tasks).set({ deletedAt: new Date() }).where(eq(tasks.id, deleted.id));
 
     const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ulaanbaatar' }).format();
-    const past = await api('POST', `/projects/${project.id}/sprints`, {
+    const past = await api('POST', `/workspaces/${project.workspaceId}/sprints`, {
+      projectIds: [project.id],
       name: 'Old',
       startDate: '2020-01-01',
       endDate: '2020-01-14',
@@ -174,14 +175,16 @@ describe('spaces, projects and the sidebar', () => {
     expect(past.statusCode).toBe(201);
     const current = sprintSchema.parse(
       (
-        await api('POST', `/projects/${project.id}/sprints`, {
+        await api('POST', `/workspaces/${project.workspaceId}/sprints`, {
+          projectIds: [project.id],
           name: 'Now',
           startDate: today,
           endDate: today,
         })
       ).json(),
     );
-    const backwards = await api('POST', `/projects/${project.id}/sprints`, {
+    const backwards = await api('POST', `/workspaces/${project.workspaceId}/sprints`, {
+      projectIds: [project.id],
       name: 'Bad',
       startDate: '2026-10-10',
       endDate: '2026-10-01',
@@ -197,7 +200,7 @@ describe('spaces, projects and the sidebar', () => {
 
     const sprints = z
       .array(sprintSchema)
-      .parse((await api('GET', `/projects/${project.id}/sprints`)).json());
+      .parse((await api('GET', `/workspaces/${project.workspaceId}/sprints`)).json());
     expect(sprints.map((s) => s.name)).toEqual(['Old', 'Now']);
     const statuses = z
       .array(statusSchema)

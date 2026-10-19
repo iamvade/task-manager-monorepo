@@ -17,6 +17,18 @@ export function canManageTags(role: WorkspaceRole): boolean {
   return role !== 'member';
 }
 
+/**
+ * Editing a sprint (name, dates, projects) and deleting an unused one: admins and owners for every
+ * one, a member for the ones they created. Any member creates sprints.
+ */
+export function canManageSprint(
+  role: WorkspaceRole,
+  createdById: string | null,
+  userId: string,
+): boolean {
+  return canManageCreated(role, createdById, userId);
+}
+
 /** Creating standup groups: admins and owners. */
 export function canCreateStandupGroup(role: WorkspaceRole): boolean {
   return role !== 'member';
