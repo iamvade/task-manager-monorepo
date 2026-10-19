@@ -9,4 +9,5 @@ export * from './activity.js';
 export * from './history.js';
 export * from './standups.js';
 export * from './absences.js';
+export * from './feedback.js';
 export * from './relations.js';

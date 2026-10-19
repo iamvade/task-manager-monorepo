@@ -46,6 +46,7 @@ import {
 import { createClock, type Clock } from './dates.js';
 import { buildHistory, planSprints, ubAt } from './history.js';
 import { buildStandups } from './standups.js';
+import { buildFeedback } from './feedback.js';
 import { backfillReferences } from '../../tasks/references.js';
 
 export interface SeedOptions {
@@ -147,6 +148,9 @@ export async function runSeed(db: Db, options: SeedOptions): Promise<void> {
     await tx.insert(schema.standupBlockers).values(rows.standupBlockers);
     await tx.insert(schema.standupReactions).values(rows.standupReactions);
     await tx.insert(schema.standupReplies).values(rows.standupReplies);
+    await tx.insert(schema.feedback).values(rows.feedback);
+    await tx.insert(schema.feedbackAttachments).values(rows.feedbackAttachments);
+    await tx.insert(schema.feedbackActivity).values(rows.feedbackActivity);
   });
 
   console.log(
@@ -754,10 +758,20 @@ export function buildRows(
   }
 
   const standups = buildStandups({ clock, pick, workspaceId, user, task });
+  const projectKeyById = new Map(projects.map((p) => [p.row.id, p.row.key]));
+  const { feedbackSeq, ...feedbackRows } = buildFeedback({
+    clock,
+    pick,
+    workspaceId,
+    user,
+    task,
+    projectKey: (id) => must(projectKeyById.get(id), `project ${id}`),
+  });
 
   return {
     holidays,
     ...standups,
+    ...feedbackRows,
     periods: [...periods, ...history.periods],
     memberships: [...memberships, ...history.memberships],
     users: users.map((u) => u.row),
@@ -765,6 +779,7 @@ export function buildRows(
       id: workspaceId,
       name: WORKSPACE.name,
       slug: WORKSPACE.slug,
+      feedbackSeq,
       createdAt: accountsCreated,
     },
     members,

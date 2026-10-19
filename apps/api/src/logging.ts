@@ -55,6 +55,10 @@ export const LOG_REDACT = {
   paths: [
     'req.headers.cookie',
     'req.headers.authorization',
+    'req.headers["x-upload-token"]',
+    'headers["x-upload-token"]',
+    'uploads[*].token',
+    '*.uploads[*].token',
     'res.headers["set-cookie"]',
     'headers.cookie',
     'headers.authorization',

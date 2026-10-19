@@ -4,6 +4,7 @@ import type { FastifyRequest } from 'fastify';
 import {
   attachments,
   comments,
+  feedback,
   projects,
   spaces,
   sprints,
@@ -151,6 +152,19 @@ export async function loadTagAccess(
   const role = await roleIn(request, tag.workspaceId, 'Tag');
   checkRole(role, minRole);
   return { tag, role };
+}
+
+/** A feedback item in a workspace the caller belongs to (every member triages); 404 otherwise. */
+export async function loadFeedbackAccess(request: FastifyRequest, feedbackId: string) {
+  requireAuth(request);
+  const [row] = await request.server.db
+    .select()
+    .from(feedback)
+    .where(eq(feedback.id, feedbackId))
+    .limit(1);
+  if (!row) throw httpError(404, 'NOT_FOUND', 'Feedback not found');
+  const role = await roleIn(request, row.workspaceId, 'Feedback');
+  return { feedback: row, role, workspaceId: row.workspaceId };
 }
 
 /** A sprint in a workspace the caller belongs to; 404 otherwise. */

@@ -18,6 +18,10 @@ import { loggerOptions } from './logging.js';
 import { scheduleArchiveJob } from './notifications/archive-job.js';
 import { scheduleStandupNotices } from './standups/notices-job.js';
 import { registerNotifier } from './notifications/notifier.js';
+import { registerFeedbackEvents } from './feedback/events.js';
+import { scheduleFeedbackCleanup } from './feedback/cleanup-job.js';
+import { feedbackRoutes } from './routes/feedback.js';
+import { publicFeedbackRoutes } from './routes/feedback-public.js';
 import { registerRealtime } from './realtime/plugin.js';
 import { ReportCache } from './reports/cache.js';
 import { attachmentRoutes } from './routes/attachments.js';
@@ -109,6 +113,8 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
   registerAuth(app);
   await registerRealtime(app);
   registerNotifier(app);
+  registerFeedbackEvents(app);
+  scheduleFeedbackCleanup(app);
   scheduleArchiveJob(app);
   scheduleStandupNotices(app);
   if (docsEnabled(config)) await registerDocs(app);
@@ -141,6 +147,8 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
       await api.register(notificationRoutes);
       await api.register(homeRoutes);
       await api.register(reportRoutes);
+      await api.register(feedbackRoutes);
+      await api.register(publicFeedbackRoutes);
       await api.register(realtimeRoutes);
     },
     { prefix: '/api/v1' },

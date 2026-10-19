@@ -12,6 +12,7 @@ import {
   users,
 } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
+import { reportsOfTask } from '../feedback/query.js';
 import { sprintDto } from '../sprints/query.js';
 import { listAttachments } from './attachments.js';
 import { listFollowers } from './followers.js';
@@ -28,7 +29,7 @@ export async function buildTaskDetail(
   taskId: string,
   viewerId: string | null,
 ): Promise<TaskDetail> {
-  const [item, [row], subtaskRows, attachmentRows, followers, refs] = await Promise.all([
+  const [item, [row], subtaskRows, attachmentRows, followers, refs, reports] = await Promise.all([
     getTaskListItem(db, taskId, viewerId),
     db
       .select({
@@ -46,6 +47,7 @@ export async function buildTaskDetail(
     listAttachments(db, taskId),
     listFollowers(db, taskId),
     mentionedIn(db, taskId),
+    reportsOfTask(db, taskId),
   ]);
   if (!item || !row) throw httpError(404, 'NOT_FOUND', 'Task not found');
   const [[reviewer], sprint] = await Promise.all([
@@ -67,6 +69,7 @@ export async function buildTaskDetail(
     followers,
     deletedAt: row.deletedAt?.toISOString() ?? null,
     mentionedIn: refs,
+    linkedFeedback: reports.reverse(),
   };
 }
 

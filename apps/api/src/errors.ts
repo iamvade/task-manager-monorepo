@@ -13,8 +13,12 @@ const codeByStatus: Record<number, string> = {
   429: 'RATE_LIMITED',
 };
 
-export function errorBody(code: string, message: string): ApiErrorBody {
-  return { error: { code, message } };
+export function errorBody(
+  code: string,
+  message: string,
+  fields?: Record<string, string>,
+): ApiErrorBody {
+  return { error: fields ? { code, message, fields } : { code, message } };
 }
 
 /** An error the handler turns into `{ error: { code, message } }` with `statusCode`. */
@@ -23,14 +27,20 @@ export class HttpError extends Error {
     readonly statusCode: number,
     readonly code: string,
     message: string,
+    /** Per-field error codes (forms show them next to their fields). */
+    readonly fields?: Record<string, string>,
   ) {
     super(message);
     this.name = 'HttpError';
   }
 }
 
-export const httpError = (statusCode: number, code: string, message: string) =>
-  new HttpError(statusCode, code, message);
+export const httpError = (
+  statusCode: number,
+  code: string,
+  message: string,
+  fields?: Record<string, string>,
+) => new HttpError(statusCode, code, message, fields);
 
 /** Makes every error response use the `{ error: { code, message } }` envelope. */
 export function registerErrorHandlers(app: FastifyInstance): void {
@@ -39,7 +49,7 @@ export function registerErrorHandlers(app: FastifyInstance): void {
       return reply.code(400).send(errorBody('VALIDATION_ERROR', err.message));
     }
     if (err instanceof HttpError) {
-      return reply.code(err.statusCode).send(errorBody(err.code, err.message));
+      return reply.code(err.statusCode).send(errorBody(err.code, err.message, err.fields));
     }
     const status = err.statusCode ?? 500;
     if (status < 500) {

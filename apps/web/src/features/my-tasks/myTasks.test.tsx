@@ -70,6 +70,7 @@ const detail = (task: TaskListItem) => ({
   attachments: [],
   followers: [],
   mentionedIn: [],
+  linkedFeedback: [],
   deletedAt: null,
 });
 const patched = (title: string, category: StatusCategory) =>

@@ -57,6 +57,7 @@ function toDetail(task: TaskListItem, extra: Partial<TaskDetail> = {}): TaskDeta
     attachments: [],
     followers: [],
     mentionedIn: [],
+    linkedFeedback: [],
     deletedAt: null,
     ...extra,
   };

@@ -1,8 +1,23 @@
 import { inviteSchema, notificationPageSchema, subtaskSchema } from '@kite/shared';
 import type { InjectOptions } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { apiClient, createUser, createWorkspace, errorCode, login, ORIGIN } from './fixtures.js';
-import { standupBlockers, standupEntries, standupReplies } from '../src/db/schema/index.js';
+import { eq } from 'drizzle-orm';
+import {
+  apiClient,
+  createUser,
+  createWorkspace,
+  errorCode,
+  login,
+  ORIGIN,
+  randomIp,
+} from './fixtures.js';
+import {
+  feedback,
+  standupBlockers,
+  standupEntries,
+  standupReplies,
+} from '../src/db/schema/index.js';
+import { PNG } from './feedback-setup.js';
 import { createTestApp } from './helpers.js';
 import { taskWorld } from './task-setup.js';
 
@@ -36,6 +51,11 @@ const NOT_WORKSPACE_SCOPED = [
   'PATCH /me',
   'GET /invites/{token}',
   'POST /invites/{token}/accept',
+  // The public feedback form: anyone with the link (the slug) may send feedback.
+  'GET /public/feedback/{slug}',
+  'POST /public/feedback/{slug}/uploads',
+  'POST /public/feedback/{slug}',
+  'DELETE /public/feedback/uploads/{uploadId}',
 ];
 
 const doc = (text: string) => ({
@@ -132,6 +152,28 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       })
     ).json<{ id: string }>();
 
+    const png = () => {
+      const form = new FormData();
+      form.append('file', new Blob([PNG], { type: 'image/png' }), 'shot.png');
+      return form;
+    };
+    const fbBody = {
+      type: 'bug',
+      title: 'Pay button freezes',
+      body: 'It freezes every time I tap it on checkout.',
+      email: 'customer@example.com',
+    };
+    const sent = await ctx.app.inject({
+      method: 'POST',
+      url: `${PREFIX}/public/feedback/${w.ws.slug}`,
+      headers: { origin: ORIGIN },
+      remoteAddress: randomIp(),
+      payload: fbBody,
+    });
+    if (sent.statusCode !== 201) throw new Error(`feedback: ${sent.body}`);
+    const [fb] = await ctx.db.select().from(feedback).where(eq(feedback.workspaceId, w.ws.id));
+    if (!fb) throw new Error('expected feedback');
+
     const outsider = await createUser(ctx.db);
     await createWorkspace(ctx.db, outsider.id);
     outsiderCookie = await login(ctx.app, outsider.email);
@@ -158,6 +200,10 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       absenceId: absence.id,
       sprintId: sprint.id,
       token: 'not-a-real-token',
+      slug: w.ws.slug,
+      feedbackId: fb.id,
+      ref: 'FB-1001',
+      uploadId: fb.id,
     };
 
     const ws = w.ws.id;
@@ -227,6 +273,17 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       'POST /standup-groups/{groupId}/days/{date}/meeting/advance': { toUserId: w.owner.id },
       'PATCH /standup-groups/{groupId}/days/{date}/meeting': { notes: 'Notes' },
       'POST /standup-groups/{groupId}/days/{date}/meeting/save-notes': {},
+      'POST /public/feedback/{slug}/uploads': png(),
+      'POST /public/feedback/{slug}': fbBody,
+      'PATCH /feedback/{feedbackId}': { status: 'review' },
+      'POST /feedback/{feedbackId}/notes': { text: 'Seen it' },
+      'PUT /feedback/{feedbackId}/link': { taskId: task.id },
+      'PUT /feedback/{feedbackId}/assignees': { userIds: [] },
+      'POST /feedback/{feedbackId}/create-task': { projectId: w.project.id, title: 'Fix' },
+      'POST /workspaces/{workspaceId}/feedback/batch': {
+        ids: [fb.id],
+        change: { action: 'status', status: 'closed' },
+      },
       'POST /standup-groups/{groupId}/days/{date}/meeting/tasks': {
         taskId: task.id,
         sourceKind: 'today',

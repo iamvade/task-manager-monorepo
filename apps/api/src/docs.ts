@@ -47,6 +47,11 @@ const tags = [
     description: 'Overview, Sprints, Workload and People reports, with CSV exports',
   },
   { name: 'Standups', description: 'Standup groups: schedule, members and meeting settings' },
+  {
+    name: 'Feedback',
+    description:
+      'Customer feedback: the public form (no account) and the team inbox, linked to tasks',
+  },
   { name: 'Realtime', description: 'WebSocket: live changes and presence' },
 ];
 
