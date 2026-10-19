@@ -34,6 +34,8 @@ interface Pending {
   inbox: boolean;
   /** A tag was created, renamed, recolored, merged or deleted. */
   tags: boolean;
+  /** Feedback arrived or was triaged. */
+  feedback: boolean;
   /** Standup blockers changed the "Blocked" marker of tasks in unknown projects. */
   allLists: boolean;
 }
@@ -87,6 +89,7 @@ export function createMessageHandler(queryClient: QueryClient) {
         sidebar: false,
         inbox: false,
         tags: false,
+        feedback: false,
         allLists: false,
       };
     }
@@ -104,6 +107,10 @@ export function createMessageHandler(queryClient: QueryClient) {
     if (p.inbox) void queryClient.invalidateQueries({ queryKey: queryKeys.notificationsOf(ws) });
     if (p.sidebar) void queryClient.invalidateQueries({ queryKey: queryKeys.sidebar(ws) });
     if (p.tags) void queryClient.invalidateQueries({ queryKey: queryKeys.tags(ws) });
+    if (p.feedback) {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.feedbackOf(ws) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.feedbackOptionsAll });
+    }
     if (busy()) return;
     if (p.tags) {
       // Chips on every list, open drawer and My Tasks show the tag's name and color.
@@ -174,6 +181,14 @@ export function createMessageHandler(queryClient: QueryClient) {
         case 'tags.changed':
           mark(message.workspaceId, (p) => {
             p.tags = true;
+          });
+          return;
+        case 'feedback.changed':
+          mark(message.workspaceId, (p) => {
+            p.feedback = true;
+            p.sidebar = true;
+            // "Linked feedback" in these tasks' drawers.
+            for (const id of message.taskIds) p.tasks.add(id);
           });
           return;
         case 'sprints.changed':

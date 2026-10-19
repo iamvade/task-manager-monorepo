@@ -8,12 +8,25 @@ import { IconButton } from '../../../components/ui/IconButton';
 import { Lightbox } from '../../../components/ui/Lightbox';
 import { useRelativeTime } from '../../../lib/useRelativeTime';
 
-interface ImageViewerProps {
-  images: Attachment[];
+/** What the viewer needs of an image (task and feedback attachments). */
+export interface ViewerImage {
+  id: string;
+  filename: string;
+  size: number;
+}
+
+interface ImageViewerProps<T extends ViewerImage> {
+  images: T[];
   index: number;
   onIndexChange: (index: number) => void;
   onClose: () => void;
+  /** Inline URL, download and the "size · uploader" line; default: task attachments. */
+  srcOf?: (image: T) => string;
+  download?: (image: T) => void;
+  meta?: (image: T, size: string) => string;
 }
+
+const asAttachment = (image: ViewerImage) => image as Attachment;
 
 // `!`: IconButton's own `bg-transparent` sorts after `bg-surface`.
 const floatButton = 'bg-surface! shadow-popover enabled:hover:bg-hover!';
@@ -23,7 +36,17 @@ const floatButton = 'bg-surface! shadow-popover enabled:hover:bg-hover!';
  * top (name, size · uploader, "2 / 3", Download, Close), the image centered and contained,
  * and ← / → buttons and keys that wrap when the task has more than one image.
  */
-export function ImageViewer({ images, index, onIndexChange, onClose }: ImageViewerProps) {
+export function ImageViewer<T extends ViewerImage>({
+  images,
+  index,
+  onIndexChange,
+  onClose,
+  srcOf = (image) => attachmentUrl(image.id, { inline: true }),
+  download = (image) => {
+    downloadAttachment(asAttachment(image));
+  },
+  meta,
+}: ImageViewerProps<T>) {
   const { t } = useTranslation();
   const { size } = useRelativeTime();
   const close = useRef<HTMLButtonElement>(null);
@@ -56,10 +79,12 @@ export function ImageViewer({ images, index, onIndexChange, onClose }: ImageView
               {image.filename}
             </span>
             <span className="text-[12px] text-muted">
-              {t('drawer.attachmentMeta', {
-                size: size(image.size),
-                name: shortName(image.uploader.name),
-              })}
+              {meta
+                ? meta(image, size(image.size))
+                : t('drawer.attachmentMeta', {
+                    size: size(image.size),
+                    name: shortName(asAttachment(image).uploader.name),
+                  })}
             </span>
           </span>
           {many && (
@@ -72,7 +97,7 @@ export function ImageViewer({ images, index, onIndexChange, onClose }: ImageView
             title={t('drawer.download')}
             icon={<DownloadIcon size={16} />}
             onClick={() => {
-              downloadAttachment(image);
+              download(image);
             }}
           />
           <IconButton
@@ -108,7 +133,7 @@ export function ImageViewer({ images, index, onIndexChange, onClose }: ImageView
                 variant="secondary"
                 icon={<DownloadIcon size={14} />}
                 onClick={() => {
-                  downloadAttachment(image);
+                  download(image);
                 }}
               >
                 {t('drawer.download')}
@@ -117,7 +142,7 @@ export function ImageViewer({ images, index, onIndexChange, onClose }: ImageView
           ) : (
             <img
               key={image.id}
-              src={attachmentUrl(image.id, { inline: true })}
+              src={srcOf(image)}
               alt={image.filename}
               onError={() => {
                 setFailed(image.id);

@@ -66,6 +66,51 @@
   --card-footer: #fcfcfd;
   /* Out-of-office avatar (standup strip and card) */
   --out-avatar: #e4e4e7;
+  /* Customer feedback types (badges, type cards, tab dots) and statuses (Feedback.dc.html) */
+  --fb-bug-bg: #fdecec;
+  --fb-bug-fg: #b42318;
+  --fb-bug-dot: #dc2626;
+  --fb-feature-bg: #e8f1fd;
+  --fb-feature-fg: #1d4ed8;
+  --fb-feature-dot: #2563eb;
+  --fb-feedback-bg: #e3f4f1;
+  --fb-feedback-fg: #0f766e;
+  --fb-feedback-dot: #0d9488;
+  --fb-other-bg: #f1f1f3;
+  --fb-other-fg: #3f3f46;
+  --fb-other-dot: #8b8b94;
+  --fb-status-review: #d97706;
+  --fb-status-linked: #0284c7;
+  --fb-status-closed: #a1a1aa;
+  /* Public feedback form (PublicFeedback.dc.html): error summary box, failed upload row, invalid
+     field border + ring, invalid type card border, success check ring, video thumbnail */
+  --form-error-bg: #fef3f2;
+  --form-error-border: #fecdca;
+  --form-error-title: #912018;
+  --form-error-row-bg: #fffbfa;
+  --field-error-border: #d92d20;
+  --field-error-ring: #fdecec;
+  --type-card-error-border: #f3b8b2;
+  --fb-success-ring: #f1faf8;
+  --fb-video-thumb: #27272a;
+  --fb-unread-row: #fcfbff;
+  /* "N people reported this" banner */
+  --fb-banner-bg: #eff6ff;
+  --fb-banner-border: #bfdbfe;
+  --fb-banner-fg: #1e3a8a;
+  --fb-banner-link: #1d4ed8;
+  /* Internal notes: amber note card and the "team only" pill */
+  --fb-note-bg: #fffbf3;
+  --fb-note-border: #f5e6cc;
+  --fb-internal-bg: #fef3e2;
+  --fb-internal-fg: #92400e;
+  /* Feedback inbox selection toolbar (dark bar replacing the table header) */
+  --selection-bar-bg: #18181b;
+  --selection-bar-control: #27272a;
+  --selection-bar-control-hover: #3f3f46;
+  --selection-bar-fg: #ffffff;
+  --selection-bar-muted: #d4d4d8;
+  --selection-bar-divider: #3f3f46;
   --warning: #b45309;
   --success: #16a34a;
   --online: #16a34a;
@@ -213,6 +258,45 @@
   --blocked-card-border: rgba(248, 113, 113, 0.36);
   --card-footer: #141416;
   --out-avatar: #2a2a30;
+  --fb-bug-bg: rgba(248, 113, 113, 0.14);
+  --fb-bug-fg: #fca5a5;
+  --fb-bug-dot: #f87171;
+  --fb-feature-bg: rgba(96, 165, 250, 0.14);
+  --fb-feature-fg: #93c5fd;
+  --fb-feature-dot: #60a5fa;
+  --fb-feedback-bg: rgba(45, 212, 191, 0.14);
+  --fb-feedback-fg: #5eead4;
+  --fb-feedback-dot: #2dd4bf;
+  --fb-other-bg: #26262b;
+  --fb-other-fg: #d4d4d8;
+  --fb-other-dot: #8e8e98;
+  --fb-status-review: #f59e0b;
+  --fb-status-linked: #38bdf8;
+  --fb-status-closed: #71717a;
+  --form-error-bg: rgba(248, 113, 113, 0.08);
+  --form-error-border: rgba(248, 113, 113, 0.32);
+  --form-error-title: #fca5a5;
+  --form-error-row-bg: rgba(248, 113, 113, 0.05);
+  --field-error-border: #f87171;
+  --field-error-ring: rgba(248, 113, 113, 0.18);
+  --type-card-error-border: rgba(248, 113, 113, 0.45);
+  --fb-success-ring: rgba(45, 212, 191, 0.07);
+  --fb-video-thumb: #0f0f11;
+  --fb-unread-row: rgba(139, 124, 246, 0.05);
+  --fb-banner-bg: rgba(96, 165, 250, 0.1);
+  --fb-banner-border: rgba(96, 165, 250, 0.32);
+  --fb-banner-fg: #bfdbfe;
+  --fb-banner-link: #93c5fd;
+  --fb-note-bg: rgba(251, 191, 36, 0.07);
+  --fb-note-border: rgba(251, 191, 36, 0.24);
+  --fb-internal-bg: rgba(251, 191, 36, 0.14);
+  --fb-internal-fg: #fcd34d;
+  --selection-bar-bg: #2a2a30;
+  --selection-bar-control: #3a3a42;
+  --selection-bar-control-hover: #4a4a54;
+  --selection-bar-fg: #fafafa;
+  --selection-bar-muted: #d4d4d8;
+  --selection-bar-divider: #4a4a54;
   --warning: #fbbf24;
   --success: #22c55e;
   --online: #22c55e;

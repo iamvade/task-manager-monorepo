@@ -5,16 +5,19 @@ import { CLIENT_ID } from '../realtime/clientId';
 export class ApiError extends Error {
   /** Seconds to wait, from a 429's `Retry-After` header. */
   readonly retryAfter: number | undefined;
+  /** Per-field error codes (`error.fields`), when a form can show them by its fields. */
+  readonly fields: Readonly<Record<string, string>> | undefined;
 
   constructor(
     readonly status: number,
     readonly code: string,
     message: string,
-    options: { retryAfter?: number } = {},
+    options: { retryAfter?: number; fields?: Record<string, string> } = {},
   ) {
     super(message);
     this.name = 'ApiError';
     this.retryAfter = options.retryAfter;
+    this.fields = options.fields;
   }
 }
 
@@ -52,7 +55,10 @@ export async function apiFetch<S extends z.ZodType>(
   const body: unknown = res.status === 204 ? null : await res.json().catch(() => null);
   if (!res.ok) {
     const parsed = apiErrorSchema.safeParse(body);
-    const options = { retryAfter: parseRetryAfter(res.headers.get('retry-after')) };
+    const options = {
+      retryAfter: parseRetryAfter(res.headers.get('retry-after')),
+      fields: parsed.success ? parsed.data.error.fields : undefined,
+    };
     throw parsed.success
       ? new ApiError(res.status, parsed.data.error.code, parsed.data.error.message, options)
       : new ApiError(res.status, 'HTTP_ERROR', res.statusText, options);

@@ -71,6 +71,38 @@ export const InboxIcon = make(
     <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
   </>,
 );
+/** Megaphone: the Feedback inbox (sidebar, linked feedback). */
+export const FeedbackIcon = make(
+  <>
+    <path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z" />
+    <path d="M15 9a3 3 0 0 1 0 6M18 6a7 7 0 0 1 0 12" />
+  </>,
+);
+/** Linked task chip (feedback inbox). */
+export const CheckCircleIcon = make(
+  <>
+    <circle cx="12" cy="12" r="9" />
+    <path d="m8.5 12 2.5 2.5 4.5-5" />
+  </>,
+);
+/** Image placeholder (feedback thumbnails whose file is gone). */
+export const ImageIcon = make(
+  <>
+    <rect x="3" y="3" width="18" height="18" rx="2" />
+    <circle cx="9" cy="9" r="2" />
+    <path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21" />
+  </>,
+);
+export const ChevronUpIcon = make(<path d="m18 15-6-6-6 6" />);
+export const ExternalLinkIcon = make(
+  <path d="M15 3h6v6M10 14 21 3M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" />,
+);
+export const MailIcon = make(
+  <>
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <path d="m3 7 9 6 9-6" />
+  </>,
+);
 export const PlusIcon = make(<path d="M12 5v14M5 12h14" />);
 export const ChevronRightIcon = make(<path d="m9 6 6 6-6 6" />, { strokeWidth: 2.5 });
 /** Previous / next period arrows (Calendar toolbar). */

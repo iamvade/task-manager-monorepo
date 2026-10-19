@@ -10,6 +10,7 @@ import {
   useRole,
 } from '@floating-ui/react';
 import { useEffect, useRef, type HTMLAttributes, type ReactNode } from 'react';
+import { cn } from '../../lib/cn';
 import { WithFloatingTree } from './floatingTree';
 
 interface DrawerProps {
@@ -22,6 +23,8 @@ interface DrawerProps {
   panelProps?: HTMLAttributes<HTMLElement>;
   /** Changes when the content is swapped for another item: focus moves back to the panel. */
   contentKey?: string;
+  /** `wide`: 66%, min 880px (feedback detail, FeedbackDetail.dc.html). */
+  size?: 'default' | 'wide';
 }
 
 /** Elements outside the panel that never dismiss it (toasts, editor suggestion popups). */
@@ -43,7 +46,15 @@ export function Drawer(props: DrawerProps) {
   );
 }
 
-function DrawerPanel({ open, onClose, label, children, panelProps, contentKey }: DrawerProps) {
+function DrawerPanel({
+  open,
+  onClose,
+  label,
+  children,
+  panelProps,
+  contentKey,
+  size,
+}: DrawerProps) {
   const nodeId = useFloatingNodeId();
   const { context } = useFloating({
     nodeId,
@@ -71,6 +82,7 @@ function DrawerPanel({ open, onClose, label, children, panelProps, contentKey }:
             floatingProps={getFloatingProps(panelProps)}
             label={label}
             contentKey={contentKey}
+            size={size}
           >
             {children}
           </Panel>
@@ -86,6 +98,7 @@ function Panel({
   floatingProps,
   label,
   contentKey,
+  size = 'default',
   children,
 }: {
   context: ReturnType<typeof useFloating>['context'];
@@ -93,6 +106,7 @@ function Panel({
   floatingProps: Record<string, unknown>;
   label: string;
   contentKey: string | undefined;
+  size: DrawerProps['size'];
   children: ReactNode;
 }) {
   const panelRef = useRef<HTMLElement | null>(null);
@@ -122,7 +136,10 @@ function Panel({
         aria-label={label}
         aria-modal="true"
         tabIndex={-1}
-        className="fixed inset-y-0 right-0 box-border flex w-[40%] max-w-full min-w-[min(520px,100vw)] flex-col overflow-y-auto border-l border-default bg-surface text-default shadow-drawer outline-none"
+        className={cn(
+          'fixed inset-y-0 right-0 box-border flex max-w-full flex-col overflow-y-auto border-l border-default bg-surface text-default shadow-drawer outline-none',
+          size === 'wide' ? 'w-[66%] min-w-[min(880px,100vw)]' : 'w-[40%] min-w-[min(520px,100vw)]',
+        )}
         data-task-drawer=""
         {...floatingProps}
       >

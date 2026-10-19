@@ -593,3 +593,11 @@ All Reports designs ship a full `STR.mn` table: take Mongolian copy from them as
 - **Settings → Members**: `settings.members.jobTitle*` "Албан тушаал", `capacity*` "Багтаамж", unit "оноо / 2 д.х" (2 долоо хоног; review the abbreviation), hint about the Workload marker.
 - **Derived Reports strings**: bad-delta labels, burndown insight variants (on track / behind), waits insight variants ("about N times", "X days longer"), past-sprint burndown title, "N unsized", Custom period popover (From / To / Apply), required project picker on Sprints ("Choose a project"), "Capacity" setting in Settings, CSV column headers.
 13. **Seed job titles** in mn come from the People/Workload `STR` data (e.g. "Фронтенд хөгжүүлэгч", "Инженерийн ахлагч"); "QA" (Bayarmaa) is not in the designs, drafted as "Чанарын баталгаажуулалт" or kept as "QA".
+
+## Feedback (drafted 2026-10-19)
+
+The feedback designs ship `STR.mn` tables for the inbox, empty state, detail, create-task modal, duplicates and public form; those strings are used as-is. Drafted here (no Mongolian in the designs):
+- **Task drawer "Linked feedback"** (`TaskDetail.dc.html` is English only), keys `feedback.task.*`: "Холбосон санал хүсэлт", "{{count}} хэрэглэгч мэдээлсэн", "Санал хүсэлт холбох", search "Холбоогүй санал хүсэлтийг гарчиг, ID, илгээгчээр хайх…", empty "Санал хүсэлт холбоогүй байна.", "Дахиад {{count}}-г харах" / "Цөөнийг харах" (review the suffix after a number).
+- **Activity lines not drawn** (`feedback.detail.event.*`): "{{key}} ажлаас салгасан", "{{key}} устгагдсан тул салгасан", "хариуцагчийг хассан · {{key}} шинэчлэгдсэн"; toasts `feedback.bulk.*`, `feedback.detail.{linked,unlinked,failed,noteFailed}`, `feedback.create.{created,failed}`, `feedback.duplicates.{closedAll,notifySubject}`.
+- **Public form messages not drawn** (`feedbackPublic.*`): file type not allowed, upload failed / rate limited / storage full, the file limit note, "too long" errors, 429 "try again in N minutes", send failure. The intro reads "{{workspace}} баг …" instead of the design's "Kite Studio-гийн баг" (the genitive suffix depends on the name).
+- **"Reply by email" subject**: "Re: {{title}} ({{ref}})"; "Notify all" subject "Таны илгээсэн санал хүсэлтийн талаар ({{refs}})".

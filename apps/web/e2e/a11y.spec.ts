@@ -104,6 +104,8 @@ const pages = (ids: Ids): [string, string][] => [
   ['Standup · settings', `/standup/${ids.mobileGroup}/settings`],
   // Anu follows (Bat facilitates); the running meeting is checked in standup-live.spec.ts.
   ['Standup · live', `/standup/${ids.mobileGroup}/${ids.mobileToday}/live`],
+  ['Feedback', '/feedback'],
+  ['Feedback · filtered', '/feedback?type=bug&status=linked&status=new'],
 ];
 
 test.describe('signed out', () => {
@@ -114,6 +116,21 @@ test.describe('signed out', () => {
     await expect(page.locator('input[name="email"]')).toBeVisible();
     await expectAccessible(page, 'Login');
   });
+
+  for (const scheme of ['light', 'dark'] as const) {
+    test(`public feedback form (${scheme})`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme: scheme });
+      // Signed out, the page is in the default language (Mongolian): find things by id.
+      await page.goto('/feedback/kite-studio');
+      const send = page.locator('form button[type="submit"]');
+      await expect(send).toBeVisible();
+      await expectAccessible(page, `Public feedback form (${scheme})`);
+      // Every field error and the summary.
+      await send.click();
+      await expect(page.getByRole('alert').first()).toBeVisible();
+      await expectAccessible(page, `Public feedback errors (${scheme})`);
+    });
+  }
 
   test('invite (invalid link)', async ({ page }) => {
     await page.goto('/invite/not-a-real-token');
@@ -151,6 +168,37 @@ for (const scheme of ['light', 'dark'] as const) {
         await expectAccessible(page, `Task drawer (${scheme})`);
         await page.keyboard.press('Escape');
         await expect(page.getByRole('dialog')).toBeHidden();
+      });
+
+      await test.step('feedback panel, link picker and create task', async () => {
+        await page.goto('/feedback?item=FB-1042');
+        const panel = page.getByRole('dialog', { name: 'Feedback FB-1042' });
+        await expect(panel.getByRole('heading', { level: 1 })).toBeVisible();
+        await expectAccessible(page, `Feedback panel (${scheme})`);
+        await panel.getByRole('button', { name: 'Link to existing task' }).click();
+        await expect(panel.getByRole('listbox')).toBeVisible();
+        await expectAccessible(page, `Feedback link picker (${scheme})`);
+        await panel.getByRole('button', { name: 'Create task from feedback' }).click();
+        const modal = page.getByRole('dialog', { name: 'Create task from feedback' });
+        await expect(modal).toBeVisible();
+        await expectAccessible(page, `Create task from feedback (${scheme})`);
+        await page.keyboard.press('Escape');
+        await expect(modal).toBeHidden();
+      });
+
+      await test.step('feedback duplicates and bulk bar', async () => {
+        await page.goto('/feedback?item=FB-1044');
+        await expect(page.getByRole('note')).toBeVisible();
+        await expectAccessible(page, `Feedback duplicates (${scheme})`);
+        await page.goto('/feedback');
+        await page
+          .getByRole('checkbox', { name: /^Select: / })
+          .first()
+          .check();
+        await expect(
+          page.getByRole('toolbar', { name: 'Actions for selected rows' }),
+        ).toBeVisible();
+        await expectAccessible(page, `Feedback bulk bar (${scheme})`);
       });
 
       await test.step('image preview', async () => {
@@ -354,6 +402,10 @@ for (const scheme of ['light', 'dark'] as const) {
       await expect(page.getByRole('dialog', { name: 'Workspace' })).toBeVisible();
       await expectAccessible(page, `Phone navigation (${scheme})`);
       await page.keyboard.press('Escape');
+
+      await page.goto('/feedback/kite-studio');
+      await expect(page.locator('form button[type="submit"]')).toBeVisible();
+      await expectAccessible(page, `Phone public feedback form (${scheme})`);
 
       await page.goto(`/standup/${ids.mobileGroup}`);
       await expect(page.getByRole('region', { name: 'Who has posted' })).toBeVisible();

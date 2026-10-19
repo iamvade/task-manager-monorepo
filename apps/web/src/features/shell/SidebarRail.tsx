@@ -3,6 +3,7 @@ import { Link, NavLink } from 'react-router';
 import { useStandupGroups } from '../../api/standups';
 import { useCurrentWorkspace, useSidebar } from '../../api/workspaces';
 import {
+  FeedbackIcon,
   InboxIcon,
   MyTasksIcon,
   PanelOpenIcon,
@@ -71,6 +72,17 @@ export function SidebarRail() {
         }
       >
         <InboxIcon size={16} />
+      </RailLink>
+      <RailLink
+        to="/feedback"
+        label={t('shell.feedback')}
+        badge={
+          sidebar.data && sidebar.data.feedbackUnreadCount > 0
+            ? t('shell.feedbackNew', { count: sidebar.data.feedbackUnreadCount })
+            : undefined
+        }
+      >
+        <FeedbackIcon size={16} />
       </RailLink>
       <RailLink to="/reports" label={t('shell.reports')}>
         <ReportsIcon size={16} />
