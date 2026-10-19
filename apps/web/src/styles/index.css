@@ -69,6 +69,7 @@
   --background-color-tooltip: var(--tooltip-bg);
   --background-color-scrim-drawer: var(--scrim-drawer);
   --background-color-scrim-modal: var(--scrim-modal);
+  --background-color-scrim-lightbox: var(--scrim-lightbox);
 
   /* Text */
   --text-color-default: var(--text);

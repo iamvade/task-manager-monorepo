@@ -13,7 +13,7 @@ Spacing on a 4/8px grid. Borders 1px.
 
 Radius scale: 3px (kbd inside field chips), 4px (kbd, 16px space badges, inline code), 5px (18px space badges, language segment buttons), 6px (tag chips, small icon buttons, menu options, calendar pills, segment buttons), 7px (language segmented track), 8px (buttons, inputs, nav items, field chips, segmented tracks, week-view cards), 10px (cards: board cards, attachments, comments, subtask list, unscheduled/template cards; popovers; editor and composer), 12px (panels: board columns, stat cards, activity panel, calendar grid, unscheduled panel), 14px (modal, empty-state illustration card), full (pills, count badges, avatars).
 
-Shadows: only the `--shadow-*` and `--ring-soft` tokens (`--shadow-float` is the StandupEmpty illustration's front card) in `apps/web/src/styles/tokens.css` (no others); scrims (drawer, modal) in `styles/index.css`.
+Shadows: only the `--shadow-*` and `--ring-soft` tokens (`--shadow-float` is the StandupEmpty illustration's front card) in `apps/web/src/styles/tokens.css` (no others); scrims (drawer, modal, and the derived image-preview `--scrim-lightbox`) in `styles/index.css`.
 
 Layout: sidebar 248px (min 220px), collapsible to a 56px icon rail. Top bar 56px + 40px view tabs. List rows 44px (comfortable) / 36px (compact). Task drawer 40% width, min 520px, from the right. Quick-create modal 600px wide, 112px from the top.
 

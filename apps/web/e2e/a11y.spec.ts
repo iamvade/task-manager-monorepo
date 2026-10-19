@@ -7,6 +7,9 @@ import { ADMIN, MEMBER } from './users';
  * the offending elements and axe's help link.
  */
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
+/** A 1×1 PNG, uploaded to check the image preview. */
+const PIXEL_PNG =
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 
 async function expectAccessible(page: Page, what: string) {
   // Let entrance transitions and data settle (axe reads computed colors).
@@ -146,6 +149,26 @@ for (const scheme of ['light', 'dark'] as const) {
         await page.goto(`/p/${ids.project}/list?task=${ids.taskKey}`);
         await expect(page.getByRole('dialog')).toBeVisible();
         await expectAccessible(page, `Task drawer (${scheme})`);
+        await page.keyboard.press('Escape');
+        await expect(page.getByRole('dialog')).toBeHidden();
+      });
+
+      await test.step('image preview', async () => {
+        await page.goto(`/p/${ids.project}/list?task=${ids.taskKey}`);
+        const drawer = page.getByRole('dialog');
+        const name = `a11y-preview-${scheme}.png`;
+        const section = drawer.getByRole('region', { name: 'Attachments' });
+        await section.locator('input[type="file"]').setInputFiles({
+          name,
+          mimeType: 'image/png',
+          buffer: Buffer.from(PIXEL_PNG, 'base64'),
+        });
+        await section.getByRole('link', { name: new RegExp(name) }).click();
+        const preview = page.getByRole('dialog', { name: `Preview of ${name}` });
+        await expect(preview.getByRole('img', { name })).toBeVisible();
+        await expectAccessible(page, `Image preview (${scheme})`);
+        await page.keyboard.press('Escape');
+        await expect(preview).toBeHidden();
         await page.keyboard.press('Escape');
         await expect(page.getByRole('dialog')).toBeHidden();
       });
