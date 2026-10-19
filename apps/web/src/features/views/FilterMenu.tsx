@@ -56,7 +56,7 @@ export function FilterMenu({ project, workspaceId, trigger }: FilterMenuProps) {
     'creator',
     'priority',
     'tag',
-    ...(project ? (['sprint'] as const) : []),
+    'sprint',
     'due',
   ];
 

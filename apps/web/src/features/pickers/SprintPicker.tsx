@@ -6,7 +6,8 @@ import { Picker } from '../../components/ui/Picker';
 import { Popover, type TriggerProps } from '../../components/ui/Popover';
 import { sprintLabel } from '../../lib/sprint';
 import { useDates } from '../../lib/useDates';
-import { NewSprintForm } from '../project/NewSprintForm';
+import { useSprints } from '../../api/sprints';
+import { SprintForm } from '../project/SprintForm';
 
 interface SprintPickerProps {
   value: string | null;
@@ -14,14 +15,14 @@ interface SprintPickerProps {
   onChange: (sprintId: string | null) => void;
   trigger: (props: TriggerProps, open: boolean) => ReactElement;
   label: string;
-  /** Shows "+ New sprint" under the list; the created sprint is picked. */
+  /** Shows "+ New sprint" (covering this project) under the list; the created sprint is picked. */
   project?: Pick<ProjectDetail, 'id' | 'workspaceId'> | undefined;
 }
 
 const NONE = 'none';
 
 /**
- * The project's sprints (name + date range) and "No sprint". ⌫ clears. "+ New sprint" swaps the
+ * The sprints covering the task's project (name + date range) and "No sprint". ⌫ clears. "+ New sprint" swaps the
  * list for the sprint form in the same popover (not designed).
  */
 export function SprintPicker({
@@ -36,6 +37,7 @@ export function SprintPicker({
   const dates = useDates();
   const [open, setOpen] = useState(false);
   const [creating, setCreating] = useState(false);
+  const allSprints = useSprints(creating ? project?.workspaceId : undefined).data;
   const newButtonRef = useRef<HTMLButtonElement>(null);
   const backFromForm = useRef(false);
   const items = [...sprints.map((s) => ({ id: s.id, sprint: s })), { id: NONE, sprint: null }];
@@ -60,11 +62,12 @@ export function SprintPicker({
       elevation="lg"
     >
       {(close) =>
-        creating && project ? (
-          <NewSprintForm
-            project={project}
-            sprints={sprints}
-            onCreated={(sprint) => {
+        creating && project && allSprints ? (
+          <SprintForm
+            workspaceId={project.workspaceId}
+            projectId={project.id}
+            sprints={allSprints}
+            onDone={(sprint) => {
               onChange(sprint.id);
               close();
             }}

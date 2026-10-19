@@ -68,8 +68,7 @@ export function FilterStrip({ project, spaceId }: FilterStripProps) {
     else view.update({ [field]: null });
   }
 
-  // Sprints are per project: the space list ignores the param, so no chip there.
-  const fields = activeFilterFields(filters).filter((f) => project !== undefined || f !== 'sprint');
+  const fields = activeFilterFields(filters);
   if (calendar && fields.length === 0) return null;
   return (
     <div className="flex flex-wrap items-center gap-2 px-6 pt-3">

@@ -15,7 +15,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { Editor } from '@tiptap/core';
 import { useMemo, useRef, useState, type KeyboardEvent, type MutableRefObject } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useProject, useSprints } from '../../api/projects';
+import { useProject } from '../../api/projects';
+import { useProjectSprints } from '../../api/sprints';
 import { queryKeys } from '../../api/queryKeys';
 import { useTags } from '../../api/tags';
 import { useCreateTask } from '../../api/tasks';
@@ -145,7 +146,7 @@ function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
   const projectId = chosenProjectId ?? fallbackProject(spaces, shell, lastProjectId);
   const sidebarProject = spaces.flatMap((s) => s.projects).find((p) => p.id === projectId);
   const project = useProject(projectId ?? undefined);
-  const sprints = useSprints(projectId ?? undefined);
+  const sprints = useProjectSprints(workspace?.id, projectId ?? undefined);
   const create = useCreateTask(projectId ?? '');
 
   const [title, setTitle] = useState(defaults.title ?? '');
@@ -179,17 +180,14 @@ function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
   );
   const teamIds = useMemo(() => new Set(team?.map((m) => m.user.id) ?? []), [team]);
   const assignee = memberList.find((m) => m.user.id === assigneeId)?.user ?? null;
-  // Undefined until picked: then the sprint the view was filtered to (only inside that
+  // Undefined until picked: then the sprint the view was filtered to (if it covers the
   // project), else the project's current sprint. Null = "No sprint".
   const [sprintChoice, setSprintChoice] = useState<string | null | undefined>(undefined);
+  const sprintList = useMemo(() => sprints.data ?? [], [sprints.data]);
   const viewSprint =
-    defaults.sprintId && projectId === (defaults.projectId ?? shell.projectId)
+    defaults.sprintId && sprintList.some((s) => s.id === defaults.sprintId)
       ? defaults.sprintId
       : undefined;
-  const sprintList = useMemo(
-    () => (sprints.data?.[0]?.projectId === projectId ? sprints.data : []),
-    [sprints.data, projectId],
-  );
   const sprintId =
     sprintChoice === undefined
       ? (viewSprint ?? detail?.activeSprint?.id)
@@ -477,8 +475,8 @@ function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
           label={t('create.project')}
           onChange={(p) => {
             setChosenProjectId(p.id);
-            // Sprints are per project: back to the new project's current one.
-            setSprintChoice(undefined);
+            // A shared sprint covering the new project stays; else back to its current one.
+            if (!sprint?.projectIds.includes(p.id)) setSprintChoice(undefined);
             // Keep the status's category; the new project's statuses differ.
             if (status) setStatusChoice({ category: status.category });
           }}

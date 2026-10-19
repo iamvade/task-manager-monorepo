@@ -3,7 +3,8 @@ import { useCallback, useMemo, useRef, useState, type DragEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUploadAttachment } from '../../api/attachments';
 import { ApiError } from '../../api/client';
-import { useProject, useSprints } from '../../api/projects';
+import { useProject } from '../../api/projects';
+import { useProjectSprints } from '../../api/sprints';
 import { useTags } from '../../api/tags';
 import { useTask } from '../../api/tasks';
 import { useWorkspaceMembers } from '../../api/workspaces';
@@ -101,7 +102,7 @@ function LoadedTask({
   const workspaceId = project?.workspaceId;
   const members = useWorkspaceMembers(workspaceId).data;
   const tags = useTags(workspaceId).data;
-  const sprints = useSprints(task.project.id).data;
+  const sprints = useProjectSprints(workspaceId, task.project.id).data;
   const { mutate: uploadFile } = useUploadAttachment(task.id);
   const [moveOpen, setMoveOpen] = useState(false);
   const [dropping, setDropping] = useState(false);

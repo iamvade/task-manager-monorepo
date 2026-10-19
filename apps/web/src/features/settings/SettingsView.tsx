@@ -10,9 +10,18 @@ import { MembersSection } from './MembersSection';
 import { NotificationsSection, ProjectLevelsSection } from './NotificationsSection';
 import { PreferencesSection } from './PreferencesSection';
 import { ProfileSection } from './ProfileSection';
+import { SprintsSection } from './SprintsSection';
 import { TagsSection } from './TagsSection';
 
-const TABS = ['profile', 'preferences', 'notifications', 'members', 'tags', 'archived'] as const;
+const TABS = [
+  'profile',
+  'preferences',
+  'notifications',
+  'members',
+  'tags',
+  'sprints',
+  'archived',
+] as const;
 const tabSchema = z.enum(TABS).catch('profile');
 
 /** /settings (not designed; built from the design system): one section per `?tab=`. */
@@ -58,6 +67,9 @@ export function SettingsView() {
           )}
           {tab === 'tags' && workspace && (
             <TagsSection workspaceId={workspace.id} role={workspace.role} />
+          )}
+          {tab === 'sprints' && workspace && (
+            <SprintsSection workspaceId={workspace.id} role={workspace.role} />
           )}
           {tab === 'archived' && workspace && (
             <ArchivedProjectsSection workspaceId={workspace.id} role={workspace.role} />

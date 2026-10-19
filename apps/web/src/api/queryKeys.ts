@@ -5,7 +5,8 @@ export const queryKeys = {
   members: (workspaceId: string) => ['workspaces', workspaceId, 'members'] as const,
   invites: (workspaceId: string) => ['workspaces', workspaceId, 'invites'] as const,
   project: (projectId: string) => ['projects', projectId] as const,
-  sprints: (projectId: string) => ['projects', projectId, 'sprints'] as const,
+  /** Every sprint of the workspace (they're shared by projects). */
+  sprints: (workspaceId: string) => ['workspaces', workspaceId, 'sprints'] as const,
   tags: (workspaceId: string) => ['workspaces', workspaceId, 'tags'] as const,
   /** A member's current and upcoming out-of-office periods. */
   absences: (workspaceId: string, userId: string) =>

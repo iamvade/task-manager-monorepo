@@ -32,11 +32,9 @@ export function ViewToolbar({ project = null, empty = false }: ViewToolbarProps)
   const listColumns = useUiStore((s) => s.listColumns);
   const setListColumn = useUiStore((s) => s.setListColumn);
   const newTask = () => {
-    openCreate(
-      project
-        ? { projectId: project.id, ...(view.sprintId ? { sprintId: view.sprintId } : {}) }
-        : {},
-    );
+    // Quick create keeps the filtered sprint while the picked project is in it.
+    const sprint = view.sprintId ? { sprintId: view.sprintId } : {};
+    openCreate(project ? { projectId: project.id, ...sprint } : sprint);
   };
 
   if (empty) {

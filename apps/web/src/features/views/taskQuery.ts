@@ -36,9 +36,7 @@ export function toTaskQuery(
   if (creators.length) query.createdBy = creators;
   if (filters.priority.length) query.priority = filters.priority;
   if (ids(filters.tag).length) query.tagId = ids(filters.tag);
-  // Sprints belong to one project; the space list ignores the param.
-  if (filters.sprint && UUID.test(filters.sprint) && scope === 'project')
-    query.sprintId = filters.sprint;
+  if (filters.sprint && UUID.test(filters.sprint)) query.sprintId = filters.sprint;
   if (filters.dueFrom) query.dueFrom = filters.dueFrom;
   if (filters.dueTo) query.dueTo = filters.dueTo;
   if (doneSince) query.doneSince = doneSince;

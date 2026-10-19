@@ -24,9 +24,12 @@ describe('toTaskQuery', () => {
     });
   });
 
-  it('filters the space list by status category and ignores sprints', () => {
+  it('filters the space list by status category and by a shared sprint', () => {
     const filters = readFilters(new URLSearchParams(`status=todo,done,${S1}&sprint=${S1}`));
-    expect(toTaskQuery(filters, ME_ID, 'space')).toEqual({ statusCategory: ['todo', 'done'] });
+    expect(toTaskQuery(filters, ME_ID, 'space')).toEqual({
+      statusCategory: ['todo', 'done'],
+      sprintId: S1,
+    });
   });
 
   it('treats sprint=none and bad dates as no filter', () => {

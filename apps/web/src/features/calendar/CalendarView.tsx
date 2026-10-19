@@ -253,7 +253,7 @@ function Calendar({ scope, scopeId, project, space }: CalendarProps) {
   const error = (rangeQuery ? range.error : null) ?? unscheduledTasks.error;
   if (error) return <ErrorState error={error} />;
 
-  const sprint = project && view.sprintId ? { sprintId: view.sprintId } : {};
+  const sprint = view.sprintId ? { sprintId: view.sprintId } : {};
 
   return (
     <DndContext
@@ -345,7 +345,7 @@ function Calendar({ scope, scopeId, project, space }: CalendarProps) {
           taskHref={taskHref}
           isTarget={effective?.kind === 'unscheduled'}
           onAdd={() => {
-            openCreate(project ? { projectId: project.id, ...sprint } : {});
+            openCreate(project ? { projectId: project.id, ...sprint } : sprint);
           }}
         />
       </div>

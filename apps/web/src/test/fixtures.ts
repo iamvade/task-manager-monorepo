@@ -111,11 +111,12 @@ export const PROJECT = {
   ],
   activeSprint: {
     id: SPRINT_ID,
-    projectId: PROJECT_ID,
     number: 1,
     name: 'Sprint 1',
     startDate: '2026-10-06',
     endDate: '2026-10-24',
+    projectIds: [PROJECT_ID],
+    createdBy: null,
   },
   taskCounts: [],
   taskCount: 16,

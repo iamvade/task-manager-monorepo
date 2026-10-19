@@ -282,7 +282,12 @@
     "start": "Start",
     "end": "End",
     "create": "Create sprint",
-    "invalidRange": "The end date can't be before the start date"
+    "invalidRange": "The end date can't be before the start date",
+    "edit": "Edit sprint",
+    "save": "Save",
+    "projects": "Projects",
+    "pickProject": "Pick at least one project",
+    "projectInUse": "Tasks of a project you unticked are still in this sprint. Move them out first."
   },
   "dates": {
     "today": "Today",
@@ -856,6 +861,7 @@
       "notifications": "Notifications",
       "members": "Members",
       "tags": "Tags",
+      "sprints": "Sprints",
       "archived": "Archived"
     },
     "profile": {
@@ -990,6 +996,29 @@
       "mergeBody": "Tasks tagged “{{from}}” get “{{into}}” instead, then “{{from}}” is deleted. This can’t be undone.",
       "mergeHint": "Pick the tag to keep.",
       "mergeConfirm": "Merge"
+    },
+    "sprints": {
+      "title": "Sprints",
+      "hint": "A sprint is shared by the projects you pick: their tasks can be in it, and Reports · Sprints counts them together. Anyone can create one; admins and whoever created it can edit or delete it.",
+      "loadError": "Couldn’t load sprints.",
+      "empty": "No sprints yet",
+      "groups": {
+        "current": "Current",
+        "upcoming": "Upcoming",
+        "past": "Past"
+      },
+      "showAllPast": "Show all {{count}} past sprints",
+      "projectsOf": "Projects in {{name}}",
+      "tasks_one": "{{count}} task",
+      "tasks_other": "{{count}} tasks",
+      "actions": "Actions for {{name}}",
+      "delete": "Delete",
+      "deleteTitle": "Delete {{name}}?",
+      "deleteBody": "No task has been in it. This can’t be undone.",
+      "deleted": "{{name}} deleted",
+      "inUse": "Tasks have been in this sprint, so it can’t be deleted.",
+      "created": "{{name}} created",
+      "saved": "{{name}} saved"
     },
     "archived": {
       "title": "Archived projects",
@@ -1174,7 +1203,7 @@
         "carried": "Carried over",
         "carriedFrom": "from Sprint {{number}}",
         "carriedFromRepeated": "from Sprint {{number}} · {{count}} carried 2+ times",
-        "carriedNone": "first sprint of the project",
+        "carriedNone": "first sprint here",
         "carriedOut": "Carried to next sprint",
         "carriedInto": "into Sprint {{number}}",
         "carriedIntoNone": "no next sprint yet"
@@ -1223,7 +1252,7 @@
         "title": "Carried over from last sprint",
         "sub_one": "{{count}} task moved from Sprint {{from}} into Sprint {{to}} · flagged when carried {{times}} or more times",
         "sub_other": "{{count}} tasks moved from Sprint {{from}} into Sprint {{to}} · flagged when carried {{times}} or more times",
-        "subFirst": "This is the project’s first sprint",
+        "subFirst": "This is the first sprint for these projects",
         "cols": {
           "task": "Task",
           "project": "Project",
@@ -1241,9 +1270,8 @@
       "replanTitle": "Open this sprint’s unfinished tasks in the List view to move some out",
       "empty": {
         "noSprintsTitle": "No sprints in {{project}} yet",
-        "noSprintsBody": "Sprint reports appear here once the project plans its first sprint.",
-        "noProjectTitle": "No projects to report on",
-        "noProjectBody": "Pick another space, or create a project first."
+        "noSprintsAnyTitle": "No sprints here yet",
+        "noSprintsBody": "Sprint reports appear here once a sprint covers a project in scope."
       }
     },
     "workload": {

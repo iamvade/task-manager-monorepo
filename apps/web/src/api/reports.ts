@@ -33,9 +33,10 @@ export interface OverviewQuery extends ReportFilters {
 }
 
 export interface SprintsQuery {
-  /** Omitted: the API picks the first project in scope that has sprints. */
+  /** Narrows the sprints listed and the tasks counted to one project. */
   projectId?: string;
   spaceId?: string;
+  /** Omitted: the current sprint in scope, else the latest started, else the newest. */
   sprintId?: string;
 }
 
