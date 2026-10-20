@@ -136,13 +136,13 @@ function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
   const tags = useTags(workspace?.id);
   const createMore = useUiStore((s) => s.createMore);
   const setCreateMore = useUiStore((s) => s.setCreateMore);
-  const lastCreateProjectId = useUiStore((s) => s.lastCreateProjectId);
+  const lastCreateProjectId = useUiStore((s) => s.lastCreateProjectIds[workspace?.id ?? '']);
   const setLastCreateProject = useUiStore((s) => s.setLastCreateProject);
 
   const spaces = useMemo(() => sidebar.data?.spaces ?? [], [sidebar.data]);
   const [chosenProjectId, setChosenProjectId] = useState<string | null>(defaults.projectId ?? null);
   // Read once: creating a task updates it, and the open form shouldn't jump.
-  const [lastProjectId] = useState(lastCreateProjectId);
+  const [lastProjectId] = useState(lastCreateProjectId ?? null);
   const projectId = chosenProjectId ?? fallbackProject(spaces, shell, lastProjectId);
   const sidebarProject = spaces.flatMap((s) => s.projects).find((p) => p.id === projectId);
   const project = useProject(projectId ?? undefined);
@@ -239,7 +239,7 @@ function QuickCreateForm({ defaults, onClose, titleRef }: FormProps) {
       {
         onSuccess: (task) => {
           setPending(false);
-          setLastCreateProject(detail.id);
+          if (workspace) setLastCreateProject(workspace.id, detail.id);
           if (defaults.onCreated) {
             defaults.onCreated(task);
             onClose();

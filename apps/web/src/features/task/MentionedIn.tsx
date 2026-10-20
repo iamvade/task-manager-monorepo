@@ -3,12 +3,14 @@ import { Link } from 'react-router';
 import { StatusDot } from '../../components/ui/StatusDot';
 import { useTaskView } from './TaskContext';
 import { useTaskKeyHref } from './useTaskKeyHref';
+import { useWsPath } from '../../api/workspaces';
 
 /**
  * "Mentioned in" (not designed): tasks whose title, description or a comment write this task's
  * key, newest first; each opens that task (at the comment).
  */
 export function MentionedIn() {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const { task } = useTaskView();
   const hrefOf = useTaskKeyHref();
@@ -20,7 +22,7 @@ export function MentionedIn() {
       </h3>
       <ul className="m-0 flex list-none flex-col pl-0">
         {task.mentionedIn.map((ref) => {
-          const base = hrefOf(ref.task.key) ?? `/t/${ref.task.key}`;
+          const base = hrefOf(ref.task.key) ?? ws(`/t/${ref.task.key}`);
           const href = ref.commentId
             ? `${base}${base.includes('?') ? '&' : '?'}comment=${ref.commentId}`
             : base;

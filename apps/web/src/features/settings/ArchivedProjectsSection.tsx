@@ -1,6 +1,7 @@
 import { canManageCreated, type ArchivedProject, type WorkspaceRole } from '@kite/shared';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { useWsPath } from '../../api/workspaces';
 import { useArchivedProjects, useSetArchived } from '../../api/projects';
 import { useAuth } from '../../auth/useAuth';
 import { Button } from '../../components/ui/Button';
@@ -100,6 +101,7 @@ function ArchivedRow({
   onRestore: () => void;
 }) {
   const { t } = useTranslation();
+  const ws = useWsPath();
   const { me } = useAuth();
   const { formatDate } = useDates();
   const archivedOn = formatDate(todayFor(me?.preferences.timezone, new Date(project.archivedAt)));
@@ -110,7 +112,7 @@ function ArchivedRow({
       <div className="flex min-w-0 flex-1 flex-col">
         <span className="flex min-w-0 items-center gap-2">
           <Link
-            to={`/p/${project.id}/list`}
+            to={ws(`/p/${project.id}/list`)}
             className="truncate text-[13px] font-medium text-default no-underline hover:underline"
           >
             {project.name}

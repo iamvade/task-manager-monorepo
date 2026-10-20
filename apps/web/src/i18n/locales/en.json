@@ -97,6 +97,7 @@
     "skipToContent": "Skip to content",
     "workspace": "Workspace",
     "switchWorkspace": "Switch workspace",
+    "unreadElsewhere": "New notifications in another workspace",
     "search": "Search",
     "collapse": "Collapse sidebar",
     "expand": "Expand sidebar",
@@ -137,6 +138,11 @@
     "feedback": "Feedback",
     "feedbackNew_one": "{{count}} new",
     "feedbackNew_other": "{{count}} new"
+  },
+  "workspace": {
+    "noneTitle": "No workspace yet",
+    "noneBody": "{{email}} isn't a member of any workspace. Ask a workspace admin to invite you.",
+    "signOut": "Sign out"
   },
   "header": {
     "breadcrumb": "Breadcrumb",

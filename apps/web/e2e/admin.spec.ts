@@ -12,7 +12,7 @@ test('platform admin creates a workspace and its owner joins', async ({ page, br
   const name = `Steppe Co ${stamp}`;
   const ownerEmail = `owner-${stamp}@example.com`;
 
-  await page.goto('/my-tasks');
+  await page.goto('/w/kite-studio/my-tasks');
   await expect(page).toHaveURL(/\/admin$/);
   await page.getByLabel('Workspace name').fill(name);
   await expect(page.getByLabel('Address')).toHaveValue(`steppe-co-${stamp}`);

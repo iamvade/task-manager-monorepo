@@ -33,6 +33,11 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
       onReconnect: () => void queryClient.invalidateQueries(),
       onUnauthorized: () => void queryClient.invalidateQueries({ queryKey: queryKeys.me }),
       onMessage: (message) => {
+        // Any workspace: the switcher's unread counts.
+        if (message.type === 'notifications.unread_changed') {
+          void queryClient.invalidateQueries({ queryKey: queryKeys.unreadCounts });
+          return;
+        }
         if ('workspaceId' in message && message.workspaceId !== workspaceRef.current) return;
         switch (message.type) {
           case 'ready':

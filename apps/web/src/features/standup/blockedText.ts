@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useDates } from '../../lib/useDates';
 import { firstName } from './day/DayContext';
 
-/** The standup day the blocker was posted on. */
+/** The standup day the blocker was posted on (inside the workspace: prefix with `useWsPath()`). */
 export const blockedHref = (blocked: TaskBlocked) => `/standup/${blocked.groupId}/${blocked.date}`;
 
 /**

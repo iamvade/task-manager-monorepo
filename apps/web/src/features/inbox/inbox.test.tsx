@@ -23,7 +23,7 @@ type Handler = (init?: RequestInit) => Response | Promise<Response>;
 function renderInbox(
   extra: Record<string, Handler> = {},
   inbox: () => NotificationPage = () => INBOX,
-  entry = '/inbox',
+  entry = '/w/kite-studio/inbox',
 ) {
   const fetchMock = mockApi({
     'GET /api/v1/auth/me': () => Response.json(EN_ME),
@@ -92,7 +92,7 @@ describe('Inbox', () => {
           Response.json(page([STATUS], { unread: 2, archived: 1 })),
       },
       () => INBOX,
-      `/inbox?project=${checkout.id}`,
+      `/w/kite-studio/inbox?project=${checkout.id}`,
     );
     const filter = await screen.findByRole('button', { name: /Checkout v2/ });
     expect(filter).toBeInTheDocument();
@@ -101,7 +101,7 @@ describe('Inbox', () => {
     });
     expect(screen.getByRole('tab', { name: 'Mentions' })).toHaveAttribute(
       'href',
-      `/inbox?tab=mentions&project=${checkout.id}`,
+      `/w/kite-studio/inbox?tab=mentions&project=${checkout.id}`,
     );
     fireEvent.click(filter);
     fireEvent.click(await screen.findByRole('menuitemradio', { name: 'All projects' }));
@@ -194,7 +194,7 @@ describe('Inbox', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Mark all as read' })).toBeDisabled();
     for (const link of screen.getAllByRole('link', { name: 'Notification settings' })) {
-      expect(link).toHaveAttribute('href', '/settings?tab=notifications');
+      expect(link).toHaveAttribute('href', '/w/kite-studio/settings?tab=notifications');
     }
     fireEvent.click(screen.getByRole('link', { name: 'View 24 archived notifications' }));
     await waitFor(() => {
@@ -216,14 +216,16 @@ describe('Inbox', () => {
     fireEvent.click(at(within(at(rows(), 0)).getAllByRole('button'), 0));
     await waitFor(() => {
       expect(router.state.location.pathname).toBe(
-        `/standup/${reply.standup?.groupId ?? ''}/2026-10-08`,
+        `/w/kite-studio/standup/${reply.standup?.groupId ?? ''}/2026-10-08`,
       );
     });
-    await router.navigate('/inbox');
+    await router.navigate('/w/kite-studio/inbox');
     await screen.findByRole('list', { name: 'All' });
     fireEvent.click(at(within(at(rows(), 1)).getAllByRole('button'), 0));
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe(`/standup/${reminder.standup?.groupId ?? ''}`);
+      expect(router.state.location.pathname).toBe(
+        `/w/kite-studio/standup/${reminder.standup?.groupId ?? ''}`,
+      );
     });
     expect(router.state.location.search).toBe('?write=1');
   });

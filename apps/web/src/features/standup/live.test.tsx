@@ -65,7 +65,7 @@ const DAY: StandupDay = dayOf({
 });
 
 function renderLive(state: StandupMeetingState, extra: Parameters<typeof renderAt>[1] = {}) {
-  return renderAt(`/standup/${MOBILE_ID}/${DATE}/live`, {
+  return renderAt(`/w/kite-studio/standup/${MOBILE_ID}/${DATE}/live`, {
     ...extra,
     extra: {
       [`GET ${BASE}`]: () => Response.json(DAY),
@@ -163,7 +163,9 @@ describe('Standup live meeting', () => {
       title: BLOCKER.text.split(' — ')[0],
       assigneeId: DORJ_REF.id,
     });
-    expect(JSON.stringify(createDefaults.description)).toContain(`/standup/${MOBILE_ID}`);
+    expect(JSON.stringify(createDefaults.description)).toContain(
+      `/w/kite-studio/standup/${MOBILE_ID}`,
+    );
     expect(createDefaults.onCreated).toBeTypeOf('function');
   });
 

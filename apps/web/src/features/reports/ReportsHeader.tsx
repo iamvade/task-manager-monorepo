@@ -6,6 +6,7 @@ import { UnderlineTabs } from '../../components/ui/UnderlineTabs';
 import { PageHeader } from '../views/PageHeader';
 import { filtersSearch } from './params';
 import { useReportsRole } from './useReportsRole';
+import { useWsPath } from '../../api/workspaces';
 
 export type ReportsTab = 'overview' | 'sprints' | 'workload' | 'people' | 'me';
 
@@ -22,6 +23,7 @@ interface ReportsHeaderProps {
  * Switching tabs keeps the period and scope filters.
  */
 export function ReportsHeader({ tab, status, toolbar }: ReportsHeaderProps) {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const [params] = useSearchParams();
   const { isAdmin } = useReportsRole();
@@ -44,7 +46,7 @@ export function ReportsHeader({ tab, status, toolbar }: ReportsHeaderProps) {
           items={tabs.map((value) => ({
             value,
             label: t(`reports.tabs.${value}`),
-            to: `/reports/${value}${search}`,
+            to: ws(`/reports/${value}${search}`),
           }))}
         />
       }

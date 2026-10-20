@@ -45,9 +45,9 @@ interface Ids {
 
 async function lookup(page: Page): Promise<Ids> {
   const me = (await (await page.request.get('/api/v1/auth/me')).json()) as {
-    workspaces: { id: string }[];
+    workspaces: { id: string; slug: string }[];
   };
-  const ws = me.workspaces[0]?.id ?? '';
+  const ws = me.workspaces.find((w) => w.slug === 'kite-studio')?.id ?? '';
   const sidebar = (await (await page.request.get(`/api/v1/workspaces/${ws}/sidebar`)).json()) as {
     spaces: { id: string; name: string; projects: { id: string; name: string }[] }[];
   };
@@ -80,32 +80,32 @@ async function lookup(page: Page): Promise<Ids> {
 }
 
 const pages = (ids: Ids): [string, string][] => [
-  ['My Tasks', '/my-tasks'],
-  ['Inbox', '/inbox'],
-  ['Settings', '/settings'],
-  ['Settings · members', '/settings?tab=members'],
-  ['Settings · tags', '/settings?tab=tags'],
-  ['Settings · sprints', '/settings?tab=sprints'],
-  ['Settings · archived', '/settings?tab=archived'],
-  ['Task page', `/t/${ids.taskKey}`],
-  ['Project list', `/p/${ids.project}/list`],
-  ['Project board', `/p/${ids.project}/board`],
-  ['Project calendar', `/p/${ids.project}/calendar`],
-  ['Space list', `/s/${ids.space}/list`],
-  ['Space board', `/s/${ids.space}/board`],
-  ['Space calendar', `/s/${ids.space}/calendar`],
-  ['Reports · Overview', '/reports/overview'],
-  ['Reports · Sprints', '/reports/sprints'],
-  ['Reports · Workload', '/reports/workload'],
-  ['Reports · People', '/reports/people'],
-  ['Reports · empty', `/reports/overview?project=${ids.emptyProject}`],
-  ['Standup · group', `/standup/${ids.mobileGroup}`],
-  ['Standup · empty group', `/standup/${ids.designGroup}`],
-  ['Standup · settings', `/standup/${ids.mobileGroup}/settings`],
+  ['My Tasks', '/w/kite-studio/my-tasks'],
+  ['Inbox', '/w/kite-studio/inbox'],
+  ['Settings', '/w/kite-studio/settings'],
+  ['Settings · members', '/w/kite-studio/settings?tab=members'],
+  ['Settings · tags', '/w/kite-studio/settings?tab=tags'],
+  ['Settings · sprints', '/w/kite-studio/settings?tab=sprints'],
+  ['Settings · archived', '/w/kite-studio/settings?tab=archived'],
+  ['Task page', `/w/kite-studio/t/${ids.taskKey}`],
+  ['Project list', `/w/kite-studio/p/${ids.project}/list`],
+  ['Project board', `/w/kite-studio/p/${ids.project}/board`],
+  ['Project calendar', `/w/kite-studio/p/${ids.project}/calendar`],
+  ['Space list', `/w/kite-studio/s/${ids.space}/list`],
+  ['Space board', `/w/kite-studio/s/${ids.space}/board`],
+  ['Space calendar', `/w/kite-studio/s/${ids.space}/calendar`],
+  ['Reports · Overview', '/w/kite-studio/reports/overview'],
+  ['Reports · Sprints', '/w/kite-studio/reports/sprints'],
+  ['Reports · Workload', '/w/kite-studio/reports/workload'],
+  ['Reports · People', '/w/kite-studio/reports/people'],
+  ['Reports · empty', `/w/kite-studio/reports/overview?project=${ids.emptyProject}`],
+  ['Standup · group', `/w/kite-studio/standup/${ids.mobileGroup}`],
+  ['Standup · empty group', `/w/kite-studio/standup/${ids.designGroup}`],
+  ['Standup · settings', `/w/kite-studio/standup/${ids.mobileGroup}/settings`],
   // Anu follows (Bat facilitates); the running meeting is checked in standup-live.spec.ts.
-  ['Standup · live', `/standup/${ids.mobileGroup}/${ids.mobileToday}/live`],
-  ['Feedback', '/feedback'],
-  ['Feedback · filtered', '/feedback?type=bug&status=linked&status=new'],
+  ['Standup · live', `/w/kite-studio/standup/${ids.mobileGroup}/${ids.mobileToday}/live`],
+  ['Feedback', '/w/kite-studio/feedback'],
+  ['Feedback · filtered', '/w/kite-studio/feedback?type=bug&status=linked&status=new'],
 ];
 
 test.describe('platform admin', () => {
@@ -162,7 +162,7 @@ for (const scheme of ['light', 'dark'] as const) {
 
     test('every screen', async ({ page }) => {
       test.setTimeout(180_000);
-      await page.goto('/my-tasks');
+      await page.goto('/w/kite-studio/my-tasks');
       await expect(page.locator('html')).toHaveAttribute('data-theme', scheme);
       const ids = await lookup(page);
       for (const [name, url] of pages(ids)) {
@@ -176,11 +176,11 @@ for (const scheme of ['light', 'dark'] as const) {
 
     test('overlays', async ({ page }) => {
       test.setTimeout(120_000);
-      await page.goto('/my-tasks');
+      await page.goto('/w/kite-studio/my-tasks');
       const ids = await lookup(page);
 
       await test.step('task drawer', async () => {
-        await page.goto(`/p/${ids.project}/list?task=${ids.taskKey}`);
+        await page.goto(`/w/kite-studio/p/${ids.project}/list?task=${ids.taskKey}`);
         await expect(page.getByRole('dialog')).toBeVisible();
         await expectAccessible(page, `Task drawer (${scheme})`);
         await page.keyboard.press('Escape');
@@ -188,7 +188,7 @@ for (const scheme of ['light', 'dark'] as const) {
       });
 
       await test.step('feedback panel, link picker and create task', async () => {
-        await page.goto('/feedback?item=FB-1042');
+        await page.goto('/w/kite-studio/feedback?item=FB-1042');
         const panel = page.getByRole('dialog', { name: 'Feedback FB-1042' });
         await expect(panel.getByRole('heading', { level: 1 })).toBeVisible();
         await expectAccessible(page, `Feedback panel (${scheme})`);
@@ -204,10 +204,10 @@ for (const scheme of ['light', 'dark'] as const) {
       });
 
       await test.step('feedback duplicates and bulk bar', async () => {
-        await page.goto('/feedback?item=FB-1044');
+        await page.goto('/w/kite-studio/feedback?item=FB-1044');
         await expect(page.getByRole('note')).toBeVisible();
         await expectAccessible(page, `Feedback duplicates (${scheme})`);
-        await page.goto('/feedback');
+        await page.goto('/w/kite-studio/feedback');
         await page
           .getByRole('checkbox', { name: /^Select: / })
           .first()
@@ -219,7 +219,7 @@ for (const scheme of ['light', 'dark'] as const) {
       });
 
       await test.step('image preview', async () => {
-        await page.goto(`/p/${ids.project}/list?task=${ids.taskKey}`);
+        await page.goto(`/w/kite-studio/p/${ids.project}/list?task=${ids.taskKey}`);
         const drawer = page.getByRole('dialog');
         const name = `a11y-preview-${scheme}.png`;
         const section = drawer.getByRole('region', { name: 'Attachments' });
@@ -278,7 +278,7 @@ for (const scheme of ['light', 'dark'] as const) {
       });
 
       await test.step('project brief and bulk bar', async () => {
-        await page.goto(`/p/${ids.project}/list?sprint=none`);
+        await page.goto(`/w/kite-studio/p/${ids.project}/list?sprint=none`);
         const brief = page.getByRole('button', { name: /^Project brief/ });
         await brief.click();
         await expect(brief).toHaveAttribute('aria-expanded', 'true');
@@ -303,21 +303,21 @@ for (const scheme of ['light', 'dark'] as const) {
       });
 
       await test.step('drawer with followers and Mentioned in', async () => {
-        await page.goto(`/p/${ids.project}/list?sprint=none&task=APP-142`);
+        await page.goto(`/w/kite-studio/p/${ids.project}/list?sprint=none&task=APP-142`);
         await expect(page.getByRole('region', { name: 'Mentioned in' })).toBeVisible();
         await expectAccessible(page, `Drawer · Mentioned in (${scheme})`);
         await page.keyboard.press('Escape');
       });
 
       await test.step('standup: group switcher, member menu, new group, time off', async () => {
-        await page.goto(`/standup/${ids.mobileGroup}`);
+        await page.goto(`/w/kite-studio/standup/${ids.mobileGroup}`);
         await page.getByRole('button', { name: /^Switch standup group/ }).click();
         await expect(page.getByRole('listbox')).toBeVisible();
         await expectAccessible(page, `Standup group switcher (${scheme})`);
         await page.keyboard.press('Escape');
 
         // The group page: reactions, the @-popup of a reply, the write modal, a past day.
-        await page.goto(`/standup/${ids.mobileGroup}`);
+        await page.goto(`/w/kite-studio/standup/${ids.mobileGroup}`);
         const card = page.getByRole('article').first();
         await expect(card).toBeVisible();
         const addReaction = card.getByRole('button', { name: 'Add reaction' });
@@ -343,7 +343,7 @@ for (const scheme of ['light', 'dark'] as const) {
         await expect(page.getByRole('heading', { name: 'Updates', exact: true })).toBeVisible();
         await expectAccessible(page, `Standup past day (${scheme})`);
 
-        await page.goto(`/standup/${ids.mobileGroup}/settings`);
+        await page.goto(`/w/kite-studio/standup/${ids.mobileGroup}/settings`);
         await page.getByRole('button', { name: 'Add members' }).click();
         await expect(page.getByRole('listbox')).toBeVisible();
         await expectAccessible(page, `Standup add members (${scheme})`);
@@ -354,7 +354,7 @@ for (const scheme of ['light', 'dark'] as const) {
         await expectAccessible(page, `New standup group (${scheme})`);
         await page.keyboard.press('Escape');
 
-        await page.goto('/settings?tab=members');
+        await page.goto('/w/kite-studio/settings?tab=members');
         await page.getByRole('button', { name: /^More actions for Mia/ }).click();
         await page.getByRole('menuitem', { name: 'Set out of office…' }).click();
         await expect(page.getByRole('dialog', { name: /^Out of office/ })).toBeVisible();
@@ -363,7 +363,7 @@ for (const scheme of ['light', 'dark'] as const) {
       });
 
       await test.step('sprints: edit dialog', async () => {
-        await page.goto('/settings?tab=sprints');
+        await page.goto('/w/kite-studio/settings?tab=sprints');
         await page.getByRole('button', { name: 'Actions for Sprint 14' }).click();
         await page.getByRole('menuitem', { name: 'Edit sprint' }).click();
         await expect(page.getByRole('dialog', { name: 'Edit sprint' })).toBeVisible();
@@ -373,7 +373,7 @@ for (const scheme of ['light', 'dark'] as const) {
       });
 
       await test.step('tags: new tag form, merge and delete dialogs', async () => {
-        await page.goto('/settings?tab=tags');
+        await page.goto('/w/kite-studio/settings?tab=tags');
         await page.getByRole('button', { name: 'New tag' }).click();
         await page.getByRole('textbox', { name: 'Tag name' }).fill('Ops');
         await expectAccessible(page, `New tag form (${scheme})`);
@@ -399,7 +399,7 @@ for (const scheme of ['light', 'dark'] as const) {
       });
 
       await test.step('deactivate dialog', async () => {
-        await page.goto('/settings?tab=members');
+        await page.goto('/w/kite-studio/settings?tab=members');
         await page.getByRole('button', { name: 'More actions for Dorj E.' }).click();
         await page.getByRole('menuitem', { name: 'Deactivate…' }).click();
         const dialog = page.getByRole('dialog', { name: 'Deactivate Dorj E.?' });
@@ -412,7 +412,7 @@ for (const scheme of ['light', 'dark'] as const) {
 
     test('phone (390×844)', async ({ page }) => {
       await page.setViewportSize({ width: 390, height: 844 });
-      await page.goto('/my-tasks');
+      await page.goto('/w/kite-studio/my-tasks');
       const ids = await lookup(page);
 
       await page.getByRole('button', { name: 'Open navigation' }).click();
@@ -424,12 +424,12 @@ for (const scheme of ['light', 'dark'] as const) {
       await expect(page.locator('form button[type="submit"]')).toBeVisible();
       await expectAccessible(page, `Phone public feedback form (${scheme})`);
 
-      await page.goto(`/standup/${ids.mobileGroup}`);
+      await page.goto(`/w/kite-studio/standup/${ids.mobileGroup}`);
       await expect(page.getByRole('region', { name: 'Who has posted' })).toBeVisible();
       await expectAccessible(page, `Phone standup group (${scheme})`);
 
       // The write page from the reminder link (Design team: Anu hasn't posted there).
-      await page.goto(`/standup/${ids.designGroup}?write=1`);
+      await page.goto(`/w/kite-studio/standup/${ids.designGroup}?write=1`);
       const dialog = page.getByRole('dialog', { name: 'Your standup' });
       // No dialog on days without a standup.
       const open = await dialog
@@ -450,13 +450,13 @@ test.describe('member', () => {
   test.use({ storageState: MEMBER.state });
 
   test('Settings · tags (read-only)', async ({ page }) => {
-    await page.goto('/settings?tab=tags');
+    await page.goto('/w/kite-studio/settings?tab=tags');
     await expect(page.getByText(/Only admins and owners can create/)).toBeVisible();
     await expectAccessible(page, 'Settings · tags (member)');
   });
 
   test('My performance', async ({ page }) => {
-    await page.goto('/reports/me');
+    await page.goto('/w/kite-studio/reports/me');
     await expect(page.locator('main')).toBeVisible();
     await expectAccessible(page, 'Reports · My performance');
   });

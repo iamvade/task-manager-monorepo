@@ -29,9 +29,9 @@ const column = (page: Page, status: string) =>
 /** A project's id, looked up through the API with the page's session. */
 async function projectId(page: Page, name: string): Promise<string> {
   const me = (await (await page.request.get('/api/v1/auth/me')).json()) as {
-    workspaces: { id: string }[];
+    workspaces: { id: string; slug: string }[];
   };
-  const ws = me.workspaces[0]?.id ?? '';
+  const ws = me.workspaces.find((w) => w.slug === 'kite-studio')?.id ?? '';
   const sidebar = (await (await page.request.get(`/api/v1/workspaces/${ws}/sidebar`)).json()) as {
     spaces: { projects: { id: string; name: string }[] }[];
   };
@@ -65,7 +65,7 @@ test.describe('task → board → mention → inbox', () => {
     const title = `E2E journey ${Date.now()}`;
 
     // 1. Create the task from the quick-create modal (C), in App Redesign.
-    const project = `/p/${await projectId(page, 'App Redesign')}`;
+    const project = `/w/kite-studio/p/${await projectId(page, 'App Redesign')}`;
     await page.goto(`${project}/list`);
     await expect(page.getByRole('navigation', { name: 'Breadcrumb' })).toContainText(
       'App Redesign',

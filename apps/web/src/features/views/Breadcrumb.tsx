@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { ChevronRightIcon } from '../../components/icons';
 import { SpaceBadge } from '../../components/ui/SpaceBadge';
+import { useWsPath } from '../../api/workspaces';
 
 interface BreadcrumbProps {
   space: { id: string; name: string; initial: string; color: PaletteKey };
@@ -12,6 +13,7 @@ interface BreadcrumbProps {
 
 /** "[P] Product › App Redesign": 14px, 18px space badge, faint chevron, current page 600. */
 export function Breadcrumb({ space, current }: BreadcrumbProps) {
+  const ws = useWsPath();
   const { t } = useTranslation();
   return (
     <nav
@@ -19,7 +21,7 @@ export function Breadcrumb({ space, current }: BreadcrumbProps) {
       className="flex min-w-0 items-center gap-1.5 text-[14px]"
     >
       <Link
-        to={`/s/${space.id}/list`}
+        to={ws(`/s/${space.id}/list`)}
         className="flex min-w-0 items-center gap-1.5 text-3 hover:text-default"
       >
         <SpaceBadge initial={space.initial} color={space.color} />

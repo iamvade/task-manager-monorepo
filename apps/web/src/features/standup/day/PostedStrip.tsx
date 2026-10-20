@@ -8,12 +8,14 @@ import { mnFrom } from '../../../lib/mn';
 import { paletteClass } from '../../../lib/palette';
 import { firstName, useDayView } from './DayContext';
 import { writeHref } from './links';
+import { useWsPath } from '../../../api/workspaces';
 
 /**
  * "Who has posted" (Standup.dc.html): the count (out of office left out), the due / meeting
  * times in my zone, one 64px column per member, and "Your turn" while I can still post.
  */
 export function PostedStrip({ yourTurn }: { yourTurn: boolean }) {
+  const ws = useWsPath();
   const { t, i18n } = useTranslation();
   const { day, clock, postBy } = useDayView();
   const meeting = day.meetingAt ? clock(day.meetingAt) : null;
@@ -45,7 +47,7 @@ export function PostedStrip({ yourTurn }: { yourTurn: boolean }) {
       <span className="flex-1" />
       {yourTurn && (
         <Link
-          to={writeHref(day.group.id)}
+          to={ws(writeHref(day.group.id))}
           className="flex h-8 items-center gap-1.5 rounded-[8px] bg-accent-soft px-3 text-[13px] font-semibold text-accent-ink no-underline hover:brightness-95"
         >
           {t('standup.day.yourTurn')}

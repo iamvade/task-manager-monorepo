@@ -7,9 +7,11 @@ import { cn } from '../../../lib/cn';
 import { useDates } from '../../../lib/useDates';
 import { useDayView } from './DayContext';
 import { writeHref } from './links';
+import { useWsPath } from '../../../api/workspaces';
 
 /** Me, not posted yet (Standup.dc.html dashed card) with Write update. */
 export function MyPlaceholderCard({ hint }: { hint: string | null }) {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const { me, day } = useDayView();
   return (
@@ -20,7 +22,7 @@ export function MyPlaceholderCard({ hint }: { hint: string | null }) {
         {hint && <span className="text-[12px] text-muted">{hint}</span>}
       </div>
       <Link
-        to={writeHref(day.group.id)}
+        to={ws(writeHref(day.group.id))}
         className={cn(
           buttonVariants.primary,
           'flex h-8 flex-none items-center rounded-[8px] px-3 text-[13px] font-medium no-underline',

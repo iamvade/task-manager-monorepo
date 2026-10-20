@@ -37,6 +37,8 @@ import {
   totalSeconds,
 } from './meeting';
 import { useMeetingClock } from './useMeetingClock';
+import { useWsPath } from '../../../api/workspaces';
+import { useOtherWorkspacePath } from '../../workspace/useOtherWorkspacePath';
 
 /**
  * `/standup/:groupId/:date/live` (StandupLive.dc.html): the screen-shared meeting, full screen
@@ -45,11 +47,14 @@ import { useMeetingClock } from './useMeetingClock';
  * shown here only.
  */
 export function StandupLivePage() {
+  const ws = useWsPath();
   const { groupId = '', date = '' } = useParams();
   const valid = dateSchema.safeParse(date).success;
   const day = useStandupDay(groupId, date, { enabled: valid });
   const meeting = useStandupMeeting(groupId, date, valid && day.isSuccess);
-  if (!valid) return <Navigate to={`/standup/${groupId}`} replace />;
+  const elsewhere = useOtherWorkspacePath(day.data?.group.workspaceId);
+  if (elsewhere) return <Navigate to={elsewhere} replace />;
+  if (!valid) return <Navigate to={ws(`/standup/${groupId}`)} replace />;
   if (day.error instanceof ApiError && day.error.status === 403) return <MembersOnly />;
   if (day.isError) return <Frame>{<ErrorState error={day.error} />}</Frame>;
   if (meeting.isError) return <Frame>{<ErrorState error={meeting.error} />}</Frame>;
@@ -62,6 +67,7 @@ function Frame({ children }: { children: ReactNode }) {
 }
 
 function MembersOnly() {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const { groupId = '' } = useParams();
   return (
@@ -69,7 +75,7 @@ function MembersOnly() {
       <EmptyState
         body={t('standup.day.membersOnly')}
         actions={
-          <Link to={`/standup/${groupId}`} className="text-[13px] font-medium text-accent-ink">
+          <Link to={ws(`/standup/${groupId}`)} className="text-[13px] font-medium text-accent-ink">
             {t('standup.live.backToStandup')}
           </Link>
         }
@@ -87,6 +93,7 @@ function Live({
   state: StandupMeetingState;
   fetchedAt: number;
 }) {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const { me } = useAuth();
   const { formatDay } = useDates();
@@ -151,7 +158,7 @@ function Live({
   });
 
   const onCreate = (req: CreateRequest) => {
-    const href = `${window.location.origin}${dayHref(group.id, day.date)}`;
+    const href = `${window.location.origin}${ws(dayHref(group.id, day.date))}`;
     const projectId = req.task?.project.id;
     openCreate({
       title: taskTitleOf(req.text),
@@ -197,7 +204,7 @@ function Live({
     }
   }, [meeting?.endedAt, group.id, queryClient]);
 
-  const back = dayHref(group.id, day.date, day.today);
+  const back = ws(dayHref(group.id, day.date, day.today));
   const facilitator = meeting?.facilitator ?? null;
   const meetingTime = day.meetingAt ? clock(day.meetingAt) : null;
   const target = group.totalMeetingMinutes * 60;

@@ -20,6 +20,7 @@ import { toast } from '../../stores/toast';
 import { useTaskView } from './TaskContext';
 import { TaskViewers } from './TaskViewers';
 import { useDeleteWithUndo } from './useDeleteWithUndo';
+import { useWsPath } from '../../api/workspaces';
 
 interface TaskHeaderProps {
   /** Opens the Project property's picker (move to another project). */
@@ -32,6 +33,7 @@ interface TaskHeaderProps {
  * (duplicate, move, delete), divider, close.
  */
 export function TaskHeader({ onMoveToProject }: TaskHeaderProps) {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const { task, project, layout, close, readOnly } = useTaskView();
   const navigate = useNavigate();
@@ -41,11 +43,11 @@ export function TaskHeader({ onMoveToProject }: TaskHeaderProps) {
   const restore = useRestoreTask();
   const duplicate = useDuplicateTask();
   const done = task.status.category === 'done';
-  const projectHref = `/p/${task.project.id}/list`;
+  const projectHref = ws(`/p/${task.project.id}/list`);
 
   async function copyLink() {
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/t/${task.key}`);
+      await navigator.clipboard.writeText(`${window.location.origin}${ws(`/t/${task.key}`)}`);
       toast({ message: t('header.linkCopied') });
     } catch {
       toast({ message: t('drawer.copyFailed'), tone: 'danger' });
@@ -54,7 +56,7 @@ export function TaskHeader({ onMoveToProject }: TaskHeaderProps) {
 
   function openTask(key: string) {
     if (layout === 'page') {
-      void navigate(`/t/${key}`);
+      void navigate(ws(`/t/${key}`));
     } else {
       setParams((prev) => {
         const next = new URLSearchParams(prev);
@@ -146,7 +148,7 @@ export function TaskHeader({ onMoveToProject }: TaskHeaderProps) {
       />
       {layout === 'drawer' && (
         <Link
-          to={`/t/${task.key}`}
+          to={ws(`/t/${task.key}`)}
           aria-label={t('drawer.openFullPage')}
           title={t('drawer.openFullPage')}
           className="flex size-8 items-center justify-center rounded-[8px] text-3 hover:bg-hover hover:text-3"

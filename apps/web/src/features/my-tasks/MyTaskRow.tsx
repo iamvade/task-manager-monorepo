@@ -1,6 +1,7 @@
 import type { MyTask, TaskStatusRef } from '@kite/shared';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { useWsPath } from '../../api/workspaces';
 import type { SectionId } from '../../api/homeCache';
 import { Avatar } from '../../components/ui/Avatar';
 import { PriorityFlag } from '../../components/ui/PriorityFlag';
@@ -33,6 +34,7 @@ interface MyTaskRowProps {
  */
 export function MyTaskRow({ task, section, onStatusChange }: MyTaskRowProps) {
   const { t } = useTranslation();
+  const ws = useWsPath();
   const dates = useDates();
 
   const due = (date: string) => {
@@ -91,7 +93,7 @@ export function MyTaskRow({ task, section, onStatusChange }: MyTaskRowProps) {
         )}
         <SpaceBadge initial={task.space.initial} color={task.space.color} size={16} />
         <Link
-          to={`/p/${task.project.id}/list`}
+          to={ws(`/p/${task.project.id}/list`)}
           className="truncate text-3 no-underline hover:text-default hover:underline"
         >
           {task.project.name}

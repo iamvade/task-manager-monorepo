@@ -74,7 +74,7 @@ function rowOf(title: string): HTMLElement {
 const focused = () => document.activeElement ?? document.body;
 const href = (input: string | URL | Request) =>
   typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
-const LIST = `/p/${PROJECT_ID}/list?sprint=none`;
+const LIST = `/w/kite-studio/p/${PROJECT_ID}/list?sprint=none`;
 
 describe('project list', () => {
   beforeEach(async () => {
@@ -592,7 +592,7 @@ describe('project list', () => {
       }),
       newState([], empty),
     );
-    renderAt(`/p/${PROJECT_ID}/list`);
+    renderAt(`/w/kite-studio/p/${PROJECT_ID}/list`);
 
     expect(
       await screen.findByRole('heading', { name: '«App Redesign» төсөлд одоогоор ажил алга' }),
@@ -608,7 +608,7 @@ describe('project list', () => {
   it('"Create first task" opens quick create for the project', async () => {
     const empty = { ...PROJECT_WITH_STATUSES, taskCount: 0, doneCount: 0, activeSprint: null };
     api(undefined, newState([], empty));
-    renderAt(`/p/${PROJECT_ID}/list`);
+    renderAt(`/w/kite-studio/p/${PROJECT_ID}/list`);
 
     fireEvent.click(await screen.findByRole('button', { name: /Эхний ажлаа үүсгэх/ }));
     const dialog = await screen.findByRole('dialog', { name: 'Шинэ ажил' });
@@ -644,7 +644,7 @@ describe('space list', () => {
 
   it('lists every project of the space by status category, with the project on each row', async () => {
     api((st) => ({ [`GET /api/v1/spaces/${SPACE_ID}/tasks`]: () => Response.json(st.tasks) }));
-    renderAt(`/s/${SPACE_ID}/list`);
+    renderAt(`/w/kite-studio/s/${SPACE_ID}/list`);
 
     const todo = await waitFor(() => group('Хийх'));
     expect(within(todo).getAllByText('App Redesign')).toHaveLength(2);
@@ -659,7 +659,7 @@ describe('space list', () => {
       [`GET /api/v1/spaces/${SPACE_ID}/tasks`]: () => Response.json(st.tasks),
     }));
     const title = at(state.tasks, 0).title;
-    renderAt(`/s/${SPACE_ID}/list`);
+    renderAt(`/w/kite-studio/s/${SPACE_ID}/list`);
 
     const marker = await screen.findByRole('button', { name: `«${title}» — төлөв: Хийх` });
     const projectCalls = () =>

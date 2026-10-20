@@ -37,8 +37,8 @@ interface UiState {
   /** Expanded spaces in the sidebar tree; missing = collapsed. */
   openSpaces: Record<string, boolean>;
   lastWorkspaceId: string | null;
-  /** The standup group opened last (`/standup` goes there). */
-  lastStandupGroupId: string | null;
+  /** The standup group opened last in each workspace (`/standup` goes there). */
+  lastStandupGroupIds: Record<string, string>;
   /**
    * List groups the user collapsed or expanded, per list (`p:<projectId>` / `s:<spaceId>`) and
    * group (`status:<id>`, `assignee:<id>` …); missing = the group's default.
@@ -49,8 +49,8 @@ interface UiState {
   createDefaults: CreateDefaults;
   /** Quick create's "Create more" switch (remembered). */
   createMore: boolean;
-  /** Project of the last task made in quick create: the default outside a project page. */
-  lastCreateProjectId: string | null;
+  /** Per workspace, project of the last task made in quick create: the default outside a project page. */
+  lastCreateProjectIds: Record<string, string>;
   /** Calendar range (Month / Week), shared by every calendar. */
   calendarMode: CalendarMode;
   /** Projects toggled off on a space calendar, per space id. */
@@ -64,12 +64,12 @@ interface UiState {
   toggleSidebar: () => void;
   setSpaceOpen: (spaceId: string, open: boolean) => void;
   setLastWorkspace: (workspaceId: string) => void;
-  setLastStandupGroup: (groupId: string) => void;
+  setLastStandupGroup: (workspaceId: string, groupId: string) => void;
   setGroupCollapsed: (list: string, group: string, collapsed: boolean) => void;
   openCreate: (defaults?: CreateDefaults) => void;
   closeCreate: () => void;
   setCreateMore: (on: boolean) => void;
-  setLastCreateProject: (projectId: string) => void;
+  setLastCreateProject: (workspaceId: string, projectId: string) => void;
   setCalendarMode: (mode: CalendarMode) => void;
   toggleCalendarProject: (spaceId: string, projectId: string) => void;
   setListColumn: (column: keyof ListColumns, on: boolean) => void;
@@ -101,12 +101,12 @@ export const initialUiState: UiData = {
   sidebarCollapsed: false,
   openSpaces: {},
   lastWorkspaceId: null,
-  lastStandupGroupId: null,
+  lastStandupGroupIds: {},
   collapsedGroups: {},
   createOpen: false,
   createDefaults: {},
   createMore: false,
-  lastCreateProjectId: null,
+  lastCreateProjectIds: {},
   calendarMode: 'month',
   calendarHidden: {},
   listColumns: { key: true, size: false },
@@ -134,8 +134,8 @@ export const useUiStore = create<UiState>()(
       setLastWorkspace: (workspaceId) => {
         set({ lastWorkspaceId: workspaceId });
       },
-      setLastStandupGroup: (groupId) => {
-        set({ lastStandupGroupId: groupId });
+      setLastStandupGroup: (workspaceId, groupId) => {
+        set((s) => ({ lastStandupGroupIds: { ...s.lastStandupGroupIds, [workspaceId]: groupId } }));
       },
       setGroupCollapsed: (list, group, collapsed) => {
         set((s) => ({
@@ -160,8 +160,10 @@ export const useUiStore = create<UiState>()(
       setCreateMore: (on) => {
         set({ createMore: on });
       },
-      setLastCreateProject: (projectId) => {
-        set({ lastCreateProjectId: projectId });
+      setLastCreateProject: (workspaceId, projectId) => {
+        set((s) => ({
+          lastCreateProjectIds: { ...s.lastCreateProjectIds, [workspaceId]: projectId },
+        }));
       },
       setCalendarMode: (mode) => {
         set({ calendarMode: mode });
@@ -208,10 +210,10 @@ export const useUiStore = create<UiState>()(
         sidebarCollapsed: s.sidebarCollapsed,
         openSpaces: s.openSpaces,
         lastWorkspaceId: s.lastWorkspaceId,
-        lastStandupGroupId: s.lastStandupGroupId,
+        lastStandupGroupIds: s.lastStandupGroupIds,
         collapsedGroups: s.collapsedGroups,
         createMore: s.createMore,
-        lastCreateProjectId: s.lastCreateProjectId,
+        lastCreateProjectIds: s.lastCreateProjectIds,
         calendarMode: s.calendarMode,
         calendarHidden: s.calendarHidden,
         listColumns: s.listColumns,

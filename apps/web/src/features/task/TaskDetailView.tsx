@@ -1,6 +1,12 @@
-import { isBlockedFilename, MAX_ATTACHMENT_BYTES, type TaskDetail } from '@kite/shared';
+import {
+  isBlockedFilename,
+  MAX_ATTACHMENT_BYTES,
+  parseTaskKey,
+  type TaskDetail,
+} from '@kite/shared';
 import { useCallback, useMemo, useRef, useState, type DragEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Navigate } from 'react-router';
 import { useUploadAttachment } from '../../api/attachments';
 import { ApiError } from '../../api/client';
 import { useProject } from '../../api/projects';
@@ -29,6 +35,10 @@ import { useViewingTask } from '../../realtime/context';
 import { useMemberHint } from '../pickers/useMemberHint';
 import { LinkedFeedback } from './LinkedFeedback';
 import { MentionedIn } from './MentionedIn';
+import {
+  useFoundInOtherWorkspace,
+  useOtherWorkspacePath,
+} from '../workspace/useOtherWorkspacePath';
 
 // React 18's types don't know `inert`; the attribute itself works in every current browser.
 const INERT = { inert: '' } as Record<string, string>;
@@ -65,7 +75,16 @@ export function TaskDetailView({ taskKey, layout, onClose }: TaskDetailViewProps
   const query = useTask(taskKey);
   const task = query.data;
   useViewingTask(task?.id);
+  // The full page of a key from another of my workspaces (old links): open it there.
+  const notFound = query.error instanceof ApiError && query.error.status === 404;
+  const projectKey = parseTaskKey(taskKey)?.key;
+  const owner = useFoundInOtherWorkspace(
+    (data) => data.spaces.some((s) => s.projects.some((p) => p.key === projectKey)),
+    layout === 'page' && notFound && projectKey !== undefined,
+  );
+  const elsewhere = useOtherWorkspacePath(owner);
 
+  if (elsewhere) return <Navigate to={elsewhere} replace />;
   if (!task) {
     return (
       <>

@@ -11,6 +11,8 @@ export type MenuItem =
       icon?: ReactNode;
       /** Shows the accent ✓ (single-choice menus like Sort / Group). */
       checked?: boolean;
+      /** Right-aligned extra (a count badge), before the ✓. */
+      trailing?: ReactNode;
       danger?: boolean;
       disabled?: boolean;
       onSelect: () => void;
@@ -90,6 +92,7 @@ export function Menu({
               >
                 {item.icon && <span className="flex text-icon">{item.icon}</span>}
                 <span className="flex-1 truncate">{item.label}</span>
+                {item.trailing}
                 {item.checked && (
                   <Check
                     size={14}

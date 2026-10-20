@@ -1,14 +1,16 @@
 import { useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { TaskDetailView } from '../features/task/TaskDetailView';
+import { useWsPath } from '../api/workspaces';
 
 /** `/t/:taskKey`: the drawer's content as a page (centered, max 760px). */
 export function TaskPage() {
+  const ws = useWsPath();
   const { taskKey = '' } = useParams();
   const navigate = useNavigate();
   const leave = useCallback(() => {
-    void navigate('/my-tasks');
-  }, [navigate]);
+    void navigate(ws('/my-tasks'));
+  }, [navigate, ws]);
 
   return (
     <div className="min-h-full bg-surface">

@@ -41,7 +41,7 @@ test('public feedback becomes a task', async ({ browser }) => {
   // Every member triages (Dorj is a member).
   const team = await browser.newContext({ storageState: MEMBER.state });
   const page = await team.newPage();
-  await page.goto('/feedback');
+  await page.goto('/w/kite-studio/feedback');
   await page.getByRole('searchbox', { name: 'Search feedback or submitters…' }).fill(title);
   await page.getByRole('link', { name: title }).click();
   const panel = page.getByRole('dialog', { name: `Feedback ${ref}` });

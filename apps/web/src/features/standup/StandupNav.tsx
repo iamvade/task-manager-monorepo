@@ -3,7 +3,7 @@ import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, useNavigate } from 'react-router';
 import { useCreateStandupGroup, useStandupGroups } from '../../api/standups';
-import { useCurrentWorkspace } from '../../api/workspaces';
+import { useCurrentWorkspace, useWsPath } from '../../api/workspaces';
 import { PlusIcon, StandupIcon } from '../../components/icons';
 import { Button } from '../../components/ui/Button';
 import { IconButton } from '../../components/ui/IconButton';
@@ -17,13 +17,14 @@ import { useWorkspaceRole, waitingForMe } from './useStandup';
  * in a group that meets today.
  */
 export function StandupNavItem() {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const workspace = useCurrentWorkspace();
   const groups = useStandupGroups(workspace?.id);
   const waiting = waitingForMe(groups.data).length > 0;
   return (
     <NavItem
-      to="/standup"
+      to={ws('/standup')}
       icon={<StandupIcon size={16} />}
       label={t('shell.standup')}
       trailing={
@@ -44,6 +45,7 @@ export function StandupNavItem() {
  * the active row is the neutral selected style. Admins get a "+" (name-only popover).
  */
 export function StandupGroupsSection() {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const workspace = useCurrentWorkspace();
   const groups = useStandupGroups(workspace?.id);
@@ -60,7 +62,7 @@ export function StandupGroupsSection() {
       {mine.map((g) => (
         <NavLink
           key={g.id}
-          to={`/standup/${g.id}`}
+          to={ws(`/standup/${g.id}`)}
           className={({ isActive }) =>
             cn(
               'group/nav flex h-[30px] items-center gap-2 rounded-[8px] px-3 text-[13px]',
@@ -88,6 +90,7 @@ export function StandupGroupsSection() {
 
 /** "+" next to "Standup groups" (admins): a name-only popover like New space. */
 function NewStandupGroupButton({ workspaceId }: { workspaceId: string }) {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -104,7 +107,7 @@ function NewStandupGroupButton({ workspaceId }: { workspaceId: string }) {
         onSuccess: (group) => {
           setName('');
           setOpen(false);
-          void navigate(`/standup/${group.id}/settings`);
+          void navigate(ws(`/standup/${group.id}/settings`));
         },
       },
     );

@@ -12,6 +12,7 @@ import { useWorkspaceRole } from '../useStandup';
 import { useDates } from '../../../lib/useDates';
 import { GroupSwitcher, StandupHeader } from '../StandupHeader';
 import { dayHref, writeHref } from './links';
+import { useWsPath } from '../../../api/workspaces';
 
 const navButton = 'flex size-8 items-center justify-center rounded-[8px] text-3 hover:bg-hover';
 
@@ -33,6 +34,7 @@ export function DayHeader({
   canWrite: boolean;
   posted: boolean;
 }) {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const { formatDay } = useDates();
   const date = day?.date ?? group.today;
@@ -48,7 +50,7 @@ export function DayHeader({
             <div className="flex items-center gap-0.5">
               {prev ? (
                 <Link
-                  to={dayHref(group.id, prev, day.today)}
+                  to={ws(dayHref(group.id, prev, day.today))}
                   aria-label={t('standup.day.prevDay')}
                   className={navButton}
                 >
@@ -62,7 +64,7 @@ export function DayHeader({
               </h1>
               {next ? (
                 <Link
-                  to={dayHref(group.id, next, day.today)}
+                  to={ws(dayHref(group.id, next, day.today))}
                   aria-label={t('standup.day.nextDay')}
                   className={navButton}
                 >
@@ -86,7 +88,7 @@ export function DayHeader({
             {(props) => (
               <Link
                 {...props}
-                to={`/standup/${group.id}/settings`}
+                to={ws(`/standup/${group.id}/settings`)}
                 aria-label={t('standup.groupSettings')}
                 className="flex size-9 items-center justify-center rounded-[8px] text-3 hover:bg-hover"
               >
@@ -96,7 +98,7 @@ export function DayHeader({
           </Tooltip>
           {canWrite && (
             <Link
-              to={writeHref(group.id)}
+              to={ws(writeHref(group.id))}
               className="flex h-9 items-center gap-1.5 rounded-[8px] border border-default bg-surface px-3 text-[13px] font-medium text-default no-underline hover:bg-hover"
             >
               <PenIcon size={14} />
@@ -133,13 +135,14 @@ const liveButton =
  * other days, or once the meeting has ended (its notes show on the page).
  */
 function MeetingButton({ day }: { day: StandupDay }) {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const { me } = useAuth();
   const role = useWorkspaceRole();
   const navigate = useNavigate();
   const start = useStartMeeting(day.group.id, day.date);
   const meeting = day.meeting;
-  const liveHref = `/standup/${day.group.id}/${day.date}/live`;
+  const liveHref = ws(`/standup/${day.group.id}/${day.date}/live`);
   const meets =
     day.group.meetingAt !== null &&
     day.date === day.today &&

@@ -31,7 +31,7 @@ test.describe('admin', () => {
   test('rebalances Workload: reassigning a Heavy person’s task updates both bars', async ({
     page,
   }) => {
-    await page.goto('/reports/workload');
+    await page.goto('/w/kite-studio/reports/workload');
     const heavy = personRows(page, 'Heavy').first();
     const light = personRows(page, 'Light').first();
     await expect(heavy).toBeVisible();
@@ -86,7 +86,7 @@ test.describe('admin', () => {
   });
 
   test('Partner Portal shows the not-enough-history state', async ({ page }) => {
-    await page.goto('/reports/overview');
+    await page.goto('/w/kite-studio/reports/overview');
     await page.getByRole('button', { name: /^Project/ }).click();
     await page.getByRole('option', { name: 'Partner Portal' }).click();
     await expect(
@@ -99,7 +99,7 @@ test.describe('admin', () => {
   });
 
   test('People: pick a person and read their report', async ({ page }) => {
-    await page.goto('/reports/people');
+    await page.goto('/w/kite-studio/reports/people');
     await expect(page.getByText('Visible to admins only')).toBeVisible();
     await page.getByRole('button', { name: /^Choose a person: / }).click();
     await page.getByRole('option', { name: /^Sara/ }).click();
@@ -113,11 +113,11 @@ test.describe('member', () => {
   test.use({ storageState: MEMBER.state });
 
   test('opens Workload, and People redirects to My performance', async ({ page }) => {
-    await page.goto('/reports/workload');
+    await page.goto('/w/kite-studio/reports/workload');
     await expect(page.getByRole('heading', { name: 'Team workload' })).toBeVisible();
     await expect(page.getByRole('tab', { name: 'People' })).toHaveCount(0);
 
-    await page.goto('/reports/people');
+    await page.goto('/w/kite-studio/reports/people');
     await expect(page).toHaveURL(/\/reports\/me$/);
     await expect(page.getByRole('heading', { name: 'Your last 4 weeks' })).toBeVisible();
     await expect(page.getByText('Visible only to you and workspace admins')).toBeVisible();

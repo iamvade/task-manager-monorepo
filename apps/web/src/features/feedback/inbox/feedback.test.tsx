@@ -21,7 +21,7 @@ type Handler = (init?: RequestInit) => Response | Promise<Response>;
 function renderFeedback(
   extra: Record<string, Handler> = {},
   list: (url: string) => FeedbackListResponse = () => listOf([FREEZE, QPAY, LINKED]),
-  entry = '/feedback',
+  entry = '/w/kite-studio/feedback',
 ) {
   const fetchMock = mockApi({
     'GET /api/v1/auth/me': () => Response.json(EN_ME),
@@ -88,10 +88,13 @@ describe('Feedback inbox', () => {
     expect(within(freeze).getByRole('img', { name: 'Unread' })).toBeVisible();
     expect(within(linked).getByRole('link', { name: /Checkout page/ })).toHaveAttribute(
       'href',
-      `/feedback?task=${TASK_REF.key}`,
+      `/w/kite-studio/feedback?task=${TASK_REF.key}`,
     );
     expect(screen.getByText('3 items · 1 unread')).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /^Bug/ })).toHaveAttribute('href', '/feedback?type=bug');
+    expect(screen.getByRole('tab', { name: /^Bug/ })).toHaveAttribute(
+      'href',
+      '/w/kite-studio/feedback?type=bug',
+    );
     expect(screen.getByLabelText('1 new')).toBeInTheDocument();
   });
 
@@ -175,7 +178,7 @@ describe('Feedback inbox', () => {
         },
       },
       undefined,
-      `/feedback?item=${FREEZE.ref}`,
+      `/w/kite-studio/feedback?item=${FREEZE.ref}`,
     );
     const panel = await screen.findByRole('dialog', { name: `Feedback ${FREEZE.ref}` });
     fireEvent.click(await within(panel).findByRole('button', { name: 'Link to existing task' }));

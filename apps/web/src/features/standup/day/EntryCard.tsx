@@ -17,6 +17,7 @@ import { dayHref, writeHref } from './links';
 import { ReactionBar } from './ReactionBar';
 import { ReplyField, ReplyThread } from './Replies';
 import { TaskChip } from './TaskChip';
+import { useWsPath } from '../../../api/workspaces';
 
 type SectionKind = 'yesterday' | 'today' | 'blockers';
 
@@ -28,6 +29,7 @@ const SECTION_STYLE: Record<SectionKind, { dot: string; label: string }> = {
 
 /** One posted update (Standup.dc.html person card): header, three sections, footer. */
 export function EntryCard({ entry }: { entry: StandupEntry }) {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const { day, me, clock } = useDayView();
   const navigate = useNavigate();
@@ -49,7 +51,7 @@ export function EntryCard({ entry }: { entry: StandupEntry }) {
   ].filter((part) => part.text);
 
   const copyLink = async () => {
-    const url = `${window.location.origin}${dayHref(day.group.id, entry.date)}#entry-${entry.id}`;
+    const url = `${window.location.origin}${ws(dayHref(day.group.id, entry.date))}#entry-${entry.id}`;
     try {
       await navigator.clipboard.writeText(url);
       toast({ message: t('header.linkCopied') });
@@ -63,7 +65,7 @@ export function EntryCard({ entry }: { entry: StandupEntry }) {
           {
             id: 'edit',
             label: t('standup.day.editUpdate'),
-            onSelect: () => void navigate(writeHref(day.group.id)),
+            onSelect: () => void navigate(ws(writeHref(day.group.id))),
           },
         ]
       : []),

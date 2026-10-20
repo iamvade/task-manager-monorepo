@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import i18n from '../../i18n';
 import { useToastStore } from '../../stores/toast';
 import { useUiStore } from '../../stores/ui';
-import { ME } from '../../test/fixtures';
+import { ME, WORKSPACE_ID } from '../../test/fixtures';
 import {
   DESIGN,
   DESIGN_ID,
@@ -18,25 +18,25 @@ import {
 describe('Standup', () => {
   beforeEach(async () => {
     localStorage.clear();
-    useUiStore.setState({ lastWorkspaceId: null, lastStandupGroupId: null });
+    useUiStore.setState({ lastWorkspaceId: null, lastStandupGroupIds: {} });
     useToastStore.setState({ toasts: [] });
     await i18n.changeLanguage('en');
   });
 
   it('adds the Standup nav item with a dot and my groups to the sidebar', async () => {
-    renderAt('/standup/' + DESIGN_ID);
+    renderAt('/w/kite-studio/standup/' + DESIGN_ID);
     const nav = await screen.findByRole('navigation', { name: 'Workspace' });
     const item = await within(nav).findByRole('link', { name: /Standup/ });
     expect(within(item).getByRole('img', { name: 'You haven’t posted today' })).toBeVisible();
     expect(within(nav).getByRole('link', { name: 'Mobile team' })).toHaveAttribute(
       'href',
-      `/standup/${MOBILE_ID}`,
+      `/w/kite-studio/standup/${MOBILE_ID}`,
     );
     expect(within(nav).getByRole('button', { name: 'New standup group' })).toBeVisible();
   });
 
   it('hides “New standup group” from members and the dot once posted', async () => {
-    renderAt('/standup/' + DESIGN_ID, {
+    renderAt('/w/kite-studio/standup/' + DESIGN_ID, {
       role: 'member',
       groups: [DESIGN, group({ myPosted: true })],
     });
@@ -47,15 +47,15 @@ describe('Standup', () => {
   });
 
   it('opens my last group, else my first', async () => {
-    useUiStore.setState({ lastStandupGroupId: MOBILE_ID });
-    const { router } = renderAt('/standup');
+    useUiStore.setState({ lastStandupGroupIds: { [WORKSPACE_ID]: MOBILE_ID } });
+    const { router } = renderAt('/w/kite-studio/standup');
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe(`/standup/${MOBILE_ID}`);
+      expect(router.state.location.pathname).toBe(`/w/kite-studio/standup/${MOBILE_ID}`);
     });
   });
 
   it('shows the empty state with the schedule in my own time zone', async () => {
-    renderAt('/standup/' + DESIGN_ID, { timezone: 'Asia/Seoul' });
+    renderAt('/w/kite-studio/standup/' + DESIGN_ID, { timezone: 'Asia/Seoul' });
     expect(
       await screen.findByRole('heading', { name: 'Start Design team’s first standup' }),
     ).toBeVisible();
@@ -65,23 +65,23 @@ describe('Standup', () => {
     expect(screen.getByText('Mon–Fri · reminder at 10:30 · Seoul (UTC+9)')).toBeVisible();
     expect(screen.getByRole('link', { name: 'Invite members' })).toHaveAttribute(
       'href',
-      `/standup/${DESIGN_ID}/settings#members`,
+      `/w/kite-studio/standup/${DESIGN_ID}/settings#members`,
     );
     expect(screen.getByRole('link', { name: 'Write the first update' })).toHaveAttribute(
       'href',
-      `/standup/${DESIGN_ID}?write=1`,
+      `/w/kite-studio/standup/${DESIGN_ID}?write=1`,
     );
   });
 
   it('shows "Create a standup group" when there are none', async () => {
-    renderAt('/standup', { groups: [] });
+    renderAt('/w/kite-studio/standup', { groups: [] });
     expect(await screen.findByRole('heading', { name: 'Create a standup group' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Create a standup group' })).toBeDisabled();
   });
 
   it('saves only the changed settings in one request', async () => {
     const patches: unknown[] = [];
-    const { router } = renderAt(`/standup/${MOBILE_ID}/settings`, {
+    const { router } = renderAt(`/w/kite-studio/standup/${MOBILE_ID}/settings`, {
       extra: {
         [`PATCH /api/v1/standup-groups/${MOBILE_ID}`]: (init) => {
           patches.push(JSON.parse(init?.body as string));
@@ -115,12 +115,12 @@ describe('Standup', () => {
       ]);
     });
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe(`/standup/${MOBILE_ID}`);
+      expect(router.state.location.pathname).toBe(`/w/kite-studio/standup/${MOBILE_ID}`);
     });
   });
 
   it('validates the schedule before saving', async () => {
-    const { fetchMock } = renderAt(`/standup/${MOBILE_ID}/settings`);
+    const { fetchMock } = renderAt(`/w/kite-studio/standup/${MOBILE_ID}/settings`);
     await screen.findByLabelText('Group name');
     for (const day of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']) {
       fireEvent.click(screen.getByRole('button', { name: day }));
@@ -134,7 +134,7 @@ describe('Standup', () => {
 
   it('makes someone facilitator from the row menu', async () => {
     const patches: unknown[] = [];
-    renderAt(`/standup/${MOBILE_ID}/settings`, {
+    renderAt(`/w/kite-studio/standup/${MOBILE_ID}/settings`, {
       extra: {
         [`PATCH /api/v1/standup-groups/${MOBILE_ID}`]: (init) => {
           patches.push(JSON.parse(init?.body as string));
@@ -151,7 +151,7 @@ describe('Standup', () => {
   });
 
   it('is read-only for members who don’t manage the group', async () => {
-    renderAt(`/standup/${MOBILE_ID}/settings`, {
+    renderAt(`/w/kite-studio/standup/${MOBILE_ID}/settings`, {
       role: 'member',
       groups: [group({ canEdit: false })],
     });
@@ -168,7 +168,7 @@ describe('Standup', () => {
 
   it('archives with Undo', async () => {
     const calls: string[] = [];
-    renderAt(`/standup/${MOBILE_ID}/settings`, {
+    renderAt(`/w/kite-studio/standup/${MOBILE_ID}/settings`, {
       extra: {
         [`POST /api/v1/standup-groups/${MOBILE_ID}/archive`]: () => {
           calls.push('archive');

@@ -55,7 +55,7 @@ describe('Reports · Sprints', () => {
   });
 
   it('shows the current sprint: banner, cards, charts and the carried-over table', async () => {
-    const { fetchMock, router } = renderReports('/reports/sprints', {
+    const { fetchMock, router } = renderReports('/w/kite-studio/reports/sprints', {
       extra: {
         [SPRINTS_API]: () => Response.json(sprintsReport({ project: null })),
         ...projectApi,
@@ -116,7 +116,7 @@ describe('Reports · Sprints', () => {
   });
 
   it('Replan opens the sprint’s open tasks in the List view', async () => {
-    const { router } = renderReports('/reports/sprints', {
+    const { router } = renderReports('/w/kite-studio/reports/sprints', {
       extra: { [SPRINTS_API]: () => Response.json(sprintsReport()), ...projectApi },
     });
     const sprint = SPRINTS[5]?.id ?? '';
@@ -130,9 +130,9 @@ describe('Reports · Sprints', () => {
     const [button] = screen.getAllByRole('link', { name: 'Replan' });
     expect(button).toHaveAttribute(
       'href',
-      `/p/${PROJECT_ID}/list?sprint=${sprint}&status=${STATUSES[0]?.id ?? ''},${STATUSES[1]?.id ?? ''}`,
+      `/w/kite-studio/p/${PROJECT_ID}/list?sprint=${sprint}&status=${STATUSES[0]?.id ?? ''},${STATUSES[1]?.id ?? ''}`,
     );
-    expect(router.state.location.pathname).toBe('/reports/sprints');
+    expect(router.state.location.pathname).toBe('/w/kite-studio/reports/sprints');
   });
 
   it('picking a sprint keeps the scope and pins the sprint in the URL; a past sprint reads differently', async () => {
@@ -155,7 +155,7 @@ describe('Reports · Sprints', () => {
       waitingMost: null,
       burndown: sprintDetail().burndown.map((p, i) => ({ ...p, remaining: 45 - i * 2 })),
     });
-    const { fetchMock, router } = renderReports('/reports/sprints', {
+    const { fetchMock, router } = renderReports('/w/kite-studio/reports/sprints', {
       extra: {
         [SPRINTS_API]: () => Response.json(sprintsReport()),
         [`${SPRINTS_API}?sprintId=${past.id}`]: () =>
@@ -197,7 +197,7 @@ describe('Reports · Sprints', () => {
     if (!current) throw new Error('fixture');
     const shared = { ...current, projects: [...current.projects, CHECKOUT] };
     const detail = sprintDetail({ ...shared });
-    const { router } = renderReports(`/reports/sprints?sprint=${current.id}`, {
+    const { router } = renderReports(`/w/kite-studio/reports/sprints?sprint=${current.id}`, {
       extra: {
         [`${SPRINTS_API}?sprintId=${current.id}`]: () =>
           Response.json(sprintsReport({ project: null, sprint: detail })),
@@ -225,7 +225,7 @@ describe('Reports · Sprints', () => {
     const [replan] = await screen.findAllByRole('link', { name: 'Replan' });
     expect(replan).toHaveAttribute(
       'href',
-      `/s/${SPACE_ID}/list?sprint=${current.id}&status=todo,in_progress,review`,
+      `/w/kite-studio/s/${SPACE_ID}/list?sprint=${current.id}&status=todo,in_progress,review`,
     );
 
     fireEvent.click(screen.getByRole('button', { name: /Project:/ }));
@@ -238,7 +238,7 @@ describe('Reports · Sprints', () => {
   });
 
   it('shows an empty state for a project without sprints', async () => {
-    renderReports('/reports/sprints', {
+    renderReports('/w/kite-studio/reports/sprints', {
       extra: {
         [SPRINTS_API]: () => Response.json(sprintsReport({ sprints: [], sprint: null })),
         ...projectApi,
@@ -252,7 +252,7 @@ describe('Reports · Sprints', () => {
 
   it('renders Mongolian copy from the design', async () => {
     await i18n.changeLanguage('mn');
-    renderReports('/reports/sprints', {
+    renderReports('/w/kite-studio/reports/sprints', {
       me: ME,
       extra: { [SPRINTS_API]: () => Response.json(sprintsReport()), ...projectApi },
     });

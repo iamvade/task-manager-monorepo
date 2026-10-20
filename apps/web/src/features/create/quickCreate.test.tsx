@@ -20,7 +20,7 @@ import {
 } from '../../test/fixtures';
 import { at, listHandlers, makeTasks, statusOf } from '../../test/tasks';
 
-const LIST = `/p/${PROJECT_ID}/list?sprint=none`;
+const LIST = `/w/kite-studio/p/${PROJECT_ID}/list?sprint=none`;
 const SARA = at(PROJECT.members, 1).user;
 const EN_ME = { ...ME, preferences: { ...ME.preferences, locale: 'en' } };
 
@@ -200,7 +200,7 @@ describe('quick create', () => {
     await waitFor(() => {
       expect(router.state.location.search).toContain('task=APP-200');
     });
-    expect(router.state.location.pathname).toBe(`/p/${PROJECT_ID}/list`);
+    expect(router.state.location.pathname).toBe(`/w/kite-studio/p/${PROJECT_ID}/list`);
     expect(screen.queryByRole('dialog', { name: 'New task' })).toBeNull();
   });
 
@@ -298,6 +298,6 @@ describe('quick create', () => {
         },
       ]);
     });
-    expect(useUiStore.getState().lastCreateProjectId).toBe(PROJECT_ID);
+    expect(useUiStore.getState().lastCreateProjectIds[WORKSPACE_ID]).toBe(PROJECT_ID);
   });
 });

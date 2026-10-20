@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useProject } from '../../../api/projects';
 import { useSprints } from '../../../api/sprints';
 import { reportCsvUrl, useSprintsReport } from '../../../api/reports';
-import { useSidebar } from '../../../api/workspaces';
+import { useSidebar, useWsPath } from '../../../api/workspaces';
 import { ErrorState } from '../../../components/ErrorState';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { ExportButton, ToolbarDivider } from '../ExportButton';
@@ -26,6 +26,7 @@ import { replanHref, replanSpaceHref, replanTarget } from './sprintMath';
  * project narrows the numbers to its tasks. The sprint stays picked while it covers the scope.
  */
 export function SprintsTab() {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const { workspace } = useReportsRole();
   const sidebar = useSidebar(workspace?.id).data;
@@ -94,8 +95,8 @@ export function SprintsTab() {
   const replan =
     sprint && replanTo && sprint.state !== 'past'
       ? 'projectId' in replanTo
-        ? replanHref(replanTo.projectId, sprint.id, statuses)
-        : replanSpaceHref(replanTo.spaceId, sprint.id)
+        ? ws(replanHref(replanTo.projectId, sprint.id, statuses))
+        : ws(replanSpaceHref(replanTo.spaceId, sprint.id))
       : null;
 
   return (

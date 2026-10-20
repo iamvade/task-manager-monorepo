@@ -824,7 +824,13 @@ export function buildRows(
     attachments,
     activity: [...activity, ...history.activity],
     notifications,
-    labs: buildLabs(clock, pick, (ref) => user(ref).id, accountsCreated),
+    // Joined two weeks ago, after Kite Studio (so Studio stays everyone's first workspace).
+    labs: buildLabs(
+      clock,
+      pick,
+      (ref) => user(ref).id,
+      new Date(clock.now.getTime() - 14 * DAY_MS),
+    ),
   };
 }
 

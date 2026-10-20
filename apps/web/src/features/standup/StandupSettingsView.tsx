@@ -12,9 +12,10 @@ import {
 } from '@kite/shared';
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useNavigate, useParams } from 'react-router';
+import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router';
 import { useArchiveStandupGroup, useStandupGroup, useUpdateStandupGroup } from '../../api/standups';
-import { useCurrentWorkspace, useWorkspaceMembers } from '../../api/workspaces';
+import { useCurrentWorkspace, useWorkspaceMembers, useWsPath } from '../../api/workspaces';
+import { useOtherWorkspacePath } from '../workspace/useOtherWorkspacePath';
 import { useAuth } from '../../auth/useAuth';
 import { ErrorState } from '../../components/ErrorState';
 import {
@@ -101,6 +102,8 @@ export function StandupSettingsPage() {
   const workspace = useCurrentWorkspace();
   const group = useStandupGroup(groupId);
   const members = useWorkspaceMembers(workspace?.id);
+  const elsewhere = useOtherWorkspacePath(group.data?.workspaceId);
+  if (elsewhere) return <Navigate to={elsewhere} replace />;
   if (group.isPending || members.isPending) {
     return (
       <div aria-busy="true" className="flex flex-col gap-4 px-6 py-5">
@@ -152,6 +155,7 @@ function SettingsForm({
   group: StandupGroup;
   workspaceMembers: readonly WorkspaceMember[];
 }) {
+  const ws = useWsPath();
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -164,7 +168,7 @@ function SettingsForm({
   const archive = useArchiveStandupGroup();
   const addRef = useRef<HTMLButtonElement | null>(null);
   const readOnly = !group.canEdit;
-  const back = `/standup/${group.id}`;
+  const back = ws(`/standup/${group.id}`);
 
   // "Invite members" on the empty state lands on #members: focus the add row.
   useEffect(() => {
@@ -215,7 +219,7 @@ function SettingsForm({
               },
             },
           });
-          void navigate('/standup');
+          void navigate(ws('/standup'));
         },
       },
     );
@@ -248,7 +252,7 @@ function SettingsForm({
           aria-label={t('standup.settings.breadcrumb')}
           className="flex min-w-0 items-center gap-1.5 text-[14px]"
         >
-          <Link to="/standup" className="text-2 hover:text-default">
+          <Link to={ws('/standup')} className="text-2 hover:text-default">
             {t('shell.standup')}
           </Link>
           <ChevronRightIcon size={14} className="flex-none text-muted" />

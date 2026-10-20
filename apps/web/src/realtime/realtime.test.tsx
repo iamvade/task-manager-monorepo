@@ -14,7 +14,7 @@ import { FakeWebSocket } from '../test/fakeSocket';
 import { ME, PROJECT, PROJECT_ID, SIDEBAR, WORKSPACE_ID, mockApi } from '../test/fixtures';
 import { at, listHandlers, makeTasks, statusOf } from '../test/tasks';
 
-const LIST = `/p/${PROJECT_ID}/list?sprint=none`;
+const LIST = `/w/kite-studio/p/${PROJECT_ID}/list?sprint=none`;
 const ANU = at(PROJECT.members, 0).user;
 const SARA = at(PROJECT.members, 1).user;
 

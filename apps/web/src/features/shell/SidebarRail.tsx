@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Link, NavLink } from 'react-router';
 import { useStandupGroups } from '../../api/standups';
-import { useCurrentWorkspace, useSidebar } from '../../api/workspaces';
+import { useCurrentWorkspace, useSidebar, useWsPath } from '../../api/workspaces';
 import {
   FeedbackIcon,
   InboxIcon,
@@ -15,10 +15,10 @@ import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import { IconButton } from '../../components/ui/IconButton';
 import { SpaceBadge } from '../../components/ui/SpaceBadge';
 import { Tooltip } from '../../components/ui/Tooltip';
-import { WorkspaceTile } from '../../components/ui/WorkspaceTile';
 import { cn } from '../../lib/cn';
 import { useUiStore } from '../../stores/ui';
 import { waitingForMe } from '../standup/useStandup';
+import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 
 const railButton = 'flex size-9 items-center justify-center rounded-[8px] text-3 hover:bg-hover';
 
@@ -26,6 +26,7 @@ const railButton = 'flex size-9 items-center justify-center rounded-[8px] text-3
 export function SidebarRail() {
   const { t } = useTranslation();
   const workspace = useCurrentWorkspace();
+  const ws = useWsPath();
   const sidebar = useSidebar(workspace?.id);
   const standupGroups = useStandupGroups(workspace?.id);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
@@ -37,7 +38,7 @@ export function SidebarRail() {
       aria-label={t('shell.workspace')}
       className="box-border flex h-full w-14 flex-none flex-col items-center gap-2 overflow-y-auto border-r border-default bg-sidebar py-3"
     >
-      {workspace && <WorkspaceTile name={workspace.name} size={28} />}
+      <WorkspaceSwitcher variant="rail" />
       <IconButton
         label={t('shell.expand')}
         size={36}
@@ -52,18 +53,18 @@ export function SidebarRail() {
         }}
         icon={<SearchIcon size={16} />}
       />
-      <RailLink to="/my-tasks" label={t('shell.myTasks')}>
+      <RailLink to={ws('/my-tasks')} label={t('shell.myTasks')}>
         <MyTasksIcon size={16} />
       </RailLink>
       <RailLink
-        to="/standup"
+        to={ws('/standup')}
         label={t('shell.standup')}
         badge={waitingForMe(standupGroups.data).length > 0 ? t('shell.notPostedToday') : undefined}
       >
         <StandupIcon size={16} />
       </RailLink>
       <RailLink
-        to="/inbox"
+        to={ws('/inbox')}
         label={t('shell.inbox')}
         badge={
           sidebar.data && sidebar.data.inboxUnreadCount > 0
@@ -74,7 +75,7 @@ export function SidebarRail() {
         <InboxIcon size={16} />
       </RailLink>
       <RailLink
-        to="/feedback"
+        to={ws('/feedback')}
         label={t('shell.feedback')}
         badge={
           sidebar.data && sidebar.data.feedbackUnreadCount > 0
@@ -84,7 +85,7 @@ export function SidebarRail() {
       >
         <FeedbackIcon size={16} />
       </RailLink>
-      <RailLink to="/reports" label={t('shell.reports')}>
+      <RailLink to={ws('/reports')} label={t('shell.reports')}>
         <ReportsIcon size={16} />
       </RailLink>
       <div className="my-1 h-px w-6 bg-[var(--border)]" />
@@ -93,7 +94,7 @@ export function SidebarRail() {
           {(props) => (
             <Link
               {...props}
-              to={`/s/${space.id}/list`}
+              to={ws(`/s/${space.id}/list`)}
               aria-label={space.name}
               className={railButton}
             >

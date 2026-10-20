@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { CreatedTaskCard } from '../live/NotesPanel';
 import { useDayView } from './DayContext';
+import { useWsPath } from '../../../api/workspaces';
 
 /**
  * The day's meeting on the group page (no design: built from the page's tokens). While it runs,
@@ -9,6 +10,7 @@ import { useDayView } from './DayContext';
  * the notes and the tasks created. Only the total length is shown, never per-person times.
  */
 export function MeetingSection() {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const { day } = useDayView();
   const meeting = day.meeting;
@@ -27,7 +29,7 @@ export function MeetingSection() {
             {by ? t('standup.day.liveNowBy', { name: by }) : t('standup.day.liveNow')}
           </p>
           <Link
-            to={`/standup/${day.group.id}/${day.date}/live`}
+            to={ws(`/standup/${day.group.id}/${day.date}/live`)}
             className="flex h-8 items-center rounded-[8px] bg-accent px-3 text-[13px] font-semibold text-white no-underline hover:brightness-110"
           >
             {t('standup.day.joinLive')}

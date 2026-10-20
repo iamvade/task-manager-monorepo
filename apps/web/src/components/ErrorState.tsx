@@ -36,7 +36,7 @@ export function ErrorState({ error, onRetry, reload = false }: ErrorStateProps) 
         body={t('common.notFoundBody')}
         actions={
           <Link
-            to="/my-tasks"
+            to="/"
             className={`${buttonVariants.primary} inline-flex h-8 items-center rounded-[8px] px-3 text-[13px] font-medium`}
           >
             {t('common.goToMyTasks')}

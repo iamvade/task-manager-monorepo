@@ -2,7 +2,7 @@ import type { OverviewReport } from '@kite/shared';
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { useCurrentWorkspace, useSidebar } from '../../api/workspaces';
+import { useCurrentWorkspace, useSidebar, useWsPath } from '../../api/workspaces';
 import { PlusIcon, StopwatchIcon, TrendIcon, WaitIcon, WarningIcon } from '../../components/icons';
 import { buttonVariants } from '../../components/ui/buttonStyles';
 import { cn } from '../../lib/cn';
@@ -23,6 +23,7 @@ const cta = 'flex h-10 items-center gap-2 rounded-[8px] text-[14px] font-medium'
  * toward the first report, actions, and a preview of the reports to come.
  */
 export function ReportsEmpty({ history, scope, onShowAll }: ReportsEmptyProps) {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const workspace = useCurrentWorkspace();
   const spaces = useSidebar(workspace?.id).data?.spaces ?? [];
@@ -95,7 +96,7 @@ export function ReportsEmpty({ history, scope, onShowAll }: ReportsEmptyProps) {
           </button>
           {project && (
             <Link
-              to={`/p/${project.id}/list`}
+              to={ws(`/p/${project.id}/list`)}
               className={cn(cta, buttonVariants.secondary, 'px-3.5')}
             >
               {t('reports.empty.ctaProject')}

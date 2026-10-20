@@ -1,7 +1,7 @@
 import type { PersonReport, WorkspaceMember } from '@kite/shared';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router';
-import { useWorkspaceMembers } from '../../../api/workspaces';
+import { useWorkspaceMembers, useWsPath } from '../../../api/workspaces';
 import { ChevronDownIcon, CommentIcon, LockIcon } from '../../../components/icons';
 import { Avatar } from '../../../components/ui/Avatar';
 import { Picker } from '../../../components/ui/Picker';
@@ -49,6 +49,7 @@ export function PersonPickerRow({
  * workspace's members; picking one moves to `/reports/people/:userId`, keeping the period.
  */
 function PersonPicker({ person }: { person: PersonReport['person'] }) {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -94,7 +95,7 @@ function PersonPicker({ person }: { person: PersonReport['person'] }) {
           label={label}
           tall
           onSelect={(m) => {
-            void navigate(`/reports/people/${m.user.id}${filtersSearch(params)}`);
+            void navigate(ws(`/reports/people/${m.user.id}${filtersSearch(params)}`));
           }}
           onClose={close}
           renderItem={(m) => (

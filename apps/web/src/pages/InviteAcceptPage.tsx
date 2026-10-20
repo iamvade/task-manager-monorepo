@@ -10,6 +10,7 @@ import { LoginForm } from '../auth/LoginForm';
 import { PasswordField } from '../auth/PasswordField';
 import { Button } from '../components/ui/Button';
 import { TextField } from '../components/ui/TextField';
+import { wsPath } from '../lib/paths';
 
 const MIN_PASSWORD = 8;
 
@@ -21,7 +22,11 @@ export function InviteAcceptPage() {
   const accept = useAcceptInvite(token);
   const { me } = useAuth();
 
-  const onJoined = () => void navigate('/my-tasks', { replace: true });
+  // Into the workspace just joined, not the one used last.
+  const onJoined = () => {
+    if (invite.data)
+      void navigate(wsPath(invite.data.workspace.slug, '/my-tasks'), { replace: true });
+  };
   const acceptInvalid = accept.error instanceof ApiError && accept.error.code === 'INVITE_INVALID';
 
   if (invite.isPending) {

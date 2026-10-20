@@ -3,7 +3,7 @@ import { useMemo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useFollowTask } from '../../api/activity';
-import { useSidebar } from '../../api/workspaces';
+import { useSidebar, useWsPath } from '../../api/workspaces';
 import { useRecentEdit, type EditedField } from '../../stores/realtime';
 import { useAuth } from '../../auth/useAuth';
 import { useMoveTaskToProject, useSetAssignees, useSetTags, useUpdateTask } from '../../api/tasks';
@@ -113,6 +113,7 @@ interface TaskPropertiesProps {
  * Priority, Size, Tags, Sprint, Project (moves the task). Every change is optimistic in the drawer and the view behind it.
  */
 export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesProps) {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const view = useTaskView();
   const { task, project, members, teamIds, tags, sprints, layout } = view;
@@ -155,7 +156,7 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
         onSuccess: (moved) => {
           toast({ message: t('drawer.movedTo', { project: target.name, key: moved.key }) });
           if (layout === 'page') {
-            void navigate(`/t/${moved.key}`, { replace: true });
+            void navigate(ws(`/t/${moved.key}`), { replace: true });
           } else {
             setParams(
               (prev) => {

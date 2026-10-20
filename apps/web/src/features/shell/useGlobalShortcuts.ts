@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import { useWsPath } from '../../api/workspaces';
 import { hasMod, isEditableTarget } from '../../lib/keyboard';
 import { useUiStore } from '../../stores/ui';
 
@@ -15,6 +16,7 @@ const GO_TO: Record<string, string> = { i: '/inbox', m: '/my-tasks' };
  */
 export function useGlobalShortcuts() {
   const navigate = useNavigate();
+  const ws = useWsPath();
 
   useEffect(() => {
     let chordAt = 0;
@@ -42,7 +44,7 @@ export function useGlobalShortcuts() {
         const path = GO_TO[key];
         if (path) {
           event.preventDefault();
-          void navigate(path);
+          void navigate(ws(path));
         }
         return;
       }
@@ -64,5 +66,5 @@ export function useGlobalShortcuts() {
     return () => {
       document.removeEventListener('keydown', onKeyDown);
     };
-  }, [navigate]);
+  }, [navigate, ws]);
 }

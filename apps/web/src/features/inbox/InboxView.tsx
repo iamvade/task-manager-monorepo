@@ -9,7 +9,7 @@ import {
   useUnarchiveNotification,
 } from '../../api/notifications';
 import { useStandupGroups } from '../../api/standups';
-import { useCurrentWorkspace, useSidebar } from '../../api/workspaces';
+import { useCurrentWorkspace, useSidebar, useWsPath } from '../../api/workspaces';
 import { ErrorState } from '../../components/ErrorState';
 import {
   BellIcon,
@@ -38,6 +38,7 @@ import { standupHref } from './standupLine';
 export function InboxView() {
   const { t } = useTranslation();
   const workspace = useCurrentWorkspace();
+  const ws = useWsPath();
   const [params, setParams] = useSearchParams();
   const tab = inboxTabSchema.catch('all').parse(params.get('tab') ?? 'all');
   const workspaceId = workspace?.id ?? '';
@@ -129,7 +130,7 @@ export function InboxView() {
               {(props) => (
                 <Link
                   {...props}
-                  to="/settings?tab=notifications"
+                  to={ws('/settings?tab=notifications')}
                   aria-label={t('inbox.notificationSettings')}
                   className="flex size-8 items-center justify-center rounded-[8px] text-3 hover:bg-hover"
                 >
@@ -146,7 +147,7 @@ export function InboxView() {
             items={INBOX_TABS.map((value) => ({
               value,
               label: t(`inbox.tabs.${value}`),
-              to: withProject(value === 'all' ? '/inbox' : `/inbox?tab=${value}`),
+              to: ws(withProject(value === 'all' ? '/inbox' : `/inbox?tab=${value}`)),
             }))}
           />
         }
@@ -196,6 +197,7 @@ function InboxList({
   const { t } = useTranslation();
   const openTask = useOpenTask();
   const navigate = useNavigate();
+  const ws = useWsPath();
   const markRead = useMarkNotificationRead(workspaceId);
   const archive = useArchiveNotification(workspaceId);
   const unarchive = useUnarchiveNotification(workspaceId);
@@ -216,7 +218,7 @@ function InboxList({
               if (n.task) openTask(n.task.key);
               else {
                 const href = standupHref(n);
-                if (href) void navigate(href);
+                if (href) void navigate(ws(href));
               }
             }}
             onMarkRead={() => {
@@ -282,6 +284,7 @@ function InboxSkeleton() {
  */
 function StandupWaiting({ workspaceId }: { workspaceId: string }) {
   const { t } = useTranslation();
+  const ws = useWsPath();
   const groups = useStandupGroups(workspaceId || undefined);
   const waiting = waitingForMe(groups.data);
   if (waiting.length === 0) return null;
@@ -294,7 +297,7 @@ function StandupWaiting({ workspaceId }: { workspaceId: string }) {
             {t('inbox.standupWaiting', { group: g.name })}
           </span>
           <Link
-            to={writeHref(g.id)}
+            to={ws(writeHref(g.id))}
             className="flex h-8 flex-none items-center rounded-[8px] bg-accent px-3 text-[13px] font-semibold text-white no-underline hover:brightness-110"
           >
             {t('standup.day.writeUpdate')}

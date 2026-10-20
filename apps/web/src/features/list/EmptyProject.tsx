@@ -15,6 +15,7 @@ import { Kbd } from '../../components/ui/Kbd';
 import { Tooltip } from '../../components/ui/Tooltip';
 import { cn } from '../../lib/cn';
 import { paletteClass } from '../../lib/palette';
+import { useWsPath } from '../../api/workspaces';
 
 const TEMPLATES: {
   id: TemplateId;
@@ -79,6 +80,7 @@ interface EmptyProjectProps {
 
 /** A project without tasks (EmptyProject.dc.html): illustration, CTAs and three templates. */
 export function EmptyProject({ project, onCreateFirst }: EmptyProjectProps) {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const apply = useApplyTemplate(project);
 
@@ -119,7 +121,7 @@ export function EmptyProject({ project, onCreateFirst }: EmptyProjectProps) {
             )}
           </Tooltip>
           <Link
-            to="/settings?tab=members"
+            to={ws('/settings?tab=members')}
             className="flex h-10 items-center gap-2 rounded-[8px] px-3.5 text-[14px] font-medium text-2 no-underline hover:bg-hover hover:text-2"
           >
             <UserPlusIcon size={14} />

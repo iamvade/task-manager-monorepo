@@ -2,6 +2,7 @@ import type { SidebarProject, SidebarSpace } from '@kite/shared';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { useWsPath } from '../../api/workspaces';
 import { ChevronRightIcon } from '../../components/icons';
 import { ProjectDot } from '../../components/ui/ProjectDot';
 import { SpaceBadge } from '../../components/ui/SpaceBadge';
@@ -34,6 +35,7 @@ export function SpaceTreeItem({
   active,
   activeProjectId,
 }: SpaceTreeItemProps) {
+  const ws = useWsPath();
   return (
     <div className="flex flex-col gap-0.5">
       <div
@@ -58,7 +60,7 @@ export function SpaceTreeItem({
           />
         </button>
         <Link
-          to={`/s/${space.id}/list`}
+          to={ws(`/s/${space.id}/list`)}
           aria-current={active ? 'page' : undefined}
           onClick={() => {
             onToggle(true);
@@ -104,11 +106,12 @@ function ProjectNavItem({
   colorDot: boolean;
 }) {
   const { t } = useTranslation();
+  const ws = useWsPath();
   const [now] = useState(() => Date.now());
   const isNew = now - Date.parse(project.createdAt) <= NEW_PROJECT_MS;
   return (
     <Link
-      to={`/p/${project.id}/list`}
+      to={ws(`/p/${project.id}/list`)}
       aria-current={active ? 'page' : undefined}
       className={cn(
         'flex h-[30px] items-center gap-2 rounded-[8px] pr-3 pl-[34px] text-[13px]',

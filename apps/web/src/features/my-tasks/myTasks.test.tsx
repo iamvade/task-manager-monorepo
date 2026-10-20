@@ -37,7 +37,7 @@ function renderHome(
     [`GET /api/v1/projects/${PROJECT_ID}`]: () => Response.json(PROJECT_WITH_STATUSES),
     ...extra,
   });
-  const router = createMemoryRouter(routes, { initialEntries: ['/my-tasks'] });
+  const router = createMemoryRouter(routes, { initialEntries: ['/w/kite-studio/my-tasks'] });
   render(
     <QueryClientProvider client={client}>
       <AuthProvider>
@@ -116,7 +116,7 @@ describe('My Tasks', () => {
     if (!row) throw new Error('no row');
     fireEvent.click(within(row).getByRole('link', { name: 'App Redesign' }));
     await waitFor(() => {
-      expect(router.state.location.pathname).toMatch(/^\/p\/.+\/list$/);
+      expect(router.state.location.pathname).toMatch(/^\/w\/kite-studio\/p\/.+\/list$/);
     });
   });
 
@@ -185,7 +185,7 @@ describe('My Tasks', () => {
       [`GET /api/v1/workspaces/${WORKSPACE_ID}/sidebar`]: () => Response.json(SIDEBAR),
       'GET /api/v1/me/home': () => Response.json(HOME),
     });
-    const router = createMemoryRouter(routes, { initialEntries: ['/my-tasks'] });
+    const router = createMemoryRouter(routes, { initialEntries: ['/w/kite-studio/my-tasks'] });
     render(
       <QueryClientProvider client={createQueryClient()}>
         <AuthProvider>
@@ -221,7 +221,7 @@ describe('My Tasks', () => {
     expect(within(section('This Week')).getAllByText('Fri, Oct 9')).not.toHaveLength(0);
     expect(
       within(section('Overdue')).getByRole('link', { name: OVERDUE[0].title }),
-    ).toHaveAttribute('href', `/my-tasks?task=${OVERDUE[0].key}`);
+    ).toHaveAttribute('href', `/w/kite-studio/my-tasks?task=${OVERDUE[0].key}`);
   });
 
   it('collapses a section', async () => {
@@ -392,7 +392,7 @@ describe('My Tasks', () => {
     expect(items[3]).toHaveTextContent('to Oct 15');
     expect(within(panel).getByRole('link', { name: 'View inbox' })).toHaveAttribute(
       'href',
-      '/inbox',
+      '/w/kite-studio/inbox',
     );
 
     fireEvent.click(within(panel).getByRole('button', { name: 'Show older activity' }));

@@ -45,11 +45,11 @@ describe('My Tasks standup card', () => {
     ).toBeVisible();
     expect(within(card).getByRole('link', { name: 'Write update' })).toHaveAttribute(
       'href',
-      `/standup/${MOBILE_ID}?write=1`,
+      `/w/kite-studio/standup/${MOBILE_ID}?write=1`,
     );
     expect(within(card).getByRole('link', { name: 'See team updates' })).toHaveAttribute(
       'href',
-      `/standup/${MOBILE_ID}`,
+      `/w/kite-studio/standup/${MOBILE_ID}`,
     );
   });
 

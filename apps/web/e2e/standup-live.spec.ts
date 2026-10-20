@@ -36,10 +36,12 @@ async function signIn(browser: Browser, baseURL: string, email: string): Promise
 
 async function mobileTeam(page: Page) {
   const me = (await (await page.request.get('/api/v1/auth/me')).json()) as {
-    workspaces: { id: string }[];
+    workspaces: { id: string; slug: string }[];
   };
   const groups = (await (
-    await page.request.get(`/api/v1/workspaces/${me.workspaces[0]?.id ?? ''}/standup-groups`)
+    await page.request.get(
+      `/api/v1/workspaces/${me.workspaces.find((w) => w.slug === 'kite-studio')?.id ?? ''}/standup-groups`,
+    )
   ).json()) as { id: string; name: string; today: string; meetsToday: boolean }[];
   const group = groups.find((g) => g.name === 'Mobile team');
   if (!group) throw new Error('seed data missing');
@@ -57,10 +59,10 @@ test('Bat runs the standup meeting, Anu follows, a task and notes land on the st
   const group = await mobileTeam(anu);
   test.skip(!group.meetsToday, 'The Mobile team has no standup today');
   const bat = await signIn(browser, baseURL ?? '', 'bat@kite.test');
-  const live = `/standup/${group.id}/${group.today}/live`;
+  const live = `/w/kite-studio/standup/${group.id}/${group.today}/live`;
 
   // Bat starts it from the group page; Anu sees "Join live" there.
-  await bat.goto(`/standup/${group.id}`);
+  await bat.goto(`/w/kite-studio/standup/${group.id}`);
   await bat.getByRole('button', { name: 'Start standup' }).click();
   await expect(bat).toHaveURL(new RegExp(`${live}$`));
   const order = bat.getByRole('navigation', { name: 'Speaking order' });
@@ -72,7 +74,7 @@ test('Bat runs the standup meeting, Anu follows, a task and notes land on the st
   await expect(bat.getByRole('heading', { level: 1 })).toHaveText('Sara K.');
   await expect(order.getByRole('img', { name: /out of office$/ })).toBeVisible();
 
-  await anu.goto(`/standup/${group.id}`);
+  await anu.goto(`/w/kite-studio/standup/${group.id}`);
   await anu.getByRole('link', { name: 'Join live' }).first().click();
   await expect(anu).toHaveURL(new RegExp(`${live}$`));
   await expect(anu.getByText('Bat O. runs the meeting. This page moves with them.')).toBeVisible();
@@ -98,6 +100,8 @@ test('Bat runs the standup meeting, Anu follows, a task and notes land on the st
     'Payment provider sandbox API keys have expired',
   );
   await expect(dialog.getByRole('link', { name: /From the Mobile team standup on/ })).toBeVisible();
+  // ⌘↵ does nothing until the project has loaded (the Create button is disabled till then).
+  await expect(dialog.getByRole('button', { name: /^Create task/ })).toBeEnabled();
   await bat.keyboard.press('ControlOrMeta+Enter');
   await expect(dialog).toBeHidden();
   const speaker = bat.locator('#live-speaker');
@@ -120,7 +124,7 @@ test('Bat runs the standup meeting, Anu follows, a task and notes land on the st
   await expect(bat.getByRole('heading', { name: 'Meeting ended' })).toBeVisible();
   await expect(anu.getByRole('heading', { name: 'Meeting ended' })).toBeVisible();
 
-  await anu.goto(`/standup/${group.id}`);
+  await anu.goto(`/w/kite-studio/standup/${group.id}`);
   const notes = anu.getByRole('region', { name: 'Meeting notes' });
   await expect(notes.getByText('Bat renews the sandbox keys today')).toBeVisible();
   await expect(notes.getByText('Payment provider sandbox API keys have expired')).toBeVisible();

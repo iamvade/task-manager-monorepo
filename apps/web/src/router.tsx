@@ -3,6 +3,8 @@ import { Navigate, createBrowserRouter, type RouteObject } from 'react-router';
 import { RedirectIfAuthed, RequireAuth, RequireVade } from './auth/RouteGuards';
 import { RouteError } from './components/ErrorState';
 import { AppShell } from './features/shell/AppShell';
+import { HomeRedirect, WorkspaceHome } from './features/workspace/HomeRedirect';
+import { WorkspaceLayout } from './features/workspace/WorkspaceLayout';
 
 /**
  * Every page is its own chunk (`route.lazy`), loaded on first visit; the guards and the shell
@@ -87,116 +89,129 @@ export const routes: RouteObject[] = [
               },
             ],
           },
+          { path: '/', element: <HomeRedirect /> },
           {
-            element: <AppShell />,
+            // Every app page is in a workspace: `/w/:slug/...`.
+            path: '/w/:slug',
+            element: <WorkspaceLayout />,
             children: [
-              { path: '/', element: <Navigate to="/my-tasks" replace /> },
               {
-                path: '/my-tasks',
-                lazy: page(
-                  () => import('./pages/MyTasksPage'),
-                  (m) => m.MyTasksPage,
-                ),
-              },
-              {
-                path: '/inbox',
-                lazy: page(
-                  () => import('./pages/InboxPage'),
-                  (m) => m.InboxPage,
-                ),
-              },
-              {
-                path: '/feedback',
-                lazy: page(
-                  () => import('./features/feedback/inbox/FeedbackPage'),
-                  (m) => m.FeedbackPage,
-                ),
-              },
-              {
-                path: '/settings',
-                lazy: page(
-                  () => import('./pages/SettingsPage'),
-                  (m) => m.SettingsPage,
-                ),
-              },
-              {
-                path: '/standup',
+                element: <AppShell />,
                 children: [
-                  { index: true, lazy: page(standupPages, (m) => m.StandupIndexPage) },
-                  { path: ':groupId/:date?', lazy: page(standupPages, (m) => m.StandupGroupPage) },
+                  { index: true, element: <WorkspaceHome /> },
                   {
-                    // Full screen: the shell drops its sidebar (`chrome: 'none'`).
-                    path: ':groupId/:date/live',
-                    handle: { chrome: 'none' },
+                    path: 'my-tasks',
                     lazy: page(
-                      () => import('./features/standup/live/StandupLivePage'),
-                      (m) => m.StandupLivePage,
+                      () => import('./pages/MyTasksPage'),
+                      (m) => m.MyTasksPage,
                     ),
                   },
                   {
-                    path: ':groupId/settings',
+                    path: 'inbox',
                     lazy: page(
-                      () => import('./features/standup/StandupSettingsView'),
-                      (m) => m.StandupSettingsPage,
+                      () => import('./pages/InboxPage'),
+                      (m) => m.InboxPage,
                     ),
                   },
+                  {
+                    path: 'feedback',
+                    lazy: page(
+                      () => import('./features/feedback/inbox/FeedbackPage'),
+                      (m) => m.FeedbackPage,
+                    ),
+                  },
+                  {
+                    path: 'settings',
+                    lazy: page(
+                      () => import('./pages/SettingsPage'),
+                      (m) => m.SettingsPage,
+                    ),
+                  },
+                  {
+                    path: 'standup',
+                    children: [
+                      { index: true, lazy: page(standupPages, (m) => m.StandupIndexPage) },
+                      {
+                        path: ':groupId/:date?',
+                        lazy: page(standupPages, (m) => m.StandupGroupPage),
+                      },
+                      {
+                        // Full screen: the shell drops its sidebar (`chrome: 'none'`).
+                        path: ':groupId/:date/live',
+                        handle: { chrome: 'none' },
+                        lazy: page(
+                          () => import('./features/standup/live/StandupLivePage'),
+                          (m) => m.StandupLivePage,
+                        ),
+                      },
+                      {
+                        path: ':groupId/settings',
+                        lazy: page(
+                          () => import('./features/standup/StandupSettingsView'),
+                          (m) => m.StandupSettingsPage,
+                        ),
+                      },
+                    ],
+                  },
+                  {
+                    path: 't/:taskKey',
+                    lazy: page(
+                      () => import('./pages/TaskPage'),
+                      (m) => m.TaskPage,
+                    ),
+                  },
+                  {
+                    path: 'reports',
+                    children: [
+                      { index: true, element: <Navigate to="overview" replace /> },
+                      {
+                        path: 'overview',
+                        lazy: page(
+                          () => import('./features/reports/overview/OverviewTab'),
+                          (m) => m.OverviewTab,
+                        ),
+                      },
+                      {
+                        path: 'sprints',
+                        lazy: page(
+                          () => import('./features/reports/sprints/SprintsTab'),
+                          (m) => m.SprintsTab,
+                        ),
+                      },
+                      {
+                        path: 'workload',
+                        lazy: page(
+                          () => import('./features/reports/workload/WorkloadTab'),
+                          (m) => m.WorkloadTab,
+                        ),
+                      },
+                      { path: 'people/:userId?', lazy: page(reportsRoutes, (m) => m.PeopleRoute) },
+                      { path: 'me', lazy: page(reportsRoutes, (m) => m.MyPerformanceRoute) },
+                    ],
+                  },
+                  {
+                    path: 'p/:projectId',
+                    lazy: page(
+                      () => import('./features/project/ProjectLayout'),
+                      (m) => m.ProjectLayout,
+                    ),
+                    children: viewRoutes('project'),
+                  },
+                  {
+                    path: 's/:spaceId',
+                    lazy: page(
+                      () => import('./features/space/SpaceLayout'),
+                      (m) => m.SpaceLayout,
+                    ),
+                    children: viewRoutes('space'),
+                  },
+                  { path: '*', element: <WorkspaceHome /> },
                 ],
               },
-              {
-                path: '/t/:taskKey',
-                lazy: page(
-                  () => import('./pages/TaskPage'),
-                  (m) => m.TaskPage,
-                ),
-              },
-              {
-                path: '/reports',
-                children: [
-                  { index: true, element: <Navigate to="overview" replace /> },
-                  {
-                    path: 'overview',
-                    lazy: page(
-                      () => import('./features/reports/overview/OverviewTab'),
-                      (m) => m.OverviewTab,
-                    ),
-                  },
-                  {
-                    path: 'sprints',
-                    lazy: page(
-                      () => import('./features/reports/sprints/SprintsTab'),
-                      (m) => m.SprintsTab,
-                    ),
-                  },
-                  {
-                    path: 'workload',
-                    lazy: page(
-                      () => import('./features/reports/workload/WorkloadTab'),
-                      (m) => m.WorkloadTab,
-                    ),
-                  },
-                  { path: 'people/:userId?', lazy: page(reportsRoutes, (m) => m.PeopleRoute) },
-                  { path: 'me', lazy: page(reportsRoutes, (m) => m.MyPerformanceRoute) },
-                ],
-              },
-              {
-                path: '/p/:projectId',
-                lazy: page(
-                  () => import('./features/project/ProjectLayout'),
-                  (m) => m.ProjectLayout,
-                ),
-                children: viewRoutes('project'),
-              },
-              {
-                path: '/s/:spaceId',
-                lazy: page(
-                  () => import('./features/space/SpaceLayout'),
-                  (m) => m.SpaceLayout,
-                ),
-                children: viewRoutes('space'),
-              },
-              { path: '*', element: <Navigate to="/my-tasks" replace /> },
             ],
           },
+          // Links from before workspaces were in the URL (`/my-tasks`, `/p/:id/list`…).
+          { path: '*', element: <HomeRedirect /> },
         ],
       },
     ],
