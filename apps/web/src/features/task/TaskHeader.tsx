@@ -16,6 +16,7 @@ import {
 import { Button } from '../../components/ui/Button';
 import { IconButton } from '../../components/ui/IconButton';
 import { Menu } from '../../components/ui/Menu';
+import { copyText } from '../../lib/clipboard';
 import { toast } from '../../stores/toast';
 import { useTaskView } from './TaskContext';
 import { TaskViewers } from './TaskViewers';
@@ -47,7 +48,7 @@ export function TaskHeader({ onMoveToProject }: TaskHeaderProps) {
 
   async function copyLink() {
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}${ws(`/t/${task.key}`)}`);
+      await copyText(`${window.location.origin}${ws(`/t/${task.key}`)}`);
       toast({ message: t('header.linkCopied') });
     } catch {
       toast({ message: t('drawer.copyFailed'), tone: 'danger' });

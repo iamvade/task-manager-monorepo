@@ -1,6 +1,7 @@
 import type { PublicFeedbackResult } from '@kite/shared';
 import { useEffect, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { copyText } from '../../../lib/clipboard';
 import { cn } from '../../../lib/cn';
 import { CheckIcon, CopyIcon, PaperclipIcon, PlusIcon } from './publicIcons';
 import { TYPE_TINT } from './typeTint';
@@ -24,9 +25,7 @@ export function SuccessView({
   }, []);
 
   const copy = () => {
-    // `navigator.clipboard` is missing outside secure contexts: the chain catches that too.
-    void Promise.resolve()
-      .then(() => navigator.clipboard.writeText(result.ref))
+    void copyText(result.ref)
       .then(() => {
         setCopied(true);
       })

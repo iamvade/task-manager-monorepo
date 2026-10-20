@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router';
 import { MoreIcon } from '../../../components/icons';
 import { Avatar } from '../../../components/ui/Avatar';
 import { Menu, type MenuItem } from '../../../components/ui/Menu';
+import { copyText } from '../../../lib/clipboard';
 import { cn } from '../../../lib/cn';
 import { toast } from '../../../stores/toast';
 import { useDayView } from './DayContext';
@@ -53,7 +54,7 @@ export function EntryCard({ entry }: { entry: StandupEntry }) {
   const copyLink = async () => {
     const url = `${window.location.origin}${ws(dayHref(day.group.id, entry.date))}#entry-${entry.id}`;
     try {
-      await navigator.clipboard.writeText(url);
+      await copyText(url);
       toast({ message: t('header.linkCopied') });
     } catch {
       toast({ message: t('drawer.copyFailed'), tone: 'danger' });

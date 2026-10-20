@@ -3,11 +3,13 @@ import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useFeedback, useMarkFeedbackRead } from '../../../api/feedback';
+import { useWsPath } from '../../../api/workspaces';
 import { ErrorState } from '../../../components/ErrorState';
 import { ChevronDownIcon, ChevronUpIcon, CloseIcon, LinkIcon } from '../../../components/icons';
 import { Drawer } from '../../../components/ui/Drawer';
 import { IconButton } from '../../../components/ui/IconButton';
 import { Skeleton } from '../../../components/ui/Skeleton';
+import { copyText } from '../../../lib/clipboard';
 import { toast } from '../../../stores/toast';
 import { FeedbackMain } from './FeedbackMain';
 import { FeedbackSide } from './FeedbackSide';
@@ -26,6 +28,7 @@ export function FeedbackDrawer({
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const ws = useWsPath();
   const [params] = useSearchParams();
   const ref = params.get('item');
   const query = useFeedback(workspaceId || undefined, ref);
@@ -61,8 +64,8 @@ export function FeedbackDrawer({
   const next = index >= 0 ? order[index + 1] : undefined;
   const copyLink = () => {
     if (!detail) return;
-    const url = `${window.location.origin}/feedback?item=${detail.ref}`;
-    navigator.clipboard.writeText(url).then(
+    const url = `${window.location.origin}${ws(`/feedback?item=${detail.ref}`)}`;
+    copyText(url).then(
       () => {
         toast({ message: t('feedback.detail.linkCopied') });
       },
