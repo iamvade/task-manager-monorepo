@@ -28,6 +28,7 @@ import {
   ME,
   PASSWORD,
   PEOPLE,
+  PLATFORM_ADMIN,
   PROJECTS,
   REVIEWERS,
   SPACES,
@@ -110,6 +111,13 @@ export async function runSeed(db: Db, options: SeedOptions): Promise<void> {
       }
     };
     await tx.insert(schema.users).values(rows.users);
+    await tx.insert(schema.users).values({
+      ...PLATFORM_ADMIN,
+      avatarColor: 'neutral',
+      passwordHash,
+      locale: options.lang,
+      platformRole: 'vade',
+    });
     await tx.insert(schema.workspaces).values(rows.workspace);
     await tx.insert(schema.workspaceMembers).values(rows.members);
     await tx.insert(schema.workspaceHolidays).values(rows.holidays);

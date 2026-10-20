@@ -8,7 +8,7 @@ import {
   inviteSchema,
   meResponseSchema,
 } from '@kite/shared';
-import { and, asc, eq, gt, isNotNull, isNull } from 'drizzle-orm';
+import { and, asc, eq, gt, isNotNull, isNull, ne } from 'drizzle-orm';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { requireWorkspaceMember } from '../auth/access.js';
@@ -17,15 +17,15 @@ import { buildMe } from '../auth/me.js';
 import { hashPassword } from '../auth/password.js';
 import { resolveSession } from '../auth/plugin.js';
 import { createSession, setSessionCookie } from '../auth/sessions.js';
-import { hashToken, newToken } from '../auth/tokens.js';
+import { hashToken } from '../auth/tokens.js';
 import type { DbOrTx } from '../db/client.js';
 import { isUniqueViolation } from '../db/errors.js';
 import { one } from '../db/rows.js';
 import { invites, users, workspaceMembers, workspaces } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
+import { insertInvite } from '../invites/create.js';
 import { activeMember } from '../auth/membership.js';
 
-const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const tokenParams = z.object({ token: z.string().min(1).max(100) });
 const err = apiErrorSchema;
 
@@ -48,6 +48,22 @@ async function findPendingInvite(db: DbOrTx, token: string, lock = false) {
     .limit(1);
   const [row] = await (lock ? query.for('update', { of: invites }) : query);
   return row;
+}
+
+/** True when the workspace already has an active owner (an owner invite is then dead). */
+export async function hasActiveOwner(db: DbOrTx, workspaceId: string): Promise<boolean> {
+  const [owner] = await db
+    .select({ userId: workspaceMembers.userId })
+    .from(workspaceMembers)
+    .where(
+      and(
+        eq(workspaceMembers.workspaceId, workspaceId),
+        eq(workspaceMembers.role, 'owner'),
+        activeMember,
+      ),
+    )
+    .limit(1);
+  return Boolean(owner);
 }
 
 export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
@@ -82,8 +98,7 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         throw httpError(409, 'ALREADY_MEMBER', 'This person is already in the workspace');
       }
 
-      const token = newToken();
-      const invite = await app.db.transaction(async (tx) => {
+      const { invite, link } = await app.db.transaction(async (tx) => {
         // One live link per person: a re-invite replaces the earlier one.
         await tx
           .delete(invites)
@@ -94,21 +109,8 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
               isNull(invites.acceptedAt),
             ),
           );
-        const values = {
-          workspaceId,
-          email,
-          role,
-          tokenHash: hashToken(token),
-          expiresAt: new Date(Date.now() + INVITE_TTL_MS),
-        };
-        return one(await tx.insert(invites).values(values).returning(), 'invite');
+        return insertInvite(app, tx, { workspaceId, email, role });
       });
-
-      const link = `${new URL(app.config.WEB_ORIGIN).origin}/invite/${token}`;
-      if (app.config.NODE_ENV !== 'production') {
-        // Handy in dev; production logs never carry invite tokens.
-        app.log.info({ email, link }, 'Invite link');
-      }
 
       // The link is a credential: keep it out of every cache.
       return reply.code(201).header('cache-control', 'no-store').send({
@@ -142,6 +144,7 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         .where(
           and(
             eq(invites.workspaceId, workspaceId),
+            ne(invites.role, 'owner'),
             isNull(invites.acceptedAt),
             gt(invites.expiresAt, new Date()),
           ),
@@ -150,7 +153,7 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       return rows.map((invite) => ({
         id: invite.id,
         email: invite.email,
-        // Owners are never invited; the column shares the workspace role enum.
+        // Owner invites (from the platform admin) are left out above.
         role: invite.role === 'admin' ? ('admin' as const) : ('member' as const),
         expiresAt: invite.expiresAt.toISOString(),
       }));
@@ -201,12 +204,17 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     },
     async (request) => {
       const row = await findPendingInvite(app.db, request.params.token);
-      if (!row || row.invite.role === 'owner') throw invalidInvite();
+      if (!row) throw invalidInvite();
+      if (row.invite.role === 'owner' && (await hasActiveOwner(app.db, row.invite.workspaceId))) {
+        throw invalidInvite();
+      }
       const [existing] = await app.db
-        .select({ id: users.id })
+        .select({ id: users.id, platformRole: users.platformRole })
         .from(users)
         .where(eq(users.email, row.invite.email))
         .limit(1);
+      // The platform admin never joins a workspace.
+      if (existing?.platformRole) throw invalidInvite();
       return {
         workspace: { name: row.workspaceName },
         email: row.invite.email,
@@ -224,7 +232,7 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Invites'],
         summary: 'Accept an invite',
         description:
-          'New accounts send `name` and `password`; an existing account must be signed in as the invited email (401 `LOGIN_REQUIRED`). 409 `ACCOUNT_EXISTS` when the account was created meanwhile (another invite accepted at the same time): sign in, then accept.',
+          'New accounts send `name` and `password`; an existing account must be signed in as the invited email (401 `LOGIN_REQUIRED`). An owner invite (from the platform admin) is invalid once the workspace has an owner; the platform admin account can never accept an invite. 409 `ACCOUNT_EXISTS` when the account was created meanwhile (another invite accepted at the same time): sign in, then accept.',
         security: [{}, { cookieAuth: [] }],
         params: tokenParams,
         body: acceptInviteSchema,
@@ -238,14 +246,25 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
 
       const result = await app.db.transaction(async (tx) => {
         const row = await findPendingInvite(tx, request.params.token, true);
-        if (!row || row.invite.role === 'owner') throw invalidInvite();
+        if (!row) throw invalidInvite();
         const { invite } = row;
+        if (invite.role === 'owner') {
+          // One owner per workspace: two owner links accepted at once serialize on the workspace row.
+          await tx
+            .select({ id: workspaces.id })
+            .from(workspaces)
+            .where(eq(workspaces.id, invite.workspaceId))
+            .for('update');
+          if (await hasActiveOwner(tx, invite.workspaceId)) throw invalidInvite();
+        }
 
         const [existing] = await tx
           .select()
           .from(users)
           .where(eq(users.email, invite.email))
           .limit(1);
+        // The platform admin never joins a workspace.
+        if (existing?.platformRole) throw invalidInvite();
         let user = existing;
         let newSessionToken: string | undefined;
 

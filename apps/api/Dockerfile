@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 # API image. Build from the repository root: docker build -f apps/api/Dockerfile .
 # Runs `node dist/server.js`; migrations are a separate command: `node dist/scripts/migrate.js`.
-# First run: `node dist/scripts/init.js --workspace … --email … --name …` (see docs/DEPLOY.md).
+# First run: `node dist/scripts/vade.js --email … --name …` creates the platform admin (see docs/DEPLOY.md).
 
 FROM node:22-slim AS base
 ENV CI=true COREPACK_ENABLE_DOWNLOAD_PROMPT=0 npm_config_store_dir=/pnpm/store

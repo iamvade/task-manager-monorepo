@@ -1,28 +1,26 @@
 import { parseArgs } from 'node:util';
+import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { loadConfig } from '../config.js';
 import { createDb } from '../db/client.js';
-import {
-  assertNotInitialized,
-  initWorkspace,
-  initWorkspaceInputSchema,
-} from '../setup/init-workspace.js';
+import { users } from '../db/schema/index.js';
+import { SetupError, createAccount, newAccountSchema } from '../setup/workspaces.js';
 
-const USAGE = `Creates the first workspace and its owner account on an empty database.
+const USAGE = `Creates a platform admin account (role "vade"). It belongs to no workspace;
+it signs in at /admin to create workspaces and invite their owners.
 
 Usage:
-  node dist/scripts/init.js --workspace <name> --email <email> --name <full name>
+  node dist/scripts/vade.js --email <email> --name <full name>
                             [--locale mn|en] [--timezone <IANA zone>]
 
 The password is asked for on the terminal (twice, not echoed). Without a terminal,
-set INIT_PASSWORD in the environment instead.
+set VADE_PASSWORD in the environment instead.
 
 Options:
-  --workspace   Workspace name, e.g. "Kite Studio"
-  --email       Owner's sign-in email
-  --name        Owner's full name, e.g. "Anu Bat"
-  --locale      UI language for the owner (default mn)
-  --timezone    Owner's time zone (default Asia/Ulaanbaatar)
+  --email       Sign-in email (must not have an account yet)
+  --name        Full name
+  --locale      UI language (default mn)
+  --timezone    Time zone (default Asia/Ulaanbaatar)
   -h, --help    Show this help
 `;
 
@@ -62,15 +60,15 @@ function readHidden(prompt: string): Promise<string> {
 }
 
 async function readPassword(): Promise<string> {
-  const fromEnv = process.env.INIT_PASSWORD;
+  const fromEnv = process.env.VADE_PASSWORD;
   if (fromEnv) return fromEnv;
   if (!process.stdin.isTTY) {
     throw new Error(
-      'No terminal to ask for the password. Run with a TTY (docker compose run, not -T) or set INIT_PASSWORD.',
+      'No terminal to ask for the password. Run with a TTY (docker compose run, not -T) or set VADE_PASSWORD.',
     );
   }
   for (;;) {
-    const first = await readHidden('Owner password (min 8 characters): ');
+    const first = await readHidden('Password (min 8 characters): ');
     const second = await readHidden('Repeat password: ');
     if (first === second) return first;
     console.error('Passwords did not match, try again.');
@@ -80,7 +78,6 @@ async function readPassword(): Promise<string> {
 async function main(): Promise<number> {
   const { values } = parseArgs({
     options: {
-      workspace: { type: 'string' },
       email: { type: 'string' },
       name: { type: 'string' },
       locale: { type: 'string' },
@@ -93,28 +90,33 @@ async function main(): Promise<number> {
     console.log(USAGE);
     return 0;
   }
-  if (!values.workspace || !values.email || !values.name) {
-    console.error(`--workspace, --email and --name are required.\n\n${USAGE}`);
+  if (!values.email || !values.name) {
+    console.error(`--email and --name are required.\n\n${USAGE}`);
     return 1;
   }
 
   const config = loadConfig();
   const fields = {
-    workspaceName: values.workspace,
     email: values.email,
     name: values.name,
     locale: values.locale,
     timezone: values.timezone,
   };
   // Check the flags and the database before asking for a password.
-  initWorkspaceInputSchema.omit({ password: true }).parse(fields);
+  const checked = newAccountSchema.omit({ password: true }).parse(fields);
   const { db, pool } = createDb(config.DATABASE_URL);
   try {
-    await assertNotInitialized(db);
-    const input = initWorkspaceInputSchema.parse({ ...fields, password: await readPassword() });
-    const { user, workspace } = await initWorkspace(db, input);
-    console.log(`Created workspace "${workspace.name}" with owner ${user.email}.`);
-    console.log(`Sign in at ${config.WEB_ORIGIN}`);
+    const [existing] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, checked.email))
+      .limit(1);
+    if (existing) {
+      throw new SetupError('EMAIL_TAKEN', `An account with ${checked.email} already exists.`);
+    }
+    const user = await createAccount(db, { ...checked, password: await readPassword() }, 'vade');
+    console.log(`Created platform admin ${user.email}.`);
+    console.log(`Sign in at ${new URL('/admin', config.WEB_ORIGIN).href}`);
     return 0;
   } finally {
     await pool.end();

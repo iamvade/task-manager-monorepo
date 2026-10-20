@@ -52,6 +52,10 @@ const tags = [
     description:
       'Customer feedback: the public form (no account) and the team inbox, linked to tasks',
   },
+  {
+    name: 'Admin',
+    description: 'Platform admin (role vade): create workspaces and invite their owners',
+  },
   { name: 'Realtime', description: 'WebSocket: live changes and presence' },
 ];
 

@@ -141,6 +141,13 @@
       "when": 1792390364719,
       "tag": "0019_feedback",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792484804234,
+      "tag": "0020_platform_role",
+      "breakpoints": true
     }
   ]
 }
