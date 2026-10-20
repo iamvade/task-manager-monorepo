@@ -87,24 +87,23 @@ docker compose logs -f web          # watch Caddy obtain the certificate
 curl https://$DOMAIN/api/v1/health  # {"status":"ok","db":"up",...}
 ```
 
-## 5. Create the workspace and owner (first run only)
+## 5. Create the platform admin, then the workspace (first run only)
 
-The demo seed is refused in production. Create the real workspace and its owner instead:
+The demo seed is refused in production. Workspaces are created by the **platform admin** (role `vade`): an account that belongs to no workspace and only sees the admin console at `/admin`. Create it once:
 
 ```sh
-docker compose run --rm api node dist/scripts/init.js \
-  --workspace "Kite Studio" \
-  --email anu@example.mn \
-  --name "Anu Bat"
+docker compose run --rm api node dist/scripts/vade.js \
+  --email admin@example.mn \
+  --name "Platform admin"
 ```
 
-It asks for the owner's password twice (hidden, at least 8 characters). Options: `--locale mn|en` (default `mn`) and `--timezone` (default `Asia/Ulaanbaatar`). Without a terminal (scripts, CI), pass the password as `-e INIT_PASSWORD=…` and add `-T`. The command refuses to run once any workspace exists.
+It asks for the password twice (hidden, at least 8 characters). Options: `--locale mn|en` (default `mn`) and `--timezone` (default `Asia/Ulaanbaatar`). Without a terminal (scripts, CI), pass the password as `-e VADE_PASSWORD=…` and add `-T`. It refuses an email that already has an account. Run it again with another email for a second platform admin.
 
-It also adds the 2026 Mongolian public holidays (used for sprint working days). No spaces or projects are created: the owner adds them in the app.
+Then sign in at `https://$DOMAIN` as that account (it opens `/admin`), fill in **New workspace** (name, address used by the public feedback form `/feedback/<address>`, the owner's email) and click **Create workspace**. Copy the owner's invite link shown under the form and send it to them; it is valid for 7 days and shown once. Until the owner accepts, **New owner link** in the list makes a new one (the old link stops working). Each workspace gets the 2026 Mongolian public holidays (used for sprint working days); no spaces or projects: the owner adds them in the app.
 
 ## 6. Invite the team
 
-Sign in at `https://$DOMAIN` as the owner, open **Settings → Members**, enter a teammate's email and click **Create invite**. Kite doesn't send email: copy the link shown under the form and send it yourself (chat, email). The link is valid for 7 days and shown only once; creating a new invite for the same email replaces the old link. Admins can invite too; set job titles and capacity in the same list.
+The owner opens their link, creates an account (or signs in) and lands in the workspace. Then, as the owner, open **Settings → Members**, enter a teammate's email and click **Create invite**. Kite doesn't send email: copy the link shown under the form and send it yourself (chat, email). The link is valid for 7 days and shown only once; creating a new invite for the same email replaces the old link. Admins can invite too; set job titles and capacity in the same list.
 
 ## Backups
 
@@ -192,7 +191,7 @@ docker compose run --rm --no-deps -T -v ./backups:/backups:ro api \
 docker compose up -d
 ```
 
-Skip `init.js` here: the workspace comes from the dump. Point DNS at the new server; Caddy fetches a new certificate.
+Skip `vade.js` here: the platform admin and the workspaces come from the dump. Point DNS at the new server; Caddy fetches a new certificate.
 
 ## S3 attachment storage (optional)
 
@@ -238,6 +237,6 @@ docker stats                          # memory / CPU per container
 | Every save fails with 403 `CSRF_REJECTED`, realtime doesn't connect | The app was opened under another address (server IP, `www.` variant) than `https://$DOMAIN`. Use exactly that host, or change `DOMAIN`. |
 | `api` restarts, logs say `Invalid environment configuration` | A setting in `.env` is wrong; the message names it (e.g. `S3_BUCKET` missing with `STORAGE_DRIVER=s3`). |
 | `migrate` exited with an error, `api` never starts | `docker compose logs migrate`. Usually the database password in `.env` changed after the first start: the `pgdata` volume keeps the original one. |
-| `init.js` says "No terminal to ask for the password" | Run without `-T`, or pass `-e INIT_PASSWORD=…`. |
+| `vade.js` says "No terminal to ask for the password" | Run without `-T`, or pass `-e VADE_PASSWORD=…`. |
 | Live updates don't arrive behind Cloudflare (orange cloud) | Enable WebSockets in Cloudflare, or keep the record DNS-only. With a proxy in front of Caddy, client IPs need Caddy `trusted_proxies` and a larger `TRUST_PROXY` hop count. |
 | Uploads fail with 413 | Files are capped at 25 MB, and each workspace at `MAX_WORKSPACE_STORAGE_BYTES` (default 5 GiB). |

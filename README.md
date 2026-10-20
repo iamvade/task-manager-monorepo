@@ -30,7 +30,7 @@ docker compose up -d
 # 3. Dependencies
 pnpm install
 
-# 4. Database schema + one owner account (pnpm db:reset:demo for the sample data)
+# 4. Database schema + one owner and the platform admin (pnpm db:reset:demo for the sample data)
 pnpm db:reset
 
 # 5. Run API (http://127.0.0.1:3000) and web (http://localhost:5173) together
@@ -124,7 +124,7 @@ Flow: the event bus (after commit) → `toRealtime` → `Broadcaster.publish` �
 
 ## Production
 
-Docker Compose on one server: Caddy (automatic HTTPS, serves the SPA and proxies `/api` and the WebSocket), the API, Postgres 16 and a nightly `pg_dump` backup. Attachments on a volume or in an S3-compatible bucket (`STORAGE_DRIVER=s3`). The first workspace and owner come from `init.js` instead of the demo seed. Step-by-step setup, updates and restores: [`docs/DEPLOY.md`](docs/DEPLOY.md).
+Docker Compose on one server: Caddy (automatic HTTPS, serves the SPA and proxies `/api` and the WebSocket), the API, Postgres 16 and a nightly `pg_dump` backup. Attachments on a volume or in an S3-compatible bucket (`STORAGE_DRIVER=s3`). Workspaces are created by the platform admin (`vade.js`, then `/admin`) instead of the demo seed. Step-by-step setup, updates and restores: [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 ## Scripts (run from the repo root)
 
@@ -139,18 +139,18 @@ Docker Compose on one server: Caddy (automatic HTTPS, serves the SPA and proxies
 | `pnpm e2e`           | Playwright end-to-end tests (see below)                        |
 | `pnpm db:generate`   | Generate a migration from `apps/api/src/db/schema`             |
 | `pnpm db:migrate`    | Apply migrations                                               |
-| `pnpm db:init`       | Create the first workspace + owner on an empty database        |
+| `pnpm db:vade`       | Create a platform admin (`--email --name`, `/admin` console)   |
 | `pnpm db:seed`       | Insert the sample data from the designs                        |
-| `pnpm db:reset`      | Drop everything, migrate, create one owner (refuses in prod)   |
+| `pnpm db:reset`      | Drop everything, migrate, one owner + platform admin (no prod) |
 | `pnpm db:reset:demo` | Drop everything, migrate, insert the sample data               |
 | `pnpm db:print`      | Print a project's tasks by status (`pnpm db:print CHK`)        |
 | `pnpm db:scenario`   | Add a realistic test workspace (`small` or `large`, see below) |
 
 ### Sample data
 
-`db:reset` leaves an empty workspace **Shoppy** with one owner, `lkhagvadorj.b@shoppy.mn` / `password123` (`apps/api/src/db/seed/blank.ts`).
+`db:reset` leaves an empty workspace **Shoppy** with one owner, `lkhagvadorj.b@shoppy.mn` / `password123`, and the platform admin `vade@shoppy.mn` / `password123`, who signs in to `/admin` to create workspaces and invite their owners (`apps/api/src/db/seed/blank.ts`).
 
-`db:seed` / `db:reset:demo` recreate the workspace from the designs: **Kite Studio**, eight people (log in as `anu@kite.test`, everyone's password is `password123`), the Product / Engineering / Design spaces with their projects, App Redesign's tasks (APP-142 is the task from the detail drawer), Anu's My Tasks and the October calendar. Design dates are shifted so that Oct 8 2026 is today.
+`db:seed` / `db:reset:demo` recreate the workspace from the designs: **Kite Studio**, eight people (log in as `anu@kite.test`, everyone's password is `password123`; `vade@kite.test` is the platform admin), the Product / Engineering / Design spaces with their projects, App Redesign's tasks (APP-142 is the task from the detail drawer), Anu's My Tasks and the October calendar. Design dates are shifted so that Oct 8 2026 is today.
 
 - `SEED_LANG=mn|en` (default `mn`): language of task, project, space, tag and people names that the designs have in both languages.
 - `SEED_TODAY=2026-10-08`: pin "today" for an exact match with the mockups (weekday-based views such as My Tasks' _This Week_ only match on a Thursday).
