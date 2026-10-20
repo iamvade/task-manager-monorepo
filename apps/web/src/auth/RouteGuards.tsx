@@ -34,6 +34,17 @@ export function RequireAuth() {
     const next = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/login?next=${next}`} replace />;
   }
+  // The platform admin belongs to no workspace: the admin console is all there is for them.
+  if (me.user.platformRole === 'vade' && location.pathname !== '/admin') {
+    return <Navigate to="/admin" replace />;
+  }
+  return <Outlet />;
+}
+
+/** Layout route for /admin (inside `RequireAuth`): the platform admin only, others go home. */
+export function RequireVade() {
+  const { me } = useAuth();
+  if (me?.user.platformRole !== 'vade') return <Navigate to="/my-tasks" replace />;
   return <Outlet />;
 }
 

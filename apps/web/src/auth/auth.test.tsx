@@ -57,6 +57,29 @@ describe('auth flow', () => {
     expect(screen.queryByRole('alert')).toBeNull();
   });
 
+  it('keeps the platform admin on /admin and everyone else out of it', async () => {
+    const vade = { ...ME, user: { ...ME.user, platformRole: 'vade' as const }, workspaces: [] };
+    mockApi({
+      'GET /api/v1/auth/me': () => Response.json(vade),
+      'GET /api/v1/admin/workspaces': () => Response.json([]),
+    });
+    const router = renderAt('/my-tasks');
+    expect(await screen.findByRole('heading', { name: 'Ажлын орчнууд' })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/admin');
+    expect(await screen.findByText('Ажлын орчин алга байна.')).toBeInTheDocument();
+  });
+
+  it('sends a workspace member away from /admin', async () => {
+    mockApi({
+      'GET /api/v1/auth/me': () => Response.json(ME),
+      [`GET /api/v1/workspaces/${WORKSPACE_ID}/sidebar`]: () => Response.json(SIDEBAR),
+      ...homeHandlers(),
+    });
+    const router = renderAt('/admin');
+    expect(await screen.findByRole('navigation', { name: 'Ажлын орчин' })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/my-tasks');
+  });
+
   it('shows the generic error on bad credentials', async () => {
     mockApi({
       'GET /api/v1/auth/me': unauthorized,

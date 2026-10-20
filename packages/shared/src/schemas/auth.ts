@@ -6,6 +6,7 @@ import {
   localeSchema,
   notificationPrefsSchema,
   paletteKeySchema,
+  platformRoleSchema,
   themeSchema,
   workspaceRoleSchema,
 } from '../enums.js';
@@ -41,6 +42,8 @@ export const meUserSchema = z.object({
   name: z.string(),
   initials: z.string(),
   avatarColor: paletteKeySchema,
+  /** `vade` for the platform admin (the `/admin` console only), else null. */
+  platformRole: platformRoleSchema.nullable(),
 });
 
 export const preferencesSchema = z.object({
@@ -89,7 +92,7 @@ export const updateMeSchema = z
   .meta({ id: 'UpdateMe' });
 export type UpdateMe = z.infer<typeof updateMeSchema>;
 
-/** Owners are made at workspace creation, never invited. */
+/** Roles a workspace admin can invite; owner invites come only from the platform admin (`/admin`). */
 export const inviteRoleSchema = z.enum(['admin', 'member']);
 
 export const createInviteSchema = z
@@ -124,7 +127,8 @@ export const invitePreviewSchema = z
   .object({
     workspace: z.object({ name: z.string() }),
     email: z.string(),
-    role: inviteRoleSchema,
+    /** `owner` for the invite the platform admin made with the workspace. */
+    role: workspaceRoleSchema,
     expiresAt: z.iso.datetime(),
     /** True when the email already has an account: accept by signing in instead of creating one. */
     accountExists: z.boolean(),

@@ -27,6 +27,14 @@ export const workspaceRoleSchema = z.enum(WORKSPACE_ROLES);
 export type WorkspaceRole = z.infer<typeof workspaceRoleSchema>;
 
 /**
+ * Platform-wide role on `users.platform_role` (null = a normal account). `vade` creates workspaces
+ * and invites their owners; it is never a member of any workspace.
+ */
+export const PLATFORM_ROLES = ['vade'] as const;
+export const platformRoleSchema = z.enum(PLATFORM_ROLES);
+export type PlatformRole = z.infer<typeof platformRoleSchema>;
+
+/**
  * Notification types, highest priority first (one notification per recipient per event: the
  * highest type they have enabled). The `standup_*` types are about a standup group, not a task:
  * a helper named on a blocker, a reply on my update, my blocker resolved, the daily reminder and

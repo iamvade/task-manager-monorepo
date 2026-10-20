@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react';
 import { Navigate, createBrowserRouter, type RouteObject } from 'react-router';
-import { RedirectIfAuthed, RequireAuth } from './auth/RouteGuards';
+import { RedirectIfAuthed, RequireAuth, RequireVade } from './auth/RouteGuards';
 import { RouteError } from './components/ErrorState';
 import { AppShell } from './features/shell/AppShell';
 
@@ -74,6 +74,19 @@ export const routes: RouteObject[] = [
       {
         element: <RequireAuth />,
         children: [
+          {
+            // The platform admin console: no workspace, so no shell.
+            element: <RequireVade />,
+            children: [
+              {
+                path: '/admin',
+                lazy: page(
+                  () => import('./features/admin/AdminPage'),
+                  (m) => m.AdminPage,
+                ),
+              },
+            ],
+          },
           {
             element: <AppShell />,
             children: [

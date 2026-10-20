@@ -28,6 +28,7 @@ export async function buildMe(db: DbOrTx, user: UserRow): Promise<MeResponse> {
       name: user.name,
       initials: user.initials,
       avatarColor: user.avatarColor,
+      platformRole: user.platformRole,
     },
     preferences: {
       locale: user.locale,

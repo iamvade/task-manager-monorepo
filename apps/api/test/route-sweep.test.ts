@@ -221,6 +221,8 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       'PATCH /me': { locale: 'en' },
       'POST /workspaces/{workspaceId}/invites': { email: 'x@kite.test' },
       'POST /invites/{token}/accept': { name: 'X', password: 'password123' },
+      'POST /admin/workspaces': { name: 'X', slug: 'sweep-x', ownerEmail: 'x@kite.test' },
+      'POST /admin/workspaces/{workspaceId}/owner-invite': { email: 'x@kite.test' },
       'PATCH /workspaces/{workspaceId}/members/{userId}': { capacityPoints: 10 },
       'POST /workspaces/{workspaceId}/spaces': { name: 'New', color: 'sky' },
       'PATCH /spaces/{spaceId}': { name: 'Renamed' },

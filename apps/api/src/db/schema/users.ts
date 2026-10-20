@@ -1,7 +1,7 @@
 import type { NotificationPrefs, PaletteKey } from '@kite/shared';
 import { index, jsonb, pgTable, text, uuid } from 'drizzle-orm/pg-core';
 import { citext, createdAt, id, timestamptz } from './columns.js';
-import { densityEnum, localeEnum, themeEnum } from './enums.js';
+import { densityEnum, localeEnum, platformRoleEnum, themeEnum } from './enums.js';
 
 export const users = pgTable('users', {
   id: id(),
@@ -10,6 +10,8 @@ export const users = pgTable('users', {
   initials: text('initials').notNull(),
   avatarColor: text('avatar_color').$type<PaletteKey>().notNull(),
   passwordHash: text('password_hash').notNull(),
+  /** `vade` = the platform admin: creates workspaces, never a member of one. Null = normal user. */
+  platformRole: platformRoleEnum('platform_role'),
   locale: localeEnum('locale').notNull().default('mn'),
   timezone: text('timezone').notNull().default('Asia/Ulaanbaatar'),
   theme: themeEnum('theme').notNull().default('system'),

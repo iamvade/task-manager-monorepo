@@ -12,6 +12,7 @@ export const ME = {
     name: 'Anu Bold',
     initials: 'AB',
     avatarColor: 'indigo',
+    platformRole: null,
   },
   preferences: {
     locale: 'mn',

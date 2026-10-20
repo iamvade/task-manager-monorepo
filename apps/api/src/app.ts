@@ -29,6 +29,7 @@ import { authRoutes } from './routes/auth.js';
 import { commentRoutes } from './routes/comments.js';
 import { healthRoutes } from './routes/health.js';
 import { homeRoutes } from './routes/home.js';
+import { adminRoutes } from './routes/admin.js';
 import { inviteRoutes } from './routes/invites.js';
 import { meRoutes } from './routes/me.js';
 import { notificationRoutes } from './routes/notifications.js';
@@ -125,6 +126,7 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
       await api.register(authRoutes);
       await api.register(meRoutes);
       await api.register(inviteRoutes);
+      await api.register(adminRoutes);
       await api.register(workspaceRoutes);
       await api.register(offboardingRoutes);
       await api.register(spaceRoutes);

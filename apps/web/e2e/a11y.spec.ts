@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { ADMIN, MEMBER } from './users';
+import { ADMIN, MEMBER, VADE } from './users';
 
 /**
  * axe (WCAG 2.1 A/AA) on every screen and overlay, light and dark. A failure lists each rule,
@@ -107,6 +107,23 @@ const pages = (ids: Ids): [string, string][] => [
   ['Feedback', '/feedback'],
   ['Feedback · filtered', '/feedback?type=bug&status=linked&status=new'],
 ];
+
+test.describe('platform admin', () => {
+  test.use({ storageState: VADE.state });
+
+  for (const scheme of ['light', 'dark'] as const) {
+    test(`admin console (${scheme})`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme: scheme });
+      await page.goto('/admin');
+      await expect(page.getByRole('heading', { name: 'Workspaces', level: 1 })).toBeVisible();
+      await expectAccessible(page, `Admin console (${scheme})`);
+      // Field errors.
+      await page.getByRole('button', { name: 'Create workspace' }).click();
+      await expect(page.getByText('Enter a name.')).toBeVisible();
+      await expectAccessible(page, `Admin console errors (${scheme})`);
+    });
+  }
+});
 
 test.describe('signed out', () => {
   test.use({ storageState: { cookies: [], origins: [] } });

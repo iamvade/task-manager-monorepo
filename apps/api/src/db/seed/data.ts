@@ -24,6 +24,9 @@ export type Text = string | readonly [mn: string, en: string];
 export const WORKSPACE = { name: 'Kite Studio', slug: 'kite-studio' } as const;
 export const PASSWORD = 'password123';
 
+/** The platform admin (`/admin`): belongs to no workspace, so it shows up nowhere in Kite Studio. */
+export const PLATFORM_ADMIN = { email: 'vade@kite.test', name: 'Vade', initials: 'V' } as const;
+
 // ---------------------------------------------------------------------------------------- people
 
 export interface PersonDef {

@@ -267,6 +267,8 @@ Login, invite accept, Settings, ⌘K palette, shortcuts help, filter/sort/group 
 - Drag: pointer (4px) or keyboard (Space picks up; ←/→ a day, ↑/↓ a week in month view, → from a Sunday reaches Unscheduled and ← comes back; Space/Enter drops; Esc cancels). Lifted copy = the pill/card with `--shadow-drag`; source 50% + dashed accent. Only targets where the drop changes something light up; done tasks can't be dropped on Unscheduled. Failure rolls back with a "Couldn't reschedule the task" toast. Pills in the day popover open the task but don't drag.
 - Unscheduled: "+" opens quick create (current project + sprint on a project calendar, no due date); the filter matches titles; "No results" when the filter hides everything; cards open the drawer on click/Enter.
 
+**Admin console `/admin` (platform admin, 2026-10-20; not designed)**: no shell (the platform admin has no workspace). A 56px header like the signed-out pages (K logo, "Kite", an "Admin" chip, the email, the language switch, Sign out), then a 760px column: 24/32 page heading, "New workspace" as a `SettingsSection` (name and address side by side above 640px, the address follows the name until edited and shows the public feedback URL as its hint, owner email, primary "Create workspace"; field errors under each field in `--danger`), the created owner link in the shared `InviteLink` box, and "All workspaces" as a divided list (name; address · member count; owner, or pending invite with its expiry, or "No owner yet"; "New owner link" opens an inline email field until an owner exists).
+
 ### 2.6 PROMPTS.md vs designs (resolved; PROMPTS updated)
 - Checkbox is native square 16px with `accent-color` (not round).
 - List tags: all chips, clipped by the cell; "+N" only on Board.
