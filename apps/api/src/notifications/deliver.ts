@@ -131,4 +131,18 @@ export function publishNotified(
       },
     });
   }
+  for (const userId of new Set(notified.map((n) => n.userId))) publishUnreadChanged(app, userId);
+}
+
+/** Tells all of `userId`'s tabs, in any workspace, to refetch their unread counts. */
+export function publishUnreadChanged(
+  app: FastifyInstance,
+  userId: string,
+  exceptClientId?: string,
+): void {
+  app.realtime.broadcaster.publish({
+    to: { userId, anyWorkspace: true },
+    exceptClientId,
+    message: { type: 'notifications.unread_changed' },
+  });
 }

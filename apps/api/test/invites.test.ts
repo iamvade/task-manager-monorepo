@@ -195,7 +195,7 @@ describe('invites', () => {
       const preview = await ctx.app.inject({ method: 'GET', url: `/api/v1/invites/${token}` });
       expect(preview.statusCode).toBe(200);
       expect(invitePreviewSchema.parse(preview.json())).toMatchObject({
-        workspace: { name: ws.name },
+        workspace: { id: ws.id, name: ws.name, slug: ws.slug },
         email,
         accountExists: false,
       });

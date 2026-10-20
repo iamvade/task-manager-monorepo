@@ -134,7 +134,8 @@ export class RealtimeHub {
 
   #deliver({ to, exceptClientId, message }: Envelope): void {
     const only = 'userIds' in to ? new Set(to.userIds) : null;
-    for (const conn of this.#byWorkspace.get(to.workspaceId) ?? []) {
+    const conns = 'anyWorkspace' in to ? this.#connections : this.#byWorkspace.get(to.workspaceId);
+    for (const conn of conns ?? []) {
       if ('userId' in to && conn.userId !== to.userId) continue;
       if (only && !only.has(conn.userId)) continue;
       if (exceptClientId && conn.clientId === exceptClientId) continue;

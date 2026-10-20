@@ -6,15 +6,24 @@ import {
   notificationPageSchema,
   readAllNotificationsSchema,
   readAllResultSchema,
+  unreadCountsSchema,
 } from '@kite/shared';
-import { and, eq, isNull, sql } from 'drizzle-orm';
+import { and, asc, eq, isNull, sql } from 'drizzle-orm';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { loadProjectAccess, requireWorkspaceMember } from '../auth/access.js';
 import { requireAuth } from '../auth/plugin.js';
-import { notifications, projectNotificationLevels, projects } from '../db/schema/index.js';
+import { activeMember } from '../auth/membership.js';
+import {
+  notifications,
+  projectNotificationLevels,
+  projects,
+  workspaceMembers,
+} from '../db/schema/index.js';
 import { httpError } from '../errors.js';
+import { publishUnreadChanged } from '../notifications/deliver.js';
 import { listNotifications, notificationsIn } from '../notifications/list.js';
+import { clientIdOf } from '../realtime/client-id.js';
 
 const err = apiErrorSchema;
 const params = z.object({ notificationId: z.uuid() });
@@ -110,6 +119,44 @@ export const notificationRoutes: FastifyPluginCallbackZod = (app, _opts, done) =
     },
   );
 
+  app.get(
+    '/me/notifications/unread-counts',
+    {
+      preHandler: app.authenticate,
+      schema: {
+        tags: ['Inbox'],
+        summary: 'My unread counts per workspace',
+        description:
+          'One row per workspace I am an active member of (oldest membership first), counting unread, unarchived notifications as the inbox badge does. The workspace switcher shows them for the workspaces not on screen.',
+        response: { 200: unreadCountsSchema, 401: err },
+      },
+    },
+    async (request) => {
+      const { user } = requireAuth(request);
+      const memberships = await app.db
+        .select({ workspaceId: workspaceMembers.workspaceId })
+        .from(workspaceMembers)
+        .where(and(eq(workspaceMembers.userId, user.id), activeMember))
+        .orderBy(asc(workspaceMembers.joinedAt));
+      return Promise.all(
+        memberships.map(async ({ workspaceId }) => {
+          const [row] = await app.db
+            .select({ unread: sql<number>`count(*)::int` })
+            .from(notifications)
+            .where(
+              and(
+                eq(notifications.userId, user.id),
+                isNull(notifications.readAt),
+                isNull(notifications.archivedAt),
+                notificationsIn(workspaceId),
+              ),
+            );
+          return { workspaceId, unread: row?.unread ?? 0 };
+        }),
+      );
+    },
+  );
+
   app.post(
     '/me/notifications/read-all',
     {
@@ -137,6 +184,7 @@ export const notificationRoutes: FastifyPluginCallbackZod = (app, _opts, done) =
           ),
         )
         .returning({ id: notifications.id });
+      if (rows.length > 0) publishUnreadChanged(app, user.id, clientIdOf(request));
       return { updated: rows.length };
     },
   );
@@ -166,6 +214,7 @@ export const notificationRoutes: FastifyPluginCallbackZod = (app, _opts, done) =
         )
         .returning({ id: notifications.id });
       if (!row) throw httpError(404, 'NOT_FOUND', 'Notification not found');
+      publishUnreadChanged(app, user.id, clientIdOf(request));
       return reply.code(204).send(null);
     },
   );
@@ -200,6 +249,7 @@ export const notificationRoutes: FastifyPluginCallbackZod = (app, _opts, done) =
         )
         .returning({ id: notifications.id });
       if (!row) throw httpError(404, 'NOT_FOUND', 'Notification not found');
+      publishUnreadChanged(app, user.id, clientIdOf(request));
       return reply.code(204).send(null);
     },
   );
@@ -230,6 +280,7 @@ export const notificationRoutes: FastifyPluginCallbackZod = (app, _opts, done) =
         )
         .returning({ id: notifications.id });
       if (!row) throw httpError(404, 'NOT_FOUND', 'Notification not found');
+      publishUnreadChanged(app, user.id, clientIdOf(request));
       return reply.code(204).send(null);
     },
   );

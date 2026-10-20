@@ -35,7 +35,7 @@ const invalidInvite = () =>
 /** A pending (unaccepted, unexpired) invite by raw token, optionally row-locked. */
 async function findPendingInvite(db: DbOrTx, token: string, lock = false) {
   const query = db
-    .select({ invite: invites, workspaceName: workspaces.name })
+    .select({ invite: invites, workspaceName: workspaces.name, workspaceSlug: workspaces.slug })
     .from(invites)
     .innerJoin(workspaces, eq(workspaces.id, invites.workspaceId))
     .where(
@@ -216,7 +216,11 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       // The platform admin never joins a workspace.
       if (existing?.platformRole) throw invalidInvite();
       return {
-        workspace: { name: row.workspaceName },
+        workspace: {
+          id: row.invite.workspaceId,
+          name: row.workspaceName,
+          slug: row.workspaceSlug,
+        },
         email: row.invite.email,
         role: row.invite.role,
         expiresAt: row.invite.expiresAt.toISOString(),

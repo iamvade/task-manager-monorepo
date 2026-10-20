@@ -48,6 +48,7 @@ import { createClock, type Clock } from './dates.js';
 import { buildHistory, planSprints, ubAt } from './history.js';
 import { buildStandups } from './standups.js';
 import { buildFeedback } from './feedback.js';
+import { buildLabs } from './labs.js';
 import { backfillReferences } from '../../tasks/references.js';
 
 export interface SeedOptions {
@@ -159,6 +160,21 @@ export async function runSeed(db: Db, options: SeedOptions): Promise<void> {
     await tx.insert(schema.feedback).values(rows.feedback);
     await tx.insert(schema.feedbackAttachments).values(rows.feedbackAttachments);
     await tx.insert(schema.feedbackActivity).values(rows.feedbackActivity);
+
+    const { labs } = rows;
+    await tx.insert(schema.workspaces).values(labs.workspace);
+    await tx.insert(schema.workspaceMembers).values(labs.members);
+    await tx.insert(schema.workspaceHolidays).values(labs.holidays);
+    await tx.insert(schema.spaces).values(labs.spaces);
+    await tx.insert(schema.projects).values(labs.projects);
+    await tx.insert(schema.projectMembers).values(labs.projectMembers);
+    await tx.insert(schema.statuses).values(labs.statuses);
+    await tx.insert(schema.tasks).values(labs.tasks);
+    await tx.insert(schema.taskStatusPeriods).values(labs.periods);
+    await tx.insert(schema.taskAssignees).values(labs.assignees);
+    await tx.insert(schema.taskFollowers).values(labs.followers);
+    await tx.insert(schema.activity).values(labs.activity);
+    await tx.insert(schema.notifications).values(labs.notifications);
   });
 
   console.log(
@@ -166,7 +182,8 @@ export async function runSeed(db: Db, options: SeedOptions): Promise<void> {
       `${rows.users.length} users, ${rows.projects.length} projects, ${rows.tasks.length} tasks, ` +
       `${rows.comments.length} comments, ${rows.activity.length} activity, ` +
       `${rows.periods.length} status periods, ${rows.sprints.length} sprints, ` +
-      `${rows.notifications.length} notifications. Log in as ${PEOPLE[ME].email} / ${PASSWORD}.`,
+      `${rows.notifications.length} notifications; "${rows.labs.workspace.name}" (Bat, Anu, Dorj). ` +
+      `Log in as ${PEOPLE[ME].email} / ${PASSWORD}.`,
   );
 }
 
@@ -807,6 +824,7 @@ export function buildRows(
     attachments,
     activity: [...activity, ...history.activity],
     notifications,
+    labs: buildLabs(clock, pick, (ref) => user(ref).id, accountsCreated),
   };
 }
 
