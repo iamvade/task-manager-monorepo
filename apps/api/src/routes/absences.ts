@@ -54,25 +54,25 @@ async function requireNoOverlap(
   if (clash) throw httpError(409, 'ABSENCE_OVERLAP', 'This overlaps another time off');
 }
 
-/** Members, pickers and Workload show absences: tell the workspace and drop cached reports. */
-function absencesChanged(
-  app: FastifyInstance,
-  request: FastifyRequest,
-  workspaceId: string,
-  userId: string,
-) {
-  app.reportCache.invalidate(workspaceId);
-  app.realtime.broadcaster.publish({
-    to: { workspaceId },
-    exceptClientId: clientIdOf(request),
-    message: {
-      type: 'absences.changed',
-      workspaceId,
-      userId,
-      actorId: requireAuth(request).user.id,
-      at: new Date().toISOString(),
-    },
-  });
+/**
+ * Members, pickers and Workload show absences, and a person's time off is the same in every
+ * workspace they're in: tell each of those workspaces and drop their cached reports.
+ */
+async function absencesChanged(app: FastifyInstance, request: FastifyRequest, userId: string) {
+  const memberships = await app.db
+    .select({ workspaceId: workspaceMembers.workspaceId })
+    .from(workspaceMembers)
+    .where(and(eq(workspaceMembers.userId, userId), activeMember));
+  const actorId = requireAuth(request).user.id;
+  const at = new Date().toISOString();
+  for (const { workspaceId } of memberships) {
+    app.reportCache.invalidate(workspaceId);
+    app.realtime.broadcaster.publish({
+      to: { workspaceId },
+      exceptClientId: clientIdOf(request),
+      message: { type: 'absences.changed', workspaceId, userId, actorId, at },
+    });
+  }
 }
 
 export const absenceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
@@ -172,7 +172,7 @@ export const absenceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           'absence',
         );
       });
-      absencesChanged(app, request, workspaceId, userId);
+      await absencesChanged(app, request, userId);
       return reply.code(201).send(toDto(created));
     },
   );
@@ -215,7 +215,7 @@ export const absenceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           'absence',
         );
       });
-      absencesChanged(app, request, workspaceId, absence.userId);
+      await absencesChanged(app, request, absence.userId);
       return toDto(updated);
     },
   );
@@ -236,7 +236,7 @@ export const absenceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       const { workspaceId, absenceId } = request.params;
       const absence = await loadAbsenceAccess(request, workspaceId, absenceId);
       await app.db.delete(userAbsences).where(eq(userAbsences.id, absence.id));
-      absencesChanged(app, request, workspaceId, absence.userId);
+      await absencesChanged(app, request, absence.userId);
       return reply.code(204).send(null);
     },
   );

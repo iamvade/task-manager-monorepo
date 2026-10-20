@@ -26,7 +26,7 @@ type Handler = (init?: RequestInit) => Response;
 const body = (init?: RequestInit): unknown =>
   typeof init?.body === 'string' ? JSON.parse(init.body) : null;
 
-const LIST = `/p/${PROJECT_ID}/list?sprint=none`;
+const LIST = `/w/kite-studio/p/${PROJECT_ID}/list?sprint=none`;
 const DORJ = at(PROJECT.members, 3).user;
 const BAT = at(PROJECT.members, 6).user;
 const ref = (u: typeof DORJ) => ({
@@ -821,7 +821,7 @@ describe('task drawer', () => {
   it('shows the task as a full page at /t/:key', async () => {
     const { state } = setup();
     api(state);
-    renderAt('/t/APP-135');
+    renderAt('/w/kite-studio/t/APP-135');
     expect(await screen.findByRole('textbox', { name: 'Task title' })).toHaveValue(
       'Checkout page — responsive layout',
     );

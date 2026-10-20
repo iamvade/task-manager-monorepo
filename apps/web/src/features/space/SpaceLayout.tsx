@@ -1,9 +1,9 @@
 import { canManageCreated } from '@kite/shared';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Outlet, useNavigate, useParams } from 'react-router';
+import { Navigate, Outlet, useNavigate, useParams } from 'react-router';
 import { useDeleteSpace } from '../../api/spaces';
-import { useCurrentWorkspace, useSidebar } from '../../api/workspaces';
+import { useCurrentWorkspace, useSidebar, useWsPath } from '../../api/workspaces';
 import { useAuth } from '../../auth/useAuth';
 import { ErrorState } from '../../components/ErrorState';
 import { MoreIcon, TrashIcon } from '../../components/icons';
@@ -21,12 +21,17 @@ import { useCurrentView } from '../views/useCurrentView';
 import { ViewTabs } from '../views/ViewTabs';
 import { ViewToolbar } from '../views/ViewToolbar';
 import { FilterStrip } from '../project/FilterStrip';
+import {
+  useFoundInOtherWorkspace,
+  useOtherWorkspacePath,
+} from '../workspace/useOtherWorkspacePath';
 
 /** /s/:spaceId/* — "[P] Product › All projects" top bar (Calendar.dc.html) around the view. */
 export function SpaceLayout() {
   const { t } = useTranslation();
   const { spaceId } = useParams();
   const workspace = useCurrentWorkspace();
+  const ws = useWsPath();
   const sidebar = useSidebar(workspace?.id);
   const view = useCurrentView();
   const { copied, copy } = useCopyLink();
@@ -34,9 +39,17 @@ export function SpaceLayout() {
   const deleteSpace = useDeleteSpace(workspace?.id ?? '');
   const { me } = useAuth();
   const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
+  // A link to a space of another of my workspaces: look there, then open it there.
+  const missing = sidebar.isSuccess && !sidebar.data.spaces.some((s) => s.id === spaceId);
+  const owner = useFoundInOtherWorkspace(
+    (data) => data.spaces.some((s) => s.id === spaceId),
+    missing,
+  );
+  const elsewhere = useOtherWorkspacePath(owner);
 
   if (sidebar.isPending) return <HeaderSkeleton />;
   if (sidebar.isError) return <ErrorState error={sidebar.error} />;
+  if (elsewhere) return <Navigate to={elsewhere} replace />;
   const space = sidebar.data.spaces.find((s) => s.id === spaceId);
   // Admins, or the member who created the space (the API checks the same rule).
   const canDelete =
@@ -53,7 +66,7 @@ export function SpaceLayout() {
       .mutateAsync(target.id)
       .then(() => {
         toast({ message: t('header.spaceDeleted', { name: target.name }) });
-        void navigate('/my-tasks');
+        void navigate(ws('/my-tasks'));
       })
       .catch(() => undefined);
   }
@@ -114,7 +127,7 @@ export function SpaceLayout() {
             />
           </>
         }
-        tabs={<ViewTabs basePath={`/s/${space.id}`} value={view} />}
+        tabs={<ViewTabs basePath={ws(`/s/${space.id}`)} value={view} />}
         toolbar={<ViewToolbar />}
       />
       <FilterStrip spaceId={space.id} />

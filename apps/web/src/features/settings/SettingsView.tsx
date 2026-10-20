@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
 import { z } from 'zod';
-import { useCurrentWorkspace } from '../../api/workspaces';
+import { useCurrentWorkspace, useWsPath } from '../../api/workspaces';
+import { useAuth } from '../../auth/useAuth';
 import { SettingsIcon } from '../../components/icons';
 import { UnderlineTabs } from '../../components/ui/UnderlineTabs';
 import { PageHeader } from '../views/PageHeader';
@@ -30,6 +31,12 @@ export function SettingsView() {
   const [params] = useSearchParams();
   const tab = tabSchema.parse(params.get('tab') ?? 'profile');
   const workspace = useCurrentWorkspace();
+  const ws = useWsPath();
+  const { me } = useAuth();
+  // With several workspaces, say whose members / tags / sprints / projects these are.
+  const workspaceTab =
+    tab === 'members' || tab === 'tags' || tab === 'sprints' || tab === 'archived';
+  const showWorkspace = workspaceTab && (me?.workspaces.length ?? 0) > 1;
 
   return (
     <>
@@ -38,6 +45,14 @@ export function SettingsView() {
           <h1 className="m-0 flex min-w-0 items-center gap-2 text-[14px] leading-5 font-semibold">
             <SettingsIcon size={16} className="flex-none text-3" />
             <span className="truncate">{t('shell.settings')}</span>
+            {showWorkspace && workspace && (
+              <>
+                <span aria-hidden="true" className="text-muted">
+                  ·
+                </span>
+                <span className="truncate font-normal text-muted">{workspace.name}</span>
+              </>
+            )}
           </h1>
         }
         tabs={
@@ -47,7 +62,7 @@ export function SettingsView() {
             items={TABS.map((value) => ({
               value,
               label: t(`settings.tabs.${value}`),
-              to: value === 'profile' ? '/settings' : `/settings?tab=${value}`,
+              to: ws(value === 'profile' ? '/settings' : `/settings?tab=${value}`),
             }))}
           />
         }

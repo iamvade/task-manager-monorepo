@@ -38,13 +38,13 @@ function renderDay(entry: string, day: StandupDay, extra: Parameters<typeof rend
 describe('Standup group page', () => {
   beforeEach(async () => {
     localStorage.clear();
-    useUiStore.setState({ lastWorkspaceId: null, lastStandupGroupId: null });
+    useUiStore.setState({ lastWorkspaceId: null, lastStandupGroupIds: {} });
     useToastStore.setState({ toasts: [] });
     await i18n.changeLanguage('en');
   });
 
   it('shows who has posted (late marked), the due / meeting line and Your turn', async () => {
-    renderDay(`/standup/${MOBILE_ID}`, dayOf());
+    renderDay(`/w/kite-studio/standup/${MOBILE_ID}`, dayOf());
     const strip = await screen.findByRole('region', { name: 'Who has posted' });
     expect(within(strip).getByText('2 of 3 have posted')).toBeVisible();
     expect(within(strip).getByText('Due by 10:00 · meeting at 10:15')).toBeVisible();
@@ -53,12 +53,12 @@ describe('Standup group page', () => {
     expect(within(strip).getByLabelText('You · Not yet')).toBeVisible();
     expect(within(strip).getByRole('link', { name: 'Your turn' })).toHaveAttribute(
       'href',
-      `/standup/${MOBILE_ID}?write=1`,
+      `/w/kite-studio/standup/${MOBILE_ID}?write=1`,
     );
     expect(screen.getByRole('heading', { name: 'Thursday, Oct 8' })).toBeVisible();
     expect(screen.getByRole('link', { name: 'Previous day' })).toHaveAttribute(
       'href',
-      `/standup/${MOBILE_ID}/2026-10-07`,
+      `/w/kite-studio/standup/${MOBILE_ID}/2026-10-07`,
     );
     expect(screen.getByRole('button', { name: 'Next day' })).toBeDisabled();
     // Sara facilitates and is in today: only she starts the meeting.
@@ -72,7 +72,7 @@ describe('Standup group page', () => {
   it('lists blockers with the task, who can help, and resolves optimistically', async () => {
     let resolved = false;
     const done = { ...BLOCKER, resolvedAt: '2026-10-08T03:00:00.000Z', resolvedBy: ME_REF };
-    renderDay(`/standup/${MOBILE_ID}`, dayOf(), {
+    renderDay(`/w/kite-studio/standup/${MOBILE_ID}`, dayOf(), {
       extra: {
         [DAY]: () => Response.json(resolved ? dayOf({ blockers: [done] }) : dayOf()),
         [`POST /api/v1/standup-blockers/${BLOCKER.id}/resolve`]: () => {
@@ -85,7 +85,7 @@ describe('Standup group page', () => {
     expect(within(section).getByText('Waiting on final tab icons')).toBeVisible();
     expect(
       within(section).getByRole('link', { name: /Implement new bottom tab bar/ }),
-    ).toHaveAttribute('href', `/standup/${MOBILE_ID}?task=APP-140`);
+    ).toHaveAttribute('href', `/w/kite-studio/standup/${MOBILE_ID}?task=APP-140`);
     expect(within(section).getByText('@Sara K.')).toBeVisible();
     const box = within(section).getByRole('checkbox', {
       name: 'Mark resolved: Waiting on final tab icons',
@@ -100,7 +100,7 @@ describe('Standup group page', () => {
 
   it('renders each update with its sections, reactions and who reacted', async () => {
     let put = '';
-    renderDay(`/standup/${MOBILE_ID}`, dayOf(), {
+    renderDay(`/w/kite-studio/standup/${MOBILE_ID}`, dayOf(), {
       extra: {
         [`PUT /api/v1/standup-entries/${SARA_ENTRY.id}/reactions/thumbs_up`]: () => {
           put = 'thumbs_up';
@@ -139,7 +139,7 @@ describe('Standup group page', () => {
 
   it('sends a reply with a picked @mention', async () => {
     const bodies: unknown[] = [];
-    renderDay(`/standup/${MOBILE_ID}`, dayOf(), {
+    renderDay(`/w/kite-studio/standup/${MOBILE_ID}`, dayOf(), {
       extra: {
         [`POST /api/v1/standup-entries/${DORJ_ENTRY.id}/replies`]: (init) => {
           const body = JSON.parse(init?.body as string) as { body: string };
@@ -180,7 +180,7 @@ describe('Standup group page', () => {
       nextDate: '2026-10-08',
       editable: false,
     });
-    renderDay(`/standup/${MOBILE_ID}/2026-10-07`, past);
+    renderDay(`/w/kite-studio/standup/${MOBILE_ID}/2026-10-07`, past);
     const card = await screen.findByRole('article', { name: 'Sara K.' });
     expect(within(card).queryByRole('button', { name: 'Add reaction' })).toBeNull();
     expect(within(card).getByRole('button', { name: 'Thumbs up, 2' })).toHaveAttribute(
@@ -197,14 +197,14 @@ describe('Standup group page', () => {
     expect(screen.getByRole('heading', { name: 'Updates' })).toBeVisible();
     expect(screen.getByRole('link', { name: 'Next day' })).toHaveAttribute(
       'href',
-      `/standup/${MOBILE_ID}`,
+      `/w/kite-studio/standup/${MOBILE_ID}`,
     );
     expect(screen.getByLabelText('You · No update')).toBeVisible();
   });
 
   it('shows only the header and a note to people outside the group', async () => {
     const outside = { ...MOBILE, isMember: false };
-    const { fetchMock } = renderAt(`/standup/${MOBILE_ID}`, { groups: [outside] });
+    const { fetchMock } = renderAt(`/w/kite-studio/standup/${MOBILE_ID}`, { groups: [outside] });
     expect(
       await screen.findByText('Only members of this group can read its updates.'),
     ).toBeVisible();
@@ -232,7 +232,7 @@ describe('Standup group page', () => {
       editable: false,
       group: weekend.group,
     });
-    const { router } = renderAt(`/standup/${MOBILE_ID}`, {
+    const { router } = renderAt(`/w/kite-studio/standup/${MOBILE_ID}`, {
       groups: [weekend.group],
       extra: {
         [DAY]: () => Response.json(weekend),
@@ -240,14 +240,14 @@ describe('Standup group page', () => {
       },
     });
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe(`/standup/${MOBILE_ID}/2026-10-09`);
+      expect(router.state.location.pathname).toBe(`/w/kite-studio/standup/${MOBILE_ID}/2026-10-09`);
     });
     expect(await screen.findByText('No standup today · next standup Mon, Oct 12')).toBeVisible();
   });
 
   it('posts from the write modal: suggestions, a Today chip and a blocker', async () => {
     const saved: unknown[] = [];
-    const { router } = renderDay(`/standup/${MOBILE_ID}?write=1`, dayOf(), {
+    const { router } = renderDay(`/w/kite-studio/standup/${MOBILE_ID}?write=1`, dayOf(), {
       extra: {
         [`PUT /api/v1/standup-groups/${MOBILE_ID}/days/2026-10-08/entry`]: (init) => {
           saved.push(JSON.parse(init?.body as string));
@@ -300,7 +300,7 @@ describe('Standup group page', () => {
 
   it('keeps a draft when the write modal closes with Esc', async () => {
     const saved: { status: string }[] = [];
-    renderDay(`/standup/${MOBILE_ID}?write=1`, dayOf(), {
+    renderDay(`/w/kite-studio/standup/${MOBILE_ID}?write=1`, dayOf(), {
       extra: {
         [`PUT /api/v1/standup-groups/${MOBILE_ID}/days/2026-10-08/entry`]: (init) => {
           saved.push(JSON.parse(init?.body as string) as { status: string });
@@ -328,7 +328,7 @@ describe('Standup group page', () => {
       ...sara,
       user: { ...SARA_REF, id: `01890000-0000-7000-8000-0000000c${String(i).padStart(4, '0')}` },
     }));
-    renderDay(`/standup/${MOBILE_ID}`, dayOf({ members: many }));
+    renderDay(`/w/kite-studio/standup/${MOBILE_ID}`, dayOf({ members: many }));
     expect(await screen.findByText(/13 people is a lot for one standup/)).toBeVisible();
   });
 
@@ -336,7 +336,7 @@ describe('Standup group page', () => {
     const base = dayOf();
     const out = base.members.map((m) => ({ ...m, state: 'out' as const }));
     renderDay(
-      `/standup/${MOBILE_ID}/2026-10-07`,
+      `/w/kite-studio/standup/${MOBILE_ID}/2026-10-07`,
       dayOf({
         date: '2026-10-07',
         editable: false,
@@ -358,7 +358,7 @@ describe('Standup group page', () => {
       id: `01890000-0000-7000-8000-0000000f${String(i).padStart(4, '0')}`,
       text: `Blocker ${String(i + 1)}`,
     }));
-    renderDay(`/standup/${MOBILE_ID}`, dayOf({ blockers: many }));
+    renderDay(`/w/kite-studio/standup/${MOBILE_ID}`, dayOf({ blockers: many }));
     expect(await screen.findByText('Blocker 6')).toBeVisible();
     expect(screen.queryByText('Blocker 7')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Show 3 more blockers' }));

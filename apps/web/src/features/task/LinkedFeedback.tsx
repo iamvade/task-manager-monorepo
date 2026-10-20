@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useFeedbackOptions, useLinkFeedbackToTask } from '../../api/feedback';
-import { useCurrentWorkspace } from '../../api/workspaces';
+import { useCurrentWorkspace, useWsPath } from '../../api/workspaces';
 import { ChevronRightIcon, FeedbackIcon, PlusIcon } from '../../components/icons';
 import { Picker } from '../../components/ui/Picker';
 import { Popover } from '../../components/ui/Popover';
@@ -72,10 +72,11 @@ export function LinkedFeedback() {
 }
 
 function ReportRow({ report, when }: { report: FeedbackReportRef; when: string }) {
+  const ws = useWsPath();
   const { t } = useTranslation();
   return (
     <Link
-      to={`/feedback?item=${report.ref}`}
+      to={ws(`/feedback?item=${report.ref}`)}
       aria-label={t('feedback.task.open', { ref: report.ref, title: report.title })}
       className="flex items-center gap-2.5 rounded-[8px] border border-subtle bg-subtle px-2.5 py-2 text-default hover:bg-hover"
     >

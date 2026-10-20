@@ -1,6 +1,7 @@
 import type { InboxTab } from '@kite/shared';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { useWsPath } from '../../api/workspaces';
 import { BellIcon, CheckIcon, InboxIcon } from '../../components/icons';
 import { buttonVariants } from '../../components/ui/buttonStyles';
 import { EmptyState } from '../../components/ui/EmptyState';
@@ -11,6 +12,7 @@ const ctaBase =
 /** "You're all caught up" (EmptyInbox.dc.html), with the real archived count. */
 export function InboxEmpty({ tab, archivedCount }: { tab: InboxTab; archivedCount: number }) {
   const { t } = useTranslation();
+  const ws = useWsPath();
   if (tab !== 'all') return <EmptyState title={t(`inbox.emptyTab.${tab}`)} />;
 
   return (
@@ -31,11 +33,11 @@ export function InboxEmpty({ tab, archivedCount }: { tab: InboxTab; archivedCoun
           <p className="m-0 text-[14px] leading-[22px] text-3">{t('inbox.empty.body')}</p>
         </div>
         <div className="flex flex-wrap justify-center gap-2">
-          <Link to="/my-tasks" className={`${ctaBase} ${buttonVariants.primary} px-4`}>
+          <Link to={ws('/my-tasks')} className={`${ctaBase} ${buttonVariants.primary} px-4`}>
             {t('inbox.empty.goToMyTasks')}
           </Link>
           <Link
-            to="/settings?tab=notifications"
+            to={ws('/settings?tab=notifications')}
             className={`${ctaBase} border border-control bg-control px-3.5 text-2 hover:bg-hover`}
           >
             <BellIcon size={14} />

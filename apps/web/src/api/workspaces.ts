@@ -9,26 +9,42 @@ import {
   memberHandoverSchema,
 } from '@kite/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useContext } from 'react';
 import { z } from 'zod';
 import { useAuth } from '../auth/useAuth';
+import { WorkspaceContext, type MeWorkspace } from '../features/workspace/WorkspaceContext';
+import { wsPath } from '../lib/paths';
 import { useUiStore } from '../stores/ui';
 import { apiFetch, apiSend } from './client';
 import { queryKeys } from './queryKeys';
 
-/** The workspace the app is showing: the last one used if still a member, else the first. */
-export function useCurrentWorkspace() {
+/**
+ * The workspace the page shows: the URL's (`/w/:slug`); outside the workspace routes the last
+ * one used if still a member, else the first.
+ */
+export function useCurrentWorkspace(): MeWorkspace | undefined {
+  const routed = useContext(WorkspaceContext);
   const { me } = useAuth();
   const lastId = useUiStore((s) => s.lastWorkspaceId);
+  if (routed) return routed;
   const workspaces = me?.workspaces ?? [];
   return workspaces.find((w) => w.id === lastId) ?? workspaces[0];
 }
 
+/** `wsPath` for the current workspace: `ws('/my-tasks')` → `/w/kite-studio/my-tasks`. */
+export function useWsPath() {
+  const slug = useCurrentWorkspace()?.slug ?? '';
+  return useCallback((path: string) => wsPath(slug, path), [slug]);
+}
+
+export const sidebarQuery = (workspaceId: string | undefined) => ({
+  queryKey: queryKeys.sidebar(workspaceId ?? ''),
+  queryFn: () => apiFetch(`/workspaces/${workspaceId ?? ''}/sidebar`, sidebarResponseSchema),
+  enabled: Boolean(workspaceId),
+});
+
 export function useSidebar(workspaceId: string | undefined) {
-  return useQuery({
-    queryKey: queryKeys.sidebar(workspaceId ?? ''),
-    queryFn: () => apiFetch(`/workspaces/${workspaceId ?? ''}/sidebar`, sidebarResponseSchema),
-    enabled: Boolean(workspaceId),
-  });
+  return useQuery(sidebarQuery(workspaceId));
 }
 
 export function useWorkspaceMembers(workspaceId: string | undefined) {

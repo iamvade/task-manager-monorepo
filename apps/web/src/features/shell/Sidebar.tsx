@@ -2,7 +2,7 @@ import type { SidebarResponse } from '@kite/shared';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
-import { useCurrentWorkspace, useSidebar } from '../../api/workspaces';
+import { useCurrentWorkspace, useSidebar, useWsPath } from '../../api/workspaces';
 import {
   CloseIcon,
   GlobeIcon,
@@ -36,6 +36,7 @@ import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 export function Sidebar({ onClose }: { onClose?: () => void } = {}) {
   const { t } = useTranslation();
   const workspace = useCurrentWorkspace();
+  const ws = useWsPath();
   const sidebar = useSidebar(workspace?.id);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
 
@@ -67,7 +68,7 @@ export function Sidebar({ onClose }: { onClose?: () => void } = {}) {
 
       <div className="flex flex-col gap-0.5">
         <NavItem
-          to="/my-tasks"
+          to={ws('/my-tasks')}
           icon={<MyTasksIcon size={16} />}
           label={t('shell.myTasks')}
           trailing={
@@ -83,7 +84,7 @@ export function Sidebar({ onClose }: { onClose?: () => void } = {}) {
         />
         <StandupNavItem />
         <NavItem
-          to="/inbox"
+          to={ws('/inbox')}
           icon={<InboxIcon size={16} />}
           label={t('shell.inbox')}
           trailing={
@@ -97,7 +98,7 @@ export function Sidebar({ onClose }: { onClose?: () => void } = {}) {
           }
         />
         <NavItem
-          to="/feedback"
+          to={ws('/feedback')}
           icon={<FeedbackIcon size={16} />}
           label={t('shell.feedback')}
           trailing={
@@ -110,7 +111,7 @@ export function Sidebar({ onClose }: { onClose?: () => void } = {}) {
             ) : null
           }
         />
-        <NavItem to="/reports" icon={<ReportsIcon size={16} />} label={t('shell.reports')} />
+        <NavItem to={ws('/reports')} icon={<ReportsIcon size={16} />} label={t('shell.reports')} />
       </div>
 
       <StandupGroupsSection />
@@ -136,10 +137,10 @@ export function Sidebar({ onClose }: { onClose?: () => void } = {}) {
           </span>
           <LanguageSwitcher track="sidebar" labelledBy="sidebar-lang-label" />
         </div>
-        <FooterLink to="/settings?tab=members" icon={<UserPlusIcon size={16} />}>
+        <FooterLink to={ws('/settings?tab=members')} icon={<UserPlusIcon size={16} />}>
           {t('shell.invite')}
         </FooterLink>
-        <FooterLink to="/settings" icon={<SettingsIcon size={16} />}>
+        <FooterLink to={ws('/settings')} icon={<SettingsIcon size={16} />}>
           {t('shell.settings')}
         </FooterLink>
         <SidebarUser />

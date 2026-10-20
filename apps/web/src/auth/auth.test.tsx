@@ -29,11 +29,11 @@ describe('auth flow', () => {
 
   it('redirects a signed-out visitor to /login, keeping the target', async () => {
     mockApi({ 'GET /api/v1/auth/me': unauthorized });
-    const router = renderAt('/my-tasks');
+    const router = renderAt('/w/kite-studio/my-tasks');
 
     expect(await screen.findByRole('heading', { name: 'Kite-д нэвтрэх' })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/login');
-    expect(router.state.location.search).toBe('?next=%2Fmy-tasks');
+    expect(router.state.location.search).toBe('?next=%2Fw%2Fkite-studio%2Fmy-tasks');
   });
 
   it('offers Try again when the server is unreachable, instead of the sign-in page', async () => {
@@ -46,10 +46,10 @@ describe('auth flow', () => {
       [`GET /api/v1/workspaces/${WORKSPACE_ID}/sidebar`]: () => Response.json(SIDEBAR),
       ...homeHandlers(),
     });
-    const router = renderAt('/my-tasks');
+    const router = renderAt('/w/kite-studio/my-tasks');
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Сервертэй холбогдож чадсангүй');
-    expect(router.state.location.pathname).toBe('/my-tasks');
+    expect(router.state.location.pathname).toBe('/w/kite-studio/my-tasks');
 
     down = false;
     fireEvent.click(screen.getByRole('button', { name: 'Дахин оролдох' }));
@@ -63,7 +63,7 @@ describe('auth flow', () => {
       'GET /api/v1/auth/me': () => Response.json(vade),
       'GET /api/v1/admin/workspaces': () => Response.json([]),
     });
-    const router = renderAt('/my-tasks');
+    const router = renderAt('/w/kite-studio/my-tasks');
     expect(await screen.findByRole('heading', { name: 'Ажлын орчнууд' })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/admin');
     expect(await screen.findByText('Ажлын орчин алга байна.')).toBeInTheDocument();
@@ -77,7 +77,7 @@ describe('auth flow', () => {
     });
     const router = renderAt('/admin');
     expect(await screen.findByRole('navigation', { name: 'Ажлын орчин' })).toBeInTheDocument();
-    expect(router.state.location.pathname).toBe('/my-tasks');
+    expect(router.state.location.pathname).toBe('/w/kite-studio/my-tasks');
   });
 
   it('shows the generic error on bad credentials', async () => {
@@ -142,7 +142,7 @@ describe('auth flow', () => {
       // My Tasks greets by first name ("Өглөөний мэнд, Anu", by time of day).
       expect(screen.getByRole('heading', { level: 1, name: /мэнд, Anu$/ })).toBeInTheDocument();
     });
-    expect(router.state.location.pathname).toBe('/my-tasks');
+    expect(router.state.location.pathname).toBe('/w/kite-studio/my-tasks');
     const loginCall = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST');
     expect(JSON.parse(loginCall?.[1]?.body as string)).toEqual({
       email: 'anu@kite.test',
@@ -160,5 +160,48 @@ describe('auth flow', () => {
     await waitFor(() => {
       expect(document.documentElement.lang).toBe('en');
     });
+  });
+
+  it('signs out from the account menu and lands on sign-in without a refresh', async () => {
+    mockApi({
+      'GET /api/v1/auth/me': () => Response.json(ME),
+      [`GET /api/v1/workspaces/${WORKSPACE_ID}/sidebar`]: () => Response.json(SIDEBAR),
+      ...homeHandlers(),
+      'POST /api/v1/auth/logout': () => new Response(null, { status: 204 }),
+    });
+    const router = renderAt('/w/kite-studio/my-tasks');
+    fireEvent.click(await screen.findByRole('button', { name: 'Anu Bold — Бүртгэлийн цэс' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Гарах' }));
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe('/login');
+    });
+    // The sign-in page is a lazy chunk: allow for loading it under a busy test run.
+    expect(
+      await screen.findByRole('heading', { name: 'Kite-д нэвтрэх' }, { timeout: 3000 }),
+    ).toBeInTheDocument();
+    // Signed out for good: the app sends any page back to sign-in.
+    await router.navigate('/w/kite-studio/my-tasks');
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe('/login');
+    });
+  });
+
+  it('signs the platform admin out of /admin', async () => {
+    const vade = { ...ME, user: { ...ME.user, platformRole: 'vade' as const }, workspaces: [] };
+    mockApi({
+      'GET /api/v1/auth/me': () => Response.json(vade),
+      'GET /api/v1/admin/workspaces': () => Response.json([]),
+      'POST /api/v1/auth/logout': () => new Response(null, { status: 204 }),
+    });
+    const router = renderAt('/admin');
+    fireEvent.click(await screen.findByRole('button', { name: 'Гарах' }));
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe('/login');
+    });
+    expect(router.state.location.search).toBe('?next=%2Fadmin');
+    expect(
+      await screen.findByRole('heading', { name: 'Kite-д нэвтрэх' }, { timeout: 3000 }),
+    ).toBeInTheDocument();
   });
 });

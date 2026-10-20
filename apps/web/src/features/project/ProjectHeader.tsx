@@ -20,9 +20,11 @@ import { ViewTabs } from '../views/ViewTabs';
 import type { View } from '../views/views';
 import { ViewToolbar } from '../views/ViewToolbar';
 import { NewSprintDialog } from './NewSprintDialog';
+import { useWsPath } from '../../api/workspaces';
 
 /** Project top bar: breadcrumb, favorite, members, Share, options; view tabs + toolbar. */
 export function ProjectHeader({ project, view }: { project: ProjectDetail; view: View }) {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const online = useOnlineIds();
   const favorite = useToggleFavorite(project);
@@ -43,7 +45,7 @@ export function ProjectHeader({ project, view }: { project: ProjectDetail; view:
     setArchived
       .mutateAsync({ projectId, archived: true })
       .then(() => {
-        void navigate(`/s/${spaceId}/list`);
+        void navigate(ws(`/s/${spaceId}/list`));
         toast({
           message: t('header.projectArchived', { name }),
           action: {
@@ -175,7 +177,7 @@ export function ProjectHeader({ project, view }: { project: ProjectDetail; view:
           />
         </>
       }
-      tabs={<ViewTabs basePath={`/p/${project.id}`} value={view} />}
+      tabs={<ViewTabs basePath={ws(`/p/${project.id}`)} value={view} />}
       toolbar={<ViewToolbar project={project} empty={project.taskCount === 0} />}
     />
   );

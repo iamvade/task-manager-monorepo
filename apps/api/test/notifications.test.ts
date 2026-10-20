@@ -4,6 +4,7 @@ import {
   notificationPageSchema,
   readAllResultSchema,
   sidebarResponseSchema,
+  unreadCountsSchema,
   type InboxTab,
   type RichTextNode,
 } from '@kite/shared';
@@ -11,7 +12,7 @@ import { and, asc, eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { notifications, workspaceMembers } from '../src/db/schema/index.js';
 import { archiveReadNotifications } from '../src/notifications/archive-job.js';
-import { errorCode } from './fixtures.js';
+import { addMember, createUser, createWorkspace, errorCode } from './fixtures.js';
 import { createTestApp } from './helpers.js';
 import { taskWorld } from './task-setup.js';
 
@@ -424,6 +425,48 @@ describe('notifications', () => {
       expect(bad.statusCode).toBe(400);
       expect(errorCode(bad)).toBe('INVALID_CURSOR');
     });
+  });
+
+  it('counts unread per workspace I am an active member of', async () => {
+    const w = await world();
+    // Sara also owns a workspace, and was in a third one until she was deactivated.
+    const own = await createWorkspace(ctx.db, w.sara.user.id);
+    const someone = await createUser(ctx.db);
+    const gone = await createWorkspace(ctx.db, someone.id);
+    await addMember(ctx.db, gone.id, w.sara.user.id);
+    await ctx.db
+      .update(workspaceMembers)
+      .set({ deactivatedAt: new Date() })
+      .where(
+        and(eq(workspaceMembers.workspaceId, gone.id), eq(workspaceMembers.userId, w.sara.user.id)),
+      );
+
+    await w.createTask({ title: 'A', assigneeIds: [w.sara.user.id] });
+    const m = await w.createTask({ title: 'M' });
+    await w.comment(w.api, m.id, doc('hi ', { id: w.sara.user.id }));
+
+    const counts = async () => {
+      const res = await w.sara.api('GET', '/me/notifications/unread-counts');
+      expect(res.statusCode, res.body).toBe(200);
+      return unreadCountsSchema.parse(res.json());
+    };
+    expect(await counts()).toEqual([
+      { workspaceId: w.ws.id, unread: 2 },
+      { workspaceId: own.id, unread: 0 },
+    ]);
+    expect((await w.inbox(w.sara.api)).counts.unread).toBe(2);
+
+    await w.call(w.sara.api, 'POST', '/me/notifications/read-all', { workspaceId: w.ws.id });
+    expect(await counts()).toEqual([
+      { workspaceId: w.ws.id, unread: 0 },
+      { workspaceId: own.id, unread: 0 },
+    ]);
+
+    const anon = await ctx.app.inject({
+      method: 'GET',
+      url: '/api/v1/me/notifications/unread-counts',
+    });
+    expect(anon.statusCode).toBe(401);
   });
 
   it('archives notifications read more than 30 days ago', async () => {

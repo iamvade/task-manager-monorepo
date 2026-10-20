@@ -25,6 +25,7 @@ import { AssigneePicker } from '../../pickers/AssigneePicker';
 import { useTaskKeyHref } from '../../task/useTaskKeyHref';
 import { uid, withEmptyBlocker, type Draft, type YesterdayKind } from './draft';
 import { TaskLinkPicker } from './TaskLinkPicker';
+import { useWsPath } from '../../../api/workspaces';
 
 type SetDraft = Dispatch<SetStateAction<Draft>>;
 
@@ -188,6 +189,7 @@ function TextRowInput({
 }
 
 function TaskLink({ task, mobile }: { task: StandupTaskRef; mobile: boolean }) {
+  const ws = useWsPath();
   const href = useTaskKeyHref()(task.key);
   // Inside the modal, a task opens on its own page in a new tab (the drawer sits under it).
   const className = cn(
@@ -195,7 +197,7 @@ function TaskLink({ task, mobile }: { task: StandupTaskRef; mobile: boolean }) {
     mobile ? 'text-[14px] leading-5 break-words' : 'truncate',
   );
   return href ? (
-    <a href={`/t/${task.key}`} target="_blank" rel="noreferrer" className={className}>
+    <a href={ws(`/t/${task.key}`)} target="_blank" rel="noreferrer" className={className}>
       {task.title}
     </a>
   ) : (

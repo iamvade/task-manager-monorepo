@@ -11,7 +11,7 @@ import { ME, PROJECT, PROJECT_ID, SIDEBAR, WORKSPACE_ID, mockApi } from '../../t
 import { at, listHandlers, makeTasks } from '../../test/tasks';
 
 const EN_ME = { ...ME, preferences: { ...ME.preferences, locale: 'en' } };
-const LIST = `/p/${PROJECT_ID}/list?sprint=none`;
+const LIST = `/w/kite-studio/p/${PROJECT_ID}/list?sprint=none`;
 const SARA = at(PROJECT.members, 1).user;
 
 function renderAt(path: string) {
@@ -133,7 +133,7 @@ describe('command palette', () => {
 
   it('finds comments and opens the task at the comment', async () => {
     const { task } = api();
-    const router = renderAt(`/p/${PROJECT_ID}/list?sprint=none`);
+    const router = renderAt(`/w/kite-studio/p/${PROJECT_ID}/list?sprint=none`);
     await screen.findByRole('table');
     fireEvent.keyDown(document.body, { key: 'k', metaKey: true });
     const dialog = await screen.findByRole('dialog', { name: 'Command palette' });
@@ -158,7 +158,7 @@ describe('command palette', () => {
     await waitFor(() => {
       expect(router.state.location.search).toBe(`?assignee=${SARA.id}`);
     });
-    expect(router.state.location.pathname).toBe(`/p/${PROJECT_ID}/list`);
+    expect(router.state.location.pathname).toBe(`/w/kite-studio/p/${PROJECT_ID}/list`);
   });
 
   it('runs actions: switch language, new task', async () => {

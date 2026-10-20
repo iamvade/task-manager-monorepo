@@ -224,6 +224,54 @@ describe('realtime', () => {
     expect(owner.types()).not.toContain('notification.created');
   });
 
+  it("tells the recipient's tabs in other workspaces that their unread counts changed", async () => {
+    const w = await world();
+    await createWorkspace(ctx.db, w.sara.user.id);
+    const elsewhere = await open(w.saraCookie);
+    const owner = await subscribed(w.ownerCookie, w.ws.id);
+    const task = await w.createTask({ title: 'Mention' });
+    const body: RichTextNode = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [{ type: 'mention', attrs: { id: w.sara.user.id, label: 'Sara' } }],
+        },
+      ],
+    };
+    await w.api('POST', `/tasks/${task.id}/comments`, { body });
+    // Not subscribed to any workspace yet (or to another one): no task events, but the dot.
+    await elsewhere.next('notifications.unread_changed');
+    await quiet();
+    expect(elsewhere.types()).toEqual(['notifications.unread_changed']);
+    expect(owner.types()).not.toContain('notifications.unread_changed');
+
+    const read = await w.sara.api('POST', '/me/notifications/read-all', { workspaceId: w.ws.id });
+    expect(read.statusCode, read.body).toBe(200);
+    await quiet();
+    expect(elsewhere.types()).toEqual([
+      'notifications.unread_changed',
+      'notifications.unread_changed',
+    ]);
+  });
+
+  it("sends a person's time-off changes to every workspace they're in", async () => {
+    const w = await world();
+    const other = await createWorkspace(ctx.db, w.sara.user.id);
+    const there = await subscribed(w.saraCookie, other.id);
+    const res = await w.sara.api(
+      'POST',
+      `/workspaces/${w.ws.id}/members/${w.sara.user.id}/absences`,
+      {
+        startDate: '2026-11-02',
+        endDate: '2026-11-04',
+      },
+    );
+    expect(res.statusCode, res.body).toBe(201);
+    const msg = await there.next('absences.changed');
+    expect(msg).toMatchObject({ workspaceId: other.id, userId: w.sara.user.id });
+  });
+
   it('tracks who is online, across tabs', async () => {
     const w = await world();
     const owner = await subscribed(w.ownerCookie, w.ws.id);

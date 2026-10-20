@@ -22,9 +22,9 @@ describe('Reports', () => {
   });
 
   it('redirects /reports to the Overview with the stat cards', async () => {
-    const { router } = renderReports('/reports');
+    const { router } = renderReports('/w/kite-studio/reports');
     const completed = await screen.findByRole('group', { name: 'Completed' });
-    expect(router.state.location.pathname).toBe('/reports/overview');
+    expect(router.state.location.pathname).toBe('/w/kite-studio/reports/overview');
     expect(within(completed).getByText('142')).toBeInTheDocument();
     expect(within(completed).getByText('· 386 points')).toBeInTheDocument();
     expect(within(completed).getByText('12%')).toBeInTheDocument();
@@ -57,7 +57,7 @@ describe('Reports', () => {
   });
 
   it('flags stale aging tasks, opens a row in the drawer and expands with View all', async () => {
-    const { fetchMock, router } = renderReports('/reports/overview');
+    const { fetchMock, router } = renderReports('/w/kite-studio/reports/overview');
     const table = await screen.findByRole('table', { name: 'Aging tasks' });
     const rows = within(table).getAllByRole('row').slice(1);
     expect(rows).toHaveLength(6);
@@ -80,7 +80,7 @@ describe('Reports', () => {
   });
 
   it('keeps the period in the URL and in the request', async () => {
-    const { fetchMock, router } = renderReports('/reports/overview');
+    const { fetchMock, router } = renderReports('/w/kite-studio/reports/overview');
     await screen.findByRole('group', { name: 'Completed' });
     fireEvent.click(screen.getByRole('radio', { name: 'This quarter' }));
     expect(router.state.location.search).toBe('?period=quarter');
@@ -94,13 +94,13 @@ describe('Reports', () => {
     // Tabs carry the filters.
     expect(screen.getByRole('tab', { name: 'Sprints' })).toHaveAttribute(
       'href',
-      '/reports/sprints?period=quarter',
+      '/w/kite-studio/reports/sprints?period=quarter',
     );
   });
 
   it('shows the loading skeleton until the report arrives', async () => {
     let resolve: (r: Response) => void = () => undefined;
-    renderReports('/reports/overview', {
+    renderReports('/w/kite-studio/reports/overview', {
       extra: { [OVERVIEW]: () => new Promise<Response>((r) => (resolve = r)) },
     });
     await waitFor(() => {
@@ -115,7 +115,7 @@ describe('Reports', () => {
   });
 
   it('shows "1 / 5" for a project without enough history', async () => {
-    renderReports(`/reports/overview?project=${PROJECT_ID}`, {
+    renderReports(`/w/kite-studio/reports/overview?project=${PROJECT_ID}`, {
       extra: {
         [`${OVERVIEW}?projectId=${PROJECT_ID}`]: () =>
           Response.json(
@@ -139,14 +139,14 @@ describe('Reports', () => {
     expect(screen.getByText('1 task completed so far · 4 more to go')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Go to project' })).toHaveAttribute(
       'href',
-      `/p/${PROJECT_ID}/list`,
+      `/w/kite-studio/p/${PROJECT_ID}/list`,
     );
     expect(screen.queryByText(/^Updated/)).toBeNull();
   });
 
   it('draws one throughput line when there is no previous period', async () => {
     const base = overview();
-    renderReports('/reports/overview', {
+    renderReports('/w/kite-studio/reports/overview', {
       extra: {
         [OVERVIEW]: () =>
           Response.json(overview({ throughput: { weeks: base.throughput.weeks, previous: [] } })),
@@ -160,7 +160,7 @@ describe('Reports', () => {
 
   it('renders Mongolian copy from the design', async () => {
     await i18n.changeLanguage('mn');
-    renderReports('/reports/overview', { me: ME });
+    renderReports('/w/kite-studio/reports/overview', { me: ME });
     const onTime = await screen.findByRole('group', { name: 'Хугацаандаа дууссан' });
     expect(within(onTime).getByText('142-оос 124')).toBeInTheDocument();
     expect(screen.getByText('5 минутын өмнө шинэчлэгдсэн')).toBeInTheDocument();
@@ -175,12 +175,12 @@ describe('Reports', () => {
   });
 
   it('sends members from People to My performance, and admins the other way', async () => {
-    const member = renderReports('/reports/people', {
+    const member = renderReports('/w/kite-studio/reports/people', {
       me: MEMBER_ME,
       extra: { [`${REPORTS_API}/people/me`]: () => Response.json(personReport()) },
     });
     await waitFor(() => {
-      expect(member.router.state.location.pathname).toBe('/reports/me');
+      expect(member.router.state.location.pathname).toBe('/w/kite-studio/reports/me');
     });
     expect(await screen.findByRole('tab', { name: 'My performance' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Workload' })).toBeInTheDocument();
@@ -188,11 +188,11 @@ describe('Reports', () => {
   });
 
   it('sends owners from My performance to People', async () => {
-    const owner = renderReports('/reports/me', {
+    const owner = renderReports('/w/kite-studio/reports/me', {
       extra: { [`${REPORTS_API}/people/me`]: () => Response.json(personReport()) },
     });
     await waitFor(() => {
-      expect(owner.router.state.location.pathname).toBe('/reports/people');
+      expect(owner.router.state.location.pathname).toBe('/w/kite-studio/reports/people');
     });
     expect(await screen.findByRole('tab', { name: 'People' })).toBeInTheDocument();
   });

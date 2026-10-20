@@ -69,7 +69,7 @@ describe('app shell', () => {
 
   it('renders the sidebar from /sidebar with counts and the active project', async () => {
     api();
-    renderAt(`/p/${PROJECT_ID}/list`);
+    renderAt(`/w/kite-studio/p/${PROJECT_ID}/list`);
 
     const nav = await waitFor(sidebarNav);
     await within(nav).findByRole('link', { name: /App Redesign/ });
@@ -93,7 +93,7 @@ describe('app shell', () => {
 
   it('shows the project header and auto-applies the active sprint filter', async () => {
     api();
-    const router = renderAt(`/p/${PROJECT_ID}/list`);
+    const router = renderAt(`/w/kite-studio/p/${PROJECT_ID}/list`);
 
     const crumb = await screen.findByRole('navigation', { name: 'Байршил' });
     expect(crumb).toHaveTextContent('Product');
@@ -112,7 +112,7 @@ describe('app shell', () => {
 
   it('switches views through the URL, keeping filters', async () => {
     api();
-    const router = renderAt(`/p/${PROJECT_ID}/list?sprint=none`);
+    const router = renderAt(`/w/kite-studio/p/${PROJECT_ID}/list?sprint=none`);
 
     const tabs = await screen.findByRole('tablist', { name: 'Харагдац' });
     expect(within(tabs).getByRole('tab', { name: 'Жагсаалт' })).toHaveAttribute(
@@ -121,7 +121,7 @@ describe('app shell', () => {
     );
     fireEvent.click(within(tabs).getByRole('tab', { name: 'Самбар' }));
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe(`/p/${PROJECT_ID}/board`);
+      expect(router.state.location.pathname).toBe(`/w/kite-studio/p/${PROJECT_ID}/board`);
     });
     expect(router.state.location.search).toBe('?sprint=none');
     // Routes load lazily: the tabs re-render once the board's chunk is in.
@@ -135,7 +135,7 @@ describe('app shell', () => {
 
   it('starts with a skip link that moves focus to the page', async () => {
     api();
-    renderAt('/my-tasks');
+    renderAt('/w/kite-studio/my-tasks');
     await screen.findByRole('navigation', { name: 'Ажлын орчин' });
 
     const skip = screen.getByRole('link', { name: 'Агуулга руу шилжих' });
@@ -146,7 +146,7 @@ describe('app shell', () => {
 
   it('collapses to the rail and remembers it', async () => {
     api();
-    renderAt('/my-tasks');
+    renderAt('/w/kite-studio/my-tasks');
 
     fireEvent.click(await screen.findByRole('button', { name: 'Хажуу самбарыг хураах' }));
     expect(
@@ -170,7 +170,7 @@ describe('app shell', () => {
     );
     useUiStore.setState({ sidebarCollapsed: true });
     api();
-    renderAt('/my-tasks');
+    renderAt('/w/kite-studio/my-tasks');
 
     expect(
       await screen.findByRole('button', { name: 'Хажуу самбарыг хураах' }),
@@ -186,7 +186,7 @@ describe('app shell', () => {
       'PATCH /api/v1/me': () =>
         Response.json({ ...ME, preferences: { ...ME.preferences, locale: 'en' } }),
     });
-    renderAt(`/p/${PROJECT_ID}/list`);
+    renderAt(`/w/kite-studio/p/${PROJECT_ID}/list`);
 
     fireEvent.click(await screen.findByRole('radio', { name: 'EN' }));
     expect(await screen.findByRole('link', { name: /My Tasks/ })).toBeInTheDocument();
@@ -206,7 +206,7 @@ describe('app shell', () => {
       'PATCH /api/v1/me': () =>
         Response.json({ ...ME, preferences: { ...ME.preferences, theme: 'dark' } }),
     });
-    renderAt('/my-tasks');
+    renderAt('/w/kite-studio/my-tasks');
 
     fireEvent.click(await screen.findByRole('button', { name: /Бүртгэлийн цэс/ }));
     fireEvent.click(await screen.findByRole('radio', { name: 'Бараан' }));
@@ -222,7 +222,7 @@ describe('app shell', () => {
         return Response.json(PROJECT_WITH_STATUSES, { status: 201 });
       },
     });
-    const router = renderAt('/my-tasks');
+    const router = renderAt('/w/kite-studio/my-tasks');
 
     const nav = await waitFor(sidebarNav);
     fireEvent.click(await within(nav).findByRole('button', { name: 'Product: шинэ төсөл' }));
@@ -235,7 +235,7 @@ describe('app shell', () => {
     fireEvent.click(create);
 
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe(`/p/${PROJECT_ID}/list`);
+      expect(router.state.location.pathname).toBe(`/w/kite-studio/p/${PROJECT_ID}/list`);
     });
     expect(posted).toEqual([{ spaceId: SIDEBAR.spaces[0]?.id, name: 'App Redesign' }]);
     expect(screen.queryByRole('dialog', { name: 'Product: шинэ төсөл' })).toBeNull();
@@ -246,7 +246,7 @@ describe('app shell', () => {
       [`POST /api/v1/workspaces/${WORKSPACE_ID}/projects`]: () =>
         Response.json({ error: { code: 'INTERNAL', message: 'boom' } }, { status: 500 }),
     });
-    renderAt('/my-tasks');
+    renderAt('/w/kite-studio/my-tasks');
 
     const nav = await waitFor(sidebarNav);
     fireEvent.click(await within(nav).findByRole('button', { name: 'Engineering: шинэ төсөл' }));
@@ -275,7 +275,7 @@ describe('app shell', () => {
         );
       },
     });
-    renderAt(`/p/${PROJECT_ID}/list`);
+    renderAt(`/w/kite-studio/p/${PROJECT_ID}/list`);
 
     fireEvent.click(await screen.findByRole('button', { name: 'Төслийн сонголтууд' }));
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Шинэ спринт' }));
@@ -320,12 +320,12 @@ describe('app shell', () => {
         return Response.json(PROJECT_WITH_STATUSES);
       },
     });
-    const router = renderAt(`/p/${PROJECT_ID}/list`);
+    const router = renderAt(`/w/kite-studio/p/${PROJECT_ID}/list`);
 
     fireEvent.click(await screen.findByRole('button', { name: 'Төслийн сонголтууд' }));
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Төслийг архивлах' }));
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe(`/s/${SPACE_ID}/list`);
+      expect(router.state.location.pathname).toBe(`/w/kite-studio/s/${SPACE_ID}/list`);
     });
     const [toast] = toasts();
     expect(toast?.message).toBe('App Redesign архивлагдлаа');
@@ -337,14 +337,14 @@ describe('app shell', () => {
 
   it('hides archive and space delete from members', async () => {
     api({ 'GET /api/v1/auth/me': asMember });
-    const router = renderAt(`/p/${PROJECT_ID}/list`);
+    const router = renderAt(`/w/kite-studio/p/${PROJECT_ID}/list`);
 
     fireEvent.click(await screen.findByRole('button', { name: 'Төслийн сонголтууд' }));
     await screen.findByRole('menuitem', { name: 'Шинэ спринт' });
     expect(screen.queryByRole('menuitem', { name: 'Төслийг архивлах' })).toBeNull();
     fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
 
-    await act(() => router.navigate(`/s/${SPACE_ID}/list`));
+    await act(() => router.navigate(`/w/kite-studio/s/${SPACE_ID}/list`));
     fireEvent.click(await screen.findByRole('button', { name: 'Орон зайн сонголтууд' }));
     await screen.findByRole('menuitem', { name: 'Холбоос хуулах' });
     expect(screen.queryByRole('menuitem', { name: 'Орон зайг устгах' })).toBeNull();
@@ -362,13 +362,13 @@ describe('app shell', () => {
           spaces: SIDEBAR.spaces.map((space) => ({ ...space, ...mine })),
         }),
     });
-    const router = renderAt(`/p/${PROJECT_ID}/list`);
+    const router = renderAt(`/w/kite-studio/p/${PROJECT_ID}/list`);
 
     fireEvent.click(await screen.findByRole('button', { name: 'Төслийн сонголтууд' }));
     expect(await screen.findByRole('menuitem', { name: 'Төслийг архивлах' })).toBeInTheDocument();
     fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
 
-    await act(() => router.navigate(`/s/${SPACE_ID}/list`));
+    await act(() => router.navigate(`/w/kite-studio/s/${SPACE_ID}/list`));
     fireEvent.click(await screen.findByRole('button', { name: 'Орон зайн сонголтууд' }));
     expect(await screen.findByRole('menuitem', { name: 'Орон зайг устгах' })).toBeInTheDocument();
   });
@@ -390,7 +390,7 @@ describe('app shell', () => {
         return Response.json({ ...PROJECT_WITH_STATUSES, description: brief, leadId: sara?.id });
       },
     });
-    renderAt(`/p/${PROJECT_ID}/list`);
+    renderAt(`/w/kite-studio/p/${PROJECT_ID}/list`);
     const region = await screen.findByRole('region', { name: 'App Redesign төслийн тухай' });
     const toggle = within(region).getByRole('button', { name: /Төслийн товч/ });
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
@@ -422,7 +422,7 @@ describe('app shell', () => {
         return Response.json(PROJECT_WITH_STATUSES);
       },
     });
-    renderAt(`/p/${PROJECT_ID}/list`);
+    renderAt(`/w/kite-studio/p/${PROJECT_ID}/list`);
 
     expect(
       await screen.findByText(
@@ -445,7 +445,7 @@ describe('app shell', () => {
         return new Response(null, { status: 204 });
       },
     });
-    const router = renderAt(`/s/${SPACE_ID}/list`);
+    const router = renderAt(`/w/kite-studio/s/${SPACE_ID}/list`);
 
     fireEvent.click(await screen.findByRole('button', { name: 'Орон зайн сонголтууд' }));
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Орон зайг устгах' }));
@@ -458,7 +458,7 @@ describe('app shell', () => {
     });
     fireEvent.click(within(dialog).getByRole('button', { name: 'Орон зайг устгах' }));
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe('/my-tasks');
+      expect(router.state.location.pathname).toBe('/w/kite-studio/my-tasks');
     });
     expect(deleted).toEqual([SPACE_ID]);
     expect(toasts().map((x) => x.message)).toEqual(['Product устгагдлаа']);
@@ -473,7 +473,7 @@ describe('app shell', () => {
           { status: 409 },
         ),
     });
-    const router = renderAt(`/s/${SPACE_ID}/list`);
+    const router = renderAt(`/w/kite-studio/s/${SPACE_ID}/list`);
     const openDelete = async () => {
       fireEvent.click(await screen.findByRole('button', { name: 'Орон зайн сонголтууд' }));
       fireEvent.click(await screen.findByRole('menuitem', { name: 'Орон зайг устгах' }));
@@ -498,6 +498,6 @@ describe('app shell', () => {
       ]);
     });
     expect(deletes()).toHaveLength(1);
-    expect(router.state.location.pathname).toBe(`/s/${SPACE_ID}/list`);
+    expect(router.state.location.pathname).toBe(`/w/kite-studio/s/${SPACE_ID}/list`);
   });
 });

@@ -3,7 +3,7 @@ import { useMemo, useRef, useState, type MutableRefObject, type ReactNode } from
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useSearch } from '../../api/search';
-import { useCurrentWorkspace, useSidebar } from '../../api/workspaces';
+import { useCurrentWorkspace, useSidebar, useWsPath } from '../../api/workspaces';
 import { useLanguage } from '../../components/useLanguage';
 import {
   GlobeIcon,
@@ -84,6 +84,7 @@ function PaletteBody({
   inputRef: MutableRefObject<HTMLInputElement | null>;
   onClose: () => void;
 }) {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const dates = useDates();
   const navigate = useNavigate();
@@ -128,7 +129,7 @@ function PaletteBody({
       icon: <MyTasksIcon size={14} />,
       hint: <Keys keys={['G', 'M']} />,
       run: run(() => {
-        void navigate('/my-tasks');
+        void navigate(ws('/my-tasks'));
       }),
     },
     {
@@ -138,7 +139,7 @@ function PaletteBody({
       icon: <InboxIcon size={14} />,
       hint: <Keys keys={['G', 'I']} />,
       run: run(() => {
-        void navigate('/inbox');
+        void navigate(ws('/inbox'));
       }),
     },
     {
@@ -320,7 +321,7 @@ function PaletteBody({
                 key={project.id}
                 value={`project:${project.id}`}
                 onSelect={run(() => {
-                  void navigate(`/p/${project.id}/list`);
+                  void navigate(ws(`/p/${project.id}/list`));
                 })}
                 className={itemClass}
               >
@@ -344,7 +345,7 @@ function PaletteBody({
                 key={person.id}
                 value={`person:${person.id}`}
                 onSelect={run(() => {
-                  void navigate(personHref(person.id));
+                  void navigate(ws(personHref(person.id)));
                 })}
                 className={itemClass}
               >

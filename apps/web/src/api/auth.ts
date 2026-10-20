@@ -43,10 +43,14 @@ export function useLogout() {
     // Signing out always succeeds locally; no error toast.
     meta: { errorToast: false },
     mutationFn: () => apiSend('/auth/logout', z.null(), 'POST'),
-    // Even if the server call fails the local state should forget the user.
+    // Even if the server call fails the local state should forget the user. Not `clear()`: it
+    // drops the `me` query under its observers, so the app would keep showing the user until a
+    // reload. Set `me` first (the guards send the page to sign-in), then forget the rest.
     onSettled: () => {
-      queryClient.clear();
+      void queryClient.cancelQueries();
       queryClient.setQueryData(meQueryKey, null);
+      queryClient.removeQueries({ predicate: (query) => query.queryKey[0] !== meQueryKey[0] });
+      queryClient.getMutationCache().clear();
     },
   });
 }

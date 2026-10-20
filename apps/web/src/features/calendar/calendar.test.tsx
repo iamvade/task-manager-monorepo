@@ -16,7 +16,7 @@ type Handler = (init?: RequestInit) => Response | Promise<Response>;
 const body = (init?: RequestInit): unknown =>
   typeof init?.body === 'string' ? JSON.parse(init.body) : null;
 const EN_ME = { ...ME, preferences: { ...ME.preferences, locale: 'en' } };
-const SPACE_CALENDAR = `/s/${SPACE_ID}/calendar`;
+const SPACE_CALENDAR = `/w/kite-studio/s/${SPACE_ID}/calendar`;
 const CHECKOUT = {
   id: '01890000-0000-7000-8000-000000000021',
   spaceId: SPACE_ID,
@@ -331,7 +331,7 @@ describe('calendar', () => {
 
   it('shows the project calendar without applying the active sprint filter', async () => {
     const fetchMock = api({ tasks: calendarTasks() });
-    const router = renderAt(`/p/${PROJECT_ID}/calendar`);
+    const router = renderAt(`/w/kite-studio/p/${PROJECT_ID}/calendar`);
     await screen.findByRole('heading', { name: 'October 2026' });
     expect(await screen.findByText('Audit current navigation patterns')).toBeInTheDocument();
     expect(router.state.location.search).toBe('');

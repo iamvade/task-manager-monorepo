@@ -17,7 +17,7 @@ const TaskDetailView = lazy(() =>
 export function TaskDrawer() {
   const { t } = useTranslation();
   const [params, setParams] = useSearchParams();
-  const onTaskPage = useMatch('/t/:taskKey');
+  const onTaskPage = useMatch('/w/:slug/t/:taskKey');
   const key = params.get('task');
 
   // The element focused when the drawer opened (a list row, a card…) and the last key shown.

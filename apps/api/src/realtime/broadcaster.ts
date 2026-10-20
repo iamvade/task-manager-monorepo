@@ -2,13 +2,15 @@ import type { RealtimeServerMessage } from '@kite/shared';
 
 /**
  * A message and who gets it: everyone subscribed to a workspace, one user's connections, or the
- * connections of a list of users (a standup group's members).
+ * connections of a list of users (a standup group's members); `anyWorkspace` reaches a user's
+ * connections whatever workspace they are subscribed to (or none yet).
  */
 export interface Envelope {
   to:
     | { workspaceId: string }
     | { userId: string; workspaceId: string }
-    | { userIds: readonly string[]; workspaceId: string };
+    | { userIds: readonly string[]; workspaceId: string }
+    | { userId: string; anyWorkspace: true };
   /** The tab that made the change already shows it; it gets no echo. */
   exceptClientId?: string;
   message: RealtimeServerMessage;

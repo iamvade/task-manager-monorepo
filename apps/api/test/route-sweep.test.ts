@@ -49,6 +49,8 @@ const NOT_WORKSPACE_SCOPED = [
   'POST /auth/logout',
   'GET /auth/me',
   'PATCH /me',
+  // The caller's own counts over their own workspaces (the outsider sees only theirs).
+  'GET /me/notifications/unread-counts',
   'GET /invites/{token}',
   'POST /invites/{token}/accept',
   // The public feedback form: anyone with the link (the slug) may send feedback.

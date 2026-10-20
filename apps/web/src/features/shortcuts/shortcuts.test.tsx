@@ -21,7 +21,7 @@ function renderList() {
     ...homeHandlers(),
   });
   const router = createMemoryRouter(routes, {
-    initialEntries: [`/p/${PROJECT_ID}/list?sprint=none`],
+    initialEntries: [`/w/kite-studio/p/${PROJECT_ID}/list?sprint=none`],
   });
   render(
     <QueryClientProvider client={createQueryClient()}>
@@ -64,12 +64,12 @@ describe('global shortcuts', () => {
     fireEvent.keyDown(document.body, { key: 'g' });
     fireEvent.keyDown(document.body, { key: 'i' });
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe('/inbox');
+      expect(router.state.location.pathname).toBe('/w/kite-studio/inbox');
     });
     fireEvent.keyDown(document.body, { key: 'g' });
     fireEvent.keyDown(document.body, { key: 'm' });
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe('/my-tasks');
+      expect(router.state.location.pathname).toBe('/w/kite-studio/my-tasks');
     });
   });
 

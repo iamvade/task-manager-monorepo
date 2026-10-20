@@ -1,5 +1,6 @@
 import {
   notificationPageSchema,
+  unreadCountsSchema,
   projectNotificationLevelSchema,
   type NotificationLevel,
   readAllResultSchema,
@@ -21,6 +22,15 @@ import { apiFetch, apiSend, toQuery } from './client';
 import { queryKeys } from './queryKeys';
 
 type Pages = InfiniteData<NotificationPage, string>;
+
+/** My unread count per workspace; refetched when the socket says one changed. */
+export function useUnreadCounts(enabled = true) {
+  return useQuery({
+    queryKey: queryKeys.unreadCounts,
+    queryFn: () => apiFetch('/me/notifications/unread-counts', unreadCountsSchema),
+    enabled,
+  });
+}
 
 /**
  * One inbox tab (optionally one project), newest first, page by page. `counts` (unread/archived)

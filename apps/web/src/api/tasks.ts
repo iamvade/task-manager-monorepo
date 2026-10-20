@@ -10,6 +10,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { z } from 'zod';
 import { ApiError, apiFetch, apiSend, toQuery } from './client';
 import { queryKeys } from './queryKeys';
+import { useCurrentWorkspace } from './workspaces';
 import {
   TASK_MUTATION,
   patchLists,
@@ -45,10 +46,16 @@ export function useSpaceTasks(spaceId: string | undefined, params: TaskListParam
 }
 
 /** `APP-142` or a task id (drawer, full page). */
+/** A task of the current workspace by key or id (keys repeat across workspaces). */
 export function useTask(ref: string | null | undefined) {
+  const workspaceId = useCurrentWorkspace()?.id ?? '';
   return useQuery({
-    queryKey: queryKeys.task(ref ?? ''),
-    queryFn: () => apiFetch(`/tasks/${encodeURIComponent(ref ?? '')}`, taskDetailSchema),
+    queryKey: queryKeys.task(workspaceId, ref ?? ''),
+    queryFn: () =>
+      apiFetch(
+        `/tasks/${encodeURIComponent(ref ?? '')}${toQuery({ workspaceId: workspaceId || undefined })}`,
+        taskDetailSchema,
+      ),
     enabled: Boolean(ref),
     retry: (count, err) => !(err instanceof ApiError && err.status === 404) && count < 2,
   });
@@ -219,13 +226,14 @@ export function useDeleteTask() {
 /** Undo of a delete: `POST /tasks/:id/restore` (back to its old status and position). */
 export function useRestoreTask() {
   const queryClient = useQueryClient();
+  const workspaceId = useCurrentWorkspace()?.id ?? '';
   return useMutation({
     mutationKey: TASK_MUTATION,
     mutationFn: (task: Pick<TaskListItem, 'id'>) =>
       apiSend(`/tasks/${task.id}/restore`, taskDetailSchema, 'POST'),
     onSuccess: (detail) => {
       // An open drawer/page of the deleted task flips back to live without waiting.
-      queryClient.setQueryData(queryKeys.task(detail.key), detail);
+      queryClient.setQueryData(queryKeys.task(workspaceId, detail.key), detail);
     },
     onSettled: () => {
       settle(queryClient);
@@ -236,12 +244,13 @@ export function useRestoreTask() {
 /** Drawer "Duplicate": `POST /tasks/:id/duplicate` (same project, right after the original). */
 export function useDuplicateTask() {
   const queryClient = useQueryClient();
+  const workspaceId = useCurrentWorkspace()?.id ?? '';
   return useMutation({
     mutationKey: TASK_MUTATION,
     mutationFn: ({ task, title }: { task: Pick<TaskListItem, 'id'>; title: string }) =>
       apiSend(`/tasks/${task.id}/duplicate`, taskDetailSchema, 'POST', { title }),
     onSuccess: (copy) => {
-      queryClient.setQueryData(queryKeys.task(copy.key), copy);
+      queryClient.setQueryData(queryKeys.task(workspaceId, copy.key), copy);
     },
     onSettled: () => {
       settle(queryClient);
@@ -252,6 +261,7 @@ export function useDuplicateTask() {
 /** Drawer "Move to project": the task gets a new key there; the old key stops resolving. */
 export function useMoveTaskToProject() {
   const queryClient = useQueryClient();
+  const workspaceId = useCurrentWorkspace()?.id ?? '';
   return useMutation({
     mutationKey: TASK_MUTATION,
     mutationFn: ({ task, projectId }: { task: Pick<TaskListItem, 'id'>; projectId: string }) =>
@@ -263,7 +273,7 @@ export function useMoveTaskToProject() {
       restoreLists(queryClient, context?.snapshot);
     },
     onSuccess: (moved) => {
-      queryClient.setQueryData(queryKeys.task(moved.key), moved);
+      queryClient.setQueryData(queryKeys.task(workspaceId, moved.key), moved);
     },
     onSettled: () => {
       settle(queryClient);

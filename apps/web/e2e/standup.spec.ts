@@ -16,9 +16,9 @@ interface Ids {
 
 async function lookup(page: Page): Promise<Ids> {
   const me = (await (await page.request.get('/api/v1/auth/me')).json()) as {
-    workspaces: { id: string }[];
+    workspaces: { id: string; slug: string }[];
   };
-  const workspace = me.workspaces[0]?.id ?? '';
+  const workspace = me.workspaces.find((w) => w.slug === 'kite-studio')?.id ?? '';
   const groups = (await (
     await page.request.get(`/api/v1/workspaces/${workspace}/standup-groups`)
   ).json()) as { id: string; name: string }[];
@@ -47,12 +47,13 @@ async function projectId(page: Page, workspace: string, name: string): Promise<s
 
 /** The task shows "Blocked" (with my blocker's text) on its List row and its Board card. */
 async function expectBlocked(page: Page, project: string, title: string, blocker: string) {
-  await page.goto(`/p/${project}/list`);
+  // The List applies the current sprint by default; the task may not be in it.
+  await page.goto(`/w/kite-studio/p/${project}/list?sprint=none`);
   const row = page.getByRole('row').filter({ hasText: title });
   await expect(
     row.getByRole('link', { name: new RegExp(`^Blocked: ${blocker}`) }).first(),
   ).toBeVisible();
-  await page.goto(`/p/${project}/board?sprint=none`);
+  await page.goto(`/w/kite-studio/p/${project}/board?sprint=none`);
   const card = page.getByRole('link', { name: new RegExp(title.replace(/[()]/g, '\\$&')) });
   await expect(card).toContainText('Blocked');
   await expect(card).toContainText(blocker);
@@ -64,7 +65,7 @@ test.describe('desktop', () => {
   test('Anu writes her update (autosaved draft, chip, linked blocker), then reacts and replies', async ({
     page,
   }) => {
-    await page.goto('/my-tasks');
+    await page.goto('/w/kite-studio/my-tasks');
     await page
       .getByRole('navigation', { name: 'Workspace' })
       .getByRole('link', { name: 'Mobile team' })
@@ -149,12 +150,12 @@ test.describe('phone', () => {
   });
 
   test('Anu posts from the reminder link on a 390×844 screen', async ({ page }) => {
-    await page.goto('/my-tasks');
+    await page.goto('/w/kite-studio/my-tasks');
     const ids = await lookup(page);
     test.skip(!(await isStandupDay(page, ids.designGroup)), 'No standup today');
 
     // The reminder notification's link: straight to writing.
-    await page.goto(`/standup/${ids.designGroup}?write=1`);
+    await page.goto(`/w/kite-studio/standup/${ids.designGroup}?write=1`);
     const dialog = page.getByRole('dialog', { name: 'Your standup' });
     await expect(dialog.getByRole('group', { name: /^Today/ })).toBeVisible();
     // Full screen, no Save draft (drafts autosave).

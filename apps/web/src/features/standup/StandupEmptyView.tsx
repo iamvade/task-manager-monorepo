@@ -11,6 +11,7 @@ import { paletteClass } from '../../lib/palette';
 import { writeHref } from './day/links';
 import { daysLabel, zoneLabel } from './format';
 import { GroupSwitcher, StandupHeader } from './StandupHeader';
+import { useWsPath } from '../../api/workspaces';
 
 const outlineLink = cn(
   'flex h-9 items-center gap-1.5 rounded-[8px] border border-default bg-surface px-3 text-[13px] font-medium text-2 hover:bg-hover',
@@ -27,6 +28,7 @@ export function StandupEmptyView({
   group: StandupGroup;
   groups: readonly StandupGroup[];
 }) {
+  const ws = useWsPath();
   const { t, i18n } = useTranslation();
   const { me } = useAuth();
   const viewerZone = me?.preferences.timezone ?? DEFAULT_TIMEZONE;
@@ -38,7 +40,7 @@ export function StandupEmptyView({
   const schedule = group.reminderAt
     ? t('standup.empty.scheduleReminder', { days, time: local(group.reminderAt), zone })
     : t('standup.empty.schedulePostBy', { days, time: local(group.postBy), zone });
-  const settings = `/standup/${group.id}/settings`;
+  const settings = ws(`/standup/${group.id}/settings`);
 
   return (
     <div className="flex min-h-full flex-col">
@@ -94,7 +96,7 @@ export function StandupEmptyView({
           <div className="flex flex-wrap justify-center gap-2">
             {group.isMember && group.meetsToday && (
               <Link
-                to={writeHref(group.id)}
+                to={ws(writeHref(group.id))}
                 className={cn(
                   buttonVariants.primary,
                   'flex h-10 items-center gap-2 rounded-[8px] border-0 px-4 text-[14px] font-medium no-underline',

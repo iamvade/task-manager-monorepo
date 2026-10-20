@@ -9,6 +9,7 @@ import { cn } from '../../../lib/cn';
 import { useDates } from '../../../lib/useDates';
 import { filtersSearch } from '../params';
 import { variantKeys, type PersonVariant } from './copy';
+import { useWsPath } from '../../../api/workspaces';
 
 /**
  * Current open tasks / Your open tasks (ReportsPeople.dc.html): heading row with a count badge
@@ -22,6 +23,7 @@ export function OpenTasksList({
   tasks: readonly ReportTask[];
   variant: PersonVariant;
 }) {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const { pathname, search } = useLocation();
   const k = variantKeys(variant);
@@ -30,8 +32,8 @@ export function OpenTasksList({
   const grid = 'grid grid-cols-[28px_minmax(0,1fr)_176px_136px_168px_96px] items-center';
   const link =
     variant === 'me'
-      ? '/my-tasks'
-      : `/reports/workload${filtersSearch(new URLSearchParams(search))}`;
+      ? ws('/my-tasks')
+      : ws(`/reports/workload${filtersSearch(new URLSearchParams(search))}`);
 
   const taskHref = (key: string) => {
     const params = new URLSearchParams(search);

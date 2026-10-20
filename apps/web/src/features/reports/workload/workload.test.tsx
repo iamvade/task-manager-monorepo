@@ -42,7 +42,7 @@ describe('Reports · Workload', () => {
   });
 
   it('lists people by open size with buckets, capacity and the load pill', async () => {
-    renderReports('/reports/workload', {
+    renderReports('/w/kite-studio/reports/workload', {
       extra: { [WORKLOAD]: () => Response.json(workloadReport()), ...membersApi },
     });
     const table = await screen.findByRole('region', { name: 'Team workload' });
@@ -79,7 +79,7 @@ describe('Reports · Workload', () => {
     // Sara gets more points than Dorj but nothing overdue.
     const sara = report.people[0];
     if (sara) sara.points = 30;
-    const { router } = renderReports('/reports/workload', {
+    const { router } = renderReports('/w/kite-studio/reports/workload', {
       extra: { [WORKLOAD]: () => Response.json(report), ...membersApi },
     });
     await screen.findByRole('region', { name: 'Team workload' });
@@ -96,7 +96,7 @@ describe('Reports · Workload', () => {
   it('expands a person, opens a task and rebalances it with the assignee picker', async () => {
     let finish: (r: Response) => void = () => undefined;
     const put = vi.fn(() => new Promise<Response>((r) => (finish = r)));
-    const { fetchMock, router } = renderReports('/reports/workload', {
+    const { fetchMock, router } = renderReports('/w/kite-studio/reports/workload', {
       extra: {
         [WORKLOAD]: () => Response.json(workloadReport()),
         ...membersApi,
@@ -138,7 +138,7 @@ describe('Reports · Workload', () => {
   });
 
   it('"Assign work" opens quick create for that person', async () => {
-    renderReports('/reports/workload', {
+    renderReports('/w/kite-studio/reports/workload', {
       extra: { [WORKLOAD]: () => Response.json(workloadReport()), ...membersApi },
     });
     await screen.findByRole('region', { name: 'Team workload' });
@@ -150,7 +150,7 @@ describe('Reports · Workload', () => {
 
   it('is open to members too, in Mongolian', async () => {
     await i18n.changeLanguage('mn');
-    renderReports('/reports/workload', {
+    renderReports('/w/kite-studio/reports/workload', {
       me: { ...MEMBER_ME, preferences: ME.preferences },
       extra: { [WORKLOAD]: () => Response.json(workloadReport()), ...membersApi },
     });

@@ -9,7 +9,7 @@ describe('seed activity', () => {
     const pick = (text: Text) => (typeof text === 'string' ? text : text[1]);
     const rows = buildRows(createClock('2026-10-08'), pick, 'hash', 'en');
     expect(rows.activity.length).toBeGreaterThan(0);
-    for (const row of rows.activity) {
+    for (const row of [...rows.activity, ...rows.labs.activity]) {
       expect(Object.hasOwn(activityPayloadSchemas, row.type), row.type).toBe(true);
       const schema = activityPayloadSchemas[row.type];
       const parsed = schema.safeParse(row.payload);

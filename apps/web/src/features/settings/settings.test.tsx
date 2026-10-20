@@ -118,7 +118,7 @@ describe('Settings', () => {
   });
 
   it('opens on Profile, with tabs in the URL', async () => {
-    renderSettings('/settings');
+    renderSettings('/w/kite-studio/settings');
     expect(await screen.findByRole('tab', { name: 'Profile' })).toHaveAttribute(
       'aria-selected',
       'true',
@@ -128,7 +128,7 @@ describe('Settings', () => {
   });
 
   it('saves a notification toggle as a partial update', async () => {
-    const { fetchMock } = renderSettings('/settings?tab=notifications');
+    const { fetchMock } = renderSettings('/w/kite-studio/settings?tab=notifications');
     const mentions = await screen.findByRole('switch', { name: /Mentions/ });
     expect(mentions).toBeChecked();
     fireEvent.click(mentions);
@@ -141,7 +141,7 @@ describe('Settings', () => {
   });
 
   it('applies the accent and theme right away', async () => {
-    const { fetchMock } = renderSettings('/settings?tab=preferences');
+    const { fetchMock } = renderSettings('/w/kite-studio/settings?tab=preferences');
     fireEvent.click(await screen.findByRole('radio', { name: 'Teal' }));
     await waitFor(() => {
       expect(document.documentElement.style.getPropertyValue('--accent')).toBe('#0F766E');
@@ -156,7 +156,7 @@ describe('Settings', () => {
   });
 
   it('sets a per-project notification level', async () => {
-    const { fetchMock } = renderSettings('/settings?tab=notifications', {
+    const { fetchMock } = renderSettings('/w/kite-studio/settings?tab=notifications', {
       [`GET /api/v1/workspaces/${WORKSPACE_ID}/notification-levels`]: () => Response.json([]),
       [`PUT /api/v1/projects/${PROJECT.id}/notification-level`]: () =>
         Response.json({ projectId: PROJECT.id, level: 'none' }),
@@ -174,7 +174,7 @@ describe('Settings', () => {
   it('deactivates a member with a handover, and lists them for reactivation', async () => {
     let deactivated = false;
     const posts: unknown[] = [];
-    renderSettings('/settings?tab=members', {
+    renderSettings('/w/kite-studio/settings?tab=members', {
       [`GET /api/v1/workspaces/${WORKSPACE_ID}/members/${DORJ.user.id}/handover`]: () =>
         Response.json({
           openTasks: 3,
@@ -210,7 +210,7 @@ describe('Settings', () => {
   });
 
   it('lets admins invite, revoke and change roles of others', async () => {
-    const { fetchMock } = renderSettings('/settings?tab=members', {
+    const { fetchMock } = renderSettings('/w/kite-studio/settings?tab=members', {
       [`POST /api/v1/workspaces/${WORKSPACE_ID}/invites`]: () =>
         Response.json(
           { ...INVITE, email: 'new@kite.test', link: 'https://kite.test/invite/abc123' },
@@ -263,7 +263,7 @@ describe('Settings', () => {
       },
       title: i === 2 ? 'Sales lead' : null,
     }));
-    renderSettings('/settings?tab=members', {
+    renderSettings('/w/kite-studio/settings?tab=members', {
       [`GET /api/v1/workspaces/${WORKSPACE_ID}/members`]: () =>
         Response.json([...MEMBERS, ...extra]),
     });
@@ -281,7 +281,7 @@ describe('Settings', () => {
   });
 
   it('shows plain members the list without controls', async () => {
-    renderSettings('/settings?tab=members', {}, 'member');
+    renderSettings('/w/kite-studio/settings?tab=members', {}, 'member');
     expect(await screen.findByText('Dorj E.')).toBeInTheDocument();
     expect(screen.getByText('Only admins can invite people and change roles.')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Change role/ })).toBeNull();
@@ -293,7 +293,7 @@ describe('Settings', () => {
   });
 
   it('lets admins set job titles and capacity inline', async () => {
-    const { fetchMock } = renderSettings('/settings?tab=members', {
+    const { fetchMock } = renderSettings('/w/kite-studio/settings?tab=members', {
       [`PATCH /api/v1/workspaces/${WORKSPACE_ID}/members/${DORJ.user.id}`]: (init) =>
         Response.json({ ...DORJ, ...(JSON.parse(init?.body as string) as object) }),
     });
@@ -331,7 +331,7 @@ describe('Settings', () => {
       const restored: string[] = [];
       const old = ARCHIVED[0];
       if (!old) throw new Error('fixture');
-      renderSettings('/settings?tab=archived', {
+      renderSettings('/w/kite-studio/settings?tab=archived', {
         [`GET /api/v1/workspaces/${WORKSPACE_ID}/archived-projects`]: () => Response.json(archived),
         [`POST /api/v1/projects/${old.id}/unarchive`]: () => {
           restored.push(old.id);
@@ -348,7 +348,7 @@ describe('Settings', () => {
       ]);
       expect(within(at(rows, 0)).getByRole('link', { name: 'Old site' })).toHaveAttribute(
         'href',
-        `/p/${old.id}/list`,
+        `/w/kite-studio/p/${old.id}/list`,
       );
 
       fireEvent.click(within(at(rows, 0)).getByRole('button', { name: 'Restore' }));
@@ -362,7 +362,7 @@ describe('Settings', () => {
     it('shows members Restore only on projects they created', async () => {
       const [old, pilot] = ARCHIVED;
       renderSettings(
-        '/settings?tab=archived',
+        '/w/kite-studio/settings?tab=archived',
         {
           [`GET /api/v1/workspaces/${WORKSPACE_ID}/archived-projects`]: () =>
             Response.json([old, { ...pilot, createdById: ME.user.id }]),
@@ -380,7 +380,7 @@ describe('Settings', () => {
     });
 
     it('says when nothing is archived', async () => {
-      renderSettings('/settings?tab=archived', {
+      renderSettings('/w/kite-studio/settings?tab=archived', {
         [`GET /api/v1/workspaces/${WORKSPACE_ID}/archived-projects`]: () => Response.json([]),
       });
       expect(await screen.findByText('No archived projects')).toBeInTheDocument();
@@ -405,7 +405,7 @@ describe('Settings', () => {
     };
 
     it('lists tags with usage, searches and sorts by use', async () => {
-      renderSettings('/settings?tab=tags', tagsGet);
+      renderSettings('/w/kite-studio/settings?tab=tags', tagsGet);
       expect(await screen.findByText('3 tasks')).toBeVisible();
       expect(screen.getByText('1 task')).toBeVisible();
       const search = screen.getByRole('searchbox', { name: 'Search tags' });
@@ -419,7 +419,7 @@ describe('Settings', () => {
     });
 
     it('creates, renames and recolors a tag', async () => {
-      const { fetchMock } = renderSettings('/settings?tab=tags', {
+      const { fetchMock } = renderSettings('/w/kite-studio/settings?tab=tags', {
         ...tagsGet,
         [`POST /api/v1/workspaces/${WORKSPACE_ID}/tags`]: (init) =>
           Response.json(
@@ -459,7 +459,7 @@ describe('Settings', () => {
     });
 
     it('shows a taken name next to the field', async () => {
-      renderSettings('/settings?tab=tags', {
+      renderSettings('/w/kite-studio/settings?tab=tags', {
         ...tagsGet,
         [`POST /api/v1/workspaces/${WORKSPACE_ID}/tags`]: () =>
           Response.json({ error: { code: 'TAG_EXISTS', message: 'taken' } }, { status: 409 }),
@@ -475,7 +475,7 @@ describe('Settings', () => {
     });
 
     it('merges a tag into another after confirming', async () => {
-      const { fetchMock } = renderSettings('/settings?tab=tags', {
+      const { fetchMock } = renderSettings('/w/kite-studio/settings?tab=tags', {
         ...tagsGet,
         'POST /api/v1/tags/01890000-0000-7000-8000-000000000a02/merge': () =>
           Response.json({ ...at(TAG_LIST, 0), taskCount: 4 }),
@@ -498,7 +498,7 @@ describe('Settings', () => {
     });
 
     it('asks before deleting, with how many tasks lose it', async () => {
-      const { fetchMock } = renderSettings('/settings?tab=tags', {
+      const { fetchMock } = renderSettings('/w/kite-studio/settings?tab=tags', {
         ...tagsGet,
         'DELETE /api/v1/tags/01890000-0000-7000-8000-000000000a01': () =>
           new Response(null, { status: 204 }),
@@ -518,7 +518,7 @@ describe('Settings', () => {
     });
 
     it('shows plain members the list without controls', async () => {
-      renderSettings('/settings?tab=tags', tagsGet, 'member');
+      renderSettings('/w/kite-studio/settings?tab=tags', tagsGet, 'member');
       expect(
         await screen.findByText('Only admins and owners can create, edit, merge or delete tags.'),
       ).toBeVisible();
@@ -563,7 +563,7 @@ describe('Settings', () => {
     });
 
     it('groups sprints into current, upcoming and past, with their projects', async () => {
-      renderSettings('/settings?tab=sprints', sprintsGet);
+      renderSettings('/w/kite-studio/settings?tab=sprints', sprintsGet);
       const current = await screen.findByRole('region', { name: 'Current' });
       expect(within(current).getByText('Sprint 2')).toBeVisible();
       // The group heading and the pill.
@@ -584,7 +584,7 @@ describe('Settings', () => {
     });
 
     it('adds a project to a sprint and deletes an unused one', async () => {
-      const { fetchMock } = renderSettings('/settings?tab=sprints', {
+      const { fetchMock } = renderSettings('/w/kite-studio/settings?tab=sprints', {
         ...sprintsGet,
         [`PATCH /api/v1/sprints/${SPRINT_LIST[2]?.id ?? ''}`]: (init) =>
           Response.json({ ...SPRINT_LIST[2], ...(JSON.parse(init?.body as string) as object) }),
@@ -631,7 +631,7 @@ describe('Settings', () => {
     it('shows members the menu only on sprints they created', async () => {
       const mine = { ...SPRINT_LIST[2], createdBy: ME.user.id };
       renderSettings(
-        '/settings?tab=sprints',
+        '/w/kite-studio/settings?tab=sprints',
         {
           [`GET /api/v1/workspaces/${WORKSPACE_ID}/sprints`]: () =>
             Response.json([SPRINT_LIST[0], SPRINT_LIST[1], mine]),
@@ -654,7 +654,7 @@ describe('Settings', () => {
     };
     const posted: unknown[] = [];
     const deleted: string[] = [];
-    renderSettings('/settings', {
+    renderSettings('/w/kite-studio/settings', {
       [`GET /api/v1/workspaces/${WORKSPACE_ID}/members/${ME.user.id}/absences`]: () =>
         Response.json([absence]),
       [`POST /api/v1/workspaces/${WORKSPACE_ID}/members/${ME.user.id}/absences`]: (init) => {

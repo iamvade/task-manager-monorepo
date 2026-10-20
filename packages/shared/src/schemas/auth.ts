@@ -125,7 +125,8 @@ export type CreatedInvite = z.infer<typeof createdInviteSchema>;
 /** `GET /invites/:token` — what the accept page shows before the user commits. */
 export const invitePreviewSchema = z
   .object({
-    workspace: z.object({ name: z.string() }),
+    /** `slug` names the workspace's pages (`/w/:slug/...`), where accepting lands. */
+    workspace: z.object({ id: z.uuid(), name: z.string(), slug: z.string() }),
     email: z.string(),
     /** `owner` for the invite the platform admin made with the workspace. */
     role: workspaceRoleSchema,

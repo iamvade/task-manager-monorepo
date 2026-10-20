@@ -52,7 +52,8 @@ export function todayIndexOf(sprint: SprintDetail): number | null {
 
 /**
  * Replan: the project's List view filtered to the sprint's unfinished tasks (open statuses);
- * any filter param keeps the List from applying its default sprint filter.
+ * any filter param keeps the List from applying its default sprint filter. Like
+ * `replanSpaceHref`, a path inside the workspace (callers prefix it with `useWsPath()`).
  */
 export function replanHref(
   projectId: string,

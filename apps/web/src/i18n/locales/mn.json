@@ -97,6 +97,7 @@
     "skipToContent": "Агуулга руу шилжих",
     "workspace": "Ажлын орчин",
     "switchWorkspace": "Ажлын орчин солих",
+    "unreadElsewhere": "Өөр ажлын орчинд шинэ мэдэгдэл байна",
     "search": "Хайх",
     "collapse": "Хажуу самбарыг хураах",
     "expand": "Хажуу самбарыг дэлгэх",
@@ -137,6 +138,11 @@
     "feedback": "Санал хүсэлт",
     "feedbackNew_one": "{{count}} шинэ",
     "feedbackNew_other": "{{count}} шинэ"
+  },
+  "workspace": {
+    "noneTitle": "Ажлын орчин алга",
+    "noneBody": "{{email}} ямар ч ажлын орчны гишүүн биш байна. Ажлын орчны админаас урилга хүсээрэй.",
+    "signOut": "Гарах"
   },
   "header": {
     "breadcrumb": "Байршил",

@@ -21,6 +21,7 @@ import { MeetingSection } from './MeetingSection';
 import { MyPlaceholderCard, OutCard } from './PersonCards';
 import { loadWriteModal } from '../write/loadWriteModal';
 import { PostedStrip } from './PostedStrip';
+import { useWsPath } from '../../../api/workspaces';
 
 const StandupWriteModal = lazy(() =>
   loadWriteModal().then((m) => ({ default: m.StandupWriteModal })),
@@ -39,6 +40,7 @@ export function StandupDayView({
   groups: readonly StandupGroup[];
   date: string | undefined;
 }) {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const { me } = useAuth();
   const { formatDay } = useDates();
@@ -92,10 +94,10 @@ export function StandupDayView({
     };
   }, [data, me, zone]);
 
-  if (!valid) return <Navigate to={`/standup/${group.id}`} replace />;
+  if (!valid) return <Navigate to={ws(`/standup/${group.id}`)} replace />;
   // No standup today (weekend, holiday): open the latest standup day.
   if (data && dateParam === undefined && !data.isStandupDay && data.prevDate) {
-    return <Navigate to={dayHref(group.id, data.prevDate)} replace />;
+    return <Navigate to={ws(dayHref(group.id, data.prevDate))} replace />;
   }
 
   const writing = params.get('write') === '1';

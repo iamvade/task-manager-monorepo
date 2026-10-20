@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useCreateProject } from '../../api/projects';
+import { useWsPath } from '../../api/workspaces';
 import { PlusIcon } from '../../components/icons';
 import { Button } from '../../components/ui/Button';
 import { IconButton } from '../../components/ui/IconButton';
@@ -22,6 +23,7 @@ interface NewProjectButtonProps {
 export function NewProjectButton({ workspaceId, space }: NewProjectButtonProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const ws = useWsPath();
   const setSpaceOpen = useUiStore((s) => s.setSpaceOpen);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
@@ -39,7 +41,7 @@ export function NewProjectButton({ workspaceId, space }: NewProjectButtonProps) 
           setName('');
           setOpen(false);
           setSpaceOpen(space.id, true);
-          void navigate(`/p/${project.id}/list`);
+          void navigate(ws(`/p/${project.id}/list`));
         },
       },
     );

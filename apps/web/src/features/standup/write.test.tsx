@@ -46,7 +46,7 @@ function answer(body: Body, blockerIds: string[] = []): StandupEntry {
 function renderWrite(myEntry: StandupEntry | null, onSave: (body: Body) => StandupEntry) {
   const saved: Body[] = [];
   const day = dayOf({ myEntry });
-  const view = renderAt(`/standup/${MOBILE_ID}?write=1`, {
+  const view = renderAt(`/w/kite-studio/standup/${MOBILE_ID}?write=1`, {
     extra: {
       [DAY]: () => Response.json(day),
       [SUGGEST]: () => Response.json(SUGGESTIONS),
@@ -69,7 +69,7 @@ describe('Write update: drafts', () => {
   beforeEach(async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     localStorage.clear();
-    useUiStore.setState({ lastWorkspaceId: null, lastStandupGroupId: null });
+    useUiStore.setState({ lastWorkspaceId: null, lastStandupGroupIds: {} });
     useToastStore.setState({ toasts: [] });
     await i18n.changeLanguage('en');
   });

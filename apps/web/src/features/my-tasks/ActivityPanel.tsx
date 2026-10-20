@@ -1,6 +1,7 @@
 import type { ActivityFeedItem } from '@kite/shared';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { useWsPath } from '../../api/workspaces';
 import { useAuth } from '../../auth/useAuth';
 import { Avatar } from '../../components/ui/Avatar';
 import { useDates } from '../../lib/useDates';
@@ -66,6 +67,7 @@ interface ActivityPanelProps {
 /** "Recent activity" panel: header with View inbox, the feed, "Show older activity". */
 export function ActivityPanel({ items, onShowOlder, loadingOlder }: ActivityPanelProps) {
   const { t } = useTranslation();
+  const ws = useWsPath();
   return (
     <aside
       aria-labelledby="recent-activity"
@@ -76,7 +78,7 @@ export function ActivityPanel({ items, onShowOlder, loadingOlder }: ActivityPane
           {t('myTasks.recentActivity')}
         </h2>
         <Link
-          to="/inbox"
+          to={ws('/inbox')}
           className="flex-none text-[12px] font-medium whitespace-nowrap text-accent-ink no-underline"
         >
           {t('myTasks.viewInbox')}

@@ -36,7 +36,7 @@ describe('Reports · People', () => {
   });
 
   it('shows a person’s cards with neutral deltas, trends, helping and open tasks', async () => {
-    renderReports(`/reports/people/${DORJ.id}`, {
+    renderReports(`/w/kite-studio/reports/people/${DORJ.id}`, {
       extra: {
         [`${REPORTS_API}/people/${DORJ.id}`]: () => Response.json(personReport()),
         ...membersApi,
@@ -91,12 +91,12 @@ describe('Reports · People', () => {
 
     const open = screen.getByRole('table', { name: 'Current open tasks' });
     const [first] = within(open).getAllByRole('row').slice(1);
-    expect(first).toHaveAttribute('href', `/reports/people/${DORJ.id}?task=CHK-1`);
+    expect(first).toHaveAttribute('href', `/w/kite-studio/reports/people/${DORJ.id}?task=CHK-1`);
     expect(within(open).getByText('Oct 3 · overdue')).toBeInTheDocument();
     expect(within(open).getByText('No due date')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'See workload' })).toHaveAttribute(
       'href',
-      '/reports/workload',
+      '/w/kite-studio/reports/workload',
     );
     expect(screen.getByRole('link', { name: 'Export CSV' })).toHaveAttribute(
       'href',
@@ -105,20 +105,23 @@ describe('Reports · People', () => {
   });
 
   it('picks another person from the picker', async () => {
-    const { router, fetchMock } = renderReports(`/reports/people/${DORJ.id}?period=week`, {
-      extra: {
-        [`${REPORTS_API}/people/${DORJ.id}`]: () => Response.json(personReport()),
-        [`${REPORTS_API}/people/${SARA.id}`]: () =>
-          Response.json(
-            personReport({ person: { user: SARA, title: 'Product designer', role: 'member' } }),
-          ),
-        ...membersApi,
+    const { router, fetchMock } = renderReports(
+      `/w/kite-studio/reports/people/${DORJ.id}?period=week`,
+      {
+        extra: {
+          [`${REPORTS_API}/people/${DORJ.id}`]: () => Response.json(personReport()),
+          [`${REPORTS_API}/people/${SARA.id}`]: () =>
+            Response.json(
+              personReport({ person: { user: SARA, title: 'Product designer', role: 'member' } }),
+            ),
+          ...membersApi,
+        },
       },
-    });
+    );
     fireEvent.click(await screen.findByRole('button', { name: 'Choose a person: Dorj E.' }));
     fireEvent.click(await screen.findByRole('option', { name: /^Sara Khan/ }));
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe(`/reports/people/${SARA.id}`);
+      expect(router.state.location.pathname).toBe(`/w/kite-studio/reports/people/${SARA.id}`);
     });
     expect(router.state.location.search).toBe('?period=week');
     expect(
@@ -128,7 +131,7 @@ describe('Reports · People', () => {
   });
 
   it('says so when there are no overdue tasks or reviews', async () => {
-    renderReports(`/reports/people/${DORJ.id}`, {
+    renderReports(`/w/kite-studio/reports/people/${DORJ.id}`, {
       extra: {
         [`${REPORTS_API}/people/${DORJ.id}`]: () =>
           Response.json(
@@ -180,7 +183,7 @@ describe('Reports · My performance', () => {
     ['?period=quarter', 'Your quarter so far'],
     ['?period=custom&from=2026-09-01&to=2026-09-30', 'Your chosen period'],
   ])('titles the period %s as “%s”', async (search, title) => {
-    renderReports(`/reports/me${search}`, {
+    renderReports(`/w/kite-studio/reports/me${search}`, {
       me: MEMBER_ME,
       extra: { [`${REPORTS_API}/people/me`]: () => Response.json(mine) },
     });
@@ -188,7 +191,7 @@ describe('Reports · My performance', () => {
   });
 
   it('lists what I completed behind the Completed card', async () => {
-    renderReports('/reports/me', {
+    renderReports('/w/kite-studio/reports/me', {
       me: MEMBER_ME,
       extra: { [`${REPORTS_API}/people/me`]: () => Response.json(mine) },
     });
@@ -199,7 +202,7 @@ describe('Reports · My performance', () => {
   });
 
   it('uses the “you” copy and exports my data', async () => {
-    renderReports('/reports/me', {
+    renderReports('/w/kite-studio/reports/me', {
       me: MEMBER_ME,
       extra: { [`${REPORTS_API}/people/me`]: () => Response.json(mine) },
     });
@@ -220,7 +223,7 @@ describe('Reports · My performance', () => {
     expect(screen.getByRole('heading', { name: 'Your open tasks' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Go to My Tasks' })).toHaveAttribute(
       'href',
-      '/my-tasks',
+      '/w/kite-studio/my-tasks',
     );
     expect(screen.getByRole('link', { name: 'Export my data' })).toHaveAttribute(
       'href',

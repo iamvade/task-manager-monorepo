@@ -44,7 +44,7 @@ export function RequireAuth() {
 /** Layout route for /admin (inside `RequireAuth`): the platform admin only, others go home. */
 export function RequireVade() {
   const { me } = useAuth();
-  if (me?.user.platformRole !== 'vade') return <Navigate to="/my-tasks" replace />;
+  if (me?.user.platformRole !== 'vade') return <Navigate to="/" replace />;
   return <Outlet />;
 }
 

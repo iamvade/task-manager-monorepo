@@ -16,7 +16,7 @@ type Handler = (init?: RequestInit) => Response;
 const body = (init?: RequestInit): unknown =>
   typeof init?.body === 'string' ? JSON.parse(init.body) : null;
 const EN_ME = { ...ME, preferences: { ...ME.preferences, locale: 'en' } };
-const BOARD = `/p/${PROJECT_ID}/board?sprint=none`;
+const BOARD = `/w/kite-studio/p/${PROJECT_ID}/board?sprint=none`;
 
 function api(tasks: TaskListItem[], extra: Record<string, Handler> = {}) {
   return mockApi({
@@ -93,7 +93,7 @@ describe('board', () => {
   it('says how many tasks the filters hide, per column and in the count line', async () => {
     const urgent = makeTasks().filter((x) => x.priority === 'urgent');
     api(urgent);
-    const router = renderAt(`/p/${PROJECT_ID}/board?sprint=none&priority=urgent`);
+    const router = renderAt(`/w/kite-studio/p/${PROJECT_ID}/board?sprint=none&priority=urgent`);
 
     expect(await screen.findByText('2 of 7 tasks · 0 done')).toBeInTheDocument();
     expect(within(column(/^To Do/)).getByText('+2 hidden by filters')).toBeInTheDocument();
@@ -276,7 +276,7 @@ describe('board', () => {
   it('applies the shared URL filters', async () => {
     const tasks = makeTasks();
     const fetchMock = api(tasks);
-    renderAt(`/p/${PROJECT_ID}/board?sprint=none&priority=urgent`);
+    renderAt(`/w/kite-studio/p/${PROJECT_ID}/board?sprint=none&priority=urgent`);
     await screen.findByRole('region', { name: /^To Do/ });
     const urls = fetchMock.mock.calls.map(([input]) =>
       typeof input === 'string' ? input : input instanceof URL ? input.href : input.url,
@@ -291,7 +291,7 @@ describe('board', () => {
     api(tasks, {
       [`GET /api/v1/spaces/${SPACE_ID}/tasks`]: () => Response.json(tasks),
     });
-    renderAt(`/s/${SPACE_ID}/board`);
+    renderAt(`/w/kite-studio/s/${SPACE_ID}/board`);
     const todo = await screen.findByRole('region', { name: 'To Do, 2 tasks' });
     expect(within(todo).getAllByText('App Redesign')).toHaveLength(2);
     // No inline add across projects; the header "+" opens quick create in that category.

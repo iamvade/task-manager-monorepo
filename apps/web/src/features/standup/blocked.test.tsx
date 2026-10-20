@@ -43,7 +43,7 @@ describe('Blocked marker', () => {
     const pill = screen.getByRole('link', {
       name: 'Blocked: Waiting on final tab icons — from Temuulen’s standup, Oct 8',
     });
-    expect(pill).toHaveAttribute('href', `/standup/${MOBILE_ID}/2026-10-08`);
+    expect(pill).toHaveAttribute('href', `/w/kite-studio/standup/${MOBILE_ID}/2026-10-08`);
     expect(pill).toHaveTextContent('Blocked');
   });
 
@@ -76,7 +76,7 @@ describe('Blocked marker', () => {
     expect(screen.getByText('Waiting on final tab icons')).toBeVisible();
     expect(screen.getByRole('link', { name: 'From Temuulen’s standup, Oct 8' })).toHaveAttribute(
       'href',
-      `/standup/${MOBILE_ID}/2026-10-08`,
+      `/w/kite-studio/standup/${MOBILE_ID}/2026-10-08`,
     );
   });
 });

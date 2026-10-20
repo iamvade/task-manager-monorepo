@@ -101,6 +101,12 @@ export const notificationPageSchema = z
   .meta({ id: 'NotificationPage' });
 export type NotificationPage = z.infer<typeof notificationPageSchema>;
 
+/** Unread inbox items per workspace I'm an active member of (the workspace switcher's dots). */
+export const unreadCountsSchema = z
+  .array(z.object({ workspaceId: z.uuid(), unread: z.number().int() }))
+  .meta({ id: 'UnreadCounts' });
+export type UnreadCounts = z.infer<typeof unreadCountsSchema>;
+
 export const readAllNotificationsSchema = z
   .object({ workspaceId: z.uuid() })
   .meta({ id: 'ReadAllNotifications' });

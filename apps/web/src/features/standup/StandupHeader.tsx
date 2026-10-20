@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router';
 import { ChevronDownIcon, UsersIcon } from '../../components/icons';
 import { Picker } from '../../components/ui/Picker';
 import { Popover } from '../../components/ui/Popover';
+import { useWsPath } from '../../api/workspaces';
 
 /**
  * Standup page header (Standup*.dc.html): min 64px, padding 12/24, bottom border. On a phone
@@ -32,6 +33,7 @@ export function GroupSwitcher({
   groups: readonly StandupGroup[];
   icon?: boolean;
 }) {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const items = groups.some((g) => g.id === group.id) ? groups : [group, ...groups];
@@ -63,7 +65,7 @@ export function GroupSwitcher({
           getLabel={(g) => g.name}
           onSelect={(g) => {
             close();
-            void navigate(`/standup/${g.id}`);
+            void navigate(ws(`/standup/${g.id}`));
           }}
           onClose={close}
           label={label}

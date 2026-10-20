@@ -37,7 +37,8 @@ export const queryKeys = {
   spaceTasks: (spaceId: string, query: object) =>
     ['tasks', 'list', 'space', spaceId, query] as const,
   taskDetails: ['tasks', 'detail'] as const,
-  task: (ref: string) => ['tasks', 'detail', ref] as const,
+  /** By key (`APP-142`, unique per workspace) or id. */
+  task: (workspaceId: string, ref: string) => ['tasks', 'detail', workspaceId, ref] as const,
   /** Drawer feed (history + comments, oldest first); under `tasks` so task writes refresh it. */
   taskActivity: (taskId: string) => ['tasks', 'activity', taskId] as const,
   /** My Tasks (`GET /me/home`); under `tasks` so every task write refreshes it. */
@@ -49,6 +50,8 @@ export const queryKeys = {
   reportsOf: (workspaceId: string) => ['tasks', 'reports', workspaceId] as const,
   report: (workspaceId: string, report: string, query: object) =>
     ['tasks', 'reports', workspaceId, report, query] as const,
+  /** My unread inbox count in each of my workspaces (the workspace switcher). */
+  unreadCounts: ['unread-counts'] as const,
   /** Prefix of every inbox tab of a workspace. */
   notificationsOf: (workspaceId: string) => ['notifications', workspaceId] as const,
   notifications: (workspaceId: string, tab: string, projectId?: string) =>

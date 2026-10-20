@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useNavigate, useParams } from 'react-router';
 import { useCreateStandupGroup, useStandupGroup, useStandupGroups } from '../../api/standups';
-import { useCurrentWorkspace } from '../../api/workspaces';
+import { useCurrentWorkspace, useWsPath } from '../../api/workspaces';
+import { useOtherWorkspacePath } from '../workspace/useOtherWorkspacePath';
 import { ErrorState } from '../../components/ErrorState';
 import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
@@ -25,16 +26,17 @@ function Loading() {
 
 /** `/standup`: my last group, else my first, else the first; no groups → create / ask. */
 export function StandupIndexPage() {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const workspace = useCurrentWorkspace();
   const groups = useStandupGroups(workspace?.id);
-  const lastId = useUiStore((s) => s.lastStandupGroupId);
+  const lastId = useUiStore((s) => s.lastStandupGroupIds[workspace?.id ?? '']);
   const role = useWorkspaceRole();
   if (groups.isPending) return <Loading />;
   if (groups.isError) return <ErrorState error={groups.error} />;
   const list = groups.data;
   const target = list.find((g) => g.id === lastId) ?? list.find((g) => g.isMember) ?? list[0];
-  if (target) return <Navigate to={`/standup/${target.id}`} replace />;
+  if (target) return <Navigate to={ws(`/standup/${target.id}`)} replace />;
   const admin = role !== undefined && canCreateStandupGroup(role);
   return (
     <EmptyState
@@ -49,6 +51,7 @@ export function StandupIndexPage() {
 
 /** Admins with no groups yet: name + "Create a standup group" (then its settings). */
 function CreateFirstGroup({ workspaceId }: { workspaceId: string }) {
+  const ws = useWsPath();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [name, setName] = useState('');
@@ -62,7 +65,7 @@ function CreateFirstGroup({ workspaceId }: { workspaceId: string }) {
         if (!trimmed) return;
         create.mutate(
           { name: trimmed },
-          { onSuccess: (group) => void navigate(`/standup/${group.id}/settings`) },
+          { onSuccess: (group) => void navigate(ws(`/standup/${group.id}/settings`)) },
         );
       }}
     >
@@ -91,12 +94,15 @@ export function StandupGroupPage() {
   const groups = useStandupGroups(workspace?.id);
   const setLast = useUiStore((s) => s.setLastStandupGroup);
   const loaded = group.data;
+  const elsewhere = useOtherWorkspacePath(loaded?.workspaceId);
   useEffect(() => {
-    if (loaded && !loaded.archivedAt) setLast(loaded.id);
-  }, [loaded, setLast]);
+    if (loaded && !loaded.archivedAt && !elsewhere) setLast(loaded.workspaceId, loaded.id);
+  }, [loaded, setLast, elsewhere]);
 
   if (group.isPending) return <Loading />;
   if (group.isError) return <ErrorState error={group.error} />;
+  // A link to a group of another of my workspaces: open it there.
+  if (elsewhere) return <Navigate to={elsewhere} replace />;
   if (!group.data.hasPosts && date === undefined) {
     return (
       <>

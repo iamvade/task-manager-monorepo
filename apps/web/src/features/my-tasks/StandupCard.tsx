@@ -2,6 +2,7 @@ import { shortName, zonedTimeToZone, type StandupDay, type StandupGroup } from '
 import { useQueries } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { useWsPath } from '../../api/workspaces';
 import { standupDayQuery, useStandupGroups } from '../../api/standups';
 import { useAuth } from '../../auth/useAuth';
 import { StandupIcon } from '../../components/icons';
@@ -94,6 +95,7 @@ function GroupBlock({
   divided: boolean;
 }) {
   const { t } = useTranslation();
+  const ws = useWsPath();
   const { me } = useAuth();
   const posted = (day?.members ?? []).filter(
     (m) => m.state === 'posted' && m.user.id !== me?.user.id,
@@ -141,7 +143,7 @@ function GroupBlock({
       </div>
       <div className="flex flex-wrap gap-2">
         <Link
-          to={writeHref(group.id)}
+          to={ws(writeHref(group.id))}
           className={cn(
             buttonVariants.primary,
             'inline-flex h-8 items-center gap-1.5 rounded-[8px] px-3 text-[13px] font-medium no-underline',
@@ -150,7 +152,7 @@ function GroupBlock({
           {t('standup.day.writeUpdate')}
         </Link>
         <Link
-          to={`/standup/${group.id}`}
+          to={ws(`/standup/${group.id}`)}
           className="inline-flex h-8 items-center rounded-[8px] px-2.5 text-[13px] font-medium text-2 no-underline hover:bg-hover"
         >
           {t('myTasks.standup.seeTeam')}
