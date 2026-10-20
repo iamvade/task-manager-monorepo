@@ -161,4 +161,47 @@ describe('auth flow', () => {
       expect(document.documentElement.lang).toBe('en');
     });
   });
+
+  it('signs out from the account menu and lands on sign-in without a refresh', async () => {
+    mockApi({
+      'GET /api/v1/auth/me': () => Response.json(ME),
+      [`GET /api/v1/workspaces/${WORKSPACE_ID}/sidebar`]: () => Response.json(SIDEBAR),
+      ...homeHandlers(),
+      'POST /api/v1/auth/logout': () => new Response(null, { status: 204 }),
+    });
+    const router = renderAt('/w/kite-studio/my-tasks');
+    fireEvent.click(await screen.findByRole('button', { name: 'Anu Bold — Бүртгэлийн цэс' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Гарах' }));
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe('/login');
+    });
+    // The sign-in page is a lazy chunk: allow for loading it under a busy test run.
+    expect(
+      await screen.findByRole('heading', { name: 'Kite-д нэвтрэх' }, { timeout: 3000 }),
+    ).toBeInTheDocument();
+    // Signed out for good: the app sends any page back to sign-in.
+    await router.navigate('/w/kite-studio/my-tasks');
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe('/login');
+    });
+  });
+
+  it('signs the platform admin out of /admin', async () => {
+    const vade = { ...ME, user: { ...ME.user, platformRole: 'vade' as const }, workspaces: [] };
+    mockApi({
+      'GET /api/v1/auth/me': () => Response.json(vade),
+      'GET /api/v1/admin/workspaces': () => Response.json([]),
+      'POST /api/v1/auth/logout': () => new Response(null, { status: 204 }),
+    });
+    const router = renderAt('/admin');
+    fireEvent.click(await screen.findByRole('button', { name: 'Гарах' }));
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe('/login');
+    });
+    expect(router.state.location.search).toBe('?next=%2Fadmin');
+    expect(
+      await screen.findByRole('heading', { name: 'Kite-д нэвтрэх' }, { timeout: 3000 }),
+    ).toBeInTheDocument();
+  });
 });
