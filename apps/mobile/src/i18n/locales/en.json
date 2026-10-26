@@ -5,13 +5,51 @@
   "common": {
     "comingSoon": "This screen is being built and arrives in an upcoming phase.",
     "notFoundTitle": "Not found",
-    "notFoundBody": "This page doesn't exist or you don't have access to it."
+    "notFoundBody": "This page doesn't exist or you don't have access to it.",
+    "loading": "Loading…",
+    "genericError": "Something went wrong. Please try again.",
+    "retry": "Try again",
+    "close": "Close",
+    "cancel": "Cancel"
   },
   "auth": {
-    "signInTitle": "Sign in to Kite"
+    "signInTitle": "Sign in to Kite",
+    "signInSubtitle": "Use your work email to continue.",
+    "email": "Email",
+    "password": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "signOut": "Sign out",
+    "invalidCredentials": "Invalid email or password.",
+    "rateLimited": "Too many attempts. Wait a moment and try again.",
+    "forgotPassword": "Forgot password?",
+    "forgotPasswordBody": "Ask your admin for a password reset link. Open it on this phone or a computer to set a new password.",
+    "lockedTitle": "Too many attempts",
+    "lockedBody": "For your security, signing in is paused for a few minutes.",
+    "lockedButton": "Try again in {{time}}"
   },
   "invite": {
-    "join": "Join workspace"
+    "join": "Join workspace",
+    "title": "Join {{workspace}}",
+    "invitedAs": "This invite was sent to {{email}}.",
+    "name": "Full name",
+    "newPassword": "Password",
+    "passwordHint": "At least 8 characters",
+    "confirmPassword": "Confirm password",
+    "passwordTooShort": "Password must be at least 8 characters.",
+    "passwordMismatch": "Passwords don't match.",
+    "createAccount": "Create account and join",
+    "creating": "Creating…",
+    "joining": "Joining…",
+    "signInToJoin": "You already have an account with this email. Sign in to join.",
+    "accountExists": "An account with this email already exists. Sign in to join.",
+    "signedInAsOther": "You're signed in as {{email}}. Sign in with the invited email to join.",
+    "switchAccount": "Use another account",
+    "invalidTitle": "This invite isn't valid",
+    "invalidBody": "The link has expired or was already used. Ask the person who invited you for a new one.",
+    "goToSignIn": "Go to sign in"
   },
   "tabs": {
     "myTasks": "My Tasks",
@@ -19,5 +57,35 @@
     "inbox": "Inbox",
     "standup": "Standup",
     "more": "More"
+  },
+  "workspace": {
+    "noneTitle": "No workspace yet",
+    "noneBody": "{{email}} isn't a member of any workspace. Ask a workspace admin to invite you.",
+    "signOut": "Sign out",
+    "checkAgain": "Check again",
+    "switcherTitle": "Workspaces",
+    "switcherLegend": "Number — unread notifications for you",
+    "current": "Current workspace",
+    "joinWithLink": "Join with an invite link",
+    "joinLinkPlaceholder": "Paste the link from your invite",
+    "joinLinkOpen": "Open invite",
+    "joinLinkInvalid": "That doesn’t look like an invite link.",
+    "signOutOf": "Sign out of {{email}}"
+  },
+  "shell": {
+    "switchWorkspace": "Switch workspace",
+    "unread_one": "{{count}} unread",
+    "unread_other": "{{count}} unread"
+  },
+  "settings": {
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "member": "Member"
+    }
+  },
+  "errors": {
+    "network": "Can’t reach the server. Check your connection and try again.",
+    "UNAUTHORIZED": "Your session ended. Sign in again."
   }
 }
