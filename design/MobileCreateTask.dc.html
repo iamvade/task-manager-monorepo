@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<title>MobileCreateTask — Kite Tasks</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+input,textarea{font:inherit;color:inherit}
+</style>
+</helmet>
+
+<div lang="{{lang}}" style="width: 1840px; min-height: 3200px; box-sizing: border-box; padding: 56px 64px 96px; display: flex; flex-direction: column; gap: 56px; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 15px; line-height: 22px; color: {{t.text}}; background: {{t.board}}; -webkit-font-smoothing: antialiased; {{t.scheme}}">
+
+  <header style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px">
+    <div style="display: flex; flex-direction: column; gap: 8px; max-width: 900px">
+      <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 12px; line-height: 16px; color: {{t.muted}}">Kite Tasks · iOS + Android · 390 × 844</span>
+      <h1 style="margin: 0; font-size: 40px; line-height: 48px; font-weight: 600; letter-spacing: -0.02em">MobileCreateTask</h1>
+      <p style="margin: 0; font-size: 15px; line-height: 22px; color: {{t.text3}}">{{L.intro}}</p>
+    </div>
+    <div aria-label="{{L.preview}}" style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 8px 8px 8px 16px; border: 1px dashed {{t.border2}}; border-radius: 14px">
+      <span style="font-size: 12px; font-weight: 600; color: {{t.muted}}">{{L.preview}}</span>
+      <sc-for list="{{toggles}}" as="tg" hint-placeholder-count="2">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <span style="font-size: 13px; color: {{t.text3}}">{{tg.label}}</span>
+          <div role="radiogroup" aria-label="{{tg.label}}" style="display: flex; gap: 2px; padding: 2px; border-radius: 10px; background: {{t.seg}}">
+            <sc-for list="{{tg.opts}}" as="o" hint-placeholder-count="2">
+              <button role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}" style="height: 32px; padding: 0 12px; border: 0; border-radius: 8px; font-size: 13px; font-weight: 600; {{o.style}}">{{o.label}}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </header>
+
+  <section style="display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; padding-bottom: 14px; border-bottom: 1px solid {{t.border}}">
+      <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 13px; color: {{accentInk}}">01–08</span>
+      <h2 style="margin: 0; font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em">{{L.secTitle}}</h2>
+      <span style="font-size: 14px; color: {{t.muted}}">{{L.secSub}}</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 64px 48px; align-items: start">
+      <sc-for list="{{phones}}" as="p" hint-placeholder-count="8">
+        <div style="display: flex; flex-direction: column; gap: 16px">
+          <span style="{{cap}}">{{p.cap}}</span>
+          <div style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; box-shadow: {{t.device}}">
+            <div style="flex: none; height: 59px"></div>
+
+            <!-- Background: My Tasks -->
+            <sc-if value="{{p.bgList}}" hint-placeholder-val="{{ true }}">
+              <div aria-hidden="true" style="display: flex; flex-direction: column">
+                <div style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px">
+                  <span style="width: 28px; height: 28px; border-radius: 7px; background: {{accent}}"></span>
+                  <span style="font-size: 15px; font-weight: 600">Kite Studio</span>
+                </div>
+                <div style="display: flex; flex-direction: column; padding: 2px 16px 12px">
+                  <span style="font-size: 13px; color: {{t.muted}}">{{L.dateLong}}</span>
+                  <span style="font-size: 28px; line-height: 34px; font-weight: 600">{{L.greeting}}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-bottom: 1px solid {{t.divider}}"><span style="font-weight: 600">{{L.tomorrow}}</span></div>
+                <sc-for list="{{ghost}}" as="x" hint-placeholder-count="6">
+                  <div style="display: flex; align-items: center; gap: 16px; height: 64px; padding: 0 16px; border-bottom: 1px solid {{t.divider}}">
+                    <span style="flex: none; width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; border: 2px solid {{t.faint}}"></span>
+                    <span style="flex: 1; display: flex; flex-direction: column; gap: 8px"><span style="height: 10px; border-radius: 5px; background: {{t.skel}}; {{x.w}}"></span><span style="height: 8px; width: 40%; border-radius: 4px; background: {{t.skel}}"></span></span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <!-- Background: Board column -->
+            <sc-if value="{{p.bgBoard}}" hint-placeholder-val="{{ false }}">
+              <div aria-hidden="true" style="display: flex; flex-direction: column; gap: 8px">
+                <div style="height: 56px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600">{{L.project}}</div>
+                <div style="margin: 0 16px; padding: 8px; border-radius: 14px; background: {{t.surface2}}; border: 1px solid {{t.divider}}; display: flex; flex-direction: column; gap: 8px">
+                  <div style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 10px; border-radius: 10px; background: {{accentSoft}}; color: {{accentInk}}; font-size: 14px; font-weight: 600"><span style="width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; {{reviewRing}}"></span>{{L.inReview}} · 3</div>
+                  <sc-for list="{{ghostCards}}" as="x" hint-placeholder-count="3">
+                    <div style="height: 112px; border-radius: 12px; background: {{t.raised}}; border: 1px solid {{t.border}}; padding: 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px"><span style="height: 10px; border-radius: 5px; background: {{t.skel}}; {{x.w}}"></span><span style="height: 10px; width: 40%; border-radius: 5px; background: {{t.skel}}"></span></div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <div aria-hidden="true" style="position: absolute; z-index: 3; inset: 0; background: {{t.scrim}}"></div>
+
+            <!-- ===== CREATE SHEET ===== -->
+            <form role="dialog" aria-modal="true" aria-label="{{L.newTask}}" style="position: absolute; z-index: 4; left: 0; right: 0; bottom: {{p.sheetBottom}}; margin: 0; display: flex; flex-direction: column; background: {{t.raised}}; border-radius: 16px 16px 0 0; box-shadow: {{t.shadowSheet}}">
+              <div style="height: 20px; display: flex; justify-content: center; padding-top: 6px; box-sizing: border-box"><span style="width: 36px; height: 5px; border-radius: 3px; background: {{t.grabber}}"></span></div>
+              <div style="display: flex; align-items: center; gap: 6px; height: 48px; padding: 0 4px 0 12px">
+                <button type="button" aria-haspopup="dialog" style="flex: none; display: inline-flex; align-items: center; gap: 6px; max-width: 170px; height: 32px; padding: 0 10px; border: 0; border-radius: 8px; background: {{t.fill}}; font-size: 13px; font-weight: 500; color: {{t.text2}}">
+                  <span style="flex: none; width: 8px; height: 8px; border-radius: 4px; background: #7C5CE0"></span>
+                  <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{L.project}}</span>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="m6 9 6 6 6-6"></path></svg>
+                </button>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="{{t.faint}}" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" style="flex: none"><path d="m9 6 6 6-6 6"></path></svg>
+                <h2 style="flex: 1; min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 500; color: {{t.text3}}">{{L.newTask}}</h2>
+                <button type="button" aria-label="{{L.close}}" style="flex: none; width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.text3}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+              </div>
+
+              <sc-if value="{{p.created}}" hint-placeholder-val="{{ false }}">
+                <div role="status" style="margin: 0 16px 4px; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 4px 0 10px; border-radius: 10px; {{okBox}}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>
+                  <span style="flex: 1; min-width: 0; font-size: 13px; font-weight: 500"><span style="font-family: Geist Mono, ui-monospace, monospace">APP-143</span> {{L.created}}</span>
+                  <a href="#" style="height: 40px; padding: 0 10px; display: flex; align-items: center; font-size: 13px; font-weight: 600; color: inherit; text-decoration: underline; text-underline-offset: 2px">{{L.open}}</a>
+                </div>
+              </sc-if>
+
+              <div style="display: flex; flex-direction: column; gap: 2px; padding: 0 16px">
+                <label for="ct-title" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">{{L.titleLabel}}</label>
+                <textarea id="ct-title" rows="2" placeholder="{{L.titlePh}}" aria-invalid="{{p.error}}" style="border: 0; outline: none; resize: none; padding: 4px 0; background: transparent; font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -0.01em; {{p.titleStyle}}">{{p.title}}</textarea>
+                <sc-if value="{{p.error}}" hint-placeholder-val="{{ false }}">
+                  <span role="alert" style="display: flex; align-items: center; gap: 6px; padding-bottom: 4px; font-size: 13px; line-height: 18px; font-weight: 500; color: {{t.red}}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16h.01"></path></svg>{{L.titleRequired}}
+                  </span>
+                </sc-if>
+                <label for="ct-desc" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">{{L.descLabel}}</label>
+                <textarea id="ct-desc" rows="1" placeholder="{{L.descPh}}" style="border: 0; outline: none; resize: none; padding: 4px 0; background: transparent; font-size: 16px; line-height: 22px; color: {{t.text2}}">{{p.desc}}</textarea>
+              </div>
+
+              <div role="group" aria-label="{{L.fields}}" style="display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 10px 16px 6px">
+                <sc-for list="{{p.chips}}" as="c" hint-placeholder-count="7">
+                  <button type="button" aria-haspopup="dialog" aria-expanded="{{c.active}}" aria-label="{{c.aria}}" style="flex: none; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px 0 {{c.padL}}; box-sizing: border-box; border-radius: 18px; font-size: 14px; font-weight: 500; white-space: nowrap; {{c.style}}">
+                    <sc-if value="{{c.isAvatar}}" hint-placeholder-val="{{ false }}"><span style="width: 26px; height: 26px; border-radius: 13px; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{c.av}}">{{c.initials}}</span></sc-if>
+                    <sc-if value="{{c.isDot}}" hint-placeholder-val="{{ false }}"><span style="width: 8px; height: 8px; border-radius: 4px; {{c.dot}}"></span></sc-if>
+                    <sc-if value="{{c.isMarker}}" hint-placeholder-val="{{ false }}"><span style="width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; {{c.ring}}"></span></sc-if>
+                    <sc-if value="{{c.isFlag}}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{c.flag}}"><path d="M4 22V4"></path><path d="M4 4h12l-2 4 2 4H4"></path></svg></sc-if>
+                    <sc-if value="{{c.isIcon}}" hint-placeholder-val="{{ true }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{c.icon}}"></path></svg></sc-if>
+                    {{c.label}}
+                  </button>
+                </sc-for>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px 12px; border-top: 1px solid {{t.divider}}">
+                <label style="display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 14px; color: {{t.text2}}; cursor: pointer">
+                  <input type="checkbox" checked="{{p.more}}" style="position: absolute; width: 1px; height: 1px; opacity: 0">
+                  <span aria-hidden="true" style="width: 40px; height: 24px; border-radius: 12px; padding: 2px; box-sizing: border-box; display: flex; {{p.switchStyle}}"><span style="width: 20px; height: 20px; border-radius: 10px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(0,0,0,0.25)"></span></span>
+                  {{L.createMore}}
+                </label>
+                <span style="flex: 1"></span>
+                <button type="submit" style="flex: none; height: 48px; padding: 0 22px; border: 0; border-radius: 12px; background: {{accent}}; color: #FFFFFF; font-size: 16px; font-weight: 600">{{L.create}}</button>
+              </div>
+              <sc-if value="{{p.safe}}" hint-placeholder-val="{{ false }}"><div style="height: 34px"></div></sc-if>
+            </form>
+
+            <!-- Keyboard placeholder -->
+            <sc-if value="{{p.keyboard}}" hint-placeholder-val="{{ true }}">
+              <div aria-hidden="true" style="position: absolute; z-index: 5; left: 0; right: 0; bottom: 0; height: 336px; background: {{t.kbd}}; display: flex; align-items: center; justify-content: center; font-family: Geist Mono, ui-monospace, monospace; font-size: 12px; color: {{t.muted}}">{{L.keyboard}}</div>
+            </sc-if>
+
+            <!-- Assignee picker in the keyboard's place -->
+            <sc-if value="{{p.pickAssignee}}" hint-placeholder-val="{{ false }}">
+              <div role="dialog" aria-label="{{L.assignee}}" style="position: absolute; z-index: 5; left: 0; right: 0; bottom: 0; height: 336px; box-sizing: border-box; display: flex; flex-direction: column; background: {{t.raised}}; border-top: 1px solid {{t.border}}">
+                <div style="flex: none; display: flex; align-items: center; height: 44px; padding: 0 4px 0 16px">
+                  <span style="flex: 1; font-size: 15px; font-weight: 600">{{L.assignee}}</span>
+                  <button style="height: 44px; padding: 0 12px; border: 0; background: transparent; font-size: 15px; font-weight: 600; color: {{accentInk}}">{{L.keyboardBack}}</button>
+                </div>
+                <div style="flex: none; padding: 0 16px 6px">
+                  <label style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; box-sizing: border-box; border-radius: 10px; background: {{t.fill}}">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{t.muted}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                    <input type="text" placeholder="{{L.searchPeople}}" aria-label="{{L.searchPeople}}" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-size: 16px; padding: 0">
+                  </label>
+                </div>
+                <div role="listbox" aria-label="{{L.assignee}}" aria-multiselectable="true" style="flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column">
+                  <sc-for list="{{people}}" as="o" hint-placeholder-count="4">
+                    <button role="option" aria-selected="{{o.on}}" style="flex: none; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 16px; border: 0; background: transparent; text-align: left">
+                      <span style="flex: none; width: 32px; height: 32px; border-radius: 16px; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{o.style}}">{{o.initials}}</span>
+                      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 15px; line-height: 20px; color: {{t.text}}">{{o.name}}</span><span style="font-size: 12px; line-height: 16px; color: {{t.muted}}">{{o.role}}</span></span>
+                      <span aria-hidden="true" style="flex: none; width: 22px; height: 22px; box-sizing: border-box; border-radius: 6px; display: flex; align-items: center; justify-content: center; {{o.box}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="{{o.check}}"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg></span>
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- Due picker in the keyboard's place -->
+            <sc-if value="{{p.pickDue}}" hint-placeholder-val="{{ false }}">
+              <div role="dialog" aria-label="{{L.due}}" style="position: absolute; z-index: 5; left: 0; right: 0; bottom: 0; height: 336px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; padding-bottom: 34px; background: {{t.raised}}; border-top: 1px solid {{t.border}}">
+                <div style="flex: none; display: flex; align-items: center; height: 44px; padding: 0 4px 0 16px">
+                  <span style="flex: 1; font-size: 15px; font-weight: 600">{{L.due}}</span>
+                  <button style="height: 44px; padding: 0 12px; border: 0; background: transparent; font-size: 15px; font-weight: 600; color: {{accentInk}}">{{L.keyboardBack}}</button>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 0 16px">
+                  <sc-for list="{{presets}}" as="o" hint-placeholder-count="4">
+                    <button aria-pressed="{{o.on}}" style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center; min-height: 52px; padding: 4px 12px; box-sizing: border-box; border-radius: 12px; text-align: left; {{o.style}}">
+                      <span style="font-size: 15px; line-height: 20px; font-weight: 500">{{o.label}}</span>
+                      <span style="font-size: 12px; line-height: 16px; color: {{t.muted}}">{{o.sub}}</span>
+                    </button>
+                  </sc-for>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); padding: 0 12px">
+                  <sc-for list="{{week}}" as="w" hint-placeholder-count="7">
+                    <button aria-label="{{w.aria}}" style="height: 56px; border: 0; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
+                      <span style="font-size: 11px; color: {{t.muted}}">{{w.wd}}</span>
+                      <span style="width: 32px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 15px; {{w.style}}">{{w.n}}</span>
+                    </button>
+                  </sc-for>
+                </div>
+                <button style="align-self: flex-start; height: 44px; margin-left: 16px; padding: 0; border: 0; background: transparent; font-size: 15px; font-weight: 500; color: {{accentInk}}">{{L.openCalendar}}</button>
+              </div>
+            </sc-if>
+
+            <!-- Discard confirmation -->
+            <sc-if value="{{p.alert}}" hint-placeholder-val="{{ false }}">
+              <div aria-hidden="true" style="position: absolute; z-index: 6; inset: 0; background: {{t.scrim}}"></div>
+              <div role="alertdialog" aria-modal="true" aria-labelledby="dc-h" aria-describedby="dc-b" style="position: absolute; z-index: 7; left: 40px; right: 40px; top: 300px; display: flex; flex-direction: column; gap: 6px; padding: 20px 16px 12px; border-radius: 16px; background: {{t.raised}}; box-shadow: {{t.shadowMenu}}; text-align: center">
+                <h2 id="dc-h" style="margin: 0; font-size: 17px; line-height: 22px; font-weight: 600">{{L.discardTitle}}</h2>
+                <p id="dc-b" style="margin: 0 0 10px; font-size: 14px; line-height: 20px; color: {{t.text3}}">{{L.discardBody}}</p>
+                <button style="height: 48px; border: 0; border-radius: 12px; background: #DC2626; color: #FFFFFF; font-size: 16px; font-weight: 600">{{L.discard}}</button>
+                <button style="height: 48px; border: 0; border-radius: 12px; background: transparent; font-size: 16px; font-weight: 600; color: {{t.text}}">{{L.keepEditing}}</button>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+
+      <!-- Behaviour -->
+      <div style="display: flex; flex-direction: column; gap: 16px">
+        <span style="{{cap}}">{{L.capRules}}</span>
+        <div style="width: 390px; box-sizing: border-box; display: flex; flex-direction: column; border: 1px solid {{t.border}}; border-radius: 16px; background: {{t.bg}}; overflow: hidden">
+          <sc-for list="{{rules}}" as="r" hint-placeholder-count="7">
+            <div style="display: flex; flex-direction: column; gap: 2px; padding: 12px 16px; border-bottom: 1px solid {{t.divider}}">
+              <span style="font-size: 14px; line-height: 20px; font-weight: 600">{{r.title}}</span>
+              <span style="font-size: 13px; line-height: 18px; color: {{t.text3}}">{{r.body}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"language":{"editor":"enum","default":"mn","options":["mn","en"]},"theme":{"editor":"enum","default":"light","options":["light","dark"]},"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"$preview":{"width":1840,"height":3200}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: undefined, theme: undefined };
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const lang = s.lang || this.props.language || 'mn';
+    const mn = lang === 'mn';
+    const pick = (p) => (mn ? p[0] : p[1]);
+    const theme = s.theme || this.props.theme || 'light';
+    const dark = theme === 'dark';
+    const accent = this.props.accent ?? '#6E56CF';
+    const inks = { '#6E56CF': '#B4A5FF', '#2F6FEB': '#93B4FF', '#0F766E': '#5EEAD4', '#3F3F46': '#D4D4D8' };
+    const accentInk = dark ? (inks[String(accent).toUpperCase()] || '#B4A5FF') : accent;
+    const accentSoft = accent + (dark ? '33' : '1A');
+
+    const STR = {
+      mn: {
+        intro: '«+» товчоос гарын хамт нээгддэг хуудас. Гарчиг, тайлбар, талбарын чипүүд — чип дарахад гар нь тухайн сонгогчоор солигдоно.',
+        preview: 'Урьдчилан харах', langLabel: 'Хэл', themeLabel: 'Горим', light: 'Цайвар', dark: 'Бараан',
+        secTitle: 'Ажил үүсгэх', secSub: 'Үндсэн · хариуцагч · огноо · үргэлжлүүлэн үүсгэх · «Миний ажил»-аас · самбараас · алдаа · хаях баталгаа',
+        cap1: '01 · Гар нээлттэй, гарчиг бичиж байна', cap2: '02 · «Хариуцагч» чип → гарын оронд сонгогч', cap3: '03 · «Огноо» чип → гарын оронд сонгогч', cap4: '04 · Үргэлжлүүлэн үүсгэх · APP-143 үүссэн',
+        cap5: '05 · «Миний ажил › Маргааш»-аас: би + маргааш', cap6: '06 · Самбарын «Хянагдаж буй» баганаас', cap7: '07 · Алдаа · гарчиг шаардлагатай', cap8: '08 · Бичсэн текстээ хаях уу?', capRules: 'Зан төлөв',
+        dateLong: 'Пүрэв, 10-р сарын 8', greeting: 'Өглөөний мэнд, Ану', tomorrow: 'Маргааш', project: 'Апп шинэчлэл', inReview: 'Хянагдаж буй',
+        newTask: 'Шинэ ажил', close: 'Хаах', created: 'үүслээ', open: 'Нээх',
+        titleLabel: 'Ажлын гарчиг', titlePh: 'Ажлын гарчиг', titleValue: 'Бүтээгдэхүүний торын skeleton ачаалагч', titleRequired: 'Гарчиг оруулна уу',
+        descLabel: 'Тайлбар', descPh: 'Тайлбар нэмэх… @ дурдах боломжтой', fields: 'Талбарууд',
+        createMore: 'Үргэлжлүүлэн үүсгэх', create: 'Үүсгэх',
+        keyboard: 'системийн гар · 291 + 34', keyboardBack: 'Гар', assignee: 'Хариуцагч', due: 'Дуусах огноо', searchPeople: 'Хүн хайх…', openCalendar: 'Хуанли нээх',
+        discardTitle: 'Ноорог хаях уу?', discardBody: 'Бичсэн гарчиг, тайлбар тань устна.', discard: 'Хаях', keepEditing: 'Үргэлжлүүлэн бичих'
+      },
+      en: {
+        intro: 'A sheet that opens from “+” with the keyboard up. Title, description and field chips — tapping a chip swaps the keyboard for that picker.',
+        preview: 'Preview', langLabel: 'Language', themeLabel: 'Theme', light: 'Light', dark: 'Dark',
+        secTitle: 'Create task', secSub: 'Default · assignee · due · create more · from My Tasks · from Board · error · discard confirmation',
+        cap1: '01 · Keyboard up, typing the title', cap2: '02 · Assignee chip → picker replaces the keyboard', cap3: '03 · Due chip → picker replaces the keyboard', cap4: '04 · Create more · APP-143 created',
+        cap5: '05 · From My Tasks › Tomorrow: me + tomorrow', cap6: '06 · From the Board’s In Review column', cap7: '07 · Error · title required', cap8: '08 · Discard what you typed?', capRules: 'Behaviour',
+        dateLong: 'Thursday, October 8', greeting: 'Good morning, Anu', tomorrow: 'Tomorrow', project: 'App Redesign', inReview: 'In Review',
+        newTask: 'New task', close: 'Close', created: 'created', open: 'Open',
+        titleLabel: 'Task title', titlePh: 'Task title', titleValue: 'Skeleton loaders for the product grid', titleRequired: 'Add a title',
+        descLabel: 'Description', descPh: 'Add a description… @mentions work here', fields: 'Fields',
+        createMore: 'Create more', create: 'Create',
+        keyboard: 'system keyboard · 291 + 34', keyboardBack: 'Keyboard', assignee: 'Assignee', due: 'Due date', searchPeople: 'Search people…', openCalendar: 'Open calendar',
+        discardTitle: 'Discard this task?', discardBody: 'Your title and description will be lost.', discard: 'Discard', keepEditing: 'Keep editing'
+      }
+    };
+    const L = STR[lang] || STR.mn;
+
+    const t = dark ? {
+      board: '#0A0A0B', bg: '#111113', surface2: '#161618', raised: '#1B1B1E', fill: '#1F1F23', chip: '#232328', seg: '#1F1F23',
+      border: '#26262B', border2: '#3A3A42', divider: '#1F1F23', grabber: '#3F3F46', kbd: '#2A2A30',
+      text: '#EDEDEF', text2: '#C9C9D1', text3: '#B4B4BC', muted: '#8E8E98', faint: '#5E5E68',
+      red: '#F87171', skel: '#232328', scrim: 'rgba(0,0,0,0.6)',
+      shadowMenu: '0 12px 32px rgba(0,0,0,0.5)', shadowSheet: '0 -8px 32px rgba(0,0,0,0.5)',
+      device: '0 0 0 1px #2A2A30, 0 0 0 10px #232328, 0 24px 48px rgba(0,0,0,0.5)',
+      segOn: 'background:#2A2A30;color:#EDEDEF;box-shadow:0 1px 2px rgba(0,0,0,0.4)', segOff: 'background:transparent;color:#8E8E98',
+      scheme: 'color-scheme: dark'
+    } : {
+      board: '#F4F4F5', bg: '#FFFFFF', surface2: '#F7F7F8', raised: '#FFFFFF', fill: '#F4F4F5', chip: '#F1F1F3', seg: '#F1F1F3',
+      border: '#E6E6EA', border2: '#C4C4CC', divider: '#EFEFF2', grabber: '#D4D4D8', kbd: '#D7D9DE',
+      text: '#18181B', text2: '#3F3F46', text3: '#52525B', muted: '#6B6B74', faint: '#A1A1AA',
+      red: '#DC2626', skel: '#EDEDF0', scrim: 'rgba(24,24,27,0.32)',
+      shadowMenu: '0 12px 32px rgba(24,24,27,0.14)', shadowSheet: '0 -8px 32px rgba(24,24,27,0.12)',
+      device: '0 0 0 1px #E6E6EA, 0 0 0 10px #18181B, 0 24px 48px rgba(24,24,27,0.18)',
+      segOn: 'background:#FFFFFF;color:#18181B;box-shadow:0 1px 2px rgba(24,24,27,0.08)', segOff: 'background:transparent;color:#6B6B74',
+      scheme: 'color-scheme: light'
+    };
+    const cap = 'font-family:Geist Mono,ui-monospace,monospace;font-size:12px;line-height:16px;color:' + t.muted;
+    const okBox = dark ? 'background:rgba(34,197,94,0.14);color:#86EFAC' : 'background:#E8F5EC;color:#166534';
+    const reviewRing = 'border:2px solid ' + accentInk + ';background:' + accentInk + '33';
+
+    const PP = {
+      anu: [['Ану Б.', 'Anu B.'], ['АБ', 'AB'], 'background:#E0E7FF;color:#3730A3', 'background:#312E81;color:#C7D2FE', ['Та · Бүтээгдэхүүний менежер', 'You · Product manager']],
+      sara: [['Сараа К.', 'Sara K.'], ['СК', 'SK'], 'background:#FFE4E6;color:#9F1239', 'background:#881337;color:#FECDD3', ['Дизайнер', 'Product designer']],
+      dorj: [['Дорж Э.', 'Dorj E.'], ['ДЭ', 'DE'], 'background:#FEF3C7;color:#92400E', 'background:#78350F;color:#FDE68A', ['Фронтенд хөгжүүлэгч', 'Frontend engineer']],
+      tem: [['Тэмүүлэн Г.', 'Temuulen G.'], ['ТГ', 'TG'], 'background:#DCFCE7;color:#166534', 'background:#14532D;color:#BBF7D0', ['Мобайл хөгжүүлэгч', 'Mobile engineer']],
+      bat: [['Бат О.', 'Bat O.'], ['БО', 'BO'], 'background:#CCFBF1;color:#115E59', 'background:#134E4A;color:#99F6E4', ['Инженерийн ахлагч', 'Engineering lead']]
+    };
+    const person = (id) => ({ name: pick(PP[id][0]), initials: pick(PP[id][1]), style: dark ? PP[id][3] : PP[id][2], role: pick(PP[id][4]) });
+
+    /* ---------- CHIPS ---------- */
+    const filled = 'border:1px solid ' + t.border + ';background:' + t.raised + ';color:' + t.text;
+    const empty = 'border:1px dashed ' + t.border2 + ';background:transparent;color:' + t.muted;
+    const active = 'border:1.5px solid ' + accent + ';background:' + accentSoft + ';color:' + t.text;
+    const ICON = {
+      person: 'M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM4 21a8 8 0 0 1 16 0',
+      cal: 'M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM16 2v4M8 2v4M3 10h18',
+      flag: 'M4 22V4M4 4h12l-2 4 2 4H4',
+      size: 'M21.3 15.3 8.7 2.7a1 1 0 0 0-1.4 0L2.7 7.3a1 1 0 0 0 0 1.4l12.6 12.6a1 1 0 0 0 1.4 0l4.6-4.6a1 1 0 0 0 0-1.4zM7.5 10.5l2-2M10.5 13.5l2-2',
+      tag: 'M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8zM7.5 7.5h.01',
+      sprint: 'M21 12a9 9 0 1 1-3-6.7M21 4v5h-5'
+    };
+    const ch = (o) => {
+      const style = o.active ? active : (o.filled ? filled : empty);
+      return { isAvatar: false, isDot: false, isMarker: false, isFlag: false, isIcon: !o.isAvatar && !o.isDot && !o.isMarker && !o.isFlag, icon: '', av: '', initials: '', dot: '', ring: '', flag: '', active: false, padL: o.isAvatar ? '5px' : '10px', ...o, style, aria: o.aria || o.label };
+    };
+    const highFlag = dark ? 'fill:#FB923C;stroke:#FB923C' : 'fill:#EA580C;stroke:#EA580C';
+    const projChip = (filledOn, act) => ch({ label: pick(['Апп шинэчлэл', 'App Redesign']), isDot: true, dot: 'background:#7C5CE0', filled: filledOn, active: act, aria: (mn ? 'Төсөл: ' : 'Project: ') + pick(['Апп шинэчлэл', 'App Redesign']) });
+    const rest = () => [
+      ch({ label: mn ? 'Ач холбогдол' : 'Priority', icon: ICON.flag }),
+      ch({ label: mn ? 'Хэмжээ' : 'Size', icon: ICON.size }),
+      ch({ label: mn ? 'Шошго' : 'Tags', icon: ICON.tag }),
+      ch({ label: mn ? 'Спринт' : 'Sprint', icon: ICON.sprint })
+    ];
+    const sara = person('sara'), anu = person('anu');
+    const chipsDefault = (opt) => [
+      opt.assignee ? ch({ label: opt.assignee.name, isAvatar: true, av: opt.assignee.style, initials: opt.assignee.initials, filled: true, active: !!opt.actA, aria: (mn ? 'Хариуцагч: ' : 'Assignee: ') + opt.assignee.name })
+                   : ch({ label: mn ? 'Хариуцагч' : 'Assignee', icon: ICON.person, active: !!opt.actA }),
+      opt.due ? ch({ label: opt.due, icon: ICON.cal, filled: true, active: !!opt.actD, aria: (mn ? 'Огноо: ' : 'Due: ') + opt.due })
+              : ch({ label: mn ? 'Огноо' : 'Due', icon: ICON.cal, active: !!opt.actD }),
+      projChip(true, false)
+    ].concat(rest());
+    const tomorrow = mn ? 'Маргааш' : 'Tomorrow';
+    const meAssignee = { ...anu, name: mn ? 'Би' : 'Me' };
+
+    const sw = (on) => (on ? 'background:' + accent + ';justify-content:flex-end' : 'background:' + (dark ? '#3F3F46' : '#D4D4D8') + ';justify-content:flex-start');
+    const base = {
+      bgList: true, bgBoard: false, sheetBottom: '336px', keyboard: true, pickAssignee: false, pickDue: false, alert: false, safe: false,
+      created: false, error: false, title: L.titleValue, titleStyle: 'color:' + t.text, desc: '', more: false
+    };
+    const phones = [
+      { ...base, cap: L.cap1, chips: chipsDefault({ assignee: sara, due: tomorrow }) },
+      { ...base, cap: L.cap2, keyboard: false, pickAssignee: true, chips: chipsDefault({ assignee: sara, due: tomorrow, actA: true }) },
+      { ...base, cap: L.cap3, keyboard: false, pickDue: true, chips: chipsDefault({ assignee: sara, due: tomorrow, actD: true }) },
+      { ...base, cap: L.cap4, created: true, title: '', more: true, chips: chipsDefault({ assignee: sara, due: tomorrow }) },
+      { ...base, cap: L.cap5, title: '', chips: chipsDefault({ assignee: meAssignee, due: tomorrow }) },
+      { ...base, cap: L.cap6, bgList: false, bgBoard: true, title: '', chips: [ch({ label: pick(['Хянагдаж буй', 'In Review']), isMarker: true, ring: reviewRing, filled: true, aria: (mn ? 'Төлөв: ' : 'Status: ') + pick(['Хянагдаж буй', 'In Review']) })].concat(chipsDefault({})) },
+      { ...base, cap: L.cap7, title: '', error: true, chips: chipsDefault({ assignee: sara }) },
+      { ...base, cap: L.cap8, keyboard: false, sheetBottom: '0px', safe: true, alert: true, desc: mn ? 'Ачаалал удаан үед 6 картын skeleton харуулах' : 'Show 6 skeleton cards while loading', chips: chipsDefault({ assignee: sara, due: tomorrow }) }
+    ].map((p) => ({ ...p, switchStyle: sw(p.more) }));
+
+    const boxOn = 'background:' + accent + ';border:0', boxOff = 'border:1.5px solid ' + (dark ? '#4A4A52' : '#C4C4CC');
+    const people = ['anu', 'sara', 'dorj', 'tem'].map((id) => { const p = person(id); const on = id === 'sara'; return { ...p, on, box: on ? boxOn : boxOff, check: 'visibility:' + (on ? 'visible' : 'hidden') }; });
+    const pOn = 'border:1.5px solid ' + accent + ';background:' + accentSoft + ';color:' + t.text;
+    const pOff = 'border:1px solid ' + t.border + ';background:' + t.raised + ';color:' + t.text;
+    const presets = [[['Өнөөдөр', 'Today'], ['Пүрэв, 10/8', 'Thu, Oct 8']], [['Маргааш', 'Tomorrow'], ['Баасан, 10/9', 'Fri, Oct 9']], [['Дараа 7 хоног', 'Next week'], ['Даваа, 10/12', 'Mon, Oct 12']], [['Огноогүй', 'No date'], ['', '']]]
+      .map(([l, sub], i) => ({ label: pick(l), sub: pick(sub), on: i === 1, style: i === 1 ? pOn : pOff }));
+    const wds = mn ? ['Пү', 'Ба', 'Бя', 'Ня', 'Да', 'Мя', 'Лх'] : ['Th', 'Fr', 'Sa', 'Su', 'Mo', 'Tu', 'We'];
+    const week = [8, 9, 10, 11, 12, 13, 14].map((n, i) => ({
+      n: String(n), wd: wds[i], aria: (mn ? '10-р сарын ' + n : 'Oct ' + n),
+      style: n === 9 ? 'background:' + accent + ';color:#FFFFFF;font-weight:600' : (n === 8 ? 'color:' + accentInk + ';font-weight:600;box-shadow:inset 0 0 0 1.5px ' + accentInk : 'color:' + t.text)
+    }));
+
+    const rules = [
+      [['Нээгдэх', 'Opening'], ['«+» дарахад гарын хамт шууд нээгдэж, гарчиг дээр курсор байрлана. Сүүлд ашигласан төсөл анхдагч.', 'Opens straight from “+” with the keyboard up and the cursor in the title. Defaults to the last project used.']],
+      [['Чипүүд', 'Chips'], ['Хоосон чип тасархай хүрээтэй, бөглөсөн нь утгаа харуулна. Дарахад гар тухайн сонгогчоор, ижил өндрөөр солигдоно; «Гар» дарж буцна.', 'Empty chips are dashed; filled ones show their value. Tapping swaps the keyboard for that picker at the same height; “Keyboard” switches back.']],
+      [['Урьдчилан бөглөх', 'Prefill'], ['«Миний ажил»-ын бүлгээс: би + тэр огноо. Самбарын баганаас: тэр төлөв. Төслийн дотроос: тэр төсөл.', 'From a My Tasks section: me + that date. From a Board column: that status. From inside a project: that project.']],
+      [['Үүсгэх', 'Create'], ['Гарчиг л заавал. Хоосон байхад дарвал алдаа гарч, гарчиг руу буцна.', 'Only the title is required. Tapping Create without it shows the error and returns focus to the title.']],
+      [['Үргэлжлүүлэн үүсгэх', 'Create more'], ['Хуудас нээлттэй үлдэнэ, гарчиг, тайлбар цэвэрлэгдэж, талбарууд хадгалагдана. «APP-143 үүслээ · Нээх» 4 секунд харагдана.', 'The sheet stays open; title and description clear, fields stay. “APP-143 created · Open” shows for 4 s.']],
+      [['Хаах', 'Dismissing'], ['Текстгүй бол шууд хаагдана. Тексттэй бол доош татах, «×» эсвэл ар тал дарахад баталгаа асууна.', 'Closes straight away when empty. With text, dragging down, “×” or tapping outside asks to confirm.']],
+      [['Гарын товчлол', 'Keyboard'], ['Гарын «Илгээх/Return» товч гарчгаас тайлбар руу шилжинэ, үүсгэхгүй.', 'Return moves from the title to the description; it doesn’t create.']]
+    ].map(([title, body]) => ({ title: pick(title), body: pick(body) }));
+
+    const segBtn = (on) => (on ? t.segOn : t.segOff);
+    const toggles = [
+      { label: L.langLabel, opts: [['mn', 'МН'], ['en', 'EN']].map(([v, lab]) => ({ label: lab, on: lang === v, style: segBtn(lang === v), pick: () => this.setState({ lang: v }) })) },
+      { label: L.themeLabel, opts: [['light', L.light], ['dark', L.dark]].map(([v, lab]) => ({ label: lab, on: theme === v, style: segBtn(theme === v), pick: () => this.setState({ theme: v }) })) }
+    ];
+
+    return {
+      lang, L, t, cap, accent, accentInk, accentSoft, okBox, reviewRing, toggles,
+      phones, people, presets, week, rules,
+      ghost: ['78%', '62%', '84%', '55%', '70%', '66%'].map((w) => ({ w: 'width:' + w })),
+      ghostCards: ['80%', '64%', '72%'].map((w) => ({ w: 'width:' + w }))
+    };
+  }
+}
+</script>
+</body>
+</html>

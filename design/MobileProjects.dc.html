@@ -1,0 +1,1069 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<title>MobileProjects — Kite Tasks</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit;color:inherit}
+</style>
+</helmet>
+
+<div lang="{{lang}}" style="width: 1840px; min-height: 3300px; box-sizing: border-box; padding: 56px 64px 96px; display: flex; flex-direction: column; gap: 56px; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 15px; line-height: 22px; color: {{t.text}}; background: {{t.board}}; -webkit-font-smoothing: antialiased; {{t.scheme}}">
+
+  <!-- ================= BOARD HEADER ================= -->
+  <header style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px">
+    <div style="display: flex; flex-direction: column; gap: 8px; max-width: 900px">
+      <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 12px; line-height: 16px; color: {{t.muted}}">Kite Tasks · iOS + Android · 390 × 844</span>
+      <h1 style="margin: 0; font-size: 40px; line-height: 48px; font-weight: 600; letter-spacing: -0.02em">MobileProjects</h1>
+      <p style="margin: 0; font-size: 15px; line-height: 22px; color: {{t.text3}}">{{L.intro}}</p>
+    </div>
+    <div aria-label="{{L.preview}}" style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 8px 8px 8px 16px; border: 1px dashed {{t.border2}}; border-radius: 14px">
+      <span style="font-size: 12px; font-weight: 600; color: {{t.muted}}">{{L.preview}}</span>
+      <sc-for list="{{toggles}}" as="tg" hint-placeholder-count="2">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <span style="font-size: 13px; color: {{t.text3}}">{{tg.label}}</span>
+          <div role="radiogroup" aria-label="{{tg.label}}" style="display: flex; gap: 2px; padding: 2px; border-radius: 10px; background: {{t.seg}}">
+            <sc-for list="{{tg.opts}}" as="o" hint-placeholder-count="2">
+              <button role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}" style="height: 32px; padding: 0 12px; border: 0; border-radius: 8px; font-size: 13px; font-weight: 600; {{o.style}}">{{o.label}}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </header>
+
+  <section style="display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; padding-bottom: 14px; border-bottom: 1px solid {{t.border}}">
+      <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 13px; color: {{accentInk}}">01–11</span>
+      <h2 style="margin: 0; font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em">{{L.secTitle}}</h2>
+      <span style="font-size: 14px; color: {{t.muted}}">{{L.secSub}}</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 64px 48px; align-items: start">
+
+      <!-- ===================== 01 · PROJECTS TAB ===================== -->
+      <div style="display: flex; flex-direction: column; gap: 16px; order: 1">
+        <span style="{{cap}}">{{L.cap01}}</span>
+        <div style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; box-shadow: {{t.device}}">
+          <div style="flex: none; height: 59px"></div>
+          <div style="flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; padding-bottom: 180px">
+            <div style="display: flex; align-items: center; height: 44px; padding: 0 4px">
+              <button aria-label="{{L.wsSwitch}}" style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 8px 0 12px; border: 0; border-radius: 12px; background: transparent">
+                <span style="width: 28px; height: 28px; border-radius: 7px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600">K</span>
+                <span style="font-size: 15px; font-weight: 600">Kite Studio</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{t.muted}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+              </button>
+              <span style="flex: 1"></span>
+              <a href="#" aria-label="{{L.profile}}" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; text-decoration: none">
+                <span style="width: 30px; height: 30px; border-radius: 15px; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{me.style}}">{{me.initials}}</span>
+              </a>
+            </div>
+            <h1 style="margin: 0; padding: 2px 16px 10px; font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.01em">{{L.tabProjects}}</h1>
+            <div style="padding: 0 16px 8px">
+              <label style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px; box-sizing: border-box; border-radius: 10px; background: {{t.fill}}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{t.muted}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                <input type="search" placeholder="{{L.searchProjects}}" aria-label="{{L.searchProjects}}" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-size: 16px; padding: 0">
+              </label>
+            </div>
+
+            <h2 style="margin: 0; height: 40px; padding: 0 16px 6px; box-sizing: border-box; display: flex; align-items: flex-end; gap: 6px; font-size: 13px; line-height: 18px; font-weight: 600; color: {{t.muted}}">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="{{favStar}}" stroke="{{favStar}}" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9z"></path></svg>
+              {{L.favorites}}
+            </h2>
+            <sc-for list="{{favorites}}" as="p" hint-placeholder-count="2">
+              <a href="#" style="display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 16px; border-bottom: 1px solid {{t.divider}}; color: {{t.text}}; text-decoration: none">
+                <span style="flex: none; width: 10px; height: 10px; border-radius: 5px; {{p.dot}}"></span>
+                <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                  <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; line-height: 22px; font-weight: 500">{{p.name}}</span>
+                  <span style="font-size: 12px; line-height: 16px; color: {{t.muted}}"><span style="font-family: Geist Mono, ui-monospace, monospace">{{p.key}}</span> · {{p.space}}</span>
+                </span>
+                <span style="font-size: 14px; color: {{t.text3}}">{{p.count}}</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{t.faint}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+              </a>
+            </sc-for>
+
+            <h2 style="margin: 0; height: 44px; padding: 0 16px 6px; box-sizing: border-box; display: flex; align-items: flex-end; font-size: 13px; line-height: 18px; font-weight: 600; color: {{t.muted}}">{{L.spaces}}</h2>
+            <sc-for list="{{spaces}}" as="sp" hint-placeholder-count="3">
+              <div style="display: flex; flex-direction: column">
+                <div style="display: flex; align-items: center; min-height: 52px; padding: 0 16px 0 2px; border-bottom: 1px solid {{t.divider}}">
+                  <button onClick="{{sp.toggle}}" aria-expanded="{{sp.open}}" aria-label="{{sp.toggleAria}}" style="flex: none; width: 44px; height: 44px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{t.muted}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{sp.chev}}"><path d="m9 6 6 6-6 6"></path></svg>
+                  </button>
+                  <a href="#" style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; min-height: 52px; color: {{t.text}}; text-decoration: none">
+                    <span style="flex: none; width: 28px; height: 28px; border-radius: 7px; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{sp.badge}}">{{sp.initial}}</span>
+                    <span style="flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; line-height: 22px; font-weight: 600">{{sp.name}}</span>
+                    <span style="font-size: 13px; color: {{t.muted}}">{{sp.meta}}</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{t.faint}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+                  </a>
+                </div>
+                <sc-if value="{{sp.open}}" hint-placeholder-val="{{ true }}">
+                  <sc-for list="{{sp.projects}}" as="p" hint-placeholder-count="3">
+                    <a href="#" style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 16px 0 56px; border-bottom: 1px solid {{t.divider}}; color: {{t.text}}; text-decoration: none">
+                      <span style="flex: none; width: 8px; height: 8px; border-radius: 4px; {{p.dot}}"></span>
+                      <span style="flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; line-height: 22px">{{p.name}}</span>
+                      <span style="font-size: 14px; {{p.countStyle}}">{{p.count}}</span>
+                    </a>
+                  </sc-for>
+                </sc-if>
+              </div>
+            </sc-for>
+            <p style="margin: 0; padding: 14px 16px; font-size: 12px; line-height: 16px; color: {{t.muted}}">{{L.countNote}}</p>
+          </div>
+          <button aria-label="{{L.fabAria}}" style="position: absolute; z-index: 3; right: 16px; bottom: 99px; width: 56px; height: 56px; border: 0; border-radius: 16px; background: {{accent}}; box-shadow: {{t.shadowFab}}; display: flex; align-items: center; justify-content: center">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+          </button>
+          <nav aria-label="{{L.tabsAria}}" style="position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.bg}}; border-top: 1px solid {{t.divider}}">
+            <div style="display: flex; height: 49px; padding: 0 4px">
+              <sc-for list="{{tabs}}" as="tb" hint-placeholder-count="5">
+                <a href="#" aria-current="{{tb.current}}" style="flex: 1; min-width: 0; height: 49px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; {{tb.color}}">
+                  <span style="position: relative; width: 24px; height: 24px">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{tb.sw}}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{tb.d1}}"></path><path d="{{tb.d2}}"></path></svg>
+                    <sc-if value="{{tb.hasBadge}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: -4px; left: 14px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px; background: {{accent}}; color: #FFFFFF; font-size: 11px; font-weight: 600; line-height: 18px; text-align: center; box-shadow: 0 0 0 2px {{t.bg}}">3</span></sc-if>
+                    <sc-if value="{{tb.hasDot}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: -1px; right: -3px; width: 8px; height: 8px; border-radius: 4px; background: {{accent}}; box-shadow: 0 0 0 2px {{t.bg}}"></span></sc-if>
+                  </span>
+                  <span style="max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; line-height: 14px; {{tb.weight}}">{{tb.label}}</span>
+                </a>
+              </sc-for>
+            </div>
+            <div style="height: 34px"></div>
+          </nav>
+        </div>
+      </div>
+
+      <!-- ===================== LIST PHONES (02 list · 03 select · 04 deleted · 10 space) ===================== -->
+      <sc-for list="{{listPhones}}" as="lp" hint-placeholder-count="4">
+        <div style="display: flex; flex-direction: column; gap: 16px; {{lp.order}}">
+          <span style="{{cap}}">{{lp.cap}}</span>
+          <div style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; box-shadow: {{t.device}}">
+            <div style="flex: none; height: 59px"></div>
+
+            <!-- header: project -->
+            <sc-if value="{{lp.isProject}}" hint-placeholder-val="{{ true }}">
+              <div style="flex: none; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; height: 56px; padding: 0 4px">
+                <div style="display: flex">
+                  <a href="#" aria-label="{{L.back}}" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: {{t.text}}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; max-width: 190px; min-width: 0">
+                  <span style="max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 16px; line-height: 22px; font-weight: 600">{{lp.title}}</span>
+                  <span style="display: flex; align-items: center; gap: 5px; font-size: 12px; line-height: 16px; color: {{t.muted}}"><span style="width: 6px; height: 6px; border-radius: 3px; {{lp.dot}}"></span><span style="font-family: Geist Mono, ui-monospace, monospace">{{lp.key}}</span> · {{lp.space}}</span>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: flex-end">
+                  <button aria-label="{{L.members}}" style="height: 44px; padding: 0 4px 0 10px; border: 0; background: transparent; display: flex; align-items: center">
+                    <sc-for list="{{memberStack}}" as="m" hint-placeholder-count="3">
+                      <span style="width: 24px; height: 24px; margin-left: -6px; box-sizing: border-box; border-radius: 12px; border: 2px solid {{t.bg}}; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{m.style}}">{{m.initials}}</span>
+                    </sc-for>
+                  </button>
+                  <button aria-label="{{L.projectMenu}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="{{t.text2}}" aria-hidden="true"><circle cx="5" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="19" cy="12" r="1.8"></circle></svg>
+                  </button>
+                </div>
+              </div>
+            </sc-if>
+            <!-- header: space -->
+            <sc-if value="{{lp.isSpace}}" hint-placeholder-val="{{ false }}">
+              <div style="flex: none; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; height: 56px; padding: 0 4px">
+                <div style="display: flex">
+                  <a href="#" aria-label="{{L.back}}" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: {{t.text}}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; max-width: 200px; min-width: 0">
+                  <span style="display: flex; align-items: center; gap: 6px; max-width: 100%; font-size: 16px; line-height: 22px; font-weight: 600"><span style="flex: none; width: 20px; height: 20px; border-radius: 5px; font-size: 11px; display: flex; align-items: center; justify-content: center; {{productBadge}}">{{productInitial}}</span><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{lp.title}}</span></span>
+                  <span style="font-size: 12px; line-height: 16px; color: {{t.muted}}">{{lp.space}}</span>
+                </div>
+                <div style="display: flex; justify-content: flex-end">
+                  <button aria-label="{{L.moreActions}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="{{t.text2}}" aria-hidden="true"><circle cx="5" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="19" cy="12" r="1.8"></circle></svg>
+                  </button>
+                </div>
+              </div>
+            </sc-if>
+            <!-- header: selection -->
+            <sc-if value="{{lp.isSelect}}" hint-placeholder-val="{{ false }}">
+              <div style="flex: none; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; height: 56px; padding: 0 4px; background: {{accentSoft}}">
+                <div style="display: flex">
+                  <button onClick="{{lp.cancelSel}}" style="height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; font-size: 16px; color: {{t.text}}">{{L.cancel}}</button>
+                </div>
+                <span role="status" style="font-size: 16px; line-height: 22px; font-weight: 600">{{lp.selCount}}</span>
+                <div style="display: flex; justify-content: flex-end">
+                  <button onClick="{{lp.selectAll}}" style="height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; font-size: 16px; font-weight: 600; color: {{accentInk}}">{{L.selectAll}}</button>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- view switch + filters -->
+            <div style="flex: none; display: flex; flex-direction: column; gap: 8px; padding: 4px 16px 0; border-bottom: 1px solid {{t.divider}}">
+              <sc-if value="{{lp.hasSeg}}" hint-placeholder-val="{{ true }}">
+                <div role="radiogroup" aria-label="{{L.view}}" style="display: flex; gap: 2px; height: 40px; padding: 2px; box-sizing: border-box; border-radius: 10px; background: {{t.seg}}">
+                  <sc-for list="{{segList}}" as="o" hint-placeholder-count="3">
+                    <button role="radio" aria-checked="{{o.on}}" style="flex: 1; min-width: 0; padding: 0 4px; border: 0; border-radius: 8px; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; {{o.style}}">{{o.label}}</button>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <div style="display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px">
+                <sc-for list="{{lp.chips}}" as="c" hint-placeholder-count="5">
+                  <button aria-pressed="{{c.on}}" aria-haspopup="dialog" style="flex: none; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; box-sizing: border-box; border-radius: 18px; font-size: 14px; font-weight: 500; white-space: nowrap; {{c.style}}">
+                    <sc-if value="{{c.hasIcon}}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"></path></svg></sc-if>
+                    {{c.label}}
+                    <sc-if value="{{c.hasCount}}" hint-placeholder-val="{{ false }}"><span style="min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px; background: {{accent}}; color: #FFFFFF; font-size: 11px; font-weight: 600; line-height: 18px; text-align: center">{{c.count}}</span></sc-if>
+                    <sc-if value="{{c.caret}}" hint-placeholder-val="{{ true }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+              <span style="height: 30px; display: flex; align-items: center; font-size: 13px; color: {{t.muted}}">{{lp.summary}}</span>
+            </div>
+
+            <!-- grouped list (sticky headers) -->
+            <div style="flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none">
+              <div style="display: flex; flex-direction: column; padding-bottom: 180px">
+                <sc-for list="{{lp.groups}}" as="g" hint-placeholder-count="4">
+                  <section aria-label="{{g.label}}" style="display: flex; flex-direction: column">
+                    <div style="position: sticky; top: 0; z-index: 1; display: flex; align-items: center; height: 44px; padding: 0 4px 0 0; background: {{t.bg}}; border-bottom: 1px solid {{t.divider}}">
+                      <button onClick="{{g.toggle}}" aria-expanded="{{g.open}}" style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 0 0 16px; border: 0; background: transparent; text-align: left">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="{{t.muted}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{g.chev}}"><path d="m9 6 6 6-6 6"></path></svg>
+                        <span aria-hidden="true" style="position: relative; flex: none; width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; {{g.mk.ring}}"><span style="position: absolute; {{g.mk.g1}}"></span><span style="position: absolute; {{g.mk.g2}}"></span></span>
+                        <span style="font-size: 15px; line-height: 20px; font-weight: 600">{{g.label}}</span>
+                        <span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 10px; background: {{t.chip}}; color: {{t.text3}}; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center">{{g.count}}</span>
+                      </button>
+                      <button aria-label="{{g.addAria}}" style="flex: none; width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{t.text3}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+                      </button>
+                    </div>
+                    <sc-if value="{{g.open}}" hint-placeholder-val="{{ true }}">
+                      <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="3">
+                        <div style="display: flex; align-items: flex-start; gap: 4px; min-height: 64px; box-sizing: border-box; padding: 10px 16px 10px 0; border-bottom: 1px solid {{t.divider}}; {{r.rowBg}}">
+                          <sc-if value="{{r.selMode}}" hint-placeholder-val="{{ false }}">
+                            <button role="checkbox" aria-checked="{{r.selected}}" aria-label="{{r.title}}" onClick="{{r.toggleSel}}" style="flex: none; width: 44px; height: 44px; margin-top: -11px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center">
+                              <span style="width: 22px; height: 22px; box-sizing: border-box; border-radius: 11px; display: flex; align-items: center; justify-content: center; {{r.selBox}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{r.selCheck}}"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg></span>
+                            </button>
+                          </sc-if>
+                          <sc-if value="{{r.normal}}" hint-placeholder-val="{{ true }}">
+                            <button aria-label="{{r.statusAria}}" style="flex: none; width: 44px; height: 44px; margin-top: -11px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center">
+                              <span aria-hidden="true" style="position: relative; width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; {{r.mk.ring}}"><span style="position: absolute; {{r.mk.g1}}"></span><span style="position: absolute; {{r.mk.g2}}"></span></span>
+                            </button>
+                          </sc-if>
+                          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+                            <a href="#" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-decoration: none; font-size: 15px; line-height: 22px; {{r.titleStyle}}">{{r.title}}</a>
+                            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 12px; line-height: 16px; color: {{t.muted}}">
+                              <span style="font-family: Geist Mono, ui-monospace, monospace; {{r.keyStyle}}">{{r.key}}</span>
+                              <sc-if value="{{r.hasProject}}" hint-placeholder-val="{{ false }}">
+                                <span style="display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 8px; border-radius: 11px; border: 1px solid {{t.border}}; color: {{t.text2}}"><span style="width: 6px; height: 6px; border-radius: 3px; {{r.projDot}}"></span>{{r.project}}</span>
+                              </sc-if>
+                              <sc-if value="{{r.hasDue}}" hint-placeholder-val="{{ true }}">
+                                <span style="display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 6px; border-radius: 6px; font-weight: 500; {{r.dueStyle}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>{{r.due}}</span>
+                              </sc-if>
+                              <sc-if value="{{r.blocked}}" hint-placeholder-val="{{ false }}">
+                                <span style="display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 8px; border-radius: 11px; font-weight: 600; {{blockedStyle}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m5.6 5.6 12.8 12.8"></path></svg>{{L.blocked}}</span>
+                              </sc-if>
+                              <sc-if value="{{r.hasSub}}" hint-placeholder-val="{{ false }}">
+                                <span style="display: inline-flex; align-items: center; gap: 4px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3v12a3 3 0 0 0 3 3h9"></path><path d="m15 15 3 3-3 3"></path></svg>{{r.sub}}</span>
+                              </sc-if>
+                              <sc-if value="{{r.hasComments}}" hint-placeholder-val="{{ false }}">
+                                <span style="display: inline-flex; align-items: center; gap: 4px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>{{r.comments}}</span>
+                              </sc-if>
+                            </div>
+                          </div>
+                          <div style="flex: none; display: flex; align-items: center; gap: 8px; height: 22px">
+                            <svg width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="{{r.prioLabel}}" style="{{r.flagStyle}}"><path d="M4 22V4"></path><path d="M4 4h12l-2 4 2 4H4"></path></svg>
+                            <span style="display: flex; padding-left: 6px">
+                              <sc-for list="{{r.people}}" as="p" hint-placeholder-count="1">
+                                <span title="{{p.name}}" style="width: 24px; height: 24px; margin-left: -6px; box-sizing: border-box; border-radius: 12px; border: 2px solid {{t.bg}}; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{p.style}}">{{p.initials}}</span>
+                              </sc-for>
+                            </span>
+                          </div>
+                        </div>
+                      </sc-for>
+                    </sc-if>
+                  </section>
+                </sc-for>
+              </div>
+            </div>
+
+            <sc-if value="{{lp.toast}}" hint-placeholder-val="{{ false }}">
+              <div role="status" style="position: absolute; z-index: 3; left: 16px; right: 16px; bottom: 91px; display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 4px 0 16px; box-sizing: border-box; border-radius: 12px; background: {{t.toastBg}}; color: {{t.toastText}}; box-shadow: {{t.shadowMenu}}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{t.toastText}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"></path></svg>
+                <span style="flex: 1; min-width: 0; font-size: 14px; line-height: 20px">{{lp.toastText}}</span>
+                <button style="flex: none; height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; font-size: 14px; font-weight: 600; color: {{t.toastAction}}">{{L.undo}}</button>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{lp.fab}}" hint-placeholder-val="{{ true }}">
+              <button aria-label="{{L.fabAria}}" style="position: absolute; z-index: 3; right: 16px; bottom: {{lp.fabBottom}}; width: 56px; height: 56px; border: 0; border-radius: 16px; background: {{accent}}; box-shadow: {{t.shadowFab}}; display: flex; align-items: center; justify-content: center">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+              </button>
+            </sc-if>
+
+            <sc-if value="{{lp.showTabs}}" hint-placeholder-val="{{ true }}">
+              <nav aria-label="{{L.tabsAria}}" style="position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.bg}}; border-top: 1px solid {{t.divider}}">
+                <div style="display: flex; height: 49px; padding: 0 4px">
+                  <sc-for list="{{tabs}}" as="tb" hint-placeholder-count="5">
+                    <a href="#" aria-current="{{tb.current}}" style="flex: 1; min-width: 0; height: 49px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; {{tb.color}}">
+                      <span style="position: relative; width: 24px; height: 24px">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{tb.sw}}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{tb.d1}}"></path><path d="{{tb.d2}}"></path></svg>
+                        <sc-if value="{{tb.hasBadge}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: -4px; left: 14px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px; background: {{accent}}; color: #FFFFFF; font-size: 11px; font-weight: 600; line-height: 18px; text-align: center; box-shadow: 0 0 0 2px {{t.bg}}">3</span></sc-if>
+                        <sc-if value="{{tb.hasDot}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: -1px; right: -3px; width: 8px; height: 8px; border-radius: 4px; background: {{accent}}; box-shadow: 0 0 0 2px {{t.bg}}"></span></sc-if>
+                      </span>
+                      <span style="max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; line-height: 14px; {{tb.weight}}">{{tb.label}}</span>
+                    </a>
+                  </sc-for>
+                </div>
+                <div style="height: 34px"></div>
+              </nav>
+            </sc-if>
+
+            <sc-if value="{{lp.isSelect}}" hint-placeholder-val="{{ false }}">
+              <nav aria-label="{{L.bulkAria}}" style="position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.raised}}; border-top: 1px solid {{t.border}}; box-shadow: {{t.shadowSheet}}">
+                <div style="display: flex; height: 56px; padding: 0 4px">
+                  <sc-for list="{{bulk}}" as="b" hint-placeholder-count="5">
+                    <button style="flex: 1; min-width: 0; height: 56px; border: 0; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; {{b.color}}">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{b.icon}}"></path></svg>
+                      <span style="max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; line-height: 14px; font-weight: 500">{{b.label}}</span>
+                    </button>
+                  </sc-for>
+                </div>
+                <div style="height: 34px"></div>
+              </nav>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+
+      <!-- ===================== 05 · FILTER SHEET ===================== -->
+      <div style="display: flex; flex-direction: column; gap: 16px; order: 5">
+        <span style="{{cap}}">{{L.cap05}}</span>
+        <div style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; box-shadow: {{t.device}}">
+          <div style="flex: none; height: 59px"></div>
+          <div style="flex: none; height: 56px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600">{{L.projectName}}</div>
+          <div style="flex: none; margin: 4px 16px 8px; height: 40px; border-radius: 10px; background: {{t.seg}}"></div>
+          <div style="flex: 1; display: flex; flex-direction: column">
+            <sc-for list="{{ghostRows}}" as="x" hint-placeholder-count="4">
+              <div style="display: flex; align-items: center; gap: 16px; height: 64px; padding: 0 16px; border-bottom: 1px solid {{t.divider}}">
+                <span style="flex: none; width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; border: 2px solid {{t.faint}}"></span>
+                <span style="flex: 1; display: flex; flex-direction: column; gap: 8px"><span style="height: 10px; border-radius: 5px; background: {{t.skel}}; {{x.w}}"></span><span style="height: 8px; width: 40%; border-radius: 4px; background: {{t.skel}}"></span></span>
+              </div>
+            </sc-for>
+          </div>
+          <div aria-hidden="true" style="position: absolute; z-index: 4; inset: 0; background: {{t.scrim}}"></div>
+          <div role="dialog" aria-modal="true" aria-labelledby="flt-h" style="position: absolute; z-index: 5; left: 0; right: 0; bottom: 0; max-height: 760px; display: flex; flex-direction: column; background: {{t.raised}}; border-radius: 16px 16px 0 0; box-shadow: {{t.shadowSheet}}">
+            <div style="flex: none; height: 20px; display: flex; justify-content: center; padding-top: 6px; box-sizing: border-box"><span style="width: 36px; height: 5px; border-radius: 3px; background: {{t.grabber}}"></span></div>
+            <div style="flex: none; display: flex; align-items: center; height: 52px; padding: 0 4px 0 16px">
+              <h2 id="flt-h" style="flex: 1; margin: 0; font-size: 17px; line-height: 22px; font-weight: 600">{{L.filter}}</h2>
+              <button style="height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; font-size: 16px; color: {{t.text2}}">{{L.reset}}</button>
+            </div>
+            <div style="flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 18px; padding: 4px 16px 16px">
+              <sc-for list="{{filterGroups}}" as="fg" hint-placeholder-count="5">
+                <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 8px">
+                  <legend style="padding: 0; margin-bottom: 8px; font-size: 13px; line-height: 18px; font-weight: 600; color: {{t.text2}}">{{fg.label}}</legend>
+                  <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                    <sc-for list="{{fg.opts}}" as="o" hint-placeholder-count="4">
+                      <button aria-pressed="{{o.on}}" style="display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px 0 {{o.padL}}; box-sizing: border-box; border-radius: 18px; font-size: 14px; font-weight: 500; white-space: nowrap; {{o.style}}">
+                        <sc-if value="{{o.hasAvatar}}" hint-placeholder-val="{{ false }}"><span style="width: 26px; height: 26px; border-radius: 13px; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{o.av}}">{{o.initials}}</span></sc-if>
+                        <sc-if value="{{o.hasFlag}}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{o.flag}}"><path d="M4 22V4"></path><path d="M4 4h12l-2 4 2 4H4"></path></svg></sc-if>
+                        <sc-if value="{{o.hasDot}}" hint-placeholder-val="{{ false }}"><span style="width: 8px; height: 8px; border-radius: 4px; {{o.dot}}"></span></sc-if>
+                        {{o.label}}
+                      </button>
+                    </sc-for>
+                  </div>
+                </fieldset>
+              </sc-for>
+            </div>
+            <div style="flex: none; display: flex; flex-direction: column; padding: 12px 16px 0; border-top: 1px solid {{t.divider}}">
+              <button style="height: 48px; border: 0; border-radius: 12px; background: {{accent}}; color: #FFFFFF; font-size: 16px; font-weight: 600">{{L.showResults}}</button>
+              <div style="height: 34px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== BOARD PHONES (06 · 07 · 08 · 09) ===================== -->
+      <sc-for list="{{boardPhones}}" as="bp" hint-placeholder-count="4">
+        <div style="display: flex; flex-direction: column; gap: 16px; {{bp.order}}">
+          <span style="{{cap}}">{{bp.cap}}</span>
+          <div style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; box-shadow: {{t.device}}">
+            <div style="flex: none; height: 59px"></div>
+            <div style="flex: none; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; height: 56px; padding: 0 4px">
+              <div style="display: flex">
+                <a href="#" aria-label="{{L.back}}" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: {{t.text}}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: center; max-width: 190px; min-width: 0">
+                <span style="max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 16px; line-height: 22px; font-weight: 600">{{L.projectName}}</span>
+                <span style="display: flex; align-items: center; gap: 5px; font-size: 12px; line-height: 16px; color: {{t.muted}}"><span style="width: 6px; height: 6px; border-radius: 3px; background: #7C5CE0"></span><span style="font-family: Geist Mono, ui-monospace, monospace">APP</span> · {{L.product}}</span>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: flex-end">
+                <button aria-label="{{L.members}}" style="height: 44px; padding: 0 4px 0 10px; border: 0; background: transparent; display: flex; align-items: center">
+                  <sc-for list="{{memberStack}}" as="m" hint-placeholder-count="3">
+                    <span style="width: 24px; height: 24px; margin-left: -6px; box-sizing: border-box; border-radius: 12px; border: 2px solid {{t.bg}}; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{m.style}}">{{m.initials}}</span>
+                  </sc-for>
+                </button>
+                <button aria-label="{{L.projectMenu}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="{{t.text2}}" aria-hidden="true"><circle cx="5" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="19" cy="12" r="1.8"></circle></svg>
+                </button>
+              </div>
+            </div>
+            <div style="flex: none; display: flex; flex-direction: column; gap: 8px; padding: 4px 16px 8px">
+              <div role="radiogroup" aria-label="{{L.view}}" style="display: flex; gap: 2px; height: 40px; padding: 2px; box-sizing: border-box; border-radius: 10px; background: {{t.seg}}">
+                <sc-for list="{{segBoard}}" as="o" hint-placeholder-count="3">
+                  <button role="radio" aria-checked="{{o.on}}" style="flex: 1; min-width: 0; padding: 0 4px; border: 0; border-radius: 8px; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; {{o.style}}">{{o.label}}</button>
+                </sc-for>
+              </div>
+              <!-- column indicator -->
+              <div role="tablist" aria-label="{{L.columns}}" style="display: flex; gap: 6px; overflow: hidden; margin: 0 -16px; padding: 0 16px; {{bp.pagerShift}}">
+                <sc-for list="{{bp.pager}}" as="pg" hint-placeholder-count="5">
+                  <button role="tab" aria-selected="{{pg.on}}" style="flex: none; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; box-sizing: border-box; border-radius: 18px; border: 0; font-size: 13px; font-weight: 600; white-space: nowrap; {{pg.style}}">
+                    <span aria-hidden="true" style="position: relative; width: 10px; height: 10px; box-sizing: border-box; border-radius: 5px; {{pg.ring}}"></span>
+                    {{pg.label}} <span style="font-weight: 500; opacity: 0.75">{{pg.count}}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+
+            <!-- paged columns -->
+            <div style="position: relative; flex: 1; min-height: 0; overflow: hidden">
+              <div style="display: flex; align-items: flex-start; gap: 8px; padding: 0 16px; {{bp.shift}}">
+                <sc-for list="{{bp.columns}}" as="col" hint-placeholder-count="5">
+                  <section aria-label="{{col.aria}}" style="flex: none; width: 342px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; padding: 8px; border-radius: 14px; {{col.body}}">
+                    <div style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 0 0 10px; border-radius: 10px; {{col.head}}">
+                      <span aria-hidden="true" style="position: relative; flex: none; width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; {{col.mk.ring}}"><span style="position: absolute; {{col.mk.g1}}"></span><span style="position: absolute; {{col.mk.g2}}"></span></span>
+                      <h3 style="margin: 0; font-size: 14px; line-height: 20px; font-weight: 600; {{col.ink}}">{{col.label}}</h3>
+                      <span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 10px; background: {{t.bg}}; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{col.ink}}">{{col.count}}</span>
+                      <span style="flex: 1"></span>
+                      <button aria-label="{{col.addAria}}" style="width: 44px; height: 44px; border: 0; border-radius: 10px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="{{col.ink}}"><path d="M12 5v14M5 12h14"></path></svg></button>
+                    </div>
+                    <sc-for list="{{col.cards}}" as="c" hint-placeholder-count="3">
+                      <div style="display: flex; flex-direction: column">
+                        <sc-if value="{{c.isDrop}}" hint-placeholder-val="{{ false }}">
+                          <div aria-hidden="true" style="height: 128px; box-sizing: border-box; border: 2px dashed {{accent}}; border-radius: 12px; background: {{accentSoft}}; display: flex; align-items: center; justify-content: center; padding: 0 16px; text-align: center; font-size: 14px; line-height: 20px; font-weight: 600; color: {{accentInk}}">{{L.dropHere}}</div>
+                        </sc-if>
+                        <sc-if value="{{c.isCard}}" hint-placeholder-val="{{ true }}">
+                          <div style="position: relative; display: flex; flex-direction: column; gap: 10px; padding: 12px 12px 10px; border-radius: 12px; background: {{t.raised}}; border: 1px solid {{t.border}}; {{c.cardStyle}}">
+                            <div style="display: flex; align-items: flex-start; gap: 6px">
+                              <sc-if value="{{c.done}}" hint-placeholder-val="{{ false }}">
+                                <svg width="16" height="16" viewBox="0 0 24 24" role="img" aria-label="{{L.doneLabel}}" style="flex: none; margin-top: 3px"><circle cx="12" cy="12" r="10" fill="{{t.green}}"></circle><path d="m7.5 12.5 3 3 6-6.5" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                              </sc-if>
+                              <a href="#" style="flex: 1; min-width: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-decoration: none; font-size: 15px; line-height: 22px; font-weight: 500; {{c.titleStyle}}">{{c.title}}</a>
+                              <button aria-label="{{c.moreAria}}" style="flex: none; width: 44px; height: 44px; margin: -12px -12px -10px 0; border: 0; border-radius: 12px; background: transparent; display: flex; align-items: center; justify-content: center">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="{{t.muted}}" aria-hidden="true"><circle cx="5" cy="12" r="1.7"></circle><circle cx="12" cy="12" r="1.7"></circle><circle cx="19" cy="12" r="1.7"></circle></svg>
+                              </button>
+                            </div>
+                            <sc-if value="{{c.blocked}}" hint-placeholder-val="{{ false }}">
+                              <span style="display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 8px; font-size: 13px; line-height: 18px; font-weight: 500; {{blockedStyle}}">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="9"></circle><path d="m5.6 5.6 12.8 12.8"></path></svg>
+                                <span><strong style="font-weight: 600">{{L.blocked}}</strong> · {{c.blockedText}}</span>
+                              </span>
+                            </sc-if>
+                            <div style="display: flex; flex-wrap: wrap; gap: 4px">
+                              <sc-for list="{{c.tags}}" as="tg" hint-placeholder-count="2">
+                                <span style="height: 22px; padding: 0 8px; border-radius: 6px; font-size: 12px; font-weight: 500; display: flex; align-items: center; white-space: nowrap; {{tg.style}}">{{tg.label}}</span>
+                              </sc-for>
+                              <sc-if value="{{c.hasMore}}" hint-placeholder-val="{{ false }}">
+                                <span style="height: 22px; padding: 0 6px; border-radius: 6px; font-size: 12px; font-weight: 500; display: flex; align-items: center; background: {{t.chip}}; color: {{t.text3}}">{{c.more}}</span>
+                              </sc-if>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px; font-size: 12px; line-height: 16px; color: {{t.text3}}">
+                              <span style="font-family: Geist Mono, ui-monospace, monospace; color: {{t.muted}}">{{c.key}}</span>
+                              <span style="display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 6px; border-radius: 6px; font-weight: 500; {{c.dueStyle}}">{{c.due}}</span>
+                              <sc-if value="{{c.hasSub}}" hint-placeholder-val="{{ false }}">
+                                <span style="display: flex; align-items: center; gap: 5px" aria-label="{{c.subAria}}">
+                                  {{c.sub}}
+                                  <span style="width: 28px; height: 4px; border-radius: 2px; background: {{t.chip}}; overflow: hidden; display: flex"><span style="height: 4px; border-radius: 2px; {{c.barStyle}}"></span></span>
+                                </span>
+                              </sc-if>
+                              <span style="flex: 1"></span>
+                              <svg width="14" height="14" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="{{c.prioLabel}}" style="flex: none; {{c.flagStyle}}"><path d="M4 22V4"></path><path d="M4 4h12l-2 4 2 4H4"></path></svg>
+                              <span style="display: flex; padding-left: 6px">
+                                <sc-for list="{{c.people}}" as="p" hint-placeholder-count="1">
+                                  <span title="{{p.name}}" style="width: 24px; height: 24px; margin-left: -6px; box-sizing: border-box; border-radius: 12px; border: 2px solid {{t.raised}}; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{p.style}}">{{p.initials}}</span>
+                                </sc-for>
+                              </span>
+                            </div>
+                          </div>
+                        </sc-if>
+                      </div>
+                    </sc-for>
+                  </section>
+                </sc-for>
+              </div>
+
+              <sc-if value="{{bp.edgeHint}}" hint-placeholder-val="{{ false }}">
+                <div aria-hidden="true" style="position: absolute; z-index: 2; top: 0; right: 0; bottom: 0; width: 64px; display: flex; align-items: center; justify-content: center; background: linear-gradient(90deg, transparent, {{accentSoft}}); border-left: 2px dashed {{accent}}">
+                  <span style="width: 36px; height: 36px; border-radius: 18px; background: {{accent}}; display: flex; align-items: center; justify-content: center; box-shadow: {{t.shadowFab}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+                </div>
+              </sc-if>
+            </div>
+
+            <!-- lifted card -->
+            <sc-if value="{{bp.lifted}}" hint-placeholder-val="{{ false }}">
+              <div aria-hidden="true" style="position: absolute; z-index: 6; width: 300px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 12px; background: {{t.raised}}; border: 1.5px solid {{accent}}; box-shadow: 0 2px 6px rgba(0,0,0,0.08), 0 20px 40px rgba(0,0,0,0.22); {{bp.liftPos}}">
+                <span style="font-size: 15px; line-height: 22px; font-weight: 500">{{lift.title}}</span>
+                <div style="display: flex; gap: 4px">
+                  <sc-for list="{{lift.tags}}" as="tg" hint-placeholder-count="2"><span style="height: 22px; padding: 0 8px; border-radius: 6px; font-size: 12px; font-weight: 500; display: flex; align-items: center; {{tg.style}}">{{tg.label}}</span></sc-for>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; font-size: 12px; color: {{t.text3}}">
+                  <span style="font-family: Geist Mono, ui-monospace, monospace; color: {{t.muted}}">{{lift.key}}</span>
+                  <span style="height: 22px; padding: 0 6px; border-radius: 6px; display: inline-flex; align-items: center; font-weight: 500; {{lift.dueStyle}}">{{lift.due}}</span>
+                  <span style="flex: 1"></span>
+                  <span style="width: 24px; height: 24px; border-radius: 12px; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{lift.av}}">{{lift.initials}}</span>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- Move to… sheet -->
+            <sc-if value="{{bp.sheet}}" hint-placeholder-val="{{ false }}">
+              <div aria-hidden="true" style="position: absolute; z-index: 7; inset: 0; background: {{t.scrim}}"></div>
+              <div role="dialog" aria-modal="true" aria-labelledby="mv-h" style="position: absolute; z-index: 8; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.raised}}; border-radius: 16px 16px 0 0; box-shadow: {{t.shadowSheet}}">
+                <div style="height: 20px; display: flex; justify-content: center; padding-top: 6px; box-sizing: border-box"><span style="width: 36px; height: 5px; border-radius: 3px; background: {{t.grabber}}"></span></div>
+                <div style="display: flex; align-items: flex-start; gap: 8px; padding: 4px 4px 12px 16px; border-bottom: 1px solid {{t.divider}}">
+                  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                    <h2 id="mv-h" style="margin: 0; font-size: 17px; line-height: 22px; font-weight: 600">{{L.moveTo}}</h2>
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; line-height: 18px; color: {{t.muted}}"><span style="font-family: Geist Mono, ui-monospace, monospace">{{lift.key}}</span> · {{lift.title}}</span>
+                  </div>
+                  <button aria-label="{{L.close}}" style="flex: none; width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.text3}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+                </div>
+                <div role="listbox" aria-labelledby="mv-h" style="display: flex; flex-direction: column; padding: 4px 0">
+                  <sc-for list="{{moveOpts}}" as="o" hint-placeholder-count="6">
+                    <button role="option" aria-selected="{{o.current}}" style="display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 16px; border: 0; background: transparent; text-align: left">
+                      <span style="flex: none; width: 32px; display: flex; justify-content: center"><span aria-hidden="true" style="position: relative; width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; {{o.mk.ring}}"><span style="position: absolute; {{o.mk.g1}}"></span><span style="position: absolute; {{o.mk.g2}}"></span></span></span>
+                      <span style="flex: 1; font-size: 15px; line-height: 22px; color: {{t.text}}">{{o.label}}</span>
+                      <span style="font-size: 13px; color: {{t.muted}}">{{o.meta}}</span>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{accentInk}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; {{o.check}}"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>
+                    </button>
+                  </sc-for>
+                </div>
+                <div style="border-top: 1px solid {{t.divider}}; padding: 4px 0">
+                  <button style="width: 100%; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 16px; border: 0; background: transparent; text-align: left; font-size: 15px; color: {{t.text}}">
+                    <span style="flex: none; width: 32px; display: flex; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM10 13h6M13 10l3 3-3 3"></path></svg></span>
+                    <span style="flex: 1">{{L.moveProject}}</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{t.faint}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+                  </button>
+                </div>
+                <div style="height: 34px"></div>
+              </div>
+            </sc-if>
+
+            <nav aria-label="{{L.tabsAria}}" style="position: absolute; z-index: 5; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.bg}}; border-top: 1px solid {{t.divider}}">
+              <div style="display: flex; height: 49px; padding: 0 4px">
+                <sc-for list="{{tabs}}" as="tb" hint-placeholder-count="5">
+                  <a href="#" aria-current="{{tb.current}}" style="flex: 1; min-width: 0; height: 49px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; {{tb.color}}">
+                    <span style="position: relative; width: 24px; height: 24px">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{tb.sw}}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{tb.d1}}"></path><path d="{{tb.d2}}"></path></svg>
+                      <sc-if value="{{tb.hasBadge}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: -4px; left: 14px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px; background: {{accent}}; color: #FFFFFF; font-size: 11px; font-weight: 600; line-height: 18px; text-align: center; box-shadow: 0 0 0 2px {{t.bg}}">3</span></sc-if>
+                      <sc-if value="{{tb.hasDot}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: -1px; right: -3px; width: 8px; height: 8px; border-radius: 4px; background: {{accent}}; box-shadow: 0 0 0 2px {{t.bg}}"></span></sc-if>
+                    </span>
+                    <span style="max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; line-height: 14px; {{tb.weight}}">{{tb.label}}</span>
+                  </a>
+                </sc-for>
+              </div>
+              <div style="height: 34px"></div>
+            </nav>
+          </div>
+        </div>
+      </sc-for>
+
+      <!-- ===================== 11 · EMPTY PROJECT ===================== -->
+      <div style="display: flex; flex-direction: column; gap: 16px; order: 11">
+        <span style="{{cap}}">{{L.cap11}}</span>
+        <div style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; box-shadow: {{t.device}}">
+          <div style="flex: none; height: 59px"></div>
+          <div style="flex: none; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; height: 56px; padding: 0 4px; border-bottom: 1px solid {{t.divider}}">
+            <div style="display: flex">
+              <a href="#" aria-label="{{L.back}}" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: {{t.text}}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; max-width: 190px; min-width: 0">
+              <span style="max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 16px; line-height: 22px; font-weight: 600">{{L.ppName}}</span>
+              <span style="display: flex; align-items: center; gap: 5px; font-size: 12px; line-height: 16px; color: {{t.muted}}"><span style="width: 6px; height: 6px; border-radius: 3px; background: #A1A1AA"></span><span style="font-family: Geist Mono, ui-monospace, monospace">PRT</span> · {{L.product}}</span>
+            </div>
+            <div style="display: flex; justify-content: flex-end">
+              <button aria-label="{{L.projectMenu}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="{{t.text2}}" aria-hidden="true"><circle cx="5" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="19" cy="12" r="1.8"></circle></svg></button>
+            </div>
+          </div>
+          <div style="flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 20px; padding: 24px 16px 120px">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center">
+              <div aria-hidden="true" style="width: 72px; height: 72px; border-radius: 36px; background: {{t.surface2}}; border: 1px solid {{t.divider}}; display: flex; align-items: center; justify-content: center">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="{{t.faint}}" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 3v18M15 3v18"></path></svg>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px">
+                <h1 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.01em">{{L.emptyTitle}}</h1>
+                <p style="margin: 0; font-size: 15px; line-height: 22px; color: {{t.text3}}">{{L.emptyBody}}</p>
+              </div>
+              <div style="align-self: stretch; display: flex; gap: 8px">
+                <button style="flex: 1; height: 48px; border: 0; border-radius: 12px; background: {{accent}}; color: #FFFFFF; font-size: 16px; font-weight: 600">{{L.addFirst}}</button>
+                <button style="flex: 1; height: 48px; border: 1px solid {{t.border}}; border-radius: 12px; background: {{t.bg}}; color: {{t.text}}; font-size: 16px; font-weight: 600">{{L.invite}}</button>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px">
+              <h2 style="margin: 0; font-size: 13px; line-height: 18px; font-weight: 600; color: {{t.muted}}">{{L.templates}}</h2>
+              <sc-for list="{{templates}}" as="tp" hint-placeholder-count="4">
+                <button style="display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 12px; box-sizing: border-box; border: 1px solid {{t.border}}; border-radius: 14px; background: {{t.bg}}; text-align: left">
+                  <span aria-hidden="true" style="flex: none; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; {{tp.tile}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{tp.icon}}"></path></svg></span>
+                  <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                    <span style="font-size: 15px; line-height: 20px; font-weight: 600; color: {{t.text}}">{{tp.name}}</span>
+                    <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{tp.meta}}</span>
+                  </span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{t.faint}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <nav aria-label="{{L.tabsAria}}" style="position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.bg}}; border-top: 1px solid {{t.divider}}">
+            <div style="display: flex; height: 49px; padding: 0 4px">
+              <sc-for list="{{tabs}}" as="tb" hint-placeholder-count="5">
+                <a href="#" aria-current="{{tb.current}}" style="flex: 1; min-width: 0; height: 49px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; {{tb.color}}">
+                  <span style="position: relative; width: 24px; height: 24px">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{tb.sw}}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{tb.d1}}"></path><path d="{{tb.d2}}"></path></svg>
+                  </span>
+                  <span style="max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; line-height: 14px; {{tb.weight}}">{{tb.label}}</span>
+                </a>
+              </sc-for>
+            </div>
+            <div style="height: 34px"></div>
+          </nav>
+        </div>
+      </div>
+
+      <!-- ===================== 12 · BEHAVIOUR ===================== -->
+      <div style="display: flex; flex-direction: column; gap: 16px; order: 12">
+        <span style="{{cap}}">{{L.cap12}}</span>
+        <div style="width: 390px; box-sizing: border-box; display: flex; flex-direction: column; border: 1px solid {{t.border}}; border-radius: 16px; background: {{t.bg}}; overflow: hidden">
+          <sc-for list="{{rules}}" as="r" hint-placeholder-count="8">
+            <div style="display: flex; flex-direction: column; gap: 2px; padding: 12px 16px; border-bottom: 1px solid {{t.divider}}">
+              <span style="font-size: 14px; line-height: 20px; font-weight: 600">{{r.title}}</span>
+              <span style="font-size: 13px; line-height: 18px; color: {{t.text3}}">{{r.body}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"language":{"editor":"enum","default":"mn","options":["mn","en"]},"theme":{"editor":"enum","default":"light","options":["light","dark"]},"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"$preview":{"width":1840,"height":3300}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: undefined, theme: undefined, openSpaces: { product: true, engineering: false, design: false }, closed: { done: true, cancelled: true }, sel: { a131: true, a147: true, a149: true } };
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const lang = s.lang || this.props.language || 'mn';
+    const mn = lang === 'mn';
+    const pick = (p) => (mn ? p[0] : p[1]);
+    const theme = s.theme || this.props.theme || 'light';
+    const dark = theme === 'dark';
+    const accent = this.props.accent ?? '#6E56CF';
+    const inks = { '#6E56CF': '#B4A5FF', '#2F6FEB': '#93B4FF', '#0F766E': '#5EEAD4', '#3F3F46': '#D4D4D8' };
+    const darkInk = inks[String(accent).toUpperCase()] || '#B4A5FF';
+    const accentInk = dark ? darkInk : accent;
+    const accentSoft = accent + (dark ? '33' : '1A');
+
+    /* ---------- STRINGS ---------- */
+    const STR = {
+      mn: {
+        intro: 'Төслүүд таб: дуртай төслүүд, орон зай → төсөл. Төслийн дэлгэц: жагсаалт, самбар, олноор сонгох, шүүлтүүр, орон зайн жагсаалт, хоосон төсөл.',
+        preview: 'Урьдчилан харах', langLabel: 'Хэл', themeLabel: 'Горим', light: 'Цайвар', dark: 'Бараан',
+        secTitle: 'Төслүүд', secSub: 'Таб · жагсаалт · олноор сонгох · самбар · чирэх · «Зөөх…» · орон зай · хоосон төсөл',
+        cap01: '01 · Төслүүд таб (орон зайг дарж хумина)', cap02: '02 · Жагсаалт · наалдсан бүлгийн толгой (гүйлгэж туршина)', cap03: '03 · Удаан дарж олноор сонгох (мөр дарж туршина)', cap04: '04 · 3 ажлыг устгасны дараа · буцаах',
+        cap05: '05 · Шүүлтүүрийн хуудас', cap06: '06 · Самбар · нэг багана нэг дэлгэц', cap07: '07 · Чирэх · дараагийн багана ирмэгт', cap08: '08 · Чирэх · «Хянагдаж буй» руу шилжсэн',
+        cap09: '09 · Чирэхгүй зам: карт ⋯ → Зөөх…', cap10: '10 · Орон зайн жагсаалт · төсөл бүрийн шошготой', cap11: '11 · Хоосон төсөл · загварууд', cap12: 'Зан төлөв',
+        wsSwitch: 'Ажлын орчин солих: Kite Studio', profile: 'Профайл ба Бусад', tabProjects: 'Төслүүд', searchProjects: 'Төсөл хайх',
+        favorites: 'Дуртай', spaces: 'Орон зай', countNote: 'Тоо нь нээлттэй ажлыг харуулна. Архивласан төслүүд энд харагдахгүй.',
+        fabAria: 'Шинэ ажил үүсгэх', tabsAria: 'Үндсэн цэс', tabs: ['Миний ажил', 'Төслүүд', 'Мэдэгдэл', 'Стэндап', 'Бусад'],
+        back: 'Буцах', members: 'Төслийн 7 гишүүн', projectMenu: 'Төслийн цэс', moreActions: 'Бусад үйлдэл',
+        projectName: 'Апп шинэчлэл', product: 'Бүтээгдэхүүн', ppName: 'Түншийн портал',
+        view: 'Харагдац', segList: ['Жагсаалт', 'Самбар', 'Хуанли'],
+        summary: '16 ажил · 4 дууссан', cancel: 'Цуцлах', selectAll: 'Бүгдийг сонгох', bulkAria: 'Сонгосон ажлын үйлдэл',
+        blocked: 'Гацсан', undo: 'Буцаах', deleted: '3 ажлыг устгалаа',
+        filter: 'Шүүлтүүр', reset: 'Арилгах', showResults: '9 ажил харуулах',
+        columns: 'Баганууд', dropHere: '«Хянагдаж буй» руу зөөхийн тулд суллана уу', doneLabel: 'Дууссан',
+        moveTo: 'Зөөх…', moveProject: 'Өөр төсөл рүү зөөх', close: 'Хаах',
+        emptyTitle: 'Төсөл хоосон байна', emptyBody: 'Анхны ажлаа нэмэх эсвэл бэлэн загвараас эхлээрэй.', addFirst: 'Ажил нэмэх', invite: 'Гишүүн урих', templates: 'Загвараас эхлэх'
+      },
+      en: {
+        intro: 'Projects tab: favorites, then spaces → projects. Project screen: list, board, multi-select, filters, space-level list and an empty project.',
+        preview: 'Preview', langLabel: 'Language', themeLabel: 'Theme', light: 'Light', dark: 'Dark',
+        secTitle: 'Projects', secSub: 'Tab · list · multi-select · board · drag · “Move to…” · space · empty project',
+        cap01: '01 · Projects tab (tap a space to collapse)', cap02: '02 · List · sticky group headers (try scrolling)', cap03: '03 · Long-press multi-select (tap rows)', cap04: '04 · After deleting 3 tasks · Undo',
+        cap05: '05 · Filter sheet', cap06: '06 · Board · one column per screen', cap07: '07 · Dragging · next column at the edge', cap08: '08 · Dragging · paged to In Review',
+        cap09: '09 · Without dragging: card ⋯ → Move to…', cap10: '10 · Space-level list · project pill on rows', cap11: '11 · Empty project · templates', cap12: 'Behaviour',
+        wsSwitch: 'Switch workspace: Kite Studio', profile: 'Profile and More', tabProjects: 'Projects', searchProjects: 'Search projects',
+        favorites: 'Favorites', spaces: 'Spaces', countNote: 'Numbers are open tasks. Archived projects aren’t shown here.',
+        fabAria: 'Create task', tabsAria: 'Main', tabs: ['My Tasks', 'Projects', 'Inbox', 'Standup', 'More'],
+        back: 'Back', members: '7 project members', projectMenu: 'Project menu', moreActions: 'More actions',
+        projectName: 'App Redesign', product: 'Product', ppName: 'Partner Portal',
+        view: 'View', segList: ['List', 'Board', 'Calendar'],
+        summary: '16 tasks · 4 done', cancel: 'Cancel', selectAll: 'Select all', bulkAria: 'Actions for selected tasks',
+        blocked: 'Blocked', undo: 'Undo', deleted: '3 tasks deleted',
+        filter: 'Filter', reset: 'Reset', showResults: 'Show 9 tasks',
+        columns: 'Columns', dropHere: 'Drop to move to In Review', doneLabel: 'Done',
+        moveTo: 'Move to…', moveProject: 'Move to another project', close: 'Close',
+        emptyTitle: 'This project is empty', emptyBody: 'Add your first task, or start from a template.', addFirst: 'Add task', invite: 'Invite members', templates: 'Start from a template'
+      }
+    };
+    const L = STR[lang] || STR.mn;
+
+    /* ---------- TOKENS ---------- */
+    const t = dark ? {
+      board: '#0A0A0B', bg: '#111113', surface2: '#161618', raised: '#1B1B1E', fill: '#1F1F23', chip: '#232328', seg: '#1F1F23',
+      border: '#26262B', border2: '#3A3A42', divider: '#1F1F23', grabber: '#3F3F46',
+      text: '#EDEDEF', text2: '#C9C9D1', text3: '#B4B4BC', muted: '#8E8E98', faint: '#5E5E68',
+      green: '#22C55E', red: '#F87171', skel: '#232328', scrim: 'rgba(0,0,0,0.6)',
+      toastBg: '#EDEDEF', toastText: '#18181B', toastAction: accent,
+      shadowMenu: '0 12px 32px rgba(0,0,0,0.5)', shadowSheet: '0 -8px 32px rgba(0,0,0,0.5)', shadowFab: '0 2px 4px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.45)',
+      device: '0 0 0 1px #2A2A30, 0 0 0 10px #232328, 0 24px 48px rgba(0,0,0,0.5)',
+      segOn: 'background:#2A2A30;color:#EDEDEF;box-shadow:0 1px 2px rgba(0,0,0,0.4)', segOff: 'background:transparent;color:#8E8E98',
+      scheme: 'color-scheme: dark'
+    } : {
+      board: '#F4F4F5', bg: '#FFFFFF', surface2: '#F7F7F8', raised: '#FFFFFF', fill: '#F4F4F5', chip: '#F1F1F3', seg: '#F1F1F3',
+      border: '#E6E6EA', border2: '#C4C4CC', divider: '#EFEFF2', grabber: '#D4D4D8',
+      text: '#18181B', text2: '#3F3F46', text3: '#52525B', muted: '#6B6B74', faint: '#A1A1AA',
+      green: '#16A34A', red: '#DC2626', skel: '#EDEDF0', scrim: 'rgba(24,24,27,0.32)',
+      toastBg: '#18181B', toastText: '#FAFAFA', toastAction: darkInk,
+      shadowMenu: '0 12px 32px rgba(24,24,27,0.14)', shadowSheet: '0 -8px 32px rgba(24,24,27,0.12)', shadowFab: '0 2px 4px rgba(24,24,27,0.08), 0 8px 20px rgba(24,24,27,0.18)',
+      device: '0 0 0 1px #E6E6EA, 0 0 0 10px #18181B, 0 24px 48px rgba(24,24,27,0.18)',
+      segOn: 'background:#FFFFFF;color:#18181B;box-shadow:0 1px 2px rgba(24,24,27,0.08)', segOff: 'background:transparent;color:#6B6B74',
+      scheme: 'color-scheme: light'
+    };
+    const cap = 'font-family:Geist Mono,ui-monospace,monospace;font-size:12px;line-height:16px;color:' + t.muted;
+    const blockedStyle = dark ? 'background:rgba(248,113,113,0.14);color:#FCA5A5' : 'background:#FDECEC;color:#B42318';
+
+    /* ---------- STATUS ---------- */
+    const SC = dark ? { todo: '#71717A', prog: '#F59E0B', hold: '#F87171', done: '#22C55E', can: '#71717A' } : { todo: '#A1A1AA', prog: '#D97706', hold: '#DC2626', done: '#16A34A', can: '#A1A1AA' };
+    const NONE = 'display:none';
+    const bar = (l, c) => 'display:block;top:2px;left:' + l + 'px;width:2px;height:4px;border-radius:1px;background:' + c;
+    const xs = (d, c) => 'display:block;top:3px;left:1px;width:6px;height:2px;border-radius:1px;background:' + c + ';transform:rotate(' + d + 'deg)';
+    const MK = {
+      todo: { ring: 'border:2px solid ' + SC.todo, g1: NONE, g2: NONE },
+      progress: { ring: 'border:2px solid ' + SC.prog + ';background:linear-gradient(90deg,' + SC.prog + ' 50%,transparent 50%)', g1: NONE, g2: NONE },
+      review: { ring: 'border:2px solid ' + accentInk + ';background:' + accentInk + '33', g1: NONE, g2: NONE },
+      hold: { ring: 'border:2px solid ' + SC.hold, g1: bar(1, SC.hold), g2: bar(5, SC.hold) },
+      done: { ring: 'border:2px solid ' + SC.done + ';background:' + SC.done, g1: NONE, g2: NONE },
+      cancelled: { ring: 'border:2px solid ' + SC.can, g1: xs(45, SC.can), g2: xs(-45, SC.can) }
+    };
+    const STATUS = { todo: ['Хийх', 'To Do'], progress: ['Хийгдэж буй', 'In Progress'], review: ['Хянагдаж буй', 'In Review'], hold: ['Түр зогссон', 'On Hold'], done: ['Дууссан', 'Done'], cancelled: ['Цуцалсан', 'Cancelled'] };
+    const COLTINT = dark ? {
+      todo: ['background:#232328', 'color:#C9C9D1'], progress: ['background:rgba(245,158,11,0.16)', 'color:#FCD34D'], review: ['background:' + accentSoft, 'color:' + accentInk],
+      hold: ['background:rgba(248,113,113,0.14)', 'color:#FCA5A5'], done: ['background:rgba(34,197,94,0.14)', 'color:#86EFAC']
+    } : {
+      todo: ['background:#EDEDF0', 'color:#3F3F46'], progress: ['background:#FDF0DC', 'color:#92400E'], review: ['background:' + accentSoft, 'color:' + accent],
+      hold: ['background:#FDECEC', 'color:#B42318'], done: ['background:#E3F4E8', 'color:#166534']
+    };
+    const colBody = 'background:' + t.surface2 + ';border:1px solid ' + t.divider;
+
+    /* ---------- PRIORITY / DUE / TAGS ---------- */
+    const PF = dark
+      ? { urgent: 'fill:#F87171;stroke:#F87171', high: 'fill:#FB923C;stroke:#FB923C', medium: 'fill:#FACC15;stroke:#FACC15', low: 'fill:none;stroke:#71717A' }
+      : { urgent: 'fill:#DC2626;stroke:#DC2626', high: 'fill:#EA580C;stroke:#EA580C', medium: 'fill:#CA8A04;stroke:#CA8A04', low: 'fill:none;stroke:#A1A1AA' };
+    const PRIO = { urgent: ['Яаралтай', 'Urgent'], high: ['Өндөр', 'High'], medium: ['Дунд', 'Medium'], low: ['Бага', 'Low'] };
+    const DUE = dark
+      ? { overdue: 'background:rgba(248,113,113,0.14);color:#F87171', today: 'background:rgba(251,191,36,0.14);color:#FBBF24', soon: 'background:#232328;color:#C9C9D1', later: 'background:#232328;color:#8E8E98', done: 'background:transparent;color:#5E5E68' }
+      : { overdue: 'background:#FDECEC;color:#C42B1C', today: 'background:#FDF0DC;color:#B45309', soon: 'background:#F1F1F3;color:#3F3F46', later: 'background:#F1F1F3;color:#6B6B74', done: 'background:transparent;color:#A1A1AA' };
+    const N1 = 'background:#F1F1F3;color:#3F3F46', N2 = 'background:#232328;color:#C9C9D1';
+    const TAGS = {
+      research: [['Судалгаа', 'Research'], 'background:#E8F1FD;color:#1D4ED8', 'background:rgba(59,130,246,0.16);color:#93C5FD'],
+      ux: [['UX', 'UX'], 'background:#F1EEFD;color:#5B45B8', 'background:rgba(139,116,240,0.18);color:#C4B5FD'],
+      ui: [['UI', 'UI'], 'background:#F1EEFD;color:#5B45B8', 'background:rgba(139,116,240,0.18);color:#C4B5FD'],
+      ds: [['Дизайн систем', 'Design system'], 'background:#E3F4F1;color:#0F766E', 'background:rgba(20,184,166,0.16);color:#5EEAD4'],
+      fe: [['Фронтенд', 'Frontend'], N1, N2], ios: [['iOS', 'iOS'], N1, N2], android: [['Android', 'Android'], N1, N2], docs: [['Баримт', 'Docs'], N1, N2],
+      analytics: [['Аналитик', 'Analytics'], 'background:#FDF1E1;color:#9A3412', 'background:rgba(249,115,22,0.16);color:#FDBA74'],
+      a11y: [['Хүртээмж', 'A11y'], 'background:#E6F4EA;color:#166534', 'background:rgba(34,197,94,0.16);color:#86EFAC'],
+      onboarding: [['Танилцуулга', 'Onboarding'], 'background:#FCEBF3;color:#9D174D', 'background:rgba(236,72,153,0.16);color:#F9A8D4']
+    };
+    const tag = (k) => ({ label: pick(TAGS[k][0]), style: dark ? TAGS[k][2] : TAGS[k][1] });
+    const MON = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const D = (m, d) => (mn ? m + '-р сарын ' + d : MON[m] + ' ' + d);
+    const TODAY = ['Өнөөдөр', 'Today'], TOMORROW = ['Маргааш', 'Tomorrow'];
+
+    /* ---------- PEOPLE / PROJECTS ---------- */
+    const PP = {
+      anu: [['Ану Б.', 'Anu B.'], ['АБ', 'AB'], 'background:#E0E7FF;color:#3730A3', 'background:#312E81;color:#C7D2FE'],
+      bat: [['Бат О.', 'Bat O.'], ['БО', 'BO'], 'background:#CCFBF1;color:#115E59', 'background:#134E4A;color:#99F6E4'],
+      sara: [['Сараа К.', 'Sara K.'], ['СК', 'SK'], 'background:#FFE4E6;color:#9F1239', 'background:#881337;color:#FECDD3'],
+      tem: [['Тэмүүлэн Г.', 'Temuulen G.'], ['ТГ', 'TG'], 'background:#DCFCE7;color:#166534', 'background:#14532D;color:#BBF7D0'],
+      dorj: [['Дорж Э.', 'Dorj E.'], ['ДЭ', 'DE'], 'background:#FEF3C7;color:#92400E', 'background:#78350F;color:#FDE68A'],
+      mia: [['Мишээл Л.', 'Mia L.'], ['МЛ', 'ML'], 'background:#E0F2FE;color:#075985', 'background:#0C4A6E;color:#BAE6FD'],
+      oyu: [['Оюука Н.', 'Oyuka N.'], ['ОН', 'ON'], 'background:#F3E8FF;color:#6B21A8', 'background:#581C87;color:#E9D5FF']
+    };
+    const person = (id) => ({ name: pick(PP[id][0]), initials: pick(PP[id][1]), style: dark ? PP[id][3] : PP[id][2] });
+    const me = person('anu');
+    const PROJ = {
+      ar: [['Апп шинэчлэл', 'App Redesign'], '#7C5CE0', 'APP'], co: [['Төлбөрийн хуудас v2', 'Checkout v2'], '#0284C7', 'CHK'], q4: [['Q4 замын зураг', 'Q4 Roadmap'], '#D97706', 'Q4'],
+      pp: [['Түншийн портал', 'Partner Portal'], '#A1A1AA', 'PRT'], mr: [['Мобайл хувилбар 4.2', 'Mobile release 4.2'], '#16A34A', 'MOB'], pm: [['Платформ шилжүүлэлт', 'Platform migration'], '#0D9488', 'PLT'],
+      bt: [['Алдааны ангилал', 'Bug triage'], '#64748B', 'BUG'], ds: [['Дизайн систем', 'Design system'], '#E11D48', 'DS'], br: [['Брэнд шинэчлэл', 'Brand refresh'], '#DB2777', 'BR']
+    };
+
+    /* ---------- TASKS (desktop App Redesign + a few from the space) ---------- */
+    const TK = {
+      a136: { key: 'APP-136', st: 'todo', n: ['Одоогийн навигацийн хэв маягийг шалгах', 'Audit current navigation patterns'], due: [10, 14], dk: 'later', pr: 'medium', ppl: ['tem'], c: 2, sub: '0/4', tags: ['research', 'ux'] },
+      a139: { key: 'APP-139', st: 'todo', n: ['Бараан горимын өнгөний токен тодорхойлох', 'Define color tokens for dark mode'], due: [10, 16], dk: 'later', pr: 'low', ppl: ['sara'], sub: '1/6', tags: ['ds'] },
+      a143: { key: 'APP-143', st: 'todo', n: ['Хэрэглээний тестийн скрипт — шинэ танилцуулга', 'Usability test script — new onboarding'], due: [10, 22], dk: 'later', pr: 'low', ppl: ['mia'], sub: '1/3', tags: ['research'] },
+      a146: { key: 'APP-146', st: 'todo', n: ['Хайлтын үр дүнгийн хоосон төлөвүүд', 'Empty states for search results'], due: [10, 23], dk: 'later', pr: 'medium', ppl: ['sara'], tags: ['ui'] },
+      a138: { key: 'APP-138', st: 'progress', n: ['Шинэ доод таб самбар хэрэгжүүлэх', 'Implement new bottom tab bar'], due: [10, 10], dk: 'soon', pr: 'urgent', ppl: ['tem', 'dorj'], sub: '1/4', blocked: true, tags: ['ios', 'android'] },
+      a131: { key: 'APP-131', st: 'progress', n: ['Бүтээгдэхүүний картын компонент v2', 'Product card component v2'], dw: TOMORROW, dk: 'soon', pr: 'high', ppl: ['sara', 'tem'], sub: '3/5', c: 4, tags: ['ds', 'ui'] },
+      a147: { key: 'APP-147', st: 'progress', n: ['Танилцуулах урсгалыг шинэчлэх (3 дэлгэц)', 'Redesign onboarding flow (3 screens)'], due: [10, 12], dk: 'later', pr: 'high', ppl: ['anu', 'sara'], sub: '2/3', c: 7, tags: ['onboarding', 'ux', 'research'] },
+      a149: { key: 'APP-149', st: 'progress', n: ['Төлбөрийн хэсгийн аналитик эвентүүдийг шинэчлэх', 'Update analytics events for checkout'], due: [10, 15], dk: 'later', pr: 'medium', ppl: ['oyu'], sub: '2/5', tags: ['analytics', 'fe'] },
+      a127: { key: 'APP-127', st: 'review', n: ['Үндсэн товчлууруудын хүртээмжийн шалгалт', 'Accessibility pass on primary buttons'], due: [10, 7], dk: 'overdue', pr: 'high', ppl: ['mia'], sub: '4/4', c: 3, tags: ['a11y', 'ui'] },
+      a142: { key: 'APP-142', st: 'review', n: ['Төлбөрийн хуудас — респонсив байрлал', 'Checkout page — responsive layout'], dw: TODAY, dk: 'today', pr: 'urgent', ppl: ['dorj', 'anu'], sub: '5/6', c: 5, tags: ['fe'] },
+      a144: { key: 'APP-144', st: 'review', n: ['Дүрс тэмдгийн багц шинэчлэх (48 дүрс)', 'Icon set refresh (48 icons)'], due: [10, 13], dk: 'later', pr: 'low', ppl: ['sara'], sub: '32/48', tags: ['ui', 'ds'] },
+      a129: { key: 'APP-129', st: 'hold', n: ['Тохиргооны дэлгэцийн шилжүүлэлтийн төлөвлөгөө', 'Migration plan for the settings screen'], due: [10, 20], dk: 'later', pr: 'medium', ppl: ['dorj', 'anu'], tags: ['fe', 'docs'] },
+      a101: { key: 'APP-101', st: 'done', n: ['Эхлэлийн уулзалт ба зорилгын баримт', 'Kickoff and goals doc'], due: [9, 29], pr: 'medium', ppl: ['anu'], tags: ['docs'] },
+      a109: { key: 'APP-109', st: 'done', n: ['Өрсөлдөгчдийн шинжилгээ — 5 апп', 'Competitive teardown — 5 apps'], due: [10, 1], pr: 'low', ppl: ['mia'], sub: '5/5', tags: ['research'] },
+      a112: { key: 'APP-112', st: 'done', n: ['Оролцогч талуудтай ярилцлага', 'Stakeholder interviews'], due: [10, 2], pr: 'medium', ppl: ['anu', 'mia'], sub: '6/6', tags: ['research'] },
+      a115: { key: 'APP-115', st: 'done', n: ['Визуал чиглэлийн мүүдборд', 'Visual direction moodboard'], due: [10, 3], pr: 'low', ppl: ['sara'], tags: ['ui'] },
+      a150: { key: 'APP-150', st: 'cancelled', n: ['Шургуулга хэлбэрийн навигацийн прототип', 'Drawer-style navigation prototype'], due: [10, 5], pr: 'low', ppl: ['tem'], tags: ['ux'] },
+      c61: { key: 'CHK-61', st: 'todo', n: ['Хуулийн хэлтэст промо кодын нөхцөлөөр хариулах', 'Reply to legal on promo-code terms'], dw: TODAY, dk: 'today', pr: 'medium', ppl: ['anu'], proj: 'co', tags: [] },
+      q12: { key: 'Q4-12', st: 'todo', n: ['Q4-ийн тэргүүлэх чиглэлийг батлах', 'Approve Q4 roadmap priorities'], due: [10, 7], dk: 'overdue', pr: 'urgent', ppl: ['anu'], proj: 'q4', tags: [] },
+      c64: { key: 'CHK-64', st: 'progress', n: ['Хадгалсан сагсны PRD бичих', 'Write PRD: saved carts'], dw: TOMORROW, dk: 'soon', pr: 'medium', ppl: ['anu'], c: 1, proj: 'co', tags: [] },
+      c66: { key: 'CHK-66', st: 'review', n: ['Төлбөрийн үйлчилгээ үзүүлэгчийн хяналт', 'Payment provider review'], due: [10, 9], dk: 'soon', pr: 'high', ppl: ['dorj', 'bat'], blocked: true, proj: 'co', tags: [] }
+    };
+    const closedSt = (st) => st === 'done' || st === 'cancelled';
+    const dueOf = (o) => (o.dw ? pick(o.dw) : D(o.due[0], o.due[1]));
+
+    const row = (id, opts) => {
+      const o = TK[id];
+      const closed = closedSt(o.st);
+      const selMode = !!opts.selMode;
+      const selected = selMode && !!(opts.sel || {})[id];
+      const proj = PROJ[o.proj || 'ar'];
+      return {
+        id, key: o.key, title: pick(o.n), mk: MK[o.st],
+        statusAria: (mn ? 'Төлөв: ' : 'Status: ') + pick(STATUS[o.st]),
+        titleStyle: closed ? 'color:' + t.faint + ';text-decoration:line-through' : 'color:' + t.text,
+        keyStyle: 'color:' + (closed ? t.faint : t.muted),
+        hasDue: true, due: dueOf(o), dueStyle: DUE[closed ? 'done' : (o.dk || 'later')],
+        blocked: !!o.blocked && !closed,
+        hasSub: !!o.sub, sub: o.sub || '', hasComments: !!o.c, comments: String(o.c || ''),
+        flagStyle: PF[o.pr], prioLabel: (mn ? 'Ач холбогдол: ' : 'Priority: ') + pick(PRIO[o.pr]),
+        people: o.ppl.map(person),
+        hasProject: !!opts.showProject, project: pick(proj[0]), projDot: 'background:' + proj[1],
+        selMode, normal: !selMode, selected,
+        rowBg: selected ? 'background:' + accentSoft : 'background:' + t.bg,
+        selBox: selected ? 'background:' + accent + ';border:0' : 'border:2px solid ' + (dark ? '#4A4A52' : '#C4C4CC'),
+        selCheck: 'visibility:' + (selected ? 'visible' : 'hidden'),
+        toggleSel: opts.interactiveSel ? () => this.setState({ sel: { ...(this.state.sel || {}), [id]: !selected } }) : () => {}
+      };
+    };
+
+    const GROUPS = [
+      ['todo', ['a136', 'a139', 'a143', 'a146']], ['progress', ['a138', 'a131', 'a147', 'a149']], ['review', ['a127', 'a142', 'a144']],
+      ['hold', ['a129']], ['done', ['a101', 'a109', 'a112', 'a115']], ['cancelled', ['a150']]
+    ];
+    const groupList = (opts) => GROUPS.map(([st, ids]) => {
+      const rowsIds = ids.filter((id) => !(opts.removed || {})[id]);
+      const closed = opts.closed || {};
+      const open = !closed[st];
+      return {
+        label: pick(STATUS[st]), mk: MK[st], count: String(rowsIds.length), open,
+        chev: 'transition:transform .15s;transform:rotate(' + (open ? 90 : 0) + 'deg)',
+        addAria: (mn ? '«' + pick(STATUS[st]) + '»-д ажил нэмэх' : 'Add task to ' + pick(STATUS[st])),
+        toggle: opts.interactive ? () => this.setState({ closed: { ...(this.state.closed || {}), [st]: open } }) : () => {},
+        rows: rowsIds.map((id) => row(id, opts))
+      };
+    });
+
+    const chipOn = 'border:1px solid ' + accentInk + ';background:' + accentSoft + ';color:' + accentInk;
+    const chipOff = 'border:1px solid ' + t.border + ';background:' + t.bg + ';color:' + t.text2;
+    const chip = (c) => ({ on: false, hasIcon: false, hasCount: false, count: '', caret: true, ...c, style: c.on ? chipOn : chipOff });
+    const projectChips = [
+      chip({ label: L.filter, hasIcon: true, hasCount: true, count: '1', caret: false }),
+      chip({ label: mn ? 'Спринт 14' : 'Sprint 14', on: true }),
+      chip({ label: mn ? 'Хариуцагч' : 'Assignee' }),
+      chip({ label: mn ? 'Ач холбогдол' : 'Priority' }),
+      chip({ label: mn ? 'Шошго' : 'Tags' }),
+      chip({ label: mn ? 'Дууссан: сүүлийн 14 хоног' : 'Done: last 14 days' })
+    ];
+    const spaceChips = [
+      chip({ label: L.filter, hasIcon: true, caret: false }),
+      chip({ label: mn ? 'Төсөл: бүгд' : 'Project: all' }),
+      chip({ label: mn ? 'Хариуцагч' : 'Assignee' }),
+      chip({ label: mn ? 'Дууссан: сүүлийн 14 хоног' : 'Done: last 14 days' })
+    ];
+
+    const sel = s.sel || {};
+    const selN = Object.keys(sel).filter((k) => sel[k]).length;
+    const allIds = GROUPS.reduce((a, g) => a.concat(g[1]), []);
+    const listPhones = [
+      { order: 'order:2', cap: L.cap02, isProject: true, isSpace: false, isSelect: false, hasSeg: true,
+        title: L.projectName, key: 'APP', space: L.product, dot: 'background:#7C5CE0', chips: projectChips, summary: L.summary,
+        groups: groupList({ closed: s.closed, interactive: true }), toast: false, toastText: '', fab: true, fabBottom: '99px', showTabs: true, cancelSel: () => {}, selectAll: () => {}, selCount: '' },
+      { order: 'order:3', cap: L.cap03, isProject: false, isSpace: false, isSelect: true, hasSeg: true,
+        title: '', key: '', space: '', dot: '', chips: projectChips, summary: L.summary,
+        groups: groupList({ closed: { done: true, cancelled: true }, selMode: true, sel: sel, interactiveSel: true }),
+        toast: false, toastText: '', fab: false, fabBottom: '99px', showTabs: false,
+        selCount: mn ? selN + ' сонгосон' : selN + ' selected',
+        cancelSel: () => this.setState({ sel: {} }),
+        selectAll: () => { const all = {}; allIds.forEach((id) => { all[id] = true; }); this.setState({ sel: all }); } },
+      { order: 'order:4', cap: L.cap04, isProject: true, isSpace: false, isSelect: false, hasSeg: true,
+        title: L.projectName, key: 'APP', space: L.product, dot: 'background:#7C5CE0', chips: projectChips, summary: mn ? '13 ажил · 4 дууссан' : '13 tasks · 4 done',
+        groups: groupList({ closed: { done: true, cancelled: true }, removed: { a131: true, a147: true, a149: true } }),
+        toast: true, toastText: L.deleted, fab: true, fabBottom: '151px', showTabs: true, cancelSel: () => {}, selectAll: () => {}, selCount: '' },
+      { order: 'order:10', cap: L.cap10, isProject: false, isSpace: true, isSelect: false, hasSeg: false,
+        title: L.product, key: '', space: mn ? '4 төсөл · 28 нээлттэй ажил' : '4 projects · 28 open tasks', dot: '', chips: spaceChips, summary: mn ? 'Төлөвөөр бүлэглэсэн · дуусах огноогоор эрэмбэлсэн' : 'Grouped by status · sorted by due date',
+        groups: [
+          ['todo', ['q12', 'c61']], ['progress', ['a138', 'c64']], ['review', ['a142', 'c66']]
+        ].map(([st, ids]) => ({
+          label: pick(STATUS[st]), mk: MK[st], count: String(ids.length), open: true,
+          chev: 'transform:rotate(90deg)', addAria: mn ? 'Ажил нэмэх' : 'Add task', toggle: () => {},
+          rows: ids.map((id) => row(id, { showProject: true }))
+        })),
+        toast: false, toastText: '', fab: true, fabBottom: '99px', showTabs: true, cancelSel: () => {}, selectAll: () => {}, selCount: '' }
+    ];
+
+    const bulk = [
+      [mn ? 'Төлөв' : 'Status', 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 3v18', false],
+      [mn ? 'Хариуцагч' : 'Assignee', 'M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM4 21a8 8 0 0 1 16 0', false],
+      [mn ? 'Огноо' : 'Due', 'M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM16 2v4M8 2v4M3 10h18', false],
+      [mn ? 'Ач холбогдол' : 'Priority', 'M4 22V4M4 4h12l-2 4 2 4H4', false],
+      [mn ? 'Устгах' : 'Delete', 'M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6', true]
+    ].map(([label, icon, danger]) => ({ label, icon, color: 'color:' + (danger ? t.red : t.text) }));
+
+    /* ---------- PROJECTS TAB ---------- */
+    const openCount = { ar: 12, co: 9, q4: 5, pp: 0, mr: 6, pm: 4, bt: 11, ds: 7, br: 3 };
+    const favorites = ['ar', 'mr'].map((k) => ({ name: pick(PROJ[k][0]), key: PROJ[k][2], space: k === 'ar' ? L.product : (mn ? 'Инженерчлэл' : 'Engineering'), dot: 'background:' + PROJ[k][1], count: String(openCount[k]) }));
+    const openSpaces = s.openSpaces || {};
+    const SPACES = [
+      { id: 'product', name: ['Бүтээгдэхүүн', 'Product'], initial: ['Б', 'P'], badge: dark ? 'background:#2E1065;color:#DDD6FE' : 'background:#EDE9FE;color:#5B21B6', projects: ['ar', 'co', 'q4', 'pp'] },
+      { id: 'engineering', name: ['Инженерчлэл', 'Engineering'], initial: ['И', 'E'], badge: dark ? 'background:#14532D;color:#BBF7D0' : 'background:#DCFCE7;color:#166534', projects: ['pm', 'mr', 'bt'] },
+      { id: 'design', name: ['Дизайн', 'Design'], initial: ['Д', 'D'], badge: dark ? 'background:#4C0519;color:#FECDD3' : 'background:#FFE4E6;color:#9F1239', projects: ['ds', 'br'] }
+    ];
+    const spaces = SPACES.map((sp) => {
+      const open = !!openSpaces[sp.id];
+      const name = pick(sp.name);
+      return {
+        name, initial: pick(sp.initial), badge: sp.badge, open,
+        meta: mn ? sp.projects.length + ' төсөл' : sp.projects.length + ' projects',
+        chev: 'transition:transform .15s;transform:rotate(' + (open ? 90 : 0) + 'deg)',
+        toggleAria: (open ? (mn ? 'Хумих: ' : 'Collapse ') : (mn ? 'Дэлгэх: ' : 'Expand ')) + name,
+        toggle: () => this.setState({ openSpaces: { ...(this.state.openSpaces || {}), [sp.id]: !open } }),
+        projects: sp.projects.map((k) => ({
+          name: pick(PROJ[k][0]), dot: 'background:' + PROJ[k][1],
+          count: openCount[k] ? String(openCount[k]) : (mn ? 'Хоосон' : 'Empty'),
+          countStyle: 'color:' + (openCount[k] ? t.text3 : t.faint)
+        }))
+      };
+    });
+    const favStar = dark ? '#FACC15' : '#CA8A04';
+
+    /* ---------- TABS ---------- */
+    const TABI = {
+      my: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z', 'm8.5 12 2.5 2.5 4.5-5'],
+      projects: ['M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z', 'M3 10h18'],
+      inbox: ['M22 12h-6l-2 3h-4l-2-3H2', 'M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'],
+      standup: ['M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', 'M8 9h8M8 13h5'],
+      more: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z', 'M7.5 12h1M11.5 12h1M15.5 12h1']
+    };
+    const tabs = ['my', 'projects', 'inbox', 'standup', 'more'].map((id, i) => ({
+      label: L.tabs[i], d1: TABI[id][0], d2: TABI[id][1],
+      current: id === 'projects' ? 'page' : 'false',
+      color: 'color:' + (id === 'projects' ? accentInk : t.muted),
+      weight: 'font-weight:' + (id === 'projects' ? '600' : '500'),
+      sw: id === 'projects' ? '2.25' : '1.75',
+      hasBadge: id === 'inbox', hasDot: id === 'standup'
+    }));
+    const seg = (active) => L.segList.map((label, i) => ({ label, on: i === active, style: i === active ? t.segOn : t.segOff }));
+
+    /* ---------- BOARD ---------- */
+    const card = (id, extra) => {
+      const o = TK[id];
+      const closed = closedSt(o.st);
+      const [a, b] = o.sub ? o.sub.split('/').map(Number) : [0, 0];
+      const shown = o.tags.slice(0, 2);
+      return {
+        isCard: true, isDrop: false, key: o.key, title: pick(o.n), done: o.st === 'done',
+        titleStyle: closed ? 'color:' + t.muted : 'color:' + t.text,
+        moreAria: (mn ? 'Картын үйлдэл: ' : 'Card actions: ') + pick(o.n),
+        flagStyle: PF[o.pr], prioLabel: (mn ? 'Ач холбогдол: ' : 'Priority: ') + pick(PRIO[o.pr]),
+        tags: shown.map(tag), hasMore: o.tags.length > 2, more: '+' + (o.tags.length - 2),
+        due: dueOf(o) + (o.dk === 'overdue' ? (mn ? ' · хэтэрсэн' : ' · overdue') : ''), dueStyle: DUE[closed ? 'done' : (o.dk || 'later')],
+        hasSub: !!o.sub, sub: o.sub || '', subAria: (o.sub || '') + (mn ? ' дэд ажил дууссан' : ' subtasks done'),
+        barStyle: 'width:' + (b ? Math.round((a / b) * 100) : 0) + '%;background:' + (a === b ? t.green : accent),
+        people: o.ppl.map(person), blocked: !!o.blocked, blockedText: mn ? 'таб дүрс тэмдгийг хүлээж байна' : 'waiting on final tab icons',
+        cardStyle: '', ...extra
+      };
+    };
+    const COLS = [['todo', ['a136', 'a139', 'a143', 'a146']], ['progress', ['a138', 'a131', 'a147', 'a149']], ['review', ['a127', 'a142', 'a144']], ['hold', ['a129']], ['done', ['a101', 'a109', 'a112', 'a115']]];
+    const ghostStyle = 'opacity:0.4;border-style:dashed;box-shadow:none';
+    const columns = (mode) => COLS.map(([st, ids]) => {
+      let cards = ids.map((id) => card(id, mode && id === 'a149' ? { cardStyle: ghostStyle } : {}));
+      if (mode === 'paged' && st === 'review') cards = [cards[0], { isCard: false, isDrop: true }].concat(cards.slice(1));
+      return {
+        label: pick(STATUS[st]), mk: MK[st], count: String(ids.length),
+        aria: pick(STATUS[st]) + ', ' + ids.length,
+        addAria: (mn ? '«' + pick(STATUS[st]) + '»-д ажил нэмэх' : 'Add task to ' + pick(STATUS[st])),
+        head: COLTINT[st][0], ink: COLTINT[st][1], body: colBody, cards
+      };
+    });
+    const pager = (active) => COLS.map(([st, ids], i) => ({
+      label: pick(STATUS[st]), count: String(ids.length), on: i === active, ring: MK[st].ring,
+      style: i === active ? COLTINT[st][0] + ';' + COLTINT[st][1] : 'background:transparent;color:' + t.muted
+    }));
+    const lift = { title: pick(TK.a149.n), key: 'APP-149', tags: TK.a149.tags.map(tag), due: D(10, 15), dueStyle: DUE.later, av: person('oyu').style, initials: person('oyu').initials };
+    const boardPhones = [
+      { order: 'order:6', cap: L.cap06, pager: pager(1), columns: columns(null), shift: 'transform:translateX(-350px)', lifted: false, liftPos: '', edgeHint: false, sheet: false },
+      { order: 'order:7', cap: L.cap07, pager: pager(1), columns: columns('drag'), shift: 'transform:translateX(-398px)', lifted: true, liftPos: 'left: 132px; top: 520px; transform: rotate(3deg)', edgeHint: true, sheet: false },
+      { order: 'order:8', cap: L.cap08, pagerShift: 'text-indent:0;margin-left:-130px', pager: pager(2), columns: columns('paged'), shift: 'transform:translateX(-700px)', lifted: true, liftPos: 'left: 52px; top: 470px; transform: rotate(-2deg)', edgeHint: false, sheet: false },
+      { order: 'order:9', cap: L.cap09, pager: pager(1), columns: columns(null), shift: 'transform:translateX(-350px)', lifted: false, liftPos: '', edgeHint: false, sheet: true }
+    ].map((b) => ({ pagerShift: '', ...b }));
+    const moveOpts = ['todo', 'progress', 'review', 'hold', 'done', 'cancelled'].map((st) => ({
+      label: pick(STATUS[st]), mk: MK[st], current: st === 'progress', check: 'visibility:' + (st === 'progress' ? 'visible' : 'hidden'),
+      meta: st === 'progress' ? (mn ? 'Одоогийн' : 'Current') : ''
+    }));
+
+    /* ---------- FILTER SHEET ---------- */
+    const fOn = 'border:1px solid ' + accentInk + ';background:' + accentSoft + ';color:' + t.text;
+    const fOff = 'border:1px solid ' + t.border + ';background:' + t.raised + ';color:' + t.text2;
+    const fo = (o) => ({ hasAvatar: false, hasFlag: false, hasDot: false, av: '', initials: '', flag: '', dot: '', padL: '12px', ...o, style: o.on ? fOn : fOff });
+    const filterGroups = [
+      { label: mn ? 'Спринт' : 'Sprint', opts: [fo({ label: mn ? 'Спринт 14 · одоогийн' : 'Sprint 14 · current', on: true }), fo({ label: mn ? 'Спринт 15' : 'Sprint 15' }), fo({ label: mn ? 'Спринтгүй' : 'No sprint' })] },
+      { label: mn ? 'Хариуцагч' : 'Assignee', opts: ['anu', 'sara', 'tem', 'dorj', 'mia', 'oyu'].map((id) => { const p = person(id); return fo({ label: id === 'anu' ? (mn ? 'Би' : 'Me') : p.name, hasAvatar: true, av: p.style, initials: p.initials, padL: '4px', on: id === 'anu' || id === 'sara' }); }) },
+      { label: mn ? 'Ач холбогдол' : 'Priority', opts: ['urgent', 'high', 'medium', 'low'].map((k) => fo({ label: pick(PRIO[k]), hasFlag: true, flag: PF[k], on: k === 'urgent' || k === 'high' })) },
+      { label: mn ? 'Шошго' : 'Tags', opts: ['ux', 'ui', 'research', 'fe', 'a11y'].map((k) => fo({ label: tag(k).label, hasDot: true, dot: tag(k).style.split(';')[1].replace('color:', 'background:'), on: k === 'ux' })) },
+      { label: mn ? 'Дууссан ажил' : 'Done tasks', opts: [fo({ label: mn ? 'Сүүлийн 14 хоног' : 'Last 14 days', on: true }), fo({ label: mn ? 'Бүгд' : 'All' }), fo({ label: mn ? 'Нуух' : 'Hide' })] }
+    ];
+    const ghostRows = ['78%', '62%', '84%', '55%'].map((w) => ({ w: 'width:' + w }));
+
+    /* ---------- EMPTY PROJECT ---------- */
+    const tileA = 'background:' + accentSoft + ';color:' + accentInk;
+    const templates = [
+      [['Спринт төлөвлөлт', 'Sprint planning'], ['4 төлөв · 2 долоо хоногийн спринт · 8 жишээ ажил', '4 statuses · 2-week sprints · 8 sample tasks'], 'M21 12a9 9 0 1 1-3-6.7M21 4v5h-5'],
+      [['Апп гаргалт', 'App release'], ['QA шалгах жагсаалт · дэлгүүрт оруулах алхмууд', 'QA checklist · store submission steps'], 'M12 2v13M7 10l5 5 5-5M4 20h16'],
+      [['Алдааны ангилал', 'Bug triage'], ['Шинэ → Баталгаажсан → Засагдсан · ноцтой байдлын шошго', 'New → Confirmed → Fixed · severity tags'], 'M8 6V4h8v2M5 9h14M6 9v8a6 6 0 0 0 12 0V9M12 13v6'],
+      [['Хэрэглэгчийн судалгаа', 'User research'], ['Ярилцлага, тэмдэглэл, дүгнэлт · 6 ажил', 'Interviews, notes, synthesis · 6 tasks'], 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM21 21l-4.3-4.3']
+    ].map(([name, meta, icon]) => ({ name: pick(name), meta: pick(meta), icon, tile: tileA }));
+
+    /* ---------- RULES ---------- */
+    const rules = [
+      [['Төслүүд таб', 'Projects tab'], ['Дуртай нь дээр, дараа нь орон зай. Орон зайн нэрийг дарахад орон зайн жагсаалт, сумыг дарахад хумигдана. Архивласан төсөл харагдахгүй.', 'Favorites first, then spaces. Tapping a space name opens its list; the chevron collapses it. Archived projects are hidden.']],
+      [['Наалдсан толгой', 'Sticky headers'], ['Бүлгийн толгой гүйлгэхэд дээд талд наалдана. «+» тухайн төлөвтэй ажил үүсгэнэ.', 'Group headers stick while scrolling. “+” creates a task in that status.']],
+      [['Дууссан, цуцалсан', 'Done and Cancelled'], ['Анхдагчаар хумигдсан. «Дууссан: сүүлийн 14 хоног» шүүлтүүрээр хуучин нь нуугдана. Цуцалсныг нийт тоонд оруулахгүй.', 'Collapsed by default. “Done: last 14 days” hides older ones. Cancelled is left out of the total.']],
+      [['Олноор сонгох', 'Multi-select'], ['Мөрийг удаан дарж эхэлнэ. Доод таб үйлдлийн мөрөөр солигдоно. Устгасны дараа 8 секунд «Буцаах».', 'Long-press a row to start. The tab bar becomes the action bar. Delete shows Undo for 8 s.']],
+      [['Самбар', 'Board'], ['Нэг багана = нэг дэлгэц, хажуу тийш шудрахад шилжинэ. Дээд талын шошго нь байрлалыг харуулж, дарж үсрэнэ.', 'One column per screen; swipe sideways to page. The pills on top show where you are and jump on tap.']],
+      [['Чирэх', 'Dragging'], ['Картыг удаан дарж өргөнө. Ирмэг дээр 0.5 секунд барихад дараагийн багана руу шилжинэ. Суллахад зөөгдөж, «Буцаах» гарна.', 'Long-press lifts the card. Holding at an edge for 0.5 s pages to the next column. Releasing moves it and shows Undo.']],
+      [['Чирэхгүй зам', 'Without dragging'], ['Карт бүрийн ⋯ → «Зөөх…» төлөв эсвэл өөр төсөл сонгоно. Дэлгэц уншигчид үүнийг ашиглана.', 'Every card’s ⋯ → “Move to…” picks a status or another project. Screen readers use this path.']],
+      [['Хуанли', 'Calendar'], ['Сегментэд байгаа ч дэлгэц нь дараагийн файлд.', 'In the segmented control; its screen comes in a later file.']]
+    ].map(([title, body]) => ({ title: pick(title), body: pick(body) }));
+
+    const segBtn = (on) => (on ? t.segOn : t.segOff);
+    const toggles = [
+      { label: L.langLabel, opts: [['mn', 'МН'], ['en', 'EN']].map(([v, lab]) => ({ label: lab, on: lang === v, style: segBtn(lang === v), pick: () => this.setState({ lang: v }) })) },
+      { label: L.themeLabel, opts: [['light', L.light], ['dark', L.dark]].map(([v, lab]) => ({ label: lab, on: theme === v, style: segBtn(theme === v), pick: () => this.setState({ theme: v }) })) }
+    ];
+
+    return {
+      lang, L, t, cap, accent, accentInk, accentSoft, blockedStyle, toggles, me, favStar,
+      favorites, spaces, tabs, listPhones, bulk, memberStack: ['anu', 'sara', 'tem'].map(person),
+      productBadge: SPACES[0].badge, productInitial: mn ? 'Б' : 'P',
+      segList: seg(0), segBoard: seg(1), boardPhones, lift, moveOpts,
+      filterGroups, ghostRows, templates, rules
+    };
+  }
+}
+</script>
+</body>
+</html>

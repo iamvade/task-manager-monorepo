@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<title>MobileFeedback — Kite Tasks</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit;color:inherit}
+</style>
+</helmet>
+
+<div lang="{{lang}}" style="width: 1840px; min-height: 3300px; box-sizing: border-box; padding: 56px 64px 96px; display: flex; flex-direction: column; gap: 56px; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 15px; line-height: 22px; color: {{t.text}}; background: {{t.board}}; -webkit-font-smoothing: antialiased; {{t.scheme}}">
+
+  <header style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px">
+    <div style="display: flex; flex-direction: column; gap: 8px; max-width: 900px">
+      <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 12px; line-height: 16px; color: {{t.muted}}">Kite Tasks · iOS + Android · 390 × 844</span>
+      <h1 style="margin: 0; font-size: 40px; line-height: 48px; font-weight: 600; letter-spacing: -0.02em">MobileFeedback</h1>
+      <p style="margin: 0; font-size: 15px; line-height: 22px; color: {{t.text3}}">{{L.intro}}</p>
+    </div>
+    <div aria-label="{{L.preview}}" style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 8px 8px 8px 16px; border: 1px dashed {{t.border2}}; border-radius: 14px">
+      <span style="font-size: 12px; font-weight: 600; color: {{t.muted}}">{{L.preview}}</span>
+      <sc-for list="{{toggles}}" as="tg" hint-placeholder-count="2">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <span style="font-size: 13px; color: {{t.text3}}">{{tg.label}}</span>
+          <div role="radiogroup" aria-label="{{tg.label}}" style="display: flex; gap: 2px; padding: 2px; border-radius: 10px; background: {{t.seg}}">
+            <sc-for list="{{tg.opts}}" as="o" hint-placeholder-count="2">
+              <button role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}" style="height: 32px; padding: 0 12px; border: 0; border-radius: 8px; font-size: 13px; font-weight: 600; {{o.style}}">{{o.label}}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </header>
+
+  <section style="display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; padding-bottom: 14px; border-bottom: 1px solid {{t.border}}">
+      <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 13px; color: {{accentInk}}">01–09</span>
+      <h2 style="margin: 0; font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em">{{L.secTitle}}</h2>
+      <span style="font-size: 14px; color: {{t.muted}}">{{L.secSub}}</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 64px 48px; align-items: start">
+
+      <sc-for list="{{phones}}" as="p" hint-placeholder-count="9">
+        <div style="display: flex; flex-direction: column; gap: 16px; {{p.order}}">
+          <span style="{{cap}}">{{p.cap}}</span>
+          <div style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; box-shadow: {{t.device}}">
+            <div style="flex: none; height: 59px"></div>
+
+            <!-- ================= INBOX ================= -->
+            <sc-if value="{{p.isInbox}}" hint-placeholder-val="{{ true }}">
+              <sc-if value="{{p.ib.notSearching}}" hint-placeholder-val="{{ true }}">
+                <div style="flex: none; display: flex; align-items: center; justify-content: space-between; height: 44px; padding: 0 4px">
+                  <a href="#" style="height: 44px; padding: 0 8px 0 4px; display: flex; align-items: center; gap: 2px; color: {{accentInk}}; text-decoration: none; font-size: 16px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>{{L.more}}</a>
+                  <button aria-label="{{L.moreActions}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="{{t.text2}}" aria-hidden="true"><circle cx="5" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="19" cy="12" r="1.8"></circle></svg></button>
+                </div>
+                <div style="flex: none; display: flex; align-items: baseline; gap: 10px; padding: 0 16px 10px">
+                  <h1 style="margin: 0; font-size: 30px; line-height: 36px; font-weight: 600; letter-spacing: -0.02em">{{L.feedback}}</h1>
+                  <span style="font-size: 14px; color: {{t.muted}}">{{p.ib.unreadLabel}}</span>
+                </div>
+              </sc-if>
+              <div style="flex: none; display: flex; align-items: center; gap: 4px; padding: 0 4px 10px 16px">
+                <span style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px; box-sizing: border-box; border-radius: 12px; background: {{t.fieldBg}}; font-size: 16px; {{p.ib.searchRing}}">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{t.muted}}" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex: none"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                  <span style="flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; {{p.ib.qStyle}}">{{p.ib.qText}}</span>
+                </span>
+                <sc-if value="{{p.ib.searching}}" hint-placeholder-val="{{ false }}"><button style="flex: none; height: 44px; padding: 0 12px; border: 0; background: transparent; font-size: 16px; color: {{accentInk}}">{{L.cancel}}</button></sc-if>
+                <sc-if value="{{p.ib.notSearching}}" hint-placeholder-val="{{ true }}"><span style="width: 12px"></span></sc-if>
+              </div>
+              <div role="tablist" aria-label="{{L.typeAria}}" style="flex: none; display: flex; gap: 4px; padding: 0 12px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid {{t.divider}}">
+                <sc-for list="{{p.ib.tabs}}" as="tb" hint-placeholder-count="5">
+                  <button role="tab" aria-selected="{{tb.on}}" onClick="{{tb.pick}}" style="flex: none; height: 44px; padding: 0 8px; border: 0; background: transparent; display: flex; align-items: center; gap: 6px; font-size: 15px; white-space: nowrap; {{tb.style}}">{{tb.label}}<span style="font-size: 12px; font-weight: 500; color: {{t.muted}}">{{tb.count}}</span></button>
+                </sc-for>
+              </div>
+              <div role="radiogroup" aria-label="{{L.statusAria}}" style="flex: none; display: flex; gap: 8px; padding: 10px 16px; overflow-x: auto; scrollbar-width: none">
+                <sc-for list="{{p.ib.chips}}" as="c" hint-placeholder-count="6">
+                  <button role="radio" aria-checked="{{c.on}}" onClick="{{c.pick}}" style="flex: none; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; box-sizing: border-box; border-radius: 18px; font-size: 14px; font-weight: 500; white-space: nowrap; {{c.style}}"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 4px; {{c.dot}}"></span>{{c.label}}</button>
+                </sc-for>
+              </div>
+              <div style="flex: 1; min-height: 0; overflow: hidden; border-top: 1px solid {{t.divider}}">
+                <div style="display: flex; flex-direction: column; padding-bottom: 120px">
+                  <sc-for list="{{p.ib.rows}}" as="r" hint-placeholder-count="6">
+                    <a href="#" onClick="{{r.open}}" style="display: flex; gap: 0; padding: 12px 16px 12px 0; border-bottom: 1px solid {{t.divider}}; text-decoration: none; color: {{t.text}}; {{r.rowStyle}}">
+                      <span style="flex: none; width: 24px; display: flex; justify-content: center; padding-top: 7px"><sc-if value="{{r.unread}}" hint-placeholder-val="{{ true }}"><span aria-label="{{L.unread}}" style="width: 8px; height: 8px; border-radius: 4px; background: {{accent}}"></span></sc-if></span>
+                      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+                        <span style="display: flex; align-items: center; gap: 8px; font-size: 12px; line-height: 16px; color: {{t.muted}}">
+                          <span style="height: 20px; padding: 0 6px; border-radius: 5px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; {{r.typeStyle}}">{{r.type}}</span>
+                          <span style="font-family: Geist Mono, ui-monospace, monospace">{{r.id}}</span>
+                          <span style="flex: 1"></span>
+                          <span>{{r.date}}</span>
+                        </span>
+                        <span style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 15px; line-height: 22px; {{r.titleStyle}}">{{r.preT}}<mark style="background: {{t.hl}}; color: inherit; border-radius: 3px">{{r.hitT}}</mark>{{r.postT}}</span>
+                        <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 13px; line-height: 18px; color: {{t.text3}}">
+                          <span>{{r.from}}</span>
+                          <span style="display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 8px; border-radius: 11px; font-size: 12px; font-weight: 600; {{r.stStyle}}"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 3px; {{r.stDot}}"></span>{{r.status}}</span>
+                          <sc-if value="{{r.linked}}" hint-placeholder-val="{{ false }}"><span style="display: inline-flex; align-items: center; gap: 4px; font-family: Geist Mono, ui-monospace, monospace; font-size: 12px; color: {{t.text2}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"></path><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path></svg>{{r.task}}</span></sc-if>
+                        </span>
+                      </span>
+                    </a>
+                  </sc-for>
+                  <sc-if value="{{p.ib.empty}}" hint-placeholder-val="{{ false }}">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 64px 24px 0; text-align: center">
+                      <span aria-hidden="true" style="width: 56px; height: 56px; border-radius: 18px; background: {{t.fill}}; color: {{t.muted}}; display: flex; align-items: center; justify-content: center; margin-bottom: 6px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54z"></path></svg></span>
+                      <span style="font-size: 18px; line-height: 24px; font-weight: 600">{{L.emptyTitle}}</span>
+                      <span style="max-width: 280px; font-size: 15px; line-height: 22px; color: {{t.text3}}">{{L.emptyBody}}</span>
+                      <button style="margin-top: 8px; height: 44px; padding: 0 16px; border: 1px solid {{t.border}}; border-radius: 12px; background: {{t.bg}}; font-size: 15px; font-weight: 600">{{L.clearFilters}}</button>
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+              <sc-if value="{{p.ib.searching}}" hint-placeholder-val="{{ false }}">
+                <div aria-hidden="true" style="position: absolute; z-index: 6; left: 0; right: 0; bottom: 0; height: 336px; display: flex; align-items: center; justify-content: center; background: {{t.kbd}}; font-family: Geist Mono, ui-monospace, monospace; font-size: 12px; color: {{t.muted}}">{{L.kbd}}</div>
+              </sc-if>
+            </sc-if>
+
+            <!-- ================= DETAIL ================= -->
+            <sc-if value="{{p.isDetail}}" hint-placeholder-val="{{ false }}">
+              <div style="flex: none; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; height: 56px; padding: 0 4px; border-bottom: 1px solid {{t.divider}}">
+                <div style="display: flex"><a href="#" style="height: 44px; padding: 0 8px 0 4px; display: flex; align-items: center; gap: 2px; color: {{accentInk}}; text-decoration: none; font-size: 16px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>{{L.feedback}}</a></div>
+                <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 15px; font-weight: 500">FB-1042</span>
+                <div style="display: flex; justify-content: flex-end">
+                  <button aria-label="{{L.copyLink}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.text2}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"></path><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path></svg></button>
+                  <button aria-label="{{L.moreActions}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="{{t.text2}}" aria-hidden="true"><circle cx="5" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="19" cy="12" r="1.8"></circle></svg></button>
+                </div>
+              </div>
+              <div style="flex: 1; min-height: 0; overflow: hidden">
+                <div style="display: flex; flex-direction: column; gap: 20px; padding: 16px 16px 40px; {{p.dt.shift}}">
+                  <div style="display: flex; flex-direction: column; gap: 10px">
+                    <div style="display: flex; align-items: center; gap: 8px">
+                      <span style="height: 24px; padding: 0 8px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; {{fb.typeStyle}}">{{fb.type}}</span>
+                      <button aria-haspopup="dialog" style="height: 44px; padding: 0; border: 0; background: transparent; display: flex; align-items: center"><span style="display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 8px 0 10px; border-radius: 15px; font-size: 13px; font-weight: 600; {{p.dt.stStyle}}"><span aria-hidden="true" style="width: 7px; height: 7px; border-radius: 4px; {{p.dt.stDot}}"></span>{{p.dt.status}}<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span></button>
+                    </div>
+                    <h1 style="margin: 0; font-size: 22px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em">{{fb.title}}</h1>
+                    <div style="display: flex; align-items: center; gap: 10px">
+                      <span style="flex: none; width: 36px; height: 36px; border-radius: 18px; background: {{t.chip}}; color: {{t.text3}}; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center">{{fb.initials}}</span>
+                      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                        <span style="font-size: 15px; line-height: 20px; font-weight: 600">{{fb.from}} <span style="font-weight: 400; color: {{t.muted}}">· {{fb.email}}</span></span>
+                        <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{fb.source}}</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <p style="margin: 0; font-size: 16px; line-height: 24px; color: {{t.text}}">{{fb.body}}</p>
+
+                  <div style="display: flex; flex-direction: column; gap: 8px">
+                    <span style="font-size: 13px; font-weight: 600; color: {{t.muted}}">{{L.attachments}} · 3</span>
+                    <div style="display: flex; gap: 8px">
+                      <sc-for list="{{fb.files}}" as="f" hint-placeholder-count="3">
+                        <a href="#" style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; text-decoration: none; color: {{t.text}}">
+                          <span style="position: relative; height: 96px; border-radius: 10px; border: 1px solid {{t.border}}; display: flex; align-items: center; justify-content: center; overflow: hidden; {{f.thumb}}">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{{f.iconColor}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{f.icon}}"></path></svg>
+                            <sc-if value="{{f.hasBadge}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; right: 6px; bottom: 6px; height: 18px; padding: 0 5px; border-radius: 4px; background: rgba(0,0,0,0.6); color: #FFFFFF; font-family: Geist Mono, ui-monospace, monospace; font-size: 11px; line-height: 18px">{{f.badge}}</span></sc-if>
+                          </span>
+                          <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; line-height: 16px">{{f.name}}</span>
+                          <span style="font-size: 11px; line-height: 14px; color: {{t.muted}}">{{f.size}}</span>
+                        </a>
+                      </sc-for>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; border: 1px solid {{t.border}}; border-radius: 14px; overflow: hidden">
+                    <div style="display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 4px 0 14px; background: {{t.surface2}}; border-bottom: 1px solid {{t.divider}}">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{t.text3}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"></rect><path d="M12 18h.01"></path></svg>
+                      <span style="flex: 1; font-size: 14px; font-weight: 600">{{L.device}}</span>
+                      <button style="height: 44px; padding: 0 10px; border: 0; background: transparent; font-size: 14px; font-weight: 600; color: {{accentInk}}">{{L.copy}}</button>
+                    </div>
+                    <sc-for list="{{fb.device}}" as="d" hint-placeholder-count="7">
+                      <div style="display: flex; align-items: baseline; gap: 12px; min-height: 40px; padding: 9px 14px; box-sizing: border-box; border-bottom: 1px solid {{t.divider}}; font-size: 14px; line-height: 20px">
+                        <span style="flex: none; width: 112px; color: {{t.muted}}">{{d.k}}</span>
+                        <span style="flex: 1; min-width: 0; {{d.vStyle}}">{{d.v}}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+
+                  <section style="display: flex; flex-direction: column; gap: 8px">
+                    <h2 style="margin: 0; font-size: 17px; line-height: 22px; font-weight: 600">{{L.linkedTask}}</h2>
+                    <sc-if value="{{p.dt.linked}}" hint-placeholder-val="{{ false }}">
+                      <a href="MobileTaskDetail.dc.html" style="display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 14px; border: 1px solid {{t.border}}; text-decoration: none; color: {{t.text}}">
+                        <span aria-hidden="true" style="flex: none; margin-top: 5px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; border: 2px solid {{t.todoRing}}"></span>
+                        <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+                          <span style="font-size: 15px; line-height: 22px; font-weight: 500">{{L.newTaskTitle}}</span>
+                          <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 12px; line-height: 16px; color: {{t.muted}}"><span style="font-family: Geist Mono, ui-monospace, monospace">CHK-75</span><span style="display: inline-flex; align-items: center; gap: 5px"><span style="width: 6px; height: 6px; border-radius: 3px; background: #0284C7"></span>{{L.checkout}}</span><span>{{L.toDo}}</span><span>{{L.dorj}}</span></span>
+                        </span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{t.faint}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 2px"><path d="m9 18 6-6-6-6"></path></svg>
+                      </a>
+                      <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.linkedHint}}</span>
+                    </sc-if>
+                    <sc-if value="{{p.dt.notLinked}}" hint-placeholder-val="{{ true }}">
+                      <div style="display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 14px; border: 1.5px dashed {{t.border2}}">
+                        <span style="font-size: 14px; line-height: 20px; color: {{t.text3}}">{{L.notLinked}}</span>
+                        <div style="display: flex; gap: 8px">
+                          <button style="flex: 1; height: 44px; border: 1px solid {{t.border}}; border-radius: 12px; background: {{t.bg}}; font-size: 15px; font-weight: 600">{{L.linkExisting}}</button>
+                          <button style="flex: 1; height: 44px; border: 0; border-radius: 12px; background: {{accent}}; color: #FFFFFF; font-size: 15px; font-weight: 600">{{L.createTask}}</button>
+                        </div>
+                      </div>
+                    </sc-if>
+                  </section>
+
+                  <section style="display: flex; flex-direction: column; gap: 10px">
+                    <div style="display: flex; align-items: center; gap: 8px">
+                      <h2 style="margin: 0; font-size: 17px; line-height: 22px; font-weight: 600">{{L.notes}}</h2>
+                      <span style="display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 8px; border-radius: 11px; background: {{t.notesChip}}; color: {{t.notesInk}}; font-size: 12px; font-weight: 600"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>{{L.teamOnly}}</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 12px; padding: 14px; border-radius: 14px; background: {{t.notes}}; border: 1px solid {{t.notesBorder}}">
+                      <sc-for list="{{fb.notes}}" as="n" hint-placeholder-count="2">
+                        <div style="display: flex; align-items: flex-start; gap: 10px">
+                          <span style="flex: none; width: 28px; height: 28px; border-radius: 14px; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{n.av}}">{{n.initials}}</span>
+                          <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                            <span style="font-size: 14px; line-height: 20px"><strong style="font-weight: 600">{{n.name}}</strong> <span style="font-size: 12px; color: {{t.muted}}">{{n.time}}</span></span>
+                            <span style="font-size: 15px; line-height: 22px; color: {{t.text2}}">{{n.text}}</span>
+                          </span>
+                        </div>
+                      </sc-for>
+                      <span style="display: flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid {{t.notesBorder}}; background: {{t.bg}}; font-size: 16px; color: {{t.faint}}">{{L.addNote}}</span>
+                    </div>
+                  </section>
+
+                  <section style="display: flex; flex-direction: column; gap: 6px">
+                    <h2 style="margin: 0; font-size: 17px; line-height: 22px; font-weight: 600">{{L.history}}</h2>
+                    <sc-for list="{{p.dt.history}}" as="h" hint-placeholder-count="3">
+                      <span style="display: flex; gap: 8px; font-size: 13px; line-height: 20px; color: {{t.text3}}"><span aria-hidden="true" style="color: {{t.faint}}">•</span><span>{{h.text}} <span style="color: {{t.muted}}">· {{h.time}}</span></span></span>
+                    </sc-for>
+                  </section>
+                </div>
+              </div>
+              <sc-if value="{{p.dt.toast}}" hint-placeholder-val="{{ false }}">
+                <div role="status" style="position: absolute; z-index: 6; left: 16px; right: 16px; bottom: 42px; display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 4px 0 16px; border-radius: 12px; background: {{t.toast}}; color: {{t.toastText}}; box-shadow: 0 8px 24px rgba(0,0,0,0.24)">
+                  <span style="flex: 1; font-size: 15px; line-height: 20px">{{L.linkedToast}}</span>
+                  <button style="height: 44px; padding: 0 12px; border: 0; background: transparent; font-size: 15px; font-weight: 600; color: {{t.toastAction}}">{{L.undo}}</button>
+                </div>
+              </sc-if>
+              <div style="flex: none; height: 34px"></div>
+            </sc-if>
+
+            <!-- tab bar on inbox -->
+            <sc-if value="{{p.hasTabs}}" hint-placeholder-val="{{ true }}">
+              <nav aria-label="{{L.tabsAria}}" style="position: absolute; z-index: 5; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.bg}}; border-top: 1px solid {{t.divider}}">
+                <div style="display: flex; height: 49px; padding: 0 4px">
+                  <sc-for list="{{tabbar}}" as="tb" hint-placeholder-count="5">
+                    <a href="#" aria-current="{{tb.current}}" style="flex: 1; min-width: 0; height: 49px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; {{tb.color}}">
+                      <span style="position: relative; width: 24px; height: 24px">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{tb.sw}}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{tb.d1}}"></path><path d="{{tb.d2}}"></path></svg>
+                        <sc-if value="{{tb.hasBadge}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: -4px; left: 14px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px; background: {{accent}}; color: #FFFFFF; font-size: 11px; font-weight: 600; line-height: 18px; text-align: center; box-shadow: 0 0 0 2px {{t.bg}}">3</span></sc-if>
+                        <sc-if value="{{tb.hasDot}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: -1px; right: -3px; width: 8px; height: 8px; border-radius: 4px; background: {{accent}}; box-shadow: 0 0 0 2px {{t.bg}}"></span></sc-if>
+                      </span>
+                      <span style="max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; line-height: 14px; {{tb.weight}}">{{tb.label}}</span>
+                    </a>
+                  </sc-for>
+                </div>
+                <div style="height: 34px"></div>
+              </nav>
+            </sc-if>
+
+            <!-- ================= SHEETS ================= -->
+            <sc-if value="{{p.hasSheet}}" hint-placeholder-val="{{ false }}">
+              <div aria-hidden="true" style="position: absolute; z-index: 7; inset: 0; background: {{t.scrim}}"></div>
+              <div role="dialog" aria-modal="true" aria-labelledby="sh-h" style="position: absolute; z-index: 8; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.raised}}; border-radius: 16px 16px 0 0; box-shadow: {{t.shadowSheet}}; {{p.sheetTop}}">
+                <div style="height: 20px; display: flex; justify-content: center; padding-top: 6px; box-sizing: border-box"><span style="width: 36px; height: 5px; border-radius: 3px; background: {{t.grabber}}"></span></div>
+                <div style="display: flex; align-items: center; gap: 4px; padding: 0 4px 8px 16px">
+                  <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                    <h2 id="sh-h" style="margin: 0; font-size: 17px; line-height: 22px; font-weight: 600">{{p.sheetTitle}}</h2>
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; line-height: 18px; color: {{t.muted}}"><span style="font-family: Geist Mono, ui-monospace, monospace">FB-1042</span> · {{fb.title}}</span>
+                  </span>
+                  <button style="flex: none; height: 44px; padding: 0 12px; border: 0; background: transparent; font-size: 16px; color: {{accentInk}}; {{p.sheetActionStyle}}">{{p.sheetAction}}</button>
+                </div>
+
+                <sc-if value="{{p.statusSheet}}" hint-placeholder-val="{{ false }}">
+                  <div role="radiogroup" aria-labelledby="sh-h" style="display: flex; flex-direction: column; border-top: 1px solid {{t.divider}}">
+                    <sc-for list="{{statusOpts}}" as="o" hint-placeholder-count="5">
+                      <button role="radio" aria-checked="{{o.on}}" style="display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 16px; box-sizing: border-box; border: 0; border-bottom: 1px solid {{t.divider}}; background: transparent; text-align: left">
+                        <span aria-hidden="true" style="flex: none; width: 10px; height: 10px; border-radius: 5px; {{o.dot}}"></span>
+                        <span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 16px; line-height: 22px; {{o.labelStyle}}">{{o.label}}</span><span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{o.sub}}</span></span>
+                        <sc-if value="{{o.isOn}}" hint-placeholder-val="{{ false }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{accentInk}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg></sc-if>
+                      </button>
+                    </sc-for>
+                    <div style="display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 16px; box-sizing: border-box">
+                      <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 16px; line-height: 22px">{{L.notify}}</span><span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.notifySub}}</span></span>
+                      <span role="switch" aria-checked="true" style="flex: none; width: 51px; height: 31px; border-radius: 16px; background: {{accent}}; position: relative"><span style="position: absolute; top: 2px; left: 22px; width: 27px; height: 27px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 2px 4px rgba(0,0,0,0.2)"></span></span>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{p.linkSheet}}" hint-placeholder-val="{{ false }}">
+                  <div style="padding: 0 16px 10px">
+                    <span style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px; border-radius: 12px; background: {{t.fieldBg}}; box-shadow: inset 0 0 0 1.5px {{accent}}; font-size: 16px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{t.muted}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>{{L.linkQuery}}<span style="display: inline-block; width: 2px; height: 20px; margin-left: -6px; background: {{accent}}"></span></span>
+                  </div>
+                  <span style="padding: 4px 16px 6px; font-size: 13px; font-weight: 600; color: {{t.muted}}">{{L.suggested}}</span>
+                  <div style="display: flex; flex-direction: column; border-top: 1px solid {{t.divider}}">
+                    <sc-for list="{{linkOpts}}" as="o" hint-placeholder-count="4">
+                      <button style="display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 16px; box-sizing: border-box; border: 0; border-bottom: 1px solid {{t.divider}}; background: transparent; text-align: left">
+                        <span aria-hidden="true" style="flex: none; width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; {{o.ring}}"></span>
+                        <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; line-height: 22px; color: {{t.text}}">{{o.title}}</span><span style="display: flex; align-items: center; gap: 8px; font-size: 12px; line-height: 16px; color: {{t.muted}}"><span style="font-family: Geist Mono, ui-monospace, monospace">{{o.key}}</span><span style="display: inline-flex; align-items: center; gap: 5px"><span style="width: 6px; height: 6px; border-radius: 3px; {{o.dot}}"></span>{{o.project}}</span><span>{{o.reason}}</span></span></span>
+                        <span style="flex: none; height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid {{t.border}}; font-size: 13px; font-weight: 600; color: {{t.text2}}; display: flex; align-items: center">{{L.link}}</span>
+                      </button>
+                    </sc-for>
+                  </div>
+                  <div aria-hidden="true" style="height: 300px; display: flex; align-items: center; justify-content: center; background: {{t.kbd}}; font-family: Geist Mono, ui-monospace, monospace; font-size: 12px; color: {{t.muted}}">{{L.kbdShort}}</div>
+                </sc-if>
+
+                <sc-if value="{{p.createSheet}}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; flex-direction: column; gap: 12px; padding: 4px 16px 0">
+                    <span style="font-size: 20px; line-height: 28px; font-weight: 600">{{L.newTaskTitle}}</span>
+                    <span style="font-size: 15px; line-height: 22px; color: {{t.text3}}">{{L.newTaskDesc}}</span>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                      <sc-for list="{{createChips}}" as="c" hint-placeholder-count="5">
+                        <span style="display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px 0 10px; box-sizing: border-box; border: 1px solid {{t.border2}}; border-radius: 18px; font-size: 14px; font-weight: 500; color: {{t.text}}"><span aria-hidden="true" style="display: flex; align-items: center; justify-content: center; {{c.iconStyle}}">{{c.icon}}</span>{{c.label}}</span>
+                      </sc-for>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 12px; border-radius: 12px; background: {{t.fill}}">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{t.text3}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"></path><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path></svg>
+                      <span style="flex: 1; font-size: 14px; line-height: 20px; color: {{t.text2}}">{{L.willLink}}</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px; min-height: 52px; border-top: 1px solid {{t.divider}}">
+                      <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; line-height: 22px">{{L.setPlanned}}</span><span style="font-size: 12px; line-height: 16px; color: {{t.muted}}">{{L.setPlannedSub}}</span></span>
+                      <span role="switch" aria-checked="true" style="flex: none; width: 51px; height: 31px; border-radius: 16px; background: {{accent}}; position: relative"><span style="position: absolute; top: 2px; left: 22px; width: 27px; height: 27px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 2px 4px rgba(0,0,0,0.2)"></span></span>
+                    </div>
+                  </div>
+                  <div style="padding: 8px 16px 0">
+                    <button style="width: 100%; height: 48px; border: 0; border-radius: 12px; background: {{accent}}; color: #FFFFFF; font-size: 16px; font-weight: 600">{{L.createTask}}</button>
+                  </div>
+                </sc-if>
+                <div style="height: 34px"></div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+
+      <div style="display: flex; flex-direction: column; gap: 16px; order: 10">
+        <span style="{{cap}}">{{L.capRules}}</span>
+        <div style="width: 390px; box-sizing: border-box; display: flex; flex-direction: column; border: 1px solid {{t.border}}; border-radius: 16px; background: {{t.bg}}; overflow: hidden">
+          <sc-for list="{{rules}}" as="r" hint-placeholder-count="9">
+            <div style="display: flex; flex-direction: column; gap: 2px; padding: 12px 16px; border-bottom: 1px solid {{t.divider}}">
+              <span style="font-size: 14px; line-height: 20px; font-weight: 600">{{r.title}}</span>
+              <span style="font-size: 13px; line-height: 18px; color: {{t.text3}}">{{r.body}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"language":{"editor":"enum","default":"mn","options":["mn","en"]},"theme":{"editor":"enum","default":"light","options":["light","dark"]},"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"$preview":{"width":1840,"height":3300}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: undefined, theme: undefined, type: 'all', status: 'all', read: {} };
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const lang = s.lang || this.props.language || 'mn';
+    const mn = lang === 'mn';
+    const pick = (p) => (mn ? p[0] : p[1]);
+    const theme = s.theme || this.props.theme || 'light';
+    const dark = theme === 'dark';
+    const accent = this.props.accent ?? '#6E56CF';
+    const inks = { '#6E56CF': '#B4A5FF', '#2F6FEB': '#93B4FF', '#0F766E': '#5EEAD4', '#3F3F46': '#D4D4D8' };
+    const accentInk = dark ? (inks[String(accent).toUpperCase()] || '#B4A5FF') : accent;
+    const accentSoft = accent + (dark ? '33' : '1A');
+
+    const STR = {
+      mn: {
+        intro: 'Хэрэглэгчдийн санал хүсэлт утсанд: төрлөөр таб, төлвөөр чип, хайлт, уншаагүй цэг; дэлгэрэнгүйд төхөөрөмжийн мэдээлэл, хавсралт, багийн дотоод тэмдэглэл, ажилтай холбох эсвэл ажил үүсгэх, төлөв солих.',
+        preview: 'Урьдчилан харах', langLabel: 'Хэл', themeLabel: 'Горим', light: 'Цайвар', dark: 'Бараан',
+        secTitle: 'Санал хүсэлт', secSub: 'Жагсаалт · хайлт · хоосон шүүлтүүр · дэлгэрэнгүй · тэмдэглэл · төлөв · холбох · ажил үүсгэх · холбогдсон',
+        cap1: '01 · Жагсаалт (таб, төлөв, мөрийг туршина)', cap2: '02 · Хайлт · «төлб»', cap3: '03 · Шүүлтүүрт таарах зүйлгүй', cap4: '04 · FB-1042 дэлгэрэнгүй',
+        cap5: '05 · Гүйлгэсэн · холбогдоогүй · дотоод тэмдэглэл', cap6: '06 · Төлөв солих', cap7: '07 · Одоо байгаа ажилтай холбох', cap8: '08 · Санал хүсэлтээс ажил үүсгэх', cap9: '09 · Холбогдсоны дараа', capRules: 'Зан төлөв',
+        more: 'Бусад', moreActions: 'Бусад үйлдэл', feedback: 'Санал хүсэлт', cancel: 'Болих', unread: 'Уншаагүй', typeAria: 'Төрөл', statusAria: 'Төлөв',
+        kbd: 'системийн гар · 291 + 34', kbdShort: 'системийн гар',
+        emptyTitle: 'Таарах санал хүсэлт алга', emptyBody: '«Шийдсэн» төлөвтэй функцийн хүсэлт одоогоор байхгүй байна.', clearFilters: 'Шүүлтүүр арилгах',
+        copyLink: 'Холбоос хуулах', attachments: 'Хавсралт', device: 'Төхөөрөмжийн мэдээлэл', copy: 'Хуулах',
+        linkedTask: 'Холбогдсон ажил', notLinked: 'Ажилтай холбогдоогүй. Холбосон ажил дуусахад илгээгч мэдэгдэл авна.', linkExisting: 'Ажилтай холбох', createTask: 'Ажил үүсгэх',
+        linkedHint: 'CHK-75 дуусахад төлөв «Шийдсэн» болж, илгээгчид мэдэгдэнэ.',
+        notes: 'Дотоод тэмдэглэл', teamOnly: 'Зөвхөн баг', addNote: 'Тэмдэглэл нэмэх…', history: 'Түүх',
+        newTaskTitle: 'Хадгалсан картаар төлөхөд Android дээр гацдаг', checkout: 'Төлбөрийн хуудас v2', toDo: 'Хийх', dorj: 'Дорж Э.',
+        linkedToast: 'CHK-75-тай холбогдлоо · төлөв «Төлөвлөсөн»', undo: 'Буцаах',
+        status: 'Төлөв', done: 'Болсон', notify: 'Илгээгчид мэдэгдэх', notifySub: 'Энхжинд и-мэйлээр төлөв очно',
+        linkTitle: 'Ажилтай холбох', linkQuery: 'төлб', suggested: 'Санал болгох', link: 'Холбох',
+        createTitle: 'Ажил үүсгэх', newTaskDesc: 'Хадгалсан Visa картаар «Төлөх» дарахад дэлгэц цагаан болж гацна. Samsung Galaxy A14 · Android 14 · апп 3.8.1.',
+        willLink: 'FB-1042 энэ ажилтай холбогдож, тайлбар, хавсралт хуулагдана', setPlanned: 'Төлвийг «Төлөвлөсөн» болгох', setPlannedSub: 'Илгээгчид мэдэгдэнэ',
+        tabsAria: 'Үндсэн цэс', tabs: ['Миний ажил', 'Төслүүд', 'Мэдэгдэл', 'Стэндап', 'Бусад']
+      },
+      en: {
+        intro: 'Customer feedback on the phone: type tabs, status chips, search and unread dots; the detail has device info, attachments, internal team notes, link to a task or create one, and status.',
+        preview: 'Preview', langLabel: 'Language', themeLabel: 'Theme', light: 'Light', dark: 'Dark',
+        secTitle: 'Feedback', secSub: 'Inbox · search · empty filter · detail · notes · status · link · create task · linked',
+        cap1: '01 · Inbox (try tabs, status, rows)', cap2: '02 · Search · “pay”', cap3: '03 · Nothing matches the filters', cap4: '04 · FB-1042 detail',
+        cap5: '05 · Scrolled · not linked · internal notes', cap6: '06 · Change status', cap7: '07 · Link to an existing task', cap8: '08 · Create a task from feedback', cap9: '09 · After linking', capRules: 'Behaviour',
+        more: 'More', moreActions: 'More actions', feedback: 'Feedback', cancel: 'Cancel', unread: 'Unread', typeAria: 'Type', statusAria: 'Status',
+        kbd: 'system keyboard · 291 + 34', kbdShort: 'system keyboard',
+        emptyTitle: 'No feedback matches', emptyBody: 'There are no Feature requests marked Resolved yet.', clearFilters: 'Clear filters',
+        copyLink: 'Copy link', attachments: 'Attachments', device: 'Device info', copy: 'Copy',
+        linkedTask: 'Linked task', notLinked: 'Not linked to a task. When a linked task is done, the submitter is notified.', linkExisting: 'Link a task', createTask: 'Create task',
+        linkedHint: 'When CHK-75 is done, this becomes Resolved and the submitter is notified.',
+        notes: 'Internal notes', teamOnly: 'Team only', addNote: 'Add a note…', history: 'History',
+        newTaskTitle: 'Payment step freezes on Android with a saved card', checkout: 'Checkout v2', toDo: 'To Do', dorj: 'Dorj E.',
+        linkedToast: 'Linked to CHK-75 · status set to Planned', undo: 'Undo',
+        status: 'Status', done: 'Done', notify: 'Notify the submitter', notifySub: 'Enkhjin gets the new status by email',
+        linkTitle: 'Link to a task', linkQuery: 'pay', suggested: 'Suggested', link: 'Link',
+        createTitle: 'Create task', newTaskDesc: 'Tapping “Pay” with a saved Visa card turns the screen white and freezes. Samsung Galaxy A14 · Android 14 · app 3.8.1.',
+        willLink: 'FB-1042 is linked to this task; its text and attachments are copied in', setPlanned: 'Set status to Planned', setPlannedSub: 'Notifies the submitter',
+        tabsAria: 'Main', tabs: ['My Tasks', 'Projects', 'Inbox', 'Standup', 'More']
+      }
+    };
+    const L = STR[lang] || STR.mn;
+
+    const t = dark ? {
+      board: '#0A0A0B', bg: '#111113', surface2: '#161618', raised: '#1B1B1E', fill: '#1F1F23', fieldBg: '#1F1F23', chip: '#232328', seg: '#1F1F23', kbd: '#1F1F23',
+      border: '#26262B', border2: '#3A3A42', divider: '#1F1F23', grabber: '#3F3F46', todoRing: '#71717A',
+      text: '#EDEDEF', text2: '#C9C9D1', text3: '#B4B4BC', muted: '#8E8E98', faint: '#5E5E68', scrim: 'rgba(0,0,0,0.6)', hl: 'rgba(250,204,21,0.28)',
+      notes: '#18160F', notesBorder: '#3A3220', notesChip: 'rgba(250,204,21,0.14)', notesInk: '#FDE68A',
+      toast: '#EDEDEF', toastText: '#18181B', toastAction: accent,
+      shadowSheet: '0 -8px 32px rgba(0,0,0,0.5)',
+      device: '0 0 0 1px #2A2A30, 0 0 0 10px #232328, 0 24px 48px rgba(0,0,0,0.5)',
+      segOn: 'background:#2A2A30;color:#EDEDEF;box-shadow:0 1px 2px rgba(0,0,0,0.4)', segOff: 'background:transparent;color:#8E8E98',
+      scheme: 'color-scheme: dark'
+    } : {
+      board: '#F4F4F5', bg: '#FFFFFF', surface2: '#FAFAFB', raised: '#FFFFFF', fill: '#F4F4F5', fieldBg: '#F1F1F3', chip: '#F1F1F3', seg: '#F1F1F3', kbd: '#D1D3D9',
+      border: '#E6E6EA', border2: '#C4C4CC', divider: '#EFEFF2', grabber: '#D4D4D8', todoRing: '#A1A1AA',
+      text: '#18181B', text2: '#3F3F46', text3: '#52525B', muted: '#6B6B74', faint: '#A1A1AA', scrim: 'rgba(24,24,27,0.32)', hl: '#FEF08A',
+      notes: '#FFFBEB', notesBorder: '#F5E6B8', notesChip: '#FEF3C7', notesInk: '#92400E',
+      toast: '#18181B', toastText: '#FFFFFF', toastAction: '#B4A5FF',
+      shadowSheet: '0 -8px 32px rgba(24,24,27,0.12)',
+      device: '0 0 0 1px #E6E6EA, 0 0 0 10px #18181B, 0 24px 48px rgba(24,24,27,0.18)',
+      segOn: 'background:#FFFFFF;color:#18181B;box-shadow:0 1px 2px rgba(24,24,27,0.08)', segOff: 'background:transparent;color:#6B6B74',
+      scheme: 'color-scheme: light'
+    };
+    const cap = 'font-family:Geist Mono,ui-monospace,monospace;font-size:12px;line-height:16px;color:' + t.muted;
+
+    /* ---------- TYPES / STATUS ---------- */
+    const TY = {
+      bug: [['Алдаа', 'Bug'], 'background:#FDECEC;color:#B42318', 'background:rgba(248,113,113,0.14);color:#FCA5A5'],
+      feature: [['Функц', 'Feature'], 'background:#E8F1FD;color:#1D4ED8', 'background:rgba(59,130,246,0.16);color:#93C5FD'],
+      feedback: [['Санал', 'Feedback'], 'background:#E3F4F1;color:#0F766E', 'background:rgba(45,212,191,0.14);color:#5EEAD4'],
+      other: [['Бусад', 'Other'], 'background:#F1F1F3;color:#3F3F46', 'background:#232328;color:#C9C9D1']
+    };
+    const ST = {
+      new: [['Шинэ', 'New'], ['Хараахан хянаагүй', 'Not looked at yet'], accent, accentSoft, accentInk],
+      reviewing: [['Хянаж буй', 'Reviewing'], ['Багаас хэн нэгэн шалгаж байна', 'Someone on the team is checking it'], '#D97706', dark ? 'rgba(245,158,11,0.16)' : '#FEF3C7', dark ? '#FCD34D' : '#92400E'],
+      planned: [['Төлөвлөсөн', 'Planned'], ['Ажилтай холбогдсон, хийгдэнэ', 'Linked to a task that will be done'], '#2563EB', dark ? 'rgba(59,130,246,0.16)' : '#E8F1FD', dark ? '#93C5FD' : '#1D4ED8'],
+      resolved: [['Шийдсэн', 'Resolved'], ['Засагдсан эсвэл хийгдсэн', 'Fixed or shipped'], '#16A34A', dark ? 'rgba(34,197,94,0.16)' : '#E8F5EC', dark ? '#4ADE80' : '#166534'],
+      closed: [['Хаасан', 'Closed'], ['Хийхгүй эсвэл давхардсан', 'Won’t do or duplicate'], '#71717A', dark ? '#232328' : '#F1F1F3', dark ? '#C9C9D1' : '#52525B']
+    };
+    const stStyle = (k) => 'background:' + ST[k][3] + ';color:' + ST[k][4];
+    const stDot = (k) => 'background:' + ST[k][2];
+
+    const FB = [
+      ['FB-1044', 'bug', ['iPhone SE дээр Төлөх товч гарын ард нуугддаг', 'Pay button hidden behind keyboard on iPhone SE'], ['Цэцэг Б.', 'Tsetseg B.'], ['09:14', '09:14'], 'new', '', true],
+      ['FB-1043', 'feature', ['QPay-г төлбөрийн сонголтод нэмж өгөөч', 'Please add QPay as a payment option'], ['Батбаяр Ц.', 'Batbayar Ts.'], ['08:02', '08:02'], 'new', '', true],
+      ['FB-1042', 'bug', ['Төлбөрийн алхам дээр апп гацдаг', 'App freezes on the payment step'], ['Энхжин Д.', 'Enkhjin D.'], ['Өчигдөр', 'Yesterday'], 'reviewing', '', true],
+      ['FB-1041', 'bug', ['24-өөс урт промо код тасарч харагддаг', 'Promo codes longer than 24 characters get cut off'], ['Тэмүүжин Н.', 'Temuujin N.'], ['10/6', 'Oct 6'], 'resolved', 'CHK-60', false],
+      ['FB-1039', 'feedback', ['Сагсаа хадгалах санаа үнэхээр таалагдлаа', 'Love the idea of saving my cart for later'], ['Номин Э.', 'Nomin E.'], ['10/6', 'Oct 6'], 'planned', 'CHK-72', false],
+      ['FB-1037', 'bug', ['Жижиг утсан дээр захиалгын дүн картын формыг давхарладаг', 'Order summary overlaps the card form on small phones'], ['Батзориг М.', 'Batzorig M.'], ['10/5', 'Oct 5'], 'planned', 'APP-142', false],
+      ['FB-1035', 'other', ['Байгууллагын нэхэмжлэх авч болох уу?', 'Can I get a company invoice?'], ['Оюунаа Г.', 'Oyunaa G.'], ['10/5', 'Oct 5'], 'closed', '', false],
+      ['FB-1034', 'bug', ['Алдаатай бичихэд хайлт хоосон дэлгэц харуулдаг', 'Search shows a blank screen for typos'], ['Билгүүн Т.', 'Bilguun T.'], ['10/4', 'Oct 4'], 'reviewing', '', true],
+      ['FB-1030', 'feedback', ['Таблет дээр төлбөрийн хуудсыг уншихад хэцүү', 'Checkout is hard to read on my tablet'], ['Оюун-Эрдэнэ Д.', 'Oyun-Erdene D.'], ['10/2', 'Oct 2'], 'planned', 'APP-142', false],
+      ['FB-1028', 'bug', ['Нийт дүнг харахын тулд хажуу тийш гүйлгэх хэрэгтэй', 'Have to scroll sideways to see the total'], ['Гэрэл С.', 'Gerel S.'], ['10/1', 'Oct 1'], 'resolved', 'APP-142', false]
+    ].map(([id, ty, title, from, date, st, task, unread]) => ({ id, ty, title, from, date, st, task, unread }));
+
+    const read = s.read || {};
+    const rowOf = (f, o) => {
+      const unread = f.unread && !(o.interactive && read[f.id]);
+      const title = pick(f.title);
+      let preT = title, hitT = '', postT = '';
+      if (o.q) { const i = title.toLowerCase().indexOf(o.q); if (i >= 0) { preT = title.slice(0, i); hitT = title.slice(i, i + o.q.length); postT = title.slice(i + o.q.length); } }
+      return {
+        id: f.id, unread, type: pick(TY[f.ty][0]), typeStyle: TY[f.ty][dark ? 2 : 1], date: pick(f.date), from: pick(f.from),
+        preT, hitT, postT, titleStyle: unread ? 'font-weight:600' : 'font-weight:400;color:' + t.text2,
+        status: pick(ST[f.st][0]), stStyle: stStyle(f.st), stDot: stDot(f.st), linked: !!f.task, task: f.task,
+        rowStyle: '', open: o.interactive ? () => this.setState({ read: { ...(this.state.read || {}), [f.id]: true } }) : () => {}
+      };
+    };
+    const TYK = ['all', 'bug', 'feature', 'feedback', 'other'];
+    const STK = ['all', 'new', 'reviewing', 'planned', 'resolved', 'closed'];
+    const buildInbox = (o) => {
+      const type = o.type, status = o.status;
+      const byType = FB.filter((f) => type === 'all' || f.ty === type);
+      let list = byType.filter((f) => status === 'all' || f.st === status);
+      if (o.q) list = FB.filter((f) => pick(f.title).toLowerCase().includes(o.q));
+      const unreadN = FB.filter((f) => f.unread && !(o.interactive && read[f.id])).length;
+      const tabs = TYK.map((k) => {
+        const on = k === type;
+        const n = k === 'all' ? FB.length : FB.filter((f) => f.ty === k).length;
+        return { label: k === 'all' ? (mn ? 'Бүгд' : 'All') : pick(TY[k][0]), count: String(n), on: on ? 'true' : 'false',
+          style: on ? 'font-weight:600;color:' + t.text + ';box-shadow:inset 0 -2px 0 ' + accent : 'font-weight:500;color:' + t.muted,
+          pick: o.interactive ? () => this.setState({ type: k }) : () => {} };
+      });
+      const chips = STK.map((k) => {
+        const on = k === status;
+        const n = k === 'all' ? byType.length : byType.filter((f) => f.st === k).length;
+        return { label: (k === 'all' ? (mn ? 'Бүх төлөв' : 'Any status') : pick(ST[k][0])) + (k === 'all' ? '' : ' · ' + n), on: on ? 'true' : 'false',
+          dot: k === 'all' ? 'display:none' : stDot(k),
+          style: on ? 'background:' + t.text + ';color:' + t.bg + ';border:1px solid ' + t.text : 'border:1px solid ' + t.border + ';background:transparent;color:' + t.text2,
+          pick: o.interactive ? () => this.setState({ status: k }) : () => {} };
+      });
+      return {
+        searching: !!o.q, notSearching: !o.q,
+        qText: o.q ? o.q : (mn ? 'Гарчиг, ID, илгээгч хайх' : 'Search title, ID or submitter'),
+        qStyle: o.q ? 'color:' + t.text : 'color:' + t.muted,
+        searchRing: o.q ? 'box-shadow:inset 0 0 0 1.5px ' + accent : '',
+        unreadLabel: mn ? unreadN + ' уншаагүй' : unreadN + ' unread',
+        tabs, chips, rows: list.map((f) => rowOf(f, o)), empty: list.length === 0
+      };
+    };
+
+    /* ---------- DETAIL ---------- */
+    const PP = {
+      dorj: [['ДЭ', 'DE'], ['Дорж Э.', 'Dorj E.'], 'background:#FEF3C7;color:#92400E', 'background:#78350F;color:#FDE68A'],
+      bat: [['БО', 'BO'], ['Бат О.', 'Bat O.'], 'background:#CCFBF1;color:#115E59', 'background:#134E4A;color:#99F6E4']
+    };
+    const fb = {
+      type: pick(TY.bug[0]), typeStyle: TY.bug[dark ? 2 : 1], title: pick(['Төлбөрийн алхам дээр апп гацдаг', 'App freezes on the payment step']),
+      initials: mn ? 'ЭД' : 'ED', from: pick(['Энхжин Д.', 'Enkhjin D.']), email: 'e•••@gmail.com',
+      source: pick(['Апп доторх маягт · 10-р сарын 7, 21:42', 'In-app form · Oct 7, 21:42']),
+      body: pick(['Хадгалсан картаараа «Төлөх» дарахад дэлгэц цагаан болоод юу ч болохгүй. Аппаа хааж байж гарна. Өнөө өглөө 3 удаа оролдсон, захиалга сагсандаа байсаар.', 'Every time I tap “Pay” with my saved card the screen goes white and nothing happens. I have to close the app. Tried 3 times this morning — the order is still in my cart.']),
+      files: [
+        { name: 'screen-recording.mp4', size: '0:14 · 4.8 MB', icon: 'M7 4.5v15l12-7.5z', iconColor: '#FFFFFF', thumb: 'background:linear-gradient(160deg,#3F3F46,#18181B)', hasBadge: true, badge: '0:14' },
+        { name: 'screenshot-2142.png', size: '412 KB', icon: 'M4 5h16v14H4zM4 15l4-4 4 4 3-3 5 5', iconColor: dark ? '#C9C9D1' : '#52525B', thumb: 'background:' + (dark ? '#1F1F23' : '#F4F4F5'), hasBadge: false, badge: '' },
+        { name: 'app-log.txt', size: '18 KB', icon: 'M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6M8 13h8M8 17h5', iconColor: dark ? '#C9C9D1' : '#52525B', thumb: 'background:' + (dark ? '#1F1F23' : '#F4F4F5'), hasBadge: false, badge: '' }
+      ],
+      device: [
+        [['Төхөөрөмж', 'Device'], 'Samsung Galaxy A14'], [['Систем', 'OS'], 'Android 14'], [['Апп', 'App'], '3.8.1 (2210)'],
+        [['Дэлгэц', 'Screen'], '1080 × 2408'], [['Хэл, бүс', 'Locale'], 'mn-MN'], [['Сүлжээ', 'Network'], '4G'], [['Сул зай', 'Free storage'], '2.1 GB']
+      ].map(([k, v]) => ({ k: pick(k), v, vStyle: /\d/.test(v) && v.length < 14 ? 'font-family:Geist Mono,ui-monospace,monospace;font-size:13px' : '' })),
+      notes: [
+        { who: 'dorj', time: pick(['09:05', '09:05']), text: pick(['A14 дээр хадгалсан Visa-аар давтагдлаа. 3DS цонх буцаж ирэхгүй байх шиг.', 'Reproduced on an A14 with a saved Visa. Looks like the 3DS webview never returns.']) },
+        { who: 'bat', time: '09:31', text: pick(['FB-1037-тэй нэг шалтгаантай юу? @Дорж логийг шалгаад өгөөч.', 'Same root cause as FB-1037? @Dorj can you check the logs.']) }
+      ].map((n) => ({ initials: pick(PP[n.who][0]), name: pick(PP[n.who][1]), av: PP[n.who][dark ? 3 : 2], time: n.time, text: n.text }))
+    };
+    const histBase = [
+      [['Энхжин Д. илгээсэн', 'Submitted by Enkhjin D.'], ['10/7 21:42', 'Oct 7 21:42']],
+      [['Дорж Э. «Хянаж буй» болгосон', 'Dorj E. set status to Reviewing'], ['09:02', '09:02']]
+    ];
+    const histLinked = histBase.concat([[['Ану Б. CHK-75 үүсгэж холбосон · «Төлөвлөсөн»', 'Anu B. created and linked CHK-75 · Planned'], ['одоо', 'just now']]]);
+    const hist = (h) => h.map(([a, b]) => ({ text: pick(a), time: pick(b) }));
+    const dtOf = (o) => {
+      const k = o.linked ? 'planned' : 'reviewing';
+      return { shift: o.shift || '', status: pick(ST[k][0]), stStyle: stStyle(k), stDot: stDot(k), linked: !!o.linked, notLinked: !o.linked, toast: !!o.toast, history: hist(o.linked ? histLinked : histBase) };
+    };
+
+    const statusOpts = ['new', 'reviewing', 'planned', 'resolved', 'closed'].map((k) => ({
+      label: pick(ST[k][0]), sub: pick(ST[k][1]), dot: stDot(k), on: k === 'reviewing' ? 'true' : 'false', isOn: k === 'reviewing',
+      labelStyle: k === 'reviewing' ? 'font-weight:600' : ''
+    }));
+    const RING = {
+      todo: 'border:2px solid ' + t.todoRing,
+      progress: 'border:2px solid #D97706;background:linear-gradient(90deg,#D97706 50%,transparent 50%)',
+      review: 'border:2px solid ' + accentInk + ';background:' + accentInk + '33'
+    };
+    const linkOpts = [
+      ['CHK-66', 'review', ['Төлбөрийн үйлчилгээ үзүүлэгчийн хяналт', 'Payment provider review'], '#0284C7', ['Төлбөрийн хуудас v2', 'Checkout v2'], ['гарчиг таарсан', 'title match']],
+      ['APP-142', 'review', ['Төлбөрийн хуудас — респонсив байрлал', 'Checkout page — responsive layout'], '#7C5CE0', ['Апп шинэчлэл', 'App Redesign'], ['FB-1037 холбогдсон', 'has FB-1037']],
+      ['CHK-64', 'progress', ['Хадгалсан сагсны PRD бичих', 'Write PRD: saved carts'], '#0284C7', ['Төлбөрийн хуудас v2', 'Checkout v2'], ['«хадгалсан»', '“saved”']],
+      ['CHK-71', 'todo', ['Төлбөрийн алдааны мэдэгдлийг сайжруулах', 'Better payment error messages'], '#0284C7', ['Төлбөрийн хуудас v2', 'Checkout v2'], ['гарчиг таарсан', 'title match']]
+    ].map(([key, st, title, c, proj, reason]) => ({ key, ring: RING[st], title: pick(title), dot: 'background:' + c, project: pick(proj), reason: '· ' + pick(reason) }));
+    const createChips = [
+      [mn ? 'ДЭ' : 'DE', pick(PP.dorj[1]), 'width:20px;height:20px;border-radius:10px;font-size:8px;font-weight:600;' + PP.dorj[dark ? 3 : 2]],
+      ['●', mn ? 'Төлбөрийн хуудас v2' : 'Checkout v2', 'color:#0284C7;font-size:10px'],
+      ['⚑', mn ? 'Өндөр' : 'High', 'color:' + (dark ? '#FB923C' : '#EA580C')],
+      ['#', mn ? 'алдаа' : 'bug', 'color:' + t.muted],
+      ['◷', mn ? 'Огноо' : 'Due', 'color:' + t.muted]
+    ].map(([icon, label, iconStyle]) => ({ icon, label, iconStyle }));
+
+    /* ---------- TAB BAR ---------- */
+    const TABI = {
+      my: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z', 'm8.5 12 2.5 2.5 4.5-5'],
+      projects: ['M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z', 'M3 10h18'],
+      inbox: ['M22 12h-6l-2 3h-4l-2-3H2', 'M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'],
+      standup: ['M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', 'M8 9h8M8 13h5'],
+      more: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z', 'M7.5 12h1M11.5 12h1M15.5 12h1']
+    };
+    const tabbar = ['my', 'projects', 'inbox', 'standup', 'more'].map((id, i) => ({
+      label: L.tabs[i], d1: TABI[id][0], d2: TABI[id][1], current: id === 'more' ? 'page' : 'false',
+      color: 'color:' + (id === 'more' ? accentInk : t.muted), weight: 'font-weight:' + (id === 'more' ? '600' : '500'),
+      sw: id === 'more' ? '2.25' : '1.75', hasBadge: id === 'inbox', hasDot: id === 'more'
+    }));
+
+    /* ---------- PHONES ---------- */
+    const blankIb = buildInbox({ type: 'all', status: 'all' });
+    const base = { isInbox: false, isDetail: false, hasTabs: false, hasSheet: false, statusSheet: false, linkSheet: false, createSheet: false, ib: blankIb, dt: dtOf({}), sheetTop: '', sheetTitle: '', sheetAction: '', sheetActionStyle: '' };
+    const phones = [
+      { ...base, order: 'order:1', cap: L.cap1, isInbox: true, hasTabs: true, ib: buildInbox({ type: s.type || 'all', status: s.status || 'all', interactive: true }) },
+      { ...base, order: 'order:2', cap: L.cap2, isInbox: true, ib: buildInbox({ type: 'all', status: 'all', q: mn ? 'төлб' : 'pay' }) },
+      { ...base, order: 'order:3', cap: L.cap3, isInbox: true, hasTabs: true, ib: buildInbox({ type: 'feature', status: 'resolved' }) },
+      { ...base, order: 'order:4', cap: L.cap4, isDetail: true, dt: dtOf({}) },
+      { ...base, order: 'order:5', cap: L.cap5, isDetail: true, dt: dtOf({ shift: 'margin-top:-640px' }) },
+      { ...base, order: 'order:6', cap: L.cap6, isDetail: true, dt: dtOf({}), hasSheet: true, statusSheet: true, sheetTitle: L.status, sheetAction: L.done, sheetActionStyle: 'font-weight:600' },
+      { ...base, order: 'order:7', cap: L.cap7, isDetail: true, dt: dtOf({ shift: 'margin-top:-640px' }), hasSheet: true, linkSheet: true, sheetTop: 'top:110px', sheetTitle: L.linkTitle, sheetAction: L.cancel },
+      { ...base, order: 'order:8', cap: L.cap8, isDetail: true, dt: dtOf({ shift: 'margin-top:-640px' }), hasSheet: true, createSheet: true, sheetTitle: L.createTitle, sheetAction: L.cancel },
+      { ...base, order: 'order:9', cap: L.cap9, isDetail: true, dt: dtOf({ linked: true, toast: true, shift: 'margin-top:-640px' }) }
+    ];
+
+    const rules = [
+      [['Хаанаас', 'Entry'], ['Бусад таб → Санал хүсэлт (уншаагүй тоо). Мэдэгдэл, Push-аас шууд дэлгэрэнгүй рүү.', 'More → Feedback (unread count). Inbox and push open the detail directly.']],
+      [['Шүүлтүүр', 'Filters'], ['Төрлийн таб ба төлвийн чип хоёулаа үйлчилнэ; чип дэх тоо тухайн табын дотор тоолно. Сонголт энэ төхөөрөмжид хадгалагдана.', 'Type tabs and status chips combine; chip counts are within the current tab. Remembered on this device.']],
+      [['Хайлт', 'Search'], ['Гарчиг, ID, илгээгч, текстээр; шүүлтүүрийг үл хамаарч бүх санал хүсэлтээс хайна.', 'Title, ID, submitter and body, across all feedback regardless of filters.']],
+      [['Уншаагүй', 'Unread'], ['Цэг + тод гарчиг. Нээхэд уншсан болно. Шудрахад: уншсан/уншаагүй, хаах.', 'Dot + bold title. Opening marks it read. Swipe: read/unread, close.']],
+      [['Төлөв', 'Status'], ['Шинэ → Хянаж буй → Төлөвлөсөн → Шийдсэн, эсвэл Хаасан. Өнгө дандаа нэр, цэгтэй хамт. Илгээгчид мэдэгдэх эсэхийг сонгоно.', 'New → Reviewing → Planned → Resolved, or Closed. Color always comes with a name and dot. You choose whether to notify the submitter.']],
+      [['Төхөөрөмж', 'Device info'], ['Апп автоматаар хавсаргана; «Хуулах» нь бүгдийг текстээр хуулна.', 'Attached by the app automatically; Copy puts it all on the clipboard as text.']],
+      [['Дотоод тэмдэглэл', 'Internal notes'], ['Зөвхөн баг харна, илгээгчид хэзээ ч очихгүй; шар дэвсгэр + цоож. @дурдах болно.', 'Visible to the team only, never sent to the submitter; yellow with a lock. @mentions work.']],
+      [['Ажил', 'Tasks'], ['Холбох эсвэл үүсгэх: урьдчилан бөглөсөн хуудас (гарчиг, тайлбар, хавсралт, «алдаа» шошго). Холбосон ажил дуусахад «Шийдсэн» болно.', 'Link or create: a prefilled sheet (title, description, attachments, bug tag). When the linked task is done, the feedback becomes Resolved.']]
+    ].map(([title, body]) => ({ title: pick(title), body: pick(body) }));
+
+    const segBtn = (on) => (on ? t.segOn : t.segOff);
+    const toggles = [
+      { label: L.langLabel, opts: [['mn', 'МН'], ['en', 'EN']].map(([v, lab]) => ({ label: lab, on: lang === v, style: segBtn(lang === v), pick: () => this.setState({ lang: v }) })) },
+      { label: L.themeLabel, opts: [['light', L.light], ['dark', L.dark]].map(([v, lab]) => ({ label: lab, on: theme === v, style: segBtn(theme === v), pick: () => this.setState({ theme: v }) })) }
+    ];
+
+    return { lang, L, t, cap, accent, accentInk, accentSoft, toggles, fb, statusOpts, linkOpts, createChips, tabbar, phones, rules };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,881 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<title>MobileMyTasks — Kite Tasks</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit;color:inherit}
+</style>
+</helmet>
+
+<div lang="{{lang}}" style="width: 1840px; min-height: 2400px; box-sizing: border-box; padding: 56px 64px 96px; display: flex; flex-direction: column; gap: 56px; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 15px; line-height: 22px; color: {{t.text}}; background: {{t.board}}; -webkit-font-smoothing: antialiased; {{t.scheme}}">
+
+  <!-- ================= BOARD HEADER ================= -->
+  <header style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px">
+    <div style="display: flex; flex-direction: column; gap: 8px; max-width: 900px">
+      <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 12px; line-height: 16px; color: {{t.muted}}">Kite Tasks · iOS + Android · 390 × 844</span>
+      <h1 style="margin: 0; font-size: 40px; line-height: 48px; font-weight: 600; letter-spacing: -0.02em">MobileMyTasks</h1>
+      <p style="margin: 0; font-size: 15px; line-height: 22px; color: {{t.text3}}">{{L.intro}}</p>
+    </div>
+    <div aria-label="{{L.preview}}" style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 8px 8px 8px 16px; border: 1px dashed {{t.border2}}; border-radius: 14px">
+      <span style="font-size: 12px; font-weight: 600; color: {{t.muted}}">{{L.preview}}</span>
+      <sc-for list="{{toggles}}" as="tg" hint-placeholder-count="2">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <span style="font-size: 13px; color: {{t.text3}}">{{tg.label}}</span>
+          <div role="radiogroup" aria-label="{{tg.label}}" style="display: flex; gap: 2px; padding: 2px; border-radius: 10px; background: {{t.seg}}">
+            <sc-for list="{{tg.opts}}" as="o" hint-placeholder-count="2">
+              <button role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}" style="height: 32px; padding: 0 12px; border: 0; border-radius: 8px; font-size: 13px; font-weight: 600; {{o.style}}">{{o.label}}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </header>
+
+  <section style="display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; padding-bottom: 14px; border-bottom: 1px solid {{t.border}}">
+      <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 13px; color: {{accentInk}}">01–08</span>
+      <h2 style="margin: 0; font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em">{{L.secTitle}}</h2>
+      <span style="font-size: 14px; color: {{t.muted}}">{{L.secSub}}</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 64px 48px; align-items: start">
+
+      <!-- ===== LIST PHONES (normal · completed + toast · all done) ===== -->
+      <sc-for list="{{listPhones}}" as="ph" hint-placeholder-count="3">
+        <div style="display: flex; flex-direction: column; gap: 16px; {{ph.order}}">
+          <span style="{{cap}}">{{ph.cap}}</span>
+          <div style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; box-shadow: {{t.device}}">
+            <div style="flex: none; height: 59px; background: {{t.bg}}"></div>
+
+            <sc-if value="{{ph.collapsed}}" hint-placeholder-val="{{ false }}">
+              <div style="flex: none; position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; height: 56px; padding: 0 4px; background: {{t.bg}}; border-bottom: 1px solid {{t.divider}}">
+                <div style="display: flex">
+                  <button aria-label="{{L.wsSwitch}}" style="width: 44px; height: 44px; border: 0; border-radius: 12px; background: transparent; display: flex; align-items: center; justify-content: center">
+                    <span style="width: 28px; height: 28px; border-radius: 7px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600">K</span>
+                  </button>
+                </div>
+                <span style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 16px; line-height: 22px; font-weight: 600">{{L.tabMy}}</span>
+                <div style="display: flex; justify-content: flex-end">
+                  <button aria-label="{{L.search}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{t.text}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                  </button>
+                  <a href="#" aria-label="{{L.profile}}" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; text-decoration: none">
+                    <span style="width: 30px; height: 30px; border-radius: 15px; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{me.style}}">{{me.initials}}</span>
+                  </a>
+                </div>
+              </div>
+            </sc-if>
+
+            <div style="flex: 1; min-height: 0; {{ph.scroll}}">
+              <div style="display: flex; flex-direction: column; padding-bottom: 180px; {{ph.shift}}">
+
+                <!-- Large header -->
+                <header style="display: flex; flex-direction: column">
+                  <div style="display: flex; align-items: center; height: 44px; padding: 0 4px">
+                    <button aria-label="{{L.wsSwitch}}" style="display: flex; align-items: center; gap: 8px; min-width: 0; height: 44px; padding: 0 8px 0 12px; border: 0; border-radius: 12px; background: transparent">
+                      <span style="flex: none; width: 28px; height: 28px; border-radius: 7px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600">K</span>
+                      <span style="font-size: 15px; font-weight: 600; white-space: nowrap">Kite Studio</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{t.muted}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+                    </button>
+                    <span style="flex: 1"></span>
+                    <button aria-label="{{L.search}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{t.text}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                    </button>
+                    <a href="#" aria-label="{{L.profile}}" style="position: relative; width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; text-decoration: none">
+                      <span style="width: 30px; height: 30px; border-radius: 15px; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{me.style}}">{{me.initials}}</span>
+                      <span style="position: absolute; right: 6px; bottom: 6px; width: 10px; height: 10px; box-sizing: border-box; border-radius: 5px; background: {{t.online}}; border: 2px solid {{t.bg}}"></span>
+                    </a>
+                  </div>
+                  <div style="display: flex; flex-direction: column; padding: 2px 16px 10px">
+                    <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.dateLong}}</span>
+                    <h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.01em">{{L.greeting}}</h1>
+                  </div>
+                </header>
+
+                <!-- Stats: horizontal scroll -->
+                <div role="list" aria-label="{{L.statsAria}}" style="display: flex; gap: 10px; overflow-x: auto; padding: 6px 16px 16px; scroll-snap-type: x mandatory; scrollbar-width: none">
+                  <sc-for list="{{ph.stats}}" as="st" hint-placeholder-count="3">
+                    <div role="listitem" style="flex: none; scroll-snap-align: start; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; min-height: 112px; padding: 12px 14px; border-radius: 14px; {{st.card}}">
+                      <span style="display: flex; align-items: flex-start; gap: 6px; font-size: 13px; line-height: 18px; color: {{t.text3}}">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{st.iconColor}}" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 2px"><path d="{{st.icon}}"></path></svg>
+                        {{st.label}}
+                      </span>
+                      <span style="display: flex; align-items: flex-end; justify-content: space-between; gap: 8px">
+                        <span style="display: flex; flex-direction: column">
+                          <span style="font-size: 28px; line-height: 32px; font-weight: 600; {{st.valueStyle}}">{{st.value}}</span>
+                          <span style="font-size: 12px; line-height: 16px; {{st.subStyle}}">{{st.sub}}</span>
+                        </span>
+                        <sc-if value="{{st.hasBars}}" hint-placeholder-val="{{ false }}">
+                          <span role="img" aria-label="{{st.barsAria}}" style="display: flex; align-items: flex-end; gap: 3px; height: 32px">
+                            <sc-for list="{{st.bars}}" as="b" hint-placeholder-count="7">
+                              <span style="width: 7px; border-radius: 2px; {{b.style}}"></span>
+                            </sc-for>
+                          </span>
+                        </sc-if>
+                      </span>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <!-- Standup card -->
+                <sc-if value="{{ph.standupPending}}" hint-placeholder-val="{{ true }}">
+                  <section aria-label="{{L.standup}}" style="margin: 0 16px 12px; display: flex; flex-direction: column; gap: 12px; padding: 14px; border: 1px solid {{t.border}}; border-radius: 14px; background: {{t.bg}}">
+                    <div style="display: flex; align-items: flex-start; gap: 12px">
+                      <span aria-hidden="true" style="flex: none; width: 36px; height: 36px; border-radius: 10px; background: {{accentSoft}}; color: {{accentInk}}; display: flex; align-items: center; justify-content: center">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M8 9h8M8 13h5"></path></svg>
+                      </span>
+                      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                        <span style="font-size: 15px; line-height: 20px; font-weight: 600">{{L.suPending}}</span>
+                        <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.suMeta}}</span>
+                      </div>
+                    </div>
+                    <div aria-label="{{L.suWhoAria}}" style="display: flex; align-items: center; padding-left: 6px">
+                      <sc-for list="{{posted}}" as="p" hint-placeholder-count="4">
+                        <span style="position: relative; width: 26px; height: 26px; margin-left: -6px; box-sizing: border-box; border-radius: 13px; border: 2px solid {{t.bg}}; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{p.style}}">{{p.initials}}</span>
+                      </sc-for>
+                      <span style="width: 26px; height: 26px; margin-left: 6px; box-sizing: border-box; border-radius: 13px; border: 1.5px dashed {{t.faint}}; color: {{t.muted}}; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center">{{me.initials}}</span>
+                      <span style="margin-left: 8px; font-size: 13px; color: {{t.muted}}">{{L.you}}</span>
+                    </div>
+                    <div style="display: flex; gap: 8px">
+                      <a href="StandupWriteMobile.dc.html" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; height: 44px; border-radius: 12px; background: {{accent}}; color: #FFFFFF; font-size: 15px; font-weight: 600; text-decoration: none">{{L.writeUpdate}}</a>
+                      <a href="#" style="flex: 1; display: flex; align-items: center; justify-content: center; height: 44px; border-radius: 12px; border: 1px solid {{t.border}}; color: {{t.text}}; font-size: 15px; font-weight: 500; text-decoration: none">{{L.seeTeam}}</a>
+                    </div>
+                  </section>
+                </sc-if>
+                <sc-if value="{{ph.standupPosted}}" hint-placeholder-val="{{ false }}">
+                  <a href="#" style="margin: 0 16px 12px; display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 12px; box-sizing: border-box; border: 1px solid {{t.border}}; border-radius: 14px; background: {{t.bg}}; color: {{t.text}}; text-decoration: none">
+                    <span aria-hidden="true" style="flex: none; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; {{okTile}}">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>
+                    </span>
+                    <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                      <span style="font-size: 15px; line-height: 20px; font-weight: 600">{{L.suPosted}}</span>
+                      <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.suPostedMeta}}</span>
+                    </span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{t.faint}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+                  </a>
+                </sc-if>
+
+                <!-- Recent activity entry -->
+                <a href="#" style="margin: 0 16px 8px; display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 12px; box-sizing: border-box; border: 1px solid {{t.border}}; border-radius: 14px; background: {{t.bg}}; color: {{t.text}}; text-decoration: none">
+                  <span style="flex: none; display: flex; padding-left: 6px">
+                    <sc-for list="{{actors}}" as="p" hint-placeholder-count="3">
+                      <span style="width: 26px; height: 26px; margin-left: -6px; box-sizing: border-box; border-radius: 13px; border: 2px solid {{t.bg}}; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{p.style}}">{{p.initials}}</span>
+                    </sc-for>
+                  </span>
+                  <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                    <span style="font-size: 15px; line-height: 20px; font-weight: 600">{{L.recent}}</span>
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.recentSub}}</span>
+                  </span>
+                  <span style="flex: none; height: 22px; padding: 0 8px; border-radius: 11px; background: {{accentSoft}}; color: {{accentInk}}; font-size: 12px; font-weight: 600; display: flex; align-items: center">{{L.newCount}}</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{t.faint}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+                </a>
+
+                <!-- Filter row -->
+                <div style="display: flex; align-items: center; gap: 8px; height: 52px; padding: 0 16px">
+                  <button aria-haspopup="dialog" style="flex: none; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; box-sizing: border-box; border-radius: 18px; border: 1px solid {{t.border}}; background: {{t.bg}}; color: {{t.text2}}; font-size: 14px; font-weight: 500">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"></path><path d="m3 13 9 5 9-5"></path></svg>
+                    {{L.allSpaces}}
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+                  </button>
+                  <span style="flex: 1"></span>
+                  <span style="font-size: 13px; color: {{t.muted}}">{{ph.openLabel}}</span>
+                </div>
+
+                <!-- Sections -->
+                <sc-for list="{{ph.sections}}" as="g" hint-placeholder-count="4">
+                  <section aria-label="{{g.label}}" style="display: flex; flex-direction: column">
+                    <button onClick="{{g.toggle}}" aria-expanded="{{g.open}}" style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border: 0; border-bottom: 1px solid {{t.divider}}; background: {{t.bg}}; text-align: left">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{t.muted}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{g.chev}}"><path d="m9 6 6 6-6 6"></path></svg>
+                      <span style="font-size: 15px; line-height: 20px; font-weight: 600; {{g.labelStyle}}">{{g.label}}</span>
+                      <span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 10px; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; {{g.countStyle}}">{{g.count}}</span>
+                      <span style="flex: 1"></span>
+                      <span style="font-size: 13px; color: {{t.muted}}; white-space: nowrap">{{g.hint}}</span>
+                    </button>
+                    <sc-if value="{{g.open}}" hint-placeholder-val="{{ true }}">
+                      <div style="display: flex; flex-direction: column">
+                        <sc-if value="{{g.allDone}}" hint-placeholder-val="{{ false }}">
+                          <div style="margin: 12px 16px; display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 14px; {{okCard}}">
+                            <span aria-hidden="true" style="flex: none; width: 40px; height: 40px; border-radius: 20px; background: {{t.green}}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg></span>
+                            <span style="flex: 1; display: flex; flex-direction: column">
+                              <span style="font-size: 15px; line-height: 20px; font-weight: 600; color: {{t.text}}">{{L.nothingToday}}</span>
+                              <span style="font-size: 13px; line-height: 18px; color: {{t.text3}}">{{L.nothingTodaySub}}</span>
+                            </span>
+                          </div>
+                        </sc-if>
+                        <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="2">
+                          <div style="display: flex; align-items: flex-start; gap: 4px; min-height: 64px; box-sizing: border-box; padding: 10px 16px 10px 0; background: {{t.bg}}; border-bottom: 1px solid {{t.divider}}">
+                            <button onClick="{{r.toggle}}" aria-label="{{r.statusAria}}" aria-pressed="{{r.done}}" style="flex: none; width: 44px; height: 44px; margin-top: -11px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center">
+                              <span aria-hidden="true" style="position: relative; width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; {{r.mk.ring}}"><span style="position: absolute; {{r.mk.g1}}"></span><span style="position: absolute; {{r.mk.g2}}"></span></span>
+                            </button>
+                            <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+                              <a href="#" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-decoration: none; font-size: 15px; line-height: 22px; {{r.titleStyle}}">{{r.title}}</a>
+                              <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 12px; line-height: 16px; color: {{t.muted}}">
+                                <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 12px; {{r.keyStyle}}">{{r.key}}</span>
+                                <span style="display: inline-flex; align-items: center; gap: 5px; min-width: 0"><span style="flex: none; width: 6px; height: 6px; border-radius: 3px; {{r.projDot}}"></span>{{r.project}}</span>
+                                <sc-if value="{{r.hasDue}}" hint-placeholder-val="{{ false }}">
+                                  <span style="display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 6px; border-radius: 6px; font-weight: 500; {{r.dueStyle}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>{{r.due}}</span>
+                                </sc-if>
+                                <sc-if value="{{r.hasSub}}" hint-placeholder-val="{{ false }}">
+                                  <span style="display: inline-flex; align-items: center; gap: 4px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3v12a3 3 0 0 0 3 3h9"></path><path d="m15 15 3 3-3 3"></path></svg>{{r.sub}}</span>
+                                </sc-if>
+                                <sc-if value="{{r.hasComments}}" hint-placeholder-val="{{ false }}">
+                                  <span style="display: inline-flex; align-items: center; gap: 4px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>{{r.comments}}</span>
+                                </sc-if>
+                              </div>
+                            </div>
+                            <div style="flex: none; display: flex; align-items: center; gap: 8px; height: 22px">
+                              <svg width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="{{r.prioLabel}}" style="{{r.flagStyle}}"><path d="M4 22V4"></path><path d="M4 4h12l-2 4 2 4H4"></path></svg>
+                              <span style="display: flex; padding-left: 6px">
+                                <sc-for list="{{r.people}}" as="p" hint-placeholder-count="1">
+                                  <span title="{{p.name}}" style="width: 24px; height: 24px; margin-left: -6px; box-sizing: border-box; border-radius: 12px; border: 2px solid {{t.bg}}; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{p.style}}">{{p.initials}}</span>
+                                </sc-for>
+                              </span>
+                            </div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                  </section>
+                </sc-for>
+              </div>
+            </div>
+
+            <sc-if value="{{ph.toast}}" hint-placeholder-val="{{ false }}">
+              <div role="status" style="position: absolute; z-index: 3; left: 16px; right: 16px; bottom: 91px; display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 4px 0 16px; box-sizing: border-box; border-radius: 12px; background: {{t.toastBg}}; color: {{t.toastText}}; box-shadow: {{t.shadowMenu}}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{toastOk}}" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12 2.5 2.5 4.5-5"></path></svg>
+                <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                  <span style="font-size: 14px; line-height: 20px">{{L.tDone}}</span>
+                  <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; line-height: 16px; opacity: 0.7">{{ph.toastTask}}</span>
+                </span>
+                <button onClick="{{ph.undo}}" style="flex: none; height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; font-size: 14px; font-weight: 600; color: {{t.toastAction}}">{{L.undo}}</button>
+              </div>
+            </sc-if>
+
+            <button aria-label="{{L.fabAria}}" style="position: absolute; z-index: 3; right: 16px; bottom: {{ph.fabBottom}}; width: 56px; height: 56px; border: 0; border-radius: 16px; background: {{accent}}; box-shadow: {{t.shadowFab}}; display: flex; align-items: center; justify-content: center">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+            </button>
+
+            <nav aria-label="{{L.tabsAria}}" style="position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.bg}}; border-top: 1px solid {{t.divider}}">
+              <div style="display: flex; height: 49px; padding: 0 4px">
+                <sc-for list="{{ph.tabs}}" as="tb" hint-placeholder-count="5">
+                  <a href="#" aria-current="{{tb.current}}" style="flex: 1; min-width: 0; height: 49px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; {{tb.color}}">
+                    <span style="position: relative; width: 24px; height: 24px">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{tb.sw}}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{tb.d1}}"></path><path d="{{tb.d2}}"></path></svg>
+                      <sc-if value="{{tb.hasBadge}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: -4px; left: 14px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px; background: {{accent}}; color: #FFFFFF; font-size: 11px; font-weight: 600; line-height: 18px; text-align: center; box-shadow: 0 0 0 2px {{t.bg}}">{{tb.badge}}</span></sc-if>
+                      <sc-if value="{{tb.hasDot}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: -1px; right: -3px; width: 8px; height: 8px; border-radius: 4px; background: {{accent}}; box-shadow: 0 0 0 2px {{t.bg}}"></span></sc-if>
+                    </span>
+                    <span style="max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; line-height: 14px; {{tb.weight}}">{{tb.label}}</span>
+                  </a>
+                </sc-for>
+              </div>
+              <div style="height: 34px"></div>
+            </nav>
+          </div>
+        </div>
+      </sc-for>
+
+      <!-- ===== SPACE FILTER SHEET ===== -->
+      <div style="display: flex; flex-direction: column; gap: 16px; order: 3">
+        <span style="{{cap}}">{{L.capFilter}}</span>
+        <div style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; box-shadow: {{t.device}}">
+          <div style="flex: none; height: 59px"></div>
+          <div style="flex: none; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px">
+            <span style="width: 28px; height: 28px; border-radius: 7px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600">K</span>
+            <span style="font-size: 15px; font-weight: 600">Kite Studio</span>
+          </div>
+          <div style="flex: none; display: flex; flex-direction: column; padding: 2px 16px 12px">
+            <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.dateLong}}</span>
+            <span style="font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.01em">{{L.greeting}}</span>
+          </div>
+          <div style="flex: none; display: flex; gap: 10px; padding: 0 16px 16px">
+            <span style="flex: none; width: 168px; height: 112px; border-radius: 14px; background: {{t.skel}}"></span>
+            <span style="flex: none; width: 208px; height: 112px; border-radius: 14px; background: {{t.skel}}"></span>
+          </div>
+          <div style="flex: 1; display: flex; flex-direction: column">
+            <sc-for list="{{ghostRows}}" as="x" hint-placeholder-count="5">
+              <div style="display: flex; align-items: center; gap: 16px; height: 64px; padding: 0 16px; border-bottom: 1px solid {{t.divider}}">
+                <span style="flex: none; width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; border: 2px solid {{t.faint}}"></span>
+                <span style="flex: 1; display: flex; flex-direction: column; gap: 8px"><span style="height: 10px; border-radius: 5px; background: {{t.skel}}; {{x.w}}"></span><span style="height: 8px; width: 40%; border-radius: 4px; background: {{t.skel}}"></span></span>
+              </div>
+            </sc-for>
+          </div>
+          <div aria-hidden="true" style="position: absolute; z-index: 4; inset: 0; background: {{t.scrim}}"></div>
+          <div role="dialog" aria-modal="true" aria-labelledby="sf-h" style="position: absolute; z-index: 5; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.raised}}; border-radius: 16px 16px 0 0; box-shadow: {{t.shadowSheet}}">
+            <div style="height: 20px; display: flex; justify-content: center; padding-top: 6px; box-sizing: border-box"><span style="width: 36px; height: 5px; border-radius: 3px; background: {{t.grabber}}"></span></div>
+            <div style="display: flex; align-items: center; height: 52px; padding: 0 4px 0 16px">
+              <h2 id="sf-h" style="flex: 1; margin: 0; font-size: 17px; line-height: 22px; font-weight: 600">{{L.spaces}}</h2>
+              <button aria-label="{{L.close}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.text3}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+            </div>
+            <div role="listbox" aria-labelledby="sf-h" style="display: flex; flex-direction: column; padding-bottom: 4px">
+              <sc-for list="{{spaceOpts}}" as="o" hint-placeholder-count="4">
+                <button role="option" aria-selected="{{o.selected}}" style="display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 16px; border: 0; background: transparent; text-align: left">
+                  <span aria-hidden="true" style="flex: none; width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; {{o.badge}}">
+                    <sc-if value="{{o.isAll}}" hint-placeholder-val="{{ false }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5z"></path><path d="m3 13 9 5 9-5"></path></svg></sc-if>
+                    <sc-if value="{{o.isSpace}}" hint-placeholder-val="{{ true }}">{{o.initial}}</sc-if>
+                  </span>
+                  <span style="flex: 1; font-size: 15px; line-height: 22px; color: {{t.text}}">{{o.label}}</span>
+                  <span style="font-size: 13px; color: {{t.muted}}">{{o.meta}}</span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{accentInk}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; {{o.check}}"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>
+                </button>
+              </sc-for>
+            </div>
+            <span style="padding: 8px 16px 4px; font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.filterNote}}</span>
+            <div style="height: 34px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== RECENT ACTIVITY SCREEN ===== -->
+      <div style="display: flex; flex-direction: column; gap: 16px; order: 4">
+        <span style="{{cap}}">{{L.capActivity}}</span>
+        <div style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; box-shadow: {{t.device}}">
+          <div style="flex: none; height: 59px"></div>
+          <div style="flex: none; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; height: 56px; padding: 0 4px; border-bottom: 1px solid {{t.divider}}">
+            <div style="display: flex">
+              <a href="#" aria-label="{{L.back}}" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: {{t.text}}">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+              </a>
+            </div>
+            <span style="max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 16px; line-height: 22px; font-weight: 600">{{L.recent}}</span>
+            <div style="display: flex; justify-content: flex-end">
+              <button aria-label="{{L.markAllRead}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{t.text2}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5M22 10l-7.5 7.5L13 16"></path></svg>
+              </button>
+            </div>
+          </div>
+          <div style="flex: none; padding: 12px 16px 4px">
+            <div role="radiogroup" aria-label="{{L.feedFilter}}" style="display: flex; gap: 2px; height: 40px; padding: 2px; box-sizing: border-box; border-radius: 10px; background: {{t.seg}}">
+              <sc-for list="{{feedSeg}}" as="o" hint-placeholder-count="2">
+                <button role="radio" aria-checked="{{o.on}}" style="flex: 1; min-width: 0; border: 0; border-radius: 8px; font-size: 14px; font-weight: 600; {{o.style}}">{{o.label}}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; padding-bottom: 83px">
+            <sc-for list="{{feed}}" as="fg" hint-placeholder-count="3">
+              <div style="display: flex; flex-direction: column">
+                <span style="height: 36px; padding: 0 16px 6px; box-sizing: border-box; display: flex; align-items: flex-end; font-size: 13px; line-height: 18px; font-weight: 600; color: {{t.muted}}">{{fg.label}}</span>
+                <sc-for list="{{fg.items}}" as="n" hint-placeholder-count="2">
+                  <a href="#" style="display: flex; gap: 12px; min-height: 64px; padding: 10px 16px; box-sizing: border-box; border-bottom: 1px solid {{t.divider}}; background: {{t.bg}}; color: {{t.text}}; text-decoration: none">
+                    <span style="flex: none; width: 32px; height: 32px; border-radius: 16px; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{n.avatar}}">{{n.initials}}</span>
+                    <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                      <span style="font-size: 14px; line-height: 20px; color: {{t.text2}}"><strong style="font-weight: 600; color: {{t.text}}">{{n.who}}</strong> {{n.verb}}</span>
+                      <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; line-height: 20px; {{n.taskStyle}}">{{n.task}}</span>
+                      <sc-if value="{{n.hasPill}}" hint-placeholder-val="{{ false }}">
+                        <span style="align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; height: 22px; margin-top: 2px; padding: 0 8px; border-radius: 6px; font-size: 12px; font-weight: 500; {{n.pillStyle}}">
+                          <span aria-hidden="true" style="position: relative; width: 10px; height: 10px; box-sizing: border-box; border-radius: 5px; {{n.pillRing}}"></span>{{n.pill}}
+                        </span>
+                      </sc-if>
+                      <sc-if value="{{n.hasQuote}}" hint-placeholder-val="{{ false }}">
+                        <span style="margin-top: 2px; padding: 6px 8px; border-radius: 8px; background: {{t.fill}}; font-size: 13px; line-height: 18px; color: {{t.text2}}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{n.quote}}</span>
+                      </sc-if>
+                      <span style="font-size: 12px; line-height: 16px; color: {{t.muted}}">{{n.time}} · <span style="font-family: Geist Mono, ui-monospace, monospace">{{n.key}}</span></span>
+                    </span>
+                    <sc-if value="{{n.unread}}" hint-placeholder-val="{{ false }}">
+                      <span aria-label="{{L.unread}}" style="flex: none; width: 8px; height: 8px; margin-top: 6px; border-radius: 4px; background: {{accent}}"></span>
+                    </sc-if>
+                  </a>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+          <nav aria-label="{{L.tabsAria}}" style="position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.bg}}; border-top: 1px solid {{t.divider}}">
+            <div style="display: flex; height: 49px; padding: 0 4px">
+              <sc-for list="{{tabsPlain}}" as="tb" hint-placeholder-count="5">
+                <a href="#" aria-current="{{tb.current}}" style="flex: 1; min-width: 0; height: 49px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; {{tb.color}}">
+                  <span style="position: relative; width: 24px; height: 24px">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{tb.sw}}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{tb.d1}}"></path><path d="{{tb.d2}}"></path></svg>
+                    <sc-if value="{{tb.hasBadge}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: -4px; left: 14px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px; background: {{accent}}; color: #FFFFFF; font-size: 11px; font-weight: 600; line-height: 18px; text-align: center; box-shadow: 0 0 0 2px {{t.bg}}">{{tb.badge}}</span></sc-if>
+                    <sc-if value="{{tb.hasDot}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: -1px; right: -3px; width: 8px; height: 8px; border-radius: 4px; background: {{accent}}; box-shadow: 0 0 0 2px {{t.bg}}"></span></sc-if>
+                  </span>
+                  <span style="max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; line-height: 14px; {{tb.weight}}">{{tb.label}}</span>
+                </a>
+              </sc-for>
+            </div>
+            <div style="height: 34px"></div>
+          </nav>
+        </div>
+      </div>
+
+      <!-- ===== FIRST-RUN EMPTY ===== -->
+      <div style="display: flex; flex-direction: column; gap: 16px; order: 6">
+        <span style="{{cap}}">{{L.capEmpty}}</span>
+        <div style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; box-shadow: {{t.device}}">
+          <div style="flex: none; height: 59px"></div>
+          <div style="flex: none; display: flex; align-items: center; height: 44px; padding: 0 4px">
+            <button aria-label="{{L.wsSwitch}}" style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 8px 0 12px; border: 0; border-radius: 12px; background: transparent">
+              <span style="width: 28px; height: 28px; border-radius: 7px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600">K</span>
+              <span style="font-size: 15px; font-weight: 600">Kite Studio</span>
+            </button>
+            <span style="flex: 1"></span>
+            <a href="#" aria-label="{{L.profile}}" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; text-decoration: none">
+              <span style="width: 30px; height: 30px; border-radius: 15px; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{newbie.style}}">{{newbie.initials}}</span>
+            </a>
+          </div>
+          <div style="flex: none; display: flex; flex-direction: column; padding: 2px 16px 10px">
+            <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.dateLong}}</span>
+            <span style="font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.01em">{{L.welcome}}</span>
+          </div>
+          <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 0 24px 120px; text-align: center">
+            <div aria-hidden="true" style="position: relative; width: 104px; height: 104px; border-radius: 52px; background: {{t.surface2}}; border: 1px solid {{t.divider}}; display: flex; align-items: center; justify-content: center">
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="{{t.faint}}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12 2.5 2.5 4.5-5"></path></svg>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <h1 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.01em">{{L.emptyTitle}}</h1>
+              <p style="margin: 0; font-size: 15px; line-height: 22px; color: {{t.text3}}">{{L.emptyBody}}</p>
+            </div>
+            <div style="align-self: stretch; display: flex; flex-direction: column; gap: 8px">
+              <button style="height: 48px; border: 0; border-radius: 12px; background: {{accent}}; color: #FFFFFF; font-size: 16px; font-weight: 600">{{L.emptyCta}}</button>
+              <a href="#" style="display: flex; align-items: center; justify-content: center; height: 48px; border-radius: 12px; border: 1px solid {{t.border}}; color: {{t.text}}; font-size: 16px; font-weight: 600; text-decoration: none">{{L.emptyCta2}}</a>
+            </div>
+          </div>
+          <nav aria-label="{{L.tabsAria}}" style="position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.bg}}; border-top: 1px solid {{t.divider}}">
+            <div style="display: flex; height: 49px; padding: 0 4px">
+              <sc-for list="{{tabsPlain}}" as="tb" hint-placeholder-count="5">
+                <a href="#" aria-current="{{tb.current}}" style="flex: 1; min-width: 0; height: 49px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; {{tb.color}}">
+                  <span style="position: relative; width: 24px; height: 24px">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{tb.sw}}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{tb.d1}}"></path><path d="{{tb.d2}}"></path></svg>
+                  </span>
+                  <span style="max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; line-height: 14px; {{tb.weight}}">{{tb.label}}</span>
+                </a>
+              </sc-for>
+            </div>
+            <div style="height: 34px"></div>
+          </nav>
+        </div>
+      </div>
+
+      <!-- ===== LOADING ===== -->
+      <div style="display: flex; flex-direction: column; gap: 16px; order: 7">
+        <span style="{{cap}}">{{L.capLoading}}</span>
+        <div aria-busy="true" style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; box-shadow: {{t.device}}">
+          <div style="flex: none; height: 59px"></div>
+          <div style="flex: none; display: flex; align-items: center; height: 44px; padding: 0 4px">
+            <button aria-label="{{L.wsSwitch}}" style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 8px 0 12px; border: 0; border-radius: 12px; background: transparent">
+              <span style="width: 28px; height: 28px; border-radius: 7px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600">K</span>
+              <span style="font-size: 15px; font-weight: 600">Kite Studio</span>
+            </button>
+            <span style="flex: 1"></span>
+            <span style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><span style="width: 30px; height: 30px; border-radius: 15px; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{me.style}}">{{me.initials}}</span></span>
+          </div>
+          <div style="flex: none; display: flex; flex-direction: column; padding: 2px 16px 10px">
+            <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.dateLong}}</span>
+            <span style="font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.01em">{{L.greeting}}</span>
+          </div>
+          <div style="flex: none; display: flex; gap: 10px; padding: 6px 16px 16px; overflow: hidden">
+            <sc-for list="{{skelCards}}" as="k" hint-placeholder-count="3">
+              <span style="flex: none; height: 112px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; padding: 14px; border-radius: 14px; border: 1px solid {{t.border}}; {{k.w}}">
+                <span style="width: 70%; height: 10px; border-radius: 5px; background: {{t.skel}}"></span>
+                <span style="width: 40px; height: 24px; border-radius: 6px; background: {{t.skel}}"></span>
+                <span style="width: 80%; height: 8px; border-radius: 4px; background: {{t.skel2}}"></span>
+              </span>
+            </sc-for>
+          </div>
+          <div style="flex: none; margin: 0 16px 12px; height: 136px; border-radius: 14px; border: 1px solid {{t.border}}; box-sizing: border-box; padding: 14px; display: flex; flex-direction: column; gap: 12px">
+            <span style="display: flex; gap: 12px"><span style="width: 36px; height: 36px; border-radius: 10px; background: {{t.skel}}"></span><span style="flex: 1; display: flex; flex-direction: column; gap: 8px; padding-top: 4px"><span style="width: 75%; height: 10px; border-radius: 5px; background: {{t.skel}}"></span><span style="width: 50%; height: 8px; border-radius: 4px; background: {{t.skel2}}"></span></span></span>
+            <span style="margin-top: auto; height: 44px; border-radius: 12px; background: {{t.skel2}}"></span>
+          </div>
+          <div style="flex: none; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-bottom: 1px solid {{t.divider}}">
+            <span style="width: 90px; height: 12px; border-radius: 6px; background: {{t.skel}}"></span>
+          </div>
+          <sc-for list="{{skelRows}}" as="k" hint-placeholder-count="4">
+            <div style="display: flex; align-items: flex-start; gap: 16px; min-height: 64px; padding: 14px 16px; box-sizing: border-box; border-bottom: 1px solid {{t.divider}}">
+              <span style="flex: none; width: 12px; height: 12px; margin-top: 4px; border-radius: 6px; background: {{t.skel}}"></span>
+              <span style="flex: 1; display: flex; flex-direction: column; gap: 10px">
+                <span style="height: 12px; border-radius: 6px; background: {{t.skel}}; {{k.w}}"></span>
+                <span style="display: flex; gap: 8px"><span style="width: 56px; height: 10px; border-radius: 5px; background: {{t.skel2}}"></span><span style="width: 88px; height: 10px; border-radius: 5px; background: {{t.skel2}}"></span></span>
+              </span>
+            </div>
+          </sc-for>
+          <nav aria-label="{{L.tabsAria}}" style="position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.bg}}; border-top: 1px solid {{t.divider}}">
+            <div style="display: flex; height: 49px; padding: 0 4px">
+              <sc-for list="{{tabsPlain}}" as="tb" hint-placeholder-count="5">
+                <a href="#" aria-current="{{tb.current}}" style="flex: 1; min-width: 0; height: 49px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; {{tb.color}}">
+                  <span style="position: relative; width: 24px; height: 24px">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{tb.sw}}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{tb.d1}}"></path><path d="{{tb.d2}}"></path></svg>
+                  </span>
+                  <span style="max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; line-height: 14px; {{tb.weight}}">{{tb.label}}</span>
+                </a>
+              </sc-for>
+            </div>
+            <div style="height: 34px"></div>
+          </nav>
+        </div>
+      </div>
+
+      <!-- ===== BEHAVIOUR NOTES ===== -->
+      <div style="display: flex; flex-direction: column; gap: 16px; order: 8">
+        <span style="{{cap}}">{{L.capRules}}</span>
+        <div style="width: 390px; box-sizing: border-box; display: flex; flex-direction: column; border: 1px solid {{t.border}}; border-radius: 16px; background: {{t.bg}}; overflow: hidden">
+          <sc-for list="{{rules}}" as="r" hint-placeholder-count="8">
+            <div style="display: flex; flex-direction: column; gap: 2px; padding: 12px 16px; border-bottom: 1px solid {{t.divider}}">
+              <span style="font-size: 14px; line-height: 20px; font-weight: 600">{{r.title}}</span>
+              <span style="font-size: 13px; line-height: 18px; color: {{t.text3}}">{{r.body}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"language":{"editor":"enum","default":"mn","options":["mn","en"]},"theme":{"editor":"enum","default":"light","options":["light","dark"]},"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"$preview":{"width":1840,"height":2400}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: undefined, theme: undefined, done: {}, closed: {}, toast: null };
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const lang = s.lang || this.props.language || 'mn';
+    const mn = lang === 'mn';
+    const pick = (p) => (mn ? p[0] : p[1]);
+    const theme = s.theme || this.props.theme || 'light';
+    const dark = theme === 'dark';
+    const accent = this.props.accent ?? '#6E56CF';
+    const inks = { '#6E56CF': '#B4A5FF', '#2F6FEB': '#93B4FF', '#0F766E': '#5EEAD4', '#3F3F46': '#D4D4D8' };
+    const darkInk = inks[String(accent).toUpperCase()] || '#B4A5FF';
+    const accentInk = dark ? darkInk : accent;
+    const accentSoft = accent + (dark ? '33' : '1A');
+
+    /* ---------- STRINGS ---------- */
+    const STR = {
+      mn: {
+        intro: 'Эхний таб. Desktop-ийн «Миний ажил»-ыг утсанд: товч статистик, стэндап, сүүлийн үйл ажиллагаа, огноогоор бүлэглэсэн ажлууд.',
+        preview: 'Урьдчилан харах', langLabel: 'Хэл', themeLabel: 'Горим', light: 'Цайвар', dark: 'Бараан',
+        secTitle: 'Миний ажил', secSub: 'Үндсэн · дуусгасан + буцаах · орон зайн шүүлтүүр · үйл ажиллагаа · бүгд дууссан · анхны хоосон · ачаалж буй',
+        capNormal: '01 · Үндсэн · стэндап бичээгүй (дарж туршина)', capDone: '02 · Мөрийг дуусгасан · буцаах мэдэгдэл', capFilter: '03 · Орон зайн шүүлтүүр', capActivity: '04 · Сүүлийн үйл ажиллагаа',
+        capAllDone: '05 · Өнөөдрийнх бүгд дууссан · стэндап бичсэн', capEmpty: '06 · Анхны хоосон төлөв', capLoading: '07 · Ачаалж буй', capRules: 'Зан төлөв',
+        wsSwitch: 'Ажлын орчин солих: Kite Studio', search: 'Хайх', profile: 'Профайл ба Бусад', tabMy: 'Миний ажил',
+        dateLong: 'Пүрэв, 10-р сарын 8', greeting: 'Өглөөний мэнд, Ану', welcome: 'Тавтай морил, Баярмаа',
+        statsAria: 'Товч статистик',
+        stToday: 'Өнөөдөр дуусах', stWeek: 'Энэ долоо хоногт дууссан', stOver: 'Хугацаа хэтэрсэн',
+        standup: 'Стэндап', suPending: 'Мобайл багт стэндап бичээгүй байна', suMeta: '10:00-аас өмнө · 5-аас 4 нь бичсэн', suWhoAria: 'Бичсэн: Сараа, Бат, Тэмүүлэн, Дорж. Бичээгүй: та.',
+        you: 'Та', writeUpdate: 'Шинэчлэл бичих', seeTeam: 'Багийнхныг харах',
+        suPosted: 'Стэндап бичсэн · 09:32', suPostedMeta: 'Мобайл баг · 5-аас 5 нь бичсэн · 2 хариу',
+        recent: 'Сүүлийн үйл ажиллагаа', recentSub: 'Дорж Э. таныг дурдлаа · 2 цагийн өмнө', newCount: '3 шинэ',
+        allSpaces: 'Бүх орон зай',
+        overdue: 'Хугацаа хэтэрсэн', today: 'Өнөөдөр', tomorrow: 'Маргааш', week: 'Энэ долоо хоног', later: 'Дараа', nodate: 'Огноогүй',
+        hToday: 'Пүрэв', hTomorrow: 'Баасан, 10/9', hWeek: '10/10 – 10/11', hLater: 'Ирэх 7 хоногоос', hOver: 'Эхлээд эдгээрийг',
+        open: 'нээлттэй',
+        nothingToday: 'Өнөөдөр дуусах ажил алга', nothingTodaySub: '4 ажлыг дуусгалаа. Маргааш 3 ажил хүлээж байна.',
+        tDone: 'Ажил дууссан', undo: 'Буцаах', fabAria: 'Шинэ ажил үүсгэх', tabsAria: 'Үндсэн цэс',
+        tabs: ['Миний ажил', 'Төслүүд', 'Мэдэгдэл', 'Стэндап', 'Бусад'],
+        spaces: 'Орон зай', close: 'Хаах', filterNote: 'Сонголт энэ төхөөрөмж дээр хадгалагдана.',
+        back: 'Буцах', markAllRead: 'Бүгдийг уншсан болгох', feedFilter: 'Үйл ажиллагааны шүүлтүүр', unread: 'Уншаагүй',
+        feedAll: 'Бүгд', feedMine: 'Надад хамаатай',
+        emptyTitle: 'Танд оноосон ажил алга', emptyBody: 'Танд оноосон эсвэл таны үүсгэсэн ажлууд огноогоор нь энд цугларна.',
+        emptyCta: 'Анхны ажлаа үүсгэх', emptyCta2: 'Төслүүдийг үзэх'
+      },
+      en: {
+        intro: 'The first tab. Desktop My Tasks adapted to the phone: quick stats, standup, recent activity and tasks grouped by date.',
+        preview: 'Preview', langLabel: 'Language', themeLabel: 'Theme', light: 'Light', dark: 'Dark',
+        secTitle: 'My Tasks', secSub: 'Normal · completed + undo · space filter · activity · all done · first run · loading',
+        capNormal: '01 · Normal · standup not posted (try tapping)', capDone: '02 · Row completed · undo toast', capFilter: '03 · Space filter', capActivity: '04 · Recent activity',
+        capAllDone: '05 · Everything due today done · standup posted', capEmpty: '06 · First-run empty', capLoading: '07 · Loading', capRules: 'Behaviour',
+        wsSwitch: 'Switch workspace: Kite Studio', search: 'Search', profile: 'Profile and More', tabMy: 'My Tasks',
+        dateLong: 'Thursday, October 8', greeting: 'Good morning, Anu', welcome: 'Welcome, Bayarmaa',
+        statsAria: 'Quick stats',
+        stToday: 'Due today', stWeek: 'Completed this week', stOver: 'Overdue',
+        standup: 'Standup', suPending: 'You haven’t posted for Mobile team', suMeta: 'Due by 10:00 · 4 of 5 have posted', suWhoAria: 'Posted: Sara, Bat, Temuulen, Dorj. Not yet: you.',
+        you: 'You', writeUpdate: 'Write update', seeTeam: 'See team updates',
+        suPosted: 'Standup posted · 09:32', suPostedMeta: 'Mobile team · 5 of 5 posted · 2 replies',
+        recent: 'Recent activity', recentSub: 'Dorj E. mentioned you · 2h ago', newCount: '3 new',
+        allSpaces: 'All spaces',
+        overdue: 'Overdue', today: 'Today', tomorrow: 'Tomorrow', week: 'This week', later: 'Later', nodate: 'No date',
+        hToday: 'Thu', hTomorrow: 'Fri, Oct 9', hWeek: 'Oct 10 – 11', hLater: 'From next week', hOver: 'Close these first',
+        open: 'open',
+        nothingToday: 'Nothing due today', nothingTodaySub: 'You finished 4 tasks. 3 are waiting for tomorrow.',
+        tDone: 'Task completed', undo: 'Undo', fabAria: 'Create task', tabsAria: 'Main',
+        tabs: ['My Tasks', 'Projects', 'Inbox', 'Standup', 'More'],
+        spaces: 'Spaces', close: 'Close', filterNote: 'Your choice is remembered on this device.',
+        back: 'Back', markAllRead: 'Mark all as read', feedFilter: 'Activity filter', unread: 'Unread',
+        feedAll: 'All', feedMine: 'Involving me',
+        emptyTitle: 'Nothing assigned to you yet', emptyBody: 'Tasks assigned to you, or that you create, collect here by due date.',
+        emptyCta: 'Create your first task', emptyCta2: 'Browse projects'
+      }
+    };
+    const L = STR[lang] || STR.mn;
+
+    /* ---------- TOKENS (MobileFoundations) ---------- */
+    const t = dark ? {
+      board: '#0A0A0B', bg: '#111113', surface2: '#161618', raised: '#1B1B1E', fill: '#1F1F23', chip: '#232328', seg: '#1F1F23',
+      border: '#26262B', border2: '#3A3A42', divider: '#1F1F23', grabber: '#3F3F46',
+      text: '#EDEDEF', text2: '#C9C9D1', text3: '#B4B4BC', muted: '#8E8E98', faint: '#5E5E68',
+      green: '#22C55E', red: '#F87171', online: '#22C55E', skel: '#232328', skel2: '#1B1B1E', scrim: 'rgba(0,0,0,0.6)',
+      toastBg: '#EDEDEF', toastText: '#18181B', toastAction: accent,
+      shadowMenu: '0 12px 32px rgba(0,0,0,0.5)', shadowSheet: '0 -8px 32px rgba(0,0,0,0.5)', shadowFab: '0 2px 4px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.45)',
+      device: '0 0 0 1px #2A2A30, 0 0 0 10px #232328, 0 24px 48px rgba(0,0,0,0.5)',
+      segOn: 'background:#2A2A30;color:#EDEDEF;box-shadow:0 1px 2px rgba(0,0,0,0.4)', segOff: 'background:transparent;color:#8E8E98',
+      scheme: 'color-scheme: dark'
+    } : {
+      board: '#F4F4F5', bg: '#FFFFFF', surface2: '#F7F7F8', raised: '#FFFFFF', fill: '#F4F4F5', chip: '#F1F1F3', seg: '#F1F1F3',
+      border: '#E6E6EA', border2: '#C4C4CC', divider: '#EFEFF2', grabber: '#D4D4D8',
+      text: '#18181B', text2: '#3F3F46', text3: '#52525B', muted: '#6B6B74', faint: '#A1A1AA',
+      green: '#16A34A', red: '#DC2626', online: '#16A34A', skel: '#EDEDF0', skel2: '#F4F4F5', scrim: 'rgba(24,24,27,0.32)',
+      toastBg: '#18181B', toastText: '#FAFAFA', toastAction: darkInk,
+      shadowMenu: '0 12px 32px rgba(24,24,27,0.14)', shadowSheet: '0 -8px 32px rgba(24,24,27,0.12)', shadowFab: '0 2px 4px rgba(24,24,27,0.08), 0 8px 20px rgba(24,24,27,0.18)',
+      device: '0 0 0 1px #E6E6EA, 0 0 0 10px #18181B, 0 24px 48px rgba(24,24,27,0.18)',
+      segOn: 'background:#FFFFFF;color:#18181B;box-shadow:0 1px 2px rgba(24,24,27,0.08)', segOff: 'background:transparent;color:#6B6B74',
+      scheme: 'color-scheme: light'
+    };
+    const cap = 'font-family:Geist Mono,ui-monospace,monospace;font-size:12px;line-height:16px;color:' + t.muted;
+    const toastOk = dark ? '#16A34A' : '#22C55E';
+    const okTile = dark ? 'background:rgba(34,197,94,0.16);color:#86EFAC' : 'background:#E8F5EC;color:#166534';
+    const okCard = dark ? 'background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25)' : 'background:#F3FAF5;border:1px solid #CFEBD8';
+
+    /* ---------- STATUS / PRIORITY / DUE ---------- */
+    const SC = dark ? { todo: '#71717A', prog: '#F59E0B', hold: '#F87171', done: '#22C55E' } : { todo: '#A1A1AA', prog: '#D97706', hold: '#DC2626', done: '#16A34A' };
+    const NONE = 'display:none';
+    const bar = (l, c) => 'display:block;top:2px;left:' + l + 'px;width:2px;height:4px;border-radius:1px;background:' + c;
+    const MK = {
+      todo: { ring: 'border:2px solid ' + SC.todo, g1: NONE, g2: NONE },
+      progress: { ring: 'border:2px solid ' + SC.prog + ';background:linear-gradient(90deg,' + SC.prog + ' 50%,transparent 50%)', g1: NONE, g2: NONE },
+      review: { ring: 'border:2px solid ' + accentInk + ';background:' + accentInk + '33', g1: NONE, g2: NONE },
+      hold: { ring: 'border:2px solid ' + SC.hold, g1: bar(1, SC.hold), g2: bar(5, SC.hold) },
+      done: { ring: 'border:2px solid ' + SC.done + ';background:' + SC.done, g1: NONE, g2: NONE }
+    };
+    const STATUS = { todo: ['Хийх', 'To Do'], progress: ['Хийгдэж буй', 'In Progress'], review: ['Хянагдаж буй', 'In Review'], hold: ['Түр зогссон', 'On Hold'], done: ['Дууссан', 'Done'] };
+    const PF = dark
+      ? { urgent: 'fill:#F87171;stroke:#F87171', high: 'fill:#FB923C;stroke:#FB923C', medium: 'fill:#FACC15;stroke:#FACC15', low: 'fill:none;stroke:#71717A' }
+      : { urgent: 'fill:#DC2626;stroke:#DC2626', high: 'fill:#EA580C;stroke:#EA580C', medium: 'fill:#CA8A04;stroke:#CA8A04', low: 'fill:none;stroke:#A1A1AA' };
+    const PRIO = { urgent: ['Яаралтай', 'Urgent'], high: ['Өндөр', 'High'], medium: ['Дунд', 'Medium'], low: ['Бага', 'Low'] };
+    const DUE = dark
+      ? { overdue: 'background:rgba(248,113,113,0.14);color:#F87171', soon: 'background:#232328;color:#C9C9D1', later: 'background:#232328;color:#8E8E98', done: 'background:transparent;color:#5E5E68' }
+      : { overdue: 'background:#FDECEC;color:#C42B1C', soon: 'background:#F1F1F3;color:#3F3F46', later: 'background:#F1F1F3;color:#6B6B74', done: 'background:transparent;color:#A1A1AA' };
+    const MON = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const D = (m, d) => (mn ? m + '-р сарын ' + d : MON[m] + ' ' + d);
+
+    /* ---------- PEOPLE / PROJECTS ---------- */
+    const PP = {
+      anu: [['Ану Б.', 'Anu B.'], ['АБ', 'AB'], 'background:#E0E7FF;color:#3730A3', 'background:#312E81;color:#C7D2FE'],
+      bat: [['Бат О.', 'Bat O.'], ['БО', 'BO'], 'background:#CCFBF1;color:#115E59', 'background:#134E4A;color:#99F6E4'],
+      sara: [['Сараа К.', 'Sara K.'], ['СК', 'SK'], 'background:#FFE4E6;color:#9F1239', 'background:#881337;color:#FECDD3'],
+      tem: [['Тэмүүлэн Г.', 'Temuulen G.'], ['ТГ', 'TG'], 'background:#DCFCE7;color:#166534', 'background:#14532D;color:#BBF7D0'],
+      dorj: [['Дорж Э.', 'Dorj E.'], ['ДЭ', 'DE'], 'background:#FEF3C7;color:#92400E', 'background:#78350F;color:#FDE68A'],
+      mia: [['Мишээл Л.', 'Mia L.'], ['МЛ', 'ML'], 'background:#E0F2FE;color:#075985', 'background:#0C4A6E;color:#BAE6FD'],
+      oyu: [['Оюука Н.', 'Oyuka N.'], ['ОН', 'ON'], 'background:#F3E8FF;color:#6B21A8', 'background:#581C87;color:#E9D5FF'],
+      bay: [['Баярмаа Т.', 'Bayarmaa T.'], ['БТ', 'BT'], 'background:#FEF9C3;color:#854D0E', 'background:#713F12;color:#FEF08A']
+    };
+    const person = (id) => ({ name: pick(PP[id][0]), initials: pick(PP[id][1]), style: dark ? PP[id][3] : PP[id][2] });
+    const me = person('anu');
+    const PROJ = {
+      ar: [['Апп шинэчлэл', 'App Redesign'], '#7C5CE0'], co: [['Төлбөрийн хуудас v2', 'Checkout v2'], '#0284C7'], q4: [['Q4 замын зураг', 'Q4 Roadmap'], '#D97706'],
+      mr: [['Мобайл хувилбар 4.2', 'Mobile release 4.2'], '#16A34A'], ds: [['Дизайн систем', 'Design system'], '#E11D48'], br: [['Брэнд шинэчлэл', 'Brand refresh'], '#DB2777']
+    };
+
+    /* ---------- MY TASKS (desktop MyTasks data) ---------- */
+    const TK = {
+      o1: { key: 'APP-133', st: 'progress', n: ['Танилцуулгын текстийг Сараатай хянах', 'Review onboarding copy with Sara'], due: [10, 6], pr: 'high', proj: 'ar', c: 3, ppl: ['sara'] },
+      o2: { key: 'Q4-12', st: 'todo', n: ['Q4-ийн тэргүүлэх чиглэлийг батлах', 'Approve Q4 roadmap priorities'], due: [10, 7], pr: 'urgent', proj: 'q4' },
+      d1: { key: 'APP-142', st: 'review', n: ['Батлах: Төлбөрийн хуудас — респонсив байрлал', 'Sign off: Checkout page — responsive layout'], pr: 'urgent', proj: 'ar', sub: '5/6', c: 5, ppl: ['dorj'] },
+      d2: { key: 'CHK-61', st: 'todo', n: ['Хуулийн хэлтэст промо кодын нөхцөлөөр хариулах', 'Reply to legal on promo-code terms'], pr: 'medium', proj: 'co' },
+      d3: { key: 'Q4-15', st: 'todo', n: ['Спринтийн тоймын тэмдэглэл бэлдэх', 'Prepare sprint review notes'], pr: 'medium', proj: 'q4' },
+      d4: { key: 'MOB-88', st: 'todo', n: ['Тэмүүлэнтэй таб самбарын хамрах хүрээг ярилцах', 'Tab bar scope check-in with Temuulen'], pr: 'low', proj: 'mr', ppl: ['tem'], doneAtStart: true },
+      t1: { key: 'DS-21', st: 'review', n: ['Эцсийн хяналт: Бүтээгдэхүүний картын компонент v2', 'Final review: Product card component v2'], pr: 'high', proj: 'ds', sub: '3/5', c: 4, ppl: ['sara'] },
+      t2: { key: 'MOB-90', st: 'todo', n: ['Мобайл хувилбар 4.2 — гаргах эсэх шийдвэр', 'Mobile release 4.2 go / no-go'], pr: 'high', proj: 'mr', ppl: ['bat'] },
+      t3: { key: 'CHK-64', st: 'progress', n: ['Хадгалсан сагсны PRD бичих', 'Write PRD: saved carts'], pr: 'medium', proj: 'co', c: 1 },
+      w1: { key: 'APP-152', st: 'todo', n: ['Танилцуулгын прототипийг багтай хуваалцах', 'Share onboarding prototype with the team'], due: [10, 10], dk: 'soon', pr: 'medium', proj: 'ar' },
+      l1: { key: 'APP-147', st: 'progress', n: ['Танилцуулах урсгалыг шинэчлэх (3 дэлгэц)', 'Redesign onboarding flow (3 screens)'], due: [10, 12], dk: 'later', pr: 'high', proj: 'ar', sub: '2/3', c: 7, ppl: ['sara'] },
+      l2: { key: 'APP-129', st: 'hold', n: ['Тохиргооны дэлгэцийн шилжүүлэлтийн төлөвлөгөө', 'Migration plan for the settings screen'], due: [10, 20], dk: 'later', pr: 'medium', proj: 'ar', ppl: ['dorj'] },
+      l3: { key: 'BR-4', st: 'todo', n: ['Брэнд шинэчлэлийн эхлэл', 'Brand refresh kickoff'], due: [10, 27], dk: 'later', pr: 'low', proj: 'br' },
+      l4: { key: 'Q4-20', st: 'todo', n: ['Удирдлагатай Q4 замын зургийг хянах', 'Q4 roadmap review with leadership'], due: [11, 3], dk: 'later', pr: 'medium', proj: 'q4' },
+      n1: { key: 'CHK-70', st: 'todo', n: ['Өрсөлдөгчдийн хадгалсан сагсны тэмдэглэл', 'Competitor notes on saved carts'], pr: 'low', proj: 'co' },
+      n2: { key: 'APP-155', st: 'todo', n: ['Шинэ дүрс тэмдгийн талаар санал цуглуулах', 'Collect feedback on the new icons'], pr: 'low', proj: 'ar' }
+    };
+    const SECTIONS = [
+      { id: 'overdue', label: L.overdue, hint: L.hOver, ids: ['o1', 'o2'], due: 'overdue', red: true },
+      { id: 'today', label: L.today, hint: L.hToday, ids: ['d1', 'd2', 'd3', 'd4'] },
+      { id: 'tomorrow', label: L.tomorrow, hint: L.hTomorrow, ids: ['t1', 't2', 't3'] },
+      { id: 'week', label: L.week, hint: L.hWeek, ids: ['w1'], due: 'auto' },
+      { id: 'later', label: L.later, hint: L.hLater, ids: ['l1', 'l2', 'l3', 'l4'], due: 'auto' },
+      { id: 'nodate', label: L.nodate, hint: '', ids: ['n1', 'n2'] }
+    ];
+    const redCount = dark ? 'background:rgba(248,113,113,0.14);color:#FCA5A5' : 'background:#FDECEC;color:#B42318';
+    const isDoneIn = (doneMap, id) => (doneMap[id] !== undefined ? doneMap[id] : !!TK[id].doneAtStart);
+
+    const build = (opts) => {
+      const doneMap = opts.done || {};
+      const closed = opts.closed || {};
+      let open = 0;
+      const sections = SECTIONS.map((sec) => {
+        let count = 0;
+        const rows = sec.ids.map((id) => {
+          const o = TK[id];
+          const done = isDoneIn(doneMap, id);
+          if (!done) count += 1;
+          const showDue = !!sec.due && !!o.due;
+          return {
+            done, key: o.key, title: pick(o.n),
+            mk: done ? MK.done : MK[o.st],
+            statusAria: done ? (mn ? 'Дууссан. Буцаан нээх' : 'Done. Reopen') : (mn ? 'Төлөв: ' : 'Status: ') + pick(STATUS[o.st]) + (mn ? '. Дуусгах' : '. Complete'),
+            titleStyle: done ? 'color:' + t.faint + ';text-decoration:line-through' : 'color:' + t.text,
+            keyStyle: 'color:' + (done ? t.faint : t.muted),
+            project: pick(PROJ[o.proj][0]), projDot: 'background:' + PROJ[o.proj][1] + (done ? ';opacity:0.5' : ''),
+            hasDue: showDue, due: o.due ? D(o.due[0], o.due[1]) : '',
+            dueStyle: done ? DUE.done : DUE[sec.due === 'overdue' ? 'overdue' : (o.dk || 'later')],
+            hasSub: !!o.sub, sub: o.sub || '', hasComments: !!o.c, comments: String(o.c || ''),
+            flagStyle: PF[o.pr], prioLabel: (mn ? 'Ач холбогдол: ' : 'Priority: ') + pick(PRIO[o.pr]),
+            people: (o.ppl || []).map((p) => person(p)),
+            toggle: opts.interactive ? () => this.setState({ done: { ...(this.state.done || {}), [id]: !done }, toast: !done ? id : null }) : () => {}
+          };
+        });
+        open += count;
+        const isOpen = !closed[sec.id];
+        const visibleRows = opts.hideDoneToday && sec.id === 'today' ? [] : rows;
+        return {
+          id: sec.id, label: sec.label, hint: sec.hint, count: String(count), open: isOpen,
+          allDone: sec.id === 'today' && count === 0 && !!opts.hideDoneToday,
+          rows: visibleRows,
+          chev: 'transition:transform .15s;transform:rotate(' + (isOpen ? 90 : 0) + 'deg)',
+          labelStyle: 'color:' + (sec.red && count > 0 ? (dark ? '#F87171' : '#C42B1C') : t.text),
+          countStyle: sec.red && count > 0 ? redCount : 'background:' + t.chip + ';color:' + t.text3,
+          toggle: opts.interactive ? () => this.setState({ closed: { ...(this.state.closed || {}), [sec.id]: isOpen } }) : () => {},
+          hidden: count === 0 && sec.id === 'overdue'
+        };
+      }).filter((g) => !g.hidden);
+
+      const todayIds = ['d1', 'd2', 'd3', 'd4'];
+      const todayOpen = todayIds.filter((id) => !isDoneIn(doneMap, id)).length;
+      const doneNow = Object.keys(TK).filter((id) => isDoneIn(doneMap, id)).length;
+      const completed = 6 + doneNow;
+      const overdueOpen = ['o1', 'o2'].filter((id) => !isDoneIn(doneMap, id)).length;
+      const thu = doneNow;
+      const perDay = [2, 3, 1, thu, 0, 0, 0];
+      const dayNames = mn ? ['Да', 'Мя', 'Лх', 'Пү', 'Ба', 'Бя', 'Ня'] : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const card = 'background:' + t.bg + ';border:1px solid ' + t.border;
+      const redCard = dark ? 'background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.3)' : 'background:#FFF8F7;border:1px solid #F3D3CF';
+      const stats = [
+        { label: L.stToday, icon: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7v5l3 2', iconColor: dark ? '#FBBF24' : '#B45309',
+          value: String(todayOpen), valueStyle: 'color:' + t.text,
+          sub: mn ? '4-өөс ' + todayOpen + ' үлдсэн' + (isDoneIn(doneMap, 'd1') ? '' : ' · 1 яаралтай') : todayOpen + ' of 4 left' + (isDoneIn(doneMap, 'd1') ? '' : ' · 1 urgent'),
+          subStyle: 'color:' + t.muted, hasBars: false, bars: [], barsAria: '', card: card + ';width:168px' },
+        { label: L.stWeek, icon: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8.5 12l2.5 2.5 4.5-5', iconColor: t.green,
+          value: String(completed), valueStyle: 'color:' + t.text,
+          sub: (mn ? 'Өнгөрсөн 7 хоногоос +' : '+') + (completed - 4) + (mn ? '' : ' vs last week'),
+          subStyle: 'color:' + (dark ? '#86EFAC' : '#166534'), hasBars: true,
+          barsAria: perDay.map((n, i) => dayNames[i] + ' ' + n).join(', '),
+          bars: perDay.map((n, i) => ({ style: 'height:' + Math.max(4, n * 8) + 'px;background:' + (i === 3 ? accent : (i < 3 ? accent + '66' : t.chip)) })),
+          card: card + ';width:216px' },
+        { label: L.stOver, icon: 'M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01', iconColor: overdueOpen ? (dark ? '#F87171' : '#C42B1C') : t.faint,
+          value: String(overdueOpen), valueStyle: 'color:' + (overdueOpen ? (dark ? '#F87171' : '#C42B1C') : t.text),
+          sub: overdueOpen ? (mn ? 'Хамгийн хуучин нь 2 хоног' : 'Oldest is 2 days late') : (mn ? 'Хэтэрсэн ажил алга' : 'Nothing overdue'),
+          subStyle: 'color:' + t.muted, hasBars: false, bars: [], barsAria: '', card: (overdueOpen ? redCard : card) + ';width:168px' }
+      ];
+      return { sections, stats, openLabel: open + ' ' + L.open };
+    };
+
+    /* ---------- TABS ---------- */
+    const TABI = {
+      my: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z', 'm8.5 12 2.5 2.5 4.5-5'],
+      projects: ['M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z', 'M3 10h18'],
+      inbox: ['M22 12h-6l-2 3h-4l-2-3H2', 'M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'],
+      standup: ['M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', 'M8 9h8M8 13h5'],
+      more: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z', 'M7.5 12h1M11.5 12h1M15.5 12h1']
+    };
+    const tabs = (badge, dot) => ['my', 'projects', 'inbox', 'standup', 'more'].map((id, i) => ({
+      label: L.tabs[i], d1: TABI[id][0], d2: TABI[id][1],
+      current: id === 'my' ? 'page' : 'false',
+      color: 'color:' + (id === 'my' ? accentInk : t.muted),
+      weight: 'font-weight:' + (id === 'my' ? '600' : '500'),
+      sw: id === 'my' ? '2.25' : '1.75',
+      hasBadge: id === 'inbox' && badge, badge: '3', hasDot: id === 'standup' && dot
+    }));
+
+    /* ---------- LIST PHONES ---------- */
+    const interactiveToast = s.toast;
+    const p1 = build({ done: s.done, closed: s.closed, interactive: true });
+    const p2 = build({ done: { d2: true }, closed: {} });
+    const p5 = build({ done: { d1: true, d2: true, d3: true, o1: true, o2: true }, closed: {}, hideDoneToday: true });
+    const listPhones = [
+      { order: 'order:1', cap: L.capNormal, collapsed: false, scroll: 'overflow-y:auto;scrollbar-width:none', shift: '',
+        standupPending: true, standupPosted: false, ...p1,
+        toast: !!interactiveToast, toastTask: interactiveToast ? pick(TK[interactiveToast].n) : '',
+        undo: () => this.setState({ done: { ...(this.state.done || {}), [this.state.toast]: false }, toast: null }),
+        fabBottom: interactiveToast ? '151px' : '99px', tabs: tabs(true, true) },
+      { order: 'order:2', cap: L.capDone, collapsed: true, scroll: 'overflow:hidden', shift: 'margin-top:-756px',
+        standupPending: true, standupPosted: false, ...p2,
+        toast: true, toastTask: pick(TK.d2.n), undo: () => {}, fabBottom: '151px', tabs: tabs(true, true) },
+      { order: 'order:5', cap: L.capAllDone, collapsed: false, scroll: 'overflow:hidden', shift: '',
+        standupPending: false, standupPosted: true, ...p5,
+        toast: false, toastTask: '', undo: () => {}, fabBottom: '99px', tabs: tabs(true, false) }
+    ];
+
+    /* ---------- STANDUP / ACTIVITY ---------- */
+    const posted = ['sara', 'bat', 'tem', 'dorj'].map(person);
+    const actors = ['dorj', 'bat', 'sara'].map(person);
+    const reviewPill = 'background:' + accentSoft + ';color:' + accentInk;
+    const N = (who, verb, task, key, time, extra) => {
+      const p = person(who);
+      return {
+        who: p.name, initials: p.initials, avatar: p.style, verb: pick(verb), task: pick(task), key, time: pick(time),
+        hasQuote: false, quote: '', hasPill: false, pill: '', pillStyle: '', pillRing: '', unread: false,
+        taskStyle: 'font-weight:500;color:' + t.text, ...extra
+      };
+    };
+    const feed = [
+      { label: mn ? 'Өнөөдөр' : 'Today', items: [
+        N('dorj', ['таныг дурдлаа', 'mentioned you in'], TK.d1.n, 'APP-142', ['2 цагийн өмнө', '2h ago'], { hasQuote: true, quote: mn ? '«@Ану Б. Бат iOS-ийг баталмагц гарын үсэг зурахад бэлэн.»' : '“@Anu B. ready for sign-off once Bat confirms iOS.”', unread: true })
+      ]},
+      { label: mn ? 'Өчигдөр' : 'Yesterday', items: [
+        N('bat', ['төлөвийг өөрчиллөө', 'moved'], TK.d1.n, 'APP-142', ['16:12', '4:12 PM'], { hasPill: true, pill: pick(STATUS.review), pillStyle: reviewPill, pillRing: MK.review.ring, unread: true }),
+        N('sara', ['сэтгэгдэл бичлээ', 'commented on'], TK.o1.n, 'APP-133', ['15:40', '3:40 PM'], { hasQuote: true, quote: mn ? '«Текстийн v3-ийг оруулсан — ихэнхдээ угтах дэлгэц.»' : '“Pushed v3 of the copy — mostly the welcome screen.”', unread: true })
+      ]},
+      { label: mn ? 'Энэ долоо хоногт' : 'Earlier this week', items: [
+        N('tem', ['танд ажил оноолоо', 'assigned you'], TK.d4.n, 'MOB-88', ['10-р сарын 6', 'Oct 6'], { taskStyle: 'color:' + t.text3 }),
+        N('oyu', ['дуусах огноог 10-р сарын 15 болгов', 'moved the due date to Oct 15'], ['Төлбөрийн хэсгийн аналитик эвентүүд', 'Update analytics events for checkout'], 'APP-149', ['10-р сарын 6', 'Oct 6'], { taskStyle: 'color:' + t.text3 }),
+        N('mia', ['дуусгалаа', 'completed'], ['Өрсөлдөгчдийн шинжилгээ — 5 апп', 'Competitive teardown — 5 apps'], 'APP-109', ['10-р сарын 5', 'Oct 5'], { taskStyle: 'color:' + t.text3 })
+      ]}
+    ];
+    const feedSeg = [L.feedAll, L.feedMine].map((label, i) => ({ label, on: i === 0, style: i === 0 ? t.segOn : t.segOff }));
+
+    /* ---------- SPACE FILTER ---------- */
+    const allBadge = 'background:' + t.chip + ';color:' + t.text2;
+    const spaceOpts = [
+      { isAll: true, isSpace: false, initial: '', label: L.allSpaces, meta: '15', badge: allBadge, selected: true },
+      { isAll: false, isSpace: true, initial: mn ? 'Б' : 'P', label: mn ? 'Бүтээгдэхүүн' : 'Product', meta: '12', badge: dark ? 'background:#2E1065;color:#DDD6FE' : 'background:#EDE9FE;color:#5B21B6', selected: false },
+      { isAll: false, isSpace: true, initial: mn ? 'И' : 'E', label: mn ? 'Инженерчлэл' : 'Engineering', meta: '1', badge: dark ? 'background:#14532D;color:#BBF7D0' : 'background:#DCFCE7;color:#166534', selected: false },
+      { isAll: false, isSpace: true, initial: mn ? 'Д' : 'D', label: mn ? 'Дизайн' : 'Design', meta: '2', badge: dark ? 'background:#4C0519;color:#FECDD3' : 'background:#FFE4E6;color:#9F1239', selected: false }
+    ].map((o) => ({ ...o, check: 'visibility:' + (o.selected ? 'visible' : 'hidden') }));
+
+    /* ---------- SKELETONS / RULES ---------- */
+    const ghostRows = ['78%', '62%', '84%', '55%', '70%'].map((w) => ({ w: 'width:' + w }));
+    const skelCards = [168, 216, 168].map((w) => ({ w: 'width:' + w + 'px' }));
+    const skelRows = ['72%', '58%', '84%', '64%', '50%'].map((w) => ({ w: 'width:' + w }));
+    const rules = [
+      [['Дуусгах', 'Completing'], ['Тэмдгийг дарах эсвэл баруун тийш шудрахад мөр байрандаа зураастай болж, 4 секунд «Буцаах» харагдана. Дэлгэцээс гарах эсвэл татаж шинэчлэхэд л алга болно.', 'Tap the marker or swipe right: the row strikes through in place and Undo shows for 4 s. It only leaves the list when you leave the screen or pull to refresh.']],
+      [['Тоо', 'Counts'], ['Бүлгийн тоо, статистик нь зөвхөн нээлттэй ажлыг тоолж, дуусгамагц шинэчлэгдэнэ.', 'Section counts and stats count open tasks only and update the moment you complete one.']],
+      [['Огнооны чип', 'Due chip'], ['Өнөөдөр, Маргааш, Огноогүй бүлэгт огноо давхардах тул нуугдана. Хэтэрсэн бүлэгт улаан огноо харагдана.', 'Hidden in Today, Tomorrow and No date, where the section already says it. Overdue shows the red date.']],
+      [['Хоосон бүлэг', 'Empty sections'], ['Хэтэрсэн бүлэг хоосон бол нуугдана. Өнөөдөр бүлэг үргэлж харагдаж, хоосон бол «Өнөөдөр дуусах ажил алга» гэнэ.', 'Overdue hides when empty. Today always shows, with “Nothing due today” when clear.']],
+      [['Хумих', 'Collapsing'], ['Бүлгийн нээлттэй/хаалттай байдал төхөөрөмж дээр хадгалагдана.', 'Each section remembers open/closed on the device.']],
+      [['Статистик', 'Stats'], ['Хэвтээ гүйлгэнэ, карт бүр дээр дарж шүүнэ: Өнөөдөр, энэ долоо хоногт дууссан, хэтэрсэн.', 'Scrolls sideways; tapping a card filters the list to Today, Done this week or Overdue.']],
+      [['Стэндап карт', 'Standup card'], ['Стэндап бүлэгт байгаа үед л харагдана. Бичсэний дараа нэг мөрт товч болно.', 'Only for people in a standup group. After posting it shrinks to one line.']],
+      [['Анхны хоосон', 'First run'], ['Статистик, стэндап, үйл ажиллагаа нуугдана. Хоосон төлөвт өөрийн товч байгаа тул FAB харагдахгүй.', 'Stats, standup and activity are hidden. The FAB is hidden because the empty state has its own create button.']]
+    ].map(([title, body]) => ({ title: pick(title), body: pick(body) }));
+
+    const segBtn = (on) => (on ? t.segOn : t.segOff);
+    const toggles = [
+      { label: L.langLabel, opts: [['mn', 'МН'], ['en', 'EN']].map(([v, lab]) => ({ label: lab, on: lang === v, style: segBtn(lang === v), pick: () => this.setState({ lang: v }) })) },
+      { label: L.themeLabel, opts: [['light', L.light], ['dark', L.dark]].map(([v, lab]) => ({ label: lab, on: theme === v, style: segBtn(theme === v), pick: () => this.setState({ theme: v }) })) }
+    ];
+
+    return {
+      lang, L, t, cap, accent, accentInk, accentSoft, toastOk, okTile, okCard, toggles, me,
+      newbie: person('bay'), posted, actors, listPhones, feed, feedSeg, spaceOpts,
+      ghostRows, skelCards, skelRows, rules, tabsPlain: tabs(true, true)
+    };
+  }
+}
+</script>
+</body>
+</html>
