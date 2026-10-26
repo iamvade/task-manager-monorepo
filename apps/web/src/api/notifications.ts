@@ -19,7 +19,7 @@ import {
 } from '@tanstack/react-query';
 import { z } from 'zod';
 import { apiFetch, apiSend, toQuery } from './client';
-import { queryKeys } from './queryKeys';
+import { queryKeys } from '@kite/shared/client';
 
 type Pages = InfiniteData<NotificationPage, string>;
 

@@ -8,7 +8,7 @@ import {
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { apiFetch, apiSend } from './client';
-import { queryKeys } from './queryKeys';
+import { queryKeys } from '@kite/shared/client';
 
 const byName = (a: TagWithUsage, b: TagWithUsage) =>
   a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });

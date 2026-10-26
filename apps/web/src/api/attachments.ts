@@ -2,7 +2,8 @@ import { attachmentSchema, type Attachment } from '@kite/shared';
 import { useMutation, useMutationState, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { apiFetch, apiSend } from './client';
-import { TASK_MUTATION, bumpCount, patchTask, restoreTask, settle } from './taskCache';
+import { bumpCount, patchTask, restoreTask, settle } from './taskCache';
+import { TASK_MUTATION } from '@kite/shared/client';
 
 /** Download link (`inline` previews png/jpeg/gif/webp in an <img>); the session cookie applies. */
 export const attachmentUrl = (id: string, { inline = false } = {}) =>

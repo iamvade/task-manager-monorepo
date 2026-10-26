@@ -3,14 +3,18 @@ import {
   realtimeServerMessageSchema,
   type RealtimeClientMessage,
   type RealtimeServerMessage,
-} from '@kite/shared';
-import type { RealtimeStatus } from '../stores/realtime';
+} from '../schemas/realtime.js';
 
 const MAX_DELAY_MS = 30_000;
 /** Open this long and the next drop starts the backoff over. */
 const STABLE_MS = 10_000;
 /** The server sends a heartbeat every 25s; silence this long means a dead connection. */
 const WATCHDOG_MS = 60_000;
+/** `WebSocket.OPEN`. */
+const OPEN = 1;
+
+/** `connecting` until the first open, `reconnecting` after a drop. */
+export type RealtimeStatus = 'connecting' | 'open' | 'reconnecting';
 
 /** Reconnect delay: 1s, 2s, 4s … capped at 30s, ±20% jitter so tabs don't reconnect in step. */
 export function backoffDelay(attempt: number, random: () => number = Math.random): number {
@@ -18,8 +22,35 @@ export function backoffDelay(attempt: number, random: () => number = Math.random
   return Math.round(base * (0.8 + 0.4 * random()));
 }
 
+// Handlers typed as methods (bivariant), so the browser's and React Native's WebSocket both fit.
+type Handler<E> = { bivarianceHack(event: E): void }['bivarianceHack'];
+
+/** The part of a WebSocket the realtime client uses. */
+export interface SocketLike {
+  readonly readyState: number;
+  send(data: string): void;
+  close(): void;
+  onopen: Handler<unknown> | null;
+  onmessage: Handler<{ data: unknown }> | null;
+  onclose: Handler<{ code: number }> | null;
+}
+
+/**
+ * When the platform says the connection should go away or come back: web listens to
+ * online / pagehide / visibility, the app to AppState and network changes. Returns the cleanup.
+ */
+export type RealtimeLifecycle = (handlers: {
+  /** Back online or in the foreground: reconnect now instead of waiting out the backoff. */
+  resume: () => void;
+  /** Hidden or in the background: close until `resume`. */
+  suspend: () => void;
+}) => () => void;
+
 export interface RealtimeSocketOptions {
   url: string;
+  /** Opens the connection (the app adds its `Authorization` header here). */
+  createSocket: (url: string) => SocketLike;
+  lifecycle?: RealtimeLifecycle;
   onMessage: (message: RealtimeServerMessage) => void;
   onStatus: (status: RealtimeStatus) => void;
   /** Opened again after a drop: whatever happened meanwhile was missed. */
@@ -34,7 +65,7 @@ export interface RealtimeSocketOptions {
  * and replays both on every (re)open.
  */
 export class RealtimeSocket {
-  #ws: WebSocket | null = null;
+  #ws: SocketLike | null = null;
   #attempt = 0;
   #opened = false;
   #stopped = true;
@@ -43,25 +74,21 @@ export class RealtimeSocket {
   #retry: ReturnType<typeof setTimeout> | undefined;
   #stable: ReturnType<typeof setTimeout> | undefined;
   #watchdog: ReturnType<typeof setTimeout> | undefined;
+  #unlisten: (() => void) | undefined;
 
   constructor(private readonly options: RealtimeSocketOptions) {}
 
   start(): void {
     if (!this.#stopped) return;
     this.#stopped = false;
-    window.addEventListener('online', this.#reconnectNow);
-    window.addEventListener('pagehide', this.#onPageHide);
-    window.addEventListener('pageshow', this.#onPageShow);
-    document.addEventListener('visibilitychange', this.#onVisible);
+    this.#unlisten = this.options.lifecycle?.({ resume: this.resume, suspend: this.suspend });
     this.#connect();
   }
 
   stop(): void {
     this.#stopped = true;
-    window.removeEventListener('online', this.#reconnectNow);
-    window.removeEventListener('pagehide', this.#onPageHide);
-    window.removeEventListener('pageshow', this.#onPageShow);
-    document.removeEventListener('visibilitychange', this.#onVisible);
+    this.#unlisten?.();
+    this.#unlisten = undefined;
     this.#clearTimers();
     clearTimeout(this.#retry);
     const ws = this.#ws;
@@ -83,8 +110,28 @@ export class RealtimeSocket {
     this.#send({ type: 'view', taskId });
   }
 
+  /** Back online or back in the foreground: retry now instead of waiting out the backoff. */
+  readonly resume = (): void => {
+    if (this.#stopped || this.#ws) return;
+    clearTimeout(this.#retry);
+    this.#attempt = 0;
+    this.#connect();
+  };
+
+  /**
+   * Leaving the page or going to the background, where an open socket would keep me "online"
+   * and "viewing" a task I left: close now, reopen on `resume`.
+   */
+  readonly suspend = (): void => {
+    const ws = this.#ws;
+    this.#ws = null;
+    this.#clearTimers();
+    clearTimeout(this.#retry);
+    ws?.close();
+  };
+
   #connect(): void {
-    const ws = new WebSocket(this.options.url);
+    const ws = this.options.createSocket(this.options.url);
     this.#ws = ws;
     ws.onopen = () => {
       if (this.#ws !== ws) return;
@@ -97,7 +144,7 @@ export class RealtimeSocket {
       this.#armWatchdog();
       if (reconnected) this.options.onReconnect();
     };
-    ws.onmessage = (event: MessageEvent) => {
+    ws.onmessage = (event) => {
       if (this.#ws !== ws) return;
       this.#armWatchdog();
       if (typeof event.data !== 'string') return;
@@ -111,13 +158,13 @@ export class RealtimeSocket {
       const parsed = realtimeServerMessageSchema.safeParse(data);
       if (parsed.success) this.options.onMessage(parsed.data);
     };
-    ws.onclose = (event: CloseEvent) => {
+    ws.onclose = (event) => {
       this.#dropped(ws, event.code);
     };
   }
 
   /** The socket is gone (closed, or silent past the watchdog): retry after the backoff. */
-  #dropped(ws: WebSocket, code?: number): void {
+  #dropped(ws: SocketLike, code?: number): void {
     if (this.#ws !== ws) return;
     this.#ws = null;
     this.#clearTimers();
@@ -132,34 +179,6 @@ export class RealtimeSocket {
     );
     this.#attempt++;
   }
-
-  /** Back online or back in the foreground: retry now instead of waiting out the backoff. */
-  readonly #reconnectNow = () => {
-    if (this.#stopped || this.#ws) return;
-    clearTimeout(this.#retry);
-    this.#attempt = 0;
-    this.#connect();
-  };
-
-  /**
-   * Leaving the page (or entering the back/forward cache, where an open socket would keep me
-   * "online" and "viewing" a task I left): close now, reopen if the page is restored.
-   */
-  readonly #onPageHide = () => {
-    const ws = this.#ws;
-    this.#ws = null;
-    this.#clearTimers();
-    clearTimeout(this.#retry);
-    ws?.close();
-  };
-
-  readonly #onPageShow = (event: PageTransitionEvent) => {
-    if (event.persisted) this.#reconnectNow();
-  };
-
-  readonly #onVisible = () => {
-    if (document.visibilityState === 'visible') this.#reconnectNow();
-  };
 
   #armWatchdog(): void {
     clearTimeout(this.#watchdog);
@@ -179,6 +198,6 @@ export class RealtimeSocket {
 
   #send(message: RealtimeClientMessage): void {
     // Not open yet: `onopen` replays the subscription and the viewed task.
-    if (this.#ws?.readyState === WebSocket.OPEN) this.#ws.send(JSON.stringify(message));
+    if (this.#ws?.readyState === OPEN) this.#ws.send(JSON.stringify(message));
   }
 }

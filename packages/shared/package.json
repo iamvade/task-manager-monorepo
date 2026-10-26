@@ -4,11 +4,13 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./client": "./src/client/index.ts",
+    "./testing": "./src/client/testing/index.ts"
   },
   "scripts": {
-    "build": "tsc",
-    "typecheck": "tsc",
+    "build": "tsc && tsc -p src/client",
+    "typecheck": "tsc && tsc -p src/client",
     "test": "vitest run"
   },
   "dependencies": {
@@ -16,6 +18,15 @@
   },
   "devDependencies": {
     "typescript": "~6.0.3",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.3",
+    "@tanstack/query-core": "5.104.1"
+  },
+  "peerDependencies": {
+    "@tanstack/query-core": "5.104.1"
+  },
+  "peerDependenciesMeta": {
+    "@tanstack/query-core": {
+      "optional": true
+    }
   }
 }

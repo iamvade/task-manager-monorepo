@@ -1,6 +1,6 @@
 import { MutationObserver } from '@tanstack/react-query';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { ApiError } from '../api/client';
+import { ApiError, NetworkError } from '../api/client';
 import i18n from '../i18n';
 import { createQueryClient } from '../queryClient';
 import { useToastStore } from '../stores/toast';
@@ -31,7 +31,7 @@ describe('mutation error toasts', () => {
 
   it('shows a toast per failed write, worded by error code', async () => {
     await fail(new ApiError(403, 'FORBIDDEN', 'nope'));
-    await fail(new TypeError('Failed to fetch'));
+    await fail(new NetworkError(new TypeError('Failed to fetch')));
     await fail(new ApiError(500, 'INTERNAL', 'boom'));
     expect(messages()).toEqual([
       'You don’t have permission to do that.',

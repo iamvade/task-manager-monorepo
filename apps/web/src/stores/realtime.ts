@@ -1,19 +1,11 @@
+import { RECENT_EDIT_MS, type EditedField, type RealtimeStatus } from '@kite/shared/client';
 import { create } from 'zustand';
-
-/** `connecting` until the first open, `reconnecting` after a drop. */
-export type RealtimeStatus = 'connecting' | 'open' | 'reconnecting';
-
-/** Drawer fields another person can change under you ("Edited by X just now"). */
-export type EditedField = 'title' | 'status' | 'priority' | 'due' | 'assignees';
 
 export interface RecentEdit {
   actorId: string;
   /** `Date.now()` when the change arrived. */
   at: number;
 }
-
-/** How long "Edited by X just now" stays up. */
-export const RECENT_EDIT_MS = 10_000;
 
 interface RealtimeState {
   status: RealtimeStatus;

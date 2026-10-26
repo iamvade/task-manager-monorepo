@@ -10,8 +10,8 @@ import {
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { applyStatus, withRow, type KeptRow } from './homeCache';
 import { apiFetch, apiSend, toQuery } from './client';
-import { queryKeys } from './queryKeys';
-import { TASK_MUTATION, settle } from './taskCache';
+import { queryKeys, TASK_MUTATION } from '@kite/shared/client';
+import { settle } from './taskCache';
 
 export function useHome(workspaceId: string | undefined) {
   return useQuery({

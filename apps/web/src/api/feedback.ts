@@ -29,7 +29,7 @@ import {
 } from '@tanstack/react-query';
 import { z } from 'zod';
 import { ApiError, apiFetch, apiSend, parseRetryAfter, toQuery } from './client';
-import { queryKeys } from './queryKeys';
+import { queryKeys } from '@kite/shared/client';
 
 export type FeedbackListParams = Partial<Pick<FeedbackListQuery, 'q' | 'type' | 'status'>> & {
   offset?: number;

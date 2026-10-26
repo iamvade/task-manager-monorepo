@@ -1,9 +1,9 @@
+import { appPath, wsPath } from '@kite/shared';
 import type { SidebarResponse } from '@kite/shared';
 import { useQueries } from '@tanstack/react-query';
 import { useLocation } from 'react-router';
 import { sidebarQuery, useCurrentWorkspace } from '../../api/workspaces';
 import { useAuth } from '../../auth/useAuth';
-import { appPath, wsPath } from '../../lib/paths';
 
 /**
  * The same page (path, query, hash) in workspace `workspaceId` when that's another of my

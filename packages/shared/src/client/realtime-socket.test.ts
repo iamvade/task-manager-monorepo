@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { FakeWebSocket } from '../test/fakeSocket';
-import { RealtimeSocket, backoffDelay } from './socket';
+import { RealtimeSocket, backoffDelay, type RealtimeLifecycle } from './realtime-socket.js';
+import { FakeWebSocket } from './testing/fake-socket.js';
 
 const WS_ID = '01890000-0000-7000-8000-000000000002';
 const TASK_ID = '01890000-0000-7000-8000-000000000601';
@@ -12,15 +12,26 @@ function setup() {
     unauthorized: 0,
     messages: [] as string[],
   };
+  const noop = (): void => undefined;
+  const lifecycle = { resume: noop, suspend: noop, unlistened: false };
+  const listen: RealtimeLifecycle = (handlers) => {
+    lifecycle.resume = handlers.resume;
+    lifecycle.suspend = handlers.suspend;
+    return () => {
+      lifecycle.unlistened = true;
+    };
+  };
   const socket = new RealtimeSocket({
     url: 'ws://test/api/v1/ws',
+    createSocket: (url) => new FakeWebSocket(url),
+    lifecycle: listen,
     random: () => 0.5, // no jitter
     onStatus: (s) => calls.status.push(s),
     onReconnect: () => calls.reconnects++,
     onUnauthorized: () => calls.unauthorized++,
     onMessage: (m) => calls.messages.push(m.type),
   });
-  return { socket, calls };
+  return { socket, calls, lifecycle };
 }
 
 const ws = () => {
@@ -42,6 +53,7 @@ describe('backoffDelay', () => {
 describe('RealtimeSocket', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    FakeWebSocket.reset();
     FakeWebSocket.autoOpen = false;
   });
   afterEach(() => {
@@ -123,37 +135,43 @@ describe('RealtimeSocket', () => {
     socket.stop();
   });
 
-  it('retries right away when the browser comes back online', () => {
-    const { socket } = setup();
+  it('retries right away on resume', () => {
+    const { socket, lifecycle } = setup();
     socket.start();
     ws().open();
     ws().drop();
-    window.dispatchEvent(new Event('online'));
+    lifecycle.resume();
     expect(FakeWebSocket.instances).toHaveLength(2);
     socket.stop();
   });
 
-  it('closes when the page is hidden and reopens if it comes back from the cache', () => {
-    const { socket } = setup();
+  it('closes on suspend and stays closed until resumed', () => {
+    const { socket, lifecycle } = setup();
     socket.start();
     ws().open();
     const first = ws();
-    window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: true }));
+    lifecycle.suspend();
     expect(first.readyState).toBe(FakeWebSocket.CLOSED);
     vi.advanceTimersByTime(60_000);
     expect(FakeWebSocket.instances).toHaveLength(1);
-    window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
+    lifecycle.resume();
+    expect(FakeWebSocket.instances).toHaveLength(2);
+    // Already connected: a second resume opens nothing.
+    lifecycle.resume();
     expect(FakeWebSocket.instances).toHaveLength(2);
     socket.stop();
   });
 
   it('stops for good', () => {
-    const { socket, calls } = setup();
+    const { socket, calls, lifecycle } = setup();
     socket.start();
     ws().open();
     socket.stop();
     vi.advanceTimersByTime(60_000);
     expect(FakeWebSocket.instances).toHaveLength(1);
     expect(calls.status).toEqual(['open']);
+    expect(lifecycle.unlistened).toBe(true);
+    lifecycle.resume();
+    expect(FakeWebSocket.instances).toHaveLength(1);
   });
 });

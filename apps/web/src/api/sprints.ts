@@ -5,10 +5,10 @@ import {
   type SprintWithUsage,
   type UpdateSprint,
 } from '@kite/shared';
-import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { apiFetch, apiSend } from './client';
-import { queryKeys } from './queryKeys';
+import { queryKeys, refreshAfterSprintChange } from '@kite/shared/client';
 
 const byStart = (a: SprintWithUsage, b: SprintWithUsage) =>
   a.startDate === b.startDate ? a.number - b.number : a.startDate < b.startDate ? -1 : 1;
@@ -36,18 +36,6 @@ export function useProjectSprints(
   const query = useSprints(workspaceId);
   const data = query.data?.filter((s) => s.projectIds.some((id) => ids.includes(id)));
   return { ...query, data };
-}
-
-/**
- * After a sprint changed: the sprint list, the projects' active sprint, the task details and
- * lists that show it, and the reports.
- */
-export function refreshAfterSprintChange(queryClient: QueryClient, workspaceId: string) {
-  void queryClient.invalidateQueries({ queryKey: queryKeys.sprints(workspaceId) });
-  void queryClient.invalidateQueries({ queryKey: ['projects'] });
-  void queryClient.invalidateQueries({ queryKey: queryKeys.taskDetails });
-  void queryClient.invalidateQueries({ queryKey: queryKeys.taskLists });
-  void queryClient.invalidateQueries({ queryKey: queryKeys.reportsOf(workspaceId) });
 }
 
 /** New sprint (Settings → Sprints, project menu, sprint picker): the workspace's next number. */

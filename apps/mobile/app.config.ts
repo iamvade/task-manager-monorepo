@@ -64,6 +64,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     plugins: [
       'expo-router',
       'expo-localization',
+      // The session token lives in the Keychain / Keystore.
+      'expo-secure-store',
       [
         'expo-splash-screen',
         {

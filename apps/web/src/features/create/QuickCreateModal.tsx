@@ -17,7 +17,7 @@ import { useMemo, useRef, useState, type KeyboardEvent, type MutableRefObject } 
 import { useTranslation } from 'react-i18next';
 import { useProject } from '../../api/projects';
 import { useProjectSprints } from '../../api/sprints';
-import { queryKeys } from '../../api/queryKeys';
+import { queryKeys } from '@kite/shared/client';
 import { useTags } from '../../api/tags';
 import { useCreateTask } from '../../api/tasks';
 import { useCurrentWorkspace, useSidebar, useWorkspaceMembers } from '../../api/workspaces';

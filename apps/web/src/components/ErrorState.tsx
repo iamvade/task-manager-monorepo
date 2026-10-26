@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link, isRouteErrorResponse, useLocation, useNavigate, useRouteError } from 'react-router';
-import { ApiError } from '../api/client';
+import { ApiError, NetworkError } from '../api/client';
 import { refetchErrored } from '../lib/refetchErrored';
 import { Button } from './ui/Button';
 import { buttonVariants } from './ui/buttonStyles';
@@ -45,8 +45,8 @@ export function ErrorState({ error, onRetry, reload = false }: ErrorStateProps) 
       />
     );
   }
-  // fetch rejects with a TypeError when the server can't be reached.
-  const offline = error instanceof TypeError;
+  // The server couldn't be reached.
+  const offline = error instanceof NetworkError;
   const retry =
     onRetry ??
     (() => {

@@ -1,20 +1,8 @@
 import { absenceSchema, type CreateAbsence, type UpdateAbsence } from '@kite/shared';
-import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { apiFetch, apiSend } from './client';
-import { queryKeys } from './queryKeys';
-
-/** Absences show in member lists, pickers, standup groups and Workload: refetch them all. */
-export function refreshAfterAbsences(queryClient: QueryClient, workspaceId: string) {
-  return Promise.all([
-    queryClient.invalidateQueries({ queryKey: queryKeys.absencesOf(workspaceId) }),
-    queryClient.invalidateQueries({ queryKey: queryKeys.members(workspaceId) }),
-    queryClient.invalidateQueries({ queryKey: queryKeys.standupGroups(workspaceId) }),
-    queryClient.invalidateQueries({ queryKey: ['standup-groups'] }),
-    queryClient.invalidateQueries({ queryKey: queryKeys.reportsOf(workspaceId) }),
-    queryClient.invalidateQueries({ queryKey: ['projects'] }),
-  ]);
-}
+import { queryKeys, refreshAfterAbsences } from '@kite/shared/client';
 
 /** Someone's current and upcoming out-of-office periods, by start date. */
 export function useAbsences(workspaceId: string | undefined, userId: string | undefined) {

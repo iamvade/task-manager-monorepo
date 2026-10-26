@@ -2,7 +2,8 @@ import { taskListItemSchema, type BatchTaskUpdate, type TaskListItem } from '@ki
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { apiSend } from './client';
-import { TASK_MUTATION, patchLists, restoreLists, settle, writeTask } from './taskCache';
+import { patchLists, restoreLists, settle, writeTask } from './taskCache';
+import { TASK_MUTATION } from '@kite/shared/client';
 
 export interface BatchUpdateVars {
   updates: BatchTaskUpdate[];

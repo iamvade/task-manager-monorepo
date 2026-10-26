@@ -1,5 +1,5 @@
 import type { Mutation } from '@tanstack/react-query';
-import { ApiError } from '../api/client';
+import { ApiError, NetworkError } from '../api/client';
 import i18n from '../i18n';
 import { toast } from '../stores/toast';
 
@@ -29,8 +29,8 @@ export function errorMessage(error: unknown): string {
     if (KNOWN_CODES.includes(error.code))
       return i18n.t(`errors.${error.code}` as 'errors.NOT_FOUND');
     if (error.status === 401) return i18n.t('errors.UNAUTHORIZED');
-  } else if (error instanceof TypeError) {
-    // fetch rejects with a TypeError when the server can't be reached.
+  } else if (error instanceof NetworkError) {
+    // The server couldn't be reached.
     return i18n.t('errors.network');
   }
   return i18n.t('common.genericError');

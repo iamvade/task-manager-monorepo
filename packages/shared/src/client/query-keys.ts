@@ -75,3 +75,6 @@ export const queryKeys = {
   notificationLevels: (workspaceId: string) =>
     ['workspaces', workspaceId, 'notification-levels'] as const,
 };
+
+/** Mutation key of every task write (task fields, subtasks, comments, attachments). */
+export const TASK_MUTATION = ['tasks'] as const;

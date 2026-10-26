@@ -9,17 +9,9 @@ import {
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { ApiError, apiFetch, apiSend, toQuery } from './client';
-import { queryKeys } from './queryKeys';
+import { queryKeys, TASK_MUTATION } from '@kite/shared/client';
 import { useCurrentWorkspace } from './workspaces';
-import {
-  TASK_MUTATION,
-  patchLists,
-  patchTask,
-  restoreLists,
-  restoreTask,
-  settle,
-  writeTask,
-} from './taskCache';
+import { patchLists, patchTask, restoreLists, restoreTask, settle, writeTask } from './taskCache';
 
 /** Filters sent to the list endpoints (built by `toTaskQuery`); also part of the query key. */
 export type TaskListParams = Record<string, string | readonly string[] | undefined>;

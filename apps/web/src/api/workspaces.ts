@@ -7,16 +7,16 @@ import {
   type UpdateMember,
   type WorkspaceMember,
   memberHandoverSchema,
+  wsPath,
 } from '@kite/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useContext } from 'react';
 import { z } from 'zod';
 import { useAuth } from '../auth/useAuth';
 import { WorkspaceContext, type MeWorkspace } from '../features/workspace/WorkspaceContext';
-import { wsPath } from '../lib/paths';
 import { useUiStore } from '../stores/ui';
 import { apiFetch, apiSend } from './client';
-import { queryKeys } from './queryKeys';
+import { queryKeys } from '@kite/shared/client';
 
 /**
  * The workspace the page shows: the URL's (`/w/:slug`); outside the workspace routes the last
