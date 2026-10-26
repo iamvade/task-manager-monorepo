@@ -3,8 +3,8 @@ import type { FastifyRequest, FastifyServerOptions } from 'fastify';
 import { stdSerializers, type LoggerOptions } from 'pino';
 import type { Config } from './config.js';
 
-/** Invite tokens travel in the URL path; anyone reading logs could otherwise accept them. */
-const SECRET_PATH = /(\/invites\/)[^/?#]+/g;
+/** Invite and reset tokens travel in the URL path; anyone reading logs could otherwise use them. */
+const SECRET_PATH = /(\/(?:invites|password-resets)\/)[^/?#]+/g;
 
 export const redactUrl = (url: string): string => url.replace(SECRET_PATH, '$1[redacted]');
 

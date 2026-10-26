@@ -1,23 +1,34 @@
 import {
+  adminUserSchema,
   adminWorkspaceSchema,
   apiErrorSchema,
   createWorkspaceSchema,
   createdOwnerInviteSchema,
+  createdPasswordResetSchema,
   createdWorkspaceSchema,
   ownerInviteRequestSchema,
+  type AdminUser,
   type AdminWorkspace,
 } from '@kite/shared';
-import { and, asc, count, desc, eq, gt, inArray, isNull } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gt, ilike, inArray, isNull, or } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { activeMember } from '../auth/membership.js';
+import { issuePasswordReset } from '../auth/password-reset.js';
 import { requireVade } from '../auth/platform.js';
 import type { DbOrTx } from '../db/client.js';
-import { invites, users, workspaceMembers, workspaces } from '../db/schema/index.js';
+import {
+  invites,
+  passwordResets,
+  users,
+  workspaceMembers,
+  workspaces,
+} from '../db/schema/index.js';
 import { httpError } from '../errors.js';
 import { insertInvite } from '../invites/create.js';
 import { SetupError, createWorkspace } from '../setup/workspaces.js';
+import { escapeLike } from '../tasks/list.js';
 import { hasActiveOwner } from './invites.js';
 
 const err = apiErrorSchema;
@@ -79,6 +90,60 @@ async function adminWorkspaces(db: DbOrTx, ids?: string[]): Promise<AdminWorkspa
       ownerInvite: invite
         ? { email: invite.email, expiresAt: invite.expiresAt.toISOString() }
         : null,
+    };
+  });
+}
+
+const USER_SEARCH_LIMIT = 50;
+
+/** The Users search: accounts (never platform admins) whose name or email contains `q`, by name. */
+async function adminUsers(db: DbOrTx, q: string): Promise<AdminUser[]> {
+  const pattern = `%${escapeLike(q)}%`;
+  const rows = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      initials: users.initials,
+      avatarColor: users.avatarColor,
+    })
+    .from(users)
+    .where(
+      and(
+        isNull(users.platformRole),
+        q ? or(ilike(users.name, pattern), ilike(users.email, pattern)) : undefined,
+      ),
+    )
+    .orderBy(asc(users.name), asc(users.email))
+    .limit(USER_SEARCH_LIMIT);
+  if (rows.length === 0) return [];
+  const userIds = rows.map((u) => u.id);
+
+  const memberships = await db
+    .select({ userId: workspaceMembers.userId, id: workspaces.id, name: workspaces.name })
+    .from(workspaceMembers)
+    .innerJoin(workspaces, eq(workspaces.id, workspaceMembers.workspaceId))
+    .where(and(inArray(workspaceMembers.userId, userIds), activeMember))
+    .orderBy(asc(workspaces.name));
+  const resets = await db
+    .select({ userId: passwordResets.userId, expiresAt: passwordResets.expiresAt })
+    .from(passwordResets)
+    .where(
+      and(
+        inArray(passwordResets.userId, userIds),
+        isNull(passwordResets.usedAt),
+        gt(passwordResets.expiresAt, new Date()),
+      ),
+    );
+
+  return rows.map((u) => {
+    const reset = resets.find((r) => r.userId === u.id);
+    return {
+      ...u,
+      workspaces: memberships
+        .filter((m) => m.userId === u.id)
+        .map((m) => ({ id: m.id, name: m.name })),
+      pendingReset: reset ? { expiresAt: reset.expiresAt.toISOString() } : null,
     };
   });
 }
@@ -208,6 +273,53 @@ export const adminRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         return issueOwnerInvite(app, tx, workspaceId, email);
       });
       return reply.code(201).header('cache-control', 'no-store').send(invite);
+    },
+  );
+
+  app.get(
+    '/admin/users',
+    {
+      preHandler: app.authenticate,
+      schema: {
+        tags: ['Admin'],
+        summary: 'Search users',
+        description: `Platform admin only. Accounts whose name or email contains \`q\` (all when empty), by name, at most ${USER_SEARCH_LIMIT}; platform admins are left out.`,
+        querystring: z.object({ q: z.string().trim().max(100).default('') }),
+        response: { 200: z.array(adminUserSchema), 400: err, 401: err, 404: err },
+      },
+    },
+    async (request) => {
+      requireVade(request);
+      return adminUsers(app.db, request.query.q);
+    },
+  );
+
+  app.post(
+    '/admin/users/:userId/password-reset',
+    {
+      preHandler: app.authenticate,
+      schema: {
+        tags: ['Admin'],
+        summary: 'New password reset link',
+        description:
+          'Platform admin only. A one-time link (valid 24 hours) where the person sets a new password; the response carries it, once. Replaces their earlier unused link. Nothing else changes until the link is used. 404 for an unknown user or a platform admin.',
+        params: z.object({ userId: z.uuid() }),
+        response: { 201: createdPasswordResetSchema, 401: err, 404: err },
+      },
+    },
+    async (request, reply) => {
+      const { user: admin } = requireVade(request);
+      const reset = await app.db.transaction(async (tx) => {
+        const [user] = await tx
+          .select({ id: users.id, email: users.email })
+          .from(users)
+          .where(and(eq(users.id, request.params.userId), isNull(users.platformRole)))
+          .for('update');
+        if (!user) throw httpError(404, 'NOT_FOUND', 'User not found');
+        return issuePasswordReset(app, tx, user, admin.id);
+      });
+      // The link is a credential: keep it out of every cache.
+      return reply.code(201).header('cache-control', 'no-store').send(reset);
     },
   );
   done();

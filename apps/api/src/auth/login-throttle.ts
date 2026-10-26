@@ -59,6 +59,14 @@ export class LoginThrottle {
     for (const key of Object.values(this.keys(email, ip))) this.counts.delete(key);
   }
 
+  /** Forgets every failure for the email, from any IP (its password was just reset). */
+  clearAccount(email: string): void {
+    const { account } = this.keys(email, '');
+    for (const key of this.counts.keys()) {
+      if (key === account || key.startsWith(`c:${account}|`)) this.counts.delete(key);
+    }
+  }
+
   private prune() {
     const now = this.now();
     for (const [key, entry] of this.counts) if (entry.resetAt <= now) this.counts.delete(key);

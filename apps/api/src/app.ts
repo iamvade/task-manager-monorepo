@@ -8,6 +8,7 @@ import {
   validatorCompiler,
   type ZodTypeProvider,
 } from 'fastify-type-provider-zod';
+import { LoginThrottle } from './auth/login-throttle.js';
 import { registerAuth } from './auth/plugin.js';
 import { docsEnabled, type Config } from './config.js';
 import type { Db } from './db/client.js';
@@ -31,6 +32,7 @@ import { healthRoutes } from './routes/health.js';
 import { homeRoutes } from './routes/home.js';
 import { adminRoutes } from './routes/admin.js';
 import { inviteRoutes } from './routes/invites.js';
+import { passwordResetRoutes } from './routes/password-resets.js';
 import { meRoutes } from './routes/me.js';
 import { notificationRoutes } from './routes/notifications.js';
 import { projectMemberRoutes } from './routes/project-members.js';
@@ -67,6 +69,8 @@ declare module 'fastify' {
     clock: () => Date;
     /** Computed reports, cleared per workspace by task events. */
     reportCache: ReportCache;
+    /** Failed sign-in counters (`POST /auth/login`); a password reset clears the person's. */
+    loginThrottle: LoginThrottle;
   }
 }
 
@@ -96,6 +100,7 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
   app.decorate('events', new EventBus(app.log));
   app.decorate('storage', options.storage ?? (await createStorage(config)));
   app.decorate('clock', options.now ?? (() => new Date()));
+  app.decorate('loginThrottle', new LoginThrottle());
   app.decorate('reportCache', new ReportCache(config.REPORTS_CACHE_TTL_MS, () => app.clock()));
   app.events.on('*', (event) => {
     app.reportCache.invalidate(event.workspaceId);
@@ -126,6 +131,7 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
       await api.register(authRoutes);
       await api.register(meRoutes);
       await api.register(inviteRoutes);
+      await api.register(passwordResetRoutes);
       await api.register(adminRoutes);
       await api.register(workspaceRoutes);
       await api.register(offboardingRoutes);

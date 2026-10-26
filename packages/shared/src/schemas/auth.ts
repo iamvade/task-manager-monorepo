@@ -14,7 +14,7 @@ import {
 
 export const emailSchema = z.string().trim().toLowerCase().max(254).pipe(z.email());
 
-/** New passwords (invite accept). Login accepts any non-empty string so old rules never lock anyone out. */
+/** New passwords (invite accept, reset link). Login accepts any non-empty string so old rules never lock anyone out. */
 export const passwordSchema = z.string().min(8).max(200);
 
 export const nameSchema = z.string().trim().min(1).max(80);
@@ -187,3 +187,18 @@ export const acceptInviteSchema = z
   })
   .meta({ id: 'AcceptInvite' });
 export type AcceptInvite = z.infer<typeof acceptInviteSchema>;
+
+/** `GET /password-resets/:token` — whose password the reset link sets. */
+export const passwordResetPreviewSchema = z
+  .object({
+    name: z.string(),
+    email: z.string(),
+    expiresAt: z.iso.datetime(),
+  })
+  .meta({ id: 'PasswordResetPreview' });
+export type PasswordResetPreview = z.infer<typeof passwordResetPreviewSchema>;
+
+export const passwordResetRequestSchema = z
+  .object({ password: passwordSchema })
+  .meta({ id: 'PasswordResetRequest' });
+export type PasswordResetRequest = z.infer<typeof passwordResetRequestSchema>;

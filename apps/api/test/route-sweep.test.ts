@@ -56,6 +56,9 @@ const NOT_WORKSPACE_SCOPED = [
   'GET /me/notifications/unread-counts',
   'GET /invites/{token}',
   'POST /invites/{token}/accept',
+  // Password reset links (from the platform admin): the token is the credential.
+  'GET /password-resets/{token}',
+  'POST /password-resets/{token}',
   // The public feedback form: anyone with the link (the slug) may send feedback.
   'GET /public/feedback/{slug}',
   'POST /public/feedback/{slug}/uploads',
@@ -237,6 +240,7 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       'PATCH /me': { locale: 'en' },
       'POST /workspaces/{workspaceId}/invites': { email: 'x@kite.test' },
       'POST /invites/{token}/accept': { name: 'X', password: 'password123' },
+      'POST /password-resets/{token}': { password: 'password123' },
       'POST /admin/workspaces': { name: 'X', slug: 'sweep-x', ownerEmail: 'x@kite.test' },
       'POST /admin/workspaces/{workspaceId}/owner-invite': { email: 'x@kite.test' },
       'PATCH /workspaces/{workspaceId}/members/{userId}': { capacityPoints: 10 },

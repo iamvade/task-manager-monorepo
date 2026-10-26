@@ -57,3 +57,23 @@ export const sessions = pgTable(
   },
   (t) => [index('sessions_user_id_idx').on(t.userId)],
 );
+
+/**
+ * One-time links the platform admin makes so someone who forgot their password can set a new
+ * one (there is no email delivery). Only the token's hash is stored; one unused link per person.
+ */
+export const passwordResets = pgTable(
+  'password_resets',
+  {
+    id: id(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    tokenHash: text('token_hash').notNull().unique(),
+    createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+    expiresAt: timestamptz('expires_at').notNull(),
+    usedAt: timestamptz('used_at'),
+    createdAt: createdAt(),
+  },
+  (t) => [index('password_resets_user_id_idx').on(t.userId)],
+);

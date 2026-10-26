@@ -115,6 +115,7 @@ describe('logs', () => {
     expect(redactUrl('/api/v1/invites/abc/accept?x=1')).toBe(
       '/api/v1/invites/[redacted]/accept?x=1',
     );
+    expect(redactUrl('/api/v1/password-resets/abc')).toBe('/api/v1/password-resets/[redacted]');
     expect(redactUrl('/api/v1/tasks/APP-1')).toBe('/api/v1/tasks/APP-1');
 
     const pgError = Object.assign(new Error('duplicate key value'), {

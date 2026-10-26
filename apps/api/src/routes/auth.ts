@@ -9,7 +9,6 @@ import {
 import { and, desc, eq, gt } from 'drizzle-orm';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { LoginThrottle } from '../auth/login-throttle.js';
 import { buildMe } from '../auth/me.js';
 import { verifyPassword } from '../auth/password.js';
 import { requireAuth } from '../auth/plugin.js';
@@ -27,7 +26,7 @@ const errorResponses = { 401: apiErrorSchema, 429: apiErrorSchema };
 
 export const authRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
   // Failed attempts per email (+ IP); successes never count.
-  const throttle = new LoginThrottle();
+  const throttle = app.loginThrottle;
 
   app.post(
     '/auth/login',
