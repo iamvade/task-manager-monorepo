@@ -12,15 +12,8 @@ import {
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { apiFetch, apiSend } from './client';
-import { queryKeys } from './queryKeys';
-import {
-  TASK_MUTATION,
-  bumpCount,
-  patchDetail,
-  restoreTask,
-  settle,
-  type TaskSnapshot,
-} from './taskCache';
+import { queryKeys, TASK_MUTATION } from '@kite/shared/client';
+import { bumpCount, patchDetail, restoreTask, settle, type TaskSnapshot } from './taskCache';
 
 const feed = z.array(feedItemSchema);
 

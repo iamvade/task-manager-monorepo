@@ -1,0 +1,9 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    // Timers, fetch, URLSearchParams and WebSocket: in browsers and in React Native alike.
+    "lib": ["ES2023", "DOM"],
+    "types": []
+  },
+  "include": ["."]
+}

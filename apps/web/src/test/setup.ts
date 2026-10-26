@@ -2,7 +2,7 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup, configure } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
 import '../i18n';
-import { FakeWebSocket } from './fakeSocket';
+import { FakeWebSocket } from '@kite/shared/testing';
 
 // Files run in parallel, and routes load lazily (the page's chunk is imported on first visit):
 // under load a first render can take a few seconds. Only failing waits take this long.

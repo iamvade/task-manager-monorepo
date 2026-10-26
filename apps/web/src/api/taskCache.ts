@@ -1,6 +1,6 @@
 import type { TaskDetail, TaskListItem } from '@kite/shared';
 import type { QueryClient } from '@tanstack/react-query';
-import { queryKeys } from './queryKeys';
+import { TASK_MUTATION, queryKeys } from '@kite/shared/client';
 
 // Optimistic edits of one task write into every cached copy of it — the list/board rows behind
 // the drawer and the open detail — so the whole screen moves together; errors roll all back.
@@ -12,9 +12,6 @@ export interface TaskSnapshot {
   lists: ListSnapshot;
   details: DetailSnapshot;
 }
-
-/** Mutation key of every task write (task fields, subtasks, comments, attachments). */
-export const TASK_MUTATION = ['tasks'] as const;
 
 /** Applies `update` to every cached task list; returns the previous lists for rollback. */
 export async function patchLists(

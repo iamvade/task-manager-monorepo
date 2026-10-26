@@ -1,8 +1,7 @@
-import { parseTaskKey } from '@kite/shared';
+import { parseTaskKey, appPath } from '@kite/shared';
 import { useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router';
 import { useCurrentWorkspace, useSidebar, useWsPath } from '../../api/workspaces';
-import { appPath } from '../../lib/paths';
 
 /**
  * Where `APP-142` in a comment or description goes: this page with `?task=APP-142` (the drawer),

@@ -26,7 +26,7 @@ import {
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { apiFetch, apiSend } from './client';
-import { queryKeys } from './queryKeys';
+import { queryKeys } from '@kite/shared/client';
 
 /** Every non-archived standup group of the workspace (the sidebar shows the caller's). */
 export function useStandupGroups(workspaceId: string | undefined) {
@@ -332,19 +332,6 @@ export function useStandupMeeting(groupId: string, date: string, enabled = true)
       apiFetch(`/standup-groups/${groupId}/days/${date}/meeting`, standupMeetingStateSchema),
     enabled: enabled && Boolean(groupId),
   });
-}
-
-/** Puts a meeting into the cache (keeping my `canDrive`), and refreshes the day page's summary. */
-export function setMeeting(
-  queryClient: QueryClient,
-  groupId: string,
-  date: string,
-  meeting: StandupMeeting,
-  serverNow?: string,
-) {
-  queryClient.setQueryData<StandupMeetingState>(queryKeys.standupMeeting(groupId, date), (old) =>
-    old ? { ...old, meeting, serverNow: serverNow ?? old.serverNow } : undefined,
-  );
 }
 
 function useMeetingWrite<V>(

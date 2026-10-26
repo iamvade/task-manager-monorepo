@@ -1,3 +1,4 @@
+import { switchTarget } from '@kite/shared';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
 import { useUnreadCounts } from '../../api/notifications';
@@ -7,7 +8,6 @@ import { ChevronsUpDownIcon } from '../../components/icons';
 import { CountBadge } from '../../components/ui/CountBadge';
 import { Menu } from '../../components/ui/Menu';
 import { WorkspaceTile } from '../../components/ui/WorkspaceTile';
-import { switchTarget } from '../../lib/paths';
 
 /** The accent dot on the tile: unread notifications in another workspace. */
 function UnreadDot() {

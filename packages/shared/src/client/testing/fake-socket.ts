@@ -1,10 +1,12 @@
-import type { RealtimeClientMessage, RealtimeServerMessage } from '@kite/shared';
+import type { RealtimeClientMessage, RealtimeServerMessage } from '../../schemas/realtime.js';
+import type { SocketLike } from '../realtime-socket.js';
 
 /**
- * In-memory WebSocket for tests (jsdom's would try to reach a server). Opens on the next tick
+ * In-memory WebSocket for tests (a real one would try to reach a server). Opens on the next tick
  * unless `FakeWebSocket.autoOpen` is off; tests drive it with `open`, `receive` and `drop`.
+ * Events are plain objects, so it works without DOM event classes (React Native tests).
  */
-export class FakeWebSocket {
+export class FakeWebSocket implements SocketLike {
   static readonly CONNECTING = 0;
   static readonly OPEN = 1;
   static readonly CLOSING = 2;
@@ -18,12 +20,17 @@ export class FakeWebSocket {
   readonly CLOSED = 3;
   readyState = FakeWebSocket.CONNECTING;
   readonly sent: RealtimeClientMessage[] = [];
-  onopen: ((event: Event) => void) | null = null;
-  onmessage: ((event: MessageEvent) => void) | null = null;
-  onclose: ((event: CloseEvent) => void) | null = null;
-  onerror: ((event: Event) => void) | null = null;
+  onopen: ((event: unknown) => void) | null = null;
+  onmessage: ((event: { data: unknown }) => void) | null = null;
+  onclose: ((event: { code: number }) => void) | null = null;
+  onerror: ((event: unknown) => void) | null = null;
 
-  constructor(readonly url: string) {
+  /** `options` is React Native's third argument (`{ headers }`). */
+  constructor(
+    readonly url: string,
+    readonly protocols?: string | string[] | null,
+    readonly options?: { headers?: Record<string, string> },
+  ) {
     FakeWebSocket.instances.push(this);
     if (FakeWebSocket.autoOpen) {
       queueMicrotask(() => {
@@ -48,16 +55,16 @@ export class FakeWebSocket {
   close(code = 1000) {
     if (this.readyState === FakeWebSocket.CLOSED) return;
     this.readyState = FakeWebSocket.CLOSED;
-    this.onclose?.(new CloseEvent('close', { code }));
+    this.onclose?.({ code });
   }
 
   open() {
     this.readyState = FakeWebSocket.OPEN;
-    this.onopen?.(new Event('open'));
+    this.onopen?.({ type: 'open' });
   }
 
   receive(message: RealtimeServerMessage) {
-    this.onmessage?.(new MessageEvent('message', { data: JSON.stringify(message) }));
+    this.onmessage?.({ data: JSON.stringify(message) });
   }
 
   /** The server or network went away. */

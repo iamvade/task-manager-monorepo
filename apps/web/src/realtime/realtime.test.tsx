@@ -10,7 +10,7 @@ import { createQueryClient } from '../queryClient';
 import { routes } from '../router';
 import { useRealtimeStore } from '../stores/realtime';
 import { useUiStore } from '../stores/ui';
-import { FakeWebSocket } from '../test/fakeSocket';
+import { FakeWebSocket } from '@kite/shared/testing';
 import { ME, PROJECT, PROJECT_ID, SIDEBAR, WORKSPACE_ID, mockApi } from '../test/fixtures';
 import { at, listHandlers, makeTasks, statusOf } from '../test/tasks';
 

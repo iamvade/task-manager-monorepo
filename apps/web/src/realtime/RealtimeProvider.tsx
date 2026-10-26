@@ -1,12 +1,11 @@
+import { RealtimeSocket, createRealtimeRouter, queryKeys } from '@kite/shared/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { queryKeys } from '../api/queryKeys';
 import { useCurrentWorkspace } from '../api/workspaces';
 import { useRealtimeStore } from '../stores/realtime';
-import { createMessageHandler } from './applyMessage';
 import { CLIENT_ID } from './clientId';
 import { SocketContext } from './context';
-import { RealtimeSocket } from './socket';
+import { webLifecycle } from './webLifecycle';
 
 function socketUrl() {
   const scheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
@@ -26,40 +25,26 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const store = useRealtimeStore.getState();
-    const handler = createMessageHandler(queryClient);
+    const router = createRealtimeRouter({
+      queryClient,
+      currentWorkspaceId: () => workspaceRef.current,
+      presence: store,
+      onRecentEdit: store.noteEdits,
+    });
     const s = new RealtimeSocket({
       url: socketUrl(),
+      createSocket: (url) => new WebSocket(url),
+      lifecycle: webLifecycle,
       onStatus: store.setStatus,
       onReconnect: () => void queryClient.invalidateQueries(),
       onUnauthorized: () => void queryClient.invalidateQueries({ queryKey: queryKeys.me }),
-      onMessage: (message) => {
-        // Any workspace: the switcher's unread counts.
-        if (message.type === 'notifications.unread_changed') {
-          void queryClient.invalidateQueries({ queryKey: queryKeys.unreadCounts });
-          return;
-        }
-        if ('workspaceId' in message && message.workspaceId !== workspaceRef.current) return;
-        switch (message.type) {
-          case 'ready':
-            store.ready(message.workspaceId, message.online, message.viewers);
-            return;
-          case 'presence.online':
-          case 'presence.offline':
-            store.setOnline(message.userId, message.type === 'presence.online');
-            return;
-          case 'presence.viewers':
-            store.setViewers(message.taskId, message.userIds);
-            return;
-          default:
-            handler.handle(message);
-        }
-      },
+      onMessage: router.handle,
     });
     s.start();
     setSocket(s);
     return () => {
       s.stop();
-      handler.dispose();
+      router.dispose();
       store.reset();
       setSocket(null);
     };

@@ -11,7 +11,7 @@ import {
   useStartMeeting,
 } from '../../../api/standups';
 import { ApiError } from '../../../api/client';
-import { queryKeys } from '../../../api/queryKeys';
+import { queryKeys } from '@kite/shared/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../../auth/useAuth';
 import { ErrorState } from '../../../components/ErrorState';

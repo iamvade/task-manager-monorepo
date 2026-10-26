@@ -11,7 +11,8 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useFollowTask } from '../../api/activity';
 import { useSidebar, useWsPath } from '../../api/workspaces';
-import { useRecentEdit, type EditedField } from '../../stores/realtime';
+import type { EditedField } from '@kite/shared/client';
+import { useRecentEdit } from '../../stores/realtime';
 import { useAuth } from '../../auth/useAuth';
 import { useMoveTaskToProject, useSetAssignees, useSetTags, useUpdateTask } from '../../api/tasks';
 import {

@@ -2,7 +2,7 @@ import { searchResultSchema } from '@kite/shared';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { apiFetch, toQuery } from './client';
-import { queryKeys } from './queryKeys';
+import { queryKeys } from '@kite/shared/client';
 
 const DEBOUNCE_MS = 150;
 

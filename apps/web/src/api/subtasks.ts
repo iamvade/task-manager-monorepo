@@ -3,7 +3,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { generateKeyBetween } from 'fractional-indexing';
 import { z } from 'zod';
 import { apiSend } from './client';
-import { TASK_MUTATION, patchTask, restoreTask, settle } from './taskCache';
+import { patchTask, restoreTask, settle } from './taskCache';
+import { TASK_MUTATION } from '@kite/shared/client';
 
 type Progress = TaskDetail['subtaskProgress'];
 

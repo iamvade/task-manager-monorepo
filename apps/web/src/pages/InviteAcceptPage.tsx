@@ -1,3 +1,4 @@
+import { wsPath } from '@kite/shared';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
@@ -10,7 +11,6 @@ import { LoginForm } from '../auth/LoginForm';
 import { PasswordField } from '../auth/PasswordField';
 import { Button } from '../components/ui/Button';
 import { TextField } from '../components/ui/TextField';
-import { wsPath } from '../lib/paths';
 
 const MIN_PASSWORD = 8;
 

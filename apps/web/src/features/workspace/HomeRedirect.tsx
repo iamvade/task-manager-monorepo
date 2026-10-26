@@ -1,6 +1,6 @@
+import { wsPath } from '@kite/shared';
 import { Navigate, useLocation } from 'react-router';
 import { useCurrentWorkspace } from '../../api/workspaces';
-import { wsPath } from '../../lib/paths';
 import { NoWorkspacePage } from './NoWorkspacePage';
 
 /**

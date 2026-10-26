@@ -2,7 +2,7 @@ import { spaceSchema, type CreateSpace } from '@kite/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { apiSend } from './client';
-import { queryKeys } from './queryKeys';
+import { queryKeys } from '@kite/shared/client';
 
 export function useCreateSpace(workspaceId: string) {
   const queryClient = useQueryClient();

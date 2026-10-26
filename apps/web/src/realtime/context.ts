@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect } from 'react';
-import type { RealtimeSocket } from './socket';
+import type { RealtimeSocket } from '@kite/shared/client';
 
 export const SocketContext = createContext<RealtimeSocket | null>(null);
 

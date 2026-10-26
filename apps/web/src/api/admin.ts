@@ -10,7 +10,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
 import { apiFetch, apiSend, toQuery } from './client';
-import { queryKeys } from './queryKeys';
+import { queryKeys } from '@kite/shared/client';
 
 /** Platform admin: every workspace with its owner or pending owner invite. */
 export function useAdminWorkspaces() {

@@ -1,6 +1,6 @@
+import { appPath } from '@kite/shared';
 import { useCallback, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { appPath } from '../../lib/paths';
 import { useWsPath } from '../../api/workspaces';
 
 /**

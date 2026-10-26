@@ -1,12 +1,11 @@
-import type { RealtimeTaskMessage, TaskListItem } from '@kite/shared';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/query-core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { queryKeys } from '../api/queryKeys';
-import { TASK_MUTATION } from '../api/taskCache';
-import { PROJECT_ID, SIDEBAR, SPACE_ID, WORKSPACE_ID } from '../test/fixtures';
-import { PROJECT_WITH_STATUSES, at, makeTasks, statusOf } from '../test/tasks';
-import { RECENT_EDIT_MS, useRealtimeStore } from '../stores/realtime';
-import { COALESCE_MS, REPORTS_THROTTLE_MS, createMessageHandler } from './applyMessage';
+import type { RealtimeTaskMessage } from '../schemas/realtime.js';
+import type { TaskListItem } from '../schemas/task.js';
+import { TASK_MUTATION, queryKeys } from './query-keys.js';
+import { COALESCE_MS, REPORTS_THROTTLE_MS, createMessageHandler } from './realtime-cache.js';
+import { PROJECT_ID, SIDEBAR, SPACE_ID, WORKSPACE_ID } from './testing/fixtures.js';
+import { PROJECT_WITH_STATUSES, at, makeTasks, statusOf } from './testing/tasks.js';
 
 const OTHER_SPACE = '01890000-0000-7000-8000-000000000011';
 const SARA = '01890000-0000-7000-8000-000000000099';
@@ -22,9 +21,10 @@ function setup() {
   queryClient.setQueryData(queryKeys.sidebar(WORKSPACE_ID), SIDEBAR);
   queryClient.setQueryData(queryKeys.home(WORKSPACE_ID), {});
   queryClient.setQueryData(queryKeys.notificationsOf(WORKSPACE_ID), {});
-  const handler = createMessageHandler(queryClient);
+  const onRecentEdit = vi.fn();
+  const handler = createMessageHandler(queryClient, { onRecentEdit });
   const stale = (key: readonly unknown[]) => queryClient.getQueryState(key)?.isInvalidated;
-  return { queryClient, tasks, handler, projectList, spaceList, otherSpace, stale };
+  return { queryClient, tasks, handler, onRecentEdit, projectList, spaceList, otherSpace, stale };
 }
 
 const base = (task: TaskListItem) => ({
@@ -69,21 +69,17 @@ describe('createMessageHandler', () => {
     expect(s.stale(queryKeys.home(WORKSPACE_ID))).toBe(true);
   });
 
-  it('remembers who changed which drawer fields, for 10 seconds', () => {
+  it('reports which drawer fields someone changed', () => {
     const s = setup();
     const task = at(s.tasks, 0);
-    useRealtimeStore.setState({ recentEdits: {} });
     s.handler.handle({
       type: 'task.updated',
       ...base(task),
-      changes: ['title.changed', 'assignee.added', 'tag.added'],
+      changes: ['title.changed', 'assignee.added', 'assignee.removed', 'tag.added'],
     });
-    expect(useRealtimeStore.getState().recentEdits[task.id]).toEqual({
-      title: { actorId: SARA, at: expect.any(Number) as number },
-      assignees: { actorId: SARA, at: expect.any(Number) as number },
-    });
-    vi.advanceTimersByTime(RECENT_EDIT_MS);
-    expect(useRealtimeStore.getState().recentEdits[task.id]).toBeUndefined();
+    expect(s.onRecentEdit).toHaveBeenCalledWith(task.id, SARA, ['title', 'assignees']);
+    s.handler.handle({ type: 'task.updated', ...base(task), changes: ['tag.added'] });
+    expect(s.onRecentEdit).toHaveBeenCalledTimes(1);
   });
 
   it('removes a deleted task from lists right away', () => {

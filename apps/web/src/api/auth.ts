@@ -11,7 +11,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { ApiError, apiFetch, apiSend } from './client';
-import { queryKeys } from './queryKeys';
+import { queryKeys } from '@kite/shared/client';
 
 export const meQueryKey = queryKeys.me;
 

@@ -3,5 +3,7 @@
   "compilerOptions": {
     "types": []
   },
-  "include": ["src", "vitest.config.ts"]
+  "include": ["src", "vitest.config.ts"],
+  // Client-only code (query cache, realtime socket) needs timers and fetch: its own project.
+  "exclude": ["src/client"]
 }
