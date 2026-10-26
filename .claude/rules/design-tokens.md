@@ -1,6 +1,7 @@
 ---
 paths:
   - 'apps/web/**'
+  - 'apps/mobile/src/theme/**'
   - 'design/**'
   - 'docs/design-notes.md'
 ---
@@ -22,6 +23,8 @@ Standup tokens: `--danger-card-divider` (blocker row dividers), `--blocked-card-
 Feedback tokens: type colors `--fb-{bug,feature,feedback,other}-{bg,fg,dot}`, status dots `--fb-status-{review,linked,closed}` (New is `--accent`), `--fb-unread-row`, duplicates banner `--fb-banner-{bg,border,fg,link}`, internal notes `--fb-note-{bg,border}` and `--fb-internal-{bg,fg}`, the inbox selection bar `--selection-bar-*`, the public form's `--form-error-*`, `--field-error-*`, `--type-card-error-border`, `--fb-success-ring`, `--fb-video-thumb` and `--shadow-form`. Wide drawer: 66%, min 880px (`Drawer size="wide"`).
 
 Token values (light/dark: backgrounds, surfaces, borders, text, accent and accent-ink per accent, danger/warning/success and their soft variants, `--on-danger` (text on a solid danger fill: white in light, dark ink in dark for contrast), chart colors) live in `apps/web/src/styles/tokens.css`; a value the designs don't draw is derived when needed.
+
+Mobile: `apps/mobile/src/theme/tokens.ts` and `palette.ts` mirror `tokens.css` and `palette.css` value for value, and `src/theme/__tests__/drift.test.ts` fails when they differ. A token change updates both. Phone-only values are in `apps/mobile/src/theme/mobile.ts`.
 
 Implementation: raw values live in `apps/web/src/styles/tokens.css` (`:root` light, `:root[data-theme='dark']`); `index.css` maps them into Tailwind v4 property namespaces so classes read like the tokens: `bg-surface`, `bg-sidebar`, `bg-subtle`, `bg-hover`, `bg-chip`, `bg-accent-soft` · `text-default`, `text-2`, `text-3`, `text-muted`, `text-icon`, `text-faint`, `text-accent-ink`, `text-due-*` · `border-default`, `border-control`, `border-subtle`, `border-strong` · `shadow-popover` etc. Palette keys → `.pal-{avatar|space|project|tag}-{key}` + `.pal-fill` / `.pal-dot` (`styles/palette.css`). Base element styles sit in `@layer base` so utilities always win.
 

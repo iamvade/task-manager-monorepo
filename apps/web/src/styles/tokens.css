@@ -3,8 +3,9 @@
  * `data-theme="dark"` on <html> switches to the dark palette. `applyAppearance` (preferences.ts)
  * resolves the user's `system` theme to light/dark and sets `--accent`, `--accent-ink-light`,
  * `--accent-ink-dark` and the two `--accent-soft-*` values from the user's accent (hex + 1A light /
- * + 33 dark). The light ink is the accent nudged darker where needed for 4.5:1 on accent-soft over
- * the sidebar (e.g. #6E56CF → #6C55CC).
+ * + 33 dark; `accentTokens` in packages/shared). The light ink is the accent nudged darker where
+ * needed for 4.5:1 on accent-soft over the sidebar (e.g. #6E56CF → #6C55CC).
+ * apps/mobile mirrors every value here (src/theme/tokens.ts); its drift test fails on a mismatch.
  */
 :root {
   color-scheme: light;

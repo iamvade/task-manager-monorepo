@@ -1,29 +1,8 @@
-import { LOCALES, type Accent, type Locale, type Theme } from '@kite/shared';
+import { LOCALES, accentTokens, type Accent, type Locale, type Theme } from '@kite/shared';
 
 const LANGUAGE_KEY = 'kite.language';
 /** Read by the inline script in index.html to paint the right theme before React starts. */
 const APPEARANCE_KEY = 'kite.appearance';
-
-/**
- * Accent ink (accent used as text/outline) on light backgrounds: the accent, nudged darker where
- * it would miss 4.5:1 on accent-soft over the sidebar background (axe, WCAG AA).
- */
-const ACCENT_INK_LIGHT: Record<Accent, string> = {
-  '#6E56CF': '#6C55CC',
-  '#2F6FEB': '#2A63D2',
-  '#0F766E': '#0F756D',
-  '#3F3F46': '#3F3F46',
-};
-
-/** Accent ink (accent used as text/outline) on dark backgrounds, per accent. */
-const ACCENT_INK_DARK: Record<Accent, string> = {
-  '#6E56CF': '#B4A5FF',
-  '#2F6FEB': '#93B4FF',
-  '#0F766E': '#5EEAD4',
-  '#3F3F46': '#D4D4D8',
-};
-
-const DEFAULT_ACCENT: Accent = '#6E56CF';
 
 /** Language picked before sign-in (on /login), remembered per browser. */
 export function getStoredLanguage(): Locale | null {
@@ -48,19 +27,16 @@ let stopFollowingSystem: (() => void) | undefined;
 /** Sets `data-theme` and the accent variables on <html>; `system` follows the OS setting live. */
 export function applyAppearance(theme: Theme, accent: Accent): void {
   const root = document.documentElement;
-  root.style.setProperty('--accent', accent);
-  root.style.setProperty('--accent-ink-light', ACCENT_INK_LIGHT[accent]);
-  root.style.setProperty('--accent-ink-dark', ACCENT_INK_DARK[accent]);
-  // accent at 10% (light) / 20% (dark), as hex alpha like the designs (`accent + '1A'`).
-  root.style.setProperty('--accent-soft-light', `${accent}1A`);
-  root.style.setProperty('--accent-soft-dark', `${accent}33`);
-  // Sprint chart (ReportsSprints.dc.html): the default accent has its own tints, others use the
-  // accent at 45% (`+ '73'`) for committed and solid for completed; dark uses the accent ink.
-  const isDefault = accent === DEFAULT_ACCENT;
-  root.style.setProperty('--sprint-committed-light', isDefault ? '#9C8BE3' : `${accent}73`);
-  root.style.setProperty('--sprint-completed-light', isDefault ? '#5B45B8' : accent);
-  root.style.setProperty('--sprint-committed-dark', `${ACCENT_INK_DARK[accent]}73`);
-  root.style.setProperty('--sprint-completed-dark', ACCENT_INK_DARK[accent]);
+  const tokens = accentTokens(accent);
+  root.style.setProperty('--accent', tokens.accent);
+  root.style.setProperty('--accent-ink-light', tokens.accentInkLight);
+  root.style.setProperty('--accent-ink-dark', tokens.accentInkDark);
+  root.style.setProperty('--accent-soft-light', tokens.accentSoftLight);
+  root.style.setProperty('--accent-soft-dark', tokens.accentSoftDark);
+  root.style.setProperty('--sprint-committed-light', tokens.sprintCommittedLight);
+  root.style.setProperty('--sprint-completed-light', tokens.sprintCompletedLight);
+  root.style.setProperty('--sprint-committed-dark', tokens.sprintCommittedDark);
+  root.style.setProperty('--sprint-completed-dark', tokens.sprintCompletedDark);
   try {
     localStorage.setItem(APPEARANCE_KEY, JSON.stringify({ theme, accent }));
   } catch {

@@ -14,6 +14,10 @@ export default tseslint.config(
       '**/coverage/**',
       'design/**',
       'apps/api/drizzle/**',
+      'apps/mobile/.expo/**',
+      'apps/mobile/ios/**',
+      'apps/mobile/android/**',
+      'apps/mobile/expo-env.d.ts',
     ],
   },
   js.configs.recommended,
@@ -57,6 +61,18 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
+  },
+  {
+    files: ['apps/mobile/**/*.{ts,tsx}'],
+    languageOptions: { globals: { __DEV__: 'readonly' } },
+    plugins: { 'react-hooks': reactHooks },
+    rules: reactHooks.configs.recommended.rules,
+  },
+  {
+    // metro.config.js, jest.config.js (CommonJS, run by Node)
+    files: ['apps/mobile/*.js'],
+    languageOptions: { globals: globals.node, sourceType: 'commonjs' },
+    rules: { '@typescript-eslint/no-require-imports': 'off' },
   },
   prettier,
 );

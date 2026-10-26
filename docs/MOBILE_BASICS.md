@@ -55,9 +55,11 @@ Web → React Native translation:
 
 **Daily loop:**
 ```
-pnpm --filter @kite/mobile start      # = npx expo start (Metro bundler, like vite dev)
+pnpm mobile                           # = pnpm --filter @kite/mobile start = npx expo start (Metro bundler, like vite dev)
   press i → iOS Simulator, a → Android emulator, or scan the QR with your phone
 ```
+For a real phone, run the API with `HOST=0.0.0.0` (apps/api/.env); the dev app then finds it on the Mac's LAN IP, port 3000. Set `EXPO_PUBLIC_API_URL` in `apps/mobile/.env.local` to point it somewhere else.
+
 Save a file and Fast Refresh updates the app instantly. Press `j` (or shake the device) to open React Native DevTools, which feels like Chrome DevTools.
 
 **The #1 gotcha for the API:** `localhost` means different things on different devices.

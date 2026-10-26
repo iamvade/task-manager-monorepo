@@ -1,0 +1,23 @@
+{
+  "app": {
+    "name": "Kite Tasks"
+  },
+  "common": {
+    "comingSoon": "Энэ дэлгэцийг хийж байна, удахгүй нэмэгдэнэ.",
+    "notFoundTitle": "Олдсонгүй",
+    "notFoundBody": "Энэ хуудас байхгүй эсвэл танд хандах эрх алга."
+  },
+  "auth": {
+    "signInTitle": "Kite-д нэвтрэх"
+  },
+  "invite": {
+    "join": "Нэгдэх"
+  },
+  "tabs": {
+    "myTasks": "Миний ажил",
+    "projects": "Төслүүд",
+    "inbox": "Мэдэгдэл",
+    "standup": "Стэндап",
+    "more": "Бусад"
+  }
+}

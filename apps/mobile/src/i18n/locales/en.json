@@ -1,0 +1,23 @@
+{
+  "app": {
+    "name": "Kite Tasks"
+  },
+  "common": {
+    "comingSoon": "This screen is being built and arrives in an upcoming phase.",
+    "notFoundTitle": "Not found",
+    "notFoundBody": "This page doesn't exist or you don't have access to it."
+  },
+  "auth": {
+    "signInTitle": "Sign in to Kite"
+  },
+  "invite": {
+    "join": "Join workspace"
+  },
+  "tabs": {
+    "myTasks": "My Tasks",
+    "projects": "Projects",
+    "inbox": "Inbox",
+    "standup": "Standup",
+    "more": "More"
+  }
+}
