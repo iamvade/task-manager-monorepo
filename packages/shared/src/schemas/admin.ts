@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { paletteKeySchema } from '../enums.js';
 import { transliterate } from '../project-key.js';
 import { emailSchema, nameSchema } from './auth.js';
 
@@ -71,3 +72,29 @@ export const createdWorkspaceSchema = z
   })
   .meta({ id: 'CreatedWorkspace' });
 export type CreatedWorkspace = z.infer<typeof createdWorkspaceSchema>;
+
+/** One person in the console's Users search (never a platform admin). */
+export const adminUserSchema = z
+  .object({
+    id: z.uuid(),
+    name: z.string(),
+    email: z.string(),
+    initials: z.string(),
+    avatarColor: paletteKeySchema,
+    /** Workspaces where they are an active member, by name. */
+    workspaces: z.array(z.object({ id: z.uuid(), name: z.string() })),
+    /** Set while an unused, unexpired reset link exists. */
+    pendingReset: z.object({ expiresAt: z.iso.datetime() }).nullable(),
+  })
+  .meta({ id: 'AdminUser' });
+export type AdminUser = z.infer<typeof adminUserSchema>;
+
+/** A password reset link: returned once, when created. */
+export const createdPasswordResetSchema = z
+  .object({
+    email: z.string(),
+    expiresAt: z.iso.datetime(),
+    link: z.url(),
+  })
+  .meta({ id: 'AdminPasswordReset' });
+export type CreatedPasswordReset = z.infer<typeof createdPasswordResetSchema>;

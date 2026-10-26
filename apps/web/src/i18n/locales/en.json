@@ -92,7 +92,27 @@
     "newLink": "New owner link",
     "newLinkHint": "Owner's email for {{name}}. The earlier link stops working.",
     "sendLink": "Create link",
-    "ownerExists": "This workspace already has an owner."
+    "ownerExists": "This workspace already has an owner.",
+    "users": "Users",
+    "usersHint": "Someone forgot their password? Make them a reset link, valid for 24 hours, and send it yourself. Using it signs them out everywhere.",
+    "searchUsers": "Search by name or email",
+    "noUsers": "No one matches.",
+    "noWorkspace": "No workspace",
+    "resetPending": "Reset link pending · expires {{date}}",
+    "resetPassword": "Reset password",
+    "newResetLink": "New reset link",
+    "resetLinkFor": "Password reset link for {{email}}",
+    "resetLinkOnce": "Send it to them yourself, e.g. in chat. It’s shown only once and works once; any earlier link no longer works."
+  },
+  "passwordReset": {
+    "title": "Set a new password",
+    "subtitle": "For {{name}}. You’ll be signed out on every device.",
+    "save": "Save password",
+    "saving": "Saving…",
+    "doneTitle": "Password changed",
+    "doneBody": "Sign in with your new password.",
+    "invalidTitle": "Reset link is invalid",
+    "invalidBody": "The link has expired or was already used. Ask your administrator for a new one."
   },
   "shell": {
     "skipToContent": "Skip to content",

@@ -74,6 +74,14 @@ export const routes: RouteObject[] = [
         ),
       },
       {
+        // A password reset link from the platform admin: no account needed.
+        path: '/reset-password/:token',
+        lazy: page(
+          () => import('./pages/PasswordResetPage'),
+          (m) => m.PasswordResetPage,
+        ),
+      },
+      {
         element: <RequireAuth />,
         children: [
           {
