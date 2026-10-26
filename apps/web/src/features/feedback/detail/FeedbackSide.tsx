@@ -1,4 +1,9 @@
-import { FEEDBACK_STATUSES, type FeedbackDetail, type FeedbackStatus } from '@kite/shared';
+import {
+  FEEDBACK_STATUSES,
+  isClosedCategory,
+  type FeedbackDetail,
+  type FeedbackStatus,
+} from '@kite/shared';
 import { lazy, Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router';
@@ -145,6 +150,7 @@ function LinkedTask({ workspaceId, detail }: { workspaceId: string; detail: Feed
   const unlink = useUnlinkFeedback(workspaceId);
   const suggestions = useFeedbackTaskSuggestions(detail.id, picking);
   const task = detail.task;
+  const closed = task !== null && isClosedCategory(task.status.category);
   const failed = () => {
     toast({ message: t('feedback.detail.failed'), tone: 'danger' });
   };
@@ -173,8 +179,8 @@ function LinkedTask({ workspaceId, detail }: { workspaceId: string; detail: Feed
             </span>
             <span className="text-muted">{t('feedback.detail.due')}</span>
             {task.dueDate ? (
-              <span className={DUE_TONE_CLASS[dueTone(task.dueDate, task.completedAt !== null)]}>
-                {dueTone(task.dueDate, task.completedAt !== null) === 'overdue'
+              <span className={DUE_TONE_CLASS[dueTone(task.dueDate, closed)]}>
+                {dueTone(task.dueDate, closed) === 'overdue'
                   ? t('feedback.detail.overdue', { date: formatDue(task.dueDate) })
                   : formatDue(task.dueDate)}
               </span>

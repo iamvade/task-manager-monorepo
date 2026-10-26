@@ -1,3 +1,4 @@
+import { isClosedCategory } from '@kite/shared';
 import { Command } from 'cmdk';
 import { useMemo, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -256,7 +257,7 @@ function PaletteBody({
                 <span
                   className={cn(
                     'min-w-0 flex-1 truncate',
-                    task.status.category === 'done' && 'text-muted line-through',
+                    isClosedCategory(task.status.category) && 'text-muted line-through',
                   )}
                 >
                   {task.title}

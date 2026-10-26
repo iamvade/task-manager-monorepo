@@ -1,4 +1,4 @@
-import type { TaskListItem } from '@kite/shared';
+import { isClosedCategory, type TaskListItem } from '@kite/shared';
 import { forwardRef, type HTMLAttributes, type Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -48,7 +48,7 @@ function DueLine({ date, done }: { date: string; done: boolean }) {
 
 /**
  * Board card (Board.dc.html): radius 10, padding 12, gap 10, hover border #D4D4D8. Done →
- * green check + muted title (no strike-through); up to 2 tags + "+N"; footer with due,
+ * green check + muted title (no strike-through); Cancelled → muted, struck-through title; up to 2 tags + "+N"; footer with due,
  * "2/5" subtasks + 32px bar and the assignee stack. `ghost` = the spot a dragged card left
  * (40%, dashed); `overlay` = the lifted card under the pointer (rotated 2.5°, accent border).
  */
@@ -58,10 +58,12 @@ export const TaskCard = forwardRef<HTMLElement, TaskCardProps>(function TaskCard
 ) {
   const { t } = useTranslation();
   const done = task.status.category === 'done';
+  const cancelled = task.status.category === 'cancelled';
+  const closed = isClosedCategory(task.status.category);
   const shownTags = task.tags.slice(0, MAX_TAGS);
   const moreTags = task.tags.length - shownTags.length;
   const { done: subDone, total: subTotal } = task.subtaskProgress;
-  const blocked = done ? null : task.blocked;
+  const blocked = closed ? null : task.blocked;
 
   const body = (
     <>
@@ -82,7 +84,11 @@ export const TaskCard = forwardRef<HTMLElement, TaskCardProps>(function TaskCard
           />
         )}
         <span
-          className={cn('min-w-0 flex-1 text-[14px] leading-5 font-medium', done && 'text-muted')}
+          className={cn(
+            'min-w-0 flex-1 text-[14px] leading-5 font-medium',
+            closed && 'text-muted',
+            cancelled && 'line-through',
+          )}
         >
           {task.title}
         </span>
@@ -107,7 +113,7 @@ export const TaskCard = forwardRef<HTMLElement, TaskCardProps>(function TaskCard
         </span>
       )}
       <span className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[12px] text-3">
-        {task.dueDate && <DueLine date={task.dueDate} done={done} />}
+        {task.dueDate && <DueLine date={task.dueDate} done={closed} />}
         {subTotal > 0 && (
           <span
             className="flex items-center gap-1.5"

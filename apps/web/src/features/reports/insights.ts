@@ -1,6 +1,6 @@
-import type { StatusCategory } from '@kite/shared';
+import type { WaitCategory } from '@kite/shared';
 
-export type WaitCategory = Exclude<StatusCategory, 'done'>;
+export type { WaitCategory };
 
 export interface WaitsInsight {
   category: WaitCategory;

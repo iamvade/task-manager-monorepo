@@ -3,8 +3,17 @@ import { cn } from '../../lib/cn';
 import { RECENT_DONE_DAYS } from './useTaskQuery';
 import { ALL_DONE, useViewParams } from './useViewParams';
 
-/** "Done in the last 14 days · Show all" under the List and in the Board's Done column. */
-export function DoneScopeNote({ className }: { className?: string }) {
+/**
+ * "Done in the last 14 days · Show all" under the List and in the Board's Done column
+ * ("Cancelled in …" in the Cancelled column: the same window).
+ */
+export function DoneScopeNote({
+  className,
+  cancelled = false,
+}: {
+  className?: string;
+  cancelled?: boolean;
+}) {
   const { t } = useTranslation();
   const { allDone, update } = useViewParams();
   return (
@@ -12,7 +21,13 @@ export function DoneScopeNote({ className }: { className?: string }) {
       className={cn('m-0 flex flex-wrap items-center gap-x-1.5 text-[12px] text-muted', className)}
     >
       <span>
-        {allDone ? t('views.doneAll') : t('views.doneRecent', { count: RECENT_DONE_DAYS })}
+        {cancelled
+          ? allDone
+            ? t('views.cancelledAll')
+            : t('views.cancelledRecent', { count: RECENT_DONE_DAYS })
+          : allDone
+            ? t('views.doneAll')
+            : t('views.doneRecent', { count: RECENT_DONE_DAYS })}
       </span>
       <span aria-hidden>·</span>
       <button

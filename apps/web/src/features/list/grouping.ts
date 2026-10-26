@@ -1,6 +1,7 @@
 import {
   PRIORITIES,
   STATUS_CATEGORIES,
+  isClosedCategory,
   type Priority,
   type Status,
   type StatusCategory,
@@ -101,7 +102,7 @@ export function groupTasks(
           labelKey: `status.${category}`,
           marker: { kind: 'status', category },
           tasks: tasks.filter((t) => t.status.category === category),
-          defaultCollapsed: category === 'done',
+          defaultCollapsed: isClosedCategory(category),
           defaults: null,
         }));
       }
@@ -112,7 +113,7 @@ export function groupTasks(
         labelKey: status.name ? null : (`status.${status.category}` as const),
         marker: { kind: 'status', category: status.category },
         tasks: tasks.filter((t) => t.status.id === status.id),
-        defaultCollapsed: status.category === 'done',
+        defaultCollapsed: isClosedCategory(status.category),
         defaults: { statusId: status.id },
         status,
       }));

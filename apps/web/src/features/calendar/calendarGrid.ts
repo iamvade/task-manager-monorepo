@@ -1,4 +1,10 @@
-import { addDays, startOfWeek, weekdayIndex, type TaskListItem } from '@kite/shared';
+import {
+  addDays,
+  isClosedCategory,
+  startOfWeek,
+  weekdayIndex,
+  type TaskListItem,
+} from '@kite/shared';
 import type { CalendarMode } from '../../stores/ui';
 
 /** A month cell shows every task up to this many; more → `MONTH_MAX - 1` pills + "+N more". */
@@ -81,10 +87,12 @@ export function periodTitle(
   return { key: 'week', vars };
 }
 
-export const isDone = (task: Pick<TaskListItem, 'status'>) => task.status.category === 'done';
+/** Done or cancelled: struck through, never Unscheduled. */
+export const isClosed = (task: Pick<TaskListItem, 'status'>) =>
+  isClosedCategory(task.status.category);
 
 /**
- * Places tasks by their current due date: on a visible day, or (no due date, not done) in
+ * Places tasks by their current due date: on a visible day, or (no due date, not closed) in
  * Unscheduled. Rows may come from both calendar queries, and an optimistic due change edits a row
  * in place, so placing by the row's own `dueDate` moves it between grid and panel at once.
  */
@@ -99,7 +107,7 @@ export function placeTasks(
     if (seen.has(task.id)) continue;
     seen.add(task.id);
     if (task.dueDate) byDay.get(task.dueDate)?.push(task);
-    else if (!isDone(task)) unscheduled.push(task);
+    else if (!isClosed(task)) unscheduled.push(task);
   }
   return { byDay, unscheduled };
 }

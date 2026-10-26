@@ -165,6 +165,7 @@ export function historyMarker(entry: HistoryEntry): string {
   if (entry.type === 'status.changed') {
     if (entry.payload.to.category === 'review') return 'var(--status-review)';
     if (entry.payload.to.category === 'done') return 'var(--status-done)';
+    if (entry.payload.to.category === 'on_hold') return 'var(--status-hold)';
   }
   if (entry.type === 'priority.changed' && entry.payload.to === 'urgent') {
     return 'var(--prio-urgent)';

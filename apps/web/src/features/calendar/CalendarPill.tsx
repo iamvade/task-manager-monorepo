@@ -13,7 +13,7 @@ import { isTempTask } from '../../api/tasks';
 import { ProjectDot } from '../../components/ui/ProjectDot';
 import { cn } from '../../lib/cn';
 import { paletteClass } from '../../lib/palette';
-import { isDone } from './calendarGrid';
+import { isClosed } from './calendarGrid';
 
 /** month: 22px pill · popover: 26px with the project name · week: stacked card. */
 export type PillVariant = 'month' | 'popover' | 'week';
@@ -39,7 +39,7 @@ function who(task: TaskListItem) {
 
 /**
  * A task on the calendar (Calendar.dc.html) in its project's colors: 6px dot + title, ellipsis;
- * done → strike-through (full color: 65% opacity, as drawn, misses WCAG AA contrast). Links to
+ * closed (done, cancelled) → strike-through (full color: 65% opacity, as drawn, misses WCAG AA contrast). Links to
  * the drawer.
  */
 export const Pill = forwardRef<HTMLElement, PillProps>(function Pill(
@@ -47,13 +47,13 @@ export const Pill = forwardRef<HTMLElement, PillProps>(function Pill(
   ref,
 ) {
   const { t } = useTranslation();
-  const done = isDone(task);
+  const closed = isClosed(task);
   const title = (
     <span
       className={cn(
         variant === 'week' ? 'text-[12px] leading-4 font-medium' : 'min-w-0 truncate',
         variant === 'popover' && 'flex-1',
-        done && 'line-through',
+        closed && 'line-through',
       )}
     >
       {task.title}

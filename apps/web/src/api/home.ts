@@ -1,6 +1,7 @@
 import {
   activityPageSchema,
   homeSchema,
+  isClosedCategory,
   taskDetailSchema,
   type Home,
   type SidebarResponse,
@@ -60,15 +61,16 @@ export function useSetMyTaskStatus(workspaceId: string) {
       await queryClient.cancelQueries({ queryKey: homeKey, exact: true });
       const home = queryClient.getQueryData<Home>(homeKey);
       const sidebar = queryClient.getQueryData<SidebarResponse>(sidebarKey);
-      const done = status.category === 'done';
+      // My Tasks rows are open or done; picking Cancelled closes one too.
+      const closed = isClosedCategory(status.category);
       if (home) {
         const base = kept ? withRow(home, kept) : home;
         queryClient.setQueryData(homeKey, applyStatus(base, taskId, status, new Date()));
       }
-      if (sidebar && done !== wasDone) {
+      if (sidebar && closed !== wasDone) {
         queryClient.setQueryData(sidebarKey, {
           ...sidebar,
-          myTasksCount: Math.max(0, sidebar.myTasksCount + (done ? -1 : 1)),
+          myTasksCount: Math.max(0, sidebar.myTasksCount + (closed ? -1 : 1)),
         });
       }
       return { home, sidebar };

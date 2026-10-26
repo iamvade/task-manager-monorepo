@@ -14,7 +14,12 @@ import {
   type KeyboardCoordinateGetter,
   type Over,
 } from '@dnd-kit/core';
-import type { ProjectDetail, TaskListItem, WorkspaceMember } from '@kite/shared';
+import {
+  isClosedCategory,
+  type ProjectDetail,
+  type TaskListItem,
+  type WorkspaceMember,
+} from '@kite/shared';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { isTempTask, useMoveTask } from '../../api/tasks';
@@ -76,11 +81,11 @@ export function Board({ scope, boardKey, label, tasks, project, members }: Board
   );
   const byId = useMemo(() => new Map(tasks.map((task) => [task.id, task])), [tasks]);
   const labelOf = (c: TaskGroup) => c.name ?? (c.labelKey ? t(c.labelKey) : '');
-  // Project board with filters: how many of each open status's tasks they hide (Done has its
-  // own "recent only" note).
+  // Project board with filters: how many of each open status's tasks they hide (Done and
+  // Cancelled have their own "recent only" note).
   const filtering = project !== null && activeFilterFields(view.filters).length > 0;
   const hiddenIn = (c: TaskGroup) => {
-    if (!filtering || !c.status || c.status.category === 'done') return 0;
+    if (!filtering || !c.status || isClosedCategory(c.status.category)) return 0;
     const total = project.taskCounts.find((x) => x.statusId === c.status?.id)?.count ?? 0;
     return Math.max(0, total - c.tasks.filter((x) => !isTempTask(x)).length);
   };
@@ -164,8 +169,11 @@ export function Board({ scope, boardKey, label, tasks, project, members }: Board
     if (!hit) return closestCenter(args);
     const key = String(hit.id).slice(COLUMN_PREFIX.length);
     const ids = columnIds.find((c) => c.key === key)?.ids ?? [];
+    // The placeholder counts only in the column it is in, or an empty column could never win.
     const inColumn = args.droppableContainers.filter(
-      (c) => c.id === PLACEHOLDER_ID || ids.includes(String(c.id)),
+      (c) =>
+        (c.id === PLACEHOLDER_ID && targetRef.current?.columnKey === key) ||
+        ids.includes(String(c.id)),
     );
     if (!inColumn.length) return [{ id: hit.id }];
     return closestCenter({ ...args, droppableContainers: inColumn });

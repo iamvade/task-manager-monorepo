@@ -30,13 +30,15 @@ describe('sortTasks', () => {
 });
 
 describe('groupTasks', () => {
-  it('shows every project status, done collapsed by default', () => {
+  it('shows every project status, done and cancelled collapsed by default', () => {
     const groups = groupTasks(makeTasks(), 'status', { statuses: STATUSES });
     expect(groups.map((g) => [g.labelKey, g.tasks.length, g.defaultCollapsed])).toEqual([
       ['status.todo', 2, false],
       ['status.in_progress', 2, false],
       ['status.review', 2, false],
+      ['status.on_hold', 0, false],
       ['status.done', 1, true],
+      ['status.cancelled', 0, true],
     ]);
     expect(groups[1]?.defaults).toEqual({ statusId: STATUSES[1]?.id });
   });
@@ -47,9 +49,16 @@ describe('groupTasks', () => {
       'category:todo',
       'category:in_progress',
       'category:review',
+      'category:on_hold',
       'category:done',
+      'category:cancelled',
     ]);
     expect(groups.every((g) => g.defaults === null)).toBe(true);
+    // Closed groups start collapsed.
+    expect(groups.filter((g) => g.defaultCollapsed).map((g) => g.key)).toEqual([
+      'category:done',
+      'category:cancelled',
+    ]);
   });
 
   it('puts a task with two assignees in both groups', () => {

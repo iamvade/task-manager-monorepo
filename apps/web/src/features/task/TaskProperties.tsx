@@ -1,4 +1,11 @@
-import { isAway, shortName, type Status, type StatusCategory, type UserRef } from '@kite/shared';
+import {
+  isAway,
+  isClosedCategory,
+  shortName,
+  type Status,
+  type StatusCategory,
+  type UserRef,
+} from '@kite/shared';
 import { useMemo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router';
@@ -128,7 +135,7 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
   const setAssignees = useSetAssignees();
   const setTags = useSetTags();
   const move = useMoveTaskToProject();
-  const done = task.status.category === 'done';
+  const closed = isClosedCategory(task.status.category);
   const statusName = (s: { name: string | null; category: StatusCategory }) =>
     s.name ?? t(`status.${s.category}`);
   const sprint = sprints.find((s) => s.id === task.sprintId) ?? task.sprint;
@@ -209,7 +216,7 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
         <EditedBy field="status" />
       </PropertyRow>
 
-      {task.blocked && task.status.category !== 'done' && (
+      {task.blocked && !closed && (
         <PropertyRow icon={<BanIcon size={14} />} label={t('task.blocked.label')}>
           <BlockedValue blocked={task.blocked} />
         </PropertyRow>
@@ -309,7 +316,7 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
               open={open}
               label={t('table.colDue')}
               className={cn(
-                task.dueDate ? DUE_TONE_CLASS[dates.dueTone(task.dueDate, done)] : 'text-faint',
+                task.dueDate ? DUE_TONE_CLASS[dates.dueTone(task.dueDate, closed)] : 'text-faint',
               )}
             >
               {task.dueDate ? dueLabel(task.dueDate) : t('picker.noDue')}

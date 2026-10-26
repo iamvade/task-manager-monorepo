@@ -7,7 +7,9 @@ const TINT: Record<StatusCategory, string> = {
   todo: 'bg-tint-todo text-tint-todo',
   in_progress: 'bg-tint-progress text-tint-progress',
   review: 'bg-tint-review text-tint-review',
+  on_hold: 'bg-tint-hold text-tint-hold',
   done: 'bg-tint-done text-tint-done',
+  cancelled: 'bg-tint-cancelled text-tint-cancelled',
 };
 
 /**

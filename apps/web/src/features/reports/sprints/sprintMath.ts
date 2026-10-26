@@ -1,5 +1,6 @@
 import {
   STATUS_CATEGORIES,
+  isClosedCategory,
   weekdayIndex,
   type SprintDetail,
   type StatusCategory,
@@ -61,7 +62,7 @@ export function replanHref(
   statuses: readonly { id: string; category: StatusCategory }[] | undefined,
 ): string {
   const params = new URLSearchParams({ sprint: sprintId });
-  const open = statuses?.filter((s) => s.category !== 'done').map((s) => s.id) ?? [];
+  const open = statuses?.filter((s) => !isClosedCategory(s.category)).map((s) => s.id) ?? [];
   if (open.length) params.set('status', open.join(','));
   return `/p/${projectId}/list?${params.toString().replace(/%2C/g, ',')}`;
 }
@@ -71,7 +72,7 @@ export function replanHref(
  * (status categories, as the space List filters).
  */
 export function replanSpaceHref(spaceId: string, sprintId: string): string {
-  const open = STATUS_CATEGORIES.filter((c) => c !== 'done').join(',');
+  const open = STATUS_CATEGORIES.filter((c) => !isClosedCategory(c)).join(',');
   return `/s/${spaceId}/list?sprint=${sprintId}&status=${open}`;
 }
 

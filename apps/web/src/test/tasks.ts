@@ -1,4 +1,5 @@
 import {
+  STATUS_CATEGORIES,
   projectDetailSchema,
   taskListItemSchema,
   type Priority,
@@ -17,7 +18,7 @@ export function at<T>(list: readonly T[], i: number): T {
 const id = (prefix: string, n: number) =>
   `01890000-0000-7000-8000-${prefix}${String(n).padStart(12 - prefix.length, '0')}`;
 
-export const STATUSES = (['todo', 'in_progress', 'review', 'done'] as const).map((category, i) => ({
+export const STATUSES = STATUS_CATEGORIES.map((category, i) => ({
   id: id('5', i + 1),
   name: null,
   category,
@@ -31,13 +32,16 @@ export const statusOf = (category: StatusCategory) =>
   );
 
 /**
- * PROJECT with its four default statuses (what `GET /projects/:id` returns); counts match
- * `makeTasks()` (2 to do, 2 in progress, 2 in review, 1 done).
+ * PROJECT with its six default statuses (what `GET /projects/:id` returns); counts match
+ * `makeTasks()` (2 to do, 2 in progress, 2 in review, 1 done, none on hold or cancelled).
  */
 export const PROJECT_WITH_STATUSES = projectDetailSchema.parse({
   ...PROJECT,
   statuses: STATUSES,
-  taskCounts: STATUSES.map((s) => ({ statusId: s.id, count: s.category === 'done' ? 1 : 2 })),
+  taskCounts: STATUSES.map((s) => ({
+    statusId: s.id,
+    count: { todo: 2, in_progress: 2, review: 2, on_hold: 0, done: 1, cancelled: 0 }[s.category],
+  })),
   taskCount: 7,
   doneCount: 1,
 });

@@ -225,7 +225,7 @@ describe('Reports · Sprints', () => {
     const [replan] = await screen.findAllByRole('link', { name: 'Replan' });
     expect(replan).toHaveAttribute(
       'href',
-      `/w/kite-studio/s/${SPACE_ID}/list?sprint=${current.id}&status=todo,in_progress,review`,
+      `/w/kite-studio/s/${SPACE_ID}/list?sprint=${current.id}&status=todo,in_progress,review,on_hold`,
     );
 
     fireEvent.click(screen.getByRole('button', { name: /Project:/ }));

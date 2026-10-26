@@ -23,7 +23,8 @@
     "goToMyTasks": "Go to My Tasks",
     "comingSoon": "This screen is being built and arrives in an upcoming phase.",
     "undo": "Undo",
-    "completed": "{{key}} completed"
+    "completed": "{{key}} completed",
+    "cancelled": "{{key}} cancelled"
   },
   "language": {
     "label": "Language"
@@ -175,7 +176,9 @@
     "doneRecent": "Done in the last {{count}} days",
     "doneAll": "All done tasks",
     "doneShowAll": "Show all",
-    "doneRecentOnly": "Recent only"
+    "doneRecentOnly": "Recent only",
+    "cancelledRecent": "Cancelled in the last {{count}} days",
+    "cancelledAll": "All cancelled tasks"
   },
   "toolbar": {
     "filter": "Filter",
@@ -288,7 +291,9 @@
     "todo": "To Do",
     "in_progress": "In Progress",
     "review": "In Review",
-    "done": "Done"
+    "on_hold": "On Hold",
+    "done": "Done",
+    "cancelled": "Cancelled"
   },
   "priority": {
     "urgent": "Urgent",
