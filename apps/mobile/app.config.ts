@@ -15,6 +15,9 @@ function appEnv(): AppEnv {
   return env;
 }
 
+/** EAS project `@vadesans-team/kite-tasks` (builds, signing credentials, updates). */
+const EAS_PROJECT_ID = 'affda314-3de4-482f-8693-0ed87f003d52';
+
 const VARIANT: Record<AppEnv, { suffix: string; name: string; scheme: string }> = {
   development: { suffix: '.dev', name: 'Kite Tasks Dev', scheme: 'kitetasks-dev' },
   preview: { suffix: '.preview', name: 'Kite Tasks Preview', scheme: 'kitetasks-preview' },
@@ -34,8 +37,14 @@ export default ({ config }: ConfigContext): ExpoConfig => {
   return {
     ...config,
     name: variant.name,
+    owner: 'vadesans-team',
     slug: 'kite-tasks',
+    // User-facing version. Build numbers are EAS's (`appVersionSource: remote` + `autoIncrement`).
     version: '0.1.0',
+    // Any native change (library, permission, SDK) gives a new runtime, so an OTA update only
+    // reaches binaries it runs on. Each build profile has its own channel (eas.json).
+    runtimeVersion: { policy: 'fingerprint' },
+    updates: { url: `https://u.expo.dev/${EAS_PROJECT_ID}` },
     scheme: variant.scheme,
     platforms: ['ios', 'android'],
     orientation: 'portrait',
@@ -44,6 +53,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ios: {
       bundleIdentifier: bundleId,
       supportsTablet: false,
+      // Only https (exempt encryption): no export compliance question on each TestFlight upload.
+      config: { usesNonExemptEncryption: false },
       infoPlist: {
         // Plain http (an API on a LAN IP) only in dev builds; release builds are https-only.
         NSAppTransportSecurity: dev
@@ -60,12 +71,18 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         monochromeImage: './assets/android-icon-monochrome.png',
       },
       predictiveBackGestureEnabled: false,
+      // Added by the Expo template / dev tooling but never used: Play asks about each one.
+      blockedPermissions: [
+        'android.permission.READ_EXTERNAL_STORAGE',
+        'android.permission.WRITE_EXTERNAL_STORAGE',
+        'android.permission.SYSTEM_ALERT_WINDOW',
+      ],
     },
     plugins: [
       'expo-router',
       'expo-localization',
-      // The session token lives in the Keychain / Keystore.
-      'expo-secure-store',
+      // The session token lives in the Keychain / Keystore. No Face ID: no usage string to explain.
+      ['expo-secure-store', { faceIDPermission: false }],
       [
         'expo-splash-screen',
         {
@@ -78,6 +95,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       ['expo-build-properties', { android: { usesCleartextTraffic: dev } }],
     ],
     experiments: { typedRoutes: true },
-    extra: { appEnv: env },
+    extra: { appEnv: env, eas: { projectId: EAS_PROJECT_ID } },
   };
 };
