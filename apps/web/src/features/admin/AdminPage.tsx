@@ -20,13 +20,15 @@ import { cn } from '../../lib/cn';
 import { useDates } from '../../lib/useDates';
 import { toast } from '../../stores/toast';
 import { SettingsSection, settingsInput } from '../settings/SettingsRow';
+import { UserList } from './UserList';
 
 type Field = 'name' | 'slug' | 'ownerEmail';
 
 /**
  * `/admin`: the platform admin's console (role vade, no workspace of their own). Not in the
  * designs; built from the Settings → Members pieces: create a workspace with its owner invite,
- * list every workspace with its owner or pending invite, re-issue the owner link.
+ * list every workspace with its owner or pending invite, re-issue the owner link; find a user and
+ * make them a password reset link.
  */
 export function AdminPage() {
   const { t } = useTranslation();
@@ -46,6 +48,7 @@ export function AdminPage() {
         </div>
         <CreateWorkspaceForm />
         <WorkspaceList />
+        <UserList />
       </main>
     </div>
   );

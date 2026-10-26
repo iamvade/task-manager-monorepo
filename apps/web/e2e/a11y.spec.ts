@@ -121,6 +121,15 @@ test.describe('platform admin', () => {
       await page.getByRole('button', { name: 'Create workspace' }).click();
       await expect(page.getByText('Enter a name.')).toBeVisible();
       await expectAccessible(page, `Admin console errors (${scheme})`);
+      // A password reset link in the Users list.
+      await page.getByLabel('Search by name or email').fill('dorj');
+      await page
+        .getByRole('listitem')
+        .filter({ hasText: 'dorj@kite.test' })
+        .getByRole('button', { name: /^(Reset password|New reset link)$/ })
+        .click();
+      await expect(page.getByLabel(/^Password reset link for /)).toBeVisible();
+      await expectAccessible(page, `Admin console reset link (${scheme})`);
     });
   }
 });
@@ -153,6 +162,12 @@ test.describe('signed out', () => {
     await page.goto('/invite/not-a-real-token');
     await expect(page.getByRole('link')).toBeVisible();
     await expectAccessible(page, 'Invite');
+  });
+
+  test('password reset (invalid link)', async ({ page }) => {
+    await page.goto('/reset-password/not-a-real-token');
+    await expect(page.getByRole('link')).toBeVisible();
+    await expectAccessible(page, 'Password reset');
   });
 });
 

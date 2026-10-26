@@ -3,6 +3,8 @@ export const queryKeys = {
   me: ['me'] as const,
   /** The platform admin console's workspace list. */
   adminWorkspaces: ['admin', 'workspaces'] as const,
+  /** The platform admin console's Users search. */
+  adminUsers: (q: string) => ['admin', 'users', q] as const,
   sidebar: (workspaceId: string) => ['workspaces', workspaceId, 'sidebar'] as const,
   members: (workspaceId: string) => ['workspaces', workspaceId, 'members'] as const,
   invites: (workspaceId: string) => ['workspaces', workspaceId, 'invites'] as const,

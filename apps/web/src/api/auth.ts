@@ -1,9 +1,11 @@
 import {
   invitePreviewSchema,
   meResponseSchema,
+  passwordResetPreviewSchema,
   type AcceptInvite,
   type LoginRequest,
   type MeResponse,
+  type PasswordResetPreview,
   type UpdateMe,
 } from '@kite/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -81,6 +83,38 @@ export function useAcceptInvite(token: string) {
     onSuccess: (me) => {
       queryClient.setQueryData(meQueryKey, me);
       queryClient.removeQueries({ queryKey: ['invite', token] });
+    },
+  });
+}
+
+export function usePasswordReset(token: string) {
+  return useQuery({
+    queryKey: ['password-reset', token],
+    queryFn: () =>
+      apiFetch(`/password-resets/${encodeURIComponent(token)}`, passwordResetPreviewSchema),
+    retry: false,
+  });
+}
+
+/**
+ * Sets a new password with a reset link. The person is signed out everywhere, so when this
+ * browser was signed in as them, forget them here too (like logout).
+ */
+export function useResetPassword(token: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    // The reset page shows errors inline.
+    meta: { errorToast: false },
+    mutationFn: (password: string) =>
+      apiSend(`/password-resets/${encodeURIComponent(token)}`, z.null(), 'POST', { password }),
+    onSuccess: () => {
+      const email = queryClient.getQueryData<MeResponse | null>(meQueryKey)?.user.email;
+      const reset = queryClient.getQueryData<PasswordResetPreview>(['password-reset', token]);
+      if (email && email.toLowerCase() === reset?.email.toLowerCase()) {
+        void queryClient.cancelQueries();
+        queryClient.setQueryData(meQueryKey, null);
+        queryClient.removeQueries({ predicate: (query) => query.queryKey[0] !== meQueryKey[0] });
+      }
     },
   });
 }
