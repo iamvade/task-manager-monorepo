@@ -8,7 +8,7 @@ import {
   workspaceMemberSchema,
   type SidebarProject,
 } from '@kite/shared';
-import { and, asc, count, eq, isNull, ne } from 'drizzle-orm';
+import { and, asc, count, eq, isNull } from 'drizzle-orm';
 import { notificationsIn } from '../notifications/list.js';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
@@ -29,6 +29,7 @@ import {
 import { httpError } from '../errors.js';
 import { pickProjectKey } from '../projects/keys.js';
 import { listMembers } from '../projects/members.js';
+import { openStatusSql } from '../tasks/status.js';
 
 const err = apiErrorSchema;
 const params = z.object({ workspaceId: z.uuid() });
@@ -91,7 +92,7 @@ export const workspaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
                 eq(projects.workspaceId, workspaceId),
                 isNull(projects.archivedAt),
                 isNull(tasks.deletedAt),
-                ne(statuses.category, 'done'),
+                openStatusSql(),
               ),
             ),
           db

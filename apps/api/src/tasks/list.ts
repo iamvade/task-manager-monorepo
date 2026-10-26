@@ -20,7 +20,6 @@ import {
   isNotNull,
   isNull,
   lte,
-  ne,
   notExists,
   or,
   sql,
@@ -29,6 +28,7 @@ import {
 import type { DbOrTx } from '../db/client.js';
 import { dayStart } from '../reports/sql.js';
 import { projects, statuses, taskAssignees, taskTags, tasks } from '../db/schema/index.js';
+import { openStatusSql } from './status.js';
 
 /** `%`, `_` and `\` are literal in the search text. */
 export const escapeLike = (text: string) => text.replace(/[\\%_]/g, '\\$&');
@@ -133,11 +133,11 @@ export function taskFilters(db: DbOrTx, query: TaskListQuery, timezone: string):
   if (query.hasDueDate !== undefined) {
     where.push(query.hasDueDate ? isNotNull(tasks.dueDate) : isNull(tasks.dueDate));
   }
-  if (!query.includeDone) where.push(ne(statuses.category, 'done'));
+  if (!query.includeDone) where.push(openStatusSql());
   if (query.doneSince) {
     const recent = or(
-      ne(statuses.category, 'done'),
-      gte(tasks.completedAt, dayStart(query.doneSince, timezone)),
+      isNull(tasks.closedAt),
+      gte(tasks.closedAt, dayStart(query.doneSince, timezone)),
     );
     if (recent) where.push(recent);
   }

@@ -5,7 +5,7 @@ import {
   workspaceMemberSchema,
   type MemberHandover,
 } from '@kite/shared';
-import { and, asc, eq, inArray, isNotNull, isNull, ne } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { requireWorkspaceMember } from '../auth/access.js';
@@ -26,6 +26,7 @@ import { handOverFacilitator } from '../standups/groups.js';
 import { mutateTasks } from '../tasks/mutation.js';
 import { applyTaskPatch, setTaskAssignees } from '../tasks/patch.js';
 import { requireMembers } from '../tasks/refs.js';
+import { openStatusSql } from '../tasks/status.js';
 
 const err = apiErrorSchema;
 const params = z.object({ workspaceId: z.uuid(), userId: z.uuid() });
@@ -36,7 +37,7 @@ const openTasksOf = (workspaceId: string) =>
     eq(projects.workspaceId, workspaceId),
     isNull(projects.archivedAt),
     isNull(tasks.deletedAt),
-    ne(statuses.category, 'done'),
+    openStatusSql(),
   );
 
 /** Tasks a leaver hands over, by project: assigned to them, or they review. */

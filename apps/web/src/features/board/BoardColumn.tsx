@@ -1,6 +1,6 @@
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, useSortable, type SortingStrategy } from '@dnd-kit/sortable';
-import type { StatusCategory, TaskListItem } from '@kite/shared';
+import { isClosedCategory, type StatusCategory, type TaskListItem } from '@kite/shared';
 import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
@@ -27,7 +27,9 @@ const TINT: Record<StatusCategory, string> = {
   todo: 'bg-tint-todo-header text-tint-todo',
   in_progress: 'bg-tint-progress text-tint-progress',
   review: 'bg-tint-review text-tint-review',
+  on_hold: 'bg-tint-hold text-tint-hold',
   done: 'bg-tint-done text-tint-done',
+  cancelled: 'bg-tint-cancelled text-tint-cancelled',
 };
 
 type Listener<E> = ((event: E) => void) | undefined;
@@ -276,7 +278,9 @@ export function BoardColumn({
       </div>
 
       {/* Below the scrolling cards, so they stay in view. */}
-      {category === 'done' && <DoneScopeNote className="flex-none px-2.5 pt-1" />}
+      {isClosedCategory(category) && (
+        <DoneScopeNote cancelled={category === 'cancelled'} className="flex-none px-2.5 pt-1" />
+      )}
       {hiddenCount > 0 && onShowHidden && (
         <button
           type="button"

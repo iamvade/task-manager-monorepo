@@ -29,7 +29,7 @@ import { TagPicker } from '../pickers/TagPicker';
 import { SizePicker } from '../pickers/SizePicker';
 import { StatusButton } from '../pickers/StatusButton';
 import { useSizeTitle } from '../task/sizeTitle';
-import { gridColumns, isDone, useListActions } from './ListContext';
+import { gridColumns, isClosed, isDone, useListActions } from './ListContext';
 import { BlockedPill } from '../standup/BlockedMarker';
 
 interface TaskRowProps {
@@ -139,6 +139,7 @@ export function TaskRow({
   const { t } = useTranslation();
   const actions = useListActions();
   const done = isDone(task);
+  const closed = isClosed(task);
   const temp = isTempTask(task);
   const [first, ...others] = task.assignees;
   const inert = temp || dragState === 'overlay';
@@ -227,12 +228,12 @@ export function TaskRow({
           }}
           className={cn(
             'truncate text-[14px] no-underline',
-            done ? 'text-faint line-through' : 'text-default hover:text-default',
+            closed ? 'text-faint line-through' : 'text-default hover:text-default',
           )}
         >
           {task.title}
         </Link>
-        {task.blocked && !done && <BlockedPill blocked={task.blocked} />}
+        {task.blocked && !closed && <BlockedPill blocked={task.blocked} />}
         {task.subtaskProgress.total > 0 && (
           <span
             className="flex flex-none items-center gap-1 text-[12px] text-muted"
@@ -307,7 +308,7 @@ export function TaskRow({
 
       <div role="cell" className="flex min-w-0 items-center pr-2">
         {inert ? (
-          task.dueDate && <DueDate date={task.dueDate} done={done} />
+          task.dueDate && <DueDate date={task.dueDate} done={closed} />
         ) : (
           <DuePicker
             value={task.dueDate}
@@ -318,7 +319,7 @@ export function TaskRow({
             trigger={(props, open) => (
               <CellButton label={t('table.setDue', { name: task.title })} props={props} open={open}>
                 {task.dueDate ? (
-                  <DueDate date={task.dueDate} done={done} />
+                  <DueDate date={task.dueDate} done={closed} />
                 ) : (
                   <EmptyHint icon={<CalendarIcon size={14} />} />
                 )}

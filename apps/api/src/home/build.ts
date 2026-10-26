@@ -10,13 +10,14 @@ import {
   type Home,
   type MyTask,
 } from '@kite/shared';
-import { and, asc, eq, isNull, ne, notExists, or, sql } from 'drizzle-orm';
+import { and, asc, eq, isNull, notExists, or, sql } from 'drizzle-orm';
 import type { FastifyBaseLogger } from 'fastify';
 import type { UserRow } from '../auth/plugin.js';
 import type { DbOrTx } from '../db/client.js';
 import { projects, spaces, statuses, taskAssignees, tasks } from '../db/schema/index.js';
 import { projectRefColumns } from '../notifications/display.js';
 import { assigneesSql } from '../tasks/list.js';
+import { openStatusSql } from '../tasks/status.js';
 import { listMyActivity } from './activity.js';
 
 export const HOME_ACTIVITY_LIMIT = 10;
@@ -99,9 +100,14 @@ export async function buildHome(
           mineIn(user.id, workspaceId),
           // Open tasks, plus done ones due today ("3 of 4 left") or completed this week.
           or(
-            ne(statuses.category, 'done'),
-            eq(tasks.dueDate, today),
-            sql`${tasks.completedAt} >= (${weekStart}::timestamp at time zone ${timezone})`,
+            openStatusSql(),
+            and(
+              eq(statuses.category, 'done'),
+              or(
+                eq(tasks.dueDate, today),
+                sql`${tasks.completedAt} >= (${weekStart}::timestamp at time zone ${timezone})`,
+              ),
+            ),
           ),
         ),
       ),
@@ -135,7 +141,7 @@ export async function buildHome(
           eq(projects.workspaceId, workspaceId),
           isNull(projects.archivedAt),
           isNull(tasks.deletedAt),
-          ne(statuses.category, 'done'),
+          openStatusSql(),
           notExists(
             db
               .select({ one: sql`1` })

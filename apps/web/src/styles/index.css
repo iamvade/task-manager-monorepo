@@ -24,6 +24,8 @@
   --color-status-progress: var(--status-progress);
   --color-status-review: var(--status-review);
   --color-status-done: var(--status-done);
+  --color-status-hold: var(--status-hold);
+  --color-status-cancelled: var(--status-cancelled);
   --color-prio-urgent: var(--prio-urgent);
   --color-prio-high: var(--prio-high);
   --color-prio-medium: var(--prio-medium);
@@ -66,6 +68,8 @@
   --background-color-tint-progress: var(--tint-progress-bg);
   --background-color-tint-review: var(--tint-review-bg);
   --background-color-tint-done: var(--tint-done-bg);
+  --background-color-tint-hold: var(--tint-hold-bg);
+  --background-color-tint-cancelled: var(--tint-cancelled-bg);
   --background-color-tooltip: var(--tooltip-bg);
   --background-color-scrim-drawer: var(--scrim-drawer);
   --background-color-scrim-modal: var(--scrim-modal);
@@ -91,6 +95,8 @@
   --text-color-tint-progress: var(--tint-progress-fg);
   --text-color-tint-review: var(--tint-review-fg);
   --text-color-tint-done: var(--tint-done-fg);
+  --text-color-tint-hold: var(--tint-hold-fg);
+  --text-color-tint-cancelled: var(--tint-cancelled-fg);
   --text-color-due-overdue: var(--due-overdue);
   --text-color-due-today: var(--due-today);
   --text-color-due-soon: var(--due-soon);

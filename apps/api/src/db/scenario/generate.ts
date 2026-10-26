@@ -1057,6 +1057,7 @@ export function buildScenario(
         position: '',
         createdBy: creator.id,
         completedAt: completedAt === null ? null : new Date(completedAt),
+        closedAt: completedAt === null ? null : new Date(completedAt),
         createdAt: new Date(created),
         updatedAt: new Date(Math.max(...touches)),
         deletedAt: deletedAt === null ? null : new Date(deletedAt),

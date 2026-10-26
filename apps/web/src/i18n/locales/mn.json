@@ -23,7 +23,8 @@
     "goToMyTasks": "Миний ажлууд руу очих",
     "comingSoon": "Энэ дэлгэцийг хийж байна, удахгүй нэмэгдэнэ.",
     "undo": "Буцаах",
-    "completed": "{{key}} дууслаа"
+    "completed": "{{key}} дууслаа",
+    "cancelled": "{{key}} цуцлагдлаа"
   },
   "language": {
     "label": "Хэл"
@@ -175,7 +176,9 @@
     "doneRecent": "Сүүлийн {{count}} хоногт дууссан",
     "doneAll": "Бүх дууссан ажил",
     "doneShowAll": "Бүгдийг харах",
-    "doneRecentOnly": "Зөвхөн сүүлийнх"
+    "doneRecentOnly": "Зөвхөн сүүлийнх",
+    "cancelledRecent": "Сүүлийн {{count}} хоногт цуцалсан",
+    "cancelledAll": "Бүх цуцалсан ажил"
   },
   "toolbar": {
     "filter": "Шүүлтүүр",
@@ -288,7 +291,9 @@
     "todo": "Хийх",
     "in_progress": "Хийгдэж буй",
     "review": "Хянагдаж буй",
-    "done": "Дууссан"
+    "on_hold": "Түр зогссон",
+    "done": "Дууссан",
+    "cancelled": "Цуцалсан"
   },
   "priority": {
     "urgent": "Яаралтай",

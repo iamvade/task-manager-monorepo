@@ -35,7 +35,7 @@ import {
   UNSCHEDULED_ID,
   type CalendarTarget,
 } from './calendarDrag';
-import { calendarDays, isDone, placeTasks, shiftPeriod } from './calendarGrid';
+import { calendarDays, isClosed, placeTasks, shiftPeriod } from './calendarGrid';
 import { Pill } from './CalendarPill';
 import { CalendarToolbar, type CalendarProject } from './CalendarToolbar';
 import { MonthDay, WeekDay } from './DayCell';
@@ -203,7 +203,7 @@ function Calendar({ scope, scopeId, project, space }: CalendarProps) {
     reset();
     const task = byId.get(String(active.id));
     if (!task) return;
-    const dueDate = dropDue(task.dueDate, drop, isDone(task));
+    const dueDate = dropDue(task.dueDate, drop, isClosed(task));
     if (dueDate === undefined) return;
     update.mutate(
       { task, patch: { dueDate } },
@@ -218,7 +218,7 @@ function Calendar({ scope, scopeId, project, space }: CalendarProps) {
   const activeTask = activeId ? byId.get(activeId) : undefined;
   // Only targets where the drop changes something light up.
   const effective =
-    activeTask && dropDue(activeTask.dueDate, target, isDone(activeTask)) !== undefined
+    activeTask && dropDue(activeTask.dueDate, target, isClosed(activeTask)) !== undefined
       ? target
       : null;
   const dropLabelFor = (date: string) =>

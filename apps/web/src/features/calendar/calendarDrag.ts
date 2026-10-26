@@ -24,12 +24,12 @@ export function targetOf(id: string | number | undefined | null): CalendarTarget
 export function dropDue(
   current: string | null,
   target: CalendarTarget | null,
-  done: boolean,
+  closed: boolean,
 ): string | null | undefined {
   if (!target) return undefined;
   if (target.kind === 'day') return target.date === current ? undefined : target.date;
-  // Done tasks never go to Unscheduled (they keep their date on the calendar).
-  return current === null || done ? undefined : null;
+  // Closed tasks never go to Unscheduled (they keep their date on the calendar).
+  return current === null || closed ? undefined : null;
 }
 
 /**

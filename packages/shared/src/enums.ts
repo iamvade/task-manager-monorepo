@@ -18,9 +18,34 @@ export type Size = z.infer<typeof sizeSchema>;
 /** Points per size, used by Workload, Throughput and Completed points. Unsized tasks count 0. */
 export const SIZE_POINTS: Readonly<Record<Size, number>> = { S: 1, M: 3, L: 5, XL: 8 };
 
-export const STATUS_CATEGORIES = ['todo', 'in_progress', 'review', 'done'] as const;
+/**
+ * In board order. `on_hold` is open but paused; `cancelled` is closed but not completed (only
+ * `done` sets `completed_at` and counts in Reports).
+ */
+export const STATUS_CATEGORIES = [
+  'todo',
+  'in_progress',
+  'review',
+  'on_hold',
+  'done',
+  'cancelled',
+] as const;
 export const statusCategorySchema = z.enum(STATUS_CATEGORIES);
 export type StatusCategory = z.infer<typeof statusCategorySchema>;
+
+/** Categories that close a task (`tasks.closed_at`): it leaves open lists, overdue and Workload. */
+export const CLOSED_CATEGORIES = ['done', 'cancelled'] as const satisfies readonly StatusCategory[];
+export const isClosedCategory = (category: StatusCategory): boolean =>
+  (CLOSED_CATEGORIES as readonly StatusCategory[]).includes(category);
+
+/** Categories where work waits on someone (Reports "Where work waits", Aging, burndown insight). */
+export const WAIT_CATEGORIES = [
+  'todo',
+  'in_progress',
+  'review',
+] as const satisfies readonly StatusCategory[];
+export const waitCategorySchema = z.enum(WAIT_CATEGORIES);
+export type WaitCategory = z.infer<typeof waitCategorySchema>;
 
 export const WORKSPACE_ROLES = ['owner', 'admin', 'member'] as const;
 export const workspaceRoleSchema = z.enum(WORKSPACE_ROLES);
@@ -158,13 +183,8 @@ export const AVATAR_COLORS = [
 export const avatarColorSchema = z.enum(AVATAR_COLORS);
 export type AvatarColor = z.infer<typeof avatarColorSchema>;
 
-/** Categories of the four statuses every new project starts with, in board order. */
-export const DEFAULT_STATUS_CATEGORIES = [
-  'todo',
-  'in_progress',
-  'review',
-  'done',
-] as const satisfies readonly StatusCategory[];
+/** Categories of the six statuses every project has, in board order. */
+export const DEFAULT_STATUS_CATEGORIES = STATUS_CATEGORIES;
 
 /** Project templates offered on the empty-project screen. */
 export const TEMPLATE_IDS = ['product-launch', 'sprint-planning', 'bug-triage'] as const;

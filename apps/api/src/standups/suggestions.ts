@@ -21,6 +21,7 @@ import {
   tasks,
 } from '../db/schema/index.js';
 import { commentOfActivity } from '../notifications/display.js';
+import { openStatusSql } from '../tasks/status.js';
 import { dayEnd, dayStart, holidaySet, postByInstant } from './schedule.js';
 
 type GroupRow = typeof standupGroups.$inferSelect;
@@ -125,7 +126,9 @@ export async function buildSuggestions(
           eq(projects.workspaceId, group.workspaceId),
           isNull(projects.archivedAt),
           isNull(tasks.deletedAt),
-          ne(statuses.category, 'done'),
+          openStatusSql(),
+          // On hold is paused: not something to do today.
+          ne(statuses.category, 'on_hold'),
           or(sql`${tasks.dueDate} <= ${date}`, eq(statuses.category, 'in_progress')),
         ),
       ),

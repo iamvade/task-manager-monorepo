@@ -121,6 +121,9 @@
   --status-progress: #d97706;
   --status-review: var(--accent);
   --status-done: #16a34a;
+  /* On hold / Cancelled: not in the designs (docs/design-notes.md A.2, derived). */
+  --status-hold: #e11d48;
+  --status-cancelled: #8b8b94;
   --tint-todo-bg: #f1f1f3;
   --tint-todo-header: #ededf0;
   --tint-todo-fg: #3f3f46;
@@ -130,6 +133,10 @@
   --tint-review-fg: var(--accent-ink);
   --tint-done-bg: #e3f4e8;
   --tint-done-fg: #166534;
+  --tint-hold-bg: #ffe4e6;
+  --tint-hold-fg: #9f1239;
+  --tint-cancelled-bg: #f1f1f3;
+  --tint-cancelled-fg: #52525b;
 
   /* Priority flags */
   --prio-urgent: #dc2626;
@@ -306,6 +313,8 @@
   --status-progress: #f59e0b;
   --status-review: var(--accent-ink);
   --status-done: #22c55e;
+  --status-hold: #fb7185;
+  --status-cancelled: #6b6b75;
   --tint-todo-bg: #232328;
   --tint-todo-header: #232328;
   --tint-todo-fg: #c9c9d1;
@@ -313,6 +322,10 @@
   --tint-progress-fg: #fbbf24;
   --tint-done-bg: rgba(34, 197, 94, 0.16);
   --tint-done-fg: #86efac;
+  --tint-hold-bg: rgba(244, 63, 94, 0.16);
+  --tint-hold-fg: #fda4af;
+  --tint-cancelled-bg: #232328;
+  --tint-cancelled-fg: #a1a1aa;
 
   --prio-urgent: #f87171;
   --prio-high: #fb923c;

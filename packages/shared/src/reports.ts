@@ -1,11 +1,11 @@
 import { addDays, daysBetween, startOfWeek } from './dates.js';
-import type { StatusCategory } from './enums.js';
+import type { WaitCategory } from './enums.js';
 
 /** Reports appear once a scope has this many completed tasks (all time); before that "x / 5". */
 export const REPORT_MIN_COMPLETED = 5;
 
 /** Open tasks in a status longer than this many days are flagged "Stale" (Aging tasks). */
-export const STALE_DAYS: Readonly<Record<Exclude<StatusCategory, 'done'>, number>> = {
+export const STALE_DAYS: Readonly<Record<WaitCategory, number>> = {
   todo: 5,
   in_progress: 5,
   review: 5,

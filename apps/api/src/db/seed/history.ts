@@ -561,6 +561,7 @@ export function buildHistory(input: HistoryInput): HistoryRows {
         position: '',
         createdBy: userId(creator),
         completedAt,
+        closedAt: completedAt,
         createdAt,
         updatedAt: completedAt,
       };

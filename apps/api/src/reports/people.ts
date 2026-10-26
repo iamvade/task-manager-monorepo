@@ -201,7 +201,7 @@ const openTasksQuery = (ctx: ReportContext, userId: string) => sql`
   select ${reportTaskColumns}
   from tasks t
   ${reportTaskJoins}
-  where ${taskInScope(ctx, 't')} and t.completed_at is null and ${isAssignee('t', userId)}
+  where ${taskInScope(ctx, 't')} and t.closed_at is null and ${isAssignee('t', userId)}
   order by t.due_date nulls last, p.key, t.number`;
 
 /**

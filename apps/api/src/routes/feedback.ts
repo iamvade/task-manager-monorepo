@@ -65,6 +65,7 @@ import { createTask } from '../tasks/create.js';
 import { escapeLike } from '../tasks/list.js';
 import { mutateTasks } from '../tasks/mutation.js';
 import { setTaskAssignees } from '../tasks/patch.js';
+import { openStatusSql } from '../tasks/status.js';
 
 const err = apiErrorSchema;
 const feedbackParams = z.object({ feedbackId: z.uuid() });
@@ -549,7 +550,7 @@ export const feedbackRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
             eq(projects.workspaceId, workspaceId),
             isNull(projects.archivedAt),
             isNull(tasks.deletedAt),
-            ne(statuses.category, 'done'),
+            openStatusSql(),
             row.taskId ? ne(tasks.id, row.taskId) : undefined,
             sql`${similarity} > 0.15`,
           ),

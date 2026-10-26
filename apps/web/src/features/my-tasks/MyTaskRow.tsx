@@ -1,4 +1,4 @@
-import type { MyTask, TaskStatusRef } from '@kite/shared';
+import { isClosedCategory, type MyTask, type TaskStatusRef } from '@kite/shared';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useWsPath } from '../../api/workspaces';
@@ -36,6 +36,8 @@ export function MyTaskRow({ task, section, onStatusChange }: MyTaskRowProps) {
   const { t } = useTranslation();
   const ws = useWsPath();
   const dates = useDates();
+  // Cancelled rows show until the next refetch drops them.
+  const closed = task.done || isClosedCategory(task.status.category);
 
   const due = (date: string) => {
     if (section === 'today') return t('dates.today');
@@ -67,7 +69,7 @@ export function MyTaskRow({ task, section, onStatusChange }: MyTaskRowProps) {
           data-task-key={task.key}
           className={cn(
             'truncate text-[14px] no-underline',
-            task.done ? 'text-muted line-through' : 'text-default hover:text-default',
+            closed ? 'text-muted line-through' : 'text-default hover:text-default',
           )}
         >
           {task.title}
@@ -103,7 +105,7 @@ export function MyTaskRow({ task, section, onStatusChange }: MyTaskRowProps) {
         role="cell"
         className={cn(
           'truncate text-[13px]',
-          DUE_TONE_CLASS[task.done ? 'done' : SECTION_TONE[section]],
+          DUE_TONE_CLASS[closed ? 'done' : SECTION_TONE[section]],
         )}
       >
         {task.dueDate && due(task.dueDate)}

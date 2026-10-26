@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { dateSchema, daysBetween } from '../dates.js';
-import { prioritySchema, sizeSchema, statusCategorySchema, workspaceRoleSchema } from '../enums.js';
+import { prioritySchema, sizeSchema, waitCategorySchema, workspaceRoleSchema } from '../enums.js';
 import { MAX_REPORT_DAYS, REPORT_PERIODS, SPRINT_PACES, WORKLOAD_LOADS } from '../reports.js';
 import { absenceRefSchema } from './absence.js';
 import { userRefSchema } from './common.js';
@@ -215,7 +215,7 @@ export const overviewReportSchema = z
     /** Median length of status periods that ended in the period, To Do / In Progress / In Review. */
     waits: z.array(
       z.object({
-        category: statusCategorySchema.exclude(['done']),
+        category: waitCategorySchema,
         medianDays: nullableNumber,
         periods: z.number().int(),
       }),
@@ -310,7 +310,7 @@ export const sprintDetailSchema = sprintRefSchema
      * Current sprint: the status category its open tasks have waited longest in (median days in
      * their current status); null otherwise or when nothing is open.
      */
-    waitingMost: statusCategorySchema.exclude(['done']).nullable(),
+    waitingMost: waitCategorySchema.nullable(),
     /** Up to 6 related sprints (sharing a project in scope) ending with this one, oldest first. */
     recent: z.array(sprintTotalsSchema),
     /** Tasks carried over from the previous sprint, most-carried first. */

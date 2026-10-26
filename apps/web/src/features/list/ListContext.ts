@@ -1,11 +1,12 @@
-import type {
-  Priority,
-  Size,
-  Status,
-  Tag,
-  TaskListItem,
-  UserRef,
-  WorkspaceMember,
+import {
+  isClosedCategory,
+  type Priority,
+  type Size,
+  type Status,
+  type Tag,
+  type TaskListItem,
+  type UserRef,
+  type WorkspaceMember,
 } from '@kite/shared';
 import { createContext, useContext } from 'react';
 
@@ -54,6 +55,9 @@ export function useListActions(): ListActions {
 }
 
 export const isDone = (task: Pick<TaskListItem, 'status'>) => task.status.category === 'done';
+/** Done or cancelled: struck through, no due tone, no Blocked marker. */
+export const isClosed = (task: Pick<TaskListItem, 'status'>) =>
+  isClosedCategory(task.status.category);
 
 /**
  * Main.dc.html grid: [select (project list, not designed)] · status (the design's checkbox) · name · assignee · due · priority · [size] · tags · more. Size is

@@ -245,7 +245,7 @@ describe('board', () => {
     await act(async () => {
       await new Promise((r) => setTimeout(r, 0));
     });
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 4; i++) {
       fireEvent.keyDown(document.activeElement ?? document.body, {
         key: 'ArrowRight',
         code: 'ArrowRight',
@@ -259,6 +259,58 @@ describe('board', () => {
     });
     expect(at(moves, 0).statusId).toBe(statusOf('done').id);
     const toast = await screen.findByText(`${audit.key} completed`);
+    fireEvent.click(
+      within(toast.closest('[role="status"]') ?? toast).getByRole('button', { name: 'Undo' }),
+    );
+    await waitFor(() => {
+      expect(moves).toHaveLength(2);
+    });
+    // Back to To Do, right before the card that followed it.
+    expect(at(moves, 1)).toEqual({
+      statusId: statusOf('todo').id,
+      prevId: null,
+      nextId: at(tasks, 1).id,
+    });
+  });
+
+  it('offers Undo after a card is dropped into Cancelled', async () => {
+    const tasks = makeTasks();
+    const audit = at(tasks, 0);
+    const moves: { statusId: string; prevId: string | null; nextId: string | null }[] = [];
+    api(tasks, {
+      [`POST /api/v1/tasks/${audit.id}/move`]: (init) => {
+        const vars = body(init) as (typeof moves)[number];
+        moves.push(vars);
+        const status = PROJECT_WITH_STATUSES.statuses.find((s) => s.id === vars.statusId);
+        return Response.json({ ...audit, status: status ?? audit.status });
+      },
+    });
+    renderAt(BOARD);
+    await screen.findByRole('region', { name: /^To Do/ });
+    stubLayout();
+
+    const card = cardOf('Audit current navigation patterns');
+    act(() => {
+      card.focus();
+    });
+    fireEvent.keyDown(card, { key: ' ', code: 'Space' });
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+    for (let i = 0; i < 5; i++) {
+      fireEvent.keyDown(document.activeElement ?? document.body, {
+        key: 'ArrowRight',
+        code: 'ArrowRight',
+      });
+    }
+    expect(await screen.findByText('Drop to move to Cancelled')).toBeInTheDocument();
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: ' ', code: 'Space' });
+
+    await waitFor(() => {
+      expect(moves).toHaveLength(1);
+    });
+    expect(at(moves, 0).statusId).toBe(statusOf('cancelled').id);
+    const toast = await screen.findByText(`${audit.key} cancelled`);
     fireEvent.click(
       within(toast.closest('[role="status"]') ?? toast).getByRole('button', { name: 'Undo' }),
     );
