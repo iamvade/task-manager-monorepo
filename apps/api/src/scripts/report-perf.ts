@@ -305,6 +305,7 @@ async function generate(database: Db) {
         position: `a${String(i).padStart(6, '0')}`,
         createdBy: creator,
         completedAt: completedAt === null ? null : new Date(completedAt),
+        closedAt: completedAt === null ? null : new Date(completedAt),
         createdAt: new Date(createdAt),
         updatedAt: new Date(last[1]),
       });

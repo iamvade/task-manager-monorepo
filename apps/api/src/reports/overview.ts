@@ -2,6 +2,7 @@ import {
   AGING_DEFAULT_LIMIT,
   STALE_DAYS,
   THROUGHPUT_WEEKS,
+  WAIT_CATEGORIES,
   addDays,
   reportRange,
   startOfWeek,
@@ -9,6 +10,7 @@ import {
   type OverviewReport,
   type OverviewReportQuery,
   type ReportQuery,
+  type WaitCategory,
 } from '@kite/shared';
 import { sql, type SQL } from 'drizzle-orm';
 import type { DbOrTx } from '../db/client.js';
@@ -23,6 +25,7 @@ import {
   p85,
   rows,
   sizePoints,
+  waitCategoriesSql,
 } from './sql.js';
 import { reportTaskColumns, reportTaskJoins, toReportTask, type ReportTaskRow } from './tasks.js';
 
@@ -124,7 +127,7 @@ export function completedBlocks(statRows: CompletedStatsRow[]) {
 export const overdueQuery = (ctx: ReportContext, extra: SQL = sql`true`) => sql`
   select count(*)::int as count, max(${ctx.today}::date - t.due_date)::int as oldest
   from tasks t
-  where ${taskInScope(ctx, 't')} and t.completed_at is null
+  where ${taskInScope(ctx, 't')} and t.closed_at is null
     and t.due_date < ${ctx.today}::date and ${extra}`;
 
 /** Monday of the first week in the 24-week throughput window (12 shown + 12 previous). */
@@ -154,17 +157,17 @@ const waitsQuery = (ctx: ReportContext, b: PeriodBounds) => sql`
     count(*)::int as periods
   from task_status_periods sp
   join tasks t on t.id = sp.task_id
-  where ${taskInScope(ctx, 't')} and sp.category <> 'done'
+  where ${taskInScope(ctx, 't')} and sp.category in (${waitCategoriesSql})
     and sp.exited_at >= ${b.curStart} and sp.exited_at < ${b.curEnd}
   group by sp.category`;
 
-/** Open tasks with how long they've been in their current status. */
+/** Open tasks with how long they've been in their current status (on hold is parked: left out). */
 const openPeriods = (ctx: ReportContext) => sql`
   select t.id, sp.entered_at, sp.category,
     (${ctx.today}::date - ${localDate(sql`sp.entered_at`, ctx.timezone)})::int as days
   from tasks t
   join task_status_periods sp on sp.task_id = t.id and sp.exited_at is null
-  where ${taskInScope(ctx, 't')} and t.completed_at is null`;
+  where ${taskInScope(ctx, 't')} and t.closed_at is null and sp.category in (${waitCategoriesSql})`;
 
 const agingCountsQuery = (ctx: ReportContext) => sql`
   select count(*)::int as total,
@@ -227,10 +230,7 @@ export async function buildOverview(
     rows<CompletedStatsRow>(db, q.completed),
     rows<{ count: number; oldest: number | null }>(db, q.overdue),
     rows<{ week_start: string; count: number }>(db, q.throughput),
-    rows<{ category: 'todo' | 'in_progress' | 'review'; median: number | null; periods: number }>(
-      db,
-      q.waits,
-    ),
+    rows<{ category: WaitCategory; median: number | null; periods: number }>(db, q.waits),
     rows<{ total: number; stale: number }>(db, q.agingCounts),
     rows<AgingRow>(db, q.agingTasks),
   ]);
@@ -259,7 +259,7 @@ export async function buildOverview(
         ? series.slice(0, THROUGHPUT_WEEKS)
         : [],
     },
-    waits: (['todo', 'in_progress', 'review'] as const).map((category) => {
+    waits: WAIT_CATEGORIES.map((category) => {
       const w = waits.find((x) => x.category === category);
       return { category, medianDays: w?.median ?? null, periods: w?.periods ?? 0 };
     }),

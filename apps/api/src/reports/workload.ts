@@ -46,7 +46,7 @@ const assignedOpen = (ctx: ReportContext, weekEnd: string) => sql`
     ) is true as counted
   from tasks t
   join task_assignees ta on ta.task_id = t.id
-  where ${taskInScope(ctx, 't')} and t.completed_at is null`;
+  where ${taskInScope(ctx, 't')} and t.closed_at is null`;
 
 /**
  * Who is listed: every workspace member, or with a scope filter the scoped projects' members

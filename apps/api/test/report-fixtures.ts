@@ -89,6 +89,7 @@ export async function timelineTask(db: Db, input: TimelineTask) {
           position: positionAfter(tail?.position),
           createdBy: input.createdBy,
           completedAt: last[0] === 'done' ? at(last[1]) : null,
+          closedAt: last[0] === 'done' || last[0] === 'cancelled' ? at(last[1]) : null,
           createdAt: at(first[1]),
         })
         .returning(),

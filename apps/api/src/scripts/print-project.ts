@@ -9,7 +9,9 @@ const STATUS_NAMES: Record<StatusCategory, string> = {
   todo: 'To Do',
   in_progress: 'In Progress',
   review: 'In Review',
+  on_hold: 'On Hold',
   done: 'Done',
+  cancelled: 'Cancelled',
 };
 
 const key = (process.argv[2] ?? 'APP').toUpperCase();

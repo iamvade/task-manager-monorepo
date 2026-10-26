@@ -82,8 +82,22 @@ const LABELS = {
 } satisfies Record<Locale, Record<string, string>>;
 
 const STATUS_NAMES: Record<Locale, Record<StatusCategory, string>> = {
-  en: { todo: 'To Do', in_progress: 'In Progress', review: 'In Review', done: 'Done' },
-  mn: { todo: 'Хийх', in_progress: 'Хийгдэж буй', review: 'Хянагдаж буй', done: 'Дууссан' },
+  en: {
+    todo: 'To Do',
+    in_progress: 'In Progress',
+    review: 'In Review',
+    on_hold: 'On Hold',
+    done: 'Done',
+    cancelled: 'Cancelled',
+  },
+  mn: {
+    todo: 'Хийх',
+    in_progress: 'Хийгдэж буй',
+    review: 'Хянагдаж буй',
+    on_hold: 'Түр зогссон',
+    done: 'Дууссан',
+    cancelled: 'Цуцалсан',
+  },
 };
 
 const PRIORITY_NAMES: Record<Locale, Record<Priority, string>> = {

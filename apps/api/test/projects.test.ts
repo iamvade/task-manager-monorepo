@@ -73,7 +73,9 @@ describe('spaces, projects and the sidebar', () => {
       [null, 'todo'],
       [null, 'in_progress'],
       [null, 'review'],
+      [null, 'on_hold'],
       [null, 'done'],
+      [null, 'cancelled'],
     ]);
     expect(first.members.map((m) => m.user.id)).toEqual([owner.id]);
     expect(first).toMatchObject({
@@ -161,8 +163,8 @@ describe('spaces, projects and the sidebar', () => {
     const project = await createProject((await createSpace('Eng')).id, 'Platform');
     await addTask(project, 0, 1);
     await addTask(project, 0, 2);
-    const done = await addTask(project, 3, 3);
-    const deleted = await addTask(project, 3, 4);
+    const done = await addTask(project, 4, 3);
+    const deleted = await addTask(project, 4, 4);
     await ctx.db.update(tasks).set({ deletedAt: new Date() }).where(eq(tasks.id, deleted.id));
 
     const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ulaanbaatar' }).format();
@@ -192,11 +194,11 @@ describe('spaces, projects and the sidebar', () => {
     expect(backwards.statusCode).toBe(400);
 
     const detail = projectDetailSchema.parse((await api('GET', `/projects/${project.id}`)).json());
-    expect(detail.taskCounts.map((c) => c.count)).toEqual([2, 0, 0, 1]);
+    expect(detail.taskCounts.map((c) => c.count)).toEqual([2, 0, 0, 0, 1, 0]);
     expect(detail.taskCount).toBe(3);
     expect(detail.doneCount).toBe(1);
     expect(detail.activeSprint?.id).toBe(current.id);
-    expect(done.statusId).toBe(detail.statuses[3]?.id);
+    expect(done.statusId).toBe(detail.statuses[4]?.id);
 
     const sprints = z
       .array(sprintSchema)
@@ -234,7 +236,7 @@ describe('spaces, projects and the sidebar', () => {
     await addMember(ctx.db, ws.id, other.id);
     const t1 = await addTask(app, 0, 1);
     const t2 = await addTask(app, 1, 2);
-    const t3 = await addTask(app, 3, 3);
+    const t3 = await addTask(app, 4, 3);
     const t4 = await addTask(app, 0, 4);
     const tArchived = await addTask(archived, 0, 1);
     await ctx.db.insert(taskAssignees).values([

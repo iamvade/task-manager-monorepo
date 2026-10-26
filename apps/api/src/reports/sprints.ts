@@ -8,14 +8,14 @@ import {
   type ReportSprintRef,
   type SprintDetail,
   type SprintsReport,
-  type StatusCategory,
+  type WaitCategory,
 } from '@kite/shared';
 import { eq, sql, type SQL } from 'drizzle-orm';
 import type { DbOrTx } from '../db/client.js';
 import { workspaceHolidays } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
 import { loadHistory, scopeDto, scopedProjectIds, type ReportContext } from './scope.js';
-import { dayStart, doneAt, isoTs, rows, textArray } from './sql.js';
+import { closedAt, dayStart, doneAt, isoTs, rows, textArray, waitCategoriesSql } from './sql.js';
 import { reportTaskColumns, reportTaskJoins, toReportTask, type ReportTaskRow } from './tasks.js';
 
 const RECENT_SPRINTS = 6;
@@ -90,7 +90,7 @@ const burndownQuery = (ctx: ReportContext, sprintId: string, startIso: string, a
     select x.idx::int as idx,
       (select count(distinct m.task_id) from m join tasks t on t.id = m.task_id
         where m.added_at <= x.at and (m.removed_at is null or m.removed_at > x.at)
-          and not ${doneAt('t', sql`x.at`)})::int as remaining,
+          and not ${closedAt('t', sql`x.at`)})::int as remaining,
       (select count(distinct m.task_id) from m
         where m.added_at > greatest(x.prev_at, ${startIso}::timestamptz)
           and m.added_at <= x.at)::int as added
@@ -124,7 +124,7 @@ export const carriedQuery = (
           or (sm.added_at > ${startAt} and sm.added_at <= ${cutoffIso}::timestamptz))
     ),
     unfinished as (
-      -- (task, earlier sprint) pairs where the task was in the sprint and left it not done.
+      -- (task, earlier sprint) pairs where the task was in the sprint and left it open.
       select em.task_id, es.id as sprint_id
       from sprint_memberships em
       join sprints es on es.id = em.sprint_id
@@ -133,7 +133,7 @@ export const carriedQuery = (
         and es.id = any(${textArray(earlier.map((e) => e.id))}::uuid[])
         and em.added_at < ${sprintEndSql('es', ctx.timezone)}
         and (em.removed_at is null or em.removed_at > ${sprintStartSql('es', ctx.timezone)})
-        and not ${doneAt('et', membershipLeftSql('em', 'es', ctx.timezone))}
+        and not ${closedAt('et', membershipLeftSql('em', 'es', ctx.timezone))}
     ),
     carried as (
       select task_id, count(distinct sprint_id)::int as times from unfinished
@@ -156,7 +156,7 @@ const carriedOutQuery = (ctx: ReportContext, sprint: SprintRow, next: SprintRow)
     join tasks t on t.id = sm.task_id and t.deleted_at is null and ${inScope(ctx, 't')}
     where sm.sprint_id = ${sprint.id} and sm.added_at < ${endAt}
       and (sm.removed_at is null or sm.removed_at > ${startAt})
-      and not ${doneAt('t', sql`least(coalesce(sm.removed_at, 'infinity'::timestamptz), ${endAt})`)}
+      and not ${closedAt('t', sql`least(coalesce(sm.removed_at, 'infinity'::timestamptz), ${endAt})`)}
       and exists (select 1 from sprint_memberships nm
         where nm.task_id = sm.task_id and nm.sprint_id = ${next.id})`;
 };
@@ -168,10 +168,11 @@ const carriedOutQuery = (ctx: ReportContext, sprint: SprintRow, next: SprintRow)
 const waitingQuery = (ctx: ReportContext, sprintId: string, nowIso: string) => sql`
   select tsp.category
   from sprint_memberships sm
-  join tasks t on t.id = sm.task_id and t.deleted_at is null and t.completed_at is null
+  join tasks t on t.id = sm.task_id and t.deleted_at is null and t.closed_at is null
     and ${inScope(ctx, 't')}
   join task_status_periods tsp on tsp.task_id = t.id and tsp.exited_at is null
-  where sm.sprint_id = ${sprintId} and sm.removed_at is null and tsp.category <> 'done'
+  where sm.sprint_id = ${sprintId} and sm.removed_at is null
+    and tsp.category in (${waitCategoriesSql})
   group by tsp.category
   order by percentile_cont(0.5) within group (
     order by extract(epoch from ${nowIso}::timestamptz - tsp.entered_at)) desc,
@@ -213,7 +214,13 @@ export const toCarried = (r: CarriedRow): CarriedTask => ({
   replan: r.times >= REPLAN_TIMES,
 });
 
-interface ProjectRef { id: string; spaceId: string; key: string; name: string; color: PaletteKey }
+interface ProjectRef {
+  id: string;
+  spaceId: string;
+  key: string;
+  name: string;
+  color: PaletteKey;
+}
 
 export interface SprintPlan {
   /** The `projectId` filter, if any. */
@@ -417,9 +424,7 @@ async function sprintDetail(
     rows<{ idx: number; remaining: number; added: number }>(db, q.burndown),
     q.carried ? rows<CarriedRow>(db, q.carried) : Promise.resolve([]),
     q.carriedOut ? rows<{ n: number }>(db, q.carriedOut) : Promise.resolve(null),
-    q.waiting
-      ? rows<{ category: Exclude<StatusCategory, 'done'> }>(db, q.waiting)
-      : Promise.resolve([]),
+    q.waiting ? rows<{ category: WaitCategory }>(db, q.waiting) : Promise.resolve([]),
   ]);
 
   const refOf = (x: SprintRow | null) =>

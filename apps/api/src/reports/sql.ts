@@ -1,4 +1,4 @@
-import { SIZE_POINTS, SIZES } from '@kite/shared';
+import { CLOSED_CATEGORIES, SIZE_POINTS, SIZES, WAIT_CATEGORIES } from '@kite/shared';
 import { sql, type SQL } from 'drizzle-orm';
 import type { DbOrTx } from '../db/client.js';
 
@@ -61,6 +61,20 @@ export const doneAt = (t: string, at: SQL) => sql`exists (
   where dsp.task_id = ${alias(t)}.id and dsp.category = 'done'
     and dsp.entered_at <= ${at} and (dsp.exited_at is null or dsp.exited_at > ${at})
 )`;
+
+/** Whether the task was in a closed (done or cancelled) status at instant `at`. */
+export const closedAt = (t: string, at: SQL) => sql`exists (
+  select 1 from task_status_periods csp
+  where csp.task_id = ${alias(t)}.id and csp.category in (${categoryList(CLOSED_CATEGORIES)})
+    and csp.entered_at <= ${at} and (csp.exited_at is null or csp.exited_at > ${at})
+)`;
+
+/** `'todo', 'in_progress', …` for an `in (…)` list; the values are enum constants. */
+export const categoryList = (categories: readonly string[]) =>
+  sql.raw(categories.map((c) => `'${c}'`).join(', '));
+
+/** The categories where work waits on someone (Where work waits, Aging, burndown insight). */
+export const waitCategoriesSql = categoryList(WAIT_CATEGORIES);
 
 /**
  * A text array as one bound parameter (drizzle would expand a JS array into a row); cast it at

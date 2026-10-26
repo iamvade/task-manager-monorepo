@@ -1,6 +1,7 @@
-import { and, eq, isNull } from 'drizzle-orm';
+import { CLOSED_CATEGORIES, isClosedCategory, type StatusCategory } from '@kite/shared';
+import { and, eq, isNull, notInArray } from 'drizzle-orm';
 import type { DbOrTx } from '../db/client.js';
-import { taskStatusPeriods, users, workspaceMembers, type statuses } from '../db/schema/index.js';
+import { statuses, taskStatusPeriods, users, workspaceMembers } from '../db/schema/index.js';
 import type { TaskMutation, TaskRow } from './mutation.js';
 import { endOfStatus, statusSnapshot } from './refs.js';
 import { activeMember } from '../auth/membership.js';
@@ -11,6 +12,31 @@ import { activeMember } from '../auth/membership.js';
 // open period.
 
 type StatusRow = typeof statuses.$inferSelect;
+
+/** Where-condition: the joined `statuses` row is open (not done or cancelled). */
+export const openStatusSql = () => notInArray(statuses.category, [...CLOSED_CATEGORIES]);
+
+/**
+ * `completed_at` (done) and `closed_at` (done or cancelled) for a task entering a `to` status:
+ * set on entering, kept while moving between statuses of the same kind, cleared on leaving.
+ * `prev` is null for a new task.
+ */
+export function closureStamps(
+  prev: { category: StatusCategory; completedAt: Date | null; closedAt: Date | null } | null,
+  to: StatusCategory,
+  now: Date,
+) {
+  const stamp = (was: boolean, is: boolean, at: Date | null | undefined) =>
+    is ? (was ? (at ?? now) : now) : null;
+  return {
+    completedAt: stamp(prev?.category === 'done', to === 'done', prev?.completedAt),
+    closedAt: stamp(
+      prev !== null && isClosedCategory(prev.category),
+      isClosedCategory(to),
+      prev?.closedAt,
+    ),
+  };
+}
 
 export interface PeriodStart {
   taskId: string;
@@ -87,8 +113,6 @@ export async function changeStatus(
 ) {
   m.log(task.id, 'status.changed', { from: statusSnapshot(from), to: statusSnapshot(to) });
   await switchPeriod(m, task.id, to);
-  const wasDone = from.category === 'done';
-  const isDone = to.category === 'done';
   const patch: { reviewerId?: string } = {};
   if (to.category === 'review' && from.category !== 'review' && !task.reviewerId) {
     const pick = reviewer === undefined ? await projectLead(m.tx, m.project) : reviewer;
@@ -101,7 +125,7 @@ export async function changeStatus(
     ...patch,
     statusId: to.id,
     position: position ?? (await endOfStatus(m.tx, to.id)),
-    completedAt: isDone ? (wasDone ? (task.completedAt ?? m.now) : m.now) : null,
+    ...closureStamps({ ...task, category: from.category }, to.category, m.now),
     updatedAt: m.now,
   };
 }

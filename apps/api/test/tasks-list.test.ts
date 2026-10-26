@@ -80,7 +80,11 @@ describe('listing tasks', () => {
     const t = world.titles;
     const [done] = await ctx.db
       .update(tasks)
-      .set({ completedAt: new Date('2026-09-30T15:59:00Z') }) // Sep 30 23:59 in Ulaanbaatar
+      // Sep 30 23:59 in Ulaanbaatar
+      .set({
+        completedAt: new Date('2026-09-30T15:59:00Z'),
+        closedAt: new Date('2026-09-30T15:59:00Z'),
+      })
       .where(eq(tasks.title, 'Release notes 100%_done'))
       .returning({ id: tasks.id, completedAt: tasks.completedAt });
     const open = [
@@ -95,7 +99,7 @@ describe('listing tasks', () => {
     } finally {
       await ctx.db
         .update(tasks)
-        .set({ completedAt: new Date() })
+        .set({ completedAt: new Date(), closedAt: new Date() })
         .where(eq(tasks.id, done?.id ?? ''));
     }
   });

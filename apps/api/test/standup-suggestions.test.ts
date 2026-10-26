@@ -116,7 +116,7 @@ describe('standup suggestions', () => {
     clock.set('2026-10-12T00:30:00Z');
   });
 
-  it('suggests today’s open tasks: overdue, due today, then in progress', async () => {
+  it('suggests today’s open tasks: overdue, due today, then in progress (not on hold)', async () => {
     const w = await world();
     const me = [w.owner.id];
     await w.createTask({ title: 'Later', assigneeIds: me, dueDate: '2026-10-20' });
@@ -139,6 +139,15 @@ describe('standup suggestions', () => {
       dueDate: '2026-10-12',
       statusId: w.status('done').id,
     });
+    // Paused or dropped: not today's work, even when due.
+    for (const category of ['on_hold', 'cancelled'] as const) {
+      await w.createTask({
+        title: category,
+        assigneeIds: me,
+        dueDate: '2026-10-09',
+        statusId: w.status(category).id,
+      });
+    }
     await w.createTask({ title: 'Not mine', dueDate: '2026-10-12' });
     const s = await w.suggestions();
     expect(s.today.map((t) => [t.task.title, t.tag])).toEqual([

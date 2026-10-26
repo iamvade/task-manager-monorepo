@@ -7,6 +7,7 @@ import {
   createTaskSchema,
   duplicateTaskSchema,
   extractMentionIds,
+  isClosedCategory,
   moveTaskSchema,
   moveTaskToProjectSchema,
   parseTaskKey,
@@ -63,6 +64,7 @@ import {
 import { setSprint, startInSprint } from '../tasks/sprint.js';
 import {
   changeStatus,
+  closureStamps,
   openStatusPeriods,
   projectLead,
   switchStatusAcrossProjects,
@@ -196,7 +198,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Tasks'],
         summary: 'Update a task',
         description:
-          'Title, description (TipTap JSON; its plain text is stored for search, newly @mentioned members follow the task), status, priority, size, start/due date, sprint, reviewer. Writes one activity row per changed field; unchanged values are ignored. A new status puts the task at the end of that status; entering a done status sets `completedAt`, leaving it clears it. Entering a review status without a reviewer sets one: `reviewerId` from the same body, else the project lead (`reviewerId: null` keeps it empty). The reviewer must be a workspace member (400 `INVALID_REFERENCE`).',
+          'Title, description (TipTap JSON; its plain text is stored for search, newly @mentioned members follow the task), status, priority, size, start/due date, sprint, reviewer. Writes one activity row per changed field; unchanged values are ignored. A new status puts the task at the end of that status; entering a done status sets `completedAt`, leaving it clears it (`closedAt` likewise for done and cancelled). Entering a review status without a reviewer sets one: `reviewerId` from the same body, else the project lead (`reviewerId: null` keeps it empty). The reviewer must be a workspace member (400 `INVALID_REFERENCE`).',
         params: taskParams,
         body: updateTaskSchema,
         response: { 200: taskDetailSchema, 400: err, 401: err, 404: err },
@@ -349,7 +351,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Tasks'],
         summary: 'Complete or reopen a task (list checkbox)',
         description:
-          'Without a body it toggles; `{ done }` sets the state (no-op when already there). Completing moves the task to the first done status; reopening moves it back to the status it had before Done (or the first To Do status). The task goes to the end of the new status. 409 `NO_DONE_STATUS` when the project has no done status.',
+          'Without a body it toggles; `{ done }` sets the state (no-op when already there). Completing moves the task to the first done status (a cancelled task counts as not done); reopening moves it back to the open status it had before Done, On hold included (or the first To Do status). The task goes to the end of the new status. 409 `NO_DONE_STATUS` when the project has no done status.',
         params: taskParams,
         body: completeTaskSchema.nullish(),
         response: { 200: taskListItemSchema, 400: err, 401: err, 404: err, 409: err },
@@ -388,7 +390,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
             .limit(1);
           const parsed = activityPayloadSchemas['status.changed'].safeParse(last?.payload);
           const previousId = parsed.success ? parsed.data.from.id : undefined;
-          const open = statusRows.filter((s) => s.category !== 'done');
+          const open = statusRows.filter((s) => !isClosedCategory(s.category));
           to =
             open.find((s) => s.id === previousId) ??
             open.find((s) => s.category === 'todo') ??
@@ -593,7 +595,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
               dueDate: source.dueDate,
               position,
               createdBy: scope.actorId,
-              completedAt: status.category === 'done' ? m.now : null,
+              ...closureStamps(null, status.category, m.now),
               createdAt: m.now,
               updatedAt: m.now,
             })
@@ -703,7 +705,6 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
 
         const number = to.taskSeq + 1;
         await tx.update(projects).set({ taskSeq: number }).where(eq(projects.id, to.id));
-        const isDone = status.category === 'done';
         await switchStatusAcrossProjects(m, task, status);
         // A shared sprint covering the new project keeps the task.
         const keepSprint = task.sprintId !== null && (await sprintCovers(tx, task.sprintId, to.id));
@@ -716,7 +717,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
             number,
             statusId: status.id,
             position: await endOfStatus(tx, status.id),
-            completedAt: isDone ? (task.completedAt ?? m.now) : null,
+            ...closureStamps({ ...task, category: from.category }, status.category, m.now),
             updatedAt: m.now,
           })
           .where(eq(tasks.id, task.id));

@@ -16,7 +16,7 @@ import {
   statusSnapshot,
 } from './refs.js';
 import { startInSprint } from './sprint.js';
-import { openStatusPeriods, projectLead } from './status.js';
+import { closureStamps, openStatusPeriods, projectLead } from './status.js';
 
 /**
  * Creates a task in the mutation's (locked) project under its next number, as the actor:
@@ -67,7 +67,7 @@ export async function createTask(
             ? await startOfStatus(tx, status.id)
             : await endOfStatus(tx, status.id),
         createdBy: m.actorId,
-        completedAt: status.category === 'done' ? m.now : null,
+        ...closureStamps(null, status.category, m.now),
         createdAt: m.now,
         updatedAt: m.now,
       })

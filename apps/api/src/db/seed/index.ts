@@ -429,6 +429,7 @@ export function buildRows(
         position: must(columnKeys.get(column)?.[index], 'task position'),
         createdBy: user(def.createdBy ?? p.def.lead).id,
         completedAt: completedAt(def),
+        closedAt: completedAt(def),
         createdAt,
         updatedAt: createdAt,
       } satisfies Row<typeof schema.tasks>,

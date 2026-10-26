@@ -16,7 +16,7 @@ import { httpError } from '../errors.js';
 import { insertSprint } from '../sprints/query.js';
 import { sprintSnapshot, statusSnapshot } from '../tasks/refs.js';
 import { openSprintMemberships } from '../tasks/sprint.js';
-import { openStatusPeriods, projectLead } from '../tasks/status.js';
+import { closureStamps, openStatusPeriods, projectLead } from '../tasks/status.js';
 import { buildProjectDetail } from './detail.js';
 import { listStatuses } from './statuses.js';
 import { TEMPLATES, type Text } from './templates/index.js';
@@ -128,7 +128,7 @@ export async function applyTemplate(
           dueDate: def.dueInDays === undefined ? null : addDays(today, def.dueInDays),
           position: positionsByStatus.get(status.id)?.shift() ?? '',
           createdBy: user.id,
-          completedAt: status.category === 'done' ? now : null,
+          ...closureStamps(null, status.category, now),
           createdAt: now,
           updatedAt: now,
         })),

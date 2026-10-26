@@ -48,7 +48,10 @@ export const tasks = pgTable(
     createdBy: uuid('created_by')
       .notNull()
       .references(() => users.id, { onDelete: 'restrict' }),
+    /** Entered a `done` status (kept between two done statuses). Reports count it as completed. */
     completedAt: timestamptz('completed_at'),
+    /** Entered a closed status (done or cancelled): the task leaves open lists, overdue and Workload. */
+    closedAt: timestamptz('closed_at'),
     createdAt: createdAt(),
     updatedAt: timestamptz('updated_at').notNull().defaultNow(),
     /** Soft delete. */
@@ -63,6 +66,7 @@ export const tasks = pgTable(
     index('tasks_due_date_idx').on(t.dueDate),
     index('tasks_sprint_id_idx').on(t.sprintId),
     index('tasks_completed_at_idx').on(t.completedAt),
+    index('tasks_closed_at_idx').on(t.closedAt),
     // "Created by me": the List filter and My Tasks' "Requested by me".
     index('tasks_created_by_created_at_idx').on(t.createdBy, t.createdAt),
     index('tasks_title_trgm_idx').using('gin', t.title.op('gin_trgm_ops')),
