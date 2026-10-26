@@ -579,6 +579,27 @@ The live screen's own labels (speaking order, total time, Previous/Next/Finish, 
 | `tabs.standup` | Standup | Стэндап | Tab bar |
 | `tabs.more` | More | Бусад | Tab bar |
 
+## Mobile data layer and auth screens (B3, 2026-10-26)
+
+Sign in, invite, No workspace and the workspace switcher reuse the web's `auth.*`, `invite.*`, `workspace.*`, `shell.switchWorkspace`, `shell.unread_*`, `settings.roles.*`, `errors.network` keys. New mobile-only keys (Mongolian from `MobileAuth.dc.html` `STR.mn` where it has the line; the rest drafted):
+
+| key | en | mn | source |
+|---|---|---|---|
+| `auth.forgotPassword` | Forgot password? | Нууц үгээ мартсан уу? | design |
+| `auth.forgotPasswordBody` | Ask your admin for a password reset link. Open it on this phone or a computer to set a new password. | Админаасаа нууц үг сэргээх холбоос хүсээрэй. Холбоосыг энэ утас эсвэл компьютер дээрээ нээж шинэ нууц үг тохируулна. | drafted (no self-service reset) |
+| `auth.lockedTitle` | Too many attempts | Хэт олон удаа буруу оролдлоо | design |
+| `auth.lockedBody` | For your security, signing in is paused for a few minutes. | Аюулгүй байдлын үүднээс нэвтрэлтийг хэдэн минут түр зогсоолоо. | drafted (the design's "5 minutes" isn't the throttle's window; the button counts down `Retry-After`) |
+| `auth.lockedButton` | Try again in {{time}} | {{time}}-ийн дараа оролдоно уу | design |
+| `workspace.checkAgain` | Check again | Дахин шалгах | design |
+| `workspace.switcherTitle` | Workspaces | Ажлын орчин | design |
+| `workspace.switcherLegend` | Number — unread notifications for you | Тоо — танд хамаатай уншаагүй мэдэгдэл | design, without the "dot — new activity" half (no such data) |
+| `workspace.current` | Current workspace | Одоогийн ажлын орчин | drafted (screen reader) |
+| `workspace.joinWithLink` | Join with an invite link | Урилгын холбоосоор нэгдэх | design |
+| `workspace.joinLinkPlaceholder` | Paste the link from your invite | Урилгын холбоосоо энд буулгана уу | drafted |
+| `workspace.joinLinkOpen` | Open invite | Урилга нээх | drafted |
+| `workspace.joinLinkInvalid` | That doesn’t look like an invite link. | Энэ урилгын холбоос биш бололтой. | drafted |
+| `workspace.signOutOf` | Sign out of {{email}} | {{email}}-ээс гарах | design (the suffix doesn't follow the email's vowels) |
+
 ## Open questions
 
 1. **Unscheduled**: drafted "Огноогүй" (no date) rather than "Хуваарьгүй"; the hint uses "…хуваарьт оруулна уу". Pick one term.
