@@ -59,6 +59,11 @@ export const PLATFORM_ROLES = ['vade'] as const;
 export const platformRoleSchema = z.enum(PLATFORM_ROLES);
 export type PlatformRole = z.infer<typeof platformRoleSchema>;
 
+/** What a session was signed in from: the web app (cookie) or a native app (bearer token). */
+export const SESSION_CLIENTS = ['web', 'mobile'] as const;
+export const sessionClientSchema = z.enum(SESSION_CLIENTS);
+export type SessionClient = z.infer<typeof sessionClientSchema>;
+
 /**
  * Notification types, highest priority first (one notification per recipient per event: the
  * highest type they have enabled). The `standup_*` types are about a standup group, not a task:

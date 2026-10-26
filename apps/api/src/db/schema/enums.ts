@@ -9,6 +9,7 @@ import {
   NOTIFICATION_TYPES,
   PLATFORM_ROLES,
   PRIORITIES,
+  SESSION_CLIENTS,
   SIZES,
   SPEAKING_ORDERS,
   STANDUP_ENTRY_STATUSES,
@@ -24,6 +25,7 @@ export const themeEnum = pgEnum('theme', THEMES);
 export const densityEnum = pgEnum('density', DENSITIES);
 export const workspaceRoleEnum = pgEnum('workspace_role', WORKSPACE_ROLES);
 export const platformRoleEnum = pgEnum('platform_role', PLATFORM_ROLES);
+export const sessionClientEnum = pgEnum('session_client', SESSION_CLIENTS);
 export const priorityEnum = pgEnum('priority', PRIORITIES);
 export const taskSizeEnum = pgEnum('task_size', SIZES);
 export const statusCategoryEnum = pgEnum('status_category', STATUS_CATEGORIES);

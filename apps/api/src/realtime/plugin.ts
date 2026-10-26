@@ -7,6 +7,7 @@ import { LocalBroadcaster, type Broadcaster } from './broadcaster.js';
 import { RealtimeHub } from './hub.js';
 import { toRealtime } from './messages.js';
 import { activeMember } from '../auth/membership.js';
+import { SESSION_MAX_AGE_MS } from '../auth/sessions.js';
 
 /** Ping every socket this often; one that missed the previous ping is dropped. */
 const HEARTBEAT_MS = 25_000;
@@ -72,13 +73,15 @@ export async function registerRealtime(app: FastifyInstance): Promise<void> {
 export async function revalidate(app: FastifyInstance): Promise<void> {
   const conns = [...app.realtime.hub.connections];
   if (conns.length === 0) return;
+  const now = new Date();
   const live = await app.db
     .select({ id: sessions.id })
     .from(sessions)
     .where(
       and(
         inArray(sessions.id, [...new Set(conns.map((c) => c.sessionId))]),
-        gt(sessions.expiresAt, new Date()),
+        gt(sessions.expiresAt, now),
+        gt(sessions.createdAt, new Date(now.getTime() - SESSION_MAX_AGE_MS)),
       ),
     );
   const members = await app.db

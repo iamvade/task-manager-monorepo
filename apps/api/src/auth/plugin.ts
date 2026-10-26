@@ -17,8 +17,10 @@ export type UserRow = typeof users.$inferSelect;
 
 export interface AuthContext {
   user: UserRow;
-  /** Hash of the cookie token (the `sessions.id`). */
+  /** Hash of the token (the `sessions.id`). */
   sessionId: string;
+  /** How the token came: the web app's cookie, or a native app's `Authorization: Bearer`. */
+  via: 'cookie' | 'bearer';
 }
 
 declare module 'fastify' {
@@ -33,18 +35,58 @@ declare module 'fastify' {
 
 const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
+/** `newToken()` output: 32 bytes, base64url. Anything else can't be a session. */
+const BEARER = /^Bearer ([A-Za-z0-9_-]{43})$/i;
+
+const hasSessionCookie = (request: FastifyRequest) => Boolean(request.cookies[SESSION_COOKIE]);
+
+/** The raw token of `Authorization: Bearer <token>`, if well-formed. Never read from the URL. */
+function bearerToken(request: FastifyRequest): string | null {
+  return BEARER.exec(request.headers.authorization ?? '')?.[1] ?? null;
+}
+
 /**
- * Looks up the session cookie without failing the request. Pushes the expiry forward (and
- * re-sends the cookie) when the last refresh was more than a day ago, but never past
- * `SESSION_MAX_AGE_MS` after sign-in.
+ * The request's session token. A session cookie wins: a request carrying both is cookie auth
+ * (and so needs the web Origin).
+ */
+function readCredentials(
+  request: FastifyRequest,
+): { token: string; via: AuthContext['via'] } | null {
+  const cookie = request.cookies[SESSION_COOKIE];
+  if (cookie) return { token: cookie, via: 'cookie' };
+  const bearer = bearerToken(request);
+  return bearer ? { token: bearer, via: 'bearer' } : null;
+}
+
+/**
+ * CSRF: a browser request rides on the ambient cookie, so it must come from the web origin.
+ * Native apps send `Authorization: Bearer` (which no other site can attach) and often no Origin.
+ * - Origin is the web origin → allowed.
+ * - Session cookie present → nothing else is allowed (with or without a bearer header).
+ * - No cookie, bearer header → allowed whatever the Origin.
+ * - No cookie, no bearer (signing in from the app, the public form) → allowed only without an
+ *   Origin: browsers always send one on cross-site requests, so login CSRF stays blocked.
+ */
+export function originAllowed(request: FastifyRequest, webOrigin: string): boolean {
+  const { origin } = request.headers;
+  if (origin === webOrigin) return true;
+  if (hasSessionCookie(request)) return false;
+  return bearerToken(request) !== null || origin === undefined;
+}
+
+/**
+ * Looks up the session (cookie or bearer token) without failing the request. Pushes the expiry
+ * forward (and re-sends the cookie) when the last refresh was more than a day ago, but never past
+ * `SESSION_MAX_AGE_MS` after sign-in. A bearer request never gets a cookie set or cleared.
  */
 export async function resolveSession(
   request: FastifyRequest,
   reply: FastifyReply,
 ): Promise<AuthContext | null> {
   if (request.auth) return request.auth;
-  const token = request.cookies[SESSION_COOKIE];
-  if (!token) return null;
+  const credentials = readCredentials(request);
+  if (!credentials) return null;
+  const { token, via } = credentials;
 
   const { db, config } = request.server;
   const sessionId = hashToken(token);
@@ -62,19 +104,19 @@ export async function resolveSession(
     )
     .limit(1);
   if (!row) {
-    clearSessionCookie(reply, config);
+    if (via === 'cookie') clearSessionCookie(reply, config);
     return null;
   }
 
   if (row.expiresAt.getTime() - now.getTime() < SESSION_TTL_MS - SESSION_REFRESH_MS) {
     await db
       .update(sessions)
-      .set({ expiresAt: sessionExpiry(now) })
+      .set({ expiresAt: sessionExpiry(now), lastSeenAt: now })
       .where(eq(sessions.id, sessionId));
-    setSessionCookie(reply, token, config);
+    if (via === 'cookie') setSessionCookie(reply, token, config);
   }
 
-  request.auth = { user: row.user, sessionId };
+  request.auth = { user: row.user, sessionId, via };
   return request.auth;
 }
 
@@ -85,7 +127,7 @@ export function requireAuth(request: FastifyRequest): AuthContext {
 }
 
 /**
- * Session lookup, the `authenticate` preHandler, and the CSRF origin check. Registered on the
+ * Session lookup (cookie or bearer token), the `authenticate` preHandler, and the CSRF origin check. Registered on the
  * root instance (not as an encapsulated plugin) so every route context sees the decorators.
  */
 export function registerAuth(app: FastifyInstance): void {
@@ -94,10 +136,10 @@ export function registerAuth(app: FastifyInstance): void {
   app.decorateRequest('auth', null);
 
   // CSRF: browsers always send Origin on cross-site state-changing requests, and SameSite=Lax
-  // already keeps the cookie off most of them; this closes the rest.
+  // already keeps the cookie off most of them; this closes the rest (see `originAllowed`).
   app.addHook('onRequest', async (request, reply) => {
     if (!UNSAFE_METHODS.has(request.method)) return;
-    if (request.headers.origin !== webOrigin) {
+    if (!originAllowed(request, webOrigin)) {
       return reply.code(403).send(errorBody('CSRF_REJECTED', 'Request origin not allowed'));
     }
   });

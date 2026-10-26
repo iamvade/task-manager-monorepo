@@ -10,11 +10,14 @@ const description = `
 REST API for Kite Tasks. All endpoints live under \`/api/v1\` and speak JSON.
 
 **Auth.** Sign in with \`POST /auth/login\`; the session is the httpOnly \`${SESSION_COOKIE}\` cookie
-(30-day sliding expiry). Open these docs through the web dev server
-(\`http://localhost:5173/api/docs\`) so the cookie and requests share the web origin.
+(30-day sliding expiry, 90 days at most). Open these docs through the web dev server
+(\`http://localhost:5173/api/docs\`) so the cookie and requests share the web origin. Native apps
+sign in with \`client: "mobile"\` and get the token in the body instead; they send it as
+\`Authorization: Bearer <token>\` (same lifetime). A request carrying both is cookie auth.
 
-**CSRF.** Every POST/PUT/PATCH/DELETE must carry \`Origin\` equal to the web origin, otherwise
-403 \`CSRF_REJECTED\`.
+**CSRF.** A POST/PUT/PATCH/DELETE with the session cookie must carry \`Origin\` equal to the web
+origin, otherwise 403 \`CSRF_REJECTED\`. Bearer requests without the cookie need no Origin; a
+request with neither is refused only when its Origin is some other site.
 
 **Errors.** Always \`{ "error": { "code", "message" } }\` with a matching HTTP status. A resource in
 a workspace you are not a member of answers **404** (its existence is never confirmed); 403 means
@@ -23,7 +26,7 @@ you are a member without the required role.
 
 const tags = [
   { name: 'Health', description: 'Liveness and database check' },
-  { name: 'Auth', description: 'Sessions: login, logout, current user' },
+  { name: 'Auth', description: 'Sessions: login, logout, current user, signed-in devices' },
   { name: 'Me', description: 'Profile and preferences of the signed-in user' },
   { name: 'Invites', description: 'Workspace invitations' },
   { name: 'Workspaces', description: 'Sidebar, members and project key suggestions' },
@@ -97,9 +100,14 @@ export async function registerDocs(app: FastifyInstance): Promise<void> {
       components: {
         securitySchemes: {
           cookieAuth: { type: 'apiKey', in: 'cookie', name: SESSION_COOKIE },
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            description: 'Session token from `POST /auth/login` with `client: "mobile"`',
+          },
         },
       },
-      security: [{ cookieAuth: [] }],
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }],
     },
     transform: jsonSchemaTransform,
     transformObject: pruneUnusedSchemas,

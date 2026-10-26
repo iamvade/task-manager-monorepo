@@ -7,6 +7,7 @@ import {
   notificationPrefsSchema,
   paletteKeySchema,
   platformRoleSchema,
+  sessionClientSchema,
   themeSchema,
   workspaceRoleSchema,
 } from '../enums.js';
@@ -28,10 +29,21 @@ export const timezoneSchema = z.string().refine((tz) => {
   }
 }, 'Unknown time zone');
 
+/**
+ * How a native app asks for its session: `client: "mobile"` returns the token in the body
+ * (sent back as `Authorization: Bearer`) instead of setting the cookie. `deviceName` labels the
+ * session in the signed-in devices list. Absent `client` = the web app.
+ */
+const sessionRequestFields = {
+  client: sessionClientSchema.optional(),
+  deviceName: z.string().trim().min(1).max(80).optional(),
+};
+
 export const loginRequestSchema = z
   .object({
     email: emailSchema,
     password: z.string().min(1).max(200),
+    ...sessionRequestFields,
   })
   .meta({ id: 'LoginRequest' });
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
@@ -73,6 +85,35 @@ export const meResponseSchema = z
   })
   .meta({ id: 'Me' });
 export type MeResponse = z.infer<typeof meResponseSchema>;
+
+/** A native app's session: the raw token, returned once (only its SHA-256 is stored). */
+export const sessionTokenSchema = z.object({
+  token: z.string(),
+  expiresAt: z.iso.datetime(),
+});
+
+/** Login / invite accept: the signed-in user, plus `session` when `client` was `mobile`. */
+export const authResultSchema = meResponseSchema
+  .extend({ session: sessionTokenSchema.optional() })
+  .meta({ id: 'AuthResult' });
+export type AuthResult = z.infer<typeof authResultSchema>;
+
+/** `GET /auth/sessions`: one of my live sessions ("Signed-in devices"). */
+export const signedInDeviceSchema = z
+  .object({
+    id: z.uuid(),
+    client: sessionClientSchema,
+    /** `Chrome on macOS`, or the name the app sent (`Anu's iPhone`). */
+    deviceLabel: z.string().nullable(),
+    createdAt: z.iso.datetime(),
+    /** Updated at most once a day (with the sliding expiry). */
+    lastSeenAt: z.iso.datetime(),
+    expiresAt: z.iso.datetime(),
+    /** The session this request was made with. */
+    current: z.boolean(),
+  })
+  .meta({ id: 'SignedInDevice' });
+export type SignedInDevice = z.infer<typeof signedInDeviceSchema>;
 
 export const updateMeSchema = z
   .object({
@@ -142,6 +183,7 @@ export const acceptInviteSchema = z
   .object({
     name: nameSchema.optional(),
     password: passwordSchema.optional(),
+    ...sessionRequestFields,
   })
   .meta({ id: 'AcceptInvite' });
 export type AcceptInvite = z.infer<typeof acceptInviteSchema>;

@@ -1,4 +1,4 @@
-import { apiErrorSchema, type WorkspaceRole } from '@kite/shared';
+import { apiErrorSchema, authResultSchema, type WorkspaceRole } from '@kite/shared';
 import { eq } from 'drizzle-orm';
 import type { FastifyInstance, InjectOptions, LightMyRequestResponse } from 'fastify';
 import { uuidv7 } from 'uuidv7';
@@ -128,6 +128,36 @@ export async function login(app: FastifyInstance, email: string, password = PASS
   }
   return `${SESSION_COOKIE}=${cookie.value}`;
 }
+
+/**
+ * Signs in like the native app (`client: "mobile"`, no Origin) and returns the session token
+ * from the body.
+ */
+export async function loginMobile(
+  app: FastifyInstance,
+  email: string,
+  opts: { deviceName?: string; password?: string } = {},
+) {
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/v1/auth/login',
+    remoteAddress: randomIp(),
+    payload: {
+      email,
+      password: opts.password ?? PASSWORD,
+      client: 'mobile',
+      ...(opts.deviceName ? { deviceName: opts.deviceName } : {}),
+    },
+  });
+  const token = authResultSchema.parse(res.json()).session?.token;
+  if (res.statusCode !== 200 || !token) {
+    throw new Error(`mobile login failed: ${res.statusCode} ${res.body}`);
+  }
+  return token;
+}
+
+/** `Authorization` header for a bearer session. */
+export const bearer = (token: string) => ({ authorization: `Bearer ${token}` });
 
 /** The `error.code` of an API error response. */
 export function errorCode(res: LightMyRequestResponse) {
