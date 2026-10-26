@@ -10,7 +10,7 @@ Extracted from `design/*.dc.html` in Phase 0 (2026-10-08). The designs are the v
 | Mongolian copy | Only `Main.dc.html` has `STR.mn`. Claude drafts mn for the other screens in Phase 8 and lists new keys in `docs/i18n-review.md` for review. Glossary: Appendix B. |
 | Project visibility | Every workspace member sees and edits every project. `project_members` = the project's team (avatar stack, suggested assignees/mentions first). |
 | Colors | Palette keys in `users.avatar_color`, `spaces.color`, `projects.color`, `tags.color` (replaces `color_bg/color_fg`). Frontend maps key → exact light/dark values (Appendix A). |
-| Default statuses | `statuses.name` nullable. Null → UI shows the translated default for the category (Хийх / To Do …). Renamed → stored name. |
+| Default statuses | `statuses.name` nullable. Null → UI shows the translated default for the category (Хийх / To Do …). Renamed → stored name. Six per project: the four drawn plus On Hold and Cancelled (added 2026-10-26, not in the designs; colors and markers derived, A.2). |
 | Role hints | `workspace_members.title` (nullable), e.g. "Eng lead", "QA". "You" is computed. |
 | Week chart (My Tasks) | Current week Mon–Sun. "+N vs last week" compares Mon→today with Mon→same weekday last week. |
 | In scope (not in original phases) | Notification settings (`users.notification_prefs`), space-level List/Board (`/s/:spaceId/list|board`), online presence dots (WS presence). |
@@ -248,7 +248,7 @@ Login, invite accept, Settings, ⌘K palette, shortcuts help, filter/sort/group 
 - Description autosaves 800ms after typing and on blur/close; "Saving… / ✓ Saved / Couldn't save · Try again" sits right of the heading (12px muted). Esc leaves the editor; the second Esc closes the drawer. Text ▾ = Text / Heading (h3 16/24) / Subheading (h4). Link = small popover with a URL field.
 - Subtasks: click the title to rename; the due date (while open) and the 22px avatar are pickers (faint calendar / dashed avatar on row hover when empty); "…" on hover → Delete. Rows drag by pointer (4px) or Space on the focused row.
 - Attachments: images preview via `?inline=true` (`object-fit: cover`), falling back to the design's placeholder art; other files show a type badge (PDF danger-soft, others the neutral chip). Clicking an image card opens the image preview (derived, no design): full-viewport `--scrim-lightbox` (light rgba(24,24,27,.88), dark rgba(0,0,0,.88)), a surface bar on top (max 720px, radius 10, `--shadow-popover`: name 13/500, "248 KB · Dorj E." 12px muted, "2 / 3" when several images, Download, Close), the image contained (radius 10), 36px round surface ←/→ buttons and arrow keys that wrap; Esc or a click beside the image closes it and focus returns to the card; ⌘/middle-click opens the image in a new tab; a missing file shows "This image can't be shown" + Download. Other files download on click. Hover "…" → Open (images) / Download / Delete (uploader or admin). Uploading files show as dimmed pending cards. Dragging files over the drawer shows an accent dashed overlay.
-- Activity: one feed query, tabs filter client-side. Status lines use the short "changed status to <to>" form when the change starts from the status the feed last showed. Markers: grey (`--project-dot-inactive`), In Review accent, Done / completed subtask green, Urgent red. Replies are collapsed behind "N replies" and indent 34px; deleted comments with replies stay as an italic muted tombstone; edited comments show "(edited)".
+- Activity: one feed query, tabs filter client-side. Status lines use the short "changed status to <to>" form when the change starts from the status the feed last showed. Markers: grey (`--project-dot-inactive`), In Review accent, Done / completed subtask green, On Hold rose, Urgent red. Replies are collapsed behind "N replies" and indent 34px; deleted comments with replies stay as an italic muted tombstone; edited comments show "(edited)".
 - Composer is sticky at the bottom of the scroll area (border-top `--border-subtle`); resting border `--border-control`, focused accent + ring. A sent comment appears at once (dimmed until saved) and scrolls into view.
 - Toasts (not designed): bottom center, inverted like the tooltip (`--tooltip-bg/fg`), radius 10, 13px, `--shadow-popover`, action in accent-ink-dark, × to dismiss, 5s.
 
@@ -673,8 +673,8 @@ Other derived dark values (`tokens.css`): status tints in-progress rgba(245,158,
 Seed mapping: Research/Checkout=blue, UX/UI=violet, Design system=teal, Analytics=orange, A11y/Mobile web=green, Onboarding=pink, Frontend/iOS/Android/Docs=neutral.
 
 ### A.2 Status, priority, due, accent
-- Status marker 12px (2px ring): todo #A1A1AA → #71717A; in_progress ring + left-half fill #D97706 → #F59E0B; review ring accent + accent 20% fill → ring accent-ink + accent-soft; done solid #16A34A → #22C55E.
-- Status tints (pills, board headers): todo #F1F1F3/#3F3F46 (board header #EDEDF0); in_progress #FDF0DC/#92400E; review accent-soft/accent; done #E3F4E8/#166534.
+- Status marker 12px (2px ring): todo #A1A1AA → #71717A; in_progress ring + left-half fill #D97706 → #F59E0B; review ring accent + accent 20% fill → ring accent-ink + accent-soft; done solid #16A34A → #22C55E. Derived (not drawn): on_hold ring + two pause bars #E11D48 → #FB7185; cancelled solid #8B8B94 → #6B6B75 with a cross in `--bg`.
+- Status tints (pills, board headers): todo #F1F1F3/#3F3F46 (board header #EDEDF0); in_progress #FDF0DC/#92400E; review accent-soft/accent; done #E3F4E8/#166534. Derived: on_hold #FFE4E6/#9F1239 → rgba(244,63,94,.16)/#FDA4AF; cancelled #F1F1F3/#52525B → #232328/#A1A1AA. Cancelled titles are struck through and muted (List, Board, Calendar, My Tasks, ⌘K); the Cancelled group/column behaves like Done (collapsed in the List, "Cancelled in the last 14 days" note, Undo toast on drop).
 - Priority: urgent #DC2626 → #F87171; high #EA580C → #FB923C; medium #CA8A04 → #FACC15 (filled); low outline #A1A1AA → #71717A.
 - Due: overdue #C42B1C/500 (Board 600) → #F87171; today #B45309/500 → #FBBF24; soon #3F3F46 → #C9C9D1; later #6B6B74 → #8E8E98; done #A1A1AA (Board #6B6B74) → #5E5E68.
 - Accent ink (dark): #6E56CF→#B4A5FF, #2F6FEB→#93B4FF, #0F766E→#5EEAD4, #3F3F46→#D4D4D8. Soft: light accent+1A, dark accent+33.
@@ -732,6 +732,7 @@ Add the year when the date is outside the current year.
 | Task name / Assignee / Due date / Priority / Tags / Actions / Complete | Ажлын нэр / Хариуцагч / Дуусах огноо / Ач холбогдол / Шошго / Үйлдэл / Дууссан |
 | List / Board / Calendar | Жагсаалт / Самбар / Календарь |
 | To Do / In Progress / In Review / Done | Хийх / Хийгдэж буй / Хянагдаж буй / Дууссан |
+| On Hold / Cancelled | Түр зогссон / Цуцалсан |
 | Urgent / High / Medium / Low | Яаралтай / Өндөр / Дунд / Бага |
 | Today / Tomorrow | Өнөөдөр / Маргааш |
 | tasks / done | ажил / дууссан |
