@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<title>MobileCalendar — Kite Tasks</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+</style>
+</helmet>
+
+<div lang="{{lang}}" style="width: 1840px; min-height: 2400px; box-sizing: border-box; padding: 56px 64px 96px; display: flex; flex-direction: column; gap: 56px; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 15px; line-height: 22px; color: {{t.text}}; background: {{t.board}}; -webkit-font-smoothing: antialiased; {{t.scheme}}">
+
+  <header style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px">
+    <div style="display: flex; flex-direction: column; gap: 8px; max-width: 900px">
+      <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 12px; line-height: 16px; color: {{t.muted}}">Kite Tasks · iOS + Android · 390 × 844</span>
+      <h1 style="margin: 0; font-size: 40px; line-height: 48px; font-weight: 600; letter-spacing: -0.02em">MobileCalendar</h1>
+      <p style="margin: 0; font-size: 15px; line-height: 22px; color: {{t.text3}}">{{L.intro}}</p>
+    </div>
+    <div aria-label="{{L.preview}}" style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 8px 8px 8px 16px; border: 1px dashed {{t.border2}}; border-radius: 14px">
+      <span style="font-size: 12px; font-weight: 600; color: {{t.muted}}">{{L.preview}}</span>
+      <sc-for list="{{toggles}}" as="tg" hint-placeholder-count="2">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <span style="font-size: 13px; color: {{t.text3}}">{{tg.label}}</span>
+          <div role="radiogroup" aria-label="{{tg.label}}" style="display: flex; gap: 2px; padding: 2px; border-radius: 10px; background: {{t.seg}}">
+            <sc-for list="{{tg.opts}}" as="o" hint-placeholder-count="2">
+              <button role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}" style="height: 32px; padding: 0 12px; border: 0; border-radius: 8px; font-size: 13px; font-weight: 600; {{o.style}}">{{o.label}}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </header>
+
+  <section style="display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; padding-bottom: 14px; border-bottom: 1px solid {{t.border}}">
+      <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 13px; color: {{accentInk}}">01–07</span>
+      <h2 style="margin: 0; font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em">{{L.secTitle}}</h2>
+      <span style="font-size: 14px; color: {{t.muted}}">{{L.secSub}}</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 64px 48px; align-items: start">
+
+      <!-- ===================== PHONES ===================== -->
+      <sc-for list="{{phones}}" as="p" hint-placeholder-count="7">
+        <div style="display: flex; flex-direction: column; gap: 16px; {{p.order}}">
+          <span style="{{cap}}">{{p.cap}}</span>
+          <div style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; box-shadow: {{t.device}}">
+            <div style="flex: none; height: 59px"></div>
+
+            <!-- header -->
+            <div style="flex: none; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; height: 56px; padding: 0 4px">
+              <div style="display: flex"><a href="#" aria-label="{{L.back}}" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: {{t.text}}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a></div>
+              <div style="display: flex; flex-direction: column; align-items: center; min-width: 0">
+                <span style="display: flex; align-items: center; gap: 6px; font-size: 16px; line-height: 22px; font-weight: 600"><span style="width: 20px; height: 20px; border-radius: 5px; font-size: 11px; display: flex; align-items: center; justify-content: center; {{spaceBadge}}">{{spaceInitial}}</span>{{L.space}}</span>
+                <span style="font-size: 12px; line-height: 16px; color: {{t.muted}}">{{L.calendar}}</span>
+              </div>
+              <div style="display: flex; justify-content: flex-end">
+                <button aria-haspopup="dialog" aria-label="{{L.unschedAria}}" style="height: 44px; padding: 0 4px; border: 0; background: transparent; display: flex; align-items: center">
+                  <span style="display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 6px 0 10px; border: 1px solid {{t.border}}; border-radius: 16px; font-size: 13px; font-weight: 500; color: {{t.text2}}">{{L.noDate}}<span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 10px; background: {{accent}}; color: #FFFFFF; font-size: 11px; font-weight: 600; line-height: 20px; text-align: center">5</span></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- view switch + project chips -->
+            <div style="flex: none; display: flex; flex-direction: column; gap: 8px; padding: 0 16px 8px">
+              <div role="radiogroup" aria-label="{{L.view}}" style="display: flex; gap: 2px; height: 40px; padding: 2px; box-sizing: border-box; border-radius: 10px; background: {{t.seg}}">
+                <sc-for list="{{p.seg}}" as="o" hint-placeholder-count="2">
+                  <button role="radio" aria-checked="{{o.on}}" style="flex: 1; border: 0; border-radius: 8px; font-size: 14px; font-weight: 600; {{o.style}}">{{o.label}}</button>
+                </sc-for>
+              </div>
+              <sc-if value="{{p.notMoving}}" hint-placeholder-val="{{ true }}">
+                <div role="group" aria-label="{{L.projects}}" style="display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px">
+                  <sc-for list="{{p.chips}}" as="c" hint-placeholder-count="4">
+                    <button aria-pressed="{{c.on}}" onClick="{{c.toggle}}" style="flex: none; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; box-sizing: border-box; border-radius: 18px; font-size: 14px; font-weight: 500; white-space: nowrap; {{c.style}}">
+                      <span style="width: 8px; height: 8px; border-radius: 4px; {{c.dot}}"></span>{{c.label}}
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <sc-if value="{{p.moving}}" hint-placeholder-val="{{ false }}">
+                <div role="status" style="display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 12px; border-radius: 10px; background: {{accentSoft}}; color: {{accentInk}}; font-size: 14px; font-weight: 600">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9 2 12l3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"></path></svg>
+                  <span style="flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{L.moveHint}}</span>
+                </div>
+              </sc-if>
+            </div>
+
+            <!-- MONTH -->
+            <sc-if value="{{p.isMonth}}" hint-placeholder-val="{{ true }}">
+              <div style="flex: none; display: flex; flex-direction: column; padding: 0 12px; border-bottom: 1px solid {{t.divider}}">
+                <div style="display: flex; align-items: center; height: 44px; padding-left: 4px">
+                  <span aria-live="polite" style="flex: 1; font-size: 17px; line-height: 22px; font-weight: 600">{{p.monthLabel}}</span>
+                  <button onClick="{{p.goToday}}" style="height: 44px; padding: 0 8px; border: 0; background: transparent; display: flex; align-items: center"><span style="height: 30px; padding: 0 12px; display: flex; align-items: center; border-radius: 15px; font-size: 13px; font-weight: 600; {{p.todayStyle}}">{{L.today}}</span></button>
+                  <button onClick="{{p.prev}}" aria-label="{{L.prevMonth}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.text2}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+                  <button onClick="{{p.next}}" aria-label="{{L.nextMonth}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.text2}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+                </div>
+                <div aria-hidden="true" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); height: 22px; align-items: center; text-align: center; font-size: 12px; font-weight: 500; color: {{t.muted}}">
+                  <sc-for list="{{weekdays}}" as="w" hint-placeholder-count="7"><span>{{w.label}}</span></sc-for>
+                </div>
+                <div role="grid" aria-label="{{p.monthLabel}}" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); padding-bottom: 6px">
+                  <sc-for list="{{p.cells}}" as="c" hint-placeholder-count="35">
+                    <button role="gridcell" aria-selected="{{c.sel}}" aria-label="{{c.aria}}" onClick="{{c.pick}}" style="height: 50px; padding: 2px 0 0; border: 0; border-radius: 10px; display: flex; flex-direction: column; align-items: center; gap: 3px; {{c.cellStyle}}">
+                      <span style="width: 32px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 15px; {{c.numStyle}}">{{c.n}}</span>
+                      <span aria-hidden="true" style="display: flex; align-items: center; gap: 3px; height: 6px">
+                        <sc-for list="{{c.dots}}" as="d" hint-placeholder-count="2"><span style="width: 6px; height: 6px; border-radius: 3px; {{d.style}}"></span></sc-for>
+                        <sc-if value="{{c.hasMore}}" hint-placeholder-val="{{ false }}"><span style="font-size: 9px; line-height: 6px; font-weight: 600; color: {{t.muted}}">+</span></sc-if>
+                      </span>
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+              <!-- agenda -->
+              <div style="flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none">
+                <div style="display: flex; flex-direction: column; padding-bottom: 120px">
+                  <h3 style="margin: 0; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; font-size: 15px; font-weight: 600">{{p.dayLabel}}<span style="font-size: 13px; font-weight: 400; color: {{t.muted}}">{{p.dayCount}}</span></h3>
+                  <sc-for list="{{p.agenda}}" as="r" hint-placeholder-count="3">
+                    <div style="display: flex; align-items: flex-start; gap: 4px; min-height: 64px; box-sizing: border-box; padding: 10px 16px 10px 0; border-top: 1px solid {{t.divider}}; {{r.rowStyle}}">
+                      <span style="flex: none; width: 44px; height: 44px; margin-top: -11px; display: flex; align-items: center; justify-content: center"><span aria-hidden="true" style="position: relative; width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; {{r.mk.ring}}"><span style="position: absolute; {{r.mk.g1}}"></span><span style="position: absolute; {{r.mk.g2}}"></span></span></span>
+                      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+                        <a href="MobileTaskDetail.dc.html" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-decoration: none; font-size: 15px; line-height: 22px; {{r.titleStyle}}">{{r.title}}</a>
+                        <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 12px; line-height: 16px; color: {{t.muted}}">
+                          <span style="font-family: Geist Mono, ui-monospace, monospace">{{r.key}}</span>
+                          <span style="display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 8px; border-radius: 11px; border: 1px solid {{t.border}}; color: {{t.text2}}"><span style="width: 6px; height: 6px; border-radius: 3px; {{r.dot}}"></span>{{r.project}}</span>
+                        </span>
+                      </span>
+                      <span style="flex: none; display: flex; align-items: center; gap: 8px; height: 22px">
+                        <svg width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="{{r.prioLabel}}" style="{{r.flag}}"><path d="M4 22V4"></path><path d="M4 4h12l-2 4 2 4H4"></path></svg>
+                        <span style="width: 24px; height: 24px; border-radius: 12px; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{r.av}}">{{r.initials}}</span>
+                      </span>
+                    </div>
+                  </sc-for>
+                  <sc-if value="{{p.dayEmpty}}" hint-placeholder-val="{{ false }}">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 24px 16px; border-top: 1px solid {{t.divider}}; text-align: center">
+                      <span style="font-size: 15px; font-weight: 500; color: {{t.text2}}">{{L.nothingDue}}</span>
+                      <button style="height: 44px; padding: 0 12px; border: 0; background: transparent; font-size: 14px; font-weight: 600; color: {{accentInk}}">{{L.addThisDay}}</button>
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- WEEK -->
+            <sc-if value="{{p.isWeek}}" hint-placeholder-val="{{ false }}">
+              <div style="flex: none; display: flex; align-items: center; height: 44px; padding: 0 12px 0 16px; border-bottom: 1px solid {{t.divider}}">
+                <span style="flex: 1; font-size: 17px; line-height: 22px; font-weight: 600">{{L.weekLabel}}</span>
+                <button style="height: 44px; padding: 0 8px; border: 0; background: transparent; display: flex; align-items: center"><span style="height: 30px; padding: 0 12px; display: flex; align-items: center; border-radius: 15px; font-size: 13px; font-weight: 600; border: 1px solid {{t.border}}; color: {{t.text2}}">{{L.today}}</span></button>
+                <button aria-label="{{L.prevWeek}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.text2}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+                <button aria-label="{{L.nextWeek}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.text2}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+              </div>
+              <div style="flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none">
+                <div style="display: flex; flex-direction: column; padding-bottom: 120px">
+                  <sc-for list="{{week}}" as="wd" hint-placeholder-count="7">
+                    <section aria-label="{{wd.aria}}" style="display: flex; flex-direction: column">
+                      <div style="position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 16px; background: {{t.bg}}; border-bottom: 1px solid {{t.divider}}">
+                        <span style="width: 32px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; {{wd.numStyle}}">{{wd.n}}</span>
+                        <span style="flex: 1; font-size: 15px; font-weight: 600; {{wd.nameStyle}}">{{wd.name}}</span>
+                        <span style="font-size: 13px; color: {{t.muted}}">{{wd.count}}</span>
+                      </div>
+                      <sc-for list="{{wd.rows}}" as="r" hint-placeholder-count="2">
+                        <div style="display: flex; align-items: flex-start; gap: 4px; min-height: 60px; box-sizing: border-box; padding: 10px 16px 10px 0; border-bottom: 1px solid {{t.divider}}">
+                          <span style="flex: none; width: 44px; height: 44px; margin-top: -11px; display: flex; align-items: center; justify-content: center"><span aria-hidden="true" style="position: relative; width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; {{r.mk.ring}}"><span style="position: absolute; {{r.mk.g1}}"></span><span style="position: absolute; {{r.mk.g2}}"></span></span></span>
+                          <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+                            <a href="MobileTaskDetail.dc.html" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-decoration: none; font-size: 15px; line-height: 22px; {{r.titleStyle}}">{{r.title}}</a>
+                            <span style="display: flex; align-items: center; gap: 8px; font-size: 12px; line-height: 16px; color: {{t.muted}}"><span style="font-family: Geist Mono, ui-monospace, monospace">{{r.key}}</span><span style="display: inline-flex; align-items: center; gap: 5px"><span style="width: 6px; height: 6px; border-radius: 3px; {{r.dot}}"></span>{{r.project}}</span></span>
+                          </span>
+                          <span style="flex: none; width: 24px; height: 24px; border-radius: 12px; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{r.av}}">{{r.initials}}</span>
+                        </div>
+                      </sc-for>
+                      <sc-if value="{{wd.empty}}" hint-placeholder-val="{{ false }}">
+                        <span style="height: 44px; padding: 0 16px 0 58px; display: flex; align-items: center; border-bottom: 1px solid {{t.divider}}; font-size: 14px; color: {{t.muted}}">{{L.nothingDueShort}}</span>
+                      </sc-if>
+                    </section>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- lifted row while moving -->
+            <sc-if value="{{p.moving}}" hint-placeholder-val="{{ false }}">
+              <div aria-hidden="true" style="position: absolute; z-index: 6; left: 96px; top: 392px; width: 270px; box-sizing: border-box; display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 12px; background: {{t.raised}}; border: 1.5px solid {{accent}}; box-shadow: 0 2px 6px rgba(0,0,0,0.08), 0 18px 36px rgba(0,0,0,0.22); transform: rotate(-2deg)">
+                <span style="flex: none; width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; {{liftRing}}"></span>
+                <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                  <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; line-height: 20px; font-weight: 500">{{liftTitle}}</span>
+                  <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 12px; color: {{t.muted}}">Q4-15</span>
+                </span>
+              </div>
+            </sc-if>
+
+            <!-- Unscheduled sheet -->
+            <sc-if value="{{p.unsched}}" hint-placeholder-val="{{ false }}">
+              <div aria-hidden="true" style="position: absolute; z-index: 7; inset: 0; background: {{t.scrim}}"></div>
+              <div role="dialog" aria-modal="true" aria-labelledby="un-h" style="position: absolute; z-index: 8; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.raised}}; border-radius: 16px 16px 0 0; box-shadow: {{t.shadowSheet}}">
+                <div style="height: 20px; display: flex; justify-content: center; padding-top: 6px; box-sizing: border-box"><span style="width: 36px; height: 5px; border-radius: 3px; background: {{t.grabber}}"></span></div>
+                <div style="display: flex; align-items: center; gap: 8px; padding: 2px 4px 8px 16px">
+                  <span style="flex: 1; display: flex; flex-direction: column">
+                    <h2 id="un-h" style="margin: 0; font-size: 17px; line-height: 22px; font-weight: 600">{{L.unschedTitle}}</h2>
+                    <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.unschedSub}}</span>
+                  </span>
+                  <button aria-label="{{L.close}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.text3}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+                </div>
+                <div style="display: flex; flex-direction: column; border-top: 1px solid {{t.divider}}">
+                  <sc-for list="{{unsched}}" as="u" hint-placeholder-count="5">
+                    <button style="display: flex; align-items: center; gap: 4px; min-height: 60px; padding: 6px 12px 6px 0; box-sizing: border-box; border: 0; border-bottom: 1px solid {{t.divider}}; background: transparent; text-align: left">
+                      <span style="flex: none; width: 44px; display: flex; justify-content: center"><span style="width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; {{u.ring}}"></span></span>
+                      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; line-height: 22px; color: {{t.text}}">{{u.title}}</span>
+                        <span style="display: flex; align-items: center; gap: 8px; font-size: 12px; line-height: 16px; color: {{t.muted}}"><span style="font-family: Geist Mono, ui-monospace, monospace">{{u.key}}</span><span style="display: inline-flex; align-items: center; gap: 5px"><span style="width: 6px; height: 6px; border-radius: 3px; {{u.dot}}"></span>{{u.project}}</span></span>
+                      </span>
+                      <span style="flex: none; display: flex; align-items: center; gap: 4px; height: 32px; padding: 0 10px; border: 1px dashed {{t.border2}}; border-radius: 16px; font-size: 13px; font-weight: 500; color: {{t.text3}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM16 2v4M8 2v4M3 10h18"></path></svg>{{L.setDate}}</span>
+                    </button>
+                  </sc-for>
+                </div>
+                <div style="height: 34px"></div>
+              </div>
+            </sc-if>
+
+            <!-- Date picker sheet -->
+            <sc-if value="{{p.picker}}" hint-placeholder-val="{{ false }}">
+              <div aria-hidden="true" style="position: absolute; z-index: 7; inset: 0; background: {{t.scrim}}"></div>
+              <div role="dialog" aria-modal="true" aria-labelledby="pk-h" style="position: absolute; z-index: 8; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.raised}}; border-radius: 16px 16px 0 0; box-shadow: {{t.shadowSheet}}">
+                <div style="height: 20px; display: flex; justify-content: center; padding-top: 6px; box-sizing: border-box"><span style="width: 36px; height: 5px; border-radius: 3px; background: {{t.grabber}}"></span></div>
+                <div style="display: flex; align-items: center; gap: 4px; padding: 0 4px 8px">
+                  <button aria-label="{{L.back}}" style="flex: none; width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{t.text2}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+                  <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                    <h2 id="pk-h" style="margin: 0; font-size: 17px; line-height: 22px; font-weight: 600">{{L.setDueTitle}}</h2>
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; line-height: 18px; color: {{t.muted}}"><span style="font-family: Geist Mono, ui-monospace, monospace">PRT-1</span> · {{pickTask}}</span>
+                  </span>
+                  <button style="flex: none; height: 44px; padding: 0 12px; border: 0; background: transparent; font-size: 16px; font-weight: 600; color: {{accentInk}}">{{L.done}}</button>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px; padding: 0 16px 8px">
+                  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+                    <sc-for list="{{presets}}" as="o" hint-placeholder-count="4">
+                      <button aria-pressed="{{o.on}}" style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center; min-height: 52px; padding: 4px 12px; box-sizing: border-box; border-radius: 12px; text-align: left; {{o.style}}">
+                        <span style="font-size: 15px; line-height: 20px; font-weight: 500">{{o.label}}</span>
+                        <span style="font-size: 12px; line-height: 16px; color: {{t.muted}}">{{o.sub}}</span>
+                      </button>
+                    </sc-for>
+                  </div>
+                  <div aria-hidden="true" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); height: 22px; align-items: center; text-align: center; font-size: 12px; font-weight: 500; color: {{t.muted}}">
+                    <sc-for list="{{weekdays}}" as="w" hint-placeholder-count="7"><span>{{w.label}}</span></sc-for>
+                  </div>
+                  <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr))">
+                    <sc-for list="{{pickCells}}" as="c" hint-placeholder-count="35">
+                      <button aria-label="{{c.aria}}" style="height: 42px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center">
+                        <span style="width: 36px; height: 36px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 15px; {{c.numStyle}}">{{c.n}}</span>
+                      </button>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="height: 34px"></div>
+              </div>
+            </sc-if>
+
+            <nav aria-label="{{L.tabsAria}}" style="position: absolute; z-index: 5; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.bg}}; border-top: 1px solid {{t.divider}}">
+              <div style="display: flex; height: 49px; padding: 0 4px">
+                <sc-for list="{{tabbar}}" as="tb" hint-placeholder-count="5">
+                  <a href="#" aria-current="{{tb.current}}" style="flex: 1; min-width: 0; height: 49px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; {{tb.color}}">
+                    <span style="position: relative; width: 24px; height: 24px">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{tb.sw}}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{tb.d1}}"></path><path d="{{tb.d2}}"></path></svg>
+                      <sc-if value="{{tb.hasBadge}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: -4px; left: 14px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px; background: {{accent}}; color: #FFFFFF; font-size: 11px; font-weight: 600; line-height: 18px; text-align: center; box-shadow: 0 0 0 2px {{t.bg}}">3</span></sc-if>
+                    </span>
+                    <span style="max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; line-height: 14px; {{tb.weight}}">{{tb.label}}</span>
+                  </a>
+                </sc-for>
+              </div>
+              <div style="height: 34px"></div>
+            </nav>
+          </div>
+        </div>
+      </sc-for>
+
+      <!-- Behaviour -->
+      <div style="display: flex; flex-direction: column; gap: 16px; order: 8">
+        <span style="{{cap}}">{{L.capRules}}</span>
+        <div style="width: 390px; box-sizing: border-box; display: flex; flex-direction: column; border: 1px solid {{t.border}}; border-radius: 16px; background: {{t.bg}}; overflow: hidden">
+          <sc-for list="{{rules}}" as="r" hint-placeholder-count="7">
+            <div style="display: flex; flex-direction: column; gap: 2px; padding: 12px 16px; border-bottom: 1px solid {{t.divider}}">
+              <span style="font-size: 14px; line-height: 20px; font-weight: 600">{{r.title}}</span>
+              <span style="font-size: 13px; line-height: 18px; color: {{t.text3}}">{{r.body}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"language":{"editor":"enum","default":"mn","options":["mn","en"]},"theme":{"editor":"enum","default":"light","options":["light","dark"]},"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"$preview":{"width":1840,"height":2400}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: undefined, theme: undefined, month: 10, sel: [10, 8], off: {} };
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const lang = s.lang || this.props.language || 'mn';
+    const mn = lang === 'mn';
+    const pick = (p) => (mn ? p[0] : p[1]);
+    const theme = s.theme || this.props.theme || 'light';
+    const dark = theme === 'dark';
+    const accent = this.props.accent ?? '#6E56CF';
+    const inks = { '#6E56CF': '#B4A5FF', '#2F6FEB': '#93B4FF', '#0F766E': '#5EEAD4', '#3F3F46': '#D4D4D8' };
+    const accentInk = dark ? (inks[String(accent).toUpperCase()] || '#B4A5FF') : accent;
+    const accentSoft = accent + (dark ? '33' : '1A');
+
+    const STR = {
+      mn: {
+        intro: 'Орон зайн хуанли утсанд: сарын тор дээр төслийн өнгөт цэг, сонгосон өдрийн ажлууд доор нь; 7 хоногийн жагсаалт; огноогүй ажлын хуудас.',
+        preview: 'Урьдчилан харах', langLabel: 'Хэл', themeLabel: 'Горим', light: 'Цайвар', dark: 'Бараан',
+        secTitle: 'Хуанли', secSub: 'Сар · шүүлтүүр · 7 хоног · огноогүй · огноо тавих · өөр өдөр рүү зөөх · дараагийн сар',
+        cap1: '01 · Сар · өнөөдөр (өдөр, чип, сар солихыг туршина)', cap2: '02 · Өөр өдөр · Q4 шүүлтүүр унтраасан', cap3: '03 · 7 хоног · өдрөөр жагсаасан', cap4: '04 · Огноогүй ажлууд',
+        cap5: '05 · Огноо тавих', cap6: '06 · Удаан дарж өөр өдөр рүү зөөх', cap7: '07 · 11-р сар руу шударсан · «Өнөөдөр» товч', capRules: 'Зан төлөв',
+        back: 'Буцах', space: 'Бүтээгдэхүүн', calendar: 'Хуанли', noDate: 'Огноогүй', unschedAria: 'Огноогүй 5 ажил', view: 'Харагдац', projects: 'Төслүүд',
+        today: 'Өнөөдөр', prevMonth: 'Өмнөх сар', nextMonth: 'Дараагийн сар', prevWeek: 'Өмнөх 7 хоног', nextWeek: 'Дараагийн 7 хоног',
+        nothingDue: 'Энэ өдөр дуусах ажил алга', nothingDueShort: 'Ажил алга', addThisDay: 'Энэ өдөрт ажил нэмэх',
+        weekLabel: '10-р сарын 5 – 11', moveHint: 'Өдөр дээр аваачиж тавина уу · 10-р сарын 9',
+        unschedTitle: 'Огноогүй ажил', unschedSub: '5 нээлттэй ажилд дуусах огноо алга', setDate: 'Огноо', close: 'Хаах',
+        setDueTitle: 'Дуусах огноо тавих', done: 'Болсон', tabsAria: 'Үндсэн цэс', tabs: ['Миний ажил', 'Төслүүд', 'Мэдэгдэл', 'Стэндап', 'Бусад']
+      },
+      en: {
+        intro: 'The space calendar on the phone: a month grid with project-colored dots and the selected day’s tasks below, a week agenda, and an unscheduled sheet.',
+        preview: 'Preview', langLabel: 'Language', themeLabel: 'Theme', light: 'Light', dark: 'Dark',
+        secTitle: 'Calendar', secSub: 'Month · filters · week · unscheduled · set a date · move to another day · next month',
+        cap1: '01 · Month · today (try days, chips, months)', cap2: '02 · Another day · Q4 filter off', cap3: '03 · Week · agenda by day', cap4: '04 · Unscheduled tasks',
+        cap5: '05 · Setting a due date', cap6: '06 · Long-press to move to another day', cap7: '07 · Swiped to November · Today button', capRules: 'Behaviour',
+        back: 'Back', space: 'Product', calendar: 'Calendar', noDate: 'No date', unschedAria: '5 tasks without a date', view: 'View', projects: 'Projects',
+        today: 'Today', prevMonth: 'Previous month', nextMonth: 'Next month', prevWeek: 'Previous week', nextWeek: 'Next week',
+        nothingDue: 'Nothing due this day', nothingDueShort: 'Nothing due', addThisDay: 'Add a task on this day',
+        weekLabel: 'Oct 5 – 11', moveHint: 'Drop on a day · Oct 9',
+        unschedTitle: 'Unscheduled', unschedSub: '5 open tasks have no due date', setDate: 'Date', close: 'Close',
+        setDueTitle: 'Set due date', done: 'Done', tabsAria: 'Main', tabs: ['My Tasks', 'Projects', 'Inbox', 'Standup', 'More']
+      }
+    };
+    const L = STR[lang] || STR.mn;
+
+    const t = dark ? {
+      board: '#0A0A0B', bg: '#111113', surface2: '#161618', raised: '#1B1B1E', fill: '#1F1F23', chip: '#232328', seg: '#1F1F23',
+      border: '#26262B', border2: '#3A3A42', divider: '#1F1F23', grabber: '#3F3F46',
+      text: '#EDEDEF', text2: '#C9C9D1', text3: '#B4B4BC', muted: '#8E8E98', faint: '#5E5E68', scrim: 'rgba(0,0,0,0.6)',
+      shadowSheet: '0 -8px 32px rgba(0,0,0,0.5)',
+      device: '0 0 0 1px #2A2A30, 0 0 0 10px #232328, 0 24px 48px rgba(0,0,0,0.5)',
+      segOn: 'background:#2A2A30;color:#EDEDEF;box-shadow:0 1px 2px rgba(0,0,0,0.4)', segOff: 'background:transparent;color:#8E8E98',
+      scheme: 'color-scheme: dark'
+    } : {
+      board: '#F4F4F5', bg: '#FFFFFF', surface2: '#F7F7F8', raised: '#FFFFFF', fill: '#F4F4F5', chip: '#F1F1F3', seg: '#F1F1F3',
+      border: '#E6E6EA', border2: '#C4C4CC', divider: '#EFEFF2', grabber: '#D4D4D8',
+      text: '#18181B', text2: '#3F3F46', text3: '#52525B', muted: '#6B6B74', faint: '#A1A1AA', scrim: 'rgba(24,24,27,0.32)',
+      shadowSheet: '0 -8px 32px rgba(24,24,27,0.12)',
+      device: '0 0 0 1px #E6E6EA, 0 0 0 10px #18181B, 0 24px 48px rgba(24,24,27,0.18)',
+      segOn: 'background:#FFFFFF;color:#18181B;box-shadow:0 1px 2px rgba(24,24,27,0.08)', segOff: 'background:transparent;color:#6B6B74',
+      scheme: 'color-scheme: light'
+    };
+    const cap = 'font-family:Geist Mono,ui-monospace,monospace;font-size:12px;line-height:16px;color:' + t.muted;
+
+    /* ---------- STATUS / PRIORITY ---------- */
+    const SC = dark ? { todo: '#71717A', prog: '#F59E0B', hold: '#F87171', done: '#22C55E' } : { todo: '#A1A1AA', prog: '#D97706', hold: '#DC2626', done: '#16A34A' };
+    const NONE = 'display:none';
+    const bar = (l, c) => 'display:block;top:2px;left:' + l + 'px;width:2px;height:4px;border-radius:1px;background:' + c;
+    const MK = {
+      todo: { ring: 'border:2px solid ' + SC.todo, g1: NONE, g2: NONE },
+      progress: { ring: 'border:2px solid ' + SC.prog + ';background:linear-gradient(90deg,' + SC.prog + ' 50%,transparent 50%)', g1: NONE, g2: NONE },
+      review: { ring: 'border:2px solid ' + accentInk + ';background:' + accentInk + '33', g1: NONE, g2: NONE },
+      hold: { ring: 'border:2px solid ' + SC.hold, g1: bar(1, SC.hold), g2: bar(5, SC.hold) },
+      done: { ring: 'border:2px solid ' + SC.done + ';background:' + SC.done, g1: NONE, g2: NONE }
+    };
+    const PF = dark
+      ? { urgent: 'fill:#F87171;stroke:#F87171', high: 'fill:#FB923C;stroke:#FB923C', medium: 'fill:#FACC15;stroke:#FACC15', low: 'fill:none;stroke:#71717A' }
+      : { urgent: 'fill:#DC2626;stroke:#DC2626', high: 'fill:#EA580C;stroke:#EA580C', medium: 'fill:#CA8A04;stroke:#CA8A04', low: 'fill:none;stroke:#A1A1AA' };
+    const PRIO = { urgent: ['Яаралтай', 'Urgent'], high: ['Өндөр', 'High'], medium: ['Дунд', 'Medium'], low: ['Бага', 'Low'] };
+
+    const PP = {
+      anu: [['АБ', 'AB'], 'background:#E0E7FF;color:#3730A3', 'background:#312E81;color:#C7D2FE'],
+      sara: [['СК', 'SK'], 'background:#FFE4E6;color:#9F1239', 'background:#881337;color:#FECDD3'],
+      tem: [['ТГ', 'TG'], 'background:#DCFCE7;color:#166534', 'background:#14532D;color:#BBF7D0'],
+      dorj: [['ДЭ', 'DE'], 'background:#FEF3C7;color:#92400E', 'background:#78350F;color:#FDE68A'],
+      mia: [['МЛ', 'ML'], 'background:#E0F2FE;color:#075985', 'background:#0C4A6E;color:#BAE6FD'],
+      oyu: [['ОН', 'ON'], 'background:#F3E8FF;color:#6B21A8', 'background:#581C87;color:#E9D5FF'],
+      bat: [['БО', 'BO'], 'background:#CCFBF1;color:#115E59', 'background:#134E4A;color:#99F6E4']
+    };
+    const PROJ = {
+      ar: [['Апп шинэчлэл', 'App Redesign'], '#7C5CE0'], co: [['Төлбөрийн хуудас v2', 'Checkout v2'], '#0284C7'],
+      q4: [['Q4 замын зураг', 'Q4 Roadmap'], '#D97706'], pp: [['Түншийн портал', 'Partner Portal'], '#71717A']
+    };
+
+    /* ---------- TASKS (space: Product) ---------- */
+    const TK = [
+      ['APP-109', 'done', ['Өрсөлдөгчдийн шинжилгээ — 5 апп', 'Competitive teardown — 5 apps'], [10, 1], 'ar', 'low', 'mia'],
+      ['APP-112', 'done', ['Оролцогч талуудтай ярилцлага', 'Stakeholder interviews'], [10, 2], 'ar', 'medium', 'anu'],
+      ['APP-115', 'done', ['Визуал чиглэлийн мүүдборд', 'Visual direction moodboard'], [10, 3], 'ar', 'low', 'sara'],
+      ['APP-133', 'progress', ['Танилцуулгын текстийг Сараатай хянах', 'Review onboarding copy with Sara'], [10, 6], 'ar', 'high', 'anu'],
+      ['APP-127', 'review', ['Үндсэн товчлууруудын хүртээмжийн шалгалт', 'Accessibility pass on primary buttons'], [10, 7], 'ar', 'high', 'mia'],
+      ['Q4-12', 'todo', ['Q4-ийн тэргүүлэх чиглэлийг батлах', 'Approve Q4 roadmap priorities'], [10, 7], 'q4', 'urgent', 'anu'],
+      ['APP-142', 'review', ['Төлбөрийн хуудас — респонсив байрлал', 'Checkout page — responsive layout'], [10, 8], 'ar', 'urgent', 'dorj'],
+      ['CHK-61', 'todo', ['Хуулийн хэлтэст промо кодын нөхцөлөөр хариулах', 'Reply to legal on promo-code terms'], [10, 8], 'co', 'medium', 'anu'],
+      ['Q4-15', 'todo', ['Спринтийн тоймын тэмдэглэл бэлдэх', 'Prepare sprint review notes'], [10, 8], 'q4', 'medium', 'anu'],
+      ['CHK-60', 'done', ['Промо кодын урт кодын засвар', 'Promo code edge-case fix'], [10, 8], 'co', 'medium', 'dorj'],
+      ['APP-131', 'progress', ['Бүтээгдэхүүний картын компонент v2', 'Product card component v2'], [10, 9], 'ar', 'high', 'sara'],
+      ['CHK-64', 'progress', ['Хадгалсан сагсны PRD бичих', 'Write PRD: saved carts'], [10, 9], 'co', 'medium', 'anu'],
+      ['CHK-66', 'review', ['Төлбөрийн үйлчилгээ үзүүлэгчийн хяналт', 'Payment provider review'], [10, 9], 'co', 'high', 'dorj'],
+      ['APP-138', 'progress', ['Шинэ доод таб самбар хэрэгжүүлэх', 'Implement new bottom tab bar'], [10, 10], 'ar', 'urgent', 'tem'],
+      ['APP-152', 'todo', ['Танилцуулгын прототипийг багтай хуваалцах', 'Share onboarding prototype with the team'], [10, 10], 'ar', 'medium', 'anu'],
+      ['APP-147', 'progress', ['Танилцуулах урсгалыг шинэчлэх (3 дэлгэц)', 'Redesign onboarding flow (3 screens)'], [10, 12], 'ar', 'high', 'anu'],
+      ['APP-144', 'review', ['Дүрс тэмдгийн багц шинэчлэх (48 дүрс)', 'Icon set refresh (48 icons)'], [10, 13], 'ar', 'low', 'sara'],
+      ['APP-136', 'todo', ['Одоогийн навигацийн хэв маягийг шалгах', 'Audit current navigation patterns'], [10, 14], 'ar', 'medium', 'tem'],
+      ['APP-149', 'progress', ['Төлбөрийн хэсгийн аналитик эвентүүдийг шинэчлэх', 'Update analytics events for checkout'], [10, 15], 'ar', 'medium', 'oyu'],
+      ['APP-139', 'todo', ['Бараан горимын өнгөний токен', 'Define color tokens for dark mode'], [10, 16], 'ar', 'low', 'sara'],
+      ['APP-129', 'hold', ['Тохиргооны дэлгэцийн шилжүүлэлтийн төлөвлөгөө', 'Migration plan for the settings screen'], [10, 20], 'ar', 'medium', 'dorj'],
+      ['APP-143', 'todo', ['Хэрэглээний тестийн скрипт', 'Usability test script — new onboarding'], [10, 22], 'ar', 'low', 'mia'],
+      ['PRT-2', 'todo', ['Түншийн порталын хамрах хүрээ', 'Partner portal scope'], [10, 22], 'pp', 'medium', 'bat'],
+      ['APP-146', 'todo', ['Хайлтын үр дүнгийн хоосон төлөвүүд', 'Empty states for search results'], [10, 23], 'ar', 'medium', 'sara'],
+      ['Q4-18', 'todo', ['ТУЗ-д бэлдэх илтгэлийн ноорог', 'Board update draft'], [10, 27], 'q4', 'high', 'anu'],
+      ['Q4-20', 'todo', ['Удирдлагатай Q4 замын зургийг хянах', 'Q4 roadmap review with leadership'], [11, 3], 'q4', 'medium', 'anu'],
+      ['CHK-72', 'todo', ['Хадгалсан сагс — бета', 'Saved carts beta'], [11, 5], 'co', 'high', 'dorj'],
+      ['APP-158', 'todo', ['Танилцуулгын A/B тест', 'Onboarding A/B test'], [11, 12], 'ar', 'medium', 'mia']
+    ].map(([key, st, n, d, proj, pr, who]) => ({ key, st, n, d, proj, pr, who }));
+
+    const WD = mn ? ['Да', 'Мя', 'Лх', 'Пү', 'Ба', 'Бя', 'Ня'] : ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+    const WDL = mn ? ['Даваа', 'Мягмар', 'Лхагва', 'Пүрэв', 'Баасан', 'Бямба', 'Ням'] : ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const MONL = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const MON = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const D = (m, d) => (mn ? m + '-р сарын ' + d : MON[m] + ' ' + d);
+    const weekdays = WD.map((label) => ({ label }));
+    const isToday = (m, d) => m === 10 && d === 8;
+
+    const row = (x) => {
+      const done = x.st === 'done';
+      return {
+        key: x.key, title: pick(x.n), mk: MK[x.st],
+        titleStyle: 'color:' + t.text + (done ? ';text-decoration:line-through;text-decoration-thickness:1.5px' : ''),
+        rowStyle: '', project: pick(PROJ[x.proj][0]), dot: 'background:' + PROJ[x.proj][1],
+        flag: PF[x.pr], prioLabel: (mn ? 'Ач холбогдол: ' : 'Priority: ') + pick(PRIO[x.pr]),
+        av: dark ? PP[x.who][2] : PP[x.who][1], initials: pick(PP[x.who][0])
+      };
+    };
+
+    const buildMonth = (o) => {
+      const m = o.month, off = o.off || {};
+      const shown = TK.filter((x) => !off[x.proj]);
+      const first = new Date(2026, m - 1, 1);
+      const idx = (first.getDay() + 6) % 7;
+      const dim = new Date(2026, m, 0).getDate();
+      const rows = Math.ceil((idx + dim) / 7);
+      const cells = [];
+      for (let i = 0; i < rows * 7; i++) {
+        const dt = new Date(2026, m - 1, 1 - idx + i);
+        const cm = dt.getMonth() + 1, cd = dt.getDate();
+        const inM = cm === m;
+        const tasks = shown.filter((x) => x.d[0] === cm && x.d[1] === cd);
+        const sel = o.sel[0] === cm && o.sel[1] === cd;
+        const today = isToday(cm, cd);
+        const target = o.target && o.target[0] === cm && o.target[1] === cd;
+        cells.push({
+          n: String(cd), sel,
+          aria: D(cm, cd) + (today ? (mn ? ', өнөөдөр' : ', today') : '') + ', ' + tasks.length + (mn ? ' ажил' : ' tasks'),
+          numStyle: sel ? 'background:' + accent + ';color:#FFFFFF;font-weight:600'
+            : (today ? 'color:' + accentInk + ';font-weight:600;box-shadow:inset 0 0 0 1.5px ' + accentInk
+            : (inM ? 'color:' + t.text : 'color:' + t.muted)),
+          cellStyle: target ? 'background:' + accentSoft + ';box-shadow:inset 0 0 0 1.5px ' + accent : 'background:transparent',
+          dots: tasks.slice(0, 3).map((x) => ({ style: 'background:' + PROJ[x.proj][1] + (inM ? '' : ';opacity:0.6') })),
+          hasMore: tasks.length > 3,
+          pick: o.interactive ? () => this.setState({ sel: [cm, cd], month: cm }) : () => {}
+        });
+      }
+      const dayTasks = shown.filter((x) => x.d[0] === o.sel[0] && x.d[1] === o.sel[1]);
+      const selDate = new Date(2026, o.sel[0] - 1, o.sel[1]);
+      const wdName = WDL[(selDate.getDay() + 6) % 7];
+      const dayLabel = wdName + ', ' + D(o.sel[0], o.sel[1]) + (isToday(o.sel[0], o.sel[1]) ? (mn ? ' · Өнөөдөр' : ' · Today') : '');
+      const onToday = m === 10;
+      return {
+        cells, monthLabel: mn ? '2026 оны ' + m + '-р сар' : MONL[m] + ' 2026',
+        dayLabel, dayCount: dayTasks.length ? String(dayTasks.length) : '',
+        agenda: dayTasks.map((x) => ({ ...row(x), rowStyle: o.liftKey === x.key ? 'opacity:0.35' : '' })),
+        dayEmpty: dayTasks.length === 0,
+        todayStyle: onToday ? 'border:1px solid ' + t.border + ';color:' + t.text2 : 'background:' + accent + ';color:#FFFFFF',
+        chips: Object.keys(PROJ).map((k) => {
+          const on = !off[k];
+          return {
+            label: pick(PROJ[k][0]), on, dot: 'background:' + PROJ[k][1] + (on ? '' : ';opacity:0.4'),
+            style: on ? 'border:1px solid ' + t.border2 + ';background:' + t.bg + ';color:' + t.text : 'border:1px dashed ' + t.border2 + ';background:transparent;color:' + t.muted + ';text-decoration:line-through',
+            toggle: o.interactive ? () => this.setState({ off: { ...(this.state.off || {}), [k]: on } }) : () => {}
+          };
+        }),
+        goToday: o.interactive ? () => this.setState({ month: 10, sel: [10, 8] }) : () => {},
+        prev: o.interactive ? () => this.setState({ month: Math.max(9, m - 1) }) : () => {},
+        next: o.interactive ? () => this.setState({ month: Math.min(12, m + 1) }) : () => {}
+      };
+    };
+
+    const seg = (i) => [mn ? 'Сар' : 'Month', mn ? '7 хоног' : 'Week'].map((label, k) => ({ label, on: k === i, style: k === i ? t.segOn : t.segOff }));
+    const base = { isMonth: true, isWeek: false, moving: false, notMoving: true, unsched: false, picker: false, seg: seg(0) };
+    const phones = [
+      { ...base, order: 'order:1', cap: L.cap1, ...buildMonth({ month: s.month || 10, sel: s.sel || [10, 8], off: s.off, interactive: true }) },
+      { ...base, order: 'order:2', cap: L.cap2, ...buildMonth({ month: 10, sel: [10, 9], off: { q4: true } }) },
+      { ...base, order: 'order:3', cap: L.cap3, isMonth: false, isWeek: true, seg: seg(1), ...buildMonth({ month: 10, sel: [10, 8] }) },
+      { ...base, order: 'order:4', cap: L.cap4, unsched: true, ...buildMonth({ month: 10, sel: [10, 8] }) },
+      { ...base, order: 'order:5', cap: L.cap5, picker: true, ...buildMonth({ month: 10, sel: [10, 8] }) },
+      { ...base, order: 'order:6', cap: L.cap6, moving: true, notMoving: false, ...buildMonth({ month: 10, sel: [10, 8], target: [10, 9], liftKey: 'Q4-15' }) },
+      { ...base, order: 'order:7', cap: L.cap7, ...buildMonth({ month: 11, sel: [11, 3] }) }
+    ];
+
+    /* ---------- WEEK (Oct 5–11) ---------- */
+    const week = [5, 6, 7, 8, 9, 10, 11].map((d, i) => {
+      const tasks = TK.filter((x) => x.d[0] === 10 && x.d[1] === d);
+      const today = d === 8;
+      return {
+        n: String(d), name: WDL[i] + (today ? (mn ? ' · Өнөөдөр' : ' · Today') : ''),
+        aria: WDL[i] + ', ' + D(10, d), count: tasks.length ? String(tasks.length) : '',
+        numStyle: today ? 'background:' + accent + ';color:#FFFFFF' : 'background:' + t.fill + ';color:' + t.text,
+        nameStyle: today ? 'color:' + accentInk : 'color:' + t.text,
+        rows: tasks.map(row), empty: tasks.length === 0
+      };
+    });
+
+    /* ---------- UNSCHEDULED + PICKER ---------- */
+    const UN = [
+      ['PRT-1', ['Түншийн порталын эхлэлийн уулзалт', 'Partner portal kickoff'], 'pp', 'todo'],
+      ['CHK-70', ['Өрсөлдөгчдийн хадгалсан сагсны тэмдэглэл', 'Competitor notes on saved carts'], 'co', 'todo'],
+      ['APP-155', ['Шинэ дүрс тэмдгийн талаар санал цуглуулах', 'Collect feedback on the new icons'], 'ar', 'todo'],
+      ['APP-156', ['Бараан горимын QA', 'Dark mode QA pass'], 'ar', 'progress'],
+      ['Q4-22', ['1-р улирлын ажилд авах төлөвлөгөө', 'Q1 hiring plan'], 'q4', 'todo']
+    ];
+    const unsched = UN.map(([key, n, proj, st]) => ({ key, title: pick(n), project: pick(PROJ[proj][0]), dot: 'background:' + PROJ[proj][1], ring: MK[st].ring }));
+    const pOn = 'border:1.5px solid ' + accent + ';background:' + accentSoft + ';color:' + t.text;
+    const pOff = 'border:1px solid ' + t.border + ';background:' + t.raised + ';color:' + t.text;
+    const presets = [[['Өнөөдөр', 'Today'], ['Пүрэв, 10/8', 'Thu, Oct 8']], [['Маргааш', 'Tomorrow'], ['Баасан, 10/9', 'Fri, Oct 9']], [['Дараа 7 хоног', 'Next week'], ['Даваа, 10/12', 'Mon, Oct 12']], [['2 долоо хоногт', 'In two weeks'], ['Пүрэв, 10/22', 'Thu, Oct 22']]]
+      .map(([l, sub], i) => ({ label: pick(l), sub: pick(sub), on: i === 2, style: i === 2 ? pOn : pOff }));
+    const pickCells = [];
+    for (let i = 0; i < 35; i++) {
+      const dt = new Date(2026, 8, 28 + i);
+      const cm = dt.getMonth() + 1, cd = dt.getDate();
+      const sel = cm === 10 && cd === 12;
+      pickCells.push({
+        n: String(cd), aria: D(cm, cd),
+        numStyle: sel ? 'background:' + accent + ';color:#FFFFFF;font-weight:600' : (isToday(cm, cd) ? 'color:' + accentInk + ';font-weight:600;box-shadow:inset 0 0 0 1.5px ' + accentInk : (cm === 10 ? 'color:' + t.text : 'color:' + t.muted))
+      });
+    }
+
+    const TABI = {
+      my: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z', 'm8.5 12 2.5 2.5 4.5-5'],
+      projects: ['M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z', 'M3 10h18'],
+      inbox: ['M22 12h-6l-2 3h-4l-2-3H2', 'M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'],
+      standup: ['M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', 'M8 9h8M8 13h5'],
+      more: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z', 'M7.5 12h1M11.5 12h1M15.5 12h1']
+    };
+    const tabbar = ['my', 'projects', 'inbox', 'standup', 'more'].map((id, i) => ({
+      label: L.tabs[i], d1: TABI[id][0], d2: TABI[id][1], current: id === 'projects' ? 'page' : 'false',
+      color: 'color:' + (id === 'projects' ? accentInk : t.muted), weight: 'font-weight:' + (id === 'projects' ? '600' : '500'),
+      sw: id === 'projects' ? '2.25' : '1.75', hasBadge: id === 'inbox'
+    }));
+
+    const rules = [
+      [['Сарын тор', 'Month grid'], ['Өдөр бүрт 3 хүртэл цэг (ажил бүрийн төслийн өнгө), илүү бол «+». Өнөөдөр цагираг, сонгосон өдөр дүүрэн.', 'Up to 3 dots per day (one per task, in its project color), then “+”. Today has a ring, the selected day is filled.']],
+      [['Өөр сарын өдөр', 'Out-of-month days'], ['Бүдэг биш, «muted» өнгөөр — уншигдахуйц, дарж болно.', 'Muted, not faint — still readable and tappable.']],
+      [['Дууссан ажил', 'Done tasks'], ['Бүрэн өнгөөрөө, дундуураа зураастай; цэг нь хэвээр.', 'Full color with a strikethrough; its dot stays.']],
+      [['Сар солих', 'Changing months'], ['Торыг хажуу тийш шудрах эсвэл сумаар. Өөр сард байхад «Өнөөдөр» товч өргөлт өнгөтэй болно.', 'Swipe the grid or use the arrows. Away from the current month, Today turns accent-filled.']],
+      [['Шүүлтүүр', 'Filters'], ['Төслийн чип асааж/унтраана; унтарсан нь тасархай, зураастай. Сонголт энэ төхөөрөмж дээр хадгалагдана.', 'Project chips toggle; off chips are dashed and struck. Remembered on this device.']],
+      [['Огноогүй', 'Unscheduled'], ['Толгойн «Огноогүй · 5» нь нээлттэй, огноогүй ажлуудыг нээнэ. Мөрийг дарахад огноо сонгогч гарна.', '“No date · 5” in the header lists open tasks without a due date. Tapping one opens the date picker.']],
+      [['Өдөр солих', 'Moving'], ['Мөрийг удаан дарахад тор чирэх бүс болно; өдөр дээр тавихад огноо солигдож «Буцаах» гарна.', 'Long-press a row and the grid becomes the drop zone; dropping on a day changes the due date and shows Undo.']]
+    ].map(([title, body]) => ({ title: pick(title), body: pick(body) }));
+
+    const segBtn = (on) => (on ? t.segOn : t.segOff);
+    const toggles = [
+      { label: L.langLabel, opts: [['mn', 'МН'], ['en', 'EN']].map(([v, lab]) => ({ label: lab, on: lang === v, style: segBtn(lang === v), pick: () => this.setState({ lang: v }) })) },
+      { label: L.themeLabel, opts: [['light', L.light], ['dark', L.dark]].map(([v, lab]) => ({ label: lab, on: theme === v, style: segBtn(theme === v), pick: () => this.setState({ theme: v }) })) }
+    ];
+
+    return {
+      lang, L, t, cap, accent, accentInk, accentSoft, toggles,
+      spaceBadge: dark ? 'background:#2E1065;color:#DDD6FE' : 'background:#EDE9FE;color:#5B21B6', spaceInitial: mn ? 'Б' : 'P',
+      phones, weekdays, week, unsched, presets, pickCells, tabbar, rules,
+      liftTitle: pick(['Спринтийн тоймын тэмдэглэл бэлдэх', 'Prepare sprint review notes']), liftRing: MK.todo.ring,
+      pickTask: pick(['Түншийн порталын эхлэлийн уулзалт', 'Partner portal kickoff'])
+    };
+  }
+}
+</script>
+</body>
+</html>

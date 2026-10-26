@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<title>MobileInbox — Kite Tasks</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit;color:inherit}
+</style>
+</helmet>
+
+<div lang="{{lang}}" style="width: 1840px; min-height: 3300px; box-sizing: border-box; padding: 56px 64px 96px; display: flex; flex-direction: column; gap: 56px; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 15px; line-height: 22px; color: {{t.text}}; background: {{t.board}}; -webkit-font-smoothing: antialiased; {{t.scheme}}">
+
+  <header style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px">
+    <div style="display: flex; flex-direction: column; gap: 8px; max-width: 900px">
+      <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 12px; line-height: 16px; color: {{t.muted}}">Kite Tasks · iOS + Android · 390 × 844</span>
+      <h1 style="margin: 0; font-size: 40px; line-height: 48px; font-weight: 600; letter-spacing: -0.02em">MobileInbox</h1>
+      <p style="margin: 0; font-size: 15px; line-height: 22px; color: {{t.text3}}">{{L.intro}}</p>
+    </div>
+    <div aria-label="{{L.preview}}" style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 8px 8px 8px 16px; border: 1px dashed {{t.border2}}; border-radius: 14px">
+      <span style="font-size: 12px; font-weight: 600; color: {{t.muted}}">{{L.preview}}</span>
+      <sc-for list="{{toggles}}" as="tg" hint-placeholder-count="2">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <span style="font-size: 13px; color: {{t.text3}}">{{tg.label}}</span>
+          <div role="radiogroup" aria-label="{{tg.label}}" style="display: flex; gap: 2px; padding: 2px; border-radius: 10px; background: {{t.seg}}">
+            <sc-for list="{{tg.opts}}" as="o" hint-placeholder-count="2">
+              <button role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}" style="height: 32px; padding: 0 12px; border: 0; border-radius: 8px; font-size: 13px; font-weight: 600; {{o.style}}">{{o.label}}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </header>
+
+  <section style="display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; padding-bottom: 14px; border-bottom: 1px solid {{t.border}}">
+      <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 13px; color: {{accentInk}}">01–11</span>
+      <h2 style="margin: 0; font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em">{{L.secTitle}}</h2>
+      <span style="font-size: 14px; color: {{t.muted}}">{{L.secSub}}</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 64px 48px; align-items: start">
+
+      <!-- ===================== INBOX PHONES ===================== -->
+      <sc-for list="{{inboxPhones}}" as="ph" hint-placeholder-count="5">
+        <div style="display: flex; flex-direction: column; gap: 16px; {{ph.order}}">
+          <span style="{{cap}}">{{ph.cap}}</span>
+          <div style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; box-shadow: {{t.device}}">
+            <div style="flex: none; height: 59px"></div>
+            <div style="flex: none; display: flex; align-items: center; height: 44px; padding: 0 4px">
+              <button aria-label="{{L.wsSwitch}}" style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 8px 0 12px; border: 0; border-radius: 12px; background: transparent">
+                <span style="width: 28px; height: 28px; border-radius: 7px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600">K</span>
+                <span style="font-size: 15px; font-weight: 600">Kite Studio</span>
+              </button>
+              <span style="flex: 1"></span>
+              <button onClick="{{ph.markAll}}" aria-label="{{L.markAll}}" aria-disabled="{{ph.noneUnread}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ph.markColor}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5M22 10l-7.5 7.5L13 16"></path></svg></button>
+              <a href="#" aria-label="{{L.settings}}" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: {{t.text2}}"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg></a>
+            </div>
+            <h1 style="flex: none; margin: 0; padding: 2px 16px 6px; font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.01em">{{L.inbox}}</h1>
+            <div role="tablist" aria-label="{{L.inboxFilter}}" style="flex: none; display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; padding: 0 12px; border-bottom: 1px solid {{t.divider}}">
+              <sc-for list="{{ph.tabs}}" as="tb" hint-placeholder-count="4">
+                <button role="tab" aria-selected="{{tb.on}}" onClick="{{tb.pick}}" style="flex: none; display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 8px; border: 0; background: transparent; font-size: 14px; font-weight: 600; white-space: nowrap; {{tb.style}}">
+                  {{tb.label}}
+                  <sc-if value="{{tb.hasCount}}" hint-placeholder-val="{{ false }}"><span style="min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px; background: {{accent}}; color: #FFFFFF; font-size: 11px; line-height: 18px; text-align: center">{{tb.count}}</span></sc-if>
+                </button>
+              </sc-for>
+            </div>
+
+            <div style="flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none">
+              <div style="display: flex; flex-direction: column; padding-bottom: 120px">
+                <sc-if value="{{ph.showPinned}}" hint-placeholder-val="{{ true }}">
+                  <section aria-label="{{L.pinned}}" style="margin: 12px 16px 4px; display: flex; flex-direction: column; gap: 12px; padding: 12px; border: 1.5px solid {{accent}}; border-radius: 14px; background: {{t.bg}}">
+                    <div style="display: flex; align-items: flex-start; gap: 12px">
+                      <span aria-hidden="true" style="flex: none; width: 36px; height: 36px; border-radius: 10px; background: {{accentSoft}}; color: {{accentInk}}; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M8 9h8M8 13h5"></path></svg></span>
+                      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                        <span style="display: flex; align-items: center; gap: 6px; font-size: 12px; line-height: 16px; font-weight: 600; color: {{accentInk}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 3H8l1 7-3 3v2h5v6l1 1 1-1v-6h5v-2l-3-3z"></path></svg>{{L.pinned}}</span>
+                        <span style="font-size: 15px; line-height: 20px; font-weight: 600">{{L.remTitle}}</span>
+                        <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.remMeta}}</span>
+                      </span>
+                    </div>
+                    <div style="display: flex; gap: 8px">
+                      <a href="#" style="flex: 1; display: flex; align-items: center; justify-content: center; height: 44px; border-radius: 12px; background: {{accent}}; color: #FFFFFF; font-size: 15px; font-weight: 600; text-decoration: none">{{L.writeUpdate}}</a>
+                      <button style="flex: 1; height: 44px; border: 1px solid {{t.border}}; border-radius: 12px; background: {{t.bg}}; font-size: 15px; font-weight: 500; color: {{t.text}}">{{L.snooze}}</button>
+                    </div>
+                  </section>
+                </sc-if>
+
+                <sc-for list="{{ph.groups}}" as="g" hint-placeholder-count="2">
+                  <div style="display: flex; flex-direction: column">
+                    <h2 style="margin: 0; height: 36px; padding: 0 16px 6px; box-sizing: border-box; display: flex; align-items: flex-end; font-size: 13px; line-height: 18px; font-weight: 600; color: {{t.muted}}">{{g.label}}</h2>
+                    <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="4">
+                      <div style="position: relative; overflow: hidden; border-bottom: 1px solid {{t.divider}}">
+                        <sc-if value="{{r.swipeRight}}" hint-placeholder-val="{{ false }}">
+                          <div aria-hidden="true" style="position: absolute; inset: 0; display: flex; background: {{accent}}">
+                            <span style="width: 88px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #FFFFFF; font-size: 12px; font-weight: 600"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5V19a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"></path><path d="m3 9.5 9 6 9-6"></path></svg>{{L.read}}</span>
+                          </div>
+                        </sc-if>
+                        <sc-if value="{{r.swipeLeft}}" hint-placeholder-val="{{ false }}">
+                          <div aria-hidden="true" style="position: absolute; inset: 0; display: flex; justify-content: flex-end; background: #52525B">
+                            <span style="width: 88px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #FFFFFF; font-size: 12px; font-weight: 600"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18v4H3z"></path><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"></path></svg>{{L.archive}}</span>
+                          </div>
+                        </sc-if>
+                        <a href="{{r.href}}" aria-label="{{r.aria}}" style="position: relative; display: flex; gap: 12px; padding: 12px 16px; background: {{t.bg}}; color: {{t.text}}; text-decoration: none; {{r.shift}}">
+                          <sc-if value="{{r.isPerson}}" hint-placeholder-val="{{ true }}">
+                            <span style="flex: none; width: 36px; height: 36px; border-radius: 18px; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{r.avatar}}">{{r.initials}}</span>
+                          </sc-if>
+                          <sc-if value="{{r.isSystem}}" hint-placeholder-val="{{ false }}">
+                            <span aria-hidden="true" style="flex: none; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; {{r.tile}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{r.icon}}"></path></svg></span>
+                          </sc-if>
+                          <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+                            <span style="font-size: 14px; line-height: 20px; color: {{t.text2}}"><strong style="{{r.whoStyle}}">{{r.who}}</strong> {{r.verb}} <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 13px; color: {{t.text}}">{{r.key}}</span></span>
+                            <sc-if value="{{r.hasTask}}" hint-placeholder-val="{{ false }}"><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; line-height: 20px; {{r.taskStyle}}">{{r.task}}</span></sc-if>
+                            <sc-if value="{{r.hasPill}}" hint-placeholder-val="{{ false }}">
+                              <span style="align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: 6px; font-size: 12px; font-weight: 500; {{r.pillStyle}}"><span style="width: 10px; height: 10px; box-sizing: border-box; border-radius: 5px; {{r.pillRing}}"></span>{{r.pill}}</span>
+                            </sc-if>
+                            <sc-if value="{{r.hasQuote}}" hint-placeholder-val="{{ false }}">
+                              <span style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; padding: 6px 10px; border-radius: 8px; background: {{t.fill}}; font-size: 14px; line-height: 20px; color: {{t.text2}}">{{r.quote}}</span>
+                            </sc-if>
+                            <span style="font-size: 12px; line-height: 16px; color: {{t.muted}}">{{r.time}} · {{r.where}}</span>
+                          </span>
+                          <sc-if value="{{r.unread}}" hint-placeholder-val="{{ false }}">
+                            <span aria-hidden="true" style="flex: none; width: 8px; height: 8px; margin-top: 6px; border-radius: 4px; background: {{accent}}"></span>
+                          </sc-if>
+                        </a>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-for>
+
+                <!-- All caught up -->
+                <sc-if value="{{ph.emptyCaught}}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 64px 24px 0; text-align: center">
+                    <div aria-hidden="true" style="position: relative; width: 104px; height: 104px; border-radius: 52px; background: {{t.surface2}}; border: 1px solid {{t.divider}}; display: flex; align-items: center; justify-content: center">
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="{{t.faint}}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+                      <span style="position: absolute; right: 2px; top: 4px; width: 30px; height: 30px; border-radius: 15px; background: {{t.green}}; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 4px {{t.bg}}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg></span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px">
+                      <h2 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 600">{{L.caughtTitle}}</h2>
+                      <p style="margin: 0; font-size: 15px; line-height: 22px; color: {{t.text3}}">{{L.caughtBody}}</p>
+                    </div>
+                    <div style="align-self: stretch; display: flex; flex-direction: column; gap: 8px">
+                      <a href="MobileMyTasks.dc.html" style="display: flex; align-items: center; justify-content: center; height: 48px; border-radius: 12px; background: {{accent}}; color: #FFFFFF; font-size: 16px; font-weight: 600; text-decoration: none">{{L.goMyTasks}}</a>
+                      <a href="#" style="display: flex; align-items: center; justify-content: center; height: 48px; border-radius: 12px; border: 1px solid {{t.border}}; color: {{t.text}}; font-size: 16px; font-weight: 600; text-decoration: none">{{L.settings}}</a>
+                    </div>
+                    <a href="#" style="display: flex; align-items: center; height: 44px; font-size: 14px; font-weight: 500; color: {{accentInk}}; text-decoration: none">{{L.viewArchived}}</a>
+                  </div>
+                </sc-if>
+                <!-- Archived empty -->
+                <sc-if value="{{ph.emptyArchived}}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 80px 32px 0; text-align: center">
+                    <div aria-hidden="true" style="width: 88px; height: 88px; border-radius: 44px; background: {{t.surface2}}; border: 1px solid {{t.divider}}; display: flex; align-items: center; justify-content: center">
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="{{t.faint}}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18v4H3z"></path><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"></path></svg>
+                    </div>
+                    <h2 style="margin: 0; font-size: 20px; line-height: 26px; font-weight: 600">{{L.archEmptyTitle}}</h2>
+                    <p style="margin: 0; font-size: 15px; line-height: 22px; color: {{t.text3}}">{{L.archEmptyBody}}</p>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+
+            <sc-if value="{{ph.toast}}" hint-placeholder-val="{{ false }}">
+              <div role="status" style="position: absolute; z-index: 3; left: 16px; right: 16px; bottom: 91px; display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 4px 0 16px; box-sizing: border-box; border-radius: 12px; background: {{t.toastBg}}; color: {{t.toastText}}; box-shadow: {{t.shadowMenu}}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M3 4h18v4H3z"></path><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"></path></svg>
+                <span style="flex: 1; min-width: 0; font-size: 14px; line-height: 20px">{{L.archived}}</span>
+                <button style="flex: none; height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; font-size: 14px; font-weight: 600; color: {{t.toastAction}}">{{L.undo}}</button>
+              </div>
+            </sc-if>
+
+            <nav aria-label="{{L.tabsAria}}" style="position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.bg}}; border-top: 1px solid {{t.divider}}">
+              <div style="display: flex; height: 49px; padding: 0 4px">
+                <sc-for list="{{ph.tabbar}}" as="tb" hint-placeholder-count="5">
+                  <a href="#" aria-current="{{tb.current}}" style="flex: 1; min-width: 0; height: 49px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; {{tb.color}}">
+                    <span style="position: relative; width: 24px; height: 24px">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{tb.sw}}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{tb.d1}}"></path><path d="{{tb.d2}}"></path></svg>
+                      <sc-if value="{{tb.hasBadge}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: -4px; left: 14px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px; background: {{accent}}; color: #FFFFFF; font-size: 11px; font-weight: 600; line-height: 18px; text-align: center; box-shadow: 0 0 0 2px {{t.bg}}">{{tb.badge}}</span></sc-if>
+                      <sc-if value="{{tb.hasDot}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: -1px; right: -3px; width: 8px; height: 8px; border-radius: 4px; background: {{accent}}; box-shadow: 0 0 0 2px {{t.bg}}"></span></sc-if>
+                    </span>
+                    <span style="max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; line-height: 14px; {{tb.weight}}">{{tb.label}}</span>
+                  </a>
+                </sc-for>
+              </div>
+              <div style="height: 34px"></div>
+            </nav>
+          </div>
+        </div>
+      </sc-for>
+
+      <!-- ===================== SETTINGS PHONES ===================== -->
+      <sc-for list="{{settingsPhones}}" as="sp" hint-placeholder-count="2">
+        <div style="display: flex; flex-direction: column; gap: 16px; {{sp.order}}">
+          <span style="{{cap}}">{{sp.cap}}</span>
+          <div style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.surface2}}; box-shadow: {{t.device}}">
+            <div style="flex: none; height: 59px; background: {{t.bg}}"></div>
+            <div style="flex: none; position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; height: 56px; padding: 0 4px; background: {{t.bg}}; border-bottom: 1px solid {{t.divider}}">
+              <div style="display: flex"><a href="#" aria-label="{{L.back}}" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: {{t.text}}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a></div>
+              <span style="max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 16px; line-height: 22px; font-weight: 600">{{L.settings}}</span>
+              <div></div>
+            </div>
+            <div style="flex: 1; min-height: 0; {{sp.scroll}}">
+              <div style="display: flex; flex-direction: column; gap: 8px; padding: 16px 0 60px; {{sp.shift}}">
+
+                <div style="margin: 0 16px; display: flex; flex-direction: column; border-radius: 14px; background: {{t.bg}}; border: 1px solid {{t.border}}; overflow: hidden">
+                  <div style="display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 8px 8px 8px 16px">
+                    <span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 16px; line-height: 22px; font-weight: 600">{{L.pushAll}}</span><span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.pushAllSub}}</span></span>
+                    <button role="switch" aria-checked="{{master.on}}" aria-label="{{L.pushAll}}" onClick="{{master.toggle}}" style="flex: none; width: 60px; height: 44px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center"><span style="width: 48px; height: 28px; border-radius: 14px; padding: 2px; box-sizing: border-box; display: flex; {{master.track}}"><span style="width: 24px; height: 24px; border-radius: 12px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.25)"></span></span></button>
+                  </div>
+                </div>
+
+                <h2 style="margin: 12px 0 0; padding: 0 32px 4px; font-size: 13px; line-height: 18px; font-weight: 600; color: {{t.muted}}">{{L.whatAbout}}</h2>
+                <div style="margin: 0 16px; display: flex; flex-direction: column; border-radius: 14px; background: {{t.bg}}; border: 1px solid {{t.border}}; overflow: hidden; {{master.dim}}">
+                  <sc-for list="{{types}}" as="ty" hint-placeholder-count="5">
+                    <div style="display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 8px 8px 8px 16px; border-bottom: 1px solid {{t.divider}}">
+                      <span aria-hidden="true" style="flex: none; width: 32px; height: 32px; border-radius: 8px; background: {{t.fill}}; color: {{t.text2}}; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ty.icon}}"></path></svg></span>
+                      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 15px; line-height: 20px; font-weight: 500">{{ty.label}}</span><span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{ty.sub}}</span></span>
+                      <button role="switch" aria-checked="{{ty.on}}" aria-label="{{ty.label}}" onClick="{{ty.toggle}}" style="flex: none; width: 60px; height: 44px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center"><span style="width: 48px; height: 28px; border-radius: 14px; padding: 2px; box-sizing: border-box; display: flex; {{ty.track}}"><span style="width: 24px; height: 24px; border-radius: 12px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.25)"></span></span></button>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <h2 style="margin: 12px 0 0; padding: 0 32px 4px; font-size: 13px; line-height: 18px; font-weight: 600; color: {{t.muted}}">{{L.perProject}}</h2>
+                <div style="margin: 0 16px; display: flex; flex-direction: column; border-radius: 14px; background: {{t.bg}}; border: 1px solid {{t.border}}; overflow: hidden">
+                  <sc-for list="{{projects}}" as="pj" hint-placeholder-count="4">
+                    <button aria-haspopup="dialog" style="display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 12px 0 16px; border: 0; border-bottom: 1px solid {{t.divider}}; background: transparent; text-align: left">
+                      <span style="flex: none; width: 8px; height: 8px; border-radius: 4px; {{pj.dot}}"></span>
+                      <span style="flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; color: {{t.text}}">{{pj.name}}</span>
+                      <span style="font-size: 14px; color: {{t.text3}}">{{pj.level}}</span>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{t.faint}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+                    </button>
+                  </sc-for>
+                </div>
+                <p style="margin: 0; padding: 0 32px; font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.levelsNote}}</p>
+
+                <h2 style="margin: 12px 0 0; padding: 0 32px 4px; font-size: 13px; line-height: 18px; font-weight: 600; color: {{t.muted}}">{{L.quiet}}</h2>
+                <div style="margin: 0 16px; display: flex; flex-direction: column; border-radius: 14px; background: {{t.bg}}; border: 1px solid {{t.border}}; overflow: hidden">
+                  <div style="display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 6px 8px 6px 16px; border-bottom: 1px solid {{t.divider}}">
+                    <span style="flex: 1; font-size: 15px; font-weight: 500">{{L.quietOn}}</span>
+                    <button role="switch" aria-checked="{{quiet.on}}" aria-label="{{L.quietOn}}" onClick="{{quiet.toggle}}" style="flex: none; width: 60px; height: 44px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center"><span style="width: 48px; height: 28px; border-radius: 14px; padding: 2px; box-sizing: border-box; display: flex; {{quiet.track}}"><span style="width: 24px; height: 24px; border-radius: 12px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.25)"></span></span></button>
+                  </div>
+                  <sc-for list="{{quietRows}}" as="q" hint-placeholder-count="3">
+                    <button style="display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 12px 0 16px; border: 0; border-bottom: 1px solid {{t.divider}}; background: transparent; text-align: left">
+                      <span style="flex: 1; font-size: 15px; color: {{t.text}}">{{q.label}}</span>
+                      <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 14px; color: {{t.text3}}">{{q.value}}</span>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{t.faint}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+                    </button>
+                  </sc-for>
+                </div>
+                <p style="margin: 0; padding: 0 32px; font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.quietNote}}</p>
+                <p style="margin: 8px 0 0; padding: 0 32px; font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.osNote}}</p>
+              </div>
+            </div>
+
+            <sc-if value="{{sp.sheet}}" hint-placeholder-val="{{ false }}">
+              <div aria-hidden="true" style="position: absolute; z-index: 4; inset: 0; background: {{t.scrim}}"></div>
+              <div role="dialog" aria-modal="true" aria-labelledby="lvl-h" style="position: absolute; z-index: 5; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.raised}}; border-radius: 16px 16px 0 0; box-shadow: {{t.shadowSheet}}">
+                <div style="height: 20px; display: flex; justify-content: center; padding-top: 6px; box-sizing: border-box"><span style="width: 36px; height: 5px; border-radius: 3px; background: {{t.grabber}}"></span></div>
+                <div style="display: flex; align-items: center; height: 52px; padding: 0 4px 0 16px">
+                  <h2 id="lvl-h" style="flex: 1; margin: 0; display: flex; align-items: center; gap: 8px; font-size: 17px; line-height: 22px; font-weight: 600"><span style="width: 8px; height: 8px; border-radius: 4px; background: #0284C7"></span>{{L.chkName}}</h2>
+                  <button style="height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; font-size: 16px; font-weight: 600; color: {{accentInk}}">{{L.done}}</button>
+                </div>
+                <div role="radiogroup" aria-labelledby="lvl-h" style="display: flex; flex-direction: column; padding-bottom: 8px">
+                  <sc-for list="{{levels}}" as="lv" hint-placeholder-count="3">
+                    <button role="radio" aria-checked="{{lv.on}}" style="display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 8px 16px; box-sizing: border-box; border: 0; background: transparent; text-align: left">
+                      <span aria-hidden="true" style="flex: none; width: 22px; height: 22px; box-sizing: border-box; border-radius: 11px; display: flex; align-items: center; justify-content: center; {{lv.ring}}"><span style="width: 10px; height: 10px; border-radius: 5px; background: #FFFFFF; {{lv.dot}}"></span></span>
+                      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 15px; line-height: 20px; font-weight: 500; color: {{t.text}}">{{lv.label}}</span><span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{lv.sub}}</span></span>
+                    </button>
+                  </sc-for>
+                </div>
+                <div style="height: 34px"></div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+
+      <!-- ===================== LOCK SCREENS ===================== -->
+      <sc-for list="{{locks}}" as="lk" hint-placeholder-count="4">
+        <div style="display: flex; flex-direction: column; gap: 16px; {{lk.order}}">
+          <span style="{{cap}}">{{lk.cap}}</span>
+          <div lang="{{lk.lang}}" style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; box-shadow: {{t.device}}; {{lk.wall}}">
+            <div style="flex: none; height: 59px"></div>
+
+            <!-- iOS -->
+            <sc-if value="{{lk.ios}}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding-top: 18px; color: #FFFFFF">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+                <span style="margin-top: 6px; font-size: 18px; line-height: 24px; font-weight: 600">{{lk.date}}</span>
+                <span style="font-size: 92px; line-height: 96px; font-weight: 600; letter-spacing: -0.02em">09:47</span>
+              </div>
+              <div style="flex: 1"></div>
+              <div style="display: flex; flex-direction: column; gap: 8px; padding: 0 12px 24px">
+                <sc-for list="{{lk.cards}}" as="n" hint-placeholder-count="2">
+                  <div style="position: relative; display: flex; gap: 10px; padding: 12px 14px; border-radius: 22px; {{lk.cardBg}}">
+                    <span aria-hidden="true" style="flex: none; width: 38px; height: 38px; border-radius: 9px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 600">K</span>
+                    <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                      <span style="display: flex; align-items: baseline; gap: 8px"><strong style="flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; line-height: 20px; font-weight: 600; {{lk.ink}}">{{n.title}}</strong><span style="flex: none; font-size: 13px; {{lk.sub}}">{{n.time}}</span></span>
+                      <span style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-size: 15px; line-height: 20px; {{lk.ink}}">{{n.body}}</span>
+                    </span>
+                  </div>
+                </sc-for>
+                <span style="align-self: center; margin-top: 4px; font-size: 13px; color: rgba(255,255,255,0.75)">{{lk.more}}</span>
+              </div>
+            </sc-if>
+
+            <!-- Android -->
+            <sc-if value="{{lk.android}}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; align-items: center; padding-top: 24px; color: #FFFFFF">
+                <span style="font-size: 84px; line-height: 84px; font-weight: 400; letter-spacing: -0.02em">09</span>
+                <span style="font-size: 84px; line-height: 84px; font-weight: 400; letter-spacing: -0.02em">47</span>
+                <span style="margin-top: 10px; font-size: 15px; line-height: 20px">{{lk.date}}</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 4px; padding: 28px 10px 0">
+                <sc-for list="{{lk.cards}}" as="n" hint-placeholder-count="2">
+                  <div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 8px; border-radius: {{n.radius}}; {{lk.cardBg}}">
+                    <span style="display: flex; align-items: center; gap: 6px; font-size: 12px; line-height: 16px; {{lk.sub}}">
+                      <span aria-hidden="true" style="width: 18px; height: 18px; border-radius: 9px; background: {{accent}}; color: #FFFFFF; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center">K</span>
+                      Kite Tasks · {{n.where}} · {{n.time}}
+                    </span>
+                    <strong style="font-size: 15px; line-height: 20px; font-weight: 600; {{lk.ink}}">{{n.title}}</strong>
+                    <span style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 14px; line-height: 20px; {{lk.ink2}}">{{n.body}}</span>
+                    <sc-if value="{{n.hasActions}}" hint-placeholder-val="{{ false }}">
+                      <span style="display: flex; gap: 4px; margin-left: -8px">
+                        <sc-for list="{{n.actions}}" as="a" hint-placeholder-count="2">
+                          <button style="height: 44px; padding: 0 10px; border: 0; border-radius: 22px; background: transparent; font-size: 14px; font-weight: 600; color: {{lk.action}}">{{a.label}}</button>
+                        </sc-for>
+                      </span>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+
+      <!-- ===================== BEHAVIOUR ===================== -->
+      <div style="display: flex; flex-direction: column; gap: 16px; order: 12">
+        <span style="{{cap}}">{{L.capRules}}</span>
+        <div style="width: 390px; box-sizing: border-box; display: flex; flex-direction: column; border: 1px solid {{t.border}}; border-radius: 16px; background: {{t.bg}}; overflow: hidden">
+          <sc-for list="{{rules}}" as="r" hint-placeholder-count="8">
+            <div style="display: flex; flex-direction: column; gap: 2px; padding: 12px 16px; border-bottom: 1px solid {{t.divider}}">
+              <span style="font-size: 14px; line-height: 20px; font-weight: 600">{{r.title}}</span>
+              <span style="font-size: 13px; line-height: 18px; color: {{t.text3}}">{{r.body}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"language":{"editor":"enum","default":"mn","options":["mn","en"]},"theme":{"editor":"enum","default":"light","options":["light","dark"]},"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"$preview":{"width":1840,"height":3300}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: undefined, theme: undefined, tab: 'all', readAll: false, master: true, types: { mentions: true, assigned: true, comments: true, status: false, standup: true }, quiet: true };
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const lang = s.lang || this.props.language || 'mn';
+    const mn = lang === 'mn';
+    const pick = (p) => (mn ? p[0] : p[1]);
+    const theme = s.theme || this.props.theme || 'light';
+    const dark = theme === 'dark';
+    const accent = this.props.accent ?? '#6E56CF';
+    const inks = { '#6E56CF': '#B4A5FF', '#2F6FEB': '#93B4FF', '#0F766E': '#5EEAD4', '#3F3F46': '#D4D4D8' };
+    const darkInk = inks[String(accent).toUpperCase()] || '#B4A5FF';
+    const accentInk = dark ? darkInk : accent;
+    const accentSoft = accent + (dark ? '33' : '1A');
+
+    const STR = {
+      mn: {
+        intro: 'Мэдэгдлийн таб: шүүлтүүр, дурдалт, стэндапын сануулга, шудрах үйлдэл, хоосон төлөвүүд, тохиргоо ба түгжигдсэн дэлгэц дээрх push.',
+        preview: 'Урьдчилан харах', langLabel: 'Хэл', themeLabel: 'Горим', light: 'Цайвар', dark: 'Бараан',
+        secTitle: 'Мэдэгдэл', secSub: 'Бүгд · дурдалт · шудрах · бүгдийг уншсан · архив хоосон · тохиргоо · төслийн түвшин · iOS ба Android push',
+        cap1: '01 · Бүгд · сануулга дээр тогтсон (таб, «бүгдийг уншсан» туршина)', cap2: '02 · Дурдалт', cap3: '03 · Шудрах: уншсан / архивлах · буцаах', cap4: '04 · Бүгдийг уншиж дууслаа', cap5: '05 · Архив хоосон',
+        cap6: '06 · Мэдэгдлийн тохиргоо (унтраалга туршина)', cap7: '07 · Төслийн түвшин сонгох', cap8: '08 · iOS түгжээтэй дэлгэц · монгол', cap9: '09 · iOS lock screen · English', cap10: '10 · Android түгжээтэй дэлгэц · монгол', cap11: '11 · Android lock screen · English', capRules: 'Зан төлөв',
+        wsSwitch: 'Ажлын орчин солих: Kite Studio', markAll: 'Бүгдийг уншсан болгох', settings: 'Мэдэгдлийн тохиргоо', inbox: 'Мэдэгдэл', inboxFilter: 'Мэдэгдлийн шүүлтүүр',
+        tAll: 'Бүгд', tMentions: 'Дурдалт', tAssigned: 'Надад оноосон', tArchived: 'Архив',
+        pinned: 'Хүлээгдэж буй сануулга', remTitle: 'Мобайл багт шинэчлэлээ бичээрэй', remMeta: '10:00 хүртэл 13 минут · 5-аас 4 нь бичсэн', writeUpdate: 'Шинэчлэл бичих', snooze: '15 мин дараа',
+        today: 'Өнөөдөр', yesterday: 'Өчигдөр', read: 'Уншсан', archive: 'Архивлах', archived: 'Мэдэгдлийг архивласан', undo: 'Буцаах',
+        caughtTitle: 'Бүгдийг уншиж дууслаа', caughtBody: 'Дурдалт, шинэ даалгавар, дагаж буй ажлын сэтгэгдэл энд ирнэ. Уншсан мэдэгдэл 30 хоногийн дараа Архив руу шилжинэ.',
+        goMyTasks: 'Миний ажил руу очих', viewArchived: '24 архивласан мэдэгдэл харах',
+        archEmptyTitle: 'Архив хоосон', archEmptyBody: 'Зүүн тийш шударч архивласан эсвэл 30 хоногоос дээш уншсан мэдэгдэл энд хадгалагдана.',
+        tabsAria: 'Үндсэн цэс', tabs: ['Миний ажил', 'Төслүүд', 'Мэдэгдэл', 'Стэндап', 'Бусад'], back: 'Буцах', done: 'Болсон',
+        pushAll: 'Push мэдэгдэл', pushAllSub: 'Энэ утсан дээр · Kite Studio', whatAbout: 'Юуны тухай мэдэгдэх вэ', perProject: 'Төсөл бүрээр',
+        levelsNote: '«Зөвхөн шууд» — зөвхөн таныг дурдсан, танд оноосон, эсвэл таны ажлын өөрчлөлт.',
+        quiet: 'Чимээгүй цаг', quietOn: 'Чимээгүй цаг', quietNote: 'Энэ хугацаанд push дуугарахгүй; ирсэн бүхэн Мэдэгдэл хэсэгт хүлээж, өглөө нэг тойм болж ирнэ.',
+        osNote: 'Утасны тохиргоонд Kite-ийн мэдэгдлийг хаасан бол эндхийн тохиргоо ажиллахгүй.',
+        chkName: 'Төлбөрийн хуудас v2'
+      },
+      en: {
+        intro: 'The Inbox tab: filters, mentions, standup reminders, swipe actions, empty states, settings and push on the lock screen.',
+        preview: 'Preview', langLabel: 'Language', themeLabel: 'Theme', light: 'Light', dark: 'Dark',
+        secTitle: 'Inbox', secSub: 'All · mentions · swipe · all caught up · archived empty · settings · project level · iOS and Android push',
+        cap1: '01 · All · reminder pinned on top (try the tabs and “mark all read”)', cap2: '02 · Mentions', cap3: '03 · Swipe: read / archive · Undo', cap4: '04 · All caught up', cap5: '05 · Archived empty',
+        cap6: '06 · Notification settings (try the switches)', cap7: '07 · Choosing a project’s level', cap8: '08 · iOS lock screen · Mongolian', cap9: '09 · iOS lock screen · English', cap10: '10 · Android lock screen · Mongolian', cap11: '11 · Android lock screen · English', capRules: 'Behaviour',
+        wsSwitch: 'Switch workspace: Kite Studio', markAll: 'Mark all as read', settings: 'Notification settings', inbox: 'Inbox', inboxFilter: 'Inbox filter',
+        tAll: 'All', tMentions: 'Mentions', tAssigned: 'Assigned to me', tArchived: 'Archived',
+        pinned: 'Waiting reminder', remTitle: 'Post your Mobile team update', remMeta: '13 min left until 10:00 · 4 of 5 have posted', writeUpdate: 'Write update', snooze: 'In 15 min',
+        today: 'Today', yesterday: 'Yesterday', read: 'Read', archive: 'Archive', archived: 'Notification archived', undo: 'Undo',
+        caughtTitle: 'You’re all caught up', caughtBody: 'Mentions, new assignments and comments on tasks you follow will land here. Notifications you’ve read move to Archived after 30 days.',
+        goMyTasks: 'Go to My Tasks', viewArchived: 'View 24 archived notifications',
+        archEmptyTitle: 'Nothing archived', archEmptyBody: 'Notifications you swipe left, or read more than 30 days ago, are kept here.',
+        tabsAria: 'Main', tabs: ['My Tasks', 'Projects', 'Inbox', 'Standup', 'More'], back: 'Back', done: 'Done',
+        pushAll: 'Push notifications', pushAllSub: 'On this phone · Kite Studio', whatAbout: 'Notify me about', perProject: 'Per project',
+        levelsNote: '“Direct only” means you were mentioned, assigned, or something changed on your task.',
+        quiet: 'Quiet hours', quietOn: 'Quiet hours', quietNote: 'Push stays silent during these hours; everything waits in Inbox and arrives as one morning summary.',
+        osNote: 'If Kite notifications are off in your phone’s settings, these choices won’t apply.',
+        chkName: 'Checkout v2'
+      }
+    };
+    const L = STR[lang] || STR.mn;
+
+    const t = dark ? {
+      board: '#0A0A0B', bg: '#111113', surface2: '#161618', raised: '#1B1B1E', fill: '#1F1F23', chip: '#232328', seg: '#1F1F23',
+      border: '#26262B', border2: '#3A3A42', divider: '#1F1F23', grabber: '#3F3F46',
+      text: '#EDEDEF', text2: '#C9C9D1', text3: '#B4B4BC', muted: '#8E8E98', faint: '#5E5E68', green: '#22C55E', scrim: 'rgba(0,0,0,0.6)',
+      toastBg: '#EDEDEF', toastText: '#18181B', toastAction: accent,
+      shadowMenu: '0 12px 32px rgba(0,0,0,0.5)', shadowSheet: '0 -8px 32px rgba(0,0,0,0.5)',
+      device: '0 0 0 1px #2A2A30, 0 0 0 10px #232328, 0 24px 48px rgba(0,0,0,0.5)',
+      segOn: 'background:#2A2A30;color:#EDEDEF;box-shadow:0 1px 2px rgba(0,0,0,0.4)', segOff: 'background:transparent;color:#8E8E98',
+      scheme: 'color-scheme: dark'
+    } : {
+      board: '#F4F4F5', bg: '#FFFFFF', surface2: '#F7F7F8', raised: '#FFFFFF', fill: '#F4F4F5', chip: '#F1F1F3', seg: '#F1F1F3',
+      border: '#E6E6EA', border2: '#C4C4CC', divider: '#EFEFF2', grabber: '#D4D4D8',
+      text: '#18181B', text2: '#3F3F46', text3: '#52525B', muted: '#6B6B74', faint: '#A1A1AA', green: '#16A34A', scrim: 'rgba(24,24,27,0.32)',
+      toastBg: '#18181B', toastText: '#FAFAFA', toastAction: darkInk,
+      shadowMenu: '0 12px 32px rgba(24,24,27,0.14)', shadowSheet: '0 -8px 32px rgba(24,24,27,0.12)',
+      device: '0 0 0 1px #E6E6EA, 0 0 0 10px #18181B, 0 24px 48px rgba(24,24,27,0.18)',
+      segOn: 'background:#FFFFFF;color:#18181B;box-shadow:0 1px 2px rgba(24,24,27,0.08)', segOff: 'background:transparent;color:#6B6B74',
+      scheme: 'color-scheme: light'
+    };
+    const cap = 'font-family:Geist Mono,ui-monospace,monospace;font-size:12px;line-height:16px;color:' + t.muted;
+
+    const PP = {
+      bat: [['Бат О.', 'Bat O.'], ['БО', 'BO'], 'background:#CCFBF1;color:#115E59', 'background:#134E4A;color:#99F6E4'],
+      sara: [['Сараа К.', 'Sara K.'], ['СК', 'SK'], 'background:#FFE4E6;color:#9F1239', 'background:#881337;color:#FECDD3'],
+      dorj: [['Дорж Э.', 'Dorj E.'], ['ДЭ', 'DE'], 'background:#FEF3C7;color:#92400E', 'background:#78350F;color:#FDE68A'],
+      tem: [['Тэмүүлэн Г.', 'Temuulen G.'], ['ТГ', 'TG'], 'background:#DCFCE7;color:#166534', 'background:#14532D;color:#BBF7D0']
+    };
+    const person = (id) => ({ name: pick(PP[id][0]), initials: pick(PP[id][1]), style: dark ? PP[id][3] : PP[id][2] });
+
+    /* ---------- INBOX ITEMS ---------- */
+    const reviewRing = 'border:2px solid ' + accentInk + ';background:' + accentInk + '33';
+    const SYS = {
+      digest: ['M4 5h16M4 10h16M4 15h10M4 20h7', 'background:' + accentSoft + ';color:' + accentInk],
+      resolved: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8.5 12l2.5 2.5 4.5-5', dark ? 'background:rgba(34,197,94,0.16);color:#86EFAC' : 'background:#E8F5EC;color:#166534'],
+      help: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM5.6 5.6l12.8 12.8', dark ? 'background:rgba(248,113,113,0.14);color:#FCA5A5' : 'background:#FDECEC;color:#B42318']
+    };
+    const ITEMS = [
+      { id: 'i1', sec: 'today', tabs: ['mentions'], who: 'bat', verb: ['таныг дурдлаа', 'mentioned you in'], key: 'APP-142', task: ['Төлбөрийн хуудас — респонсив байрлал', 'Checkout page — responsive layout'],
+        quote: ['«@Ану Б. iOS Safari дээр QA дууслаа, бүх зүйл зөв харагдаж байна. Батлахад бэлэн, Android-ыг өнөөдөр 14:00 гэхэд шалгана.»', '“@Anu B. QA on iOS Safari is done and everything looks right. Ready for your sign-off — I’ll finish Android by 2pm today.”'],
+        time: ['24 мин', '24m'], where: ['Апп шинэчлэл', 'App Redesign'], unread: true, href: 'MobileTaskDetail.dc.html' },
+      { id: 'i2', sec: 'today', tabs: ['mentions'], who: 'dorj', verb: ['саад дээр тусламж хүслээ', 'asked for your help on a blocker'], key: '',
+        quote: ['«Төлбөрийн үйлчилгээ үзүүлэгчийн sandbox API түлхүүрийн хугацаа дууссан. Шинэ түлхүүр авах эрх надад алга.»', '“Payment provider sandbox API keys have expired. I don’t have access to request new ones.”'],
+        time: ['09:41', '9:41'], where: ['Мобайл баг · стэндап', 'Mobile team · standup'], unread: true, href: '#' },
+      { id: 'i3', sec: 'today', tabs: ['mentions'], who: 'sara', verb: ['таны шинэчлэлд хариуллаа', 'replied to your update'], key: '',
+        quote: ['«Танилцуулгын текстийн v3-ийг 11:00-д хамт үзэх үү?»', '“Want to go through onboarding copy v3 together at 11?”'],
+        time: ['09:24', '9:24'], where: ['Мобайл баг · стэндап', 'Mobile team · standup'], unread: true, href: '#' },
+      { id: 'i4', sec: 'today', tabs: ['assigned'], who: 'bat', verb: ['танд оноолоо', 'assigned you'], key: 'CHK-66', task: ['Төлбөрийн үйлчилгээ үзүүлэгчийн хяналт', 'Payment provider review'],
+        time: ['08:30', '8:30'], where: ['Төлбөрийн хуудас v2', 'Checkout v2'], unread: false, href: 'MobileTaskDetail.dc.html' },
+      { id: 'i5', sec: 'yesterday', tabs: [], sys: 'digest', title: ['Стэндапын тойм', 'Standup digest'], verb: ['· Мобайл баг', '· Mobile team'], key: '',
+        quote: ['5-аас 5 нь бичсэн · 2 саад · Тэмүүлэн таб самбарыг, Сараа дүрс тэмдгийг дуусгахаар ажиллаж байна.', '5 of 5 posted · 2 blockers · Temuulen is finishing the tab bar, Sara the icons.'],
+        time: ['18:00', '6:00 PM'], where: ['Мобайл баг', 'Mobile team'], unread: false, href: '#' },
+      { id: 'i6', sec: 'yesterday', tabs: [], sys: 'resolved', title: ['Саад шийдэгдлээ', 'Blocker resolved'], verb: ['· Сараа К.', '· Sara K.'], key: '',
+        quote: ['«Таб самбарын эцсийн дүрс тэмдгийг хүлээж байна» — Тэмүүлэнгийн стэндапаас', '“Waiting on final tab icons” — from Temuulen’s standup'],
+        time: ['16:40', '4:40 PM'], where: ['Мобайл баг', 'Mobile team'], unread: false, href: '#' },
+      { id: 'i7', sec: 'yesterday', tabs: [], who: 'bat', verb: ['төлөвийг өөрчиллөө', 'moved'], key: 'APP-142', task: ['Төлбөрийн хуудас — респонсив байрлал', 'Checkout page — responsive layout'], pill: true,
+        time: ['16:12', '4:12 PM'], where: ['Апп шинэчлэл', 'App Redesign'], unread: false, href: 'MobileTaskDetail.dc.html' },
+      { id: 'i8', sec: 'yesterday', tabs: ['mentions'], who: 'sara', verb: ['сэтгэгдэл бичлээ', 'commented on'], key: 'APP-133', task: ['Танилцуулгын текстийг Сараатай хянах', 'Review onboarding copy with Sara'],
+        quote: ['«Текстийн v3-ийг оруулсан — ихэнхдээ угтах дэлгэц.»', '“Pushed v3 of the copy — mostly the welcome screen.”'],
+        time: ['15:40', '3:40 PM'], where: ['Апп шинэчлэл', 'App Redesign'], unread: false, href: 'MobileTaskDetail.dc.html' }
+    ];
+    const row = (it, opts) => {
+      const unread = it.unread && !opts.readAll && !(opts.readIds || {})[it.id];
+      const sys = !!it.sys;
+      const p = sys ? null : person(it.who);
+      const who = sys ? pick(it.title) : p.name;
+      return {
+        id: it.id, href: it.href, isPerson: !sys, isSystem: sys,
+        avatar: p ? p.style : '', initials: p ? p.initials : '', icon: sys ? SYS[it.sys][0] : '', tile: sys ? SYS[it.sys][1] : '',
+        who, verb: pick(it.verb), key: it.key,
+        whoStyle: 'font-weight:600;color:' + t.text,
+        hasTask: !!it.task, task: it.task ? pick(it.task) : '', taskStyle: unread ? 'font-weight:500;color:' + t.text : 'color:' + t.text3,
+        hasPill: !!it.pill, pill: pick(['Хянагдаж буй', 'In Review']), pillStyle: 'background:' + accentSoft + ';color:' + accentInk, pillRing: reviewRing,
+        hasQuote: !!it.quote, quote: it.quote ? pick(it.quote) : '',
+        time: pick(it.time), where: pick(it.where), unread,
+        aria: who + ' ' + pick(it.verb) + ' ' + (it.key || '') + (unread ? (mn ? ', уншаагүй' : ', unread') : ''),
+        swipeRight: opts.swipeR === it.id, swipeLeft: opts.swipeL === it.id,
+        shift: opts.swipeR === it.id ? 'transform:translateX(88px)' : (opts.swipeL === it.id ? 'transform:translateX(-88px)' : '')
+      };
+    };
+    const grouped = (rows) => [['today', L.today], ['yesterday', L.yesterday]]
+      .map(([k, label]) => ({ label, rows: rows.filter((r) => r.sec === k) }))
+      .filter((g) => g.rows.length);
+
+    const TABI = {
+      my: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z', 'm8.5 12 2.5 2.5 4.5-5'],
+      projects: ['M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z', 'M3 10h18'],
+      inbox: ['M22 12h-6l-2 3h-4l-2-3H2', 'M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'],
+      standup: ['M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', 'M8 9h8M8 13h5'],
+      more: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z', 'M7.5 12h1M11.5 12h1M15.5 12h1']
+    };
+    const tabbar = (unread, dot) => ['my', 'projects', 'inbox', 'standup', 'more'].map((id, i) => ({
+      label: L.tabs[i], d1: TABI[id][0], d2: TABI[id][1], current: id === 'inbox' ? 'page' : 'false',
+      color: 'color:' + (id === 'inbox' ? accentInk : t.muted), weight: 'font-weight:' + (id === 'inbox' ? '600' : '500'),
+      sw: id === 'inbox' ? '2.25' : '1.75', hasBadge: id === 'inbox' && unread > 0, badge: String(unread), hasDot: id === 'standup' && dot
+    }));
+
+    const buildInbox = (o) => {
+      const tab = o.tab;
+      let items = ITEMS.slice();
+      if (o.empty || tab === 'archived') items = [];
+      else if (tab !== 'all') items = items.filter((it) => it.tabs.indexOf(tab) >= 0);
+      const rows = items.map((it) => ({ ...row(it, o), sec: it.sec }));
+      const allUnread = (o.empty ? [] : ITEMS).filter((it) => it.unread && !o.readAll && !(o.readIds || {})[it.id]);
+      const cnt = (k) => allUnread.filter((it) => k === 'all' || it.tabs.indexOf(k) >= 0).length;
+      const tabs = [['all', L.tAll], ['mentions', L.tMentions], ['assigned', L.tAssigned], ['archived', L.tArchived]].map(([k, label]) => ({
+        label, on: tab === k, hasCount: k !== 'archived' && cnt(k) > 0, count: String(cnt(k)),
+        style: tab === k ? 'color:' + t.text + ';box-shadow:inset 0 -2px 0 ' + accentInk : 'color:' + t.muted,
+        pick: o.interactive ? () => this.setState({ tab: k }) : () => {}
+      }));
+      const unreadN = allUnread.length;
+      return {
+        tabs, groups: grouped(rows), tabbar: tabbar(unreadN, !o.empty),
+        showPinned: !o.empty && (tab === 'all') && !o.hidePinned,
+        emptyCaught: !!o.empty && tab === 'all', emptyArchived: tab === 'archived',
+        noneUnread: unreadN === 0, markColor: unreadN ? t.text2 : t.faint,
+        markAll: o.interactive ? () => this.setState({ readAll: true }) : () => {}
+      };
+    };
+    const inboxPhones = [
+      { order: 'order:1', cap: L.cap1, toast: false, ...buildInbox({ tab: s.tab || 'all', readAll: !!s.readAll, interactive: true }) },
+      { order: 'order:2', cap: L.cap2, toast: false, ...buildInbox({ tab: 'mentions' }) },
+      { order: 'order:3', cap: L.cap3, toast: true, ...buildInbox({ tab: 'all', swipeR: 'i2', swipeL: 'i4', hidePinned: true }) },
+      { order: 'order:4', cap: L.cap4, toast: false, ...buildInbox({ tab: 'all', empty: true }) },
+      { order: 'order:5', cap: L.cap5, toast: false, ...buildInbox({ tab: 'archived' }) }
+    ];
+
+    /* ---------- SETTINGS ---------- */
+    const trackOn = 'background:' + accent + ';justify-content:flex-end';
+    const trackOff = 'background:' + (dark ? '#3F3F46' : '#D4D4D8') + ';justify-content:flex-start';
+    const masterOn = s.master !== false;
+    const master = { on: masterOn, track: masterOn ? trackOn : trackOff, dim: masterOn ? '' : 'opacity:0.5', toggle: () => this.setState({ master: !masterOn }) };
+    const tset = s.types || {};
+    const types = [
+      ['mentions', ['Дурдалт', 'Mentions'], ['Сэтгэгдэл, стэндап, тайлбарт @дурдах', '@mentions in comments, standups and descriptions'], 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM16 12v1.5a2.5 2.5 0 0 0 5 0V12a9 9 0 1 0-3.5 7.1'],
+      ['assigned', ['Надад оноосон', 'Assigned to me'], ['Шинэ ажил, хугацаа ойртох, хянагчаар томилох', 'New tasks, due soon, asked to review'], 'M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM4 21a8 8 0 0 1 16 0'],
+      ['comments', ['Сэтгэгдэл', 'Comments'], ['Миний дагаж буй ажлууд дээр', 'On tasks I follow'], 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'],
+      ['status', ['Төлөв өөрчлөлт', 'Status changes'], ['Миний ажил дараагийн төлөвт шилжих', 'When my tasks move to another status'], 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 3v18'],
+      ['standup', ['Стэндап', 'Standups'], ['Сануулга, тойм, саадад тусламж хүсэх, хариу', 'Reminders, digests, help requests, replies'], 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2zM8 9h8M8 13h5']
+    ].map(([k, label, sub, icon]) => {
+      const on = tset[k] !== undefined ? !!tset[k] : true;
+      return { label: pick(label), sub: pick(sub), icon, on, track: on ? trackOn : trackOff, toggle: () => this.setState({ types: { ...(this.state.types || {}), [k]: !on } }) };
+    });
+    const LV = { all: ['Бүгд', 'All'], direct: ['Зөвхөн шууд', 'Direct only'], none: ['Үгүй', 'None'] };
+    const projects = [
+      [['Апп шинэчлэл', 'App Redesign'], '#7C5CE0', 'all'], [['Төлбөрийн хуудас v2', 'Checkout v2'], '#0284C7', 'direct'],
+      [['Q4 замын зураг', 'Q4 Roadmap'], '#D97706', 'direct'], [['Мобайл хувилбар 4.2', 'Mobile release 4.2'], '#16A34A', 'all'], [['Брэнд шинэчлэл', 'Brand refresh'], '#DB2777', 'none']
+    ].map(([n, c, lv]) => ({ name: pick(n), dot: 'background:' + c, level: pick(LV[lv]) }));
+    const quietOn = s.quiet !== false;
+    const quiet = { on: quietOn, track: quietOn ? trackOn : trackOff, toggle: () => this.setState({ quiet: !quietOn }) };
+    const quietRows = [[['Эхлэх', 'From'], '22:00'], [['Дуусах', 'Until'], '08:00'], [['Өдрүүд', 'Days'], mn ? 'Өдөр бүр' : 'Every day']].map(([l, v]) => ({ label: pick(l), value: v }));
+    const levels = [
+      ['all', ['Шинэ ажил, сэтгэгдэл, төлөвийн өөрчлөлт бүр', 'Every new task, comment and status change'], false],
+      ['direct', ['Таныг дурдсан, танд оноосон, таны ажил өөрчлөгдсөн үед', 'When you’re mentioned, assigned, or your task changes'], true],
+      ['none', ['Push ирэхгүй; Мэдэгдэл хэсэгт л харагдана', 'No push; it only shows in Inbox'], false]
+    ].map(([k, sub, on]) => ({ label: pick(LV[k]), sub: pick(sub), on, ring: on ? 'background:' + accent : 'border:2px solid ' + (dark ? '#4A4A52' : '#C4C4CC'), dot: on ? '' : 'display:none' }));
+    const settingsPhones = [
+      { order: 'order:6', cap: L.cap6, scroll: 'overflow-y:auto;scrollbar-width:none', shift: '', sheet: false },
+      { order: 'order:7', cap: L.cap7, scroll: 'overflow:hidden', shift: 'margin-top:-420px', sheet: true }
+    ];
+
+    /* ---------- LOCK SCREENS ---------- */
+    const lockText = (m) => {
+      const P = (pair) => (m ? pair[0] : pair[1]);
+      return {
+        date: P(['Пүрэв, 10-р сарын 8', 'Thursday, October 8']),
+        n1: { title: P(['Бат О. · APP-142', 'Bat O. · APP-142']), body: P(['Таныг дурдлаа: «iOS Safari дээр QA дууслаа. Батлахад бэлэн.»', 'Mentioned you: “QA on iOS Safari is done. Ready for your sign-off.”']), where: P(['Апп шинэчлэл', 'App Redesign']) },
+        n2: { title: P(['Стэндап · Мобайл баг', 'Standup · Mobile team']), body: P(['Шинэчлэлээ 10:00-аас өмнө бичээрэй. 5-аас 4 нь бичсэн.', 'Post your update before 10:00. 4 of 5 have posted.']), where: P(['Мобайл баг', 'Mobile team']) },
+        now: P(['одоо', 'now']), ago: P(['13 мин', '13m']),
+        more: P(['Kite Tasks-аас өөр 2 мэдэгдэл', '2 more from Kite Tasks']),
+        reply: P(['Хариулах', 'Reply']), markRead: P(['Уншсан', 'Mark read']), write: P(['Шинэчлэл бичих', 'Write update']),
+        lang: m ? 'mn' : 'en'
+      };
+    };
+    const iosCard = dark ? 'background:rgba(38,38,42,0.82)' : 'background:rgba(246,246,248,0.86)';
+    const andCard = dark ? 'background:#2B2930' : 'background:#F7F2FA';
+    const lock = (ios, m, order, capText) => {
+      const x = lockText(m);
+      return {
+        order, cap: capText, ios, android: !ios, lang: x.lang, date: x.date, more: x.more,
+        wall: ios ? 'background:linear-gradient(160deg,#312E81 0%,#1E1B4B 45%,#0B1020 100%)' : 'background:linear-gradient(170deg,#134E4A 0%,#0F172A 60%,#020617 100%)',
+        cardBg: ios ? iosCard : andCard,
+        ink: 'color:' + (dark ? '#F4F4F5' : '#18181B'), ink2: 'color:' + (dark ? '#D4D4D8' : '#3F3F46'), sub: 'color:' + (dark ? '#A1A1AA' : '#6B6B74'),
+        action: dark ? darkInk : accent,
+        cards: [
+          { title: x.n1.title, body: x.n1.body, where: x.n1.where, time: x.now, hasActions: !ios, actions: [{ label: x.reply }, { label: x.markRead }], radius: '24px 24px 6px 6px' },
+          { title: x.n2.title, body: x.n2.body, where: x.n2.where, time: x.ago, hasActions: !ios, actions: [{ label: x.write }], radius: '6px 6px 24px 24px' }
+        ]
+      };
+    };
+    const locks = [lock(true, true, 'order:8', L.cap8), lock(true, false, 'order:9', L.cap9), lock(false, true, 'order:10', L.cap10), lock(false, false, 'order:11', L.cap11)];
+
+    const rules = [
+      [['Тогтсон сануулга', 'Pinned reminder'], ['Бичээгүй стэндапын сануулга хугацаа дуустал дээр тогтоно. Бичмэгц эсвэл хугацаа дуусахад алга болно.', 'An unposted standup reminder stays on top until its deadline. It disappears once you post or the deadline passes.']],
+      [['Мөр дарах', 'Tapping a row'], ['Ажлын мэдэгдэл ажлын дэлгэрэнгүй рүү, стэндапынх тухайн стэндап руу (саад бол саадын мөр рүү) очиж, уншсан болно.', 'Task rows open task detail; standup rows open that standup, scrolled to the blocker when relevant. Either marks it read.']],
+      [['Шудрах', 'Swipe'], ['Баруун: уншсан/уншаагүй. Зүүн: архивлах, 8 секунд «Буцаах».', 'Right: read/unread. Left: archive, with Undo for 8 s.']],
+      [['Тоо', 'Counts'], ['Таб болон доод самбарын тоо зөвхөн уншаагүйг харуулна. «Бүгдийг уншсан» нь сонгосон таб дотор л ажиллана.', 'Tab and tab-bar counts are unread only. “Mark all as read” applies to the current tab.']],
+      [['Snippet', 'Snippets'], ['Ишлэл 2 мөрөөр таслагдана. Push дээр 3 мөр (iOS) / 2 мөр (Android).', 'Quotes clamp at 2 lines; push shows 3 lines on iOS and 2 on Android.']],
+      [['Push-ийн агуулга', 'Push content'], ['Гарчиг: хүн · түлхүүр. Түгжээтэй үед агуулга нуух сонголт утасны тохиргоогоор.', 'Title: person · key. Hiding content while locked follows the phone’s own preview setting.']],
+      [['Android үйлдэл', 'Android actions'], ['Мөрөнд «Хариулах», «Уншсан» шууд; iOS дээр удаан дарахад гарна.', 'Reply and Mark read are inline on Android; on iOS they appear on long-press.']],
+      [['Чимээгүй цаг', 'Quiet hours'], ['Монголд оройн 22:00-аас өглөөний 08:00 анхдагч. Өглөө нэг тойм push ирнэ.', 'Defaults to 22:00–08:00 local time, followed by one morning summary push.']]
+    ].map(([title, body]) => ({ title: pick(title), body: pick(body) }));
+
+    const segBtn = (on) => (on ? t.segOn : t.segOff);
+    const toggles = [
+      { label: L.langLabel, opts: [['mn', 'МН'], ['en', 'EN']].map(([v, lab]) => ({ label: lab, on: lang === v, style: segBtn(lang === v), pick: () => this.setState({ lang: v }) })) },
+      { label: L.themeLabel, opts: [['light', L.light], ['dark', L.dark]].map(([v, lab]) => ({ label: lab, on: theme === v, style: segBtn(theme === v), pick: () => this.setState({ theme: v }) })) }
+    ];
+
+    return {
+      lang, L, t, cap, accent, accentInk, accentSoft, toggles,
+      inboxPhones, settingsPhones, master, types, projects, quiet, quietRows, levels, locks, rules
+    };
+  }
+}
+</script>
+</body>
+</html>

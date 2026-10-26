@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<title>MobileReports — Kite Tasks</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+</style>
+</helmet>
+
+<div lang="{{lang}}" style="width: 1840px; min-height: 2400px; box-sizing: border-box; padding: 56px 64px 96px; display: flex; flex-direction: column; gap: 56px; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 15px; line-height: 22px; color: {{t.text}}; background: {{t.board}}; -webkit-font-smoothing: antialiased; {{t.scheme}}">
+
+  <header style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px">
+    <div style="display: flex; flex-direction: column; gap: 8px; max-width: 900px">
+      <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 12px; line-height: 16px; color: {{t.muted}}">Kite Tasks · iOS + Android · 390 × 844</span>
+      <h1 style="margin: 0; font-size: 40px; line-height: 48px; font-weight: 600; letter-spacing: -0.02em">MobileReports</h1>
+      <p style="margin: 0; font-size: 15px; line-height: 22px; color: {{t.text3}}">{{L.intro}}</p>
+    </div>
+    <div aria-label="{{L.preview}}" style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 8px 8px 8px 16px; border: 1px dashed {{t.border2}}; border-radius: 14px">
+      <span style="font-size: 12px; font-weight: 600; color: {{t.muted}}">{{L.preview}}</span>
+      <sc-for list="{{toggles}}" as="tg" hint-placeholder-count="2">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <span style="font-size: 13px; color: {{t.text3}}">{{tg.label}}</span>
+          <div role="radiogroup" aria-label="{{tg.label}}" style="display: flex; gap: 2px; padding: 2px; border-radius: 10px; background: {{t.seg}}">
+            <sc-for list="{{tg.opts}}" as="o" hint-placeholder-count="2">
+              <button role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}" style="height: 32px; padding: 0 12px; border: 0; border-radius: 8px; font-size: 13px; font-weight: 600; {{o.style}}">{{o.label}}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </header>
+
+  <section style="display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; padding-bottom: 14px; border-bottom: 1px solid {{t.border}}">
+      <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 13px; color: {{accentInk}}">01–07</span>
+      <h2 style="margin: 0; font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em">{{L.secTitle}}</h2>
+      <span style="font-size: 14px; color: {{t.muted}}">{{L.secSub}}</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 64px 48px; align-items: start">
+      <sc-for list="{{phones}}" as="p" hint-placeholder-count="7">
+        <div style="display: flex; flex-direction: column; gap: 16px; {{p.order}}">
+          <span style="{{cap}}">{{p.cap}}</span>
+          <div style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.screen}}; box-shadow: {{t.device}}">
+            <div style="flex: none; height: 59px"></div>
+            <div style="flex: none; display: flex; align-items: center; justify-content: space-between; height: 44px; padding: 0 4px">
+              <a href="#" style="height: 44px; padding: 0 8px 0 4px; display: flex; align-items: center; gap: 2px; color: {{accentInk}}; text-decoration: none; font-size: 16px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>{{L.more}}</a>
+              <a href="#" aria-label="{{L.openWeb}}" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: {{t.text2}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a>
+            </div>
+            <div style="flex: none; padding: 0 16px 10px"><h1 style="margin: 0; font-size: 30px; line-height: 36px; font-weight: 600; letter-spacing: -0.02em">{{L.reports}}</h1></div>
+            <div style="flex: none; display: flex; flex-direction: column; gap: 10px; padding: 0 16px 12px; border-bottom: 1px solid {{t.divider}}">
+              <div role="tablist" style="display: flex; gap: 2px; height: 40px; padding: 2px; box-sizing: border-box; border-radius: 10px; background: {{t.seg}}">
+                <sc-for list="{{p.seg}}" as="o" hint-placeholder-count="2">
+                  <button role="tab" aria-selected="{{o.on}}" onClick="{{o.pick}}" style="flex: 1; min-width: 0; border: 0; border-radius: 8px; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; {{o.style}}">{{o.label}}</button>
+                </sc-for>
+              </div>
+              <div style="display: flex; gap: 8px">
+                <button aria-haspopup="dialog" style="flex: 1; min-width: 0; height: 44px; padding: 0 12px; box-sizing: border-box; border: 1px solid {{t.border}}; border-radius: 12px; background: {{t.card}}; display: flex; align-items: center; gap: 8px; text-align: left">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{t.text3}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM16 2v4M8 2v4M3 10h18"></path></svg>
+                  <span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 14px; line-height: 18px; font-weight: 600">{{L.periodName}}</span><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; line-height: 16px; color: {{t.muted}}">{{L.periodRange}}</span></span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{t.muted}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="m6 9 6 6 6-6"></path></svg>
+                </button>
+                <sc-if value="{{p.isWork}}" hint-placeholder-val="{{ false }}">
+                  <button style="flex: none; height: 44px; padding: 0 12px; box-sizing: border-box; border: 1px solid {{t.border}}; border-radius: 12px; background: {{t.card}}; display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600"><span style="width: 18px; height: 18px; border-radius: 5px; font-size: 10px; display: flex; align-items: center; justify-content: center; {{spaceBadge}}">{{spaceInitial}}</span>{{L.space}}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{t.muted}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+                </sc-if>
+              </div>
+            </div>
+
+            <div style="flex: 1; min-height: 0; overflow: hidden">
+              <div style="display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 120px; {{p.shift}}">
+
+                <sc-if value="{{p.isEmpty}}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 56px 20px 24px; text-align: center">
+                    <span aria-hidden="true" style="width: 64px; height: 64px; border-radius: 20px; background: {{accentSoft}}; color: {{accentInk}}; display: flex; align-items: center; justify-content: center; margin-bottom: 8px"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M8 17v-5M13 17V8M18 17v-9"></path></svg></span>
+                    <span style="font-size: 20px; line-height: 28px; font-weight: 600">{{L.emptyTitle}}</span>
+                    <span style="max-width: 300px; font-size: 15px; line-height: 22px; color: {{t.text3}}">{{L.emptyBody}}</span>
+                    <a href="MobileMyTasks.dc.html" style="margin-top: 8px; height: 44px; padding: 0 16px; border: 1px solid {{t.border}}; border-radius: 12px; background: {{t.card}}; display: flex; align-items: center; font-size: 15px; font-weight: 600; color: {{t.text}}; text-decoration: none">{{L.goMyTasks}}</a>
+                  </div>
+                </sc-if>
+
+                <!-- stat cards, stacked -->
+                <sc-for list="{{p.stats}}" as="st" hint-placeholder-count="4">
+                  <div style="display: flex; align-items: center; gap: 12px; min-height: 72px; padding: 12px 14px; box-sizing: border-box; border-radius: 14px; background: {{t.card}}; border: 1px solid {{t.border}}">
+                    <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                      <span style="font-size: 14px; line-height: 20px; color: {{t.text3}}">{{st.label}}</span>
+                      <span style="display: flex; align-items: center; gap: 4px; font-size: 13px; line-height: 18px; {{st.deltaStyle}}"><span aria-hidden="true">{{st.arrow}}</span>{{st.delta}}</span>
+                    </span>
+                    <span style="flex: none; display: flex; align-items: baseline; gap: 4px">
+                      <span style="font-size: 30px; line-height: 36px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums">{{st.value}}</span>
+                      <span style="font-size: 14px; color: {{t.muted}}">{{st.unit}}</span>
+                    </span>
+                  </div>
+                </sc-for>
+
+                <!-- charts: one per card -->
+                <sc-for list="{{p.charts}}" as="c" hint-placeholder-count="3">
+                  <figure style="margin: 0; display: flex; flex-direction: column; gap: 12px; padding: 14px; border-radius: 14px; background: {{t.card}}; border: 1px solid {{t.border}}">
+                    <figcaption style="display: flex; flex-direction: column; gap: 2px">
+                      <span style="font-size: 16px; line-height: 22px; font-weight: 600">{{c.title}}</span>
+                      <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{c.sub}}</span>
+                    </figcaption>
+
+                    <!-- column chart -->
+                    <sc-if value="{{c.isCols}}" hint-placeholder-val="{{ false }}">
+                      <div style="position: relative; display: flex; gap: 6px; height: 168px; padding-top: 28px; box-sizing: border-box">
+                        <div aria-hidden="true" style="flex: none; width: 18px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; padding-bottom: 22px; font-size: 11px; line-height: 12px; color: {{t.muted}}; font-variant-numeric: tabular-nums"><span>{{c.yMax}}</span><span>{{c.yMid}}</span><span>0</span></div>
+                        <div style="position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column">
+                          <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 6px; border-top: 1px dashed {{t.grid}}"></div>
+                          <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: calc(50% - 5px); border-top: 1px dashed {{t.grid}}"></div>
+                          <div role="list" style="position: relative; flex: 1; display: flex; align-items: flex-end; gap: 6px; border-bottom: 1px solid {{t.axis}}">
+                            <sc-for list="{{c.cols}}" as="b" hint-placeholder-count="8">
+                              <button role="listitem" aria-label="{{b.aria}}" onClick="{{b.pick}}" style="position: relative; flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; background: transparent; display: flex; align-items: flex-end; justify-content: center">
+                                <span style="width: 100%; max-width: 28px; border-radius: 4px 4px 0 0; {{b.barStyle}}"></span>
+                                <sc-if value="{{b.sel}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; z-index: 2; bottom: calc({{b.pct}}% + 6px); left: 50%; transform: translateX({{b.tipShift}}); white-space: nowrap; padding: 4px 8px; border-radius: 8px; background: {{t.tip}}; color: {{t.tipText}}; font-size: 12px; line-height: 16px; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.18)">{{b.tip}}</span></sc-if>
+                              </button>
+                            </sc-for>
+                          </div>
+                          <div aria-hidden="true" style="display: flex; gap: 6px; height: 22px; align-items: flex-end">
+                            <sc-for list="{{c.cols}}" as="b" hint-placeholder-count="8"><span style="flex: 1; min-width: 0; text-align: center; font-size: 11px; line-height: 14px; {{b.labelStyle}}">{{b.label}}</span></sc-for>
+                          </div>
+                        </div>
+                      </div>
+                    </sc-if>
+
+                    <!-- line chart -->
+                    <sc-if value="{{c.isLine}}" hint-placeholder-val="{{ false }}">
+                      <div style="display: flex; gap: 6px; height: 150px">
+                        <div aria-hidden="true" style="flex: none; width: 18px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; padding-bottom: 22px; font-size: 11px; line-height: 12px; color: {{t.muted}}"><span>4</span><span>2</span><span>0</span></div>
+                        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                          <svg viewBox="0 0 300 128" preserveAspectRatio="none" role="img" aria-label="{{c.aria}}" style="width: 100%; height: 128px; overflow: visible">
+                            <line x1="0" y1="4" x2="300" y2="4" stroke="{{t.grid}}" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"></line>
+                            <line x1="0" y1="66" x2="300" y2="66" stroke="{{t.grid}}" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"></line>
+                            <line x1="0" y1="128" x2="300" y2="128" stroke="{{t.axis}}" vector-effect="non-scaling-stroke"></line>
+                            <polyline points="{{c.points}}" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></polyline>
+                          </svg>
+                          <div aria-hidden="true" style="position: relative; height: 0">
+                            <sc-for list="{{c.dots}}" as="d" hint-placeholder-count="8"><span style="position: absolute; width: 8px; height: 8px; border-radius: 4px; background: {{accent}}; box-shadow: 0 0 0 2px {{t.card}}; {{d.pos}}"></span></sc-for>
+                            <span style="position: absolute; right: 0; top: {{c.lastTop}}; transform: translateY(-34px); padding: 3px 7px; border-radius: 6px; background: {{t.tip}}; color: {{t.tipText}}; font-size: 12px; font-weight: 600; white-space: nowrap">{{c.lastLabel}}</span>
+                          </div>
+                          <div aria-hidden="true" style="display: flex; justify-content: space-between; height: 22px; align-items: flex-end; font-size: 11px; line-height: 14px; color: {{t.muted}}"><span>{{c.x0}}</span><span>{{c.x1}}</span></div>
+                        </div>
+                      </div>
+                    </sc-if>
+
+                    <!-- horizontal bars -->
+                    <sc-if value="{{c.isRows}}" hint-placeholder-val="{{ false }}">
+                      <div role="list" style="display: flex; flex-direction: column">
+                        <sc-for list="{{c.rows}}" as="r" hint-placeholder-count="4">
+                          <button role="listitem" aria-label="{{r.aria}}" style="display: flex; flex-direction: column; gap: 6px; min-height: 48px; padding: 6px 0; box-sizing: border-box; border: 0; background: transparent; text-align: left">
+                            <span style="display: flex; align-items: center; gap: 8px; font-size: 14px; line-height: 18px">
+                              <sc-if value="{{r.hasAv}}" hint-placeholder-val="{{ false }}"><span style="flex: none; width: 22px; height: 22px; border-radius: 11px; font-size: 8px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{r.av}}">{{r.initials}}</span></sc-if>
+                              <sc-if value="{{r.hasDot}}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="flex: none; position: relative; width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; {{r.dot}}"><span style="position: absolute; {{r.g1}}"></span><span style="position: absolute; {{r.g2}}"></span></span></sc-if>
+                              <span style="flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: {{t.text}}">{{r.name}}</span>
+                              <sc-if value="{{r.over}}" hint-placeholder-val="{{ false }}"><span style="flex: none; display: inline-flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 600; color: {{t.redInk}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>{{r.overLabel}}</span></sc-if>
+                              <span style="flex: none; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: {{t.text2}}">{{r.value}}</span>
+                            </span>
+                            <span style="position: relative; display: flex; gap: 2px; height: 10px; width: 100%; border-radius: 5px; background: {{t.track}}">
+                              <span style="height: 10px; border-radius: 5px 0 0 5px; {{r.fill}}"></span>
+                              <span style="height: 10px; border-radius: 0 5px 5px 0; {{r.overFill}}"></span>
+                              <sc-if value="{{r.hasCap}}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position: absolute; top: -3px; width: 2px; height: 16px; border-radius: 1px; background: {{t.text}}; {{r.capPos}}"></span></sc-if>
+                            </span>
+                          </button>
+                        </sc-for>
+                      </div>
+                      <sc-if value="{{c.hasLegend}}" hint-placeholder-val="{{ false }}">
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; line-height: 16px; color: {{t.text3}}">
+                          <span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 12px; height: 8px; border-radius: 2px; background: {{accent}}"></span>{{L.lgLoad}}</span>
+                          <span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 2px; height: 12px; border-radius: 1px; background: {{t.text}}"></span>{{L.lgCap}}</span>
+                          <span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 12px; height: 8px; border-radius: 2px; background: {{t.red}}"></span>{{L.lgOver}}</span>
+                        </div>
+                      </sc-if>
+                    </sc-if>
+
+                    <button style="align-self: flex-start; height: 32px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: {{accentInk}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18M3 12h18M3 19h18"></path></svg>{{L.asTable}}</button>
+                  </figure>
+                </sc-for>
+
+                <sc-if value="{{p.hasWebLink}}" hint-placeholder-val="{{ true }}">
+                  <a href="#" style="display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 14px; border: 1.5px dashed {{t.border2}}; text-decoration: none; color: {{t.text}}">
+                    <span aria-hidden="true" style="flex: none; width: 40px; height: 40px; border-radius: 12px; background: {{accentSoft}}; color: {{accentInk}}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"></rect><path d="M8 21h8M12 18v3"></path></svg></span>
+                    <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                      <span style="font-size: 15px; line-height: 22px; font-weight: 600">{{L.openWeb}}</span>
+                      <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.openWebSub}}</span>
+                    </span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{t.muted}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>
+                  </a>
+                </sc-if>
+              </div>
+            </div>
+
+            <nav aria-label="{{L.tabsAria}}" style="position: absolute; z-index: 5; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.bg}}; border-top: 1px solid {{t.divider}}">
+              <div style="display: flex; height: 49px; padding: 0 4px">
+                <sc-for list="{{tabbar}}" as="tb" hint-placeholder-count="5">
+                  <a href="#" aria-current="{{tb.current}}" style="flex: 1; min-width: 0; height: 49px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; {{tb.color}}">
+                    <span style="position: relative; width: 24px; height: 24px">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{tb.sw}}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{tb.d1}}"></path><path d="{{tb.d2}}"></path></svg>
+                      <sc-if value="{{tb.hasBadge}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: -4px; left: 14px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px; background: {{accent}}; color: #FFFFFF; font-size: 11px; font-weight: 600; line-height: 18px; text-align: center; box-shadow: 0 0 0 2px {{t.bg}}">3</span></sc-if>
+                    </span>
+                    <span style="max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; line-height: 14px; {{tb.weight}}">{{tb.label}}</span>
+                  </a>
+                </sc-for>
+              </div>
+              <div style="height: 34px"></div>
+            </nav>
+
+            <!-- period sheet -->
+            <sc-if value="{{p.periodSheet}}" hint-placeholder-val="{{ false }}">
+              <div aria-hidden="true" style="position: absolute; z-index: 7; inset: 0; background: {{t.scrim}}"></div>
+              <div role="dialog" aria-modal="true" aria-labelledby="pd-h" style="position: absolute; z-index: 8; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.raised}}; border-radius: 16px 16px 0 0; box-shadow: {{t.shadowSheet}}">
+                <div style="height: 20px; display: flex; justify-content: center; padding-top: 6px; box-sizing: border-box"><span style="width: 36px; height: 5px; border-radius: 3px; background: {{t.grabber}}"></span></div>
+                <div style="display: flex; align-items: center; gap: 8px; padding: 2px 4px 8px 16px">
+                  <h2 id="pd-h" style="flex: 1; margin: 0; font-size: 17px; line-height: 22px; font-weight: 600">{{L.period}}</h2>
+                  <button style="height: 44px; padding: 0 12px; border: 0; background: transparent; font-size: 16px; font-weight: 600; color: {{accentInk}}">{{L.done}}</button>
+                </div>
+                <div role="radiogroup" aria-labelledby="pd-h" style="display: flex; flex-direction: column; border-top: 1px solid {{t.divider}}">
+                  <sc-for list="{{periods}}" as="o" hint-placeholder-count="6">
+                    <button role="radio" aria-checked="{{o.on}}" style="display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 6px 16px; box-sizing: border-box; border: 0; border-bottom: 1px solid {{t.divider}}; background: transparent; text-align: left">
+                      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 16px; line-height: 22px; {{o.labelStyle}}">{{o.label}}</span><span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{o.sub}}</span></span>
+                      <sc-if value="{{o.isOn}}" hint-placeholder-val="{{ false }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{accentInk}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg></sc-if>
+                      <sc-if value="{{o.chev}}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{t.faint}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></sc-if>
+                    </button>
+                  </sc-for>
+                  <div style="display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 16px; box-sizing: border-box">
+                    <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 16px; line-height: 22px">{{L.compare}}</span><span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.compareSub}}</span></span>
+                    <span role="switch" aria-checked="true" style="flex: none; width: 51px; height: 31px; border-radius: 16px; background: {{accent}}; position: relative"><span style="position: absolute; top: 2px; left: 22px; width: 27px; height: 27px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 2px 4px rgba(0,0,0,0.2)"></span></span>
+                  </div>
+                </div>
+                <div style="height: 34px"></div>
+              </div>
+            </sc-if>
+
+            <!-- person sheet -->
+            <sc-if value="{{p.personSheet}}" hint-placeholder-val="{{ false }}">
+              <div aria-hidden="true" style="position: absolute; z-index: 7; inset: 0; background: {{t.scrim}}"></div>
+              <div role="dialog" aria-modal="true" aria-labelledby="ps-h" style="position: absolute; z-index: 8; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.raised}}; border-radius: 16px 16px 0 0; box-shadow: {{t.shadowSheet}}">
+                <div style="height: 20px; display: flex; justify-content: center; padding-top: 6px; box-sizing: border-box"><span style="width: 36px; height: 5px; border-radius: 3px; background: {{t.grabber}}"></span></div>
+                <div style="display: flex; align-items: center; gap: 12px; padding: 2px 4px 12px 16px">
+                  <span style="flex: none; width: 44px; height: 44px; border-radius: 22px; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{ps.av}}">{{ps.initials}}</span>
+                  <span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><h2 id="ps-h" style="margin: 0; font-size: 17px; line-height: 22px; font-weight: 600">{{ps.name}}</h2><span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{ps.role}}</span></span>
+                  <button aria-label="{{L.close}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.text3}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 0 16px 12px">
+                  <sc-for list="{{ps.kpis}}" as="k" hint-placeholder-count="3">
+                    <span style="display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 12px; background: {{t.fill}}"><span style="font-size: 20px; line-height: 26px; font-weight: 600; font-variant-numeric: tabular-nums; {{k.style}}">{{k.value}}</span><span style="font-size: 12px; line-height: 16px; color: {{t.muted}}">{{k.label}}</span></span>
+                  </sc-for>
+                </div>
+                <span style="padding: 4px 16px 6px; font-size: 13px; font-weight: 600; color: {{t.muted}}">{{L.openTasks}}</span>
+                <div style="display: flex; flex-direction: column; border-top: 1px solid {{t.divider}}">
+                  <sc-for list="{{ps.tasks}}" as="r" hint-placeholder-count="5">
+                    <a href="MobileTaskDetail.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 6px 16px; box-sizing: border-box; border-bottom: 1px solid {{t.divider}}; text-decoration: none; color: {{t.text}}">
+                      <span aria-hidden="true" style="flex: none; width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; {{r.ring}}"></span>
+                      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; line-height: 22px">{{r.title}}</span><span style="font-size: 12px; line-height: 16px; color: {{t.muted}}"><span style="font-family: Geist Mono, ui-monospace, monospace">{{r.key}}</span> · <span style="{{r.dueStyle}}">{{r.due}}</span></span></span>
+                      <span style="flex: none; min-width: 28px; height: 24px; padding: 0 6px; box-sizing: border-box; border-radius: 6px; background: {{t.fill}}; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; color: {{t.text2}}">{{r.size}}</span>
+                    </a>
+                  </sc-for>
+                </div>
+                <div style="height: 34px"></div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+
+      <div style="display: flex; flex-direction: column; gap: 16px; order: 8">
+        <span style="{{cap}}">{{L.capRules}}</span>
+        <div style="width: 390px; box-sizing: border-box; display: flex; flex-direction: column; border: 1px solid {{t.border}}; border-radius: 16px; background: {{t.bg}}; overflow: hidden">
+          <sc-for list="{{rules}}" as="r" hint-placeholder-count="8">
+            <div style="display: flex; flex-direction: column; gap: 2px; padding: 12px 16px; border-bottom: 1px solid {{t.divider}}">
+              <span style="font-size: 14px; line-height: 20px; font-weight: 600">{{r.title}}</span>
+              <span style="font-size: 13px; line-height: 18px; color: {{t.text3}}">{{r.body}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"language":{"editor":"enum","default":"mn","options":["mn","en"]},"theme":{"editor":"enum","default":"light","options":["light","dark"]},"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"$preview":{"width":1840,"height":2400}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: undefined, theme: undefined, view: 'mine', selBar: 7 };
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const lang = s.lang || this.props.language || 'mn';
+    const mn = lang === 'mn';
+    const pick = (p) => (mn ? p[0] : p[1]);
+    const theme = s.theme || this.props.theme || 'light';
+    const dark = theme === 'dark';
+    const accent = this.props.accent ?? '#6E56CF';
+    const inks = { '#6E56CF': '#B4A5FF', '#2F6FEB': '#93B4FF', '#0F766E': '#5EEAD4', '#3F3F46': '#D4D4D8' };
+    const accentInk = dark ? (inks[String(accent).toUpperCase()] || '#B4A5FF') : accent;
+    const accentSoft = accent + (dark ? '33' : '1A');
+
+    const STR = {
+      mn: {
+        intro: 'Тайлан утсанд зөвхөн уншихаар: Миний гүйцэтгэл ба Ачаалал. Тоон картууд дараалан, карт бүрт нэг график, хугацааг хуудаснаас сонгоно. Админы «Хүмүүс» харагдац болон бүрэн тайлан вэб дээр.',
+        preview: 'Урьдчилан харах', langLabel: 'Хэл', themeLabel: 'Горим', light: 'Цайвар', dark: 'Бараан',
+        secTitle: 'Тайлан', secSub: 'Миний гүйцэтгэл · гүйлгэсэн · хугацаа · Ачаалал · гүйлгэсэн · хүний дэлгэрэнгүй · хоосон',
+        cap1: '01 · Миний гүйцэтгэл (таб, баганыг туршина)', cap2: '02 · Миний гүйцэтгэл · гүйлгэсэн', cap3: '03 · Хугацаа сонгох', cap4: '04 · Ачаалал',
+        cap5: '05 · Ачаалал · гүйлгэсэн', cap6: '06 · Хүн дээр дарахад', cap7: '07 · Өгөгдөл хүрэлцэхгүй (шинэ гишүүн)', capRules: 'Зан төлөв',
+        more: 'Бусад', reports: 'Тайлан', mine: 'Миний гүйцэтгэл', work: 'Ачаалал', space: 'Бүтээгдэхүүн',
+        periodName: 'Сүүлийн 30 хоног', periodRange: '9-р сарын 9 – 10-р сарын 8', period: 'Хугацаа', done: 'Болсон',
+        compare: 'Өмнөх хугацаатай харьцуулах', compareSub: 'Тоон картуудад өөрчлөлт харагдана',
+        openWeb: 'Бүрэн тайланг хөтчид нээх', openWebSub: 'Хүмүүс (админ), экспорт, дурын хугацаа · tasks.kitestudio.mn',
+        asTable: 'Хүснэгтээр харах', lgLoad: 'Оноо', lgCap: 'Багтаамж', lgOver: 'Хэтэрсэн',
+        emptyTitle: 'Өгөгдөл хараахан хүрэлцэхгүй', emptyBody: 'Ажил дуусгаад 1–2 долоо хоногийн дараа таны график энд гарч ирнэ.', goMyTasks: 'Миний ажил руу',
+        openTasks: 'Нээлттэй ажил', close: 'Хаах',
+        tabsAria: 'Үндсэн цэс', tabs: ['Миний ажил', 'Төслүүд', 'Мэдэгдэл', 'Стэндап', 'Бусад']
+      },
+      en: {
+        intro: 'Reports on the phone, read-only: My performance and Workload. Stat cards are stacked, one chart per card, and the period is picked from a sheet. The admin People view and full reports stay on the web.',
+        preview: 'Preview', langLabel: 'Language', themeLabel: 'Theme', light: 'Light', dark: 'Dark',
+        secTitle: 'Reports', secSub: 'My performance · scrolled · period · Workload · scrolled · person detail · empty',
+        cap1: '01 · My performance (try the tabs and bars)', cap2: '02 · My performance · scrolled', cap3: '03 · Period sheet', cap4: '04 · Workload',
+        cap5: '05 · Workload · scrolled', cap6: '06 · Tapping a person', cap7: '07 · Not enough data (new member)', capRules: 'Behaviour',
+        more: 'More', reports: 'Reports', mine: 'My performance', work: 'Workload', space: 'Product',
+        periodName: 'Last 30 days', periodRange: 'Sep 9 – Oct 8', period: 'Period', done: 'Done',
+        compare: 'Compare with previous period', compareSub: 'Shows the change on stat cards',
+        openWeb: 'Open in browser for full reports', openWebSub: 'People (admin), exports, custom ranges · tasks.kitestudio.mn',
+        asTable: 'View as table', lgLoad: 'Points', lgCap: 'Capacity', lgOver: 'Over capacity',
+        emptyTitle: 'Not enough data yet', emptyBody: 'Finish a few tasks and your charts will show up here in a week or two.', goMyTasks: 'Go to My Tasks',
+        openTasks: 'Open tasks', close: 'Close',
+        tabsAria: 'Main', tabs: ['My Tasks', 'Projects', 'Inbox', 'Standup', 'More']
+      }
+    };
+    const L = STR[lang] || STR.mn;
+
+    const t = dark ? {
+      board: '#0A0A0B', bg: '#111113', screen: '#0C0C0E', card: '#161618', raised: '#1B1B1E', fill: '#1F1F23', seg: '#1F1F23', track: '#232328',
+      border: '#26262B', border2: '#3A3A42', divider: '#1F1F23', grabber: '#3F3F46', grid: '#2A2A30', axis: '#3A3A42',
+      text: '#EDEDEF', text2: '#C9C9D1', text3: '#B4B4BC', muted: '#8E8E98', faint: '#5E5E68', scrim: 'rgba(0,0,0,0.6)',
+      red: '#EF4444', redInk: '#F87171', good: '#4ADE80', tip: '#EDEDEF', tipText: '#18181B',
+      shadowSheet: '0 -8px 32px rgba(0,0,0,0.5)',
+      device: '0 0 0 1px #2A2A30, 0 0 0 10px #232328, 0 24px 48px rgba(0,0,0,0.5)',
+      segOn: 'background:#2A2A30;color:#EDEDEF;box-shadow:0 1px 2px rgba(0,0,0,0.4)', segOff: 'background:transparent;color:#8E8E98',
+      scheme: 'color-scheme: dark'
+    } : {
+      board: '#F4F4F5', bg: '#FFFFFF', screen: '#F7F7F8', card: '#FFFFFF', raised: '#FFFFFF', fill: '#F4F4F5', seg: '#E9E9EC', track: '#F1F1F3',
+      border: '#E6E6EA', border2: '#C4C4CC', divider: '#EFEFF2', grabber: '#D4D4D8', grid: '#E6E6EA', axis: '#C4C4CC',
+      text: '#18181B', text2: '#3F3F46', text3: '#52525B', muted: '#6B6B74', faint: '#A1A1AA', scrim: 'rgba(24,24,27,0.32)',
+      red: '#DC2626', redInk: '#B42318', good: '#166534', tip: '#18181B', tipText: '#FFFFFF',
+      shadowSheet: '0 -8px 32px rgba(24,24,27,0.12)',
+      device: '0 0 0 1px #E6E6EA, 0 0 0 10px #18181B, 0 24px 48px rgba(24,24,27,0.18)',
+      segOn: 'background:#FFFFFF;color:#18181B;box-shadow:0 1px 2px rgba(24,24,27,0.08)', segOff: 'background:transparent;color:#6B6B74',
+      scheme: 'color-scheme: light'
+    };
+    const cap = 'font-family:Geist Mono,ui-monospace,monospace;font-size:12px;line-height:16px;color:' + t.muted;
+
+    /* ---------- STAT CARDS ---------- */
+    const up = 'color:' + t.good, down = 'color:' + t.redInk, flat = 'color:' + t.muted;
+    const stat = (label, value, unit, delta, arrow, deltaStyle) => ({ label: pick(label), value, unit: pick(unit), delta: pick(delta), arrow, deltaStyle });
+    const statsMine = [
+      stat(['Дуусгасан ажил', 'Tasks completed'], '23', ['', ''], ['өмнөхөөс +5', '+5 vs previous'], '↑', up),
+      stat(['Хугацаандаа дуусгасан', 'Done on time'], '87', ['%', '%'], ['+4 пункт', '+4 pts'], '↑', up),
+      stat(['Дундаж гүйцэтгэх хугацаа', 'Avg. cycle time'], '2.6', ['хоног', 'days'], ['0.4 хоногоор хурдан', '0.4 days faster'], '↓', up),
+      stat(['Дуусгасан оноо', 'Points done'], '41', ['', ''], ['+6', '+6'], '↑', up)
+    ];
+    const statsWork = [
+      stat(['Нээлттэй ажил', 'Open tasks'], '46', ['', ''], ['өмнөхөөс +3', '+3 vs previous'], '↑', flat),
+      stat(['Хугацаа хэтэрсэн', 'Overdue'], '6', ['', ''], ['+2', '+2'], '↑', down),
+      stat(['Энэ 7 хоногт дуусах', 'Due in the next 7 days'], '14', ['', ''], ['өөрчлөлтгүй', 'no change'], '→', flat),
+      stat(['Хариуцагчгүй', 'Unassigned'], '5', ['', ''], ['−2', '−2'], '↓', up)
+    ];
+
+    /* ---------- CHARTS ---------- */
+    const WEEKS = mn ? ['8/17', '8/24', '8/31', '9/7', '9/14', '9/21', '9/28', '10/5'] : ['Aug 17', '24', '31', 'Sep 7', '14', '21', '28', 'Oct 5'];
+    const WEEKS_FULL = mn ? ['8/17', '8/24', '8/31', '9/7', '9/14', '9/21', '9/28', '10/5'] : ['Aug 17', 'Aug 24', 'Aug 31', 'Sep 7', 'Sep 14', 'Sep 21', 'Sep 28', 'Oct 5'];
+    const done = [4, 6, 3, 5, 7, 4, 6, 5];
+    const colChart = (o) => {
+      const max = o.max;
+      return {
+        isCols: true, isLine: false, isRows: false, hasLegend: false, title: o.title, sub: o.sub, yMax: String(max), yMid: String(max / 2),
+        cols: o.values.map((v, i) => {
+          const sel = o.sel === i;
+          const pct = Math.round((v / max) * 100);
+          return {
+            label: o.labels[i], pct: String(pct), sel,
+            labelStyle: 'color:' + (sel ? t.text : t.muted) + (sel ? ';font-weight:600' : ''),
+            barStyle: 'height:' + Math.max(pct, v ? 3 : 0) + '%;background:' + (sel || o.sel == null ? accent : accent + (dark ? '99' : '8C')),
+            tip: o.tip(v, i), tipShift: i >= o.values.length - 2 ? '-85%' : (i <= 1 ? '-15%' : '-50%'),
+            aria: o.aria(v, i), pick: o.interactive ? () => this.setState({ selBar: i }) : () => {}
+          };
+        })
+      };
+    };
+    const weekly = (sel, interactive) => colChart({
+      title: pick(['Долоо хоног бүр дуусгасан', 'Completed per week']), sub: pick(['Ажлын тоо · сүүлийн 8 долоо хоног', 'Tasks · last 8 weeks']),
+      values: done, labels: WEEKS, max: 8, sel, interactive,
+      tip: (v, i) => (mn ? WEEKS_FULL[i] + '-ны 7 хоног · ' + v + ' ажил' + (i === 7 ? ' (явж буй)' : '') : 'Week of ' + WEEKS_FULL[i] + ' · ' + v + ' tasks' + (i === 7 ? ' (so far)' : '')),
+      aria: (v, i) => (mn ? WEEKS_FULL[i] + ': ' + v + ' ажил' : WEEKS_FULL[i] + ': ' + v + ' tasks')
+    });
+    const cyc = [3.4, 3.1, 3.0, 2.9, 3.2, 2.7, 2.5, 2.4];
+    const lineChart = {
+      isCols: false, isLine: true, isRows: false, hasLegend: false,
+      title: pick(['Дундаж гүйцэтгэх хугацаа', 'Average cycle time']), sub: pick(['Хоногоор · эхэлснээс дуусах хүртэл', 'Days from start to done']),
+      points: cyc.map((v, i) => (i * 300 / 7).toFixed(1) + ',' + (128 - (v / 4) * 124).toFixed(1)).join(' '),
+      dots: cyc.map((v, i) => ({ pos: 'left:calc(' + (i * 100 / 7).toFixed(2) + '% - 4px);top:' + (-(v / 4) * 124 - 4 - 0).toFixed(1) + 'px' })),
+      lastTop: (-(cyc[7] / 4) * 124).toFixed(1) + 'px', lastLabel: mn ? '2.4 хоног' : '2.4 days',
+      x0: WEEKS_FULL[0], x1: WEEKS_FULL[7],
+      aria: pick(['3.4-өөс 2.4 хоног болж буурсан', 'Down from 3.4 to 2.4 days'])
+    };
+    const PROJ = [[['Апп шинэчлэл', 'App Redesign'], '#7C5CE0', 12], [['Төлбөрийн хуудас v2', 'Checkout v2'], '#0284C7', 8], [['Q4 замын зураг', 'Q4 Roadmap'], '#D97706', 3]];
+    const blankRow = { hasAv: false, hasDot: false, av: '', initials: '', dot: '', g1: 'display:none', g2: 'display:none', over: false, overLabel: '', hasCap: false, capPos: '', overFill: 'display:none' };
+    const byProject = {
+      isCols: false, isLine: false, isRows: true, hasLegend: false,
+      title: pick(['Төслөөр', 'By project']), sub: pick(['Дуусгасан ажил · 30 хоног', 'Tasks completed · 30 days']),
+      rows: PROJ.map(([n, c, v]) => ({ ...blankRow, hasDot: true, dot: 'border-radius:5px;width:10px;height:10px;background:' + c, name: pick(n), value: String(v), aria: pick(n) + ': ' + v,
+        fill: 'width:' + Math.round((v / 12) * 100) + '%;border-radius:5px;background:' + accent }))
+    };
+
+    const PP = {
+      tem: [['ТГ', 'TG'], ['Тэмүүлэн Г.', 'Temuulen G.'], 'background:#DCFCE7;color:#166534', 'background:#14532D;color:#BBF7D0', ['Мобайл хөгжүүлэгч', 'Mobile engineer']],
+      dorj: [['ДЭ', 'DE'], ['Дорж Э.', 'Dorj E.'], 'background:#FEF3C7;color:#92400E', 'background:#78350F;color:#FDE68A'],
+      anu: [['АБ', 'AB'], ['Ану Б. (та)', 'Anu B. (you)'], 'background:#E0E7FF;color:#3730A3', 'background:#312E81;color:#C7D2FE'],
+      sara: [['СК', 'SK'], ['Сараа К.', 'Sara K.'], 'background:#FFE4E6;color:#9F1239', 'background:#881337;color:#FECDD3'],
+      bat: [['БО', 'BO'], ['Бат О.', 'Bat O.'], 'background:#CCFBF1;color:#115E59', 'background:#134E4A;color:#99F6E4'],
+      oyu: [['ОН', 'ON'], ['Оюука Н.', 'Oyuka N.'], 'background:#F3E8FF;color:#6B21A8', 'background:#581C87;color:#E9D5FF'],
+      bay: [['БТ', 'BT'], ['Баярмаа Т.', 'Bayarmaa T.'], 'background:#FCE7F3;color:#9D174D', 'background:#831843;color:#FBCFE8'],
+      mia: [['МЛ', 'ML'], ['Мишээл Л.', 'Mia L.'], 'background:#E0F2FE;color:#075985', 'background:#0C4A6E;color:#BAE6FD']
+    };
+    const SCALE = 20;
+    const LOAD = [['tem', 18, 13], ['dorj', 15, 13], ['anu', 12, 13], ['sara', 11, 13], ['bat', 9, 10], ['oyu', 6, 13], ['bay', 4, 8], ['mia', 0, 0]];
+    const perPerson = {
+      isCols: false, isLine: false, isRows: true, hasLegend: true,
+      title: pick(['Хүн бүрийн ачаалал', 'Load per person']), sub: pick(['Нээлттэй ажлын оноо ба 2 долоо хоногийн багтаамж', 'Open points vs. 2-week capacity']),
+      rows: LOAD.map(([id, pts, capy]) => {
+        const out = id === 'mia';
+        const over = pts > capy && !out;
+        const base = over ? capy : pts;
+        return {
+          ...blankRow, hasAv: true, av: PP[id][dark ? 3 : 2], initials: pick(PP[id][0]), name: pick(PP[id][1]),
+          value: out ? (mn ? 'Чөлөө · 10/12 хүртэл' : 'Out · until Oct 12') : pts + ' / ' + capy,
+          over, overLabel: over ? '+' + (pts - capy) : '',
+          hasCap: !out, capPos: 'left:calc(' + ((capy / SCALE) * 100).toFixed(1) + '% - 1px)',
+          fill: 'width:' + ((base / SCALE) * 100).toFixed(1) + '%;background:' + accent + (over ? '' : ';border-radius:5px'),
+          overFill: over ? 'width:' + (((pts - capy) / SCALE) * 100).toFixed(1) + '%;background:' + t.red : 'display:none',
+          aria: pick(PP[id][1]) + ': ' + pts + (mn ? ' оноо, багтаамж ' : ' points, capacity ') + capy + (over ? (mn ? ', хэтэрсэн' : ', over capacity') : '')
+        };
+      })
+    };
+    const DAYS = mn ? ['Пү 8', 'Ба 9', 'Бя 10', 'Ня 11', 'Да 12', 'Мя 13', 'Лх 14'] : ['Thu 8', 'Fri 9', 'Sat 10', 'Sun 11', 'Mon 12', 'Tue 13', 'Wed 14'];
+    const dueNext = colChart({
+      title: pick(['Ойрын 7 хоногт дуусах', 'Due in the next 7 days']), sub: pick(['Өдрөөр · бүх гишүүн', 'By day · everyone']),
+      values: [4, 3, 0, 0, 2, 3, 2], labels: DAYS, max: 4, sel: null,
+      tip: () => '', aria: (v, i) => DAYS[i] + ': ' + v
+    });
+    const SC = dark ? { todo: '#71717A', prog: '#F59E0B', hold: '#F87171' } : { todo: '#A1A1AA', prog: '#D97706', hold: '#DC2626' };
+    const bar2 = (l, c) => 'display:block;top:2px;left:' + l + 'px;width:2px;height:4px;border-radius:1px;background:' + c;
+    const STATUS = [
+      [['Хийх', 'To Do'], 21, 'border:2px solid ' + SC.todo, 'display:none', 'display:none'],
+      [['Хийгдэж буй', 'In Progress'], 14, 'border:2px solid ' + SC.prog + ';background:linear-gradient(90deg,' + SC.prog + ' 50%,transparent 50%)', 'display:none', 'display:none'],
+      [['Хянагдаж буй', 'In Review'], 7, 'border:2px solid ' + accentInk + ';background:' + accentInk + '33', 'display:none', 'display:none'],
+      [['Түр зогссон', 'On Hold'], 4, 'border:2px solid ' + SC.hold, bar2(1, SC.hold), bar2(5, SC.hold)]
+    ];
+    const byStatus = {
+      isCols: false, isLine: false, isRows: true, hasLegend: false,
+      title: pick(['Төлвөөр', 'By status']), sub: pick(['Нээлттэй 46 ажил', '46 open tasks']),
+      rows: STATUS.map(([n, v, ring, g1, g2]) => ({ ...blankRow, hasDot: true, dot: ring, g1, g2, name: pick(n), value: String(v), aria: pick(n) + ': ' + v,
+        fill: 'width:' + Math.round((v / 21) * 100) + '%;border-radius:5px;background:' + accent }))
+    };
+
+    /* ---------- PHONES ---------- */
+    const segOf = (view, interactive) => [['mine', L.mine], ['work', L.work]].map(([v, label]) => ({
+      label, on: v === view ? 'true' : 'false', style: v === view ? t.segOn : t.segOff, pick: interactive ? () => this.setState({ view: v }) : () => {}
+    }));
+    const viewOf = (view, o) => (view === 'mine'
+      ? { isWork: false, stats: statsMine, charts: [weekly(o.sel, o.interactive), lineChart, byProject] }
+      : { isWork: true, stats: statsWork, charts: [perPerson, dueNext, byStatus] });
+    const base = { shift: '', periodSheet: false, personSheet: false, isEmpty: false, hasWebLink: true };
+    const v1 = s.view || 'mine';
+    const phones = [
+      { ...base, order: 'order:1', cap: L.cap1, seg: segOf(v1, true), ...viewOf(v1, { sel: s.selBar == null ? 7 : s.selBar, interactive: true }) },
+      { ...base, order: 'order:2', cap: L.cap2, seg: segOf('mine'), shift: 'margin-top:-560px', ...viewOf('mine', { sel: null }) },
+      { ...base, order: 'order:3', cap: L.cap3, seg: segOf('mine'), periodSheet: true, ...viewOf('mine', { sel: null }) },
+      { ...base, order: 'order:4', cap: L.cap4, seg: segOf('work'), ...viewOf('work', {}) },
+      { ...base, order: 'order:5', cap: L.cap5, seg: segOf('work'), shift: 'margin-top:-860px', ...viewOf('work', {}) },
+      { ...base, order: 'order:6', cap: L.cap6, seg: segOf('work'), personSheet: true, ...viewOf('work', {}) },
+      { ...base, order: 'order:7', cap: L.cap7, seg: segOf('mine'), isEmpty: true, hasWebLink: false, isWork: false, stats: [], charts: [] }
+    ];
+
+    const periods = [
+      [['Энэ 7 хоног', 'This week'], ['10/5 – 10/11', 'Oct 5 – 11'], false, false],
+      [['Өнгөрсөн 7 хоног', 'Last week'], ['9/28 – 10/4', 'Sep 28 – Oct 4'], false, false],
+      [['Сүүлийн 30 хоног', 'Last 30 days'], ['9/9 – 10/8', 'Sep 9 – Oct 8'], true, false],
+      [['Энэ сар', 'This month'], ['10/1 – 10/31', 'Oct 1 – 31'], false, false],
+      [['Энэ улирал', 'This quarter'], ['Q4 · 10/1 – 12/31', 'Q4 · Oct 1 – Dec 31'], false, false],
+      [['Дурын хугацаа', 'Custom range'], ['Вэб дээр', 'On the web'], false, true]
+    ].map(([l, sub, on, chev]) => ({ label: pick(l), sub: pick(sub), on: on ? 'true' : 'false', isOn: on, chev, labelStyle: on ? 'font-weight:600' : '' }));
+
+    const RING = {
+      todo: 'border:2px solid ' + SC.todo,
+      prog: 'border:2px solid ' + SC.prog + ';background:linear-gradient(90deg,' + SC.prog + ' 50%,transparent 50%)',
+      review: 'border:2px solid ' + accentInk + ';background:' + accentInk + '33'
+    };
+    const ps = {
+      av: PP.tem[dark ? 3 : 2], initials: pick(PP.tem[0]), name: pick(PP.tem[1]), role: pick(PP.tem[4]) + ' · ' + L.periodName,
+      kpis: [
+        { value: '18 / 13', label: pick(['Оноо / багтаамж', 'Points / capacity']), style: 'color:' + t.redInk },
+        { value: '6', label: pick(['Нээлттэй ажил', 'Open tasks']), style: '' },
+        { value: '1', label: pick(['Хэтэрсэн', 'Overdue']), style: 'color:' + t.redInk }
+      ],
+      tasks: [
+        ['APP-138', 'prog', ['Шинэ доод таб самбар хэрэгжүүлэх', 'Implement new bottom tab bar'], ['Хоцорсон · 10/7', 'Overdue · Oct 7'], 'L', true],
+        ['APP-136', 'todo', ['Одоогийн навигацийн хэв маягийг шалгах', 'Audit current navigation patterns'], ['10/14', 'Oct 14'], 'M', false],
+        ['APP-160', 'todo', ['Апп дүрс дээрх тэмдэглэгээний тоо', 'Badge counts on the app icon'], ['10/16', 'Oct 16'], 'M', false],
+        ['APP-151', 'review', ['iOS Safari ба Android дээр QA', 'QA on iOS Safari and Android'], ['10/9', 'Oct 9'], 'S', false],
+        ['MOB-12', 'todo', ['Deep link-ийн тест', 'Deep link tests'], ['Огноогүй', 'No date'], 'S', false]
+      ].map(([key, st, title, due, size, late]) => ({ key, ring: RING[st], title: pick(title), due: pick(due), dueStyle: late ? 'color:' + t.redInk + ';font-weight:600' : '', size }))
+    };
+
+    const TABI = {
+      my: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z', 'm8.5 12 2.5 2.5 4.5-5'],
+      projects: ['M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z', 'M3 10h18'],
+      inbox: ['M22 12h-6l-2 3h-4l-2-3H2', 'M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'],
+      standup: ['M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', 'M8 9h8M8 13h5'],
+      more: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z', 'M7.5 12h1M11.5 12h1M15.5 12h1']
+    };
+    const tabbar = ['my', 'projects', 'inbox', 'standup', 'more'].map((id, i) => ({
+      label: L.tabs[i], d1: TABI[id][0], d2: TABI[id][1], current: id === 'more' ? 'page' : 'false',
+      color: 'color:' + (id === 'more' ? accentInk : t.muted), weight: 'font-weight:' + (id === 'more' ? '600' : '500'),
+      sw: id === 'more' ? '2.25' : '1.75', hasBadge: id === 'inbox'
+    }));
+
+    const rules = [
+      [['Зөвхөн унших', 'Read-only'], ['Утсан дээр тайлан засахгүй, хадгалахгүй, экспортлохгүй. Багана, мөр дээр дарахад утга эсвэл тухайн хүний ажлууд гарна.', 'No editing, saving or exporting on the phone. Tapping a bar or row shows its value or that person’s tasks.']],
+      [['Хоёр харагдац', 'Two views'], ['Миний гүйцэтгэл (бүгдэд) ба Ачаалал (орон зайн гишүүдэд). Админы «Хүмүүс» зөвхөн вэб дээр.', 'My performance (everyone) and Workload (space members). The admin People view is web-only.']],
+      [['Тоон карт', 'Stat cards'], ['Нэг мөрөнд нэг, бүтэн өргөнөөр. Өөрчлөлт нь сум + текстээр; ногоон/улаан нь «сайн/муу»-г заана, өсөлт/бууралтыг биш.', 'One per row, full width. Change is arrow + text; green/red means good/bad, not up/down.']],
+      [['График', 'Charts'], ['Карт бүрт нэг график, нэг өнгө (өргөлт). Төслийн өнгийг зэрэгцүүлэхгүй — ялгахад хэцүү тул цэг + нэрээр. Хэтэрсэн ачаалал = улаан + ⚠ + тоо.', 'One chart per card, one hue (accent). Project colors are never placed side by side — too close to tell apart — so rows use a dot + name. Over capacity = red + ⚠ + number.']],
+      [['Хүснэгт', 'Table view'], ['Карт бүрийн «Хүснэгтээр харах» нь ижил өгөгдлийг жагсаалтаар харуулна (дэлгэц уншигчид).', '“View as table” on each card shows the same data as a list (also for screen readers).']],
+      [['Хугацаа', 'Period'], ['Хуудаснаас: 7 хоног, өнгөрсөн 7 хоног, 30 хоног, сар, улирал. Дурын хугацаа вэб дээр. Харьцуулалт асаалттай бол картууд өмнөх хугацаатай харьцуулна.', 'From a sheet: this week, last week, 30 days, month, quarter. Custom ranges are on the web. With compare on, cards show the change.']],
+      [['Вэб', 'Web'], ['Толгойн ↗ ба доод картын «Бүрэн тайланг хөтчид нээх» нь ижил хугацаа, харагдацаар нээнэ.', 'The ↗ in the header and the bottom card open the same view and period in the browser.']]
+    ].map(([title, body]) => ({ title: pick(title), body: pick(body) }));
+
+    const segBtn = (on) => (on ? t.segOn : t.segOff);
+    const toggles = [
+      { label: L.langLabel, opts: [['mn', 'МН'], ['en', 'EN']].map(([v, lab]) => ({ label: lab, on: lang === v, style: segBtn(lang === v), pick: () => this.setState({ lang: v }) })) },
+      { label: L.themeLabel, opts: [['light', L.light], ['dark', L.dark]].map(([v, lab]) => ({ label: lab, on: theme === v, style: segBtn(theme === v), pick: () => this.setState({ theme: v }) })) }
+    ];
+
+    return {
+      lang, L, t, cap, accent, accentInk, accentSoft, toggles, phones, periods, ps, tabbar, rules,
+      spaceBadge: dark ? 'background:#2E1065;color:#DDD6FE' : 'background:#EDE9FE;color:#5B21B6', spaceInitial: mn ? 'Б' : 'P'
+    };
+  }
+}
+</script>
+</body>
+</html>

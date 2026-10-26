@@ -1,8 +1,10 @@
+import type { SessionClient } from '@kite/shared';
 import { and, eq, lt } from 'drizzle-orm';
-import type { FastifyReply } from 'fastify';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import { secureCookies, type Config } from '../config.js';
 import type { DbOrTx } from '../db/client.js';
 import { sessions } from '../db/schema/index.js';
+import { parseDevice } from '../feedback/device.js';
 import { hashToken, newToken } from './tokens.js';
 
 export const SESSION_COOKIE = 'kite_session';
@@ -14,11 +16,45 @@ export const SESSION_REFRESH_MS = 24 * 60 * 60 * 1000;
 
 export const sessionExpiry = (now = new Date()) => new Date(now.getTime() + SESSION_TTL_MS);
 
-/** Creates a session row and returns the raw token for the cookie. */
-export async function createSession(db: DbOrTx, userId: string): Promise<string> {
+export interface NewSession {
+  /** The raw token: the cookie value (web) or returned once in the body (mobile). */
+  token: string;
+  expiresAt: Date;
+}
+
+/** What a sign-in request says about itself (`client`, `deviceName` from the login/accept body). */
+export interface SessionOrigin {
+  client?: SessionClient | undefined;
+  deviceName?: string | undefined;
+}
+
+const DEVICE_LABEL_MAX = 100;
+
+/** `Chrome on macOS`, `iPhone · iOS 18.1`; the app's own name for itself wins. */
+export function deviceLabel(request: FastifyRequest, deviceName?: string): string | null {
+  if (deviceName) return deviceName.slice(0, DEVICE_LABEL_MAX);
+  const { browser, os, device } = parseDevice(request.headers['user-agent'] ?? '');
+  const label = browser && os ? `${browser} on ${os}` : [device, os].filter(Boolean).join(' · ');
+  return label ? label.slice(0, DEVICE_LABEL_MAX) : null;
+}
+
+/** Creates a session row and returns the raw token. */
+export async function createSession(
+  db: DbOrTx,
+  userId: string,
+  request: FastifyRequest,
+  origin: SessionOrigin = {},
+): Promise<NewSession> {
   const token = newToken();
-  await db.insert(sessions).values({ id: hashToken(token), userId, expiresAt: sessionExpiry() });
-  return token;
+  const expiresAt = sessionExpiry();
+  await db.insert(sessions).values({
+    id: hashToken(token),
+    userId,
+    client: origin.client ?? 'web',
+    deviceLabel: deviceLabel(request, origin.deviceName),
+    expiresAt,
+  });
+  return { token, expiresAt };
 }
 
 export async function deleteExpiredSessions(db: DbOrTx, userId: string): Promise<void> {

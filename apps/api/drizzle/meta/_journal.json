@@ -155,6 +155,13 @@
       "when": 1792980368928,
       "tag": "0021_hold_cancelled",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1792998950698,
+      "tag": "0022_session_client",
+      "breakpoints": true
     }
   ]
 }

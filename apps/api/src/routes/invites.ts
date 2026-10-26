@@ -6,7 +6,7 @@ import {
   initialsFor,
   invitePreviewSchema,
   inviteSchema,
-  meResponseSchema,
+  authResultSchema,
 } from '@kite/shared';
 import { and, asc, eq, gt, isNotNull, isNull, ne } from 'drizzle-orm';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
@@ -16,7 +16,7 @@ import { avatarColorFor } from '../auth/avatar.js';
 import { buildMe } from '../auth/me.js';
 import { hashPassword } from '../auth/password.js';
 import { resolveSession } from '../auth/plugin.js';
-import { createSession, setSessionCookie } from '../auth/sessions.js';
+import { createSession, setSessionCookie, type NewSession } from '../auth/sessions.js';
 import { hashToken } from '../auth/tokens.js';
 import type { DbOrTx } from '../db/client.js';
 import { isUniqueViolation } from '../db/errors.js';
@@ -236,15 +236,15 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Invites'],
         summary: 'Accept an invite',
         description:
-          'New accounts send `name` and `password`; an existing account must be signed in as the invited email (401 `LOGIN_REQUIRED`). An owner invite (from the platform admin) is invalid once the workspace has an owner; the platform admin account can never accept an invite. 409 `ACCOUNT_EXISTS` when the account was created meanwhile (another invite accepted at the same time): sign in, then accept.',
-        security: [{}, { cookieAuth: [] }],
+          'New accounts send `name` and `password`; an existing account must be signed in as the invited email (cookie or bearer; 401 `LOGIN_REQUIRED`). A new account is signed in like `POST /auth/login`: the cookie, or with `client: "mobile"` `session.token` in the body. An owner invite (from the platform admin) is invalid once the workspace has an owner; the platform admin account can never accept an invite. 409 `ACCOUNT_EXISTS` when the account was created meanwhile (another invite accepted at the same time): sign in, then accept.',
+        security: [{}, { cookieAuth: [] }, { bearerAuth: [] }],
         params: tokenParams,
         body: acceptInviteSchema,
-        response: { 200: meResponseSchema, 400: err, 401: err, 404: err, 409: err },
+        response: { 200: authResultSchema, 400: err, 401: err, 404: err, 409: err },
       },
     },
     async (request, reply) => {
-      const { name, password } = request.body;
+      const { name, password, client, deviceName } = request.body;
       // Read before the transaction: an existing account accepts with its current session.
       const session = await resolveSession(request, reply);
 
@@ -270,7 +270,7 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         // The platform admin never joins a workspace.
         if (existing?.platformRole) throw invalidInvite();
         let user = existing;
-        let newSessionToken: string | undefined;
+        let newSession: NewSession | undefined;
 
         if (user) {
           if (session?.user.id !== user.id) {
@@ -297,7 +297,7 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
               'An account with this email exists. Sign in to accept.',
             );
           }
-          newSessionToken = await createSession(tx, user.id);
+          newSession = await createSession(tx, user.id, request, { client, deviceName });
         }
 
         await tx
@@ -310,11 +310,17 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
             setWhere: isNotNull(workspaceMembers.deactivatedAt),
           });
         await tx.update(invites).set({ acceptedAt: new Date() }).where(eq(invites.id, invite.id));
-        return { user, newSessionToken };
+        return { user, newSession };
       });
 
-      if (result.newSessionToken) setSessionCookie(reply, result.newSessionToken, app.config);
-      return buildMe(app.db, result.user);
+      const me = await buildMe(app.db, result.user);
+      const { newSession } = result;
+      if (!newSession) return me;
+      if (client === 'mobile') {
+        return { ...me, session: { ...newSession, expiresAt: newSession.expiresAt.toISOString() } };
+      }
+      setSessionCookie(reply, newSession.token, app.config);
+      return me;
     },
   );
   done();

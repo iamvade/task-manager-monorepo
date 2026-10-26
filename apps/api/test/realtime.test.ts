@@ -1,5 +1,7 @@
 import {
   REALTIME_CLIENT_HEADER,
+  REALTIME_CLOSE_UNAUTHORIZED,
+  signedInDeviceSchema,
   commentSchema,
   subtaskSchema,
   taskListItemSchema,
@@ -11,7 +13,7 @@ import {
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import WebSocket from 'ws';
 import { toRealtime } from '../src/realtime/messages.js';
-import { ORIGIN, createUser, createWorkspace, login } from './fixtures.js';
+import { ORIGIN, createUser, createWorkspace, login, loginMobile } from './fixtures.js';
 import { createTestApp } from './helpers.js';
 import { taskWorld } from './task-setup.js';
 
@@ -38,12 +40,16 @@ describe('realtime', () => {
   });
 
   /** Opens a socket; resolves on open or rejects with the HTTP status of a refused upgrade. */
-  function open(cookie: string | null, opts: { client?: string; origin?: string | null } = {}) {
+  function open(
+    cookie: string | null,
+    opts: { client?: string; origin?: string | null; token?: string; query?: string } = {},
+  ) {
     const headers: Record<string, string> = {};
     if (cookie) headers.cookie = cookie;
+    if (opts.token) headers.authorization = `Bearer ${opts.token}`;
     const origin = opts.origin === undefined ? ORIGIN : opts.origin;
     if (origin) headers.origin = origin;
-    const query = opts.client ? `?client=${opts.client}` : '';
+    const query = opts.query ?? (opts.client ? `?client=${opts.client}` : '');
     const socket = new WebSocket(`${base}/api/v1/ws${query}`, { headers });
     sockets.push(socket);
     const received: Message[] = [];
@@ -125,6 +131,55 @@ describe('realtime', () => {
       'HTTP 403',
     );
     await expect(open(w.ownerCookie, { origin: null })).rejects.toThrow('HTTP 403');
+  });
+
+  it('authenticates a native app by the Authorization header, never by the URL', async () => {
+    const w = await world();
+    const token = await loginMobile(ctx.app, w.owner.email);
+
+    // No Origin (React Native), or whatever Origin the native socket sends.
+    for (const origin of [null, 'http://10.0.2.2:8081']) {
+      const c = await open(null, { token, origin });
+      c.send({ type: 'subscribe', workspaceId: w.ws.id });
+      await c.next('ready');
+      await w.createTask({ title: `Seen by the phone ${origin}` });
+      await c.next('task.created');
+    }
+
+    await expect(open(null, { token: `${token.slice(0, -1)}x`, origin: null })).rejects.toThrow(
+      'HTTP 401',
+    );
+    for (const name of ['token', 'access_token', 'session']) {
+      await expect(open(null, { origin: null, query: `?${name}=${token}` })).rejects.toThrow(
+        'HTTP 401',
+      );
+    }
+    // A cookie makes it cookie auth: the web Origin is required even with a bearer header.
+    await expect(open(w.ownerCookie, { token, origin: null })).rejects.toThrow('HTTP 403');
+    // Neither credential, from another site: refused before the session lookup.
+    await expect(open(null, { origin: 'https://evil.example' })).rejects.toThrow('HTTP 403');
+  });
+
+  it('closes a bearer socket with 4401 on logout or when the device is signed out', async () => {
+    const w = await world();
+    const phone = await loginMobile(ctx.app, w.owner.email);
+    const c = await open(null, { token: phone, origin: null });
+    const logout = await ctx.app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/logout',
+      headers: { authorization: `Bearer ${phone}` },
+    });
+    expect(logout.statusCode).toBe(204);
+    expect(await c.closed).toBe(REALTIME_CLOSE_UNAUTHORIZED);
+
+    const tablet = await loginMobile(ctx.app, w.owner.email, { deviceName: 'Tablet' });
+    const t = await open(null, { token: tablet, origin: null });
+    const devices = signedInDeviceSchema
+      .array()
+      .parse((await w.api('GET', '/auth/sessions')).json());
+    const target = devices.find((d) => d.deviceLabel === 'Tablet');
+    expect((await w.api('DELETE', `/auth/sessions/${target?.id}`)).statusCode).toBe(204);
+    expect(await t.closed).toBe(REALTIME_CLOSE_UNAUTHORIZED);
   });
 
   it('only subscribes members, and outsiders get no events', async () => {

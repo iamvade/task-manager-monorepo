@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<title>MobileAuth — Kite Tasks</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit;color:inherit}
+</style>
+</helmet>
+
+<div lang="{{lang}}" style="width: 1840px; min-height: 2300px; box-sizing: border-box; padding: 56px 64px 96px; display: flex; flex-direction: column; gap: 56px; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 15px; line-height: 22px; color: {{t.text}}; background: {{t.board}}; -webkit-font-smoothing: antialiased; {{t.scheme}}">
+
+  <!-- ================= BOARD HEADER ================= -->
+  <header style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px">
+    <div style="display: flex; flex-direction: column; gap: 8px; max-width: 900px">
+      <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 12px; line-height: 16px; color: {{t.muted}}">Kite Tasks · iOS + Android · 390 × 844</span>
+      <h1 style="margin: 0; font-size: 40px; line-height: 48px; font-weight: 600; letter-spacing: -0.02em">MobileAuth</h1>
+      <p style="margin: 0; font-size: 15px; line-height: 22px; color: {{t.text3}}">{{L.intro}}</p>
+    </div>
+    <div aria-label="{{L.preview}}" style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 8px 8px 8px 16px; border: 1px dashed {{t.border2}}; border-radius: 14px">
+      <span style="font-size: 12px; font-weight: 600; color: {{t.muted}}">{{L.preview}}</span>
+      <sc-for list="{{toggles}}" as="tg" hint-placeholder-count="2">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <span style="font-size: 13px; color: {{t.text3}}">{{tg.label}}</span>
+          <div role="radiogroup" aria-label="{{tg.label}}" style="display: flex; gap: 2px; padding: 2px; border-radius: 10px; background: {{t.seg}}">
+            <sc-for list="{{tg.opts}}" as="o" hint-placeholder-count="2">
+              <button role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}" style="height: 32px; padding: 0 12px; border: 0; border-radius: 8px; font-size: 13px; font-weight: 600; {{o.style}}">{{o.label}}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </header>
+
+  <!-- ================= ROW 1 · SIGN IN ================= -->
+  <section style="display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; padding-bottom: 14px; border-bottom: 1px solid {{t.border}}">
+      <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 13px; color: {{accentInk}}">01</span>
+      <h2 style="margin: 0; font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em">{{L.r1}}</h2>
+      <span style="font-size: 14px; color: {{t.muted}}">{{L.r1d}}</span>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 48px; align-items: start">
+      <sc-for list="{{signins}}" as="s" hint-placeholder-count="4">
+        <div style="display: flex; flex-direction: column; gap: 16px">
+          <span style="{{cap}}">{{s.cap}}</span>
+          <div style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; box-shadow: {{t.device}}">
+            <div style="flex: none; height: 59px"></div>
+            <div style="flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 24px; padding: 24px 16px 16px">
+              <div style="display: flex; align-items: center; gap: 10px">
+                <span aria-hidden="true" style="width: 40px; height: 40px; border-radius: 10px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 19px; font-weight: 600">K</span>
+                <span style="font-size: 17px; line-height: 22px; font-weight: 600">Kite Tasks</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px">
+                <h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.01em">{{L.siTitle}}</h1>
+                <p style="margin: 0; font-size: 15px; line-height: 22px; color: {{t.text3}}">{{s.sub}}</p>
+              </div>
+
+              <sc-if value="{{s.locked}}" hint-placeholder-val="{{ false }}">
+                <div role="alert" style="display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 12px; {{alertBox}}">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+                  <div style="display: flex; flex-direction: column; gap: 2px">
+                    <span style="font-size: 15px; line-height: 20px; font-weight: 600">{{L.lockTitle}}</span>
+                    <span style="font-size: 14px; line-height: 20px; color: {{t.text2}}">{{L.lockBody}}</span>
+                  </div>
+                </div>
+              </sc-if>
+
+              <div style="display: flex; flex-direction: column; gap: 16px">
+                <label style="display: flex; flex-direction: column; gap: 6px">
+                  <span style="font-size: 13px; line-height: 18px; font-weight: 500; color: {{t.text2}}">{{L.email}}</span>
+                  <input type="email" autocomplete="username" inputmode="email" value="anu@kitestudio.mn" style="height: 48px; padding: 0 14px; box-sizing: border-box; border: 1px solid {{t.border}}; border-radius: 12px; background: {{t.bg}}; outline: none; font-size: 16px; {{s.fieldDim}}">
+                </label>
+                <div style="display: flex; flex-direction: column; gap: 6px">
+                  <label for="pw" style="font-size: 13px; line-height: 18px; font-weight: 500; color: {{t.text2}}">{{L.password}}</label>
+                  <div style="position: relative; display: flex">
+                    <input id="pw" type="password" autocomplete="current-password" value="kite-2026" aria-invalid="{{s.wrong}}" style="flex: 1; min-width: 0; height: 48px; padding: 0 52px 0 14px; box-sizing: border-box; border-radius: 12px; background: {{t.bg}}; outline: none; font-size: 16px; {{s.pwStyle}}">
+                    <button type="button" aria-label="{{L.showPw}}" style="position: absolute; right: 2px; top: 2px; width: 44px; height: 44px; border: 0; border-radius: 10px; background: transparent; display: flex; align-items: center; justify-content: center">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.muted}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                  </div>
+                  <sc-if value="{{s.wrong}}" hint-placeholder-val="{{ false }}">
+                    <span role="alert" style="display: flex; align-items: flex-start; gap: 6px; font-size: 13px; line-height: 18px; color: {{t.red}}">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex: none; margin-top: 2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16h.01"></path></svg>
+                      {{L.wrongPw}}
+                    </span>
+                  </sc-if>
+                  <a href="#" style="align-self: flex-start; display: flex; align-items: center; height: 44px; font-size: 15px; font-weight: 500; text-decoration: none; color: {{accentInk}}">{{L.forgot}}</a>
+                </div>
+
+                <sc-if value="{{s.server}}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; flex-direction: column; gap: 6px; padding: 14px; border-radius: 12px; background: {{t.surface2}}; border: 1px solid {{t.divider}}">
+                    <label for="srv" style="display: flex; align-items: center; gap: 6px; font-size: 13px; line-height: 18px; font-weight: 500; color: {{t.text2}}">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="7" rx="2"></rect><rect x="3" y="13" width="18" height="7" rx="2"></rect><path d="M7 7.5h.01M7 16.5h.01"></path></svg>
+                      {{L.serverLabel}}
+                    </label>
+                    <input id="srv" type="url" inputmode="url" autocapitalize="off" value="https://tasks.kitestudio.mn" style="height: 48px; padding: 0 14px; box-sizing: border-box; border: 1.5px solid {{accent}}; box-shadow: 0 0 0 3px {{accentSoft}}; border-radius: 12px; background: {{t.bg}}; outline: none; font-size: 16px">
+                    <span style="display: flex; align-items: center; gap: 6px; font-size: 13px; line-height: 18px; color: {{okInk}}">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>
+                      {{L.serverOk}}
+                    </span>
+                    <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.serverHelp}}</span>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+            <div style="flex: none; display: flex; flex-direction: column; gap: 4px; padding: 12px 16px 0; border-top: 1px solid {{t.divider}}; background: {{t.bg}}">
+              <button style="height: 48px; border: 0; border-radius: 12px; font-size: 16px; font-weight: 600; {{s.btnStyle}}" aria-disabled="{{s.locked}}">{{s.btnLabel}}</button>
+              <button type="button" aria-expanded="{{s.server}}" style="display: flex; align-items: center; justify-content: center; gap: 6px; height: 44px; border: 0; background: transparent; font-size: 14px; font-weight: 500; color: {{t.text3}}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="7" rx="2"></rect><rect x="3" y="13" width="18" height="7" rx="2"></rect><path d="M7 7.5h.01M7 16.5h.01"></path></svg>
+                {{s.serverLink}}
+              </button>
+              <div style="height: 34px"></div>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <!-- ================= ROW 2 · INVITE, EMPTY, SWITCHER, NOTIFICATIONS ================= -->
+  <section style="display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; padding-bottom: 14px; border-bottom: 1px solid {{t.border}}">
+      <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 13px; color: {{accentInk}}">02</span>
+      <h2 style="margin: 0; font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em">{{L.r2}}</h2>
+      <span style="font-size: 14px; color: {{t.muted}}">{{L.r2d}}</span>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 48px; align-items: start">
+
+      <!-- Accept invite -->
+      <div style="display: flex; flex-direction: column; gap: 16px">
+        <span style="{{cap}}">{{L.capInvite}}</span>
+        <div style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; box-shadow: {{t.device}}">
+          <div style="flex: none; height: 59px"></div>
+          <div style="flex: none; display: flex; align-items: center; height: 44px; padding: 0 4px">
+            <a href="#" aria-label="{{L.close}}" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: {{t.text}}">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+            </a>
+          </div>
+          <div style="flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 20px; padding: 4px 16px 16px">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 16px; border-radius: 16px; background: {{t.surface2}}; border: 1px solid {{t.divider}}; text-align: center">
+              <span aria-hidden="true" style="width: 56px; height: 56px; border-radius: 14px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 600">K</span>
+              <div style="display: flex; flex-direction: column; gap: 2px">
+                <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.inJoin}}</span>
+                <h1 style="margin: 0; font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em">Kite Studio</h1>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; line-height: 20px; color: {{t.text2}}">
+                <span style="width: 24px; height: 24px; border-radius: 12px; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{anu.style}}">{{anu.initials}}</span>
+                {{L.inBy}}
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px">
+                <span style="display: flex; padding-left: 6px">
+                  <sc-for list="{{members}}" as="p" hint-placeholder-count="4">
+                    <span title="{{p.name}}" style="width: 24px; height: 24px; margin-left: -6px; box-sizing: border-box; border-radius: 12px; border: 2px solid {{t.surface2}}; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{p.style}}">{{p.initials}}</span>
+                  </sc-for>
+                </span>
+                <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.inMembers}}</span>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 16px">
+              <div style="display: flex; flex-direction: column; gap: 6px">
+                <span style="font-size: 13px; line-height: 18px; font-weight: 500; color: {{t.text2}}">{{L.email}}</span>
+                <div style="display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 14px; box-sizing: border-box; border-radius: 12px; background: {{t.fill}}; font-size: 16px; color: {{t.text2}}">
+                  <span style="flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">bayarmaa@kitestudio.mn</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{t.muted}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="{{L.locked}}"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+                </div>
+              </div>
+              <label style="display: flex; flex-direction: column; gap: 6px">
+                <span style="font-size: 13px; line-height: 18px; font-weight: 500; color: {{t.text2}}">{{L.fullName}}</span>
+                <input type="text" autocomplete="name" value="{{L.nameValue}}" style="height: 48px; padding: 0 14px; box-sizing: border-box; border: 1px solid {{t.border}}; border-radius: 12px; background: {{t.bg}}; outline: none; font-size: 16px">
+              </label>
+              <div style="display: flex; flex-direction: column; gap: 6px">
+                <label for="npw" style="font-size: 13px; line-height: 18px; font-weight: 500; color: {{t.text2}}">{{L.newPw}}</label>
+                <div style="position: relative; display: flex">
+                  <input id="npw" type="password" autocomplete="new-password" value="kite-studio-26" style="flex: 1; min-width: 0; height: 48px; padding: 0 52px 0 14px; box-sizing: border-box; border: 1.5px solid {{accent}}; box-shadow: 0 0 0 3px {{accentSoft}}; border-radius: 12px; background: {{t.bg}}; outline: none; font-size: 16px">
+                  <button type="button" aria-label="{{L.showPw}}" style="position: absolute; right: 2px; top: 2px; width: 44px; height: 44px; border: 0; border-radius: 10px; background: transparent; display: flex; align-items: center; justify-content: center">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.muted}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  </button>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px">
+                  <span aria-hidden="true" style="flex: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px">
+                    <sc-for list="{{strength}}" as="b" hint-placeholder-count="4"><span style="height: 4px; border-radius: 2px; {{b.style}}"></span></sc-for>
+                  </span>
+                  <span style="font-size: 13px; line-height: 18px; font-weight: 500; color: {{okInk}}">{{L.pwStrong}}</span>
+                </div>
+                <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.pwRule}}</span>
+              </div>
+            </div>
+          </div>
+          <div style="flex: none; display: flex; flex-direction: column; gap: 4px; padding: 12px 16px 0; border-top: 1px solid {{t.divider}}; background: {{t.bg}}">
+            <button style="height: 48px; border: 0; border-radius: 12px; background: {{accent}}; color: #FFFFFF; font-size: 16px; font-weight: 600">{{L.join}}</button>
+            <a href="#" style="display: flex; align-items: center; justify-content: center; height: 44px; font-size: 14px; font-weight: 500; text-decoration: none; color: {{t.text3}}">{{L.haveAccount}}</a>
+            <div style="height: 34px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- No workspace yet -->
+      <div style="display: flex; flex-direction: column; gap: 16px">
+        <span style="{{cap}}">{{L.capEmpty}}</span>
+        <div style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; box-shadow: {{t.device}}">
+          <div style="flex: none; height: 59px"></div>
+          <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 24px; text-align: center">
+            <div aria-hidden="true" style="position: relative; width: 104px; height: 104px; border-radius: 52px; background: {{t.surface2}}; border: 1px solid {{t.divider}}; display: flex; align-items: center; justify-content: center">
+              <span style="width: 48px; height: 48px; box-sizing: border-box; border-radius: 12px; border: 2px dashed {{t.faint}}; display: flex; align-items: center; justify-content: center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.faint}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+              </span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <h1 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.01em">{{L.noWsTitle}}</h1>
+              <p style="margin: 0; font-size: 15px; line-height: 22px; color: {{t.text3}}">{{L.noWsBody}}</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; max-width: 100%; height: 40px; padding: 0 14px 0 6px; box-sizing: border-box; border: 1px solid {{t.border}}; border-radius: 20px">
+              <span style="flex: none; width: 28px; height: 28px; border-radius: 14px; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{bay.style}}">{{bay.initials}}</span>
+              <span style="min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; color: {{t.text2}}">bayarmaa@kitestudio.mn</span>
+            </div>
+          </div>
+          <div style="flex: none; display: flex; flex-direction: column; gap: 4px; padding: 12px 16px 0; border-top: 1px solid {{t.divider}}; background: {{t.bg}}">
+            <button style="display: flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border: 1px solid {{t.border}}; border-radius: 12px; background: {{t.bg}}; font-size: 16px; font-weight: 600; color: {{t.text}}">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 4v5h-5"></path></svg>
+              {{L.checkAgain}}
+            </button>
+            <button style="display: flex; align-items: center; justify-content: center; gap: 8px; height: 44px; border: 0; background: transparent; font-size: 16px; font-weight: 500; color: {{t.red}}">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"></path></svg>
+              {{L.signOut}}
+            </button>
+            <div style="height: 34px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Workspace switcher sheet -->
+      <div style="display: flex; flex-direction: column; gap: 16px">
+        <span style="{{cap}}">{{L.capSwitch}}</span>
+        <div style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; box-shadow: {{t.device}}">
+          <div style="flex: none; height: 59px"></div>
+          <div style="flex: none; display: flex; align-items: center; height: 44px; padding: 0 4px 0 16px; gap: 8px">
+            <span style="width: 28px; height: 28px; border-radius: 7px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600">K</span>
+            <span style="font-size: 15px; font-weight: 600">Kite Studio</span>
+          </div>
+          <div style="flex: none; display: flex; flex-direction: column; padding: 2px 16px 10px">
+            <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.dateLong}}</span>
+            <span style="font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.01em">{{L.myTasks}}</span>
+          </div>
+          <div style="flex: 1; display: flex; flex-direction: column">
+            <sc-for list="{{ghostRows}}" as="x" hint-placeholder-count="6">
+              <div style="display: flex; align-items: center; gap: 16px; height: 64px; padding: 0 16px; border-bottom: 1px solid {{t.divider}}">
+                <span style="flex: none; width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; border: 2px solid {{t.faint}}"></span>
+                <span style="flex: 1; display: flex; flex-direction: column; gap: 8px">
+                  <span style="height: 10px; border-radius: 5px; background: {{t.skel}}; {{x.w}}"></span>
+                  <span style="height: 8px; width: 40%; border-radius: 4px; background: {{t.skel}}"></span>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+          <div aria-hidden="true" style="position: absolute; z-index: 4; inset: 0; background: {{t.scrim}}"></div>
+          <div role="dialog" aria-modal="true" aria-labelledby="ws-h" style="position: absolute; z-index: 5; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.raised}}; border-radius: 16px 16px 0 0; box-shadow: {{t.shadowSheet}}">
+            <div style="height: 20px; display: flex; justify-content: center; padding-top: 6px; box-sizing: border-box"><span style="width: 36px; height: 5px; border-radius: 3px; background: {{t.grabber}}"></span></div>
+            <div style="display: flex; align-items: center; height: 52px; padding: 0 4px 0 16px">
+              <h2 id="ws-h" style="flex: 1; margin: 0; font-size: 17px; line-height: 22px; font-weight: 600">{{L.wsTitle}}</h2>
+              <button aria-label="{{L.close}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.text3}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+            </div>
+            <div role="listbox" aria-labelledby="ws-h" style="display: flex; flex-direction: column">
+              <sc-for list="{{workspaces}}" as="w" hint-placeholder-count="4">
+                <button role="option" aria-selected="{{w.current}}" aria-label="{{w.aria}}" style="display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 8px 16px; box-sizing: border-box; border: 0; background: {{w.rowBg}}; text-align: left">
+                  <span aria-hidden="true" style="flex: none; width: 40px; height: 40px; border-radius: 10px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 600; {{w.tile}}">{{w.initial}}</span>
+                  <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; line-height: 22px; font-weight: 600">{{w.name}}</span>
+                    <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{w.meta}}</span>
+                  </span>
+                  <sc-if value="{{w.hasBadge}}" hint-placeholder-val="{{ false }}">
+                    <span aria-hidden="true" style="flex: none; min-width: 22px; height: 22px; padding: 0 7px; box-sizing: border-box; border-radius: 11px; background: {{accent}}; color: #FFFFFF; font-size: 12px; font-weight: 600; line-height: 22px; text-align: center">{{w.badge}}</span>
+                  </sc-if>
+                  <sc-if value="{{w.hasDot}}" hint-placeholder-val="{{ false }}">
+                    <span aria-hidden="true" style="flex: none; width: 8px; height: 8px; margin: 0 7px; border-radius: 4px; background: {{accent}}"></span>
+                  </sc-if>
+                  <span style="flex: none; width: 24px; display: flex; justify-content: center">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{accentInk}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{w.check}}"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>
+                  </span>
+                </button>
+              </sc-for>
+            </div>
+            <span style="padding: 6px 16px 10px; font-size: 12px; line-height: 16px; color: {{t.muted}}">{{L.wsLegend}}</span>
+            <div style="display: flex; flex-direction: column; border-top: 1px solid {{t.divider}}; padding: 4px 0">
+              <button style="display: flex; align-items: center; gap: 14px; min-height: 52px; padding: 0 16px; border: 0; background: transparent; text-align: left; font-size: 16px; color: {{t.text}}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path></svg>
+                {{L.wsJoin}}
+              </button>
+              <button style="display: flex; align-items: center; gap: 14px; min-height: 52px; padding: 0 16px; border: 0; background: transparent; text-align: left; font-size: 16px; color: {{t.red}}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"></path></svg>
+                {{L.signOutOf}}
+              </button>
+            </div>
+            <div style="height: 34px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notification priming -->
+      <div style="display: flex; flex-direction: column; gap: 16px">
+        <span style="{{cap}}">{{L.capNotif}}</span>
+        <div style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; box-shadow: {{t.device}}">
+          <div style="flex: none; height: 59px"></div>
+          <div style="flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 24px; padding: 24px 16px 16px">
+            <div aria-hidden="true" style="display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 20px; background: {{t.surface2}}">
+              <sc-for list="{{previews}}" as="p" hint-placeholder-count="3">
+                <div style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 14px; background: {{t.raised}}; border: 1px solid {{t.divider}}; box-shadow: {{t.shadowCard}}; {{p.fade}}">
+                  <span style="flex: none; width: 28px; height: 28px; border-radius: 7px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">K</span>
+                  <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                    <span style="display: flex; justify-content: space-between; gap: 8px; font-size: 12px; line-height: 16px; color: {{t.muted}}"><span>Kite Tasks</span><span>{{p.time}}</span></span>
+                    <span style="font-size: 14px; line-height: 20px; font-weight: 600">{{p.title}}</span>
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; line-height: 18px; color: {{t.text3}}">{{p.body}}</span>
+                  </span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <h1 style="margin: 0; font-size: 26px; line-height: 32px; font-weight: 600; letter-spacing: -0.01em">{{L.nTitle}}</h1>
+              <p style="margin: 0; font-size: 15px; line-height: 22px; color: {{t.text3}}">{{L.nBody}}</p>
+            </div>
+            <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px">
+              <sc-for list="{{reasons}}" as="r" hint-placeholder-count="3">
+                <li style="display: flex; align-items: flex-start; gap: 12px">
+                  <span aria-hidden="true" style="flex: none; width: 36px; height: 36px; border-radius: 10px; background: {{accentSoft}}; color: {{accentInk}}; display: flex; align-items: center; justify-content: center">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{r.icon}}"></path></svg>
+                  </span>
+                  <span style="display: flex; flex-direction: column">
+                    <span style="font-size: 15px; line-height: 22px; font-weight: 600">{{r.title}}</span>
+                    <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{r.body}}</span>
+                  </span>
+                </li>
+              </sc-for>
+            </ul>
+          </div>
+          <div style="flex: none; display: flex; flex-direction: column; gap: 4px; padding: 12px 16px 0; border-top: 1px solid {{t.divider}}; background: {{t.bg}}">
+            <button style="height: 48px; border: 0; border-radius: 12px; background: {{accent}}; color: #FFFFFF; font-size: 16px; font-weight: 600">{{L.nAllow}}</button>
+            <button style="height: 44px; border: 0; background: transparent; font-size: 16px; font-weight: 500; color: {{t.text2}}">{{L.notNow}}</button>
+            <span style="padding: 0 8px; text-align: center; font-size: 12px; line-height: 16px; color: {{t.muted}}">{{L.nLater}}</span>
+            <div style="height: 30px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"language":{"editor":"enum","default":"mn","options":["mn","en"]},"theme":{"editor":"enum","default":"light","options":["light","dark"]},"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"$preview":{"width":1840,"height":2300}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: undefined, theme: undefined };
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const lang = s.lang || this.props.language || 'mn';
+    const mn = lang === 'mn';
+    const pick = (p) => (mn ? p[0] : p[1]);
+    const theme = s.theme || this.props.theme || 'light';
+    const dark = theme === 'dark';
+    const accent = this.props.accent ?? '#6E56CF';
+    const inks = { '#6E56CF': '#B4A5FF', '#2F6FEB': '#93B4FF', '#0F766E': '#5EEAD4', '#3F3F46': '#D4D4D8' };
+    const accentInk = dark ? (inks[String(accent).toUpperCase()] || '#B4A5FF') : accent;
+    const accentSoft = accent + (dark ? '33' : '1A');
+
+    /* ---------- STRINGS ---------- */
+    const STR = {
+      mn: {
+        intro: 'Нэвтрэх, урилга хүлээн авах, ажлын орчингүй төлөв, ажлын орчин солих, мэдэгдлийн зөвшөөрөл. Монгол хэл үндсэн.',
+        preview: 'Урьдчилан харах', langLabel: 'Хэл', themeLabel: 'Горим', light: 'Цайвар', dark: 'Бараан',
+        r1: 'Нэвтрэх', r1d: 'Үндсэн · буруу нууц үг · түр түгжигдсэн · өөрийн сервер',
+        r2: 'Урилга ба ажлын орчин', r2d: 'Урилга хүлээн авах · ажлын орчин алга · солих хуудас · мэдэгдлийн зөвшөөрөл',
+        capDefault: 'Нэвтрэх · үндсэн', capWrong: 'Алдаа · буруу нууц үг', capLocked: 'Алдаа · хэт олон оролдлого', capServer: 'Сервер солих · нээлттэй',
+        capInvite: 'Урилга хүлээн авах', capEmpty: 'Ажлын орчин алга', capSwitch: 'Ажлын орчин солих хуудас', capNotif: 'Мэдэгдлийн зөвшөөрөл · OS асуухаас өмнө',
+        siTitle: 'Нэвтрэх', siSub: 'Багийнхаа ажил руу буцаж ороорой.', siSubServer: 'tasks.kitestudio.mn серверт нэвтэрнэ.',
+        email: 'Имэйл', password: 'Нууц үг', showPw: 'Нууц үгийг харуулах', forgot: 'Нууц үгээ мартсан уу?', signIn: 'Нэвтрэх',
+        wrongPw: 'Имэйл эсвэл нууц үг буруу байна. 2 оролдлого үлдлээ.',
+        lockTitle: 'Хэт олон удаа буруу оролдлоо', lockBody: 'Аюулгүй байдлын үүднээс 5 минутын дараа дахин оролдоно уу. Эсвэл нууц үгээ сэргээгээрэй.',
+        lockedBtn: '4:59-ийн дараа оролдоно уу',
+        changeServer: 'Сервер солих', resetServer: 'Kite Cloud руу буцах',
+        serverLabel: 'Серверийн хаяг', serverOk: 'Kite Tasks 4.2 сервер олдлоо', serverHelp: 'Өөрийн серверт ажилладаг багуудад. Хаягийг админаасаа асуугаарай.',
+        close: 'Хаах', inJoin: 'Таныг нэгдэхийг урьж байна', inBy: 'Ану Б. урьсан · Эзэмшигч', inMembers: '9 гишүүн · 10-р сарын 15 хүртэл хүчинтэй',
+        locked: 'Урилгын имэйл, өөрчлөх боломжгүй', fullName: 'Бүтэн нэр', nameValue: 'Баярмаа Т.', newPw: 'Нууц үг үүсгэх',
+        pwStrong: 'Хүчтэй', pwRule: '8-аас доошгүй тэмдэгт, тоо эсвэл тэмдэг оруулна.', join: 'Kite Studio-д нэгдэх', haveAccount: 'Бүртгэлтэй юу? Нэвтэрч нэгдэх',
+        noWsTitle: 'Танд ажлын орчин алга байна', noWsBody: 'Багийнхаа админаас урилга хүсээрэй. Урилга ирмэгц энд автоматаар харагдана.',
+        checkAgain: 'Дахин шалгах', signOut: 'Гарах',
+        dateLong: 'Пүрэв, 10-р сарын 8', myTasks: 'Миний ажил',
+        wsTitle: 'Ажлын орчин', wsLegend: 'Тоо — танд хамаатай уншаагүй мэдэгдэл · цэг — шинэ үйл ажиллагаа', wsJoin: 'Урилгын холбоосоор нэгдэх', signOutOf: 'anu@kitestudio.mn-ээс гарах',
+        nTitle: 'Чухал зүйлийг цагт нь мэдээрэй', nBody: 'Kite зөвхөн танд хамаатай үед л мэдэгдэнэ. Багийн бүх үйл ажиллагааг биш.',
+        nAllow: 'Мэдэгдэл асаах', notNow: 'Одоо биш', nLater: 'Дараа нь Бусад › Мэдэгдэл хэсгээс өөрчилж болно.'
+      },
+      en: {
+        intro: 'Sign in, accept an invite, no-workspace state, workspace switcher and notification permission. Mongolian is the default.',
+        preview: 'Preview', langLabel: 'Language', themeLabel: 'Theme', light: 'Light', dark: 'Dark',
+        r1: 'Sign in', r1d: 'Default · wrong password · temporarily locked · self-hosted server',
+        r2: 'Invites and workspaces', r2d: 'Accept invite · no workspace · switcher sheet · notification permission',
+        capDefault: 'Sign in · default', capWrong: 'Error · wrong password', capLocked: 'Error · too many attempts', capServer: 'Change server · open',
+        capInvite: 'Accept invite', capEmpty: 'No workspace yet', capSwitch: 'Workspace switcher sheet', capNotif: 'Notification priming · before the OS prompt',
+        siTitle: 'Sign in', siSub: 'Pick up where your team left off.', siSubServer: 'Signing in to tasks.kitestudio.mn.',
+        email: 'Email', password: 'Password', showPw: 'Show password', forgot: 'Forgot password?', signIn: 'Sign in',
+        wrongPw: 'Email or password is incorrect. 2 attempts left.',
+        lockTitle: 'Too many attempts', lockBody: 'For your security, try again in 5 minutes, or reset your password.',
+        lockedBtn: 'Try again in 4:59',
+        changeServer: 'Change server', resetServer: 'Back to Kite Cloud',
+        serverLabel: 'Server address', serverOk: 'Found a Kite Tasks 4.2 server', serverHelp: 'For teams that host Kite themselves. Ask your admin for the address.',
+        close: 'Close', inJoin: 'You’re invited to join', inBy: 'Invited by Anu B. · Owner', inMembers: '9 members · valid until Oct 15',
+        locked: 'Invite email, can’t be changed', fullName: 'Full name', nameValue: 'Bayarmaa T.', newPw: 'Create a password',
+        pwStrong: 'Strong', pwRule: 'At least 8 characters, with a number or symbol.', join: 'Join Kite Studio', haveAccount: 'Have an account? Sign in to join',
+        noWsTitle: 'You’re not in a workspace yet', noWsBody: 'Ask your team’s admin for an invite. It will show up here as soon as it arrives.',
+        checkAgain: 'Check again', signOut: 'Sign out',
+        dateLong: 'Thursday, Oct 8', myTasks: 'My Tasks',
+        wsTitle: 'Workspaces', wsLegend: 'Number — unread notifications for you · dot — new activity', wsJoin: 'Join with an invite link', signOutOf: 'Sign out of anu@kitestudio.mn',
+        nTitle: 'Know when it matters', nBody: 'Kite only notifies you about things that involve you — not every change your team makes.',
+        nAllow: 'Turn on notifications', notNow: 'Not now', nLater: 'You can change this later in More › Notifications.'
+      }
+    };
+    const L = STR[lang] || STR.mn;
+
+    /* ---------- THEME TOKENS (same as MobileFoundations) ---------- */
+    const t = dark ? {
+      board: '#0A0A0B', bg: '#111113', surface2: '#161618', raised: '#1B1B1E', fill: '#1F1F23', chip: '#232328', seg: '#1F1F23',
+      border: '#26262B', border2: '#3A3A42', divider: '#1F1F23', grabber: '#3F3F46',
+      text: '#EDEDEF', text2: '#C9C9D1', text3: '#B4B4BC', muted: '#8E8E98', faint: '#5E5E68',
+      red: '#F87171', skel: '#232328', scrim: 'rgba(0,0,0,0.6)',
+      shadowSheet: '0 -8px 32px rgba(0,0,0,0.5)', shadowCard: '0 2px 8px rgba(0,0,0,0.3)',
+      device: '0 0 0 1px #2A2A30, 0 0 0 10px #232328, 0 24px 48px rgba(0,0,0,0.5)',
+      segOn: 'background:#2A2A30;color:#EDEDEF;box-shadow:0 1px 2px rgba(0,0,0,0.4)', segOff: 'background:transparent;color:#8E8E98',
+      scheme: 'color-scheme: dark'
+    } : {
+      board: '#F4F4F5', bg: '#FFFFFF', surface2: '#F7F7F8', raised: '#FFFFFF', fill: '#F4F4F5', chip: '#F1F1F3', seg: '#F1F1F3',
+      border: '#E6E6EA', border2: '#C4C4CC', divider: '#EFEFF2', grabber: '#D4D4D8',
+      text: '#18181B', text2: '#3F3F46', text3: '#52525B', muted: '#6B6B74', faint: '#A1A1AA',
+      red: '#DC2626', skel: '#EDEDF0', scrim: 'rgba(24,24,27,0.32)',
+      shadowSheet: '0 -8px 32px rgba(24,24,27,0.12)', shadowCard: '0 2px 8px rgba(24,24,27,0.06)',
+      device: '0 0 0 1px #E6E6EA, 0 0 0 10px #18181B, 0 24px 48px rgba(24,24,27,0.18)',
+      segOn: 'background:#FFFFFF;color:#18181B;box-shadow:0 1px 2px rgba(24,24,27,0.08)', segOff: 'background:transparent;color:#6B6B74',
+      scheme: 'color-scheme: light'
+    };
+    const cap = 'font-family:Geist Mono,ui-monospace,monospace;font-size:12px;line-height:16px;color:' + t.muted;
+    const okInk = dark ? '#86EFAC' : '#166534';
+    const alertBox = dark ? 'background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.3);color:#FCA5A5' : 'background:#FFF8F7;border:1px solid #F3D3CF;color:#B42318';
+
+    /* ---------- PEOPLE ---------- */
+    const PP = {
+      anu: [['Ану Б.', 'Anu B.'], ['АБ', 'AB'], 'background:#E0E7FF;color:#3730A3', 'background:#312E81;color:#C7D2FE'],
+      sara: [['Сараа К.', 'Sara K.'], ['СК', 'SK'], 'background:#FFE4E6;color:#9F1239', 'background:#881337;color:#FECDD3'],
+      tem: [['Тэмүүлэн Г.', 'Temuulen G.'], ['ТГ', 'TG'], 'background:#DCFCE7;color:#166534', 'background:#14532D;color:#BBF7D0'],
+      dorj: [['Дорж Э.', 'Dorj E.'], ['ДЭ', 'DE'], 'background:#FEF3C7;color:#92400E', 'background:#78350F;color:#FDE68A'],
+      bay: [['Баярмаа Т.', 'Bayarmaa T.'], ['БТ', 'BT'], 'background:#FEF9C3;color:#854D0E', 'background:#713F12;color:#FEF08A']
+    };
+    const person = (id) => ({ name: pick(PP[id][0]), initials: pick(PP[id][1]), style: dark ? PP[id][3] : PP[id][2] });
+
+    /* ---------- SIGN IN VARIANTS ---------- */
+    const primary = 'background:' + accent + ';color:#FFFFFF';
+    const disabled = 'background:' + t.chip + ';color:' + t.muted + ';cursor:not-allowed';
+    const pwNormal = 'border:1px solid ' + t.border;
+    const pwError = 'border:1.5px solid ' + t.red;
+    const signins = [
+      { cap: L.capDefault, sub: L.siSub, wrong: false, locked: false, server: false, pwStyle: pwNormal, btnStyle: primary, btnLabel: L.signIn, serverLink: L.changeServer, fieldDim: '' },
+      { cap: L.capWrong, sub: L.siSub, wrong: true, locked: false, server: false, pwStyle: pwError, btnStyle: primary, btnLabel: L.signIn, serverLink: L.changeServer, fieldDim: '' },
+      { cap: L.capLocked, sub: L.siSub, wrong: false, locked: true, server: false, pwStyle: pwNormal + ';color:' + t.muted, btnStyle: disabled, btnLabel: L.lockedBtn, serverLink: L.changeServer, fieldDim: 'color:' + t.muted },
+      { cap: L.capServer, sub: L.siSubServer, wrong: false, locked: false, server: true, pwStyle: pwNormal, btnStyle: primary, btnLabel: L.signIn, serverLink: L.resetServer, fieldDim: '' }
+    ];
+
+    /* ---------- INVITE ---------- */
+    const members = ['anu', 'sara', 'tem', 'dorj'].map(person);
+    const strength = [0, 1, 2, 3].map((i) => ({ style: 'background:' + (i < 3 ? (dark ? '#22C55E' : '#16A34A') : t.chip) }));
+
+    /* ---------- SWITCHER ---------- */
+    const WS = [
+      { name: ['Kite Studio', 'Kite Studio'], meta: ['Эзэмшигч · 9 гишүүн', 'Owner · 9 members'], initial: 'K', tile: 'background:' + accent, badge: 3, dot: false, current: true },
+      { name: ['Nomad Labs', 'Nomad Labs'], meta: ['Гишүүн · 14 гишүүн', 'Member · 14 members'], initial: 'N', tile: 'background:#0F766E', badge: 12, dot: false, current: false },
+      { name: ['Steppe Digital', 'Steppe Digital'], meta: ['Зочин · 6 гишүүн', 'Guest · 6 members'], initial: 'S', tile: 'background:#B45309', badge: 0, dot: true, current: false },
+      { name: ['Ануугийн хувийн', 'Anu’s personal'], meta: ['Эзэмшигч · 1 гишүүн', 'Owner · 1 member'], initial: mn ? 'А' : 'A', tile: 'background:#52525B', badge: 0, dot: false, current: false }
+    ];
+    const workspaces = WS.map((w) => {
+      const name = pick(w.name);
+      const extra = w.badge ? (mn ? ', ' + w.badge + ' уншаагүй' : ', ' + w.badge + ' unread') : (w.dot ? (mn ? ', шинэ үйл ажиллагаа' : ', new activity') : '');
+      return {
+        name, meta: pick(w.meta), initial: w.initial, tile: w.tile,
+        hasBadge: w.badge > 0, badge: w.badge > 9 ? '9+' : String(w.badge), hasDot: w.dot,
+        current: w.current, check: 'visibility:' + (w.current ? 'visible' : 'hidden'),
+        rowBg: w.current ? accentSoft : 'transparent',
+        aria: name + extra + (w.current ? (mn ? ', одоогийн' : ', current') : '')
+      };
+    });
+    const ghostRows = ['78%', '62%', '84%', '55%', '70%', '66%'].map((w) => ({ w: 'width:' + w }));
+
+    /* ---------- NOTIFICATIONS ---------- */
+    const previews = [
+      { time: mn ? 'одоо' : 'now', title: mn ? 'Дорж Э. таныг дурдлаа' : 'Dorj E. mentioned you', body: mn ? 'APP-142 · Бат iOS-ийг баталмагц гарын үсэг зурахад бэлэн.' : 'APP-142 · Ready for sign-off once Bat confirms iOS.', fade: '' },
+      { time: '09:12', title: mn ? 'Танд ажил оноолоо' : 'You were assigned a task', body: mn ? 'CHK-64 · Хадгалсан сагсны PRD бичих' : 'CHK-64 · Write PRD: saved carts', fade: 'opacity:0.85' },
+      { time: '09:45', title: mn ? 'Стэндапаа бичих цаг боллоо' : 'Time to post your standup', body: mn ? 'Мобайл баг · 10:00-аас өмнө' : 'Mobile team · due by 10:00', fade: 'opacity:0.7' }
+    ];
+    const reasons = [
+      { icon: 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM16 12v1.5a2.5 2.5 0 0 0 5 0V12a9 9 0 1 0-3.5 7.1', title: mn ? 'Дурдалт' : 'Mentions', body: mn ? 'Хэн нэгэн таныг сэтгэгдэл эсвэл стэндапад @дурдах үед' : 'When someone @mentions you in a comment or standup' },
+      { icon: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8.5 12l2.5 2.5 4.5-5', title: mn ? 'Оноосон ажил' : 'Assignments', body: mn ? 'Танд ажил оноох эсвэл хугацаа нь ойртох үед' : 'When a task is assigned to you or its due date is close' },
+      { icon: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2zM8 9h8M8 13h5', title: mn ? 'Стэндапын сануулга' : 'Standup reminders', body: mn ? 'Бичих хугацаа дуусахаас 15 минутын өмнө, нэг удаа' : 'Once, 15 minutes before your standup is due' }
+    ];
+
+    const segBtn = (on) => (on ? t.segOn : t.segOff);
+    const toggles = [
+      { label: L.langLabel, opts: [['mn', 'МН'], ['en', 'EN']].map(([v, lab]) => ({ label: lab, on: lang === v, style: segBtn(lang === v), pick: () => this.setState({ lang: v }) })) },
+      { label: L.themeLabel, opts: [['light', L.light], ['dark', L.dark]].map(([v, lab]) => ({ label: lab, on: theme === v, style: segBtn(theme === v), pick: () => this.setState({ theme: v }) })) }
+    ];
+
+    return {
+      lang, L, t, cap, accent, accentInk, accentSoft, okInk, alertBox, toggles,
+      signins, anu: person('anu'), bay: person('bay'), members, strength,
+      workspaces, ghostRows, previews, reasons
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -4,10 +4,12 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
 import {
   apiClient,
+  bearer,
   createUser,
   createWorkspace,
   errorCode,
   login,
+  loginMobile,
   ORIGIN,
   randomIp,
 } from './fixtures.js';
@@ -48,6 +50,7 @@ const NOT_WORKSPACE_SCOPED = [
   'POST /auth/login',
   'POST /auth/logout',
   'GET /auth/me',
+  'GET /auth/sessions',
   'PATCH /me',
   // The caller's own counts over their own workspaces (the outsider sees only theirs).
   'GET /me/notifications/unread-counts',
@@ -69,6 +72,7 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
   let ctx: Awaited<ReturnType<typeof createTestApp>>;
   let ops: Op[];
   let outsiderCookie: string;
+  let outsiderToken: string;
   let memberCookie: string;
   let params: Record<string, string>;
   let bodies: Record<string, InjectOptions['payload']>;
@@ -179,6 +183,15 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
     const outsider = await createUser(ctx.db);
     await createWorkspace(ctx.db, outsider.id);
     outsiderCookie = await login(ctx.app, outsider.email);
+    outsiderToken = await loginMobile(ctx.app, outsider.email);
+    // The outsider revoking the member's session gets the same 404 as any foreign resource.
+    const memberSessions = await ctx.app.inject({
+      method: 'GET',
+      url: `${PREFIX}/auth/sessions`,
+      headers: { cookie: memberCookie },
+    });
+    const memberSession = memberSessions.json<{ id: string }[]>()[0];
+    if (!memberSession) throw new Error('expected a session for the member');
 
     params = {
       workspaceId: w.ws.id,
@@ -206,6 +219,7 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       feedbackId: fb.id,
       ref: 'FB-1001',
       uploadId: fb.id,
+      sessionId: memberSession.id,
     };
 
     const ws = w.ws.id;
@@ -366,6 +380,15 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
           ...(MUTATIONS.has(o.method) ? { origin: ORIGIN } : {}),
         }),
       );
+      expect(res.statusCode, `${key(o)}: ${res.body}`).toBe(404);
+      expect(errorCode(res), key(o)).toBe('NOT_FOUND');
+    }
+  });
+
+  it('answers the same 404 to an outsider signed in with a bearer token (no Origin)', async () => {
+    const scoped = ops.filter((o) => !NOT_WORKSPACE_SCOPED.includes(key(o)));
+    for (const o of scoped) {
+      const res = await ctx.app.inject(request(o, bearer(outsiderToken)));
       expect(res.statusCode, `${key(o)}: ${res.body}`).toBe(404);
       expect(errorCode(res), key(o)).toBe('NOT_FOUND');
     }

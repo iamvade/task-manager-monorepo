@@ -8,7 +8,7 @@ import {
 import { and, eq, isNull } from 'drizzle-orm';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { requireAuth } from '../auth/plugin.js';
+import { originAllowed, requireAuth } from '../auth/plugin.js';
 import { projects, tasks, workspaceMembers } from '../db/schema/index.js';
 import { errorBody } from '../errors.js';
 import type { Connection } from '../realtime/hub.js';
@@ -19,8 +19,9 @@ const MESSAGE_BUDGET = 50;
 const BUDGET_WINDOW_MS = 10_000;
 
 const description = `
-WebSocket (upgrade this GET). Authenticated by the session cookie; \`Origin\` must be the web origin
-(403 \`CSRF_REJECTED\` otherwise). Pass \`?client=<tab id>\` (the same id the tab sends as
+WebSocket (upgrade this GET). Authenticated by the session cookie, with \`Origin\` the web origin
+(403 \`CSRF_REJECTED\` otherwise), or by \`Authorization: Bearer <token>\` (native apps; no Origin
+needed). The token is never accepted in the query string. Pass \`?client=<tab id>\` (the same id the tab sends as
 \`X-Kite-Client\` on its requests) so the tab's own changes aren't echoed back.
 
 Client messages (JSON): \`{"type":"subscribe","workspaceId"}\` (one workspace per socket; answered
@@ -43,7 +44,7 @@ export const realtimeRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       websocket: true,
       // A GET skips the CSRF hook, and browsers send cookies on cross-site WebSocket upgrades.
       onRequest: async (request, reply) => {
-        if (request.headers.origin !== webOrigin) {
+        if (!originAllowed(request, webOrigin)) {
           return reply.code(403).send(errorBody('CSRF_REJECTED', 'Request origin not allowed'));
         }
       },

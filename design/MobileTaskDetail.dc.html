@@ -1,0 +1,880 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<title>MobileTaskDetail — Kite Tasks</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+input,textarea{font:inherit;color:inherit}
+</style>
+</helmet>
+
+<div lang="{{lang}}" style="width: 1840px; min-height: 4200px; box-sizing: border-box; padding: 56px 64px 96px; display: flex; flex-direction: column; gap: 56px; font-family: Geist, ui-sans-serif, system-ui, sans-serif; font-size: 15px; line-height: 22px; color: {{t.text}}; background: {{t.board}}; -webkit-font-smoothing: antialiased; {{t.scheme}}">
+
+  <!-- ================= BOARD HEADER ================= -->
+  <header style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px">
+    <div style="display: flex; flex-direction: column; gap: 8px; max-width: 900px">
+      <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 12px; line-height: 16px; color: {{t.muted}}">Kite Tasks · iOS + Android · 390 × 844</span>
+      <h1 style="margin: 0; font-size: 40px; line-height: 48px; font-weight: 600; letter-spacing: -0.02em">MobileTaskDetail</h1>
+      <p style="margin: 0; font-size: 15px; line-height: 22px; color: {{t.text3}}">{{L.intro}}</p>
+    </div>
+    <div aria-label="{{L.preview}}" style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 8px 8px 8px 16px; border: 1px dashed {{t.border2}}; border-radius: 14px">
+      <span style="font-size: 12px; font-weight: 600; color: {{t.muted}}">{{L.preview}}</span>
+      <sc-for list="{{toggles}}" as="tg" hint-placeholder-count="2">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <span style="font-size: 13px; color: {{t.text3}}">{{tg.label}}</span>
+          <div role="radiogroup" aria-label="{{tg.label}}" style="display: flex; gap: 2px; padding: 2px; border-radius: 10px; background: {{t.seg}}">
+            <sc-for list="{{tg.opts}}" as="o" hint-placeholder-count="2">
+              <button role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}" style="height: 32px; padding: 0 12px; border: 0; border-radius: 8px; font-size: 13px; font-weight: 600; {{o.style}}">{{o.label}}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </header>
+
+  <section style="display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; padding-bottom: 14px; border-bottom: 1px solid {{t.border}}">
+      <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 13px; color: {{accentInk}}">01–13</span>
+      <h2 style="margin: 0; font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em">{{L.secTitle}}</h2>
+      <span style="font-size: 14px; color: {{t.muted}}">{{L.secSub}}</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 64px 48px; align-items: start">
+
+      <!-- ===================== DETAIL PHONES ===================== -->
+      <sc-for list="{{phones}}" as="d" hint-placeholder-count="11">
+        <div style="display: flex; flex-direction: column; gap: 16px; {{d.order}}">
+          <span style="{{cap}}">{{d.cap}}</span>
+          <div style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; box-shadow: {{t.device}}">
+            <div style="flex: none; height: 59px; background: {{t.bg}}"></div>
+
+            <!-- Header -->
+            <div style="flex: none; position: relative; z-index: 2; display: flex; align-items: center; gap: 2px; height: 56px; padding: 0 4px; background: {{t.bg}}; border-bottom: 1px solid {{t.divider}}">
+              <a href="#" aria-label="{{L.back}}" style="flex: none; width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: {{t.text}}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+              <nav aria-label="{{L.location}}" style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 4px; font-size: 13px; line-height: 18px; color: {{t.text3}}">
+                <a href="#" style="min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: {{t.text3}}; text-decoration: none">{{L.project}}</a>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="{{t.faint}}" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" style="flex: none"><path d="m9 6 6 6-6 6"></path></svg>
+                <span aria-current="page" style="flex: none; font-family: Geist Mono, ui-monospace, monospace; font-size: 12px; color: {{t.muted}}">APP-142</span>
+              </nav>
+              <sc-if value="{{d.live}}" hint-placeholder-val="{{ true }}">
+                <button style="flex: none; display: flex; align-items: center; gap: 4px; height: 44px; padding: 0 6px; border: 0; background: transparent">
+                  <span style="display: flex; align-items: center; gap: 5px; height: 32px; padding: 0 10px 0 8px; border: 1px solid {{t.border}}; border-radius: 16px; font-size: 13px; font-weight: 600; color: {{t.text2}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>{{L.complete}}</span>
+                </button>
+                <button aria-label="{{L.copyLink}}" style="flex: none; width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.text2}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v13"></path></svg></button>
+              </sc-if>
+              <button aria-label="{{L.moreActions}}" style="flex: none; width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="{{t.text2}}" aria-hidden="true"><circle cx="5" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="19" cy="12" r="1.8"></circle></svg></button>
+            </div>
+
+            <sc-if value="{{d.deleted}}" hint-placeholder-val="{{ false }}">
+              <div role="status" style="flex: none; position: relative; z-index: 2; display: flex; align-items: center; gap: 12px; padding: 10px 8px 10px 16px; {{deletedBar}}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"></path></svg>
+                <span style="flex: 1; min-width: 0; font-size: 13px; line-height: 18px; color: {{t.text2}}">{{L.deletedMsg}}</span>
+                <button style="flex: none; height: 44px; padding: 0 14px; border: 0; border-radius: 10px; background: {{accent}}; color: #FFFFFF; font-size: 14px; font-weight: 600">{{L.restore}}</button>
+              </div>
+            </sc-if>
+
+            <!-- Scrolling body -->
+            <div style="flex: 1; min-height: 0; {{d.scroll}}">
+              <div style="display: flex; flex-direction: column; gap: 24px; padding: 14px 0 160px; {{d.shift}}">
+
+                <!-- Title -->
+                <div style="display: flex; flex-direction: column; gap: 6px; padding: 0 16px">
+                  <sc-if value="{{d.titleEditable}}" hint-placeholder-val="{{ true }}">
+                    <label for="ttl" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">{{L.titleLabel}}</label>
+                    <textarea id="ttl" rows="2" style="margin: 0 -8px; padding: 2px 8px; border: 1px solid transparent; border-radius: 10px; background: transparent; resize: none; outline: none; font-size: 22px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em; color: {{t.text}}">{{L.title}}</textarea>
+                  </sc-if>
+                  <sc-if value="{{d.conflict}}" hint-placeholder-val="{{ false }}">
+                    <label for="ttl2" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">{{L.titleLabel}}</label>
+                    <textarea id="ttl2" rows="3" style="margin: 0 -8px; padding: 6px 8px; border: 1.5px solid {{accent}}; box-shadow: 0 0 0 3px {{accentSoft}}; border-radius: 10px; background: {{t.bg}}; resize: none; outline: none; font-size: 22px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em; color: {{t.text}}">{{L.titleMine}}</textarea>
+                    <div role="alert" style="display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 12px; {{warnBox}}">
+                      <div style="display: flex; align-items: flex-start; gap: 10px">
+                        <span style="flex: none; width: 28px; height: 28px; border-radius: 14px; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{dorj.style}}">{{dorj.initials}}</span>
+                        <span style="display: flex; flex-direction: column; gap: 4px; font-size: 14px; line-height: 20px; color: {{t.text2}}">
+                          <span><strong style="font-weight: 600; color: {{t.text}}">{{dorj.name}}</strong> {{L.changedTitle}}</span>
+                          <span style="padding: 6px 8px; border-radius: 8px; background: {{t.bg}}; font-weight: 500; color: {{t.text}}">{{L.titleTheirs}}</span>
+                        </span>
+                      </div>
+                      <div style="display: flex; gap: 8px">
+                        <button style="flex: 1; height: 44px; border: 0; border-radius: 10px; background: {{accent}}; color: #FFFFFF; font-size: 14px; font-weight: 600">{{L.useTheirs}}</button>
+                        <button style="flex: 1; height: 44px; border: 1px solid {{t.border}}; border-radius: 10px; background: {{t.bg}}; font-size: 14px; font-weight: 600; color: {{t.text}}">{{L.keepMine}}</button>
+                      </div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{d.deleted}}" hint-placeholder-val="{{ false }}">
+                    <h1 style="margin: 0; font-size: 22px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em; color: {{t.text3}}">{{L.title}}</h1>
+                  </sc-if>
+                  <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.meta}}</span>
+                </div>
+
+                <!-- Blocked banner -->
+                <sc-if value="{{d.live}}" hint-placeholder-val="{{ true }}">
+                  <a href="#" style="margin: 0 16px; display: flex; align-items: flex-start; gap: 10px; padding: 12px; border-radius: 12px; text-decoration: none; {{blockedBox}}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" aria-hidden="true" style="flex: none; margin-top: 1px"><circle cx="12" cy="12" r="9"></circle><path d="m5.6 5.6 12.8 12.8"></path></svg>
+                    <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+                      <span style="font-size: 14px; line-height: 20px; font-weight: 600">{{L.blockedTitle}}</span>
+                      <span style="font-size: 13px; line-height: 18px; color: {{t.text2}}">{{L.blockedBody}}</span>
+                      <span style="font-size: 12px; line-height: 16px; color: {{t.muted}}">{{L.blockedFrom}}</span>
+                    </span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 2px"><path d="m9 6 6 6-6 6"></path></svg>
+                  </a>
+                </sc-if>
+
+                <!-- Properties -->
+                <div role="list" aria-label="{{L.properties}}" style="display: flex; flex-direction: column; border-top: 1px solid {{t.divider}}">
+                  <sc-for list="{{props}}" as="p" hint-placeholder-count="9">
+                    <button role="listitem" aria-label="{{p.aria}}" style="display: flex; align-items: center; gap: 8px; min-height: 52px; padding: 8px 8px 8px 16px; box-sizing: border-box; border: 0; border-bottom: 1px solid {{t.divider}}; text-align: left; {{p.bg}}">
+                      <span style="flex: none; width: 128px; display: flex; align-items: center; gap: 8px; font-size: 14px; line-height: 20px; color: {{t.muted}}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="{{p.icon}}"></path></svg>{{p.label}}
+                      </span>
+                      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 4px">
+                        <span style="display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 6px; max-width: 100%; font-size: 15px; line-height: 22px; {{d.valueTone}}">
+                          <sc-if value="{{p.hasMarker}}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position: relative; width: 12px; height: 12px; box-sizing: border-box; border-radius: 6px; {{p.mk.ring}}"></span></sc-if>
+                          <sc-if value="{{p.hasFlag}}" hint-placeholder-val="{{ false }}"><svg width="15" height="15" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{p.flag}}"><path d="M4 22V4"></path><path d="M4 4h12l-2 4 2 4H4"></path></svg></sc-if>
+                          <sc-if value="{{p.hasPeople}}" hint-placeholder-val="{{ false }}">
+                            <span style="display: flex; padding-left: 6px"><sc-for list="{{p.people}}" as="pp" hint-placeholder-count="2"><span style="width: 24px; height: 24px; margin-left: -6px; box-sizing: border-box; border-radius: 12px; border: 2px solid {{t.bg}}; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{pp.style}}">{{pp.initials}}</span></sc-for></span>
+                          </sc-if>
+                          <sc-if value="{{p.hasTags}}" hint-placeholder-val="{{ false }}">
+                            <sc-for list="{{p.tags}}" as="tg" hint-placeholder-count="3"><span style="height: 24px; padding: 0 8px; border-radius: 6px; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; white-space: nowrap; {{tg.style}}">{{tg.label}}</span></sc-for>
+                          </sc-if>
+                          <sc-if value="{{p.hasText}}" hint-placeholder-val="{{ true }}"><span style="min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; {{p.textStyle}}">{{p.text}}</span></sc-if>
+                        </span>
+                        <sc-if value="{{p.hasSub}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; line-height: 16px; color: {{t.muted}}">{{p.sub}}</span></sc-if>
+                        <sc-if value="{{p.hasLive}}" hint-placeholder-val="{{ false }}">
+                          <span style="display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 8px 0 3px; border-radius: 11px; background: {{accent}}; color: #FFFFFF; font-size: 12px; font-weight: 600">
+                            <span style="width: 16px; height: 16px; border-radius: 8px; background: #FFFFFF; color: {{accent}}; font-size: 7px; display: flex; align-items: center; justify-content: center">{{sara.initials}}</span>{{L.justNow}}
+                          </span>
+                        </sc-if>
+                      </span>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{t.faint}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; {{d.chev}}"><path d="m9 6 6 6-6 6"></path></svg>
+                    </button>
+                  </sc-for>
+                </div>
+
+                <!-- Description -->
+                <section aria-labelledby="desc-h" style="display: flex; flex-direction: column; gap: 10px; padding: 0 16px">
+                  <div style="display: flex; align-items: center; justify-content: space-between">
+                    <h2 id="desc-h" style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 600">{{L.description}}</h2>
+                    <sc-if value="{{d.live}}" hint-placeholder-val="{{ true }}"><button style="height: 44px; padding: 0 4px; border: 0; background: transparent; font-size: 14px; font-weight: 500; color: {{accentInk}}">{{d.editLabel}}</button></sc-if>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 10px; font-size: 15px; line-height: 23px; color: {{t.text}}; {{d.descBox}}">
+                    <p style="margin: 0">{{L.descP1}}</p>
+                    <h3 style="margin: 4px 0 0; font-size: 16px; line-height: 22px; font-weight: 600">{{L.descH}}</h3>
+                    <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px">
+                      <li>{{L.descL1a}} <code style="font-family: Geist Mono, ui-monospace, monospace; font-size: 13px; padding: 1px 5px; border-radius: 4px; background: {{t.fill}}">768px</code></li>
+                      <li>{{L.descL2}}</li>
+                      <li>{{L.descL3a}} <strong style="font-weight: 600">{{L.descL3b}}</strong> {{L.descL3c}}</li>
+                      <li>{{L.descL4}}</li>
+                    </ul>
+                    <p style="margin: 0">{{L.specs}} <a href="#" style="color: {{accentInk}}; text-decoration: underline; text-underline-offset: 2px">{{L.specsLink}}</a>. <a href="#" style="display: inline-flex; align-items: center; height: 24px; padding: 0 7px; border-radius: 6px; background: {{accentSoft}}; color: {{accentInk}}; font-weight: 500; text-decoration: none; vertical-align: 1px">@{{sara.name}}</a> {{L.descTail}}</p>
+                  </div>
+                </section>
+
+                <!-- Subtasks -->
+                <section aria-labelledby="sub-h" style="display: flex; flex-direction: column; gap: 8px">
+                  <div style="display: flex; align-items: center; gap: 12px; padding: 0 16px">
+                    <h2 id="sub-h" style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 600">{{L.subtasks}}</h2>
+                    <span style="font-size: 13px; color: {{t.muted}}">5/6</span>
+                    <span role="progressbar" aria-valuenow="83" aria-valuemin="0" aria-valuemax="100" aria-label="{{L.subtasks}}" style="flex: 1; height: 6px; border-radius: 3px; background: {{t.chip}}; overflow: hidden; display: flex"><span style="width: 83%; height: 6px; border-radius: 3px; background: {{accent}}"></span></span>
+                  </div>
+                  <div style="display: flex; flex-direction: column; border-top: 1px solid {{t.divider}}">
+                    <sc-for list="{{subtasks}}" as="s" hint-placeholder-count="6">
+                      <div style="display: flex; align-items: center; gap: 4px; min-height: 52px; padding: 4px 16px 4px 0; box-sizing: border-box; border-bottom: 1px solid {{t.divider}}">
+                        <button role="checkbox" aria-checked="{{s.done}}" aria-label="{{s.text}}" style="flex: none; width: 48px; height: 44px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center">
+                          <span style="width: 22px; height: 22px; box-sizing: border-box; border-radius: 6px; display: flex; align-items: center; justify-content: center; {{s.box}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{s.check}}"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg></span>
+                        </button>
+                        <span style="flex: 1; min-width: 0; font-size: 15px; line-height: 21px; {{s.textStyle}}">{{s.text}}</span>
+                        <sc-if value="{{s.hasDue}}" hint-placeholder-val="{{ false }}"><span style="flex: none; height: 22px; padding: 0 6px; border-radius: 6px; font-size: 12px; font-weight: 500; display: flex; align-items: center; {{s.dueStyle}}">{{s.due}}</span></sc-if>
+                        <span title="{{s.person.name}}" style="flex: none; width: 24px; height: 24px; border-radius: 12px; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{s.person.style}}">{{s.person.initials}}</span>
+                      </div>
+                    </sc-for>
+                    <sc-if value="{{d.live}}" hint-placeholder-val="{{ true }}">
+                      <button style="display: flex; align-items: center; gap: 4px; min-height: 48px; padding: 0 16px 0 0; border: 0; border-bottom: 1px solid {{t.divider}}; background: transparent; font-size: 15px; color: {{t.muted}}; text-align: left">
+                        <span style="width: 48px; display: flex; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></span>{{L.addSubtask}}
+                      </button>
+                    </sc-if>
+                  </div>
+                </section>
+
+                <!-- Attachments -->
+                <section aria-labelledby="att-h" style="display: flex; flex-direction: column; gap: 10px; padding: 0 16px">
+                  <div style="display: flex; align-items: center; justify-content: space-between">
+                    <h2 id="att-h" style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 600">{{L.attachments}} <span style="font-weight: 400; color: {{t.muted}}">3</span></h2>
+                    <sc-if value="{{d.live}}" hint-placeholder-val="{{ true }}"><button style="display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 4px; border: 0; background: transparent; font-size: 14px; font-weight: 500; color: {{accentInk}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>{{L.add}}</button></sc-if>
+                  </div>
+                  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+                    <sc-for list="{{images}}" as="im" hint-placeholder-count="2">
+                      <a href="#" style="display: flex; flex-direction: column; border: 1px solid {{t.border}}; border-radius: 12px; overflow: hidden; color: {{t.text}}; text-decoration: none">
+                        <span aria-hidden="true" style="height: 104px; background: {{t.fill}}; display: flex; align-items: center; justify-content: center">
+                          <span style="{{im.frame}}; box-sizing: border-box; border-radius: 6px; background: {{t.raised}}; border: 1px solid {{t.border}}; display: flex; flex-direction: column; gap: 4px; padding: 6px">
+                            <span style="height: 4px; border-radius: 2px; background: {{t.border2}}"></span>
+                            <span style="height: 14px; border-radius: 2px; background: {{t.divider}}"></span>
+                            <span style="height: 4px; border-radius: 2px; background: {{t.divider}}"></span>
+                            <span style="margin-top: auto; height: 8px; border-radius: 2px; background: {{accent}}"></span>
+                          </span>
+                        </span>
+                        <span style="display: flex; flex-direction: column; padding: 8px 10px">
+                          <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; line-height: 18px; font-weight: 500">{{im.name}}</span>
+                          <span style="font-size: 12px; line-height: 16px; color: {{t.muted}}">{{im.meta}}</span>
+                        </span>
+                      </a>
+                    </sc-for>
+                    <a href="#" style="display: flex; align-items: center; gap: 10px; min-height: 64px; padding: 10px; box-sizing: border-box; border: 1px solid {{t.border}}; border-radius: 12px; color: {{t.text}}; text-decoration: none">
+                      <span aria-hidden="true" style="flex: none; width: 36px; height: 36px; border-radius: 8px; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{pdfTile}}">PDF</span>
+                      <span style="display: flex; flex-direction: column; min-width: 0"><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; line-height: 18px; font-weight: 500">QA-checklist.pdf</span><span style="font-size: 12px; line-height: 16px; color: {{t.muted}}">84 KB · {{bat.name}}</span></span>
+                    </a>
+                    <sc-if value="{{d.live}}" hint-placeholder-val="{{ true }}">
+                      <button style="display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 64px; border: 1px dashed {{t.border2}}; border-radius: 12px; background: transparent; font-size: 14px; font-weight: 500; color: {{t.muted}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"></path></svg>{{L.add}}</button>
+                    </sc-if>
+                  </div>
+                </section>
+
+                <!-- Linked feedback -->
+                <section aria-labelledby="fb-h" style="display: flex; flex-direction: column; gap: 6px">
+                  <div style="display: flex; align-items: center; gap: 8px; padding: 0 16px">
+                    <h2 id="fb-h" style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 600">{{L.feedback}}</h2>
+                    <span style="height: 20px; padding: 0 7px; border-radius: 10px; background: {{t.chip}}; color: {{t.text3}}; font-size: 12px; font-weight: 500; display: flex; align-items: center">4</span>
+                  </div>
+                  <div style="display: flex; flex-direction: column; border-top: 1px solid {{t.divider}}">
+                    <sc-for list="{{feedback}}" as="f" hint-placeholder-count="3">
+                      <a href="#" style="display: flex; align-items: center; gap: 10px; min-height: 60px; padding: 8px 16px; box-sizing: border-box; border-bottom: 1px solid {{t.divider}}; color: {{t.text}}; text-decoration: none">
+                        <span style="flex: none; height: 22px; padding: 0 7px; border-radius: 6px; font-size: 11px; font-weight: 600; display: flex; align-items: center; {{f.typeStyle}}">{{f.type}}</span>
+                        <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                          <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; line-height: 20px">{{f.title}}</span>
+                          <span style="font-size: 12px; line-height: 16px; color: {{t.muted}}"><span style="font-family: Geist Mono, ui-monospace, monospace">{{f.id}}</span> · {{f.from}}</span>
+                        </span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{t.faint}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+                      </a>
+                    </sc-for>
+                    <a href="#" style="display: flex; align-items: center; height: 44px; padding: 0 16px; font-size: 14px; font-weight: 500; color: {{t.text3}}; text-decoration: none">{{L.seeAllFeedback}}</a>
+                  </div>
+                </section>
+
+                <!-- Mentioned in -->
+                <section aria-labelledby="mi-h" style="display: flex; flex-direction: column; gap: 6px">
+                  <h2 id="mi-h" style="margin: 0; padding: 0 16px; font-size: 15px; line-height: 20px; font-weight: 600">{{L.mentionedIn}}</h2>
+                  <div style="display: flex; flex-direction: column; border-top: 1px solid {{t.divider}}">
+                    <sc-for list="{{mentions}}" as="m" hint-placeholder-count="3">
+                      <a href="#" style="display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 16px; box-sizing: border-box; border-bottom: 1px solid {{t.divider}}; color: {{t.text}}; text-decoration: none">
+                        <span aria-hidden="true" style="flex: none; width: 32px; height: 32px; border-radius: 8px; background: {{t.fill}}; color: {{t.text3}}; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{m.icon}}"></path></svg></span>
+                        <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                          <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; line-height: 20px; font-weight: 500">{{m.title}}</span>
+                          <span style="font-size: 12px; line-height: 16px; color: {{t.muted}}">{{m.meta}}</span>
+                        </span>
+                      </a>
+                    </sc-for>
+                  </div>
+                </section>
+
+                <!-- Activity -->
+                <section aria-labelledby="act-h" style="display: flex; flex-direction: column; gap: 12px; padding: 0 16px">
+                  <h2 id="act-h" style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 600">{{L.activity}}</h2>
+                  <div role="tablist" aria-label="{{L.activity}}" style="display: flex; gap: 2px; height: 40px; padding: 2px; box-sizing: border-box; border-radius: 10px; background: {{t.seg}}">
+                    <sc-for list="{{actSeg}}" as="o" hint-placeholder-count="3">
+                      <button role="tab" aria-selected="{{o.on}}" style="flex: 1; min-width: 0; border: 0; border-radius: 8px; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; {{o.style}}">{{o.label}}</button>
+                    </sc-for>
+                  </div>
+                  <ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px">
+                    <sc-for list="{{activity}}" as="a" hint-placeholder-count="8">
+                      <li style="display: flex; flex-direction: column">
+                        <sc-if value="{{a.isHistory}}" hint-placeholder-val="{{ true }}">
+                          <div style="display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; font-size: 14px; line-height: 20px; color: {{t.text3}}">
+                            <span aria-hidden="true" style="flex: none; width: 28px; height: 20px; display: flex; align-items: center; justify-content: center"><span style="width: 8px; height: 8px; box-sizing: border-box; border-radius: 4px; {{a.mark}}"></span></span>
+                            <span style="flex: 1; min-width: 0"><sc-for list="{{a.parts}}" as="pt" hint-placeholder-count="3"><sc-if value="{{pt.isText}}" hint-placeholder-val="{{ true }}"><span>{{pt.text}}</span></sc-if><sc-if value="{{pt.isBold}}" hint-placeholder-val="{{ false }}"><strong style="font-weight: 600; color: {{t.text}}">{{pt.text}}</strong></sc-if><sc-if value="{{pt.isPill}}" hint-placeholder-val="{{ false }}"><span style="display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 7px; border-radius: 6px; vertical-align: middle; font-size: 12px; font-weight: 500; {{pt.style}}"><span style="width: 8px; height: 8px; box-sizing: border-box; border-radius: 4px; {{pt.ring}}"></span>{{pt.text}}</span></sc-if></sc-for></span>
+                            <time style="flex: none; font-size: 12px; color: {{t.muted}}">{{a.time}}</time>
+                          </div>
+                        </sc-if>
+                        <sc-if value="{{a.isComment}}" hint-placeholder-val="{{ false }}">
+                          <div style="display: flex; align-items: flex-start; gap: 10px; padding: 8px 0">
+                            <span style="flex: none; width: 28px; height: 28px; border-radius: 14px; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{a.person.style}}">{{a.person.initials}}</span>
+                            <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px">
+                              <div style="display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 4px 14px 14px 14px; background: {{t.fill}}">
+                                <span style="display: flex; align-items: baseline; gap: 8px"><strong style="font-size: 14px; font-weight: 600">{{a.person.name}}</strong><time style="font-size: 12px; color: {{t.muted}}">{{a.time}}</time></span>
+                                <p style="margin: 0; font-size: 15px; line-height: 22px; color: {{t.text}}"><sc-for list="{{a.parts}}" as="pt" hint-placeholder-count="3"><sc-if value="{{pt.isText}}" hint-placeholder-val="{{ true }}"><span>{{pt.text}}</span></sc-if><sc-if value="{{pt.isMention}}" hint-placeholder-val="{{ false }}"><a href="#" style="padding: 1px 6px; border-radius: 6px; background: {{accentSoft}}; color: {{accentInk}}; font-weight: 500; text-decoration: none">@{{pt.text}}</a></sc-if></sc-for></p>
+                              </div>
+                              <sc-for list="{{a.replies}}" as="rp" hint-placeholder-count="1">
+                                <div style="display: flex; align-items: flex-start; gap: 8px; padding-left: 4px">
+                                  <span style="flex: none; width: 22px; height: 22px; border-radius: 11px; font-size: 8px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{rp.person.style}}">{{rp.person.initials}}</span>
+                                  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 4px 12px 12px 12px; background: {{t.fill}}">
+                                    <span style="display: flex; align-items: baseline; gap: 8px"><strong style="font-size: 13px; font-weight: 600">{{rp.person.name}}</strong><time style="font-size: 12px; color: {{t.muted}}">{{rp.time}}</time></span>
+                                    <span style="font-size: 14px; line-height: 20px">{{rp.text}}</span>
+                                  </div>
+                                </div>
+                              </sc-for>
+                              <sc-if value="{{d.live}}" hint-placeholder-val="{{ true }}">
+                                <button style="align-self: flex-start; height: 32px; margin: -4px 0 -4px -6px; padding: 0 6px; border: 0; background: transparent; font-size: 13px; font-weight: 500; color: {{t.text3}}">{{L.reply}}</button>
+                              </sc-if>
+                            </div>
+                          </div>
+                        </sc-if>
+                      </li>
+                    </sc-for>
+                  </ol>
+                </section>
+              </div>
+            </div>
+
+            <!-- Composer (resting) -->
+            <sc-if value="{{d.composer}}" hint-placeholder-val="{{ true }}">
+              <div style="flex: none; position: relative; z-index: 2; display: flex; flex-direction: column; background: {{t.bg}}; border-top: 1px solid {{t.divider}}">
+                <div style="display: flex; align-items: center; gap: 4px; padding: 8px 8px 8px 4px">
+                  <button aria-label="{{L.attach}}" style="flex: none; width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.text3}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.4 11.1-8.5 8.5a6 6 0 0 1-8.5-8.5l8.5-8.5a4 4 0 0 1 5.7 5.7l-8.5 8.5a2 2 0 0 1-2.8-2.8l7.8-7.8"></path></svg></button>
+                  <label style="flex: 1; min-width: 0; display: flex; align-items: center; height: 44px; padding: 0 16px; box-sizing: border-box; border-radius: 22px; background: {{t.fill}}">
+                    <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">{{L.writeComment}}</span>
+                    <input type="text" placeholder="{{L.writeComment}}" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-size: 16px; padding: 0">
+                  </label>
+                </div>
+                <div style="height: 26px"></div>
+              </div>
+            </sc-if>
+
+            <!-- Keyboard placeholder -->
+            <sc-if value="{{d.keyboard}}" hint-placeholder-val="{{ false }}">
+              <div aria-hidden="true" style="position: absolute; z-index: 6; left: 0; right: 0; bottom: 0; height: 336px; background: {{t.kbd}}; display: flex; align-items: center; justify-content: center; font-family: Geist Mono, ui-monospace, monospace; font-size: 12px; color: {{t.muted}}">{{L.keyboard}}</div>
+            </sc-if>
+
+            <!-- Formatting toolbar above keyboard -->
+            <sc-if value="{{d.toolbar}}" hint-placeholder-val="{{ false }}">
+              <div role="toolbar" aria-label="{{L.formatting}}" style="position: absolute; z-index: 7; left: 0; right: 0; bottom: 336px; display: flex; align-items: center; height: 48px; background: {{t.raised}}; border-top: 1px solid {{t.border}}">
+                <div style="flex: 1; min-width: 0; display: flex; overflow-x: auto; scrollbar-width: none; padding: 0 4px">
+                  <sc-for list="{{fmt}}" as="b" hint-placeholder-count="8">
+                    <button aria-label="{{b.aria}}" aria-pressed="{{b.on}}" style="flex: none; width: 44px; height: 44px; border: 0; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; {{b.style}}">
+                      <sc-if value="{{b.isText}}" hint-placeholder-val="{{ true }}"><span style="{{b.textStyle}}">{{b.text}}</span></sc-if>
+                      <sc-if value="{{b.isIcon}}" hint-placeholder-val="{{ false }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{b.icon}}"></path></svg></sc-if>
+                    </button>
+                  </sc-for>
+                </div>
+                <button style="flex: none; height: 44px; padding: 0 14px; border: 0; border-left: 1px solid {{t.divider}}; background: transparent; font-size: 15px; font-weight: 600; color: {{accentInk}}">{{L.done}}</button>
+              </div>
+            </sc-if>
+
+            <!-- Composer focused + @ suggestions -->
+            <sc-if value="{{d.composerFocus}}" hint-placeholder-val="{{ false }}">
+              <div role="listbox" aria-label="{{L.mentionSugg}}" style="position: absolute; z-index: 7; left: 8px; right: 8px; bottom: 448px; display: flex; flex-direction: column; padding: 4px; border-radius: 14px; background: {{t.raised}}; border: 1px solid {{t.border}}; box-shadow: {{t.shadowMenu}}">
+                <span style="padding: 6px 10px 4px; font-size: 12px; font-weight: 600; color: {{t.muted}}">{{L.people}}</span>
+                <sc-for list="{{suggestions}}" as="sg" hint-placeholder-count="2">
+                  <button role="option" aria-selected="{{sg.on}}" style="display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 10px; border: 0; border-radius: 10px; text-align: left; {{sg.bg}}">
+                    <span style="flex: none; width: 32px; height: 32px; border-radius: 16px; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; {{sg.style}}">{{sg.initials}}</span>
+                    <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                      <span style="font-size: 15px; line-height: 20px; font-weight: 500; color: {{t.text}}">{{sg.name}}</span>
+                      <span style="font-size: 13px; line-height: 18px; color: {{t.muted}}">{{sg.role}}</span>
+                    </span>
+                  </button>
+                </sc-for>
+              </div>
+              <div style="position: absolute; z-index: 7; left: 0; right: 0; bottom: 336px; display: flex; flex-direction: column; gap: 4px; padding: 8px 8px 4px 12px; background: {{t.bg}}; border-top: 1px solid {{t.divider}}">
+                <label style="display: flex; flex-direction: column; padding: 10px 14px; border-radius: 18px; background: {{t.fill}}; box-shadow: inset 0 0 0 1.5px {{accent}}">
+                  <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">{{L.writeComment}}</span>
+                  <textarea rows="2" style="border: 0; outline: none; resize: none; padding: 0; background: transparent; font-size: 16px; line-height: 22px">{{L.draft}}</textarea>
+                </label>
+                <div style="display: flex; align-items: center">
+                  <button aria-label="{{L.attach}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.text3}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.4 11.1-8.5 8.5a6 6 0 0 1-8.5-8.5l8.5-8.5a4 4 0 0 1 5.7 5.7l-8.5 8.5a2 2 0 0 1-2.8-2.8l7.8-7.8"></path></svg></button>
+                  <button aria-label="{{L.mention}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; font-size: 18px; color: {{accentInk}}">@</button>
+                  <span style="flex: 1"></span>
+                  <button aria-label="{{L.send}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: {{accent}}; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"></path></svg></button>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- Sheets -->
+            <sc-if value="{{d.anySheet}}" hint-placeholder-val="{{ false }}">
+              <div aria-hidden="true" style="position: absolute; z-index: 8; inset: 0; background: {{t.scrim}}"></div>
+            </sc-if>
+
+            <sc-if value="{{d.sheetDue}}" hint-placeholder-val="{{ false }}">
+              <div role="dialog" aria-modal="true" aria-labelledby="due-h" style="position: absolute; z-index: 9; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.raised}}; border-radius: 16px 16px 0 0; box-shadow: {{t.shadowSheet}}">
+                <div style="height: 20px; display: flex; justify-content: center; padding-top: 6px; box-sizing: border-box"><span style="width: 36px; height: 5px; border-radius: 3px; background: {{t.grabber}}"></span></div>
+                <div style="display: flex; align-items: center; height: 52px; padding: 0 4px 0 16px">
+                  <h2 id="due-h" style="flex: 1; margin: 0; font-size: 17px; line-height: 22px; font-weight: 600">{{L.dates}}</h2>
+                  <button style="height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; font-size: 16px; font-weight: 600; color: {{accentInk}}">{{L.done}}</button>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 12px; padding: 0 16px 8px">
+                  <div role="tablist" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+                    <sc-for list="{{dateTabs}}" as="dt" hint-placeholder-count="2">
+                      <button role="tab" aria-selected="{{dt.on}}" style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center; min-height: 56px; padding: 6px 12px; box-sizing: border-box; border-radius: 12px; text-align: left; {{dt.style}}">
+                        <span style="font-size: 12px; line-height: 16px; color: {{t.muted}}">{{dt.label}}</span>
+                        <span style="font-size: 15px; line-height: 20px; font-weight: 600; color: {{t.text}}">{{dt.value}}</span>
+                      </button>
+                    </sc-for>
+                  </div>
+                  <div style="display: flex; gap: 8px; overflow: hidden">
+                    <sc-for list="{{presets}}" as="pr" hint-placeholder-count="4">
+                      <button style="flex: none; height: 36px; padding: 0 12px; border: 1px solid {{t.border}}; border-radius: 18px; background: {{t.raised}}; font-size: 14px; font-weight: 500; color: {{t.text2}}; white-space: nowrap">{{pr.label}}</button>
+                    </sc-for>
+                  </div>
+                  <div style="display: flex; align-items: center; height: 44px">
+                    <span style="flex: 1; font-size: 15px; font-weight: 600">{{L.month}}</span>
+                    <button aria-label="{{L.prevMonth}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.text2}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+                    <button aria-label="{{L.nextMonth}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.text2}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+                  </div>
+                  <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); height: 24px; align-items: center; text-align: center; font-size: 12px; font-weight: 500; color: {{t.muted}}">
+                    <sc-for list="{{weekdays}}" as="w" hint-placeholder-count="7"><span>{{w.label}}</span></sc-for>
+                  </div>
+                  <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); row-gap: 2px">
+                    <sc-for list="{{days}}" as="dy" hint-placeholder-count="35">
+                      <button aria-label="{{dy.aria}}" style="height: 42px; padding: 0; border: 0; display: flex; align-items: center; justify-content: center; {{dy.band}}">
+                        <span style="width: 36px; height: 36px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 15px; {{dy.style}}">{{dy.n}}</span>
+                      </button>
+                    </sc-for>
+                  </div>
+                  <button style="align-self: flex-start; height: 44px; padding: 0; border: 0; background: transparent; font-size: 15px; font-weight: 500; color: {{t.text3}}">{{L.clearStart}}</button>
+                </div>
+                <div style="height: 34px"></div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{d.sheetMore}}" hint-placeholder-val="{{ false }}">
+              <div role="dialog" aria-modal="true" aria-label="{{L.moreActions}}" style="position: absolute; z-index: 9; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.raised}}; border-radius: 16px 16px 0 0; box-shadow: {{t.shadowSheet}}">
+                <div style="height: 20px; display: flex; justify-content: center; padding-top: 6px; box-sizing: border-box"><span style="width: 36px; height: 5px; border-radius: 3px; background: {{t.grabber}}"></span></div>
+                <div style="display: flex; flex-direction: column; gap: 2px; padding: 4px 16px 12px; border-bottom: 1px solid {{t.divider}}">
+                  <span style="font-family: Geist Mono, ui-monospace, monospace; font-size: 12px; line-height: 16px; color: {{t.muted}}">APP-142</span>
+                  <span style="font-size: 15px; line-height: 22px; font-weight: 600">{{L.title}}</span>
+                </div>
+                <div style="display: flex; flex-direction: column; padding: 4px 0">
+                  <sc-for list="{{moreActs}}" as="a" hint-placeholder-count="5">
+                    <button style="display: flex; align-items: center; gap: 14px; min-height: 52px; padding: 0 16px; border: 0; background: transparent; text-align: left; font-size: 16px; {{a.style}}">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{a.icon}}"></path></svg>{{a.label}}
+                    </button>
+                  </sc-for>
+                </div>
+                <div style="padding: 8px 16px 0"><button style="width: 100%; height: 48px; border: 1px solid {{t.border}}; border-radius: 12px; background: {{t.raised}}; font-size: 16px; font-weight: 600; color: {{t.text}}">{{L.cancel}}</button></div>
+                <div style="height: 34px"></div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{d.sheetAttach}}" hint-placeholder-val="{{ false }}">
+              <div role="dialog" aria-modal="true" aria-labelledby="add-h" style="position: absolute; z-index: 9; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: {{t.raised}}; border-radius: 16px 16px 0 0; box-shadow: {{t.shadowSheet}}">
+                <div style="height: 20px; display: flex; justify-content: center; padding-top: 6px; box-sizing: border-box"><span style="width: 36px; height: 5px; border-radius: 3px; background: {{t.grabber}}"></span></div>
+                <div style="display: flex; align-items: center; height: 52px; padding: 0 4px 0 16px">
+                  <h2 id="add-h" style="flex: 1; margin: 0; font-size: 17px; line-height: 22px; font-weight: 600">{{L.addAttachment}}</h2>
+                  <button aria-label="{{L.close}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.text3}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 4px 16px 12px">
+                  <sc-for list="{{sources}}" as="sr" hint-placeholder-count="3">
+                    <button style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 96px; border: 1px solid {{t.border}}; border-radius: 14px; background: {{t.raised}}">
+                      <span aria-hidden="true" style="width: 44px; height: 44px; border-radius: 12px; background: {{accentSoft}}; color: {{accentInk}}; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{sr.icon}}"></path></svg></span>
+                      <span style="font-size: 14px; line-height: 18px; font-weight: 500; color: {{t.text}}">{{sr.label}}</span>
+                    </button>
+                  </sc-for>
+                </div>
+                <span style="padding: 0 16px 8px; font-size: 13px; line-height: 18px; color: {{t.muted}}">{{L.sizeLimit}}</span>
+                <div style="height: 34px"></div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+
+      <!-- ===================== 10 · IMAGE VIEWER ===================== -->
+      <div style="display: flex; flex-direction: column; gap: 16px; order: 10">
+        <span style="{{cap}}">{{L.cap10}}</span>
+        <div role="dialog" aria-label="{{L.viewer}}" style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: #000000; color: #FFFFFF; box-shadow: {{t.device}}">
+          <div style="flex: none; height: 59px"></div>
+          <div style="flex: none; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; height: 56px; padding: 0 4px">
+            <div style="display: flex"><button aria-label="{{L.close}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.25" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></div>
+            <span style="font-size: 15px; font-weight: 600">1 / 2</span>
+            <div style="display: flex; justify-content: flex-end; gap: 4px">
+              <button aria-label="{{L.share}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v13"></path></svg></button>
+            </div>
+          </div>
+          <div style="position: relative; flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center">
+            <div role="img" aria-label="checkout-mobile-360.png" style="width: 260px; height: 520px; box-sizing: border-box; border-radius: 18px; background: #FFFFFF; display: flex; flex-direction: column; gap: 10px; padding: 18px 14px">
+              <span style="height: 10px; width: 50%; border-radius: 5px; background: #D4D4D8"></span>
+              <span style="height: 90px; border-radius: 8px; background: #F1F1F3"></span>
+              <span style="height: 10px; width: 80%; border-radius: 5px; background: #E6E6EA"></span>
+              <span style="height: 10px; width: 65%; border-radius: 5px; background: #E6E6EA"></span>
+              <span style="height: 44px; border-radius: 8px; border: 1px solid #E6E6EA"></span>
+              <span style="height: 44px; border-radius: 8px; border: 1px solid #E6E6EA"></span>
+              <span style="height: 44px; border-radius: 8px; border: 1.5px solid #DC2626"></span>
+              <span style="margin-top: auto; height: 44px; border-radius: 10px; background: {{accent}}"></span>
+            </div>
+            <div aria-hidden="true" style="position: absolute; right: -236px; top: 50%; margin-top: -170px; width: 260px; height: 340px; border-radius: 14px; background: #27272A"></div>
+          </div>
+          <div style="flex: none; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 12px 16px 0">
+            <span style="font-size: 15px; line-height: 20px; font-weight: 600">checkout-mobile-360.png</span>
+            <span style="font-size: 13px; line-height: 18px; color: #A1A1AA">{{L.viewerMeta}}</span>
+            <span aria-hidden="true" style="display: flex; gap: 6px"><span style="width: 18px; height: 6px; border-radius: 3px; background: #FFFFFF"></span><span style="width: 6px; height: 6px; border-radius: 3px; background: #52525B"></span></span>
+            <span style="font-size: 12px; color: #A1A1AA">{{L.viewerHint}}</span>
+          </div>
+          <div style="flex: none; height: 34px"></div>
+        </div>
+      </div>
+
+      <!-- ===================== 12 · LOADING ===================== -->
+      <div style="display: flex; flex-direction: column; gap: 16px; order: 12">
+        <span style="{{cap}}">{{L.cap12}}</span>
+        <div aria-busy="true" style="position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; box-shadow: {{t.device}}">
+          <div style="flex: none; height: 59px"></div>
+          <div style="flex: none; display: flex; align-items: center; gap: 2px; height: 56px; padding: 0 4px; border-bottom: 1px solid {{t.divider}}">
+            <span style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: {{t.text}}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></span>
+            <span style="flex: 1; font-family: Geist Mono, ui-monospace, monospace; font-size: 12px; color: {{t.muted}}">APP-142</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 12px; padding: 16px">
+            <span style="height: 22px; width: 92%; border-radius: 6px; background: {{t.skel}}"></span>
+            <span style="height: 22px; width: 60%; border-radius: 6px; background: {{t.skel}}"></span>
+            <span style="height: 12px; width: 70%; border-radius: 6px; background: {{t.skel2}}"></span>
+          </div>
+          <div style="display: flex; flex-direction: column; border-top: 1px solid {{t.divider}}">
+            <sc-for list="{{skelProps}}" as="k" hint-placeholder-count="8">
+              <div style="display: flex; align-items: center; justify-content: space-between; height: 52px; padding: 0 16px; border-bottom: 1px solid {{t.divider}}">
+                <span style="width: 96px; height: 12px; border-radius: 6px; background: {{t.skel2}}"></span>
+                <span style="height: 14px; border-radius: 7px; background: {{t.skel}}; {{k.w}}"></span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px; padding: 20px 16px">
+            <span style="height: 14px; width: 30%; border-radius: 7px; background: {{t.skel}}"></span>
+            <span style="height: 12px; width: 100%; border-radius: 6px; background: {{t.skel2}}"></span>
+            <span style="height: 12px; width: 94%; border-radius: 6px; background: {{t.skel2}}"></span>
+            <span style="height: 12px; width: 70%; border-radius: 6px; background: {{t.skel2}}"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== 14 · BEHAVIOUR ===================== -->
+      <div style="display: flex; flex-direction: column; gap: 16px; order: 14">
+        <span style="{{cap}}">{{L.cap14}}</span>
+        <div style="width: 390px; box-sizing: border-box; display: flex; flex-direction: column; border: 1px solid {{t.border}}; border-radius: 16px; background: {{t.bg}}; overflow: hidden">
+          <sc-for list="{{rules}}" as="r" hint-placeholder-count="8">
+            <div style="display: flex; flex-direction: column; gap: 2px; padding: 12px 16px; border-bottom: 1px solid {{t.divider}}">
+              <span style="font-size: 14px; line-height: 20px; font-weight: 600">{{r.title}}</span>
+              <span style="font-size: 13px; line-height: 18px; color: {{t.text3}}">{{r.body}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"language":{"editor":"enum","default":"mn","options":["mn","en"]},"theme":{"editor":"enum","default":"light","options":["light","dark"]},"accent":{"editor":"color","default":"#6E56CF","options":["#6E56CF","#2F6FEB","#0F766E","#3F3F46"]},"$preview":{"width":1840,"height":4200}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: undefined, theme: undefined };
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const lang = s.lang || this.props.language || 'mn';
+    const mn = lang === 'mn';
+    const pick = (p) => (mn ? p[0] : p[1]);
+    const theme = s.theme || this.props.theme || 'light';
+    const dark = theme === 'dark';
+    const accent = this.props.accent ?? '#6E56CF';
+    const inks = { '#6E56CF': '#B4A5FF', '#2F6FEB': '#93B4FF', '#0F766E': '#5EEAD4', '#3F3F46': '#D4D4D8' };
+    const darkInk = inks[String(accent).toUpperCase()] || '#B4A5FF';
+    const accentInk = dark ? darkInk : accent;
+    const accentSoft = accent + (dark ? '33' : '1A');
+
+    /* ---------- STRINGS ---------- */
+    const STR = {
+      mn: {
+        intro: 'Аль ч мөрнөөс дотогш ордог бүтэн дэлгэц. Desktop TaskDetail-ийг утсанд: шинж чанарын мөрүүд, тайлбар, дэд ажил, хавсралт, холбоос, үйл ажиллагаа ба сэтгэгдэл.',
+        preview: 'Урьдчилан харах', langLabel: 'Хэл', themeLabel: 'Горим', light: 'Цайвар', dark: 'Бараан',
+        secTitle: 'Ажлын дэлгэрэнгүй', secSub: 'Дээд хэсэг · тайлбар · хавсралт · үйл ажиллагаа · засварлах · @ санал · хуудаснууд · зураг · устгасан · ачаалж буй · зөрчил',
+        cap01: '01 · Дээд хэсэг · гацсан · бодит цагийн өөрчлөлт (гүйлгэж туршина)', cap02: '02 · Тайлбар ба дэд ажил', cap03: '03 · Хавсралт · холбосон санал · дурдсан газар', cap04: '04 · Үйл ажиллагаа · сэтгэгдэл ба хариу',
+        cap05: '05 · Тайлбар засах · гарын дээрх хэрэгслүүд', cap06: '06 · Сэтгэгдэл бичих · @ санал', cap07: '07 · Огноо · эхлэх ба дуусах', cap08: '08 · Бусад үйлдэл',
+        cap09: '09 · Хавсралт нэмэх', cap10: '10 · Зураг бүтэн дэлгэцээр · шударч солих', cap11: '11 · Устгасан ажил · зөвхөн унших', cap12: '12 · Ачаалж буй',
+        cap13: '13 · Засаж байхад өөр хүн гарчгийг өөрчилсөн', cap14: 'Зан төлөв',
+        back: 'Буцах', location: 'Байршил', project: 'Апп шинэчлэл', complete: 'Дуусгах', copyLink: 'Хуваалцах эсвэл холбоос хуулах', moreActions: 'Бусад үйлдэл',
+        titleLabel: 'Ажлын гарчиг', title: 'Төлбөрийн хуудас — респонсив байрлал',
+        titleMine: 'Төлбөрийн хуудас — респонсив байрлал ба sticky төлбөрийн мөр',
+        titleTheirs: 'Төлбөрийн хуудас — респонсив (360–1440)', changedTitle: 'дөнгөж сая гарчгийг өөрчиллөө:',
+        useTheirs: 'Тэднийхийг авах', keepMine: 'Минийхийг хадгалах',
+        meta: 'Ану Б. 10-р сарын 1-нд үүсгэсэн · 2 цагийн өмнө шинэчилсэн',
+        blockedTitle: 'Гацсан', blockedBody: 'Төлбөрийн sandbox API түлхүүрийн хугацаа дууссан тул QA хийж чадахгүй байна.', blockedFrom: 'Дорж Э.-ийн стэндапаас · өнөөдөр 09:41 · Туслах: Бат О.',
+        deletedMsg: 'Ану Б. 2 минутын өмнө устгасан. 30 хоногийн дараа бүрмөсөн устна.', restore: 'Сэргээх',
+        properties: 'Шинж чанар', justNow: 'Сараа · дөнгөж сая',
+        description: 'Тайлбар', edit: 'Засах', editing: 'Засаж байна',
+        descP1: 'Төлбөрийн хуудсыг 360px-ээс 1440px хүртэл цэвэр ажиллуулах. 768px-ээс доош захиалгын дүн төлбөрийн маягтыг давхардаж, промо кодын талбар хүрээнээсээ халиж байна.',
+        descH: 'Хүлээн авах шалгуур', descL1a: 'Захиалгын дүн дараах өргөнөөс доош accordion болно:', descL2: 'Төлбөрийн талбарууд нэг баганад, оролт бүр 44px-ээс багагүй',
+        descL3a: 'Утсан дээр', descL3b: '«Захиалах»', descL3c: 'мөр нийт дүнгийн хамт үргэлж харагдана', descL4: '360px дээр хэвтээ гүйлгээ байхгүй',
+        specs: 'Тодорхойлолт:', specsLink: 'Төлбөрийн хуудас — респонсив', descTail: 'промо кодын онцгой тохиолдлыг мэднэ.',
+        subtasks: 'Дэд ажил', addSubtask: 'Дэд ажил нэмэх', attachments: 'Хавсралт', add: 'Нэмэх',
+        feedback: 'Холбосон санал хүсэлт', seeAllFeedback: 'Бүгдийг харах (4)', mentionedIn: 'Дурдсан газар',
+        activity: 'Үйл ажиллагаа', reply: 'Хариулах',
+        attach: 'Файл хавсаргах', writeComment: 'Сэтгэгдэл бичих…', mention: 'Хэн нэгнийг дурдах', send: 'Илгээх',
+        draft: 'Баярлалаа, Дорж — @Ба', people: 'Хүмүүс', mentionSugg: 'Дурдах хүмүүсийн санал',
+        keyboard: 'системийн гар · 291 + 34', formatting: 'Форматлах', done: 'Болсон',
+        dates: 'Огноо', month: '2026 оны 10-р сар', prevMonth: 'Өмнөх сар', nextMonth: 'Дараагийн сар', clearStart: 'Эхлэх огноог арилгах',
+        cancel: 'Цуцлах', close: 'Хаах', addAttachment: 'Хавсралт нэмэх', sizeLimit: 'Нэг файл 25 МБ хүртэл. Зураг автоматаар жижгэрнэ.',
+        viewer: 'Зураг харах', share: 'Хуваалцах', viewerMeta: '248 KB · Дорж Э. · 10-р сарын 6', viewerHint: 'Хажуу тийш шударч солих · хоёр хуруугаар томруулах'
+      },
+      en: {
+        intro: 'Full screen, pushed from any row. Desktop TaskDetail adapted to the phone: property rows, description, subtasks, attachments, links, activity and comments.',
+        preview: 'Preview', langLabel: 'Language', themeLabel: 'Theme', light: 'Light', dark: 'Dark',
+        secTitle: 'Task detail', secSub: 'Top · description · attachments · activity · editing · @ suggestions · sheets · image viewer · deleted · loading · conflict',
+        cap01: '01 · Top · blocked · realtime change (try scrolling)', cap02: '02 · Description and subtasks', cap03: '03 · Attachments · linked feedback · mentioned in', cap04: '04 · Activity · comments and replies',
+        cap05: '05 · Editing the description · toolbar above the keyboard', cap06: '06 · Writing a comment · @ suggestions', cap07: '07 · Dates · start and due', cap08: '08 · More actions',
+        cap09: '09 · Add attachment', cap10: '10 · Full-screen image · swipe between', cap11: '11 · Deleted task · read-only', cap12: '12 · Loading',
+        cap13: '13 · Someone changed the title while I’m editing', cap14: 'Behaviour',
+        back: 'Back', location: 'Location', project: 'App Redesign', complete: 'Complete', copyLink: 'Share or copy link', moreActions: 'More actions',
+        titleLabel: 'Task title', title: 'Checkout page — responsive layout',
+        titleMine: 'Checkout page — responsive layout and sticky pay bar',
+        titleTheirs: 'Checkout page — responsive (360–1440)', changedTitle: 'just changed the title to:',
+        useTheirs: 'Use theirs', keepMine: 'Keep mine',
+        meta: 'Created by Anu B. on Oct 1 · Updated 2 hours ago',
+        blockedTitle: 'Blocked', blockedBody: 'Payment provider sandbox API keys have expired, so QA can’t run.', blockedFrom: 'From Dorj E.’s standup · today 09:41 · Can help: Bat O.',
+        deletedMsg: 'Deleted by Anu B. 2 minutes ago. It will be removed for good in 30 days.', restore: 'Restore',
+        properties: 'Properties', justNow: 'Sara · just now',
+        description: 'Description', edit: 'Edit', editing: 'Editing',
+        descP1: 'Make checkout work cleanly from 360px to 1440px. Below 768px the order summary overlaps the payment form, and the promo code field overflows its container.',
+        descH: 'Acceptance criteria', descL1a: 'Order summary collapses into an accordion under', descL2: 'Payment fields stack to one column; inputs are at least 44px tall',
+        descL3a: 'Sticky', descL3b: 'Place order', descL3c: 'bar on mobile with the total always visible', descL4: 'No horizontal scroll at 360px',
+        specs: 'Specs:', specsLink: 'Checkout — responsive specs', descTail: 'knows the promo-code edge cases.',
+        subtasks: 'Subtasks', addSubtask: 'Add subtask', attachments: 'Attachments', add: 'Add',
+        feedback: 'Linked feedback', seeAllFeedback: 'See all (4)', mentionedIn: 'Mentioned in',
+        activity: 'Activity', reply: 'Reply',
+        attach: 'Attach a file', writeComment: 'Write a comment…', mention: 'Mention someone', send: 'Send',
+        draft: 'Thanks Dorj — looping in @Ba', people: 'People', mentionSugg: 'Mention suggestions',
+        keyboard: 'system keyboard · 291 + 34', formatting: 'Formatting', done: 'Done',
+        dates: 'Dates', month: 'October 2026', prevMonth: 'Previous month', nextMonth: 'Next month', clearStart: 'Clear start date',
+        cancel: 'Cancel', close: 'Close', addAttachment: 'Add attachment', sizeLimit: 'Up to 25 MB per file. Photos are resized automatically.',
+        viewer: 'Image viewer', share: 'Share', viewerMeta: '248 KB · Dorj E. · Oct 6', viewerHint: 'Swipe to switch · pinch to zoom'
+      }
+    };
+    const L = STR[lang] || STR.mn;
+
+    /* ---------- TOKENS ---------- */
+    const t = dark ? {
+      board: '#0A0A0B', bg: '#111113', surface2: '#161618', raised: '#1B1B1E', fill: '#1F1F23', chip: '#232328', seg: '#1F1F23',
+      border: '#26262B', border2: '#3A3A42', divider: '#1F1F23', grabber: '#3F3F46', kbd: '#2A2A30',
+      text: '#EDEDEF', text2: '#C9C9D1', text3: '#B4B4BC', muted: '#8E8E98', faint: '#5E5E68',
+      green: '#22C55E', red: '#F87171', skel: '#232328', skel2: '#1B1B1E', scrim: 'rgba(0,0,0,0.6)',
+      shadowMenu: '0 12px 32px rgba(0,0,0,0.5)', shadowSheet: '0 -8px 32px rgba(0,0,0,0.5)',
+      device: '0 0 0 1px #2A2A30, 0 0 0 10px #232328, 0 24px 48px rgba(0,0,0,0.5)',
+      segOn: 'background:#2A2A30;color:#EDEDEF;box-shadow:0 1px 2px rgba(0,0,0,0.4)', segOff: 'background:transparent;color:#8E8E98',
+      scheme: 'color-scheme: dark'
+    } : {
+      board: '#F4F4F5', bg: '#FFFFFF', surface2: '#F7F7F8', raised: '#FFFFFF', fill: '#F4F4F5', chip: '#F1F1F3', seg: '#F1F1F3',
+      border: '#E6E6EA', border2: '#C4C4CC', divider: '#EFEFF2', grabber: '#D4D4D8', kbd: '#D7D9DE',
+      text: '#18181B', text2: '#3F3F46', text3: '#52525B', muted: '#6B6B74', faint: '#A1A1AA',
+      green: '#16A34A', red: '#DC2626', skel: '#EDEDF0', skel2: '#F4F4F5', scrim: 'rgba(24,24,27,0.32)',
+      shadowMenu: '0 12px 32px rgba(24,24,27,0.14)', shadowSheet: '0 -8px 32px rgba(24,24,27,0.12)',
+      device: '0 0 0 1px #E6E6EA, 0 0 0 10px #18181B, 0 24px 48px rgba(24,24,27,0.18)',
+      segOn: 'background:#FFFFFF;color:#18181B;box-shadow:0 1px 2px rgba(24,24,27,0.08)', segOff: 'background:transparent;color:#6B6B74',
+      scheme: 'color-scheme: light'
+    };
+    const cap = 'font-family:Geist Mono,ui-monospace,monospace;font-size:12px;line-height:16px;color:' + t.muted;
+    const blockedBox = dark ? 'background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.3);color:#FCA5A5' : 'background:#FFF8F7;border:1px solid #F3D3CF;color:#B42318';
+    const warnBox = dark ? 'background:rgba(251,191,36,0.10);border:1px solid rgba(251,191,36,0.3)' : 'background:#FFFBEB;border:1px solid #FDE68A';
+    const deletedBar = dark ? 'background:rgba(248,113,113,0.12);border-bottom:1px solid rgba(248,113,113,0.3);color:#FCA5A5' : 'background:#FFF8F7;border-bottom:1px solid #F3D3CF;color:#B42318';
+    const pdfTile = dark ? 'background:rgba(248,113,113,0.14);color:#FCA5A5' : 'background:#FDECEC;color:#B42318';
+
+    /* ---------- STATUS / PRIORITY / DUE / TAGS ---------- */
+    const SC = dark ? { todo: '#71717A', prog: '#F59E0B' } : { todo: '#A1A1AA', prog: '#D97706' };
+    const MK = {
+      todo: { ring: 'border:2px solid ' + SC.todo },
+      progress: { ring: 'border:2px solid ' + SC.prog + ';background:linear-gradient(90deg,' + SC.prog + ' 50%,transparent 50%)' },
+      review: { ring: 'border:2px solid ' + accentInk + ';background:' + accentInk + '33' }
+    };
+    const pillTone = {
+      todo: dark ? 'background:#232328;color:#C9C9D1' : 'background:#F1F1F3;color:#3F3F46',
+      progress: dark ? 'background:rgba(245,158,11,0.16);color:#FCD34D' : 'background:#FDF0DC;color:#92400E',
+      review: 'background:' + accentSoft + ';color:' + accentInk
+    };
+    const STATUS = { todo: ['Хийх', 'To Do'], progress: ['Хийгдэж буй', 'In Progress'], review: ['Хянагдаж буй', 'In Review'] };
+    const urgentFlag = dark ? 'fill:#F87171;stroke:#F87171' : 'fill:#DC2626;stroke:#DC2626';
+    const todayInk = dark ? '#FBBF24' : '#B45309';
+    const DUEsoon = dark ? 'background:#232328;color:#C9C9D1' : 'background:#F1F1F3;color:#3F3F46';
+    const tagsAPP = [
+      { label: mn ? 'Фронтенд' : 'Frontend', style: dark ? 'background:#232328;color:#C9C9D1' : 'background:#F1F1F3;color:#3F3F46' },
+      { label: mn ? 'Төлбөр' : 'Checkout', style: dark ? 'background:rgba(59,130,246,0.16);color:#93C5FD' : 'background:#E8F1FD;color:#1D4ED8' },
+      { label: mn ? 'Мобайл веб' : 'Mobile web', style: dark ? 'background:rgba(34,197,94,0.16);color:#86EFAC' : 'background:#E6F4EA;color:#166534' }
+    ];
+
+    /* ---------- PEOPLE ---------- */
+    const PP = {
+      anu: [['Ану Б.', 'Anu B.'], ['АБ', 'AB'], 'background:#E0E7FF;color:#3730A3', 'background:#312E81;color:#C7D2FE', ['Бүтээгдэхүүний менежер', 'Product manager']],
+      bat: [['Бат О.', 'Bat O.'], ['БО', 'BO'], 'background:#CCFBF1;color:#115E59', 'background:#134E4A;color:#99F6E4', ['Инженерийн ахлагч', 'Engineering lead']],
+      sara: [['Сараа К.', 'Sara K.'], ['СК', 'SK'], 'background:#FFE4E6;color:#9F1239', 'background:#881337;color:#FECDD3', ['Дизайнер', 'Product designer']],
+      tem: [['Тэмүүлэн Г.', 'Temuulen G.'], ['ТГ', 'TG'], 'background:#DCFCE7;color:#166534', 'background:#14532D;color:#BBF7D0', ['Мобайл хөгжүүлэгч', 'Mobile engineer']],
+      dorj: [['Дорж Э.', 'Dorj E.'], ['ДЭ', 'DE'], 'background:#FEF3C7;color:#92400E', 'background:#78350F;color:#FDE68A', ['Фронтенд хөгжүүлэгч', 'Frontend engineer']],
+      mia: [['Мишээл Л.', 'Mia L.'], ['МЛ', 'ML'], 'background:#E0F2FE;color:#075985', 'background:#0C4A6E;color:#BAE6FD', ['UX судлаач', 'UX researcher']],
+      bay: [['Баярмаа Т.', 'Bayarmaa T.'], ['БТ', 'BT'], 'background:#FEF9C3;color:#854D0E', 'background:#713F12;color:#FEF08A', ['Чанарын шалгагч', 'QA']]
+    };
+    const person = (id) => ({ name: pick(PP[id][0]), initials: pick(PP[id][1]), style: dark ? PP[id][3] : PP[id][2], role: pick(PP[id][4]) });
+
+    /* ---------- PROPERTIES ---------- */
+    const P = (o) => ({ hasMarker: false, hasFlag: false, hasPeople: false, hasTags: false, hasText: true, hasSub: false, hasLive: false, mk: MK.todo, flag: '', people: [], tags: [], text: '', textStyle: '', sub: '', bg: 'background:transparent', ...o, aria: o.label + ': ' + (o.ariaVal || o.text) });
+    const props = [
+      P({ icon: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 3v18', label: mn ? 'Төлөв' : 'Status', hasMarker: true, mk: MK.review, text: pick(STATUS.review) }),
+      P({ icon: 'M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM4 21a8 8 0 0 1 16 0', label: mn ? 'Хариуцагч' : 'Assignees', hasPeople: true, people: [person('dorj'), person('anu')], text: mn ? 'Дорж Э., Ану Б.' : 'Dorj E., Anu B.' }),
+      P({ icon: 'M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM16 2v4M8 2v4M3 10h18', label: mn ? 'Огноо' : 'Due', text: mn ? 'Өнөөдөр, 10-р сарын 8' : 'Today, Oct 8', textStyle: 'color:' + todayInk + ';font-weight:500', hasSub: true, sub: mn ? 'Эхэлсэн 10-р сарын 4' : 'Started Oct 4' }),
+      P({ icon: 'M4 22V4M4 4h12l-2 4 2 4H4', label: mn ? 'Ач холбогдол' : 'Priority', hasFlag: true, flag: urgentFlag, text: mn ? 'Яаралтай' : 'Urgent' }),
+      P({ icon: 'M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8zM7.5 7.5h.01', label: mn ? 'Шошго' : 'Tags', hasTags: true, tags: tagsAPP, hasText: false, ariaVal: tagsAPP.map((x) => x.label).join(', '), hasLive: true, bg: 'background:' + accentSoft }),
+      P({ icon: 'M21.3 15.3 8.7 2.7a1 1 0 0 0-1.4 0L2.7 7.3a1 1 0 0 0 0 1.4l12.6 12.6a1 1 0 0 0 1.4 0l4.6-4.6a1 1 0 0 0 0-1.4zM7.5 10.5l2-2M10.5 13.5l2-2M13.5 16.5l2-2', label: mn ? 'Хэмжээ' : 'Size', text: mn ? 'L · 3–5 өдөр' : 'L · 3–5 days' }),
+      P({ icon: 'M21 12a9 9 0 1 1-3-6.7M21 4v5h-5', label: mn ? 'Спринт' : 'Sprint', text: mn ? 'Спринт 14' : 'Sprint 14' }),
+      P({ icon: 'M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z', label: mn ? 'Хянагч' : 'Reviewer', hasPeople: true, people: [person('bat')], text: pick(PP.bat[0]), hasSub: true, sub: mn ? 'Хянагдаж буй үед л харагдана' : 'Shown while in review' }),
+      P({ icon: 'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0', label: mn ? 'Дагагч' : 'Followers', hasPeople: true, people: [person('anu'), person('sara'), person('bat'), person('mia')], text: '6', hasSub: true, sub: mn ? 'Та дагаж байна' : 'You’re following' })
+    ];
+
+    /* ---------- SUBTASKS ---------- */
+    const boxOn = 'background:' + accent + ';border:0';
+    const boxOff = 'border:2px solid ' + (dark ? '#4A4A52' : '#C4C4CC');
+    const subtasks = [
+      [['360 / 768 / 1024 / 1440 цэгүүдийг шалгах', 'Breakpoint audit at 360 / 768 / 1024 / 1440'], 'dorj', true],
+      [['Захиалгын дүнг accordion болгох', 'Collapse order summary into an accordion'], 'dorj', true],
+      [['Нэг баганат төлбөрийн маягт, 44px оролт', 'Single-column payment form, 44px inputs'], 'dorj', true],
+      [['Утсан дээр «Захиалах» мөр наалддаг болгох', 'Sticky “Place order” bar on mobile'], 'anu', true],
+      [['Промо кодын талбарын халалтыг засах (24 тэмдэгт)', 'Fix promo code field overflow (24-char codes)'], 'dorj', true],
+      [['iOS Safari ба Android Chrome дээр QA', 'QA on iOS Safari and Android Chrome'], 'bat', false]
+    ].map(([text, who, done]) => ({
+      text: pick(text), done, person: person(who),
+      box: done ? boxOn : boxOff, check: 'visibility:' + (done ? 'visible' : 'hidden'),
+      textStyle: done ? 'color:' + t.muted + ';text-decoration:line-through' : 'color:' + t.text,
+      hasDue: !done, due: mn ? 'Маргааш' : 'Tomorrow', dueStyle: DUEsoon
+    }));
+
+    /* ---------- ATTACHMENTS / FEEDBACK / MENTIONS ---------- */
+    const images = [
+      { name: 'checkout-mobile-360.png', meta: '248 KB · ' + pick(PP.dorj[0]), frame: 'width:44px;height:80px' },
+      { name: 'checkout-tablet-768.png', meta: '312 KB · ' + pick(PP.dorj[0]), frame: 'width:100px;height:72px' }
+    ];
+    const typeStyle = {
+      bug: dark ? 'background:rgba(248,113,113,0.14);color:#FCA5A5' : 'background:#FDECEC;color:#B42318',
+      feature: dark ? 'background:rgba(59,130,246,0.16);color:#93C5FD' : 'background:#E8F1FD;color:#1D4ED8',
+      fb: dark ? 'background:rgba(45,212,191,0.14);color:#5EEAD4' : 'background:#E3F4F1;color:#0F766E'
+    };
+    const feedback = [
+      { id: 'FB-1037', type: mn ? 'Алдаа' : 'Bug', typeStyle: typeStyle.bug, title: mn ? 'Жижиг утсан дээр захиалгын дүн картын формыг давхарладаг' : 'Order summary overlaps the card form on small phones', from: mn ? 'Батзориг М. · 10-р сарын 5' : 'Batzorig M. · Oct 5' },
+      { id: 'FB-1030', type: mn ? 'Санал' : 'Feedback', typeStyle: typeStyle.fb, title: mn ? 'Таблет дээр төлбөрийн хуудсыг уншихад хэцүү' : 'Checkout is hard to read on my tablet', from: mn ? 'Оюун-Эрдэнэ Д. · 10-р сарын 2' : 'Oyun-Erdene D. · Oct 2' },
+      { id: 'FB-1028', type: mn ? 'Алдаа' : 'Bug', typeStyle: typeStyle.bug, title: mn ? 'Нийт дүнг харахын тулд хажуу тийш гүйлгэх хэрэгтэй' : 'Have to scroll sideways to see the total', from: mn ? 'Гэрэл С. · 10-р сарын 1' : 'Gerel S. · Oct 1' }
+    ];
+    const mentions = [
+      { icon: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2zM8 9h8M8 13h5', title: mn ? 'Дорж Э.-ийн стэндап' : 'Dorj E.’s standup', meta: mn ? 'Мобайл баг · өнөөдөр 09:41' : 'Mobile team · today 09:41' },
+      { icon: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8.5 12l2.5 2.5 4.5-5', title: mn ? 'APP-147 · Танилцуулах урсгалыг шинэчлэх' : 'APP-147 · Redesign onboarding flow', meta: mn ? 'Сараа К.-гийн сэтгэгдэл · өчигдөр' : 'Comment by Sara K. · yesterday' },
+      { icon: 'M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6M8 13h8M8 17h5', title: mn ? 'Төлбөрийн хуудас — респонсив' : 'Checkout — responsive specs', meta: mn ? 'Баримт · Бат О. засварласан' : 'Doc · edited by Bat O.' }
+    ];
+
+    /* ---------- ACTIVITY ---------- */
+    const T = (text) => ({ isText: true, isBold: false, isPill: false, isMention: false, text });
+    const B = (text) => ({ isText: false, isBold: true, isPill: false, isMention: false, text });
+    const M = (text) => ({ isText: false, isBold: false, isPill: false, isMention: true, text });
+    const PL = (k) => ({ isText: false, isBold: false, isPill: true, isMention: false, text: pick(STATUS[k]), style: pillTone[k], ring: MK[k].ring });
+    const H = (parts, time, mark) => ({ isHistory: true, isComment: false, parts, time, mark: mark || 'background:' + t.faint, person: person('anu'), replies: [] });
+    const C = (who, parts, time, replies) => ({ isHistory: false, isComment: true, person: person(who), parts, time, replies: replies || [], mark: '' });
+    const anu = pick(PP.anu[0]), dorjN = pick(PP.dorj[0]), batN = pick(PP.bat[0]);
+    const activity = [
+      H([B(anu), T(mn ? ' энэ ажлыг үүсгэсэн' : ' created this task')], mn ? '10/1' : 'Oct 1'),
+      C('sara', [T(mn ? 'Промо талбарын тухай — түншийн кампанит ажил 24 тэмдэгт хүртэлх код ашигладаг. ' : 'Heads up on the promo field — the partner campaign uses codes up to 24 characters. '), M(dorjN), T(mn ? ' 360px дээр тасрахгүй байлгаж чадах уу?' : ' can we make sure those don’t clip on 360px?')], mn ? '10/3' : 'Oct 3',
+        [{ person: person('dorj'), time: mn ? '10/3' : 'Oct 3', text: mn ? 'Тийм, 24 тэмдэгттэй кодоор тест хийнэ.' : 'Yes — I’ll test with 24-character codes.' }]),
+      H([B(dorjN), T(mn ? ' төлөвийг ' : ' changed status from '), PL('todo'), T(mn ? ' → ' : ' to '), PL('progress')], mn ? '10/4' : 'Oct 4'),
+      H([B(dorjN), T(mn ? ' хавсаргасан: ' : ' attached '), B('checkout-mobile-360.png')], mn ? '10/6' : 'Oct 6'),
+      H([B(anu), T(mn ? ' ач холбогдлыг Яаралтай болгосон' : ' changed priority to Urgent')], mn ? '10/7' : 'Oct 7', 'background:' + (dark ? '#F87171' : '#DC2626')),
+      H([B(batN), T(mn ? ' төлөвийг өөрчилсөн → ' : ' changed status to '), PL('review')], mn ? 'Өчигдөр 16:12' : 'Yesterday 4:12 PM', 'background:' + accentInk),
+      C('dorj', [M(anu), T(mn ? ' Бат iOS-ийг баталмагц гарын үсэг зурахад бэлэн.' : ' ready for sign-off once Bat confirms iOS.')], mn ? '2 цагийн өмнө' : '2h ago')
+    ];
+    const actSeg = [mn ? 'Бүгд' : 'All', mn ? 'Сэтгэгдэл' : 'Comments', mn ? 'Түүх' : 'History'].map((label, i) => ({ label, on: i === 0, style: i === 0 ? t.segOn : t.segOff }));
+    const suggestions = ['bat', 'bay'].map((id, i) => { const p = person(id); return { ...p, on: i === 0, bg: i === 0 ? 'background:' + accentSoft : 'background:transparent' }; });
+
+    /* ---------- FORMATTING TOOLBAR ---------- */
+    const onBtn = 'background:' + accentSoft + ';color:' + accentInk;
+    const offBtn = 'background:transparent;color:' + t.text;
+    const fmt = [
+      { isText: true, isIcon: false, text: 'B', textStyle: 'font-weight:700', aria: mn ? 'Тод' : 'Bold', on: true },
+      { isText: true, isIcon: false, text: 'I', textStyle: 'font-style:italic;font-family:Georgia,serif', aria: mn ? 'Налуу' : 'Italic', on: false },
+      { isText: true, isIcon: false, text: 'S', textStyle: 'text-decoration:line-through', aria: mn ? 'Дундуур зураас' : 'Strikethrough', on: false },
+      { isText: false, isIcon: true, icon: 'm8 7-5 5 5 5M16 7l5 5-5 5', aria: mn ? 'Код' : 'Inline code', on: false },
+      { isText: false, isIcon: true, icon: 'M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01', aria: mn ? 'Цэгтэй жагсаалт' : 'Bulleted list', on: false },
+      { isText: false, isIcon: true, icon: 'M10 6h11M10 12h11M10 18h11M4 4v4M3 18h3l-3 3h3', aria: mn ? 'Дугаартай жагсаалт' : 'Numbered list', on: false },
+      { isText: false, isIcon: true, icon: 'M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7', aria: mn ? 'Холбоос' : 'Link', on: false },
+      { isText: true, isIcon: false, text: '@', textStyle: '', aria: mn ? 'Дурдах' : 'Mention', on: false }
+    ].map((b) => ({ text: '', textStyle: '', icon: '', ...b, style: b.on ? onBtn : offBtn }));
+
+    /* ---------- DATE SHEET ---------- */
+    const tabOn = 'border:1.5px solid ' + accent + ';background:' + accentSoft;
+    const tabOff = 'border:1px solid ' + t.border + ';background:' + t.raised;
+    const dateTabs = [
+      { label: mn ? 'Эхлэх' : 'Start', value: mn ? '10-р сарын 4' : 'Oct 4', on: false, style: tabOff },
+      { label: mn ? 'Дуусах' : 'Due', value: mn ? 'Өнөөдөр, 10/8' : 'Today, Oct 8', on: true, style: tabOn }
+    ];
+    const presets = [mn ? 'Өнөөдөр' : 'Today', mn ? 'Маргааш' : 'Tomorrow', mn ? 'Дараа 7 хоног' : 'Next week', mn ? 'Огноогүй' : 'No date'].map((label) => ({ label }));
+    const weekdays = (mn ? ['Да', 'Мя', 'Лх', 'Пү', 'Ба', 'Бя', 'Ня'] : ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']).map((label) => ({ label }));
+    const MON = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const days = [];
+    for (let i = 0; i < 35; i++) {
+      let m, d;
+      if (i < 3) { m = 9; d = 28 + i; } else if (i - 2 <= 31) { m = 10; d = i - 2; } else { m = 11; d = i - 33; }
+      const inM = m === 10;
+      const isStart = inM && d === 4, isDue = inM && d === 8, inRange = inM && d > 4 && d < 8;
+      days.push({
+        n: String(d), aria: (mn ? m + '-р сарын ' + d : MON[m] + ' ' + d) + (isStart ? (mn ? ', эхлэх' : ', start') : '') + (isDue ? (mn ? ', дуусах, өнөөдөр' : ', due, today') : ''),
+        band: (inRange ? 'background:' + accentSoft : (isStart ? 'background:linear-gradient(90deg,transparent 50%,' + accentSoft + ' 50%)' : (isDue ? 'background:linear-gradient(90deg,' + accentSoft + ' 50%,transparent 50%)' : 'background:transparent'))),
+        style: isDue ? 'background:' + accent + ';color:#FFFFFF;font-weight:600' : (isStart ? 'box-shadow:inset 0 0 0 1.5px ' + accentInk + ';color:' + accentInk + ';font-weight:600;background:' + t.raised : (inM ? 'color:' + t.text : 'color:' + t.faint))
+      });
+    }
+
+    /* ---------- MORE / ATTACH SHEETS ---------- */
+    const moreActs = [
+      [mn ? 'Хуулбар үүсгэх' : 'Duplicate', 'M8 8h12v12H8zM16 8V4H4v12h4', false],
+      [mn ? 'Өөр төсөл рүү зөөх' : 'Move to project', 'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM10 13h6M13 10l3 3-3 3', false],
+      [mn ? 'Дагахаа болих' : 'Unfollow', 'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0M3 3l18 18', false],
+      [mn ? 'Ажлыг устгах' : 'Delete task', 'M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6', true]
+    ].map(([label, icon, danger]) => ({ label, icon, style: 'color:' + (danger ? t.red : t.text) + (danger ? ';border-top:1px solid ' + t.divider : '') }));
+    const sources = [
+      [mn ? 'Камер' : 'Camera', 'M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1zM12 10a4 4 0 1 0 0 8 4 4 0 0 0 0-8z'],
+      [mn ? 'Зураг' : 'Photos', 'M4 4h16v16H4zM4 16l5-5 4 4 3-3 4 4M15 8h.01'],
+      [mn ? 'Файл' : 'Files', 'M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6']
+    ].map(([label, icon]) => ({ label, icon }));
+
+    /* ---------- PHONES ---------- */
+    const base = {
+      live: true, deleted: false, conflict: false, titleEditable: true, composer: true, composerFocus: false, keyboard: false, toolbar: false,
+      sheetDue: false, sheetMore: false, sheetAttach: false, anySheet: false, chev: '', valueTone: 'color:' + t.text,
+      scroll: 'overflow:hidden', shift: '', editLabel: L.edit, descBox: ''
+    };
+    const editBox = 'padding:12px 14px;border-radius:12px;border:1.5px solid ' + accent + ';box-shadow:0 0 0 3px ' + accentSoft;
+    const phones = [
+      { ...base, order: 'order:1', cap: L.cap01, scroll: 'overflow-y:auto;scrollbar-width:none' },
+      { ...base, order: 'order:2', cap: L.cap02, shift: 'margin-top:-780px' },
+      { ...base, order: 'order:3', cap: L.cap03, shift: 'margin-top:-1610px' },
+      { ...base, order: 'order:4', cap: L.cap04, shift: 'margin-top:-2560px' },
+      { ...base, order: 'order:5', cap: L.cap05, shift: 'margin-top:-760px', composer: false, keyboard: true, toolbar: true, editLabel: L.editing, descBox: editBox },
+      { ...base, order: 'order:6', cap: L.cap06, shift: 'margin-top:-2880px', composer: false, keyboard: true, composerFocus: true },
+      { ...base, order: 'order:7', cap: L.cap07, sheetDue: true, anySheet: true },
+      { ...base, order: 'order:8', cap: L.cap08, sheetMore: true, anySheet: true },
+      { ...base, order: 'order:9', cap: L.cap09, shift: 'margin-top:-1610px', sheetAttach: true, anySheet: true },
+      { ...base, order: 'order:11', cap: L.cap11, live: false, deleted: true, titleEditable: false, composer: false, chev: 'visibility:hidden', valueTone: 'color:' + t.text3 },
+      { ...base, order: 'order:13', cap: L.cap13, titleEditable: false, conflict: true, composer: false, keyboard: true }
+    ];
+
+    const rules = [
+      [['Шинж чанар', 'Properties'], ['Мөр бүрийг дарахад MobileFoundations-ийн доод хуудас нээгдэнэ. «Хянагч» зөвхөн «Хянагдаж буй» төлөвт харагдана.', 'Each row opens its MobileFoundations sheet. Reviewer only shows while the task is In Review.']],
+      [['Бодит цаг', 'Realtime'], ['Багийн хүн өөрчлөхөд тухайн мөр 3 секунд өнгөөр тодорч, «Сараа · дөнгөж сая» шошго 30 секунд харагдана.', 'A teammate’s change tints the row for 3 s and shows “Sara · just now” for 30 s.']],
+      [['Гацсан', 'Blocked'], ['Стэндапын саад энэ ажилтай холбогдсон үед гарна. Дарахад тэр стэндап руу очно. Саад шийдэгдмэгц алга болно.', 'Shown when a standup blocker links this task; tapping opens that standup. It disappears when the blocker is resolved.']],
+      [['Тайлбар', 'Description'], ['Уншихдаа форматтайгаар, «Засах» дарахад засварлагч болно. Хэрэгслийн мөр гарын дээр наалдана, «Болсон» хадгална.', 'Formatted while reading; “Edit” switches to the editor. The toolbar sits above the keyboard and Done saves.']],
+      [['Сэтгэгдэл', 'Comments'], ['Бичих талбар доор наалдсан. «@» бичихэд хүний санал гарын дээр гарна: нэр ба албан тушаал.', 'The composer stays pinned at the bottom. Typing “@” shows people above the keyboard with name and job title.']],
+      [['Зөрчил', 'Conflicts'], ['Таныг засаж байхад өөр хүн өөрчилбөл таны текст хадгалагдаж, тэднийх доор харагдана. Сонголт хийх хүртэл хадгалагдахгүй.', 'If someone edits while you are editing, your text stays and theirs shows below. Nothing saves until you choose.']],
+      [['Устгасан', 'Deleted'], ['30 хоног зөвхөн уншигдана. Сэргээх нь бүх шинж чанар, сэтгэгдлийг буцаана.', 'Read-only for 30 days. Restore brings back every property and comment.']],
+      [['Зураг харах', 'Image viewer'], ['Үргэлж хар дэвсгэртэй. Шударч солих, доош татаж хаах, хоёр хуруугаар томруулах.', 'Always on black. Swipe to switch, drag down to close, pinch to zoom.']]
+    ].map(([title, body]) => ({ title: pick(title), body: pick(body) }));
+
+    const segBtn = (on) => (on ? t.segOn : t.segOff);
+    const toggles = [
+      { label: L.langLabel, opts: [['mn', 'МН'], ['en', 'EN']].map(([v, lab]) => ({ label: lab, on: lang === v, style: segBtn(lang === v), pick: () => this.setState({ lang: v }) })) },
+      { label: L.themeLabel, opts: [['light', L.light], ['dark', L.dark]].map(([v, lab]) => ({ label: lab, on: theme === v, style: segBtn(theme === v), pick: () => this.setState({ theme: v }) })) }
+    ];
+
+    return {
+      lang, L, t, cap, accent, accentInk, accentSoft, toggles,
+      blockedBox, warnBox, deletedBar, pdfTile,
+      phones, props, subtasks, images, feedback, mentions, activity, actSeg, suggestions, fmt,
+      dateTabs, presets, weekdays, days, moreActs, sources, rules,
+      sara: person('sara'), dorj: person('dorj'), bat: person('bat'),
+      skelProps: ['30%', '45%', '38%', '28%', '52%', '24%', '34%', '40%'].map((w) => ({ w: 'width:' + w }))
+    };
+  }
+}
+</script>
+</body>
+</html>

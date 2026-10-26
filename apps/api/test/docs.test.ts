@@ -31,6 +31,10 @@ describe('OpenAPI docs', () => {
   it('serves an OpenAPI 3.1 spec generated from the routes', () => {
     expect(spec.openapi).toMatch(/^3\.1\./);
     expect(spec.components.securitySchemes).toHaveProperty('cookieAuth');
+    expect(spec.components.securitySchemes.bearerAuth).toMatchObject({
+      type: 'http',
+      scheme: 'bearer',
+    });
     expect(Object.keys(spec.paths)).toEqual(
       expect.arrayContaining([
         '/api/v1/health',
