@@ -851,9 +851,9 @@ Tokens mirror `styles/tokens.css` + `palette.css`, with these phone additions or
   - `reports.ts`, `attachments.ts` (`MAX_ATTACHMENT_BYTES`, `isBlockedFilename`), `project-key.ts`.
 - **Realtime:** `realtimeServerMessageSchema`, `REALTIME_CLOSE_UNAUTHORIZED`, event names.
 
-Platform notes for B2:
-- Shared source imports its siblings with `.js` specifiers (`./dates.js` → `dates.ts`). Check that Metro resolves these in the pnpm monorepo. If it doesn't, add a small `resolver.resolveRequest` in `metro.config.js` that retries `.js` as `.ts` for `@kite/shared`.
-- `todayInZone` and the standup zone helpers use `Intl.DateTimeFormat` with `timeZone`. Hermes supports this; add a jest-expo test plus one on-device check (Android) for `Asia/Ulaanbaatar` and a DST zone.
+Platform notes for B2 (outcome, 2026-10-26):
+- Shared source imports its siblings with `.js` specifiers (`./dates.js` → `dates.ts`). Metro does **not** resolve them on its own, so `apps/mobile/metro.config.js` has a `resolver.resolveRequest` that drops `.js` for relative imports inside `packages/shared/src`; jest does the same with a `moduleNameMapper`.
+- `todayInZone` and the standup zone helpers use `Intl.DateTimeFormat` with `timeZone`. The jest-expo test (`src/__tests__/shared.test.ts`, `Asia/Ulaanbaatar` + New York across DST) passes; the on-device check (Android Hermes) is still to do.
 - zod v4 and the pure-TS helpers work in React Native unchanged.
 - Mobile can be on React 19 while web stays on 18: shared has no React dependency.
 

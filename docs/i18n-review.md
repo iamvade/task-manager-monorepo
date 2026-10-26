@@ -567,6 +567,18 @@ The live screen's own labels (speaking order, total time, Previous/Next/Finish, 
 | `standup.write.moreSuggestions_other` | Show {{count}} more suggestions | Өөр {{count}} санал харуулах |
 | `inbox.standupWaiting` | Your {{group}} standup is waiting for your update | «{{group}}» стэндапад таны шинэчлэл хүлээгдэж байна |
 
+## Mobile app (B2, 2026-10-26)
+
+`apps/mobile/src/i18n/locales/` reuses web keys with the web's exact text (a test enforces it). New mobile-only keys (Mongolian from `MobileFoundations.dc.html` `STR.mn`, not drafted):
+
+| key | en | mn | where |
+|---|---|---|---|
+| `tabs.myTasks` | My Tasks | Миний ажил | Tab bar (the web's `shell.myTasks` is "Миний ажлууд") |
+| `tabs.projects` | Projects | Төслүүд | Tab bar |
+| `tabs.inbox` | Inbox | Мэдэгдэл | Tab bar |
+| `tabs.standup` | Standup | Стэндап | Tab bar |
+| `tabs.more` | More | Бусад | Tab bar |
+
 ## Open questions
 
 1. **Unscheduled**: drafted "Огноогүй" (no date) rather than "Хуваарьгүй"; the hint uses "…хуваарьт оруулна уу". Pick one term.

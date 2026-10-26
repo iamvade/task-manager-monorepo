@@ -6,3 +6,16 @@ packages:
 allowBuilds:
   esbuild: true
   argon2: true
+  # Ship prebuilt binaries as optional deps; their install scripts are only a fallback.
+  '@parcel/watcher': false
+  unrs-resolver: false
+
+# Keep the type packages apps/mobile brings out of pnpm's hidden hoist
+# (node_modules/.pnpm/node_modules), so they never leak into other apps' type checks: React 19
+# types (web is on 18 and maps `react` to its own types in tsconfig `paths`) and jest's
+# @types/jsdom (breaks api's Blob types through vitest).
+hoistPattern:
+  - '*'
+  - '!@types/react'
+  - '!@types/react-dom'
+  - '!@types/jsdom'

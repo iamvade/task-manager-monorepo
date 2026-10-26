@@ -1,3 +1,4 @@
+export * from './appearance.js';
 export * from './attachments.js';
 export * from './dates.js';
 export * from './enums.js';

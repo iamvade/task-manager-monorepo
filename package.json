@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "pnpm --parallel --filter @kite/api --filter @kite/web dev",
+    "mobile": "pnpm --filter @kite/mobile start",
     "build": "pnpm -r build",
     "lint": "eslint .",
     "format": "prettier --write .",

@@ -5,3 +5,5 @@ coverage/
 apps/api/drizzle/
 CLAUDE.md
 docs/
+apps/mobile/.expo/
+apps/mobile/expo-env.d.ts
