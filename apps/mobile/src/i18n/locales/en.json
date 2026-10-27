@@ -87,5 +87,12 @@
   "errors": {
     "network": "Can’t reach the server. Check your connection and try again.",
     "UNAUTHORIZED": "Your session ended. Sign in again."
+  },
+  "more": {
+    "about": "About",
+    "version": "Version",
+    "server": "Server",
+    "update": "Update",
+    "updateBuiltIn": "built in"
   }
 }
