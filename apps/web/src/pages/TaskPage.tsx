@@ -13,7 +13,9 @@ export function TaskPage() {
   }, [navigate, ws]);
 
   return (
-    <div className="min-h-full bg-surface">
+    // `flex-none`: <main> is a flex column, so a shrinkable wrapper stops at one viewport and
+    // its background ends while the content scrolls on.
+    <div className="min-h-full flex-none bg-surface">
       <div className="mx-auto w-full max-w-[760px]">
         <TaskDetailView key={taskKey} taskKey={taskKey} layout="page" onClose={leave} />
       </div>

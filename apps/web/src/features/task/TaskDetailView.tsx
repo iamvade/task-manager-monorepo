@@ -245,7 +245,7 @@ function LoadedTask({
           <ActivitySection />
         </div>
         {!view.readOnly && (
-          <div className="sticky bottom-0 z-[2] border-t border-subtle bg-surface px-6 pt-3 pb-4">
+          <div className="sticky bottom-0 z-[2] border-t border-default bg-surface px-6 pt-3 pb-4">
             <CommentComposer />
           </div>
         )}
