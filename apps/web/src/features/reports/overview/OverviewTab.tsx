@@ -80,7 +80,15 @@ export function OverviewTab() {
     <>
       <ReportsHeader
         tab="overview"
-        status={<UpdatedStatus generatedAt={data.generatedAt} />}
+        status={
+          <UpdatedStatus
+            generatedAt={data.generatedAt}
+            isFetching={report.isFetching}
+            onRefresh={() => {
+              void report.refetch();
+            }}
+          />
+        }
         toolbar={
           <>
             <PeriodControl value={filters} onChange={setFilters} />
@@ -105,7 +113,7 @@ export function OverviewTab() {
         </p>
         <OverviewStats report={data} />
         <div className="flex flex-wrap items-stretch gap-4">
-          <ThroughputPanel throughput={data.throughput} />
+          <ThroughputPanel throughput={data.throughput} range={data.range} />
           <WaitsPanel waits={data.waits} />
         </div>
         <AgingTable

@@ -92,7 +92,12 @@ export function SprintBars({ groups, ariaLabel, table, height = 200 }: SprintBar
           </div>
         ))}
       </div>
-      <HoverColumns count={groups.length} onHover={setHover} />
+      <HoverColumns
+        count={groups.length}
+        active={hover}
+        name={table?.caption ?? ariaLabel}
+        onHover={setHover}
+      />
       {hover !== null && hovered && (
         <ChartTooltip index={hover} count={groups.length}>
           {hovered.tooltip}

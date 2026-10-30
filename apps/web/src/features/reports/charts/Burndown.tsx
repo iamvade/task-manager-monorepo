@@ -155,7 +155,12 @@ export function Burndown({
         </span>
       )}
       {hover !== null && <HoverLine index={hover} count={n} />}
-      <HoverColumns count={n} onHover={setHover} />
+      <HoverColumns
+        count={n}
+        active={hover}
+        name={table?.caption ?? ariaLabel}
+        onHover={setHover}
+      />
       {hover !== null && hovered && (
         <ChartTooltip index={hover} count={n}>
           <span className="font-semibold text-default">{hovered.title}</span>

@@ -6,6 +6,13 @@ import { LineTrend } from './LineTrend';
 import { ReferenceTrend } from './ReferenceTrend';
 import { StackedBar } from './StackedBar';
 
+/** The open chart tooltip (hidden from the accessibility tree; the data table reads out). */
+const tooltip = (container: HTMLElement) => {
+  const tip = container.querySelector<HTMLElement>('[data-chart-tooltip]');
+  if (!tip) throw new Error('No chart tooltip');
+  return tip;
+};
+
 describe('LineTrend', () => {
   const points = [10, 20, 15].map((value, i) => ({
     label: `W${String(i)}`,
@@ -31,11 +38,45 @@ describe('LineTrend', () => {
 
     const columns = [...container.querySelectorAll('.h-full.flex-1')];
     fireEvent.mouseEnter(at(columns, 2));
-    const tip = screen.getByRole('status');
+    const tip = tooltip(container);
     expect(tip).toHaveTextContent('Week 2');
     expect(tip).toHaveTextContent('This week is still in progress');
     fireEvent.mouseEnter(at(columns, 0));
-    expect(screen.getByRole('status')).not.toHaveTextContent('still in progress');
+    expect(tooltip(container)).not.toHaveTextContent('still in progress');
+  });
+
+  it('steps through the points from the keyboard', () => {
+    const { container } = render(
+      <LineTrend points={points} seriesLabel="This period" ariaLabel="Summary" />,
+    );
+    const layer = screen.getByRole('group', { name: /Summary/ });
+    fireEvent.focus(layer);
+    expect(tooltip(container)).toHaveTextContent('Week 2');
+    fireEvent.keyDown(layer, { key: 'ArrowLeft' });
+    expect(tooltip(container)).toHaveTextContent('Week 1');
+    fireEvent.keyDown(layer, { key: 'Home' });
+    expect(tooltip(container)).toHaveTextContent('Week 0');
+    fireEvent.keyDown(layer, { key: 'ArrowLeft' });
+    expect(tooltip(container)).toHaveTextContent('Week 0');
+    fireEvent.keyDown(layer, { key: 'Escape' });
+    expect(container.querySelector('[data-chart-tooltip]')).toBeNull();
+  });
+
+  it('tints the band columns and dashes the previous line', () => {
+    const { container } = render(
+      <LineTrend
+        points={points}
+        seriesLabel="Last 12 weeks"
+        prevLabel="12 weeks before"
+        ariaLabel="Summary"
+        band={{ from: 1, to: 2 }}
+        prevDashed
+      />,
+    );
+    const band = container.querySelector<HTMLElement>('[data-band]');
+    expect(band?.style.left).toBe('33.33%');
+    expect(band?.style.width).toBe('66.67%');
+    expect(container.querySelector('path')).toHaveAttribute('stroke-dasharray', '4 4');
   });
 });
 
@@ -88,9 +129,9 @@ describe('Burndown', () => {
     expect(screen.getByText('+2')).toBeInTheDocument();
     const columns = [...container.querySelectorAll('.h-full.flex-1')];
     fireEvent.mouseEnter(at(columns, 1));
-    expect(screen.getByRole('status')).toHaveTextContent('Remaining8 tasks');
+    expect(tooltip(container)).toHaveTextContent('Remaining8 tasks');
     fireEvent.mouseEnter(at(columns, 4));
-    expect(screen.getByRole('status')).toHaveTextContent('Projection4 tasks');
+    expect(tooltip(container)).toHaveTextContent('Projection4 tasks');
   });
 });
 
@@ -140,7 +181,7 @@ describe('ReferenceTrend', () => {
     expect(table).toHaveTextContent('Week 2—');
     const columns = [...container.querySelectorAll('.h-full.flex-1')];
     fireEvent.mouseEnter(at(columns, 4));
-    const tip = screen.getByRole('status');
+    const tip = tooltip(container);
     expect(tip).toHaveTextContent('Week 43 tasksThis week is still in progress');
   });
 });
