@@ -500,4 +500,77 @@ describe('app shell', () => {
     expect(deletes()).toHaveLength(1);
     expect(router.state.location.pathname).toBe(`/w/kite-studio/s/${SPACE_ID}/list`);
   });
+
+  it('renames a space from its sidebar row menu', async () => {
+    const patches: unknown[] = [];
+    api({
+      [`PATCH /api/v1/spaces/${SPACE_ID}`]: (init) => {
+        patches.push(body(init));
+        return Response.json({
+          id: SPACE_ID,
+          workspaceId: WORKSPACE_ID,
+          name: 'Design',
+          initial: 'P',
+          color: 'violet',
+          position: 'a0',
+          createdById: null,
+        });
+      },
+    });
+    renderAt('/w/kite-studio/my-tasks');
+
+    const nav = await waitFor(sidebarNav);
+    fireEvent.click(await within(nav).findByRole('button', { name: 'Product: сонголтууд' }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Нэр солих' }));
+    const field = await within(nav).findByRole('textbox', { name: 'Орон зайн нэр' });
+    expect(field).toHaveValue('Product');
+    fireEvent.change(field, { target: { value: ' Design ' } });
+    fireEvent.keyDown(field, { key: 'Enter' });
+
+    expect(within(nav).queryByRole('textbox', { name: 'Орон зайн нэр' })).toBeNull();
+    await waitFor(() => {
+      expect(patches).toEqual([{ name: 'Design' }]);
+    });
+  });
+
+  it('renames a project from its header menu in the sidebar row; Esc cancels', async () => {
+    const patches: unknown[] = [];
+    api({
+      [`PATCH /api/v1/projects/${PROJECT_ID}`]: (init) => {
+        patches.push(body(init));
+        return Response.json(PROJECT_WITH_STATUSES);
+      },
+    });
+    renderAt(`/w/kite-studio/p/${PROJECT_ID}/list`);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Төслийн сонголтууд' }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Нэр солих' }));
+    const nav = sidebarNav();
+    let field = await within(nav).findByRole('textbox', { name: 'Төслийн нэр' });
+    expect(field).toHaveValue('App Redesign');
+    fireEvent.keyDown(field, { key: 'Escape' });
+    expect(within(nav).queryByRole('textbox', { name: 'Төслийн нэр' })).toBeNull();
+
+    fireEvent.click(await within(nav).findByRole('button', { name: 'App Redesign: сонголтууд' }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Нэр солих' }));
+    field = await within(nav).findByRole('textbox', { name: 'Төслийн нэр' });
+    fireEvent.change(field, { target: { value: 'App 2027' } });
+    fireEvent.blur(field);
+    await waitFor(() => {
+      expect(patches).toEqual([{ name: 'App 2027' }]);
+    });
+  });
+
+  it('hides rename and reordering from members', async () => {
+    api({ 'GET /api/v1/auth/me': asMember });
+    renderAt(`/w/kite-studio/p/${PROJECT_ID}/list`);
+
+    const nav = await waitFor(sidebarNav);
+    const link = await within(nav).findByRole('link', { name: /App Redesign/ });
+    expect(link).not.toHaveAttribute('aria-roledescription');
+    expect(within(nav).queryByRole('button', { name: /сонголтууд$/ })).toBeNull();
+    fireEvent.click(await screen.findByRole('button', { name: 'Төслийн сонголтууд' }));
+    await screen.findByRole('menuitem', { name: 'Шинэ спринт' });
+    expect(screen.queryByRole('menuitem', { name: 'Нэр солих' })).toBeNull();
+  });
 });

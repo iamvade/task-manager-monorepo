@@ -16,6 +16,7 @@ import { z } from 'zod';
 import {
   loadProjectAccess,
   requireCreatorOrAdmin,
+  requireRole,
   requireWorkspaceMember,
 } from '../auth/access.js';
 import { requireAuth } from '../auth/plugin.js';
@@ -24,6 +25,7 @@ import { movePosition, positionAfter } from '../db/position.js';
 import { one } from '../db/rows.js';
 import { favorites, projectMembers, projects, spaces } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
+import { broadcastSpacesChanged } from '../realtime/spaces.js';
 import { buildProjectDetail } from '../projects/detail.js';
 import { pickProjectKey } from '../projects/keys.js';
 import { insertDefaultStatuses } from '../projects/statuses.js';
@@ -112,6 +114,7 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           if (key || attempt >= 3) throw keyTaken();
         }
       }
+      broadcastSpacesChanged(request, workspaceId);
       return reply.code(201).send(await detail(request, project));
     },
   );
@@ -190,14 +193,17 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Projects'],
         summary: 'Update a project',
         description:
-          'Name, key, color, lead (the default reviewer; a workspace member, else 400 `INVALID_REFERENCE`) or the brief (`description`, TipTap JSON; its plain text is stored for search). Any member may edit. 409 `PROJECT_KEY_TAKEN` when the key is in use.',
+          'Name, key, color, lead (the default reviewer; a workspace member, else 400 `INVALID_REFERENCE`) or the brief (`description`, TipTap JSON; its plain text is stored for search). Any member may edit the lead and the brief; name, key and color are for admins and owners (403). 409 `PROJECT_KEY_TAKEN` when the key is in use.',
         params: projectParams,
         body: updateProjectSchema,
-        response: { 200: projectDetailSchema, 400: err, 401: err, 404: err, 409: err },
+        response: { 200: projectDetailSchema, 400: err, 401: err, 403: err, 404: err, 409: err },
       },
     },
     async (request) => {
-      const { project } = await loadProjectAccess(request, request.params.projectId);
+      const { project, role } = await loadProjectAccess(request, request.params.projectId);
+      const { name, key, color } = request.body;
+      const structural = name !== undefined || key !== undefined || color !== undefined;
+      if (structural) requireRole(role, 'admin');
       if (request.body.leadId) {
         await requireMembers(app.db, project.workspaceId, [request.body.leadId], 'Lead');
       }
@@ -216,6 +222,7 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           })
           .where(eq(projects.id, project.id))
           .returning();
+        if (structural) broadcastSpacesChanged(request, project.workspaceId);
         return await detail(request, updated ?? project);
       } catch (e) {
         if (isUniqueViolation(e, KEY_CONSTRAINT)) throw keyTaken();
@@ -232,14 +239,18 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Projects'],
         summary: 'Reorder or move a project',
         description:
-          'Neighbors after the move (`prevId`, `nextId`), optionally into another space of the same workspace (`spaceId`).',
+          'Admins and owners (403 for members). Neighbors after the move (`prevId`, `nextId`), optionally into another space of the same workspace (`spaceId`).',
         params: projectParams,
         body: moveProjectSchema,
-        response: { 200: projectDetailSchema, 400: err, 401: err, 404: err },
+        response: { 200: projectDetailSchema, 400: err, 401: err, 403: err, 404: err },
       },
     },
     async (request) => {
-      const { project, workspaceId } = await loadProjectAccess(request, request.params.projectId);
+      const { project, workspaceId } = await loadProjectAccess(
+        request,
+        request.params.projectId,
+        'admin',
+      );
       const { spaceId = project.spaceId, ...move } = request.body;
       if (spaceId !== project.spaceId) await requireSpaceIn(request, workspaceId, spaceId);
       const siblings = await app.db
@@ -253,6 +264,7 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         .set({ spaceId, position })
         .where(eq(projects.id, project.id))
         .returning();
+      broadcastSpacesChanged(request, workspaceId);
       return detail(request, updated ?? project);
     },
   );
@@ -280,6 +292,7 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           .set({ archivedAt })
           .where(eq(projects.id, project.id))
           .returning();
+        broadcastSpacesChanged(request, project.workspaceId);
         return detail(request, updated ?? project);
       },
     );

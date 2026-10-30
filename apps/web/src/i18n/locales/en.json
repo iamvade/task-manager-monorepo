@@ -158,7 +158,20 @@
     "createStandupGroup": "Create group",
     "feedback": "Feedback",
     "feedbackNew_one": "{{count}} new",
-    "feedbackNew_other": "{{count}} new"
+    "feedbackNew_other": "{{count}} new",
+    "rename": "Rename",
+    "renameSpace": "Space name",
+    "renameProject": "Project name",
+    "spaceOptions": "Options for {{name}}",
+    "projectOptions": "Options for {{name}}",
+    "dnd": {
+      "instructions": "To reorder, press Space. Use the arrow keys to move it, Space to drop it in place, or Escape to cancel.",
+      "picked": "Picked up {{name}}.",
+      "over": "{{name}} is over {{target}}.",
+      "notOver": "{{name}} is not over a place to drop.",
+      "dropped": "{{name}} was moved.",
+      "cancelled": "Moving {{name}} was cancelled."
+    }
   },
   "workspace": {
     "noneTitle": "No workspace yet",

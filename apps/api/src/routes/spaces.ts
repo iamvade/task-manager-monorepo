@@ -14,6 +14,7 @@ import { movePosition, positionAfter } from '../db/position.js';
 import { one } from '../db/rows.js';
 import { projects, spaces } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
+import { broadcastSpacesChanged } from '../realtime/spaces.js';
 
 const err = apiErrorSchema;
 const spaceParams = z.object({ spaceId: z.uuid() });
@@ -66,6 +67,7 @@ export const spaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         };
         return one(await tx.insert(spaces).values(values).returning(), 'space');
       });
+      broadcastSpacesChanged(request, workspaceId);
       return reply.code(201).send(toSpaceDto(space));
     },
   );
@@ -77,18 +79,20 @@ export const spaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       schema: {
         tags: ['Spaces'],
         summary: 'Rename or recolor a space',
+        description: 'Admins and owners (403 for members).',
         params: spaceParams,
         body: updateSpaceSchema,
-        response: { 200: spaceSchema, 400: err, 401: err, 404: err },
+        response: { 200: spaceSchema, 400: err, 401: err, 403: err, 404: err },
       },
     },
     async (request) => {
-      const { space } = await loadSpaceAccess(request, request.params.spaceId);
+      const { space } = await loadSpaceAccess(request, request.params.spaceId, 'admin');
       const [updated] = await app.db
         .update(spaces)
         .set(request.body)
         .where(eq(spaces.id, space.id))
         .returning();
+      broadcastSpacesChanged(request, space.workspaceId);
       return toSpaceDto(updated ?? space);
     },
   );
@@ -101,14 +105,14 @@ export const spaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Spaces'],
         summary: 'Reorder a space',
         description:
-          'Send the neighbors after the move (`prevId`, `nextId`; `null` = list edge). Both null moves it to the end.',
+          'Admins and owners (403 for members). Send the neighbors after the move (`prevId`, `nextId`; `null` = list edge). Both null moves it to the end.',
         params: spaceParams,
         body: moveSchema,
-        response: { 200: spaceSchema, 400: err, 401: err, 404: err },
+        response: { 200: spaceSchema, 400: err, 401: err, 403: err, 404: err },
       },
     },
     async (request) => {
-      const { space } = await loadSpaceAccess(request, request.params.spaceId);
+      const { space } = await loadSpaceAccess(request, request.params.spaceId, 'admin');
       const siblings = await app.db
         .select({ id: spaces.id, position: spaces.position })
         .from(spaces)
@@ -120,6 +124,7 @@ export const spaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         .set({ position })
         .where(eq(spaces.id, space.id))
         .returning();
+      broadcastSpacesChanged(request, space.workspaceId);
       return toSpaceDto(updated ?? space);
     },
   );
@@ -157,6 +162,7 @@ export const spaceRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         }
         await tx.delete(spaces).where(eq(spaces.id, space.id));
       });
+      broadcastSpacesChanged(request, space.workspaceId);
       return reply.code(204).send(null);
     },
   );

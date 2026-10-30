@@ -600,6 +600,23 @@ Sign in, invite, No workspace and the workspace switcher reuse the web's `auth.*
 | `workspace.joinLinkInvalid` | That doesn’t look like an invite link. | Энэ урилгын холбоос биш бололтой. | drafted |
 | `workspace.signOutOf` | Sign out of {{email}} | {{email}}-ээс гарах | design (the suffix doesn't follow the email's vowels) |
 
+## Sidebar rename and reorder (derived, 2026-10-30)
+
+Admins and owners only; not designed.
+
+| key | en | mn (draft) | where |
+|---|---|---|---|
+| `shell.rename` | Rename | Нэр солих | sidebar row "…" menu, project / space header menu |
+| `shell.renameSpace` | Space name | Орон зайн нэр | inline rename field aria-label |
+| `shell.renameProject` | Project name | Төслийн нэр | inline rename field aria-label |
+| `shell.spaceOptions` / `shell.projectOptions` | Options for {{name}} | {{name}}: сонголтууд | sidebar row "…" button |
+| `shell.dnd.instructions` | To reorder, press Space. Use the arrow keys to move it, Space to drop it in place, or Escape to cancel. | Дарааллыг солихын тулд Space дарна уу. Сумаар зөөж, Space дарж тавина, Esc дарж болино. | screen reader, sidebar rows |
+| `shell.dnd.picked` | Picked up {{name}}. | «{{name}}»-г авлаа. | screen reader |
+| `shell.dnd.over` | {{name}} is over {{target}}. | «{{name}}» → {{target}}. | screen reader |
+| `shell.dnd.notOver` | {{name}} is not over a place to drop. | «{{name}}» тавих газрын гадна байна. | screen reader |
+| `shell.dnd.dropped` | {{name}} was moved. | «{{name}}» шилжлээ. | screen reader |
+| `shell.dnd.cancelled` | Moving {{name}} was cancelled. | «{{name}}» шилжүүлэлтийг цуцаллаа. | screen reader |
+
 ## Open questions
 
 1. **Unscheduled**: drafted "Огноогүй" (no date) rather than "Хуваарьгүй"; the hint uses "…хуваарьт оруулна уу". Pick one term.

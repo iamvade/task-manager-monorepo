@@ -6,7 +6,7 @@ import { useDeleteSpace } from '../../api/spaces';
 import { useCurrentWorkspace, useSidebar, useWsPath } from '../../api/workspaces';
 import { useAuth } from '../../auth/useAuth';
 import { ErrorState } from '../../components/ErrorState';
-import { MoreIcon, TrashIcon } from '../../components/icons';
+import { MoreIcon, PencilIcon, TrashIcon } from '../../components/icons';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { IconButton } from '../../components/ui/IconButton';
 import { Menu, type MenuItem } from '../../components/ui/Menu';
@@ -21,6 +21,7 @@ import { useCurrentView } from '../views/useCurrentView';
 import { ViewTabs } from '../views/ViewTabs';
 import { ViewToolbar } from '../views/ViewToolbar';
 import { FilterStrip } from '../project/FilterStrip';
+import { useStartRename } from '../shell/useStartRename';
 import {
   useFoundInOtherWorkspace,
   useOtherWorkspacePath,
@@ -38,6 +39,7 @@ export function SpaceLayout() {
   const navigate = useNavigate();
   const deleteSpace = useDeleteSpace(workspace?.id ?? '');
   const { me } = useAuth();
+  const startRename = useStartRename();
   const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
   // A link to a space of another of my workspaces: look there, then open it there.
   const missing = sidebar.isSuccess && !sidebar.data.spaces.some((s) => s.id === spaceId);
@@ -73,6 +75,18 @@ export function SpaceLayout() {
 
   const items: MenuItem[] = [
     { id: 'copy', label: t('header.copyLink'), onSelect: () => void copy() },
+    ...(startRename
+      ? [
+          {
+            id: 'rename',
+            label: t('shell.rename'),
+            icon: <PencilIcon size={14} />,
+            onSelect: () => {
+              startRename(space.id, space.id);
+            },
+          },
+        ]
+      : []),
     ...(canDelete
       ? ([
           { type: 'separator', id: 'sep-delete' },

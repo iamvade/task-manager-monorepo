@@ -5,7 +5,14 @@ import { useNavigate } from 'react-router';
 import { useNotificationLevels, useSetNotificationLevel } from '../../api/notifications';
 import { useSetArchived, useToggleFavorite } from '../../api/projects';
 import { useCanManageCreated } from '../../lib/useCanManageCreated';
-import { ArchiveIcon, MoreIcon, SprintIcon, StarIcon, UnarchiveIcon } from '../../components/icons';
+import {
+  ArchiveIcon,
+  MoreIcon,
+  PencilIcon,
+  SprintIcon,
+  StarIcon,
+  UnarchiveIcon,
+} from '../../components/icons';
 import { Menu, type MenuItem } from '../../components/ui/Menu';
 import { AvatarStack } from '../../components/ui/AvatarStack';
 import { IconButton } from '../../components/ui/IconButton';
@@ -21,6 +28,7 @@ import type { View } from '../views/views';
 import { ViewToolbar } from '../views/ViewToolbar';
 import { NewSprintDialog } from './NewSprintDialog';
 import { useWsPath } from '../../api/workspaces';
+import { useStartRename } from '../shell/useStartRename';
 
 /** Project top bar: breadcrumb, favorite, members, Share, options; view tabs + toolbar. */
 export function ProjectHeader({ project, view }: { project: ProjectDetail; view: View }) {
@@ -36,6 +44,7 @@ export function ProjectHeader({ project, view }: { project: ProjectDetail; view:
   const levels = useNotificationLevels(project.workspaceId);
   const setLevel = useSetNotificationLevel(project.workspaceId);
   const navigate = useNavigate();
+  const startRename = useStartRename();
 
   function archive() {
     const { id: projectId, name, spaceId } = project;
@@ -137,6 +146,18 @@ export function ProjectHeader({ project, view }: { project: ProjectDetail; view:
                 label: t('header.copyLink'),
                 onSelect: () => void copy(),
               },
+              ...(startRename && !project.archivedAt
+                ? [
+                    {
+                      id: 'rename',
+                      label: t('shell.rename'),
+                      icon: <PencilIcon size={14} />,
+                      onSelect: () => {
+                        startRename(project.id, project.spaceId);
+                      },
+                    },
+                  ]
+                : []),
               { type: 'separator', id: 'sep' },
               {
                 id: 'newSprint',

@@ -158,7 +158,20 @@
     "createStandupGroup": "Бүлэг үүсгэх",
     "feedback": "Санал хүсэлт",
     "feedbackNew_one": "{{count}} шинэ",
-    "feedbackNew_other": "{{count}} шинэ"
+    "feedbackNew_other": "{{count}} шинэ",
+    "rename": "Нэр солих",
+    "renameSpace": "Орон зайн нэр",
+    "renameProject": "Төслийн нэр",
+    "spaceOptions": "{{name}}: сонголтууд",
+    "projectOptions": "{{name}}: сонголтууд",
+    "dnd": {
+      "instructions": "Дарааллыг солихын тулд Space дарна уу. Сумаар зөөж, Space дарж тавина, Esc дарж болино.",
+      "picked": "«{{name}}»-г авлаа.",
+      "over": "«{{name}}» → {{target}}.",
+      "notOver": "«{{name}}» тавих газрын гадна байна.",
+      "dropped": "«{{name}}» шилжлээ.",
+      "cancelled": "«{{name}}» шилжүүлэлтийг цуцаллаа."
+    }
   },
   "workspace": {
     "noneTitle": "Ажлын орчин алга",
