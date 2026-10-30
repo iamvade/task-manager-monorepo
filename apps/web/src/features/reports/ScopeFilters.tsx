@@ -129,24 +129,21 @@ export function ScopeFilters({ value, onChange, projectOnly }: ScopeFiltersProps
 }
 
 /** Outline 32px filter button: muted label, value, 12px chevron. */
-export function FilterButton({
+function FilterButton({
   props,
   open,
   label,
   value,
-  disabled,
 }: {
   props: TriggerProps;
   open: boolean;
   label: string;
   value: ReactNode;
-  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
       {...props}
-      disabled={disabled}
       aria-haspopup="listbox"
       aria-expanded={open}
       className="flex h-8 max-w-[240px] items-center gap-1.5 rounded-[8px] border border-control bg-control px-2.5 text-[13px] text-2 hover:bg-hover"

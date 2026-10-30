@@ -111,7 +111,7 @@ describe('Reports · Sprints', () => {
     expect(screen.getByRole('button', { name: /Project:/ })).toHaveTextContent('All');
 
     // Rows open the drawer.
-    fireEvent.click(within(at(rows, 1)).getByRole('link'));
+    fireEvent.click(at(rows, 1));
     expect(new URLSearchParams(router.state.location.search).get('task')).toBe('APP-202');
   });
 

@@ -22,7 +22,7 @@ function PersonCard({
   value: ReactNode;
   unit?: string;
   /** Chip text; omitted = no chip. */
-  delta?: { text: string; srText?: string; delta: Delta } | null;
+  delta?: { text: string; delta: Delta } | null;
   sub: string;
   /** Overdue now with overdue tasks: the only colored card (neutral tone otherwise). */
   danger?: boolean;
@@ -62,14 +62,7 @@ function PersonCard({
         {unit && <span className="min-w-0 text-[13px] text-3">{unit}</span>}
       </span>
       <span className="flex min-h-5 flex-wrap items-center gap-1.5 text-[12px] text-muted">
-        {delta && (
-          <DeltaChip
-            value={delta.text}
-            direction={delta.delta.direction}
-            tone="neutral"
-            {...(delta.srText === undefined ? {} : { srValue: delta.srText })}
-          />
-        )}
+        {delta && <DeltaChip value={delta.text} direction={delta.delta.direction} tone="neutral" />}
         <span className={cn(danger && 'font-medium text-danger')}>{sub}</span>
       </span>
     </div>
@@ -127,8 +120,7 @@ export function PersonStats({
         value={onTimePct === null ? '—' : `${String(onTimePct)}%`}
         delta={
           onTimeDelta && {
-            text: t('reports.delta.pctPoints', { count: onTimeDelta.amount }),
-            srText: t('reports.delta.pctPointsLong', { count: onTimeDelta.amount }),
+            text: t('reports.delta.points', { count: onTimeDelta.amount }),
             delta: onTimeDelta,
           }
         }

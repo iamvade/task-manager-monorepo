@@ -80,24 +80,18 @@ export function CompletedTasksList({
               </div>
             )}
             {shown.map((task) => (
-              <div
+              <Link
                 key={task.id}
                 role="row"
-                className={`${grid} h-11 border-b border-subtle text-default relative hover:bg-subtle`}
+                to={taskHref(task.key)}
+                className={`${grid} h-11 border-b border-subtle text-default hover:bg-subtle focus-visible:-outline-offset-2`}
               >
                 <span role="cell" className="pl-1.5">
                   <StatusDot category={task.status.category} size={10} />
                 </span>
-                <span role="cell" className="min-w-0 pr-4">
-                  <Link
-                    to={taskHref(task.key)}
-                    title={task.title}
-                    data-task-key={task.key}
-                    className="block truncate rounded-[4px] text-default after:absolute after:inset-0 focus-visible:-outline-offset-2"
-                  >
-                    <span className="sr-only">{task.key} </span>
-                    {task.title}
-                  </Link>
+                <span role="cell" className="min-w-0 truncate pr-4" title={task.title}>
+                  <span className="sr-only">{task.key} </span>
+                  {task.title}
                 </span>
                 <span role="cell" className="flex min-w-0 items-center gap-1.5 text-[12px] text-3">
                   <ProjectDot color={task.project.color} size={8} />
@@ -117,7 +111,7 @@ export function CompletedTasksList({
                 <span role="cell" className="flex items-center gap-1.5 text-[13px] text-2">
                   <PriorityFlag priority={task.priority} showLabel />
                 </span>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

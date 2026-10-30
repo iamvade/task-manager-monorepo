@@ -116,20 +116,14 @@ function CarriedRow({
   const status = task.status.name ?? t(`status.${task.status.category}`);
   const pip = task.replan ? 'var(--sprint-added)' : 'var(--sprint-carried)';
   return (
-    <div
+    <Link
       role="row"
-      className={`${GRID} h-12 border-b border-table-row text-default last:border-b-0 relative hover:bg-subtle`}
+      to={to}
+      className={`${GRID} h-12 border-b border-table-row text-default last:border-b-0 hover:bg-subtle focus-visible:-outline-offset-2`}
     >
-      <span role="cell" className="min-w-0 pr-4 font-medium">
-        <Link
-          to={to}
-          title={task.title}
-          data-task-key={task.key}
-          className="block truncate rounded-[4px] text-default after:absolute after:inset-0 focus-visible:-outline-offset-2"
-        >
-          <span className="sr-only">{task.key} </span>
-          {task.title}
-        </Link>
+      <span role="cell" className="min-w-0 truncate pr-4 font-medium" title={task.title}>
+        <span className="sr-only">{task.key} </span>
+        {task.title}
       </span>
       <span role="cell" className="flex min-w-0 items-center gap-1.5 text-[13px] text-2">
         <ProjectDot color={task.project.color} size={8} />
@@ -172,6 +166,6 @@ function CarriedRow({
           {t(`${k}.times`, { count: task.timesCarried })}
         </span>
       </span>
-    </div>
+    </Link>
   );
 }

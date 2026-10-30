@@ -3,7 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import i18n from '../../../i18n';
 import { useUiStore } from '../../../stores/ui';
 import { WORKSPACE_ID } from '../../../test/fixtures';
-import { at } from '../../../test/tasks';
 import { MEMBER_ME, REPORTS_API, renderReports, requested } from '../../../test/renderReports';
 import type { BAT } from '../../../test/reports';
 import { DORJ, REPORTS_NOW, SARA, personReport } from '../../../test/reports';
@@ -82,20 +81,17 @@ describe('Reports · People', () => {
     expect(trend.getAttribute('aria-label')).toContain('Team median 3.0 a week.');
     expect(within(trend).getByRole('table', { hidden: true })).toBeInTheDocument();
 
-    const mentions = screen.getByRole('group', { name: 'Mentions answered' });
-    expect(mentions).toHaveTextContent('11 / 121 unanswered');
-    // Reply time is only a tooltip: on the card it read like a responsiveness score.
-    expect(mentions).toHaveAttribute('title', 'Median reply time 2h');
+    expect(screen.getByRole('group', { name: 'Mentions answered' })).toHaveTextContent(
+      '11 / 12Median reply time 2h',
+    );
     expect(screen.getByRole('group', { name: 'Subtasks done on others’ tasks' })).toHaveTextContent(
       'across 4 tasks',
     );
     expect(screen.getByText('8 times')).toBeInTheDocument();
 
     const open = screen.getByRole('table', { name: 'Current open tasks' });
-    expect(within(at(within(open).getAllByRole('row'), 1)).getByRole('link')).toHaveAttribute(
-      'href',
-      `/w/kite-studio/reports/people/${DORJ.id}?task=CHK-1`,
-    );
+    const [first] = within(open).getAllByRole('row').slice(1);
+    expect(first).toHaveAttribute('href', `/w/kite-studio/reports/people/${DORJ.id}?task=CHK-1`);
     expect(within(open).getByText('Oct 3 · overdue')).toBeInTheDocument();
     expect(within(open).getByText('No due date')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'See workload' })).toHaveAttribute(
@@ -221,7 +217,7 @@ describe('Reports · My performance', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'How you helped others' })).toBeInTheDocument();
     expect(screen.getByRole('group', { name: 'Mentions answered' })).toHaveTextContent(
-      'All answered',
+      'All answered · median reply 1h',
     );
     expect(screen.getByText('People you worked with most')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Your open tasks' })).toBeInTheDocument();

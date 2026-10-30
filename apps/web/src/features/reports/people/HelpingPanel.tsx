@@ -30,19 +30,15 @@ export function HelpingPanel({
   const { comments, subtasks, mentions, workedWith } = helping;
   const periodPhrase = period === 'custom' ? range : t(`${h}.periods.${period}`);
 
-  // Reply time stays in the tile's tooltip: on the card it read like a responsiveness score.
   let mentionsSub: string;
-  let mentionsTitle: string | undefined;
   if (mentions.total === 0) mentionsSub = t(`${h}.noMentions`);
   else if (mentions.medianReplyHours === null) mentionsSub = t(`${h}.notAnswered`);
   else {
-    mentionsTitle = t(`${h}.medianReply`, {
-      time: formatReplyTime(t, mentions.medianReplyHours),
-    });
+    const time = formatReplyTime(t, mentions.medianReplyHours);
     mentionsSub =
-      mentions.answered === mentions.total
-        ? t(`${h}.allAnswered`)
-        : t(`${h}.unanswered`, { count: mentions.total - mentions.answered });
+      variant === 'me' && mentions.answered === mentions.total
+        ? t('reports.person.mine.allAnswered', { time })
+        : t(`${h}.medianReply`, { time });
   }
 
   return (
@@ -72,7 +68,6 @@ export function HelpingPanel({
             label={t(`${h}.mentions`)}
             value={`${String(mentions.answered)} / ${String(mentions.total)}`}
             sub={mentionsSub}
-            {...(mentionsTitle === undefined ? {} : { title: mentionsTitle })}
           />
         </div>
         <div className="flex min-w-0 flex-[1_1_240px] flex-col gap-2">
@@ -109,20 +104,16 @@ function HelpTile({
   label,
   value,
   sub,
-  title,
 }: {
   icon: ReactNode;
   label: string;
   value: ReactNode;
   sub: string;
-  /** Extra detail on hover (Mentions answered: the median reply time). */
-  title?: string;
 }) {
   return (
     <div
       role="group"
       aria-label={label}
-      title={title}
       className="flex min-w-0 gap-3 rounded-[10px] bg-subtle p-3"
     >
       <span

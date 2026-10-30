@@ -143,12 +143,7 @@ export function ReferenceTrend({
             {formatValue(last.value)}
           </span>
         )}
-        <HoverColumns
-          count={n}
-          active={hover}
-          name={table?.caption ?? ariaLabel}
-          onHover={setHover}
-        />
+        <HoverColumns count={n} onHover={setHover} />
         {hover !== null && hovered && (
           <ChartTooltip index={hover} count={n} compact>
             <span className="text-muted">{hovered.title}</span>
