@@ -1121,6 +1121,8 @@
       "me": "My performance"
     },
     "updated": "Updated {{ago}}",
+    "refresh": "Refresh reports · updated {{ago}}",
+    "chartExplore": "{{chart}}. Use the left and right arrow keys to step through the values.",
     "loading": "Loading reports…",
     "period": {
       "label": "Period",
@@ -1138,6 +1140,7 @@
       "lastMonth": "Last month"
     },
     "filters": {
+      "period": "Period:",
       "space": "Space:",
       "project": "Project:",
       "all": "All",
@@ -1165,8 +1168,10 @@
       "percent": "{{value}}%",
       "days_one": "{{value}} day",
       "days_other": "{{value}} days",
-      "points_one": "{{count}} pt",
-      "points_other": "{{count}} pts"
+      "pctPoints_one": "{{count}} pp",
+      "pctPoints_other": "{{count}} pp",
+      "pctPointsLong_one": "{{count}} percentage point",
+      "pctPointsLong_other": "{{count}} percentage points"
     },
     "cards": {
       "completed": "Completed",
@@ -1180,7 +1185,7 @@
       "onTime": "On-time delivery",
       "onTimeOf": "{{onTime}} of {{total}}",
       "noDueDates": "no due dates",
-      "overdue": "Overdue",
+      "overdue": "Overdue now",
       "tasks_one": "task",
       "tasks_other": "tasks",
       "oldestLate_one": "Oldest is {{count}} day late",
@@ -1190,11 +1195,12 @@
     "throughput": {
       "title": "Throughput",
       "sub": "Tasks completed per week · last 12 weeks",
-      "thisPeriod": "This period",
-      "prevPeriod": "Previous period",
+      "last12": "Last 12 weeks",
+      "prev12": "12 weeks before",
+      "selected": "Selected period",
       "partialWeek": "This week is still in progress",
       "weekOf": "Week of {{date}}",
-      "summary": "Tasks completed per week over the last 12 weeks: {{first}} in the first week and {{last}} in the latest, peaking at {{peak}}; {{total}} in total versus {{previousTotal}} in the previous period.",
+      "summary": "Tasks completed per week over the last 12 weeks: {{first}} in the first week and {{last}} in the latest, peaking at {{peak}}; {{total}} in total versus {{previousTotal}} in the 12 weeks before.",
       "summaryNoPrev": "Tasks completed per week over the last 12 weeks: {{first}} in the first week and {{last}} in the latest, peaking at {{peak}}; {{total}} in total. No earlier history to compare with."
     },
     "waits": {
@@ -1203,15 +1209,15 @@
       "days_one": "{{value}} day",
       "days_other": "{{value}} days",
       "status": {
-        "todo": "To Do",
-        "in_progress": "progress",
-        "review": "review"
+        "todo": "in To Do",
+        "in_progress": "while in progress",
+        "review": "in review"
       },
       "insight": {
-        "twice": "Tasks wait longest in {{status}} — {{days}} days on median, about twice as long as any other status.",
-        "times": "Tasks wait longest in {{status}} — {{days}} days on median, about {{ratio}} times as long as any other status.",
-        "slight": "Tasks wait longest in {{status}} — {{days}} days on median, a little longer than any other status.",
-        "much": "Tasks wait longest in {{status}} — {{days}} days on median, far longer than any other status."
+        "twice": "Tasks wait longest {{status}} — {{days}} days on median, about twice as long as any other status.",
+        "times": "Tasks wait longest {{status}} — {{days}} days on median, about {{ratio}} times as long as any other status.",
+        "slight": "Tasks wait longest {{status}} — {{days}} days on median, a little longer than any other status.",
+        "much": "Tasks wait longest {{status}} — {{days}} days on median, far longer than any other status."
       }
     },
     "aging": {
@@ -1442,6 +1448,9 @@
         "mentions": "Mentions answered",
         "medianReply": "Median reply time {{time}}",
         "notAnswered": "None answered yet",
+        "allAnswered": "All answered",
+        "unanswered_one": "{{count}} unanswered",
+        "unanswered_other": "{{count}} unanswered",
         "noMentions": "No mentions this period",
         "hours": "{{count}}h",
         "underHour": "<1h",
@@ -1510,7 +1519,6 @@
         "seriesCycle": "You (days)",
         "helping": "How you helped others",
         "helpingSub": "Your contributions on other people’s tasks · {{period}}",
-        "allAnswered": "All answered · median reply {{time}}",
         "workedWith": "People you worked with most",
         "openTasks": "Your open tasks",
         "openLink": "Go to My Tasks",

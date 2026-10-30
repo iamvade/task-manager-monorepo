@@ -34,9 +34,21 @@ export function OverviewStats({ report }: { report: OverviewReport }) {
     { kind: 'diff' },
   );
 
-  const footer = (delta: Delta | null, value: (d: Delta) => string, note: string) => (
+  const footer = (
+    delta: Delta | null,
+    value: (d: Delta) => string,
+    note: string,
+    srValue?: (d: Delta) => string,
+  ) => (
     <CardFooter>
-      {delta && <DeltaChip value={value(delta)} direction={delta.direction} tone={delta.tone} />}
+      {delta && (
+        <DeltaChip
+          value={value(delta)}
+          direction={delta.direction}
+          tone={delta.tone}
+          {...(srValue ? { srValue: srValue(delta) } : {})}
+        />
+      )}
       {note}
     </CardFooter>
   );
@@ -94,8 +106,9 @@ export function OverviewStats({ report }: { report: OverviewReport }) {
         }
         footer={footer(
           onTimeDelta,
-          (d) => t('reports.delta.points', { count: d.amount }),
+          (d) => t('reports.delta.pctPoints', { count: d.amount }),
           t('reports.delta.vsPrev'),
+          (d) => t('reports.delta.pctPointsLong', { count: d.amount }),
         )}
       />
       <StatCard

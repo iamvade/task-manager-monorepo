@@ -103,7 +103,15 @@ export function SprintsTab() {
     <>
       <ReportsHeader
         tab="sprints"
-        status={<UpdatedStatus generatedAt={data.generatedAt} />}
+        status={
+          <UpdatedStatus
+            generatedAt={data.generatedAt}
+            isFetching={report.isFetching}
+            onRefresh={() => {
+              void report.refetch();
+            }}
+          />
+        }
         toolbar={
           <>
             {sprint && (

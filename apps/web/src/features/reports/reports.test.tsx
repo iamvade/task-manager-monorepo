@@ -40,9 +40,10 @@ describe('Reports', () => {
     const onTime = screen.getByRole('group', { name: 'On-time delivery' });
     expect(within(onTime).getByText('87%')).toBeInTheDocument();
     expect(within(onTime).getByText('124 of 142')).toBeInTheDocument();
-    expect(within(onTime).getByText('4 pts')).toBeInTheDocument();
+    expect(within(onTime).getByText('4 pp')).toBeInTheDocument();
+    expect(within(onTime).getByText('4 percentage points')).toHaveClass('sr-only');
 
-    const overdue = screen.getByRole('group', { name: 'Overdue' });
+    const overdue = screen.getByRole('group', { name: 'Overdue now' });
     expect(within(overdue).getByText('Oldest is 6 days late')).toBeInTheDocument();
 
     expect(screen.getByText('Updated 5 minutes ago')).toBeInTheDocument();
@@ -53,6 +54,10 @@ describe('Reports', () => {
       screen.getByText(/Tasks wait longest in review — 4.6 days on median, about twice as long/),
     ).toBeInTheDocument();
     expect(screen.getByRole('figure', { name: /Tasks completed per week/ })).toBeInTheDocument();
+    // The chart is always 12 weeks: the legend says so and the selected period is tinted.
+    expect(screen.getAllByText('Last 12 weeks').length).toBeGreaterThan(0);
+    expect(screen.getByText('Selected period')).toBeInTheDocument();
+    expect(document.querySelector('[data-band]')).not.toBeNull();
     expect(screen.getByRole('link', { name: 'Reports' })).toHaveAttribute('aria-current', 'page');
   });
 
@@ -75,8 +80,24 @@ describe('Reports', () => {
     });
     expect(screen.getByRole('button', { name: 'Show less' })).toBeInTheDocument();
 
-    fireEvent.click(at(within(table).getAllByRole('row'), 1));
+    const link = within(at(within(table).getAllByRole('row'), 1)).getByRole('link');
+    expect(link).toHaveAttribute('data-task-key', 'APP-100');
+    fireEvent.click(link);
     expect(new URLSearchParams(router.state.location.search).get('task')).toBe('APP-100');
+  });
+
+  it('refetches from the Updated button', async () => {
+    const { fetchMock } = renderReports('/w/kite-studio/reports/overview');
+    const button = await screen.findByRole('button', { name: /^Refresh reports · updated/ });
+    const count = () =>
+      fetchMock.mock.calls.filter(
+        ([input]) => typeof input === 'string' && input.includes('/reports/overview'),
+      ).length;
+    const before = count();
+    fireEvent.click(button);
+    await waitFor(() => {
+      expect(count()).toBeGreaterThan(before);
+    });
   });
 
   it('keeps the period in the URL and in the request', async () => {
@@ -154,8 +175,8 @@ describe('Reports', () => {
     });
     const figure = await screen.findByRole('figure', { name: /No earlier history to compare/ });
     expect(figure).toBeInTheDocument();
-    expect(screen.getAllByText('This period').length).toBeGreaterThan(0);
-    expect(screen.queryByText('Previous period')).toBeNull();
+    expect(screen.getAllByText('Last 12 weeks').length).toBeGreaterThan(0);
+    expect(screen.queryByText('12 weeks before')).toBeNull();
   });
 
   it('renders Mongolian copy from the design', async () => {
@@ -169,7 +190,7 @@ describe('Reports', () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Хянагдаж буй ажлууд дунджаар 4.6 хоног хүлээж байна — бусад төлвөөс 2 дахин урт.',
+        'Хянагдаж буй ажлууд медианаар 4.6 хоног хүлээж байна — бусад төлвөөс 2 дахин урт.',
       ),
     ).toBeInTheDocument();
   });
