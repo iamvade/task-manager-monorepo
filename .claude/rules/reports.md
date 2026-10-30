@@ -51,10 +51,10 @@ Tabs: Overview, Sprints, Workload, plus People (admins/owner) or My performance 
 
 - **Completed**: tasks whose `completed_at` falls in the period. **Points** = sum of `SIZE_POINTS[size]` (S 1 · M 3 · L 5 · XL 8). Unsized tasks count 0 points and are reported as "N unsized".
 - **Cycle time**: `completed_at` − `entered_at` of the task's first `in_progress` or `review` period. If neither exists, use `created_at`. Report the median and the 85th percentile, in days to 1 decimal.
-- **On-time delivery**: among completed tasks that have a due date, the share with completion date (local) ≤ `due_date`. Shown as "% · N of M". Delta in percentage points ("4 pp"; "pts" means story points).
+- **On-time delivery**: among completed tasks that have a due date, the share with completion date (local) ≤ `due_date`. Shown as "% · N of M". Delta in percentage points.
 - **Open** everywhere below means `closed_at` is null: not done and not cancelled. On hold is open. Cancelled tasks never count as completed (`completed_at` is set by done only).
 - **Overdue**: open tasks with `due_date` < today. A snapshot that ignores the period. "Oldest is N days late" = max(today − due).
-- **Throughput**: tasks completed per Monday–Sunday week over the last 12 weeks, regardless of the period. The web labels the series "Last 12 weeks" / "12 weeks before" and tints the weeks that overlap the selected period.
+- **Throughput**: tasks completed per Monday–Sunday week over the last 12 weeks, regardless of the period.
   - Previous series = the 12 weeks before; omitted (empty array, one legend line) when nothing was completed in them.
   - The current week is flagged `partial`: hollow point, with the tooltip "This week is still in progress".
 - **Where work waits**: per category (To Do, In Progress, In Review: `WAIT_CATEGORIES`; On hold is parked on purpose and left out), the median length in days of status periods that ended within the period.
@@ -99,5 +99,5 @@ Tabs: Overview, Sprints, Workload, plus People (admins/owner) or My performance 
   - **Helping others**:
     - **Comments on others' tasks**: comments by the person on tasks they aren't assigned to.
     - **Subtasks done on others' tasks**: `subtask.completed` by the person on such tasks, plus the number of distinct tasks.
-    - **Mentions answered**: the person's @mentions in comments in the period (descriptions don't record when a mention was added, so they don't count), "answered / total". Answered = the person comments on that task within 7 days after the mention. Median reply time = the delay to that comment, shown as "2h" / "2ц" in the tile's tooltip only (the sub-line reads "All answered" / "N unanswered").
+    - **Mentions answered**: the person's @mentions in comments in the period (descriptions don't record when a mention was added, so they don't count), "answered / total". Answered = the person comments on that task within 7 days after the mention. Median reply time = the delay to that comment, shown as "2h" / "2ц".
     - **Worked with most**: the top 3 people by helping contributions in either direction (person on their tasks + them on the person's tasks). Shown as "N times".

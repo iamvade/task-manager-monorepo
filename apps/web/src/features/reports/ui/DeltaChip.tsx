@@ -11,17 +11,14 @@ const TONES: Record<DeltaTone, string> = {
 
 /**
  * "↑ 12%" chip (Reports.dc.html): 20px, radius 6, 12/600, 12px arrow; green when it improved.
- * Neutral chips (People / My performance) point sideways when nothing changed. `srValue` replaces
- * a terse value for screen readers ("4 pp" → "4 percentage points").
+ * Neutral chips (People / My performance) point sideways when nothing changed.
  */
 export function DeltaChip({
   value,
   direction,
   tone,
-  srValue,
 }: {
   value: string;
-  srValue?: string;
   direction: DeltaDirection;
   tone: DeltaTone;
 }) {
@@ -51,14 +48,7 @@ export function DeltaChip({
               : 'reports.delta.same',
         )}{' '}
       </span>
-      {srValue === undefined ? (
-        value
-      ) : (
-        <>
-          <span aria-hidden="true">{value}</span>
-          <span className="sr-only">{srValue}</span>
-        </>
-      )}
+      {value}
     </span>
   );
 }

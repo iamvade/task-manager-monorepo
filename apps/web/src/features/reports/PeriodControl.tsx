@@ -4,16 +4,10 @@ import { useTranslation } from 'react-i18next';
 import type { ReportFilters } from '../../api/reports';
 import { Button } from '../../components/ui/Button';
 import { DateField } from '../../components/ui/DateField';
-import { Picker } from '../../components/ui/Picker';
 import { Popover } from '../../components/ui/Popover';
 import { SegmentedControl } from '../../components/ui/SegmentedControl';
 import { useDates } from '../../lib/useDates';
-import { useMediaQuery } from '../../lib/useMediaQuery';
 import { isValidCustomRange } from './params';
-import { FilterButton } from './ScopeFilters';
-
-/** Below this the six segments crowd the toolbar, so the period becomes a filter menu. */
-const COMPACT_QUERY = '(max-width: 1439px)';
 
 interface PeriodControlProps {
   value: ReportFilters;
@@ -25,8 +19,7 @@ interface PeriodControlProps {
 /**
  * This week / Last week / Last 4 weeks / Last month / This quarter / Custom (Reports.dc.html
  * period segmented; Last week and Last month added after the usability review). Custom
- * opens a small From / To popover under the control (not drawn; derived-UI rules). Narrower than
- * 1440px it is a "Period: Last 4 weeks ▾" menu like the scope filters (not drawn either).
+ * opens a small From / To popover under the control (not drawn; derived-UI rules).
  */
 export function PeriodControl({ value, onChange, disabled }: PeriodControlProps) {
   const { t } = useTranslation();
@@ -35,7 +28,6 @@ export function PeriodControl({ value, onChange, disabled }: PeriodControlProps)
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const id = useId();
-  const compact = useMediaQuery(COMPACT_QUERY);
 
   const openCustom = () => {
     setFrom(value.from ?? addDays(today, -27));
@@ -43,10 +35,6 @@ export function PeriodControl({ value, onChange, disabled }: PeriodControlProps)
     setOpen(true);
   };
   const valid = from !== '' && to !== '' && isValidCustomRange(from, to);
-  const pick = (period: ReportPeriod) => {
-    if (period === 'custom') openCustom();
-    else onChange({ period, from: undefined, to: undefined });
-  };
 
   return (
     <Popover
@@ -59,46 +47,20 @@ export function PeriodControl({ value, onChange, disabled }: PeriodControlProps)
       // Only the Custom segment opens it, so the trigger takes the anchor ref alone.
       trigger={(props) => (
         <div ref={props.ref}>
-          {compact ? (
-            <Popover
-              label={t('reports.period.label')}
-              width={200}
-              elevation="lg"
-              trigger={(menuProps, menuOpen) => (
-                <FilterButton
-                  props={menuProps}
-                  open={menuOpen}
-                  disabled={disabled}
-                  label={t('reports.filters.period')}
-                  value={t(`reports.period.${value.period}`)}
-                />
-              )}
-            >
-              {(close) => (
-                <Picker<ReportPeriod>
-                  items={REPORT_PERIODS}
-                  value={value.period}
-                  getKey={(p) => p}
-                  getLabel={(p) => t(`reports.period.${p}`)}
-                  label={t('reports.period.label')}
-                  onSelect={pick}
-                  onClose={close}
-                />
-              )}
-            </Popover>
-          ) : (
-            <SegmentedControl<ReportPeriod>
-              label={t('reports.period.label')}
-              size="toolbar"
-              disabled={disabled}
-              value={value.period}
-              options={REPORT_PERIODS.map((p) => ({ value: p, label: t(`reports.period.${p}`) }))}
-              onChange={pick}
-              onClear={() => {
-                if (value.period === 'custom') openCustom();
-              }}
-            />
-          )}
+          <SegmentedControl<ReportPeriod>
+            label={t('reports.period.label')}
+            size="toolbar"
+            disabled={disabled}
+            value={value.period}
+            options={REPORT_PERIODS.map((p) => ({ value: p, label: t(`reports.period.${p}`) }))}
+            onChange={(period) => {
+              if (period === 'custom') openCustom();
+              else onChange({ period, from: undefined, to: undefined });
+            }}
+            onClear={() => {
+              if (value.period === 'custom') openCustom();
+            }}
+          />
         </div>
       )}
     >

@@ -29,10 +29,6 @@ interface LineTrendProps {
   /** Series names at the right end of the lines (Throughput). */
   endLabels?: boolean;
   formatValue?: (value: number) => string;
-  /** Columns tinted accent-soft behind the lines (the weeks of the selected period). */
-  band?: { from: number; to: number } | null;
-  /** Dash the previous line (4 4) so it doesn't rely on its light grey alone. */
-  prevDashed?: boolean;
 }
 
 const END_MARGIN = 72;
@@ -54,8 +50,6 @@ export function LineTrend({
   height = 200,
   endLabels = true,
   formatValue = String,
-  band = null,
-  prevDashed = false,
 }: LineTrendProps) {
   const [hover, setHover] = useState<number | null>(null);
   const n = points.length;
@@ -93,17 +87,6 @@ export function LineTrend({
       height={height}
       endMargin={endLabels ? END_MARGIN : 0}
     >
-      {band && (
-        <span
-          aria-hidden="true"
-          data-band=""
-          className="absolute inset-y-0 rounded-[4px] bg-accent-soft"
-          style={{
-            left: `${((band.from / n) * 100).toFixed(2)}%`,
-            width: `${(((band.to - band.from + 1) / n) * 100).toFixed(2)}%`,
-          }}
-        />
-      )}
       <svg
         aria-hidden="true"
         width="100%"
@@ -118,7 +101,6 @@ export function LineTrend({
             fill="none"
             stroke={PREV}
             strokeWidth={2}
-            strokeDasharray={prevDashed ? '4 4' : undefined}
             strokeLinejoin="round"
             strokeLinecap="round"
             vectorEffect="non-scaling-stroke"
@@ -169,12 +151,7 @@ export function LineTrend({
           {prevLabel}
         </span>
       )}
-      <HoverColumns
-        count={n}
-        active={hover}
-        name={table?.caption ?? ariaLabel}
-        onHover={setHover}
-      />
+      <HoverColumns count={n} onHover={setHover} />
       {hover !== null && hovered && (
         <ChartTooltip index={hover} count={n}>
           <span className="font-semibold text-default">{hovered.title}</span>

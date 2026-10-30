@@ -1,5 +1,4 @@
-import type { KeyboardEvent, ReactNode } from 'react';
-import { useTranslation } from 'react-i18next';
+import type { ReactNode } from 'react';
 import { cn } from '../../../lib/cn';
 import { tooltipPlacement } from './scale';
 
@@ -14,15 +13,12 @@ interface ChartTooltipProps {
 
 /**
  * Chart hover card (Reports.dc.html): surface, 1px border, radius 8, padding 8 10, 12px text,
- * `--shadow-tooltip`, min-width 168, 8px from the top of the plot; flips near the edges. Hidden
- * from screen readers: the figure's data table carries the same values without announcing each
- * hover.
+ * `--shadow-tooltip`, min-width 168, 8px from the top of the plot; flips near the edges.
  */
 export function ChartTooltip({ index, count, compact, children }: ChartTooltipProps) {
   return (
     <div
-      aria-hidden="true"
-      data-chart-tooltip=""
+      role="status"
       className={cn(
         'pointer-events-none absolute z-[2] flex rounded-[8px] border border-tooltip bg-surface text-[12px] shadow-tooltip',
         compact
@@ -71,51 +67,17 @@ export function HoverLine({ index, count }: { index: number; count: number }) {
   );
 }
 
-/**
- * Invisible equal-width columns that report the hovered index. The layer is also the chart's
- * keyboard stop: focus shows the latest column, ←/→/Home/End step, Esc closes the tooltip.
- */
+/** Invisible equal-width columns that report the hovered index. */
 export function HoverColumns({
   count,
-  active,
-  name,
   onHover,
 }: {
   count: number;
-  /** The hovered column, for keyboard steps from it. */
-  active: number | null;
-  /** The chart's name, read out with the keyboard hint. */
-  name: string;
   onHover: (index: number | null) => void;
 }) {
-  const { t } = useTranslation();
-  const last = count - 1;
-  const onKeyDown = (event: KeyboardEvent) => {
-    const from = active ?? last;
-    let next: number | null;
-    if (event.key === 'ArrowLeft') next = Math.max(0, from - 1);
-    else if (event.key === 'ArrowRight') next = Math.min(last, from + 1);
-    else if (event.key === 'Home') next = 0;
-    else if (event.key === 'End') next = last;
-    else if (event.key === 'Escape' && active !== null) next = null;
-    else return;
-    event.preventDefault();
-    onHover(next);
-  };
   return (
     <div
-      role="group"
-      tabIndex={0}
-      aria-label={t('reports.chartExplore', { chart: name })}
-      className="absolute inset-0 flex rounded-[4px]"
-      onKeyDown={onKeyDown}
-      onFocus={() => {
-        // A mouse click focuses the layer too; keep the column under the pointer then.
-        if (active === null) onHover(last);
-      }}
-      onBlur={() => {
-        onHover(null);
-      }}
+      className="absolute inset-0 flex"
       onMouseLeave={() => {
         onHover(null);
       }}

@@ -95,15 +95,7 @@ export function PersonTab({ variant, personId }: PersonTabProps) {
     <>
       <ReportsHeader
         tab={tab}
-        status={
-          <UpdatedStatus
-            generatedAt={data.generatedAt}
-            isFetching={report.isFetching}
-            onRefresh={() => {
-              void report.refetch();
-            }}
-          />
-        }
+        status={<UpdatedStatus generatedAt={data.generatedAt} />}
         toolbar={
           <>
             <PeriodControl value={filters} onChange={setFilters} />
