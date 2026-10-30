@@ -61,6 +61,8 @@ interface UiState {
   briefOpen: Record<string, boolean>;
   paletteOpen: boolean;
   shortcutsOpen: boolean;
+  /** The space or project whose sidebar row shows the rename field (admins; not persisted). */
+  renamingId: string | null;
   toggleSidebar: () => void;
   setSpaceOpen: (spaceId: string, open: boolean) => void;
   setLastWorkspace: (workspaceId: string) => void;
@@ -76,6 +78,7 @@ interface UiState {
   setBriefOpen: (projectId: string, open: boolean) => void;
   setPaletteOpen: (open: boolean) => void;
   setShortcutsOpen: (open: boolean) => void;
+  setRenaming: (id: string | null) => void;
 }
 
 type UiData = Omit<
@@ -95,6 +98,7 @@ type UiData = Omit<
   | 'setBriefOpen'
   | 'setPaletteOpen'
   | 'setShortcutsOpen'
+  | 'setRenaming'
 >;
 
 export const initialUiState: UiData = {
@@ -113,6 +117,7 @@ export const initialUiState: UiData = {
   briefOpen: {},
   paletteOpen: false,
   shortcutsOpen: false,
+  renamingId: null,
 };
 
 /** Signed out, or before `/auth/me` answers. Signed in: `kite.ui.<userId>`. */
@@ -192,6 +197,9 @@ export const useUiStore = create<UiState>()(
       },
       setShortcutsOpen: (open) => {
         set(open ? { shortcutsOpen: true, paletteOpen: false } : { shortcutsOpen: false });
+      },
+      setRenaming: (id) => {
+        set({ renamingId: id });
       },
     }),
     {

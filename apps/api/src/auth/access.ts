@@ -28,6 +28,11 @@ const ROLE_RANK: Record<WorkspaceRole, number> = { member: 0, admin: 1, owner: 2
 export const roleAtLeast = (role: WorkspaceRole, min: WorkspaceRole): boolean =>
   ROLE_RANK[role] >= ROLE_RANK[min];
 
+/** 403 for a member below `minRole`, for checks that depend on the request body. */
+export function requireRole(role: WorkspaceRole, minRole: WorkspaceRole): void {
+  checkRole(role, minRole);
+}
+
 function checkRole(role: WorkspaceRole, minRole: WorkspaceRole): void {
   if (!roleAtLeast(role, minRole)) {
     throw httpError(403, 'FORBIDDEN', 'You do not have permission to do this');

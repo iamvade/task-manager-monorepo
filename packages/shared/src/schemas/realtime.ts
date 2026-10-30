@@ -90,6 +90,16 @@ export const realtimeServerMessageSchema = z.discriminatedUnion('type', [
     at: z.iso.datetime(),
   }),
   /**
+   * A space or project was created, renamed, recolored, reordered, moved to another space,
+   * archived, restored or deleted: refetch the sidebar and project details.
+   */
+  z.object({
+    type: z.literal('spaces.changed'),
+    workspaceId: z.uuid(),
+    actorId: z.uuid(),
+    at: z.iso.datetime(),
+  }),
+  /**
    * A sprint was created, edited (name, dates, projects) or deleted: refetch sprints, projects
    * (active sprint), tasks and reports.
    */

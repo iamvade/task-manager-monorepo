@@ -153,15 +153,21 @@ describe('structural API access control', () => {
     }
   });
 
+  /** Renaming, recoloring and reordering spaces and projects: admins and owners. */
+  const isStructural = ([method, path]: Call) =>
+    (method === 'PATCH' && (path.startsWith('/spaces/') || path === `/projects/${ids.project}`)) ||
+    (path.endsWith('/move') && (path.startsWith('/spaces/') || path.startsWith('/projects/')));
+
   it('lets a plain member do everyday structural edits', async () => {
     const member = as('member');
     const everyday = calls().filter(
-      ([method, path]) =>
-        !(method === 'DELETE' && path.startsWith('/spaces')) &&
+      (call) =>
+        !isStructural(call) &&
+        !(call[0] === 'DELETE' && call[1].startsWith('/spaces')) &&
         // Tags: everyone reads them, only admins and owners manage them.
-        !(method !== 'GET' && (path.startsWith('/tags') || path.endsWith('/tags'))) &&
-        !path.endsWith('/archive') &&
-        !path.endsWith('/unarchive'),
+        !(call[0] !== 'GET' && (call[1].startsWith('/tags') || call[1].endsWith('/tags'))) &&
+        !call[1].endsWith('/archive') &&
+        !call[1].endsWith('/unarchive'),
     );
     for (const [method, path, body] of everyday) {
       const res = await member(method, path, body);
@@ -180,6 +186,7 @@ describe('structural API access control', () => {
       ['PATCH', `/tags/${ids.tag}`, { color: 'green' }],
       ['POST', `/tags/${ids.tag}/merge`, { intoTagId: ids.otherTag }],
       ['DELETE', `/tags/${ids.otherTag}`],
+      ...calls().filter(isStructural),
     ];
     for (const [method, path, body] of adminOnly) {
       const res = await member(method, path, body);
@@ -228,7 +235,7 @@ describe('structural API access control', () => {
     res = await member('DELETE', `/spaces/${space.id}`);
     expect(res.statusCode).toBe(409);
     expect(errorCode(res)).toBe('SPACE_NOT_EMPTY');
-    res = await member('POST', `/projects/${project.id}/move`, { spaceId: ids.space });
+    res = await as('admin')('POST', `/projects/${project.id}/move`, { spaceId: ids.space });
     expect(res.statusCode, res.body).toBeLessThan(300);
     res = await member('DELETE', `/spaces/${space.id}`);
     expect(res.statusCode, res.body).toBe(204);
@@ -236,6 +243,7 @@ describe('structural API access control', () => {
 
   it('does not accept IDs from another workspace', async () => {
     const member = as('member');
+    const admin = as('admin');
 
     let res = await member('POST', `/workspaces/${ids.ws}/projects`, {
       spaceId: ids.otherSpace,
@@ -243,10 +251,10 @@ describe('structural API access control', () => {
     });
     expect(res.statusCode).toBe(404);
 
-    res = await member('POST', `/projects/${ids.project}/move`, { spaceId: ids.otherSpace });
+    res = await admin('POST', `/projects/${ids.project}/move`, { spaceId: ids.otherSpace });
     expect(res.statusCode).toBe(404);
 
-    res = await member('POST', `/projects/${ids.project}/move`, { prevId: ids.otherProject });
+    res = await admin('POST', `/projects/${ids.project}/move`, { prevId: ids.otherProject });
     expect(res.statusCode).toBe(400);
     expect(errorCode(res)).toBe('INVALID_MOVE');
 

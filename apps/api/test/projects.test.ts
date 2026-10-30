@@ -8,7 +8,7 @@ import {
   type ProjectDetail,
 } from '@kite/shared';
 import { eq } from 'drizzle-orm';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import { notifications, projects, taskAssignees, tasks } from '../src/db/schema/index.js';
 import {
@@ -326,6 +326,66 @@ describe('spaces, projects and the sidebar', () => {
     );
     expect(renamed).toMatchObject({ name: 'Дизайн', initial: 'Д', color: 'rose' });
     expect((await api('PATCH', `/spaces/${a.id}`, {})).statusCode).toBe(400);
+  });
+
+  it('lets only admins and owners rename and reorder spaces and projects', async () => {
+    const { ws, createSpace, createProject } = await setup();
+    const a = await createSpace('A');
+    const b = await createSpace('B');
+    const p = await createProject(a.id, 'Thing');
+    const member = await createUser(ctx.db);
+    await addMember(ctx.db, ws.id, member.id);
+    const asMember = apiClient(ctx.app, await login(ctx.app, member.email));
+
+    for (const [method, url, body] of [
+      ['PATCH', `/spaces/${a.id}`, { name: 'Renamed' }],
+      ['POST', `/spaces/${a.id}/move`, { prevId: b.id }],
+      ['PATCH', `/projects/${p.id}`, { name: 'Renamed' }],
+      ['PATCH', `/projects/${p.id}`, { color: 'rose' }],
+      ['POST', `/projects/${p.id}/move`, { spaceId: b.id }],
+    ] as const) {
+      const res = await asMember(method, url, body);
+      expect(res.statusCode, `${method} ${url}`).toBe(403);
+      expect(errorCode(res)).toBe('FORBIDDEN');
+    }
+    // The brief and the lead stay open to every member.
+    const lead = await asMember('PATCH', `/projects/${p.id}`, { leadId: member.id });
+    expect(lead.statusCode, lead.body).toBe(200);
+
+    const admin = await createUser(ctx.db);
+    await addMember(ctx.db, ws.id, admin.id, 'admin');
+    const asAdmin = apiClient(ctx.app, await login(ctx.app, admin.email));
+    expect((await asAdmin('PATCH', `/spaces/${a.id}`, { name: 'Design' })).statusCode).toBe(200);
+    expect((await asAdmin('POST', `/spaces/${a.id}/move`, { prevId: b.id })).statusCode).toBe(200);
+    expect((await asAdmin('PATCH', `/projects/${p.id}`, { name: 'Web' })).statusCode).toBe(200);
+    const moved = await asAdmin('POST', `/projects/${p.id}/move`, { spaceId: b.id });
+    expect(projectDetailSchema.parse(moved.json())).toMatchObject({ spaceId: b.id, name: 'Web' });
+  });
+
+  it('tells the workspace when spaces or projects change, except the tab that changed them', async () => {
+    const { ws, api, createSpace, createProject } = await setup();
+    const publish = vi.spyOn(ctx.app.realtime.broadcaster, 'publish');
+    try {
+      const a = await createSpace('A');
+      const b = await createSpace('B');
+      const p = await createProject(a.id, 'Thing');
+      await api('PATCH', `/spaces/${a.id}`, { name: 'Renamed' });
+      await api('POST', `/spaces/${b.id}/move`, { nextId: a.id });
+      await api('PATCH', `/projects/${p.id}`, { name: 'Other' });
+      await api('POST', `/projects/${p.id}/move`, { spaceId: b.id });
+      // A brief edit doesn't touch the sidebar.
+      await api('PATCH', `/projects/${p.id}`, { description: null });
+      const sent = publish.mock.calls
+        .map(([envelope]) => envelope)
+        .filter((e) => e.message.type === 'spaces.changed');
+      expect(sent).toHaveLength(7);
+      for (const e of sent) {
+        expect(e.to).toEqual({ workspaceId: ws.id });
+        expect(e.message).toMatchObject({ workspaceId: ws.id });
+      }
+    } finally {
+      publish.mockRestore();
+    }
   });
 
   it('manages tags and project members', async () => {

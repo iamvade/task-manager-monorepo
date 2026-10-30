@@ -1,5 +1,3 @@
-import type { SidebarResponse } from '@kite/shared';
-import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
 import { useCurrentWorkspace, useSidebar, useWsPath } from '../../api/workspaces';
@@ -15,17 +13,14 @@ import {
   UserPlusIcon,
 } from '../../components/icons';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
-import { Button } from '../../components/ui/Button';
 import { CountBadge } from '../../components/ui/CountBadge';
 import { IconButton } from '../../components/ui/IconButton';
-import { Skeleton } from '../../components/ui/Skeleton';
 import { useUiStore } from '../../stores/ui';
 import { StandupGroupsSection, StandupNavItem } from '../standup/StandupNav';
 import { NavItem } from './NavItem';
 import { NewSpaceButton } from './NewSpaceButton';
 import { SidebarSearch } from './SidebarSearch';
-import { SpaceTreeItem } from './SpaceTree';
-import { useShellLocation } from './useShellLocation';
+import { SpaceList } from './SpaceList';
 import { SidebarUser } from './UserMenu';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 
@@ -168,71 +163,4 @@ function FooterLink({
       {children}
     </NavLink>
   );
-}
-
-function SpaceList({
-  query,
-  workspaceId,
-}: {
-  query: ReturnType<typeof useSidebar>;
-  workspaceId: string | undefined;
-}) {
-  const { t } = useTranslation();
-  const { projectId, spaceId } = useShellLocation();
-  const openSpaces = useUiStore((s) => s.openSpaces);
-  const setSpaceOpen = useUiStore((s) => s.setSpaceOpen);
-  const activeSpaceId = activeProjectSpace(query.data, projectId) ?? spaceId;
-
-  // Opening a project or space (e.g. from a link) expands its space once.
-  useEffect(() => {
-    if (activeSpaceId && openSpaces[activeSpaceId] === undefined) setSpaceOpen(activeSpaceId, true);
-  }, [activeSpaceId, openSpaces, setSpaceOpen]);
-
-  if (query.isPending) {
-    return (
-      <div aria-busy="true" className="flex flex-col gap-3 px-3 py-2">
-        {[64, 88, 56].map((w) => (
-          <div key={w} className="flex items-center gap-2">
-            <Skeleton width={18} height={18} />
-            <Skeleton width={w} height={10} />
-          </div>
-        ))}
-      </div>
-    );
-  }
-  if (query.isError) {
-    return (
-      <div
-        role="alert"
-        className="flex flex-col items-start gap-2 px-3 py-2 text-[12px] text-muted"
-      >
-        {t('shell.loadError')}
-        <Button size="sm" onClick={() => void query.refetch()}>
-          {t('common.retry')}
-        </Button>
-      </div>
-    );
-  }
-  return (
-    <>
-      {query.data.spaces.map((space) => (
-        <SpaceTreeItem
-          key={space.id}
-          workspaceId={workspaceId}
-          space={space}
-          open={openSpaces[space.id] ?? space.id === activeSpaceId}
-          onToggle={(open) => {
-            setSpaceOpen(space.id, open);
-          }}
-          active={space.id === spaceId}
-          activeProjectId={projectId}
-        />
-      ))}
-    </>
-  );
-}
-
-function activeProjectSpace(data: SidebarResponse | undefined, projectId: string | undefined) {
-  if (!data || !projectId) return undefined;
-  return data.spaces.find((s) => s.projects.some((p) => p.id === projectId))?.id;
 }

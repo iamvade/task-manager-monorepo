@@ -12,6 +12,14 @@ export function canManageCreated(
   return role !== 'member' || (createdById !== null && createdById === userId);
 }
 
+/**
+ * Renaming, recoloring and reordering spaces and projects, and moving a project to another space:
+ * admins and owners. Members edit a project's brief and lead.
+ */
+export function canManageStructure(role: WorkspaceRole): boolean {
+  return role !== 'member';
+}
+
 /** Creating, renaming, recoloring, merging and deleting workspace tags: admins and owners. */
 export function canManageTags(role: WorkspaceRole): boolean {
   return role !== 'member';

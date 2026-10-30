@@ -186,6 +186,16 @@ export function createMessageHandler(
             for (const id of message.taskIds) p.tasks.add(id);
           });
           return;
+        case 'spaces.changed':
+          mark(message.workspaceId, (p) => {
+            p.sidebar = true;
+          });
+          // Names and colors in project headers, the archived list and space pages.
+          void queryClient.invalidateQueries({ queryKey: ['projects'] });
+          void queryClient.invalidateQueries({
+            queryKey: queryKeys.archivedProjects(message.workspaceId),
+          });
+          return;
         case 'sprints.changed':
           refreshAfterSprintChange(queryClient, message.workspaceId);
           return;
