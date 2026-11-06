@@ -4,10 +4,11 @@ import { z } from 'zod';
 import { apiFetch, apiSend } from './client';
 import { bumpCount, patchTask, restoreTask, settle } from './taskCache';
 import { TASK_MUTATION } from '@kite/shared/client';
+import { apiUrl } from '../lib/basePath';
 
 /** Download link (`inline` previews png/jpeg/gif/webp in an <img>); the session cookie applies. */
 export const attachmentUrl = (id: string, { inline = false } = {}) =>
-  `/api/v1/attachments/${id}/download${inline ? '?inline=true' : ''}`;
+  apiUrl(`/attachments/${id}/download${inline ? '?inline=true' : ''}`);
 
 /** PNG/JPEG/GIF/WebP: the server streams these inline, so the drawer previews them. */
 export const PREVIEWABLE = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp']);

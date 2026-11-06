@@ -19,6 +19,7 @@ import { ReactionBar } from './ReactionBar';
 import { ReplyField, ReplyThread } from './Replies';
 import { TaskChip } from './TaskChip';
 import { useWsPath } from '../../../api/workspaces';
+import { appUrl } from '../../../lib/basePath';
 
 type SectionKind = 'yesterday' | 'today' | 'blockers';
 
@@ -52,7 +53,7 @@ export function EntryCard({ entry }: { entry: StandupEntry }) {
   ].filter((part) => part.text);
 
   const copyLink = async () => {
-    const url = `${window.location.origin}${ws(dayHref(day.group.id, entry.date))}#entry-${entry.id}`;
+    const url = `${appUrl(ws(dayHref(day.group.id, entry.date)))}#entry-${entry.id}`;
     try {
       await copyText(url);
       toast({ message: t('header.linkCopied') });

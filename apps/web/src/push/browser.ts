@@ -1,7 +1,8 @@
 import type { PushSubscriptionInput } from '@kite/shared';
+import { BASE_PATH } from '../lib/basePath';
 
 /** The service worker in `public/sw.js` (served `no-cache`, so updates land on the next load). */
-export const SERVICE_WORKER_URL = '/sw.js';
+export const SERVICE_WORKER_URL = `${BASE_PATH}/sw.js`;
 
 /**
  * Whether this browser can get pushes here:
@@ -64,7 +65,7 @@ function toInput(subscription: PushSubscription): PushSubscriptionInput {
 }
 
 async function registration(): Promise<ServiceWorkerRegistration> {
-  await navigator.serviceWorker.register(SERVICE_WORKER_URL, { scope: '/' });
+  await navigator.serviceWorker.register(SERVICE_WORKER_URL, { scope: `${BASE_PATH}/` });
   return navigator.serviceWorker.ready;
 }
 

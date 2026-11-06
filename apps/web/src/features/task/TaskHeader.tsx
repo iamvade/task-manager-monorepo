@@ -22,6 +22,7 @@ import { useTaskView } from './TaskContext';
 import { TaskViewers } from './TaskViewers';
 import { useDeleteWithUndo } from './useDeleteWithUndo';
 import { useWsPath } from '../../api/workspaces';
+import { appUrl } from '../../lib/basePath';
 
 interface TaskHeaderProps {
   /** Opens the Project property's picker (move to another project). */
@@ -48,7 +49,7 @@ export function TaskHeader({ onMoveToProject }: TaskHeaderProps) {
 
   async function copyLink() {
     try {
-      await copyText(`${window.location.origin}${ws(`/t/${task.key}`)}`);
+      await copyText(appUrl(ws(`/t/${task.key}`)));
       toast({ message: t('header.linkCopied') });
     } catch {
       toast({ message: t('drawer.copyFailed'), tone: 'danger' });

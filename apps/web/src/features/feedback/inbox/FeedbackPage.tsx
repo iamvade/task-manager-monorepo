@@ -22,6 +22,7 @@ import { FeedbackStatusDot, TypeDot } from '../parts';
 import { useCopy } from '../useCopy';
 import { FeedbackEmpty } from './FeedbackEmpty';
 import { FeedbackTable } from './FeedbackTable';
+import { BASE_PATH } from '../../../lib/basePath';
 
 const SEARCH_DELAY_MS = 250;
 
@@ -39,7 +40,9 @@ function useFilters() {
   // item) but before React re-rendered: start from the address bar, which the browser router
   // updates at once (the memory router in tests doesn't touch it, so it falls back to `params`).
   const current = () =>
-    new URLSearchParams(window.location.pathname === pathname ? window.location.search : params);
+    new URLSearchParams(
+      window.location.pathname === BASE_PATH + pathname ? window.location.search : params,
+    );
   /** Changes the filters (back to page 1); `replace` for typing in the search box. */
   const update = (edit: (next: URLSearchParams) => void, replace = false) => {
     const next = current();

@@ -1,7 +1,7 @@
 import { parseArgs } from 'node:util';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
-import { loadConfig } from '../config.js';
+import { loadConfig, webUrl } from '../config.js';
 import { createDb } from '../db/client.js';
 import { users } from '../db/schema/index.js';
 import { SetupError, createAccount, newAccountSchema } from '../setup/workspaces.js';
@@ -116,7 +116,7 @@ async function main(): Promise<number> {
     }
     const user = await createAccount(db, { ...checked, password: await readPassword() }, 'vade');
     console.log(`Created platform admin ${user.email}.`);
-    console.log(`Sign in at ${new URL('/admin', config.WEB_ORIGIN).href}`);
+    console.log(`Sign in at ${webUrl(config, '/admin')}`);
     return 0;
   } finally {
     await pool.end();

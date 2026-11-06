@@ -1,6 +1,7 @@
 import type { WorkspaceRole } from '@kite/shared';
 import type { FastifyInstance } from 'fastify';
 import { hashToken, newToken } from '../auth/tokens.js';
+import { webUrl } from '../config.js';
 import type { DbOrTx } from '../db/client.js';
 import { one } from '../db/rows.js';
 import { invites } from '../db/schema/index.js';
@@ -28,7 +29,7 @@ export async function insertInvite(
       .returning(),
     'invite',
   );
-  const link = `${new URL(app.config.WEB_ORIGIN).origin}/invite/${token}`;
+  const link = webUrl(app.config, `/invite/${token}`);
   if (app.config.NODE_ENV !== 'production') {
     app.log.info({ email: values.email, link }, 'Invite link');
   }

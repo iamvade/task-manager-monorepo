@@ -17,9 +17,10 @@ x-db-env: &db-env
 x-api-env: &api-env
   NODE_ENV: production
   DATABASE_URL: postgres://kite:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/kite
-  WEB_ORIGIN: https://${DOMAIN:?Set DOMAIN in .env}
-  # Caddy is the one proxy in front.
-  TRUST_PROXY: '1'
+  # With BASE_PATH (e.g. /task-manager) the app lives under that path: cookie path and links.
+  WEB_ORIGIN: https://${DOMAIN:?Set DOMAIN in .env}${BASE_PATH:-}
+  # Caddy is the one proxy in front (2 when another proxy sits before Caddy, see TRUSTED_PROXIES).
+  TRUST_PROXY: ${TRUST_PROXY:-1}
   LOG_LEVEL: ${LOG_LEVEL:-info}
   API_DOCS: ${API_DOCS:-false}
   REPORTS_CACHE_TTL_MS: ${REPORTS_CACHE_TTL_MS:-300000}
@@ -90,14 +91,20 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+      args:
+        # Empty = the domain root; e.g. /task-manager behind a proxy that serves Kite there.
+        BASE_PATH: ${BASE_PATH:-}
     restart: unless-stopped
     environment:
-      DOMAIN: ${DOMAIN:?Set DOMAIN in .env}
+      # $DOMAIN = automatic HTTPS; `:80` = plain HTTP behind your own proxy (docs/DEPLOY.md).
+      SITE_ADDRESS: ${SITE_ADDRESS:-${DOMAIN:?Set DOMAIN in .env}}
       ACME_EMAIL: ${ACME_EMAIL:?Set ACME_EMAIL in .env}
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-127.0.0.1/32}
+    # Behind your own proxy: HTTP_BIND=127.0.0.1:8080 and HTTPS_BIND=127.0.0.1:8443 (unused).
     ports:
-      - '80:80'
-      - '443:443'
-      - '443:443/udp'
+      - '${HTTP_BIND:-80}:80'
+      - '${HTTPS_BIND:-443}:443'
+      - '${HTTPS_BIND:-443}:443/udp'
     volumes:
       - caddy_data:/data
       - caddy_config:/config
