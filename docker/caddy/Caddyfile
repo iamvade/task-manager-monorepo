@@ -40,5 +40,8 @@
 		header @assets Cache-Control "public, max-age=31536000, immutable"
 		@other not path /assets/*
 		header @other Cache-Control "no-cache"
+		# The web app manifest (Add to Home Screen) under its registered type.
+		@manifest path /manifest.webmanifest
+		header @manifest Content-Type "application/manifest+json"
 	}
 }

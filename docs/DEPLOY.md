@@ -225,7 +225,7 @@ docker compose up -d api
 
 - Generate the pair **once** and keep it with the other secrets (the backups don't include `.env`). A new pair makes every browser's subscription invalid, so everyone has to turn push on again.
 - The API sends pushes to the browsers' push services (Google FCM for Chrome/Edge/Brave, Mozilla for Firefox, Apple for Safari, Microsoft WNS) over outbound HTTPS (port 443). Only those hosts are accepted as subscription endpoints. The message is encrypted to the browser, so the push service can't read it.
-- Push only works over https (the `DOMAIN` address). On iPhone and iPad, Safari allows it only for a site added to the Home Screen, and Kite doesn't ship a web app manifest yet.
+- Push only works over https (the `DOMAIN` address). On iPhone and iPad (iOS 16.4+), Safari allows it only once Kite is added to the Home Screen (Share → Add to Home Screen) and opened from there; Settings explains this on those devices.
 - Signing out, signing out a device in Settings, or a password reset removes that browser's subscription.
 
 ## Operations
