@@ -213,6 +213,21 @@ and run `docker compose up -d`. The key needs `s3:PutObject`, `s3:GetObject`, `s
 - The nightly backup then covers only the database. Turn on **bucket versioning** (or replication) so deleted or overwritten files can be recovered.
 - Switching drivers doesn't move existing files. To switch an existing install, copy the `uploads` volume's contents into the bucket under the same keys (`<workspace>/<task>/<attachment>`, after `S3_PREFIX`), e.g. with `rclone copy`, before restarting with `STORAGE_DRIVER=s3`.
 
+## Push notifications (optional)
+
+Browsers can show Kite notifications while the app is closed (Web Push). Each person turns it on per browser in Settings → Notifications → "This device". It needs a VAPID key pair on the server; without one the switch is hidden.
+
+```sh
+docker compose run --rm api node dist/scripts/push-keys.js   # prints VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY
+nano .env                                                     # paste both, plus VAPID_SUBJECT=mailto:ops@example.mn
+docker compose up -d api
+```
+
+- Generate the pair **once** and keep it with the other secrets (the backups don't include `.env`). A new pair makes every browser's subscription invalid, so everyone has to turn push on again.
+- The API sends pushes to the browsers' push services (Google FCM for Chrome/Edge/Brave, Mozilla for Firefox, Apple for Safari, Microsoft WNS) over outbound HTTPS (port 443). Only those hosts are accepted as subscription endpoints. The message is encrypted to the browser, so the push service can't read it.
+- Push only works over https (the `DOMAIN` address). On iPhone and iPad, Safari allows it only for a site added to the Home Screen, and Kite doesn't ship a web app manifest yet.
+- Signing out, signing out a device in Settings, or a password reset removes that browser's subscription.
+
 ## Operations
 
 ```sh
@@ -237,6 +252,8 @@ docker stats                          # memory / CPU per container
 | Every save fails with 403 `CSRF_REJECTED`, realtime doesn't connect | The app was opened under another address (server IP, `www.` variant) than `https://$DOMAIN`. Use exactly that host, or change `DOMAIN`. |
 | `api` restarts, logs say `Invalid environment configuration` | A setting in `.env` is wrong; the message names it (e.g. `S3_BUCKET` missing with `STORAGE_DRIVER=s3`). |
 | `migrate` exited with an error, `api` never starts | `docker compose logs migrate`. Usually the database password in `.env` changed after the first start: the `pgdata` volume keeps the original one. |
+| No "This device" push switch in Settings → Notifications | `VAPID_*` aren't set (all three), or `api` wasn't restarted after setting them. |
+| Push switch on, but nothing arrives | `docker compose logs api \| grep push`: "push not accepted" with a status means the push service refused it (403 = the VAPID pair changed since the browser subscribed: turn the switch off and on). Also check the OS's notification settings for the browser, and that outbound 443 is open. Nothing shows while a Kite tab is focused. |
 | `vade.js` says "No terminal to ask for the password" | Run without `-T`, or pass `-e VADE_PASSWORD=…`. |
 | Live updates don't arrive behind Cloudflare (orange cloud) | Enable WebSockets in Cloudflare, or keep the record DNS-only. With a proxy in front of Caddy, client IPs need Caddy `trusted_proxies` and a larger `TRUST_PROXY` hop count. |
 | Uploads fail with 413 | Files are capped at 25 MB, and each workspace at `MAX_WORKSPACE_STORAGE_BYTES` (default 5 GiB). |

@@ -10,6 +10,7 @@ import {
 } from '@kite/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
+import { unsubscribeBrowser } from '../push/browser';
 import { ApiError, apiFetch, apiSend } from './client';
 import { queryKeys } from '@kite/shared/client';
 
@@ -44,6 +45,11 @@ export function useLogout() {
   return useMutation({
     // Signing out always succeeds locally; no error toast.
     meta: { errorToast: false },
+    // This browser's push subscription ends too (the server drops its row with the session), so
+    // the next person signing in here isn't sent pushes before they turn them on.
+    onMutate: () => {
+      void unsubscribeBrowser().catch(() => undefined);
+    },
     mutationFn: () => apiSend('/auth/logout', z.null(), 'POST'),
     // Even if the server call fails the local state should forget the user. Not `clear()`: it
     // drops the `me` query under its observers, so the app would keep showing the user until a

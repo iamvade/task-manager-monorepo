@@ -55,6 +55,9 @@ import { templateRoutes } from './routes/templates.js';
 import { offboardingRoutes } from './routes/offboarding.js';
 import { workspaceRoutes } from './routes/workspaces.js';
 import { createStorage } from './storage/index.js';
+import { PushService } from './push/service.js';
+import { webPushTransport, type PushTransport } from './push/transport.js';
+import { pushRoutes } from './routes/push.js';
 import type { Storage } from './storage/storage.js';
 
 declare module 'fastify' {
@@ -71,6 +74,8 @@ declare module 'fastify' {
     reportCache: ReportCache;
     /** Failed sign-in counters (`POST /auth/login`); a password reset clears the person's. */
     loginThrottle: LoginThrottle;
+    /** Web Push to subscribed browsers (off without VAPID keys). */
+    push: PushService;
   }
 }
 
@@ -81,6 +86,8 @@ export interface AppOptions {
   now?: () => Date;
   /** Send logs here (tests read them back); otherwise per `NODE_ENV`. */
   logStream?: NodeJS.WritableStream;
+  /** Sends Web Push; defaults to `web-push` with the VAPID keys (none = push is off). */
+  pushTransport?: PushTransport;
 }
 
 export async function buildApp(config: Config, db: Db, options: AppOptions = {}) {
@@ -102,6 +109,25 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
   app.decorate('clock', options.now ?? (() => new Date()));
   app.decorate('loginThrottle', new LoginThrottle());
   app.decorate('reportCache', new ReportCache(config.REPORTS_CACHE_TTL_MS, () => app.clock()));
+  const vapid =
+    config.VAPID_PUBLIC_KEY && config.VAPID_PRIVATE_KEY && config.VAPID_SUBJECT
+      ? {
+          publicKey: config.VAPID_PUBLIC_KEY,
+          privateKey: config.VAPID_PRIVATE_KEY,
+          subject: config.VAPID_SUBJECT,
+        }
+      : null;
+  app.decorate(
+    'push',
+    new PushService(
+      app,
+      vapid ? (options.pushTransport ?? webPushTransport(vapid)) : null,
+      vapid?.publicKey ?? null,
+    ),
+  );
+  app.addHook('onClose', async () => {
+    await app.push.idle();
+  });
   app.events.on('*', (event) => {
     app.reportCache.invalidate(event.workspaceId);
   });
@@ -153,6 +179,7 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
       await api.register(taskActivityRoutes);
       await api.register(searchRoutes);
       await api.register(notificationRoutes);
+      await api.register(pushRoutes);
       await api.register(homeRoutes);
       await api.register(reportRoutes);
       await api.register(feedbackRoutes);

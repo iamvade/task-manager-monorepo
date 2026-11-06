@@ -63,6 +63,12 @@ interface UiState {
   shortcutsOpen: boolean;
   /** The space or project whose sidebar row shows the rename field (admins; not persisted). */
   renamingId: string | null;
+  /**
+   * This person turned on push notifications in this browser (Settings → Notifications). Per
+   * account and browser, so the next person signing in here isn't subscribed by the browser's
+   * permission alone.
+   */
+  pushOptIn: boolean;
   toggleSidebar: () => void;
   setSpaceOpen: (spaceId: string, open: boolean) => void;
   setLastWorkspace: (workspaceId: string) => void;
@@ -79,6 +85,7 @@ interface UiState {
   setPaletteOpen: (open: boolean) => void;
   setShortcutsOpen: (open: boolean) => void;
   setRenaming: (id: string | null) => void;
+  setPushOptIn: (on: boolean) => void;
 }
 
 type UiData = Omit<
@@ -99,6 +106,7 @@ type UiData = Omit<
   | 'setPaletteOpen'
   | 'setShortcutsOpen'
   | 'setRenaming'
+  | 'setPushOptIn'
 >;
 
 export const initialUiState: UiData = {
@@ -118,6 +126,7 @@ export const initialUiState: UiData = {
   paletteOpen: false,
   shortcutsOpen: false,
   renamingId: null,
+  pushOptIn: false,
 };
 
 /** Signed out, or before `/auth/me` answers. Signed in: `kite.ui.<userId>`. */
@@ -201,6 +210,9 @@ export const useUiStore = create<UiState>()(
       setRenaming: (id) => {
         set({ renamingId: id });
       },
+      setPushOptIn: (on) => {
+        set({ pushOptIn: on });
+      },
     }),
     {
       name: ANONYMOUS_KEY,
@@ -226,6 +238,7 @@ export const useUiStore = create<UiState>()(
         calendarHidden: s.calendarHidden,
         listColumns: s.listColumns,
         briefOpen: s.briefOpen,
+        pushOptIn: s.pushOptIn,
       }),
     },
   ),

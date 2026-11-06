@@ -54,6 +54,10 @@ const NOT_WORKSPACE_SCOPED = [
   'PATCH /me',
   // The caller's own counts over their own workspaces (the outsider sees only theirs).
   'GET /me/notifications/unread-counts',
+  // This browser's push subscription: only ever the caller's own rows.
+  'GET /push/config',
+  'PUT /me/push-subscriptions',
+  'DELETE /me/push-subscriptions',
   'GET /invites/{token}',
   'POST /invites/{token}/accept',
   // Password reset links (from the platform admin): the token is the credential.
@@ -277,6 +281,15 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       'POST /tasks/{taskId}/attachments': data,
       'POST /me/notifications/read-all': { workspaceId: ws },
       'PUT /projects/{projectId}/notification-level': { level: 'none' },
+      'PUT /me/push-subscriptions': {
+        endpoint: 'https://fcm.googleapis.com/fcm/send/sweep',
+        keys: {
+          p256dh:
+            'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM',
+          auth: 'tBHItJI5svbpez7KI4CCXg',
+        },
+      },
+      'DELETE /me/push-subscriptions': { endpoint: 'https://fcm.googleapis.com/fcm/send/sweep' },
       'POST /workspaces/{workspaceId}/members/{userId}/deactivate': {},
       'POST /projects/{projectId}/tasks/batch': { updates: [{ id: task.id, priority: 'low' }] },
       'POST /projects/{projectId}/tasks/batch-delete': { ids: [task.id] },

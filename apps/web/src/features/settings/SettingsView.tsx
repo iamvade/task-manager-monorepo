@@ -10,6 +10,7 @@ import { ArchivedProjectsSection } from './ArchivedProjectsSection';
 import { MembersSection } from './MembersSection';
 import { NotificationsSection, ProjectLevelsSection } from './NotificationsSection';
 import { PreferencesSection } from './PreferencesSection';
+import { PushSection } from './PushSection';
 import { ProfileSection } from './ProfileSection';
 import { SprintsSection } from './SprintsSection';
 import { TagsSection } from './TagsSection';
@@ -74,6 +75,7 @@ export function SettingsView() {
           {tab === 'notifications' && (
             <div className="flex flex-col gap-8">
               <NotificationsSection />
+              <PushSection />
               <ProjectLevelsSection />
             </div>
           )}

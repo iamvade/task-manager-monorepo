@@ -644,6 +644,12 @@ All Reports designs ship a full `STR.mn` table: take Mongolian copy from them as
 - **Derived Reports strings**: bad-delta labels, burndown insight variants (on track / behind), waits insight variants ("about N times", "X days longer"), past-sprint burndown title, "N unsized", Custom period popover (From / To / Apply), required project picker on Sprints ("Choose a project"), "Capacity" setting in Settings, CSV column headers.
 13. **Seed job titles** in mn come from the People/Workload `STR` data (e.g. "Фронтенд хөгжүүлэгч", "Инженерийн ахлагч"); "QA" (Bayarmaa) is not in the designs, drafted as "Чанарын баталгаажуулалт" or kept as "QA".
 
+## Push notifications (drafted 2026-11-06)
+
+Push text is written by the server (`PUSH_STRINGS` in `packages/shared/src/push.ts`), laid out like the lock-screen pushes in `MobileInbox.dc.html` ("Бат О. · APP-142" over "Таныг дурдлаа: «…»"; "Стэндап · {group}"). Standup lines and status names are the web's own (a test keeps them equal). Drafted here:
+- **Task verbs** after the design's "Таныг дурдлаа": "Таныг хариуцагчаар томиллоо", "Сэтгэгдэл бичлээ", "Төлөвийг «{{status}}» болголоо", "Дуусгалаа", "Шинэчиллээ".
+- **Settings → Notifications → This device** (`settings.notifications.push.*`, not designed): "Энэ төхөөрөмж", "Push мэдэгдэл" (from the design's `pushAll`), the intro and hint, and the explanations for plain http, iPhone outside the Home Screen, an unsupported browser, blocked notifications, and the toast when the permission prompt is dismissed.
+
 ## Feedback (drafted 2026-10-19)
 
 The feedback designs ship `STR.mn` tables for the inbox, empty state, detail, create-task modal, duplicates and public form; those strings are used as-is. Drafted here (no Mongolian in the designs):
