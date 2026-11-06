@@ -37,6 +37,7 @@ self.addEventListener('push', (event) => {
       if (windows.some((client) => client.focused && client.visibilityState === 'visible')) return;
       await self.registration.showNotification(payload.title, {
         body: payload.body,
+        icon: '/icons/icon-192.png',
         // One popup per notification: a collapsed one (same id) replaces it and alerts again.
         tag: payload.id,
         renotify: true,
