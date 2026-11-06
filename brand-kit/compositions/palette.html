@@ -1,0 +1,97 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Geist";
+      src: url("assets/fonts/Geist_500Medium.ttf") format("truetype");
+      font-weight: 500;
+    }
+    @font-face {
+      font-family: "Geist";
+      src: url("assets/fonts/Geist_600SemiBold.ttf") format("truetype");
+      font-weight: 600;
+    }
+    @font-face {
+      font-family: "Geist Mono";
+      src: url("assets/fonts/GeistMono_400Regular.ttf") format("truetype");
+      font-weight: 400;
+    }
+    #root {
+      position: absolute;
+      inset: 0;
+      background: #ffffff;
+      font-family: "Geist", sans-serif;
+      color: #18181b;
+    }
+    #pal-wrap {
+      position: absolute;
+      left: 160px;
+      right: 160px;
+      top: 150px;
+    }
+    #pal-title {
+      font-size: 56px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin-bottom: 56px;
+    }
+    .pal-row {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    .pal-sw {
+      flex: 1;
+      border: 1px solid #e6e6ea;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+    .pal-chip {
+      height: 180px;
+    }
+    .pal-row-status .pal-chip {
+      height: 100px;
+    }
+    .pal-meta {
+      padding: 16px 20px;
+    }
+    .pal-name {
+      font-size: 28px;
+      font-weight: 500;
+    }
+    .pal-hex {
+      font-family: "Geist Mono", monospace;
+      font-size: 28px;
+      color: #6b6b74;
+      margin-top: 4px;
+    }
+  </style>
+  <div id="root" data-composition-id="palette" data-width="1920" data-height="1080">
+    <div id="pal-wrap">
+      <div id="pal-title">Colour</div>
+      <div class="pal-row">
+        <div class="pal-sw" id="pal-sw1"><div class="pal-chip" style="background: #6e56cf"></div><div class="pal-meta"><div class="pal-name">Kite violet</div><div class="pal-hex">#6E56CF</div></div></div>
+        <div class="pal-sw" id="pal-sw2"><div class="pal-chip" style="background: #efebfd"></div><div class="pal-meta"><div class="pal-name">Violet soft</div><div class="pal-hex">#EFEBFD</div></div></div>
+        <div class="pal-sw" id="pal-sw3"><div class="pal-chip" style="background: #18181b"></div><div class="pal-meta"><div class="pal-name">Ink</div><div class="pal-hex">#18181B</div></div></div>
+        <div class="pal-sw" id="pal-sw4"><div class="pal-chip" style="background: #f7f7f8"></div><div class="pal-meta"><div class="pal-name">Sidebar</div><div class="pal-hex">#F7F7F8</div></div></div>
+        <div class="pal-sw" id="pal-sw5"><div class="pal-chip" style="background: #111113"></div><div class="pal-meta"><div class="pal-name">Night</div><div class="pal-hex">#111113</div></div></div>
+      </div>
+      <div class="pal-row pal-row-status">
+        <div class="pal-sw" id="pal-st1"><div class="pal-chip" style="background: #a1a1aa"></div><div class="pal-meta"><div class="pal-name">To Do</div><div class="pal-hex">#A1A1AA</div></div></div>
+        <div class="pal-sw" id="pal-st2"><div class="pal-chip" style="background: #d97706"></div><div class="pal-meta"><div class="pal-name">In Progress</div><div class="pal-hex">#D97706</div></div></div>
+        <div class="pal-sw" id="pal-st3"><div class="pal-chip" style="background: #6e56cf"></div><div class="pal-meta"><div class="pal-name">In Review</div><div class="pal-hex">#6E56CF</div></div></div>
+        <div class="pal-sw" id="pal-st4"><div class="pal-chip" style="background: #e11d48"></div><div class="pal-meta"><div class="pal-name">On Hold</div><div class="pal-hex">#E11D48</div></div></div>
+        <div class="pal-sw" id="pal-st5"><div class="pal-chip" style="background: #16a34a"></div><div class="pal-meta"><div class="pal-name">Done</div><div class="pal-hex">#16A34A</div></div></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#pal-title", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 0.1);
+    tl.fromTo(["#pal-sw1", "#pal-sw2", "#pal-sw3", "#pal-sw4", "#pal-sw5"], { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power3.out", stagger: 0.08 }, 0.3);
+    tl.fromTo(["#pal-st1", "#pal-st2", "#pal-st3", "#pal-st4", "#pal-st5"], { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power3.out", stagger: 0.08 }, 0.9);
+    tl.to("#pal-wrap", { y: -12, duration: 2.2, ease: "none" }, 1.2);
+    tl.to("#pal-wrap", { opacity: 0, duration: 0.3, ease: "power2.in" }, 3.35);
+    window.__timelines["palette"] = tl;
+  </script>
+</template>

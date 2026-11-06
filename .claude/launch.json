@@ -1,0 +1,35 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "api",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@kite/api", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "web",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@kite/web", "dev"],
+      "port": 5173
+    },
+    {
+      "name": "api-verify",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "cd apps/api && DATABASE_URL=postgres://kite:kite@localhost:5433/kite_e2e PORT=3300 WEB_ORIGIN=http://localhost:5473 pnpm exec tsx src/server.ts"
+      ],
+      "port": 3300
+    },
+    {
+      "name": "web-verify",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "cd apps/web && API_PROXY_TARGET=http://127.0.0.1:3300 pnpm exec vite --port 5473 --strictPort"
+      ],
+      "port": 5473
+    }
+  ]
+}

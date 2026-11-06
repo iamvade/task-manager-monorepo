@@ -1,0 +1,71 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Geist";
+      src: url("assets/fonts/Geist_400Regular.ttf") format("truetype");
+      font-weight: 400;
+    }
+    @font-face {
+      font-family: "Geist";
+      src: url("assets/fonts/Geist_600SemiBold.ttf") format("truetype");
+      font-weight: 600;
+    }
+    #root {
+      position: absolute;
+      inset: 0;
+      background: #ffffff;
+      font-family: "Geist", sans-serif;
+      color: #18181b;
+    }
+    #logo-stage {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+    }
+    #logo-lockup {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+    }
+    #logo-tile {
+      width: 160px;
+      height: 160px;
+      border-radius: 40px;
+      box-shadow:
+        0 1px 2px rgba(24, 24, 27, 0.06),
+        0 16px 40px rgba(110, 86, 207, 0.22);
+    }
+    #logo-word {
+      font-weight: 600;
+      font-size: 120px;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    #logo-tagline {
+      font-size: 36px;
+      color: #6b6b74;
+    }
+  </style>
+  <div id="root" data-composition-id="logo" data-width="1920" data-height="1080">
+    <div id="logo-stage">
+      <div id="logo-lockup">
+        <img id="logo-tile" src="assets/brand-kit/logos/kite-mark.svg" alt="Kite Tasks" />
+        <div id="logo-word">Kite Tasks</div>
+      </div>
+      <div id="logo-tagline" data-var-text="tagline">Team tasks, calmly organised.</div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#logo-tile", { scale: 0.85, opacity: 1, rotation: -6 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.7, ease: "back.out(1.6)" }, 0);
+    tl.fromTo("#logo-word", { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 0.55);
+    tl.fromTo("#logo-tagline", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 1.0);
+    tl.to("#logo-lockup", { scale: 1.03, duration: 1.5, ease: "none" }, 1.5);
+    tl.to("#logo-stage", { opacity: 0, duration: 0.3, ease: "power2.in" }, 3.1);
+    window.__timelines["logo"] = tl;
+  </script>
+</template>
