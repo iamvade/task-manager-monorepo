@@ -63,6 +63,11 @@ export default tseslint.config(
     },
   },
   {
+    // The Web Push service worker (plain script, served as is).
+    files: ['apps/web/public/sw.js'],
+    languageOptions: { globals: globals.serviceworker, sourceType: 'script' },
+  },
+  {
     files: ['apps/mobile/**/*.{ts,tsx}'],
     languageOptions: { globals: { __DEV__: 'readonly' } },
     plugins: { 'react-hooks': reactHooks },

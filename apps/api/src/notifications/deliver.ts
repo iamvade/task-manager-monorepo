@@ -111,7 +111,10 @@ export async function writeNotifications(
   return notified;
 }
 
-/** Pushes `notification.created` to each recipient (after the notifications committed). */
+/**
+ * Pushes `notification.created` to each recipient's open tabs and queues Web Push to their
+ * subscribed browsers (after the notifications committed).
+ */
 export function publishNotified(
   app: FastifyInstance,
   workspaceId: string,
@@ -132,6 +135,7 @@ export function publishNotified(
     });
   }
   for (const userId of new Set(notified.map((n) => n.userId))) publishUnreadChanged(app, userId);
+  app.push.notify(workspaceId, notified);
 }
 
 /** Tells all of `userId`'s tabs, in any workspace, to refetch their unread counts. */

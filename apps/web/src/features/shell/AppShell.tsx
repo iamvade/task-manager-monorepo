@@ -1,6 +1,7 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet, useMatches } from 'react-router';
+import { usePushSync } from '../../push/usePush';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
 import { cn } from '../../lib/cn';
 import { Toaster } from '../../components/ui/Toaster';
@@ -91,6 +92,7 @@ export function AppShell() {
   const bare = useBareRoute();
   useGlobalShortcuts();
   usePreloadOverlays();
+  usePushSync();
 
   return (
     <RealtimeProvider>

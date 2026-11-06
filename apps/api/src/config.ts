@@ -65,6 +65,18 @@ const envSchema = z
       .default(5 * 1024 ** 3),
     /** How long computed reports are reused, ms; 0 turns the cache off. */
     REPORTS_CACHE_TTL_MS: z.coerce.number().int().min(0).default(300_000),
+    /**
+     * Web Push (VAPID) key pair from `pnpm --filter @kite/api push:keys`, and a contact URL the
+     * push services can reach (`mailto:` or `https:`). All three or none; none = push is off.
+     */
+    VAPID_PUBLIC_KEY: optionalString,
+    VAPID_PRIVATE_KEY: optionalString,
+    VAPID_SUBJECT: optionalString.pipe(
+      z
+        .string()
+        .regex(/^(mailto:|https:\/\/)/, 'Must start with mailto: or https://')
+        .optional(),
+    ),
   })
   .superRefine((env, ctx) => {
     if (env.STORAGE_DRIVER === 's3' && !env.S3_BUCKET) {
@@ -79,6 +91,14 @@ const envSchema = z
         code: 'custom',
         path: ['S3_SECRET_ACCESS_KEY'],
         message: 'Set both S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY, or neither',
+      });
+    }
+    const vapid = [env.VAPID_PUBLIC_KEY, env.VAPID_PRIVATE_KEY, env.VAPID_SUBJECT];
+    if (vapid.some(Boolean) && !vapid.every(Boolean)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['VAPID_SUBJECT'],
+        message: 'Set VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY and VAPID_SUBJECT together, or none',
       });
     }
   });

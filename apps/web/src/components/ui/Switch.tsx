@@ -10,6 +10,8 @@ interface SwitchProps {
   hint?: string;
   /** `start` = track before the label (Create more); `end` = label left, track right (settings). */
   placement?: 'start' | 'end';
+  /** Not operable (e.g. while saving); dimmed. */
+  disabled?: boolean;
   className?: string;
 }
 
@@ -23,6 +25,7 @@ export function Switch({
   label,
   hint,
   placement = 'start',
+  disabled = false,
   className,
 }: SwitchProps) {
   const hintId = useId();
@@ -31,6 +34,7 @@ export function Switch({
       className={cn(
         'flex cursor-pointer items-center gap-2 text-[13px] text-2 select-none',
         placement === 'end' && 'flex-row-reverse justify-between gap-6',
+        disabled && 'cursor-default opacity-60',
         className,
       )}
     >
@@ -38,6 +42,7 @@ export function Switch({
         type="checkbox"
         role="switch"
         checked={checked}
+        disabled={disabled}
         aria-describedby={hint ? hintId : undefined}
         onChange={(e) => {
           onChange(e.target.checked);

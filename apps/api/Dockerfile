@@ -2,6 +2,7 @@
 # API image. Build from the repository root: docker build -f apps/api/Dockerfile .
 # Runs `node dist/server.js`; migrations are a separate command: `node dist/scripts/migrate.js`.
 # First run: `node dist/scripts/vade.js --email … --name …` creates the platform admin (see docs/DEPLOY.md).
+# `node dist/scripts/push-keys.js` prints a Web Push (VAPID) key pair for .env.
 
 FROM node:22-slim AS base
 ENV CI=true COREPACK_ENABLE_DOWNLOAD_PROMPT=0 npm_config_store_dir=/pnpm/store

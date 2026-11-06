@@ -1004,7 +1004,18 @@
       "standupsHint": "Reminders to post, someone needs your help with a blocker, replies on your update, your blocker resolved; the facilitator also gets a daily summary.",
       "perProject": "Per project",
       "perProjectHint": "Turn down projects you don’t need to follow closely: only mentions and assignments, or nothing at all.",
-      "levelOf": "Notifications for {{project}}"
+      "levelOf": "Notifications for {{project}}",
+      "push": {
+        "title": "This device",
+        "intro": "Get notified on this computer even when Kite isn’t open. Turn it on in each browser you use.",
+        "label": "Push notifications",
+        "hint": "Same notifications as your Inbox, from all your workspaces. None while you’re looking at Kite.",
+        "insecure": "Needs a secure (https) connection. Open Kite at its https address to turn this on.",
+        "iosInstall": "On iPhone and iPad, first add Kite to your Home Screen (Share → Add to Home Screen) and open it from there.",
+        "unsupported": "This browser can’t receive push notifications.",
+        "denied": "Notifications are blocked for this site. Allow them in your browser’s site settings, then reload the page.",
+        "notAllowed": "Notifications weren’t allowed, so push stays off."
+      }
     },
     "roles": {
       "owner": "Owner",
