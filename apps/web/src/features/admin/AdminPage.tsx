@@ -21,6 +21,7 @@ import { useDates } from '../../lib/useDates';
 import { toast } from '../../stores/toast';
 import { SettingsSection, settingsInput } from '../settings/SettingsRow';
 import { UserList } from './UserList';
+import { appUrl } from '../../lib/basePath';
 
 type Field = 'name' | 'slug' | 'ownerEmail';
 
@@ -102,7 +103,6 @@ function CreateWorkspaceForm() {
   const [ownerEmail, setOwnerEmail] = useState('');
   const [errors, setErrors] = useState<Partial<Record<Field | 'form', string>>>({});
   const [created, setCreated] = useState<{ email: string; link: string } | null>(null);
-  const origin = window.location.origin;
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -209,7 +209,7 @@ function CreateWorkspaceForm() {
                 clear('slug');
               },
             },
-            t('admin.slugHint', { url: `${origin}/feedback/${slug || '…'}` }),
+            t('admin.slugHint', { url: appUrl(`/feedback/${slug || '…'}`) }),
           )}
         </div>
         {field(ids.ownerEmail, 'ownerEmail', t('admin.ownerEmail'), {

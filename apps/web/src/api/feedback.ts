@@ -30,6 +30,7 @@ import {
 import { z } from 'zod';
 import { ApiError, apiFetch, apiSend, parseRetryAfter, toQuery } from './client';
 import { queryKeys } from '@kite/shared/client';
+import { apiUrl, appUrl } from '../lib/basePath';
 
 export type FeedbackListParams = Partial<Pick<FeedbackListQuery, 'q' | 'type' | 'status'>> & {
   offset?: number;
@@ -42,10 +43,12 @@ export const feedbackAttachmentUrl = (
   attachmentId: string,
   { inline = false } = {},
 ) =>
-  `/api/v1/feedback/${feedbackId}/attachments/${attachmentId}/download${inline ? '?inline=true' : ''}`;
+  apiUrl(
+    `/feedback/${feedbackId}/attachments/${attachmentId}/download${inline ? '?inline=true' : ''}`,
+  );
 
 /** The public form's address, as the inbox shares it. */
-export const publicFeedbackUrl = (slug: string) => `${window.location.origin}/feedback/${slug}`;
+export const publicFeedbackUrl = (slug: string) => appUrl(`/feedback/${slug}`);
 
 export function useFeedbackList(workspaceId: string | undefined, params: FeedbackListParams) {
   return useQuery({
@@ -298,7 +301,7 @@ export function uploadPublicFeedbackFile(
 ): Promise<PublicFeedbackUpload> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `/api/v1/public/feedback/${slug}/uploads`);
+    xhr.open('POST', apiUrl(`/public/feedback/${slug}/uploads`));
     xhr.setRequestHeader('Accept', 'application/json');
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) onProgress(e.loaded / e.total);

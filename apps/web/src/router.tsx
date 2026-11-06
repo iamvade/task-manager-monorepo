@@ -5,6 +5,7 @@ import { RouteError } from './components/ErrorState';
 import { AppShell } from './features/shell/AppShell';
 import { HomeRedirect, WorkspaceHome } from './features/workspace/HomeRedirect';
 import { WorkspaceLayout } from './features/workspace/WorkspaceLayout';
+import { BASE_PATH } from './lib/basePath';
 
 /**
  * Every page is its own chunk (`route.lazy`), loaded on first visit; the guards and the shell
@@ -226,4 +227,4 @@ export const routes: RouteObject[] = [
   },
 ];
 
-export const router = createBrowserRouter(routes);
+export const router = createBrowserRouter(routes, { basename: BASE_PATH || '/' });

@@ -13,6 +13,7 @@ import { copyText } from '../../../lib/clipboard';
 import { toast } from '../../../stores/toast';
 import { FeedbackMain } from './FeedbackMain';
 import { FeedbackSide } from './FeedbackSide';
+import { appUrl } from '../../../lib/basePath';
 
 /**
  * Feedback detail panel (FeedbackDetail.dc.html): opens over the inbox for `?item=FB-1042`.
@@ -64,7 +65,7 @@ export function FeedbackDrawer({
   const next = index >= 0 ? order[index + 1] : undefined;
   const copyLink = () => {
     if (!detail) return;
-    const url = `${window.location.origin}${ws(`/feedback?item=${detail.ref}`)}`;
+    const url = appUrl(ws(`/feedback?item=${detail.ref}`));
     copyText(url).then(
       () => {
         toast({ message: t('feedback.detail.linkCopied') });

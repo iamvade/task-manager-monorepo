@@ -2,7 +2,8 @@
 # Web image: the Vite build served by Caddy, which also reverse-proxies /api (REST + WebSocket)
 # to the `api` service, so the browser sees one origin. Build from the repository root:
 #   docker build -f apps/web/Dockerfile .
-# Needs DOMAIN and ACME_EMAIL at runtime (see docker/caddy/Caddyfile).
+# Needs SITE_ADDRESS and ACME_EMAIL at runtime (see docker/caddy/Caddyfile). BASE_PATH (build arg)
+# builds the app for a sub-path, e.g. /task-manager.
 
 FROM node:22-slim AS build
 ENV CI=true COREPACK_ENABLE_DOWNLOAD_PROMPT=0 npm_config_store_dir=/pnpm/store
@@ -15,10 +16,12 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     pnpm install --frozen-lockfile --filter @kite/web...
 COPY packages/shared packages/shared
 COPY apps/web apps/web
-RUN pnpm --filter @kite/web build
+# Empty = served at the domain root; e.g. /task-manager behind a proxy that serves the app there.
+ARG BASE_PATH=
+RUN BASE_PATH="$BASE_PATH" pnpm --filter @kite/web build
 
 FROM caddy:2.10.2-alpine
 COPY docker/caddy/Caddyfile /etc/caddy/Caddyfile
 COPY --from=build /repo/apps/web/dist /srv
 # Fail the build on a broken Caddyfile.
-RUN DOMAIN=kite.example ACME_EMAIL=ops@kite.example caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+RUN SITE_ADDRESS=kite.example ACME_EMAIL=ops@kite.example caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile

@@ -1,11 +1,16 @@
-# Serves the web app and proxies the API (REST + WebSocket) on one origin, with automatic HTTPS
-# for $DOMAIN. Caddy replaces any client-sent X-Forwarded-For, so the API trusts one hop
-# (TRUST_PROXY=1).
+# Serves the web app and proxies the API (REST + WebSocket) on one origin. SITE_ADDRESS is $DOMAIN
+# by default (automatic HTTPS); behind your own proxy it is `:80` (plain HTTP, no certificates),
+# see docs/DEPLOY.md. Caddy replaces any X-Forwarded-For from untrusted peers, so the API trusts
+# one hop (TRUST_PROXY=1); with TRUSTED_PROXIES covering the outer proxy, its header is kept and
+# the API trusts two (TRUST_PROXY=2).
 {
 	email {$ACME_EMAIL}
+	servers {
+		trusted_proxies static {$TRUSTED_PROXIES:127.0.0.1/32}
+	}
 }
 
-{$DOMAIN} {
+{$SITE_ADDRESS} {
 	encode zstd gzip
 	header -Server
 

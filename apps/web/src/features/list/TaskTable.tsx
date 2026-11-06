@@ -63,6 +63,7 @@ import { TaskRow } from './TaskRow';
 import { toast } from '../../stores/toast';
 import { Checkbox } from '../../components/ui/Checkbox';
 import { cn } from '../../lib/cn';
+import { appUrl } from '../../lib/basePath';
 
 interface TaskTableProps {
   scope: ListScope;
@@ -256,7 +257,7 @@ export function TaskTable({
     setStatus,
     remove,
     copyLink: (task) => {
-      void copy(`${window.location.origin}/t/${task.key}`);
+      void copy(appUrl(`/t/${task.key}`));
     },
     setAssignees: (task, users) => {
       setAssigneesMutation.mutate({ task, users });

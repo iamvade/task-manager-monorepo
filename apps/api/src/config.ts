@@ -36,7 +36,18 @@ const envSchema = z
       .default('info'),
     DATABASE_URL: z.url(),
     TEST_DATABASE_URL: z.url().optional(),
-    WEB_ORIGIN: z.url().default('http://localhost:5173'),
+    /**
+     * Where the web app is served: an origin, plus a path when it lives under one
+     * (`https://host/task-manager`). CSRF, CORS and the socket compare the bare origin; the path
+     * scopes the session cookie and goes into invite and password-reset links.
+     */
+    WEB_ORIGIN: z
+      .url()
+      .refine((value) => {
+        const url = new URL(value);
+        return !url.search && !url.hash;
+      }, 'WEB_ORIGIN must be an origin, optionally with a path, without a query or hash')
+      .default('http://localhost:5173'),
     /** Set when running behind a reverse proxy so `request.ip` (login throttle, logs) is the client's. */
     TRUST_PROXY: trustProxySchema,
     /** OpenAPI spec + Swagger UI at /api/docs. Unset = on everywhere except production. */
@@ -108,6 +119,14 @@ export type Config = z.infer<typeof envSchema>;
 /** Session cookies are `Secure` whenever the web app is served over https. */
 export const secureCookies = (config: Config): boolean =>
   new URL(config.WEB_ORIGIN).protocol === 'https:';
+
+/** `/task-manager` when the app is served under a path, else `''`. */
+export const webBasePath = (config: Pick<Config, 'WEB_ORIGIN'>): string =>
+  new URL(config.WEB_ORIGIN).pathname.replace(/\/+$/, '');
+
+/** Absolute link to a web route, e.g. `webUrl(config, '/invite/abc')`. */
+export const webUrl = (config: Pick<Config, 'WEB_ORIGIN'>, path: string): string =>
+  `${new URL(config.WEB_ORIGIN).origin}${webBasePath(config)}${path}`;
 
 export const docsEnabled = (config: Config): boolean =>
   config.API_DOCS ?? config.NODE_ENV !== 'production';

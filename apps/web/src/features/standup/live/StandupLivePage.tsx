@@ -39,6 +39,7 @@ import {
 import { useMeetingClock } from './useMeetingClock';
 import { useWsPath } from '../../../api/workspaces';
 import { useOtherWorkspacePath } from '../../workspace/useOtherWorkspacePath';
+import { appUrl } from '../../../lib/basePath';
 
 /**
  * `/standup/:groupId/:date/live` (StandupLive.dc.html): the screen-shared meeting, full screen
@@ -158,7 +159,7 @@ function Live({
   });
 
   const onCreate = (req: CreateRequest) => {
-    const href = `${window.location.origin}${ws(dayHref(group.id, day.date))}`;
+    const href = appUrl(ws(dayHref(group.id, day.date)));
     const projectId = req.task?.project.id;
     openCreate({
       title: taskTitleOf(req.text),

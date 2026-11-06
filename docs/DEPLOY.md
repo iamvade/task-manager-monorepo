@@ -69,7 +69,7 @@ Set at least:
 
 The rest have working defaults: `LOG_LEVEL=info`, `TZ` / `BACKUP_TIME` / `BACKUP_KEEP_DAYS` for backups, `STORAGE_DRIVER=local` (see [S3](#s3-attachment-storage-optional)). `.env` sets `COMPOSE_FILE=docker-compose.prod.yml`, so every `docker compose` command below uses the production file when run from `/opt/kite`.
 
-The compose file sets the production API settings itself: `NODE_ENV=production`, `WEB_ORIGIN=https://$DOMAIN` (so session cookies are `Secure` and CSRF/WebSocket origin checks match), `TRUST_PROXY=1` (Caddy is the one proxy in front, so the login throttle and logs see the real client IP), and uploads at `/data/uploads` on the `uploads` volume. Swagger UI stays off unless `API_DOCS=true`.
+The compose file sets the production API settings itself: `NODE_ENV=production`, `WEB_ORIGIN=https://$DOMAIN` (plus `BASE_PATH` when set, see [Behind an existing nginx](#behind-an-existing-nginx-under-a-sub-path); so session cookies are `Secure` and CSRF/WebSocket origin checks match), `TRUST_PROXY=1` (Caddy is the one proxy in front, so the login throttle and logs see the real client IP), and uploads at `/data/uploads` on the `uploads` volume. Swagger UI stays off unless `API_DOCS=true`.
 
 ## 4. Build and start
 
@@ -104,6 +104,46 @@ Then sign in at `https://$DOMAIN` as that account (it opens `/admin`), fill in *
 ## 6. Invite the team
 
 The owner opens their link, creates an account (or signs in) and lands in the workspace. Then, as the owner, open **Settings → Members**, enter a teammate's email and click **Create invite**. Kite doesn't send email: copy the link shown under the form and send it yourself (chat, email). The link is valid for 7 days and shown only once; creating a new invite for the same email replaces the old link. Admins can invite too; set job titles and capacity in the same list.
+
+## Behind an existing nginx, under a sub-path
+
+Use this when the server already runs nginx on ports 80/443 (so Caddy can't bind them) and Kite should live under a path of an existing site, e.g. `https://staging.api.shoppyhub.mn/task-manager`. nginx keeps its certificate and forwards `/task-manager/` (stripping the prefix) to the Kite `web` container, which listens on plain HTTP on `127.0.0.1:8080` and serves the app and proxies the API as usual.
+
+```
+browser ──https──▶ nginx ── /task-manager/* ──▶ web (Caddy, 127.0.0.1:8080, plain HTTP) ── /api/* ──▶ api
+```
+
+**1. `.env`** (steps 1–3 above otherwise apply; on AWS skip ufw and keep 8080 closed in the security group):
+
+```sh
+COMPOSE_FILE=docker-compose.prod.yml  # not docker-compose.http.yml
+DOMAIN=staging.api.shoppyhub.mn
+BASE_PATH=/task-manager
+ACME_EMAIL=ops@shoppy.mn              # required by the compose file, unused here
+POSTGRES_PASSWORD=…
+
+SITE_ADDRESS=:80                      # Caddy: plain HTTP, no certificates
+HTTP_BIND=127.0.0.1:8080              # only nginx on this host can reach it
+HTTPS_BIND=127.0.0.1:8443             # unused, just off 443
+TRUSTED_PROXIES=private_ranges        # nginx reaches Caddy via Docker's bridge gateway (172.x) …
+TRUST_PROXY=2                         # … and the API trusts both hops (real client IP)
+```
+
+`BASE_PATH` is baked into the web build (asset URLs, router, API, WebSocket and service-worker URLs) and makes the API's `WEB_ORIGIN` `https://$DOMAIN$BASE_PATH`: the session cookie gets `Path=/task-manager` (the other services on the host never see it) and invite and password-reset links include the path. Changing it needs `docker compose build web`.
+
+**2. Build and start** as in [step 4](#4-build-and-start). `docker compose ps` shows `web` on `127.0.0.1:8080`; `curl -s http://127.0.0.1:8080/api/v1/health` answers.
+
+**3. nginx:** add the `map` and the two `location` blocks from [`docker/nginx/kite-subpath.conf`](../docker/nginx/kite-subpath.conf) (the locations go in the `listen 443 ssl` server), then `sudo nginx -t && sudo systemctl reload nginx`. The locations set every proxy header themselves (a `proxy_set_header` in a location drops the server-level ones), overwrite `X-Forwarded-For` with the client address so nobody can spoof it with `TRUST_PROXY=2` (the login throttle depends on it), keep the WebSocket open for an hour and allow 30 MB bodies. If a load balancer sits in front of nginx, set nginx's `real_ip` module up for it first. If the site file is generated (e.g. by Ansible), the next run overwrites the hand edit: put the locations in the template too.
+
+**4. Check:**
+
+```sh
+curl https://staging.api.shoppyhub.mn/task-manager/api/v1/health
+```
+
+Sign in at `https://$DOMAIN/task-manager/` (first run: [step 5](#5-create-the-platform-admin-then-the-workspace-first-run-only)). [Updating](#updating) works unchanged. Swagger UI (`API_DOCS=true`) doesn't work under a path.
+
+**Moving an existing install** (e.g. from `http://<ip>:8080` with `docker-compose.http.yml`): edit `.env` as above, `docker compose build && docker compose up -d`, then nginx. Data and uploads stay (same volumes). The new address is a new origin, so everyone signs in again, push notifications are turned on again per browser, and links made for the old address (invites, password resets, the public feedback form, now `/task-manager/feedback/<slug>`) stop working.
 
 ## Backups
 

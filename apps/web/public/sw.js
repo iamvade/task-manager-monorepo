@@ -9,6 +9,13 @@ const OPEN_MESSAGE = 'kite.push.open';
 /** A same-origin app path (never `//host`, which would leave the site). */
 const isAppPath = (url) => typeof url === 'string' && /^\/(?!\/)/.test(url);
 
+/**
+ * Where the app is served: `''` at the domain root, `/task-manager` under a sub-path. The worker
+ * is registered at `{BASE}/sw.js` with scope `{BASE}/`, so the scope tells it. Push payloads carry
+ * app paths (`/w/…`) without it; URLs the browser fetches or opens get it here.
+ */
+const BASE = new URL(self.registration.scope).pathname.replace(/\/+$/, '');
+
 self.addEventListener('install', () => {
   void self.skipWaiting();
 });
@@ -37,7 +44,7 @@ self.addEventListener('push', (event) => {
       if (windows.some((client) => client.focused && client.visibilityState === 'visible')) return;
       await self.registration.showNotification(payload.title, {
         body: payload.body,
-        icon: '/icons/icon-192.png',
+        icon: `${BASE}/icons/icon-192.png`,
         // One popup per notification: a collapsed one (same id) replaces it and alerts again.
         tag: payload.id,
         renotify: true,
@@ -55,7 +62,7 @@ self.addEventListener('notificationclick', (event) => {
     (async () => {
       if (typeof id === 'string' && /^[0-9a-f-]{36}$/i.test(id)) {
         // Opened = read, like opening it from the Inbox. Best effort.
-        fetch(`/api/v1/me/notifications/${id}/read`, {
+        fetch(`${BASE}/api/v1/me/notifications/${id}/read`, {
           method: 'POST',
           credentials: 'same-origin',
         }).catch(() => undefined);
@@ -67,7 +74,7 @@ self.addEventListener('notificationclick', (event) => {
         tab.postMessage({ type: OPEN_MESSAGE, url });
         return;
       }
-      await self.clients.openWindow(url);
+      await self.clients.openWindow(BASE + url);
     })(),
   );
 });
@@ -84,7 +91,7 @@ self.addEventListener('pushsubscriptionchange', (event) => {
         applicationServerKey: key,
       });
       const { keys } = subscription.toJSON();
-      await fetch('/api/v1/me/push-subscriptions', {
+      await fetch(`${BASE}/api/v1/me/push-subscriptions`, {
         method: 'PUT',
         credentials: 'same-origin',
         headers: { 'content-type': 'application/json' },

@@ -22,13 +22,16 @@ interface Manifest {
 describe('installable app (Add to Home Screen)', () => {
   const manifest = JSON.parse(read('public/manifest.webmanifest').toString('utf8')) as Manifest;
 
+  // Relative URLs resolve against the manifest's own URL, so the same file works at the domain
+  // root and under a BASE_PATH (e.g. /task-manager/).
   it('opens standalone over the whole app, which iOS needs for Web Push', () => {
-    expect(manifest).toMatchObject({ start_url: '/', scope: '/', display: 'standalone' });
+    expect(manifest).toMatchObject({ start_url: './', scope: './', display: 'standalone' });
   });
 
   it('lists icons that exist at the sizes it claims, including a maskable one', () => {
     for (const icon of manifest.icons) {
-      const path = `public${icon.src}`;
+      expect(icon.src, 'relative to the manifest').not.toMatch(/^\//);
+      const path = `public/${icon.src}`;
       expect(existsSync(resolve(web, path)), path).toBe(true);
       if (icon.type === 'image/png') expect(pngSize(path)).toBe(icon.sizes);
     }
@@ -39,9 +42,9 @@ describe('installable app (Add to Home Screen)', () => {
 
   it('links the manifest and a 180px Home Screen icon from the page', () => {
     const html = read('index.html').toString('utf8');
-    expect(html).toContain('<link rel="manifest" href="/manifest.webmanifest" />');
+    expect(html).toContain('<link rel="manifest" href="%BASE_URL%manifest.webmanifest" />');
     const touch = /<link rel="apple-touch-icon" href="([^"]+)"/.exec(html)?.[1];
     expect(touch).toBeDefined();
-    expect(pngSize(`public${touch ?? ''}`)).toBe('180x180');
+    expect(pngSize(`public/${(touch ?? '').replace('%BASE_URL%', '')}`)).toBe('180x180');
   });
 });

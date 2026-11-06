@@ -1,5 +1,6 @@
 import { and, eq, gt, isNull } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
+import { webUrl } from '../config.js';
 import type { DbOrTx } from '../db/client.js';
 import { one } from '../db/rows.js';
 import { passwordResets, users } from '../db/schema/index.js';
@@ -33,7 +34,7 @@ export async function issuePasswordReset(
       .returning(),
     'password reset',
   );
-  const link = `${new URL(app.config.WEB_ORIGIN).origin}/reset-password/${token}`;
+  const link = webUrl(app.config, `/reset-password/${token}`);
   if (app.config.NODE_ENV !== 'production') {
     app.log.info({ email: user.email, link }, 'Password reset link');
   }

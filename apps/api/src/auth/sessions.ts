@@ -1,7 +1,7 @@
 import type { SessionClient } from '@kite/shared';
 import { and, eq, lt } from 'drizzle-orm';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { secureCookies, type Config } from '../config.js';
+import { secureCookies, webBasePath, type Config } from '../config.js';
 import type { DbOrTx } from '../db/client.js';
 import { sessions } from '../db/schema/index.js';
 import { parseDevice } from '../feedback/device.js';
@@ -68,7 +68,7 @@ export function setSessionCookie(reply: FastifyReply, token: string, config: Con
     httpOnly: true,
     secure: secureCookies(config),
     sameSite: 'lax',
-    path: '/',
+    path: webBasePath(config) || '/',
     maxAge: SESSION_TTL_MS / 1000,
   });
 }
@@ -78,6 +78,6 @@ export function clearSessionCookie(reply: FastifyReply, config: Config): void {
     httpOnly: true,
     secure: secureCookies(config),
     sameSite: 'lax',
-    path: '/',
+    path: webBasePath(config) || '/',
   });
 }
