@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Kite Tasks brand guide</title>
+    <style>
+      @font-face { font-family: "Geist"; src: url("../assets/brand-kit/fonts/Geist_400Regular.ttf"); font-weight: 400; }
+      @font-face { font-family: "Geist"; src: url("../assets/brand-kit/fonts/Geist_500Medium.ttf"); font-weight: 500; }
+      @font-face { font-family: "Geist"; src: url("../assets/brand-kit/fonts/Geist_600SemiBold.ttf"); font-weight: 600; }
+      @font-face { font-family: "Geist Mono"; src: url("../assets/brand-kit/fonts/GeistMono_400Regular.ttf"); font-weight: 400; }
+      @font-face { font-family: "Geist Mono"; src: url("../assets/brand-kit/fonts/GeistMono_500Medium.ttf"); font-weight: 500; }
+      @page { size: A4 landscape; margin: 0; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font-family: "Geist", sans-serif; color: #18181b; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .page { width: 297mm; height: 210mm; padding: 18mm 20mm; page-break-after: always; position: relative; overflow: hidden; }
+      .page:last-child { page-break-after: auto; }
+      .eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: #6c55cc; }
+      h1 { font-size: 44px; font-weight: 600; letter-spacing: -0.02em; margin-top: 6px; }
+      h2 { font-size: 26px; font-weight: 600; letter-spacing: -0.01em; margin-top: 6px; margin-bottom: 18px; }
+      p, li { font-size: 13px; line-height: 20px; color: #3f3f46; }
+      .muted { color: #6b6b74; }
+      .mono { font-family: "Geist Mono", monospace; }
+      .foot { position: absolute; left: 20mm; right: 20mm; bottom: 10mm; display: flex; justify-content: space-between; font-size: 10px; color: #6b6b74; }
+      /* cover */
+      .cover { display: flex; flex-direction: column; justify-content: center; gap: 22px; }
+      .cover img.word { height: 72px; align-self: flex-start; }
+      .cover .lead { font-size: 20px; line-height: 30px; color: #3f3f46; max-width: 640px; }
+      /* logos */
+      .logos { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 14px; }
+      .logo-cell { border: 1px solid #e6e6ea; border-radius: 12px; height: 150px; display: flex; align-items: center; justify-content: center; }
+      .logo-cell.dark { background: #111113; border-color: #26262b; }
+      .logo-cell img { max-height: 60px; max-width: 85%; }
+      .logo-cap { font-size: 11px; color: #6b6b74; margin-top: 6px; }
+      .rules-sm { margin-top: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 30px; }
+      /* colours */
+      .swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+      .sw { border: 1px solid #e6e6ea; border-radius: 10px; overflow: hidden; }
+      .sw .chip { height: 70px; }
+      .sw .meta { padding: 8px 10px; }
+      .sw .role { font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #6c55cc; }
+      .sw .name { font-size: 13px; font-weight: 600; margin-top: 2px; }
+      .sw .hex { font-family: "Geist Mono", monospace; font-size: 11px; color: #6b6b74; }
+      .sw .use { font-size: 10.5px; line-height: 14px; color: #52525b; margin-top: 4px; }
+      .sub { font-size: 14px; font-weight: 600; margin: 18px 0 10px; }
+      .status { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+      .st { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+      .st i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex: none; }
+      /* type */
+      .typerow { display: grid; grid-template-columns: 100px 1fr 150px; align-items: baseline; padding: 9px 0; border-bottom: 1px solid #efeff2; }
+      .typerow .lbl { font-size: 12px; color: #6b6b74; }
+      .typerow .spec { font-family: "Geist Mono", monospace; font-size: 11px; color: #6b6b74; text-align: right; }
+      .two { display: grid; grid-template-columns: 1.5fr 1fr; gap: 36px; }
+      ol.rules { padding-left: 18px; display: grid; gap: 8px; }
+      ol.rules li { font-size: 13.5px; line-height: 20px; }
+      .card { border: 1px solid #e6e6ea; border-radius: 12px; padding: 18px; box-shadow: 0 1px 2px rgba(24,24,27,.05), 0 8px 24px rgba(24,24,27,.06); }
+      .chips { display: flex; gap: 8px; margin-top: 10px; }
+      .chips span { font-size: 12px; font-weight: 500; padding: 3px 9px; border-radius: 6px; }
+      .btn { display: inline-block; margin-top: 14px; background: #6e56cf; color: #fff; font-size: 13px; font-weight: 500; padding: 7px 14px; border-radius: 8px; }
+    </style>
+  </head>
+  <body>
+    <!-- 1. Cover -->
+    <section class="page cover">
+      <img class="word" src="../assets/brand-kit/logos/kite-wordmark.svg" alt="Kite Tasks" />
+      <div>
+        <div class="eyebrow">Brand guide</div>
+        <h1>Team tasks, calmly organised.</h1>
+      </div>
+      <p class="lead">
+        Kite Tasks is a task manager for teams of 5 to 30: spaces, projects and tasks in List, Board and Calendar views,
+        with daily standups, reports and customer feedback. The interface is bilingual, Mongolian first and English second.
+        The brand is quiet and precise: zinc greys carry the layout and one violet accent marks what matters.
+      </p>
+      <div class="foot"><span>Kite Tasks · Brand guide</span><span>1</span></div>
+    </section>
+
+    <!-- 2. Logo -->
+    <section class="page">
+      <div class="eyebrow">Logo</div>
+      <h2>The K tile and the wordmark</h2>
+      <div class="logos">
+        <div><div class="logo-cell"><img src="../assets/brand-kit/logos/kite-wordmark.svg" alt="" /></div><div class="logo-cap">Main logo: wordmark on light</div></div>
+        <div><div class="logo-cell"><img src="../assets/brand-kit/logos/kite-mark.svg" alt="" /></div><div class="logo-cap">Symbol: K tile</div></div>
+        <div><div class="logo-cell dark"><img src="../assets/brand-kit/logos/kite-mark-mono-light.svg" alt="" /></div><div class="logo-cap">Mono on dark</div></div>
+        <div><div class="logo-cell"><img src="../assets/brand-kit/logos/kite-mark-mono-dark.svg" alt="" /></div><div class="logo-cap">Mono on light</div></div>
+      </div>
+      <div style="margin-top: 14px"><div class="logo-cell dark" style="height: 120px"><img src="../assets/brand-kit/logos/kite-wordmark-dark.svg" alt="" style="max-height: 52px" /></div><div class="logo-cap">Wordmark on dark (#111113)</div></div>
+      <div class="rules-sm">
+        <p>The symbol is a violet (#6E56CF) square with 25% rounded corners and a white Geist SemiBold “K”.</p>
+        <p>The wordmark is the tile plus “Kite Tasks” in Geist SemiBold, gap one third of the tile.</p>
+        <p>Keep clear space of half a tile around the logo. Minimum tile size 16 px.</p>
+        <p>No gradients, glows, outlines, rotation or recolouring other than the mono versions.</p>
+      </div>
+      <div class="foot"><span>Kite Tasks · Brand guide</span><span>2</span></div>
+    </section>
+
+    <!-- 3. Colour -->
+    <section class="page">
+      <div class="eyebrow">Colour</div>
+      <h2>Palette</h2>
+      <div class="swatches">
+        <div class="sw"><div class="chip" style="background:#6E56CF"></div><div class="meta"><div class="role">Main</div><div class="name">Kite violet</div><div class="hex">#6E56CF</div><div class="use">Primary buttons, active item, focus ring, logo tile</div></div></div>
+        <div class="sw"><div class="chip" style="background:#6C55CC"></div><div class="meta"><div class="role">Secondary</div><div class="name">Violet ink</div><div class="hex">#6C55CC</div><div class="use">Accent as text on light. On dark: #B4A5FF</div></div></div>
+        <div class="sw"><div class="chip" style="background:#EFEBFD"></div><div class="meta"><div class="role">Accent</div><div class="name">Violet soft</div><div class="hex">#EFEBFD</div><div class="use">Selected rows, mention chips, highlights</div></div></div>
+        <div class="sw"><div class="chip" style="background:#18181B"></div><div class="meta"><div class="role">Text</div><div class="name">Ink</div><div class="hex">#18181B</div><div class="use">Headings and body. On dark: #EDEDEF</div></div></div>
+        <div class="sw"><div class="chip" style="background:#FFFFFF; border-bottom:1px solid #e6e6ea"></div><div class="meta"><div class="role">Background</div><div class="name">Paper</div><div class="hex">#FFFFFF</div><div class="use">Page and cards</div></div></div>
+        <div class="sw"><div class="chip" style="background:#F7F7F8"></div><div class="meta"><div class="role">Neutral</div><div class="name">Sidebar</div><div class="hex">#F7F7F8</div><div class="use">Sidebar, panels, quiet sections</div></div></div>
+        <div class="sw"><div class="chip" style="background:#E6E6EA"></div><div class="meta"><div class="role">Neutral</div><div class="name">Border</div><div class="hex">#E6E6EA</div><div class="use">1 px borders and dividers</div></div></div>
+        <div class="sw"><div class="chip" style="background:#6B6B74"></div><div class="meta"><div class="role">Neutral</div><div class="name">Muted</div><div class="hex">#6B6B74</div><div class="use">Secondary text and meta</div></div></div>
+        <div class="sw"><div class="chip" style="background:#111113"></div><div class="meta"><div class="role">Background (dark)</div><div class="name">Night</div><div class="hex">#111113</div><div class="use">Dark-mode page</div></div></div>
+        <div class="sw"><div class="chip" style="background:#C42B1C"></div><div class="meta"><div class="role">Status</div><div class="name">Danger</div><div class="hex">#C42B1C</div><div class="use">Overdue, errors, delete</div></div></div>
+      </div>
+      <div class="sub">Status colours (meaning only, never decoration)</div>
+      <div class="status">
+        <div class="st"><i style="background:#A1A1AA"></i>To Do</div>
+        <div class="st"><i style="background:#D97706"></i>In Progress</div>
+        <div class="st"><i style="background:#6E56CF"></i>In Review</div>
+        <div class="st"><i style="background:#E11D48"></i>On Hold</div>
+        <div class="st"><i style="background:#16A34A"></i>Done</div>
+        <div class="st"><i style="background:#8B8B94"></i>Cancelled</div>
+        <div class="st"><i style="background:#C42B1C"></i>Overdue</div>
+      </div>
+      <div class="foot"><span>Kite Tasks · Brand guide</span><span>3</span></div>
+    </section>
+
+    <!-- 4. Type -->
+    <section class="page">
+      <div class="eyebrow">Typography</div>
+      <h2>Geist and Geist Mono</h2>
+      <div class="two">
+        <div>
+          <div class="typerow"><span class="lbl">Display</span><span style="font-size:28px;font-weight:600;letter-spacing:-0.01em">Good morning, Anu</span><span class="spec">Geist 600 · 28/32</span></div>
+          <div class="typerow"><span class="lbl">Page heading</span><span style="font-size:24px;font-weight:600;letter-spacing:-0.01em">My Tasks</span><span class="spec">Geist 600 · 24/32</span></div>
+          <div class="typerow"><span class="lbl">Title</span><span style="font-size:20px;font-weight:600;letter-spacing:-0.01em">Миний даалгаврууд</span><span class="spec">Geist 600 · 20/28</span></div>
+          <div class="typerow"><span class="lbl">Body</span><span style="font-size:14px">Redesign the onboarding checklist</span><span class="spec">Geist 400 · 14/20</span></div>
+          <div class="typerow"><span class="lbl">Secondary</span><span style="font-size:13px;font-weight:500">Create task</span><span class="spec">Geist 500 · 13/18</span></div>
+          <div class="typerow"><span class="lbl">Meta</span><span style="font-size:12px;font-weight:500" class="muted">10-р сарын 14 · Oct 14</span><span class="spec">Geist 500 · 12/16</span></div>
+          <div class="typerow"><span class="lbl">Task key</span><span class="mono" style="font-size:12px;font-weight:500">APP-142</span><span class="spec">Geist Mono 500 · 12/16</span></div>
+          <p class="muted" style="margin-top:14px">Weights 400, 500, 600 only. Headings 600 with −0.01em tracking from 20 px. Mongolian Cyrillic and Latin share the same family.</p>
+        </div>
+        <div>
+          <div class="card">
+            <div class="mono muted" style="font-size:12px;font-weight:500">APP-142</div>
+            <div style="font-size:20px;font-weight:600;letter-spacing:-0.01em;margin-top:6px">Redesign onboarding checklist</div>
+            <div class="chips">
+              <span style="background:#EFEBFD;color:#6C55CC">In Review</span>
+              <span style="background:#FDF0DC;color:#92400E">Due Oct 14</span>
+              <span style="background:#F1F1F3;color:#3F3F46">Size M</span>
+            </div>
+            <span class="btn">+ New task</span>
+          </div>
+          <p class="muted" style="margin-top:12px">Radii: 6 chips · 8 buttons and inputs · 10 cards · 12 panels · 14 modals. Spacing on a 4/8 px grid, 1 px borders, soft shadows.</p>
+        </div>
+      </div>
+      <div class="foot"><span>Kite Tasks · Brand guide</span><span>4</span></div>
+    </section>
+
+    <!-- 5. Rules -->
+    <section class="page">
+      <div class="eyebrow">Rules</div>
+      <h2>How Kite Tasks looks and sounds</h2>
+      <ol class="rules">
+        <li>Calm, neutral interface: zinc greys carry the layout; Kite violet marks the one thing that matters on screen.</li>
+        <li>Use the accent sparingly: one primary action, the active item, focus. Never as a large background behind body text.</li>
+        <li>Typography is Geist only, with Geist Mono for task keys such as APP-142. Weights 400, 500 and 600.</li>
+        <li>Mongolian is the default language; every on-screen line has an English twin. Mongolian dates read “10-р сарын 14”, English “Oct 14”.</li>
+        <li>Status colours mean status only: amber in progress, violet in review, green done, rose on hold, red overdue.</li>
+        <li>Text keeps WCAG AA contrast: accent text uses #6C55CC on light and #B4A5FF on dark.</li>
+        <li>Light and dark both exist: dark mode uses #111113 page, #1F1F23 surfaces, #EDEDEF text.</li>
+        <li>Plenty of space, 1 px borders and soft shadows. No gradients, glows, stock photos or decorative illustration behind content.</li>
+        <li>Voice: short, plain and helpful. Say what happened and what to do next; no exclamation marks or jokes in the product.</li>
+        <li>Show the real product: List, Board, Calendar, My Tasks, Standup and Reports screens rather than abstract imagery.</li>
+      </ol>
+      <div class="foot"><span>Kite Tasks · Brand guide</span><span>5</span></div>
+    </section>
+  </body>
+</html>

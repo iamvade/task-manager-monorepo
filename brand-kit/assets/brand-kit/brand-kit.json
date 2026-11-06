@@ -1,0 +1,59 @@
+{
+  "name": "Kite Tasks",
+  "source": "apps/web/src/styles/tokens.css, palette.css, packages/shared/src/appearance.ts, design/*.dc.html",
+  "logos": {
+    "main": "logos/kite-mark.svg",
+    "wordmark": "logos/kite-wordmark.svg",
+    "wordmarkOnDark": "logos/kite-wordmark-dark.svg",
+    "monoOnLight": "logos/kite-mark-mono-dark.svg",
+    "monoOnDark": "logos/kite-mark-mono-light.svg"
+  },
+  "colors": [
+    { "role": "Main", "name": "Kite violet", "hex": "#6E56CF", "use": "Accent: primary buttons, active nav, focus rings, the K tile" },
+    { "role": "Secondary", "name": "Violet ink", "hex": "#6C55CC", "use": "Accent used as text on light; on dark use #B4A5FF" },
+    { "role": "Accent", "name": "Violet soft", "hex": "#EFEBFD", "use": "Accent-soft fills (selected rows, mention chips); = #6E56CF at 10% on white" },
+    { "role": "Text", "name": "Ink", "hex": "#18181B", "use": "Headings and primary text (dark mode #EDEDEF)" },
+    { "role": "Background", "name": "Paper", "hex": "#FFFFFF", "use": "Page and surfaces (dark mode #111113)" },
+    { "role": "Neutral", "name": "Sidebar", "hex": "#F7F7F8", "use": "Sidebar and panels (dark mode #161618)" },
+    { "role": "Neutral", "name": "Border", "hex": "#E6E6EA", "use": "1px borders (dark mode #26262B)" },
+    { "role": "Neutral", "name": "Muted text", "hex": "#6B6B74", "use": "De-emphasised text (dark mode #8E8E98)" },
+    { "role": "Neutral", "name": "Night", "hex": "#111113", "use": "Dark-mode background" }
+  ],
+  "statusColors": {
+    "todo": "#A1A1AA",
+    "inProgress": "#D97706",
+    "review": "#6E56CF",
+    "onHold": "#E11D48",
+    "done": "#16A34A",
+    "cancelled": "#8B8B94",
+    "danger": "#C42B1C"
+  },
+  "alternateAccents": ["#2F6FEB", "#0F766E", "#3F3F46"],
+  "textStyles": [
+    { "name": "Display", "font": "Geist", "weight": 600, "size": 28, "lineHeight": 32, "letterSpacing": "-0.01em" },
+    { "name": "Page heading", "font": "Geist", "weight": 600, "size": 24, "lineHeight": 32, "letterSpacing": "-0.01em" },
+    { "name": "Title", "font": "Geist", "weight": 600, "size": 20, "lineHeight": 28, "letterSpacing": "-0.01em" },
+    { "name": "Body", "font": "Geist", "weight": 400, "size": 14, "lineHeight": 20 },
+    { "name": "Secondary", "font": "Geist", "weight": 500, "size": 13, "lineHeight": 18 },
+    { "name": "Meta", "font": "Geist", "weight": 500, "size": 12, "lineHeight": 16 },
+    { "name": "Key", "font": "Geist Mono", "weight": 500, "size": 12, "lineHeight": 16, "example": "APP-142" }
+  ],
+  "fonts": [
+    "fonts/Geist_400Regular.ttf",
+    "fonts/Geist_500Medium.ttf",
+    "fonts/Geist_600SemiBold.ttf",
+    "fonts/GeistMono_400Regular.ttf",
+    "fonts/GeistMono_500Medium.ttf"
+  ],
+  "radii": { "chip": 6, "control": 8, "card": 10, "panel": 12, "modal": 14, "logoTile": "25% of tile" },
+  "rules": [
+    "Calm, neutral interface: zinc greys carry the layout, Kite violet marks the one thing that matters on screen.",
+    "Use the accent sparingly: one primary action, the active item, focus. Never as a large background behind body text.",
+    "Typography is Geist only (Geist Mono for task keys like APP-142). Weights 400/500/600; no bold 700+.",
+    "Headings 600 with -0.01em tracking at 20px and up.",
+    "Mongolian is the default language; every on-screen line has an English twin.",
+    "Status colours mean status only: amber in progress, violet in review, green done, rose on hold.",
+    "Text keeps WCAG AA contrast: accent text on light uses #6C55CC, on dark #B4A5FF.",
+    "Keep space: 4/8px grid, 1px borders, soft shadows; no gradients or glow behind the logo."
+  ]
+}
