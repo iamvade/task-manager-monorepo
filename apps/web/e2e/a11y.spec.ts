@@ -378,6 +378,19 @@ for (const scheme of ['light', 'dark'] as const) {
         await page.keyboard.press('Escape');
       });
 
+      await test.step('Claude: new token with the extension steps', async () => {
+        // The dev server has no packaged extension; answer its HEAD like the web image does.
+        await page.route('**/downloads/kite-tasks.mcpb', (route) =>
+          route.fulfill({ status: 200, contentType: 'application/zip', body: '' }),
+        );
+        await page.goto('/w/kite-studio/settings?tab=claude');
+        await page.getByRole('button', { name: 'Create token' }).click();
+        await expect(page.getByRole('link', { name: 'Download for Claude Desktop' })).toBeVisible();
+        await page.getByText('Set up without the extension (developers)').click();
+        await expectAccessible(page, `Claude extension steps (${scheme})`);
+        await page.unroute('**/downloads/kite-tasks.mcpb');
+      });
+
       await test.step('sprints: edit dialog', async () => {
         await page.goto('/w/kite-studio/settings?tab=sprints');
         await page.getByRole('button', { name: 'Actions for Sprint 14' }).click();

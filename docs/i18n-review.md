@@ -641,6 +641,22 @@ Not designed; built from the Settings pieces (`features/settings/ClaudeSection.t
 | `settings.claude.revokeBody` | Claude Desktop stops working with this token right away. This can’t be undone. | Энэ токентой Claude Desktop шууд ажиллахаа болино. Буцаах боломжгүй. | confirm dialog body |
 | `settings.claude.revoked` | Token revoked | Токен цуцлагдлаа | toast |
 
+The extension download steps (phase 2, 2026-11-11), shown when the server serves `/downloads/kite-tasks.mcpb`. "Kite address" in `addressNote` is the field name in Claude Desktop's extension form, which comes from the extension manifest in English, so it stays in English.
+
+| key | en | mn (draft) | where |
+|---|---|---|---|
+| `settings.claude.step1` | Download the extension | Өргөтгөлийг татах | step 1 heading |
+| `settings.claude.step1Hint` | Open the downloaded file: Claude Desktop installs it and asks for the settings below. | Татсан файлаа нээхэд Claude Desktop суулгаж, доорх тохиргоог асууна. | step 1 hint |
+| `settings.claude.download` | Download for Claude Desktop | Claude Desktop-д зориулж татах | download link (button style) |
+| `settings.claude.step2` | Fill in its settings | Тохиргоог бөглөх | step 2 heading |
+| `settings.claude.addressLabel` | Kite address | Kite-ын хаяг | Kite address copy box label |
+| `settings.claude.addressNote` | Paste it into “Kite address”. | «Kite address» талбарт буулгана уу. | Kite address copy box note |
+| `settings.claude.copyAddress` | Copy address | Хаягийг хуулах | copy address button |
+| `settings.claude.workspaceNote` | Workspace (optional): {{slug}} | Ажлын орчин (заавал биш): {{slug}} | step 2, when the person has several workspaces |
+| `settings.claude.step3` | Ask Claude | Claude-оос асуух | step 3 heading |
+| `settings.claude.step3Hint` | For example: “What’s on my plate today in Kite?” Teammates do the same with their own token. | Жишээ нь: «Өнөөдөр Kite-д миний хийх зүйл юу байна?» Багийнхан өөрсдийн токеноор адилхан хийнэ. | step 3 hint |
+| `settings.claude.manualSummary` | Set up without the extension (developers) | Өргөтгөлгүйгээр тохируулах (хөгжүүлэгчдэд) | collapsed manual-config section |
+
 ## Open questions
 
 1. **Unscheduled**: drafted "Огноогүй" (no date) rather than "Хуваарьгүй"; the hint uses "…хуваарьт оруулна уу". Pick one term.
