@@ -142,4 +142,9 @@ export class Kite {
   standupUrl(workspace: Workspace, groupId: string, date: string): string {
     return `${this.baseUrl}/w/${workspace.slug}/standup/${groupId}/${date}`;
   }
+
+  /** The feedback inbox with one item open: `{baseUrl}/w/{slug}/feedback?item=FB-1042`. */
+  feedbackUrl(workspace: Workspace, ref: string): string {
+    return `${this.baseUrl}/w/${workspace.slug}/feedback?item=${ref}`;
+  }
 }

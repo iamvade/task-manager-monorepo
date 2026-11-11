@@ -7,6 +7,7 @@ import { BAT, DETAIL, TASK, TOKEN, comment, connect, writes } from './harness.js
 const READ_ONLY = [
   'get_task',
   'inbox',
+  'list_feedback',
   'list_members',
   'list_projects',
   'list_tasks',
@@ -21,6 +22,8 @@ const WRITES = [
   'complete_subtask',
   'complete_task',
   'create_task',
+  'get_feedback',
+  'link_feedback_to_task',
   'post_standup',
   'update_task',
 ];

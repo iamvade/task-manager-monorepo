@@ -108,6 +108,18 @@
     {
       "name": "post_standup",
       "description": "Write and post my standup update, or save it as a draft"
+    },
+    {
+      "name": "list_feedback",
+      "description": "Customer feedback inbox by search, type or status"
+    },
+    {
+      "name": "get_feedback",
+      "description": "One feedback report (marks it read); no contact details"
+    },
+    {
+      "name": "link_feedback_to_task",
+      "description": "Link a feedback report to a task"
     }
   ],
   "compatibility": {

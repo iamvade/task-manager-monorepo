@@ -21,6 +21,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { names, oneLine, section, taskLine, userContent } from './format.js';
 import type { Kite } from './kite.js';
+import { registerFeedbackTools } from './tools-feedback.js';
 import { registerStandupTools } from './tools-standups.js';
 import { registerSubtaskTools } from './tools-subtasks.js';
 import { ToolError, matchStatus, parseDate, statusLabel } from './resolve.js';
@@ -530,4 +531,5 @@ export function registerTools(server: McpServer, kite: Kite): void {
 
   registerSubtaskTools(server, kite, lookups);
   registerStandupTools(server, kite, lookups);
+  registerFeedbackTools(server, kite, lookups);
 }

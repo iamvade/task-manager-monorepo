@@ -3,7 +3,9 @@
  * guesses: no match or several matches is a `ToolError` that lists the choices.
  */
 import {
+  formatFeedbackRef,
   nameSearchKey,
+  parseFeedbackRef,
   parseTaskKey,
   type StandupGroup,
   type Status,
@@ -175,4 +177,11 @@ export function matchStandupGroup(groups: readonly StandupGroup[], query?: strin
   if (!only) throw new ToolError('You are not a member of any standup group in this workspace.');
   if (others.length === 0) return only;
   throw new ToolError(`You are in several standup groups; pass \`group\`: ${listOf(mine)}.`);
+}
+
+/** `fb-1042` → `FB-1042`; anything else is a `ToolError`. */
+export function feedbackRef(input: string): string {
+  const number = parseFeedbackRef(input);
+  if (number === null) throw new ToolError(`"${input}" is not a feedback ref like FB-1042.`);
+  return formatFeedbackRef(number);
 }
