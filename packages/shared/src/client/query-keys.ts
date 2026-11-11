@@ -3,6 +3,8 @@ export const queryKeys = {
   me: ['me'] as const,
   /** My live sessions (`GET /auth/sessions`): Settings → Claude lists the MCP tokens. */
   signedInDevices: ['auth', 'sessions'] as const,
+  /** Whether this server serves the Claude Desktop extension (Settings → Claude). */
+  claudeExtension: ['claude-extension'] as const,
   /** Whether the server sends Web Push, and its VAPID key. */
   pushConfig: ['push-config'] as const,
   /** The platform admin console's workspace list. */

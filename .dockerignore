@@ -18,3 +18,4 @@ docs
 apps/web/e2e/.auth
 **/.DS_Store
 docker-compose*.yml
+**/.mcpb-stage

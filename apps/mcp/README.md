@@ -1,14 +1,15 @@
 # Kite MCP server (`@kite/mcp`)
 
-Last updated: 2026-11-11 04:33 AM CST
+Last updated: 2026-11-11 05:54 AM CST
 
 A local [MCP](https://modelcontextprotocol.io) server that lets **Claude Desktop** read your Kite tasks and make everyday changes **as you**. Claude Desktop starts it as a child process and talks to it over stdio. The server calls the normal Kite REST API (`/api/v1`) with a personal token, so access checks, activity history, notifications and realtime updates work exactly as in the web app.
 
-Phase 1 of the Claude Desktop integration. A one-click `.mcpb` package and a remote connector with OAuth come later.
+It ships as a **Claude Desktop extension** (`kite-tasks.mcpb`) that every Kite server serves from Settings → Claude, so teammates install it with a double-click: no checkout, no Node (Claude Desktop brings its own). A remote connector with OAuth (Claude on the web and phone) comes later.
 
 ## Contents
 
-- [Setup](#setup)
+- [Install the extension](#install-the-extension)
+- [Setup from a checkout (developers)](#setup-from-a-checkout-developers)
 - [Tools](#tools)
 - [How it resolves names](#how-it-resolves-names)
 - [Security](#security)
@@ -16,7 +17,22 @@ Phase 1 of the Claude Desktop integration. A one-click `.mcpb` package and a rem
 - [Troubleshooting](#troubleshooting)
 - [Known limitations](#known-limitations)
 
-## Setup
+## Install the extension
+
+1. In Kite, open **Settings → Claude**, name the token if you like, and click **Create token**. The token is shown once.
+2. Click **Download for Claude Desktop** and open `kite-tasks.mcpb`. Claude Desktop shows the extension and asks for its settings:
+   - **Kite address**: copy it from the same page (the address you open Kite at, including any sub-path).
+   - **Kite token**: the token from step 1. Claude Desktop keeps it in the system keychain.
+   - **Workspace** (optional): a workspace slug, when you are in several.
+3. Ask Claude something like "what's on my plate today in Kite?"
+
+After a Kite update, download the extension again from the same page and open it to replace the old one; Claude Desktop shows the installed version. The extension is not signed, so Claude Desktop may say so when it installs.
+
+<sub>[↑ Back to contents](#contents)</sub>
+
+## Setup from a checkout (developers)
+
+Without the extension, e.g. against a development server, which doesn't serve one. Settings → Claude then shows only the manual config.
 
 1. **Build the server** (Node 22.12+, from the repo root):
 
@@ -25,7 +41,7 @@ Phase 1 of the Claude Desktop integration. A one-click `.mcpb` package and a rem
    pnpm --filter @kite/mcp build   # → apps/mcp/dist/index.js (one bundled file)
    ```
 
-2. **Create a token** in Kite: **Settings → Claude → Create token**. The token is shown once. The page also shows a ready `claude_desktop_config.json` entry.
+2. **Create a token** in Kite: **Settings → Claude → Create token**. The token is shown once, with a ready `claude_desktop_config.json` entry (under "Set up without the extension" when the extension is available).
 
 3. **Add it to Claude Desktop**: merge the entry into its `claude_desktop_config.json` (macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`; the app's developer settings can open it) and replace the path with your checkout's absolute path:
 
@@ -105,19 +121,24 @@ Read tools carry `readOnlyHint`, so Claude Desktop can treat them differently fr
 pnpm --filter @kite/mcp test        # vitest: resolvers + every tool through an in-memory MCP client
 pnpm --filter @kite/mcp typecheck
 KITE_URL=http://localhost:5173 KITE_TOKEN=… pnpm --filter @kite/mcp dev   # run from source (tsx)
+pnpm --filter @kite/mcp pack:mcpb   # → apps/mcp/dist/kite-tasks.mcpb
 ```
 
-| File             | Purpose                                                                    |
-| ---------------- | -------------------------------------------------------------------------- |
-| `src/index.ts`   | Entry: reads config, connects the stdio transport                          |
-| `src/config.ts`  | `KITE_URL` / `KITE_TOKEN` / `KITE_WORKSPACE` validation                    |
-| `src/kite.ts`    | API client (shared `createApiClient`), workspace choice, 60 s lookup cache |
-| `src/resolve.ts` | Project / status / person / date / key resolution                          |
-| `src/format.ts`  | Text output and the `<user_content>` fence                                 |
-| `src/tools.ts`   | The twelve tools and error messages                                        |
-| `src/server.ts`  | `McpServer` with its instructions                                          |
+| File                    | Purpose                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------- |
+| `src/index.ts`          | Entry: reads config, connects the stdio transport                               |
+| `src/config.ts`         | `KITE_URL` / `KITE_TOKEN` / `KITE_WORKSPACE` validation                         |
+| `src/kite.ts`           | API client (shared `createApiClient`), workspace choice, 60 s lookup cache      |
+| `src/resolve.ts`        | Project / status / person / date / key resolution                               |
+| `src/format.ts`         | Text output and the `<user_content>` fence                                      |
+| `src/tools.ts`          | The twelve tools and error messages                                             |
+| `src/server.ts`         | `McpServer` with its instructions                                               |
+| `mcpb/manifest.json`    | The extension's manifest (v0.2); its `version` is filled in from `package.json` |
+| `scripts/pack-mcpb.mjs` | Builds, stages, validates and packs `dist/kite-tasks.mcpb`                      |
 
 `@kite/shared` ships TypeScript source, so tsup bundles everything (shared, the SDK, zod) into one `dist/index.js`. Rebuild after pulling changes to the shared schemas.
+
+**The extension.** `pack:mcpb` runs tsup, stages `manifest.json`, `server/index.mjs` (the bundle; `.mjs` because it is ESM and no `package.json` sits beside it) and `icon.png` (the web's 512px icon) in `.mcpb-stage/`, then `mcpb validate` and `mcpb pack` (`@anthropic-ai/mcpb`, pinned). The web image (`apps/web/Dockerfile`) runs it and serves the result at `/downloads/kite-tasks.mcpb`; Settings → Claude shows the download only when that URL answers with something other than the SPA's HTML. Bump `version` in `package.json` when the tools change, so people can tell an old install from a new one. Adding or renaming a tool also means updating the manifest's `tools`; `test/manifest.test.ts` fails until they match. In the extension, a blank optional setting can reach the server as the literal `${user_config.…}`; `readConfig` treats that as unset.
 
 <sub>[↑ Back to contents](#contents)</sub>
 
@@ -135,7 +156,8 @@ KITE_URL=http://localhost:5173 KITE_TOKEN=… pnpm --filter @kite/mcp dev   # ru
 
 ## Known limitations
 
-- Each person has to build it from a checkout (the `.mcpb` package is phase 2).
+- No auto-update: after a Kite update, download and open the extension again.
+- The extension isn't signed.
 - No sprints, tags, subtasks, standups or feedback tools yet.
 - Changes show up in Kite as made by you; nothing marks them as "via Claude".
 

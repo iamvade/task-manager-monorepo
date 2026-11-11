@@ -2,6 +2,7 @@ import { mcpTokenSchema, signedInDeviceSchema, type CreateMcpToken } from '@kite
 import { queryKeys } from '@kite/shared/client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
+import { appUrl } from '../lib/basePath';
 import { apiFetch, apiSend } from './client';
 
 /** My MCP tokens (Settings → Claude), most recently used first. */
@@ -28,5 +29,28 @@ export function useRevokeMcpToken() {
   return useMutation({
     mutationFn: (id: string) => apiSend(`/auth/sessions/${id}`, z.null(), 'DELETE'),
     onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.signedInDevices }),
+  });
+}
+
+/** The Claude Desktop extension the web image serves (apps/web/Dockerfile). */
+export const EXTENSION_URL = () => appUrl('/downloads/kite-tasks.mcpb');
+
+/**
+ * Whether this server serves the extension. Missing files still answer 200 with the SPA's
+ * index.html (Caddy `try_files`, Vite in development), so HTML counts as absent.
+ */
+export function useExtensionAvailable() {
+  return useQuery({
+    queryKey: queryKeys.claudeExtension,
+    queryFn: async () => {
+      try {
+        const res = await fetch(EXTENSION_URL(), { method: 'HEAD' });
+        return res.ok && !(res.headers.get('content-type') ?? '').includes('text/html');
+      } catch {
+        return false;
+      }
+    },
+    staleTime: Infinity,
+    meta: { errorToast: false },
   });
 }

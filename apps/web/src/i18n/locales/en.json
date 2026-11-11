@@ -1141,7 +1141,18 @@
       "revoke": "Revoke",
       "revokeTitle": "Revoke “{{name}}”?",
       "revokeBody": "Claude Desktop stops working with this token right away. This can’t be undone.",
-      "revoked": "Token revoked"
+      "revoked": "Token revoked",
+      "step1": "Download the extension",
+      "step1Hint": "Open the downloaded file: Claude Desktop installs it and asks for the settings below.",
+      "download": "Download for Claude Desktop",
+      "step2": "Fill in its settings",
+      "addressLabel": "Kite address",
+      "addressNote": "Paste it into “Kite address”.",
+      "copyAddress": "Copy address",
+      "workspaceNote": "Workspace (optional): {{slug}}",
+      "step3": "Ask Claude",
+      "step3Hint": "For example: “What’s on my plate today in Kite?” Teammates do the same with their own token.",
+      "manualSummary": "Set up without the extension (developers)"
     }
   },
   "errors": {

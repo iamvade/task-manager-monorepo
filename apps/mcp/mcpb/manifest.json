@@ -1,0 +1,105 @@
+{
+  "manifest_version": "0.2",
+  "name": "kite-tasks",
+  "display_name": "Kite Tasks",
+  "version": "0.0.0",
+  "description": "Read your Kite tasks and make everyday changes as you: create, update, complete, comment.",
+  "long_description": "Connects Claude Desktop to your team's Kite Tasks. Claude can read My Tasks, search, open tasks with their comments, list projects, members and your inbox, and create, update, complete or comment on tasks as you. It can't delete anything. Create a token in Kite: Settings → Claude.",
+  "author": {
+    "name": "Kite Tasks"
+  },
+  "icon": "icon.png",
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.mjs",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/index.mjs"],
+      "env": {
+        "KITE_URL": "${user_config.kite_url}",
+        "KITE_TOKEN": "${user_config.kite_token}",
+        "KITE_WORKSPACE": "${user_config.kite_workspace}"
+      }
+    }
+  },
+  "user_config": {
+    "kite_url": {
+      "type": "string",
+      "title": "Kite address",
+      "description": "The address you open Kite at, e.g. https://kite.example.com/task-manager. Copy it from Kite: Settings → Claude.",
+      "required": true
+    },
+    "kite_token": {
+      "type": "string",
+      "title": "Kite token",
+      "description": "A token from Kite: Settings → Claude → Create token. Anyone with it can act as you in Kite.",
+      "required": true,
+      "sensitive": true
+    },
+    "kite_workspace": {
+      "type": "string",
+      "title": "Workspace (optional)",
+      "description": "Workspace slug to use by default when you are in several, e.g. kite-studio.",
+      "required": false,
+      "default": ""
+    }
+  },
+  "tools": [
+    {
+      "name": "list_workspaces",
+      "description": "Who I am and my workspaces"
+    },
+    {
+      "name": "my_tasks",
+      "description": "My Tasks: overdue, today, this week, later, requested"
+    },
+    {
+      "name": "search",
+      "description": "Search tasks, projects, people and comments"
+    },
+    {
+      "name": "get_task",
+      "description": "One task with its description, subtasks and comments"
+    },
+    {
+      "name": "list_projects",
+      "description": "Spaces and their open projects"
+    },
+    {
+      "name": "list_tasks",
+      "description": "A project's tasks by status, assignee or text"
+    },
+    {
+      "name": "list_members",
+      "description": "People in a workspace and who is out of office"
+    },
+    {
+      "name": "inbox",
+      "description": "My latest notifications"
+    },
+    {
+      "name": "create_task",
+      "description": "Create a task as me"
+    },
+    {
+      "name": "update_task",
+      "description": "Change title, description, status, priority, due date or assignees"
+    },
+    {
+      "name": "complete_task",
+      "description": "Mark a task done or reopen it"
+    },
+    {
+      "name": "add_comment",
+      "description": "Comment on a task, optionally @mentioning people"
+    }
+  ],
+  "compatibility": {
+    "platforms": ["darwin", "win32"],
+    "runtimes": {
+      "node": ">=20.0.0"
+    }
+  },
+  "keywords": ["tasks", "project management", "kite"],
+  "license": "UNLICENSED"
+}

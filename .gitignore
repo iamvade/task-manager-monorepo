@@ -15,3 +15,6 @@ backups/
 
 # Usability review screenshots (14 MB of PNGs; the review text is committed)
 docs/review/screenshots/
+
+# Claude Desktop extension staging (apps/mcp/scripts/pack-mcpb.mjs)
+apps/mcp/.mcpb-stage/

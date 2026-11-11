@@ -9,6 +9,7 @@ import { routes } from '../../router';
 import { useToastStore } from '../../stores/toast';
 import { useUiStore } from '../../stores/ui';
 import { ME, SIDEBAR, WORKSPACE_ID, mockApi } from '../../test/fixtures';
+import { EXTENSION_URL } from '../../api/mcpTokens';
 import { desktopConfig } from './claudeConfig';
 
 const TOKEN = 'k'.repeat(43);
@@ -25,12 +26,17 @@ const device = (id: string, client: string, deviceLabel: string) => ({
 const OLD = device('01890000-0000-7000-8000-000000000a01', 'mcp', 'Work Mac');
 const BROWSER = device('01890000-0000-7000-8000-000000000a02', 'web', 'Chrome on macOS');
 
-function renderClaude() {
+function renderClaude(extension: 'served' | 'missing' = 'missing') {
   let devices = [OLD, BROWSER];
   const fetchMock = mockApi({
     'GET /api/v1/auth/me': () => Response.json(ME_EN),
     [`GET /api/v1/workspaces/${WORKSPACE_ID}/sidebar`]: () => Response.json(SIDEBAR),
     'GET /api/v1/auth/sessions': () => Response.json(devices),
+    // Caddy and Vite answer a missing file with index.html (200), so that counts as absent.
+    [`HEAD ${EXTENSION_URL()}`]: () =>
+      extension === 'served'
+        ? new Response(null, { headers: { 'content-length': '342453' } })
+        : new Response(null, { headers: { 'content-type': 'text/html; charset=utf-8' } }),
     'POST /api/v1/auth/mcp-tokens': () => {
       const created = device('01890000-0000-7000-8000-000000000a03', 'mcp', 'Claude Desktop');
       devices = [created, ...devices];
@@ -82,6 +88,26 @@ describe('Settings → Claude', () => {
     expect(await screen.findByLabelText('Token for Claude Desktop')).toHaveValue(TOKEN);
     expect(screen.getByText(/"KITE_TOKEN": "k{43}"/)).toBeInTheDocument();
     expect(await screen.findByText('Claude Desktop')).toBeInTheDocument();
+  });
+
+  it('offers the extension in three steps when the server serves it', async () => {
+    renderClaude('served');
+    fireEvent.click(await screen.findByRole('button', { name: 'Create token' }));
+    const download = await screen.findByRole('link', { name: 'Download for Claude Desktop' });
+    expect(download).toHaveAttribute('href', EXTENSION_URL());
+    expect(download).toHaveAttribute('download', 'kite-tasks.mcpb');
+    expect(screen.getByLabelText('Kite address')).toHaveValue(window.location.origin);
+    expect(screen.getByLabelText('Token for Claude Desktop')).toHaveValue(TOKEN);
+    // The manual config is still there, folded away.
+    expect(screen.getByText('Set up without the extension (developers)')).toBeInTheDocument();
+  });
+
+  it('shows only the manual config when the extension is not served', async () => {
+    renderClaude('missing');
+    fireEvent.click(await screen.findByRole('button', { name: 'Create token' }));
+    expect(await screen.findByLabelText('Token for Claude Desktop')).toHaveValue(TOKEN);
+    expect(screen.queryByRole('link', { name: 'Download for Claude Desktop' })).toBeNull();
+    expect(screen.queryByText('Set up without the extension (developers)')).toBeNull();
   });
 
   it('revokes a token after confirming', async () => {

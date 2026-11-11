@@ -1,9 +1,11 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import pkg from '../package.json' with { type: 'json' };
 import type { Kite } from './kite.js';
 import { registerTools } from './tools.js';
 
 export const SERVER_NAME = 'kite-tasks';
-export const SERVER_VERSION = '0.1.0';
+/** From package.json, which also versions the .mcpb (scripts/pack-mcpb.mjs). */
+export const SERVER_VERSION = pkg.version;
 
 const INSTRUCTIONS = `Kite Tasks: the team's task manager (workspaces → spaces → projects → tasks keyed like APP-142).
 You act as the person whose token this is: everything you create or change is shown as done by them, and teammates are notified as usual.
