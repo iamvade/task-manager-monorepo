@@ -2,7 +2,7 @@
 export interface McpConfig {
   /** Origin plus any sub-path, no trailing slash: `http://localhost:3000`, `https://host/task-manager`. */
   baseUrl: string;
-  /** A token from Settings → Connect Claude (43 base64url characters). */
+  /** A token from Settings → Claude (43 base64url characters). */
   token: string;
   /** Workspace slug to use when a tool call names none. */
   workspace: string | undefined;
@@ -34,7 +34,7 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): McpConfig {
   const token = env.KITE_TOKEN?.trim() ?? '';
   if (!TOKEN.test(token)) {
     throw new ConfigError(
-      'KITE_TOKEN is missing or malformed. Create one in Kite: Settings → Connect Claude.',
+      'KITE_TOKEN is missing or malformed. Create one in Kite: Settings → Claude.',
     );
   }
 

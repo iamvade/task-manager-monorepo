@@ -133,7 +133,7 @@ export const authRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Auth'],
         summary: 'Create an MCP token',
         description:
-          'Settings → Connect Claude: a bearer token for a local MCP server (Claude Desktop) that acts as me. Returned once; listed in `GET /auth/sessions` with `client: "mcp"` and revoked with `DELETE /auth/sessions/:id`. Same 30-day sliding expiry as other sessions but no 90-day cap; a password reset ends it. Only from a web session (cookie): a bearer request (app or MCP token) answers 403 `COOKIE_SESSION_REQUIRED`, so a leaked token can’t make more. The token is the whole account: what Claude may do is limited by the MCP server’s tools, not by the server.',
+          'Settings → Claude: a bearer token for a local MCP server (Claude Desktop) that acts as me. Returned once; listed in `GET /auth/sessions` with `client: "mcp"` and revoked with `DELETE /auth/sessions/:id`. Same 30-day sliding expiry as other sessions but no 90-day cap; a password reset ends it. Only from a web session (cookie): a bearer request (app or MCP token) answers 403 `COOKIE_SESSION_REQUIRED`, so a leaked token can’t make more; the platform admin gets 403 `FORBIDDEN`. The token is the whole account: what Claude may do is limited by the MCP server’s tools, not by the server.',
         body: createMcpTokenSchema,
         response: { 201: mcpTokenSchema, 401: apiErrorSchema, 403: apiErrorSchema },
       },
@@ -146,6 +146,11 @@ export const authRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           'COOKIE_SESSION_REQUIRED',
           'MCP tokens can only be created from the web app',
         );
+      }
+      // The platform admin is in no workspace (nothing for the tools to do) and an uncapped
+      // token reaching /admin is not worth the risk.
+      if (user.platformRole !== null) {
+        throw httpError(403, 'FORBIDDEN', 'The platform admin cannot create MCP tokens');
       }
       await deleteExpiredSessions(app.db, user.id);
       const session = await createSession(app.db, user.id, request, {

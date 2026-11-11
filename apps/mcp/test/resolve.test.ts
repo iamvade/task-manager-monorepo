@@ -48,7 +48,7 @@ describe('readConfig', () => {
     [{ KITE_TOKEN: TOKEN }, /KITE_URL is not set/],
     [{ KITE_URL: 'ftp://x', KITE_TOKEN: TOKEN }, /http/],
     [{ KITE_URL: 'https://u:p@h.example', KITE_TOKEN: TOKEN }, /no credentials/],
-    [{ KITE_URL: 'https://h.example' }, /Settings → Connect Claude/],
+    [{ KITE_URL: 'https://h.example' }, /Settings → Claude/],
     [{ KITE_URL: 'https://h.example', KITE_TOKEN: 'short' }, /malformed/],
   ])('rejects %o', (env, message) => {
     expect(() => readConfig(env)).toThrow(ConfigError);

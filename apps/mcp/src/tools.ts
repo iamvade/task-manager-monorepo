@@ -6,6 +6,7 @@
 import {
   PRIORITIES,
   commentSchema,
+  currentAbsence,
   homeSchema,
   notificationPageSchema,
   plainToRichText,
@@ -13,6 +14,7 @@ import {
   searchResultSchema,
   taskDetailSchema,
   taskListItemSchema,
+  todayInZone,
   type RichTextNode,
   type TaskDetail,
 } from '@kite/shared';
@@ -20,11 +22,20 @@ import { NetworkError, isApiError, toQuery } from '@kite/shared/client';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import { names, section, taskLine, userContent } from './format.js';
+import { names, oneLine, section, taskLine, userContent } from './format.js';
 import type { Kite, Workspace } from './kite.js';
 import { ToolError, matchMember, matchStatus, parseDate, statusLabel, taskKey } from './resolve.js';
 
 const LIST_LIMIT = 100;
+
+/** Today in the person's zone; an unknown zone falls back to Kite's default. */
+function todayIn(timeZone: string): string {
+  try {
+    return todayInZone(timeZone);
+  } catch {
+    return todayInZone('Asia/Ulaanbaatar');
+  }
+}
 
 const workspaceArg = z
   .string()
@@ -47,7 +58,7 @@ export function errorResult(err: unknown): CallToolResult {
   else if (isApiError(err)) {
     if (err.status === 401) {
       message =
-        'Kite rejected the token (revoked or expired). Create a new one in Kite: Settings → Connect Claude, then update KITE_TOKEN and restart Claude Desktop.';
+        'Kite rejected the token (revoked or expired). Create a new one in Kite: Settings → Claude, then update KITE_TOKEN and restart Claude Desktop.';
     } else if (err.status === 404) message = `Not found in Kite (${err.message}).`;
     else message = `Kite said ${err.status} ${err.code}: ${err.message}`;
   } else if (err instanceof Error && err.name === 'ZodError') {
@@ -111,8 +122,8 @@ export function registerTools(server: McpServer, kite: Kite): void {
     },
     run(async () => {
       const me = await kite.me();
-      const lines = me.workspaces.map((w) => `${w.slug} · ${w.name} · ${w.role}`);
-      return `Signed in as ${me.user.name} <${me.user.email}>, time zone ${me.preferences.timezone}.\n${section('Workspaces', lines)}`;
+      const lines = me.workspaces.map((w) => `${w.slug} · ${oneLine(w.name)} · ${w.role}`);
+      return `Signed in as ${oneLine(me.user.name)} <${me.user.email}>, time zone ${me.preferences.timezone}.\n${section('Workspaces', lines)}`;
     }),
   );
 
@@ -168,7 +179,7 @@ export function registerTools(server: McpServer, kite: Kite): void {
           r.tasks.map((t) =>
             [
               t.key,
-              t.title,
+              oneLine(t.title),
               statusLabel(t.status),
               t.dueDate ? `due ${t.dueDate}` : null,
               names(t.assignees),
@@ -179,16 +190,17 @@ export function registerTools(server: McpServer, kite: Kite): void {
         ),
         section(
           'Projects',
-          r.projects.map((p) => `${p.key} · ${p.name}`),
+          r.projects.map((p) => `${p.key} · ${oneLine(p.name)}`),
         ),
         section(
           'People',
-          r.people.map((p) => p.name),
+          r.people.map((p) => oneLine(p.name)),
         ),
         section(
           'Comments',
           r.comments.map(
-            (c) => `${c.task.key} · ${c.author.name}: ${userContent(c.snippet, 'comment snippet')}`,
+            (c) =>
+              `${c.task.key} · ${oneLine(c.author.name)}: ${userContent(c.snippet, 'comment snippet')}`,
           ),
         ),
       ].join('\n\n');
@@ -212,21 +224,23 @@ export function registerTools(server: McpServer, kite: Kite): void {
       const ws = await kite.workspace(workspace);
       const t = await task(ws, key);
       const lines = [
-        `# ${t.key} · ${t.title}`,
+        `# ${t.key} · ${oneLine(t.title)}`,
         `Link: ${kite.taskUrl(ws, t.key)}`,
-        `Project: ${t.project.key} (${t.project.name})`,
+        `Project: ${t.project.key} (${oneLine(t.project.name)})`,
         `Status: ${statusLabel(t.status)} (${t.status.category})`,
         `Priority: ${t.priority}${t.size ? ` · Size ${t.size}` : ''}`,
         `Assignees: ${names(t.assignees)}`,
-        `Reviewer: ${t.reviewer?.name ?? 'none'}`,
+        `Reviewer: ${t.reviewer ? oneLine(t.reviewer.name) : 'none'}`,
         `Start: ${t.startDate ?? '—'} · Due: ${t.dueDate ?? '—'}`,
-        `Sprint: ${t.sprint ? (t.sprint.name ?? `Sprint ${t.sprint.number}`) : 'none'}`,
-        `Tags: ${t.tags.map((g) => g.name).join(', ') || 'none'}`,
-        `Created by ${t.creator.name} on ${t.createdAt.slice(0, 10)}; updated ${t.updatedAt.slice(0, 10)}`,
+        `Sprint: ${t.sprint ? oneLine(t.sprint.name ?? `Sprint ${t.sprint.number}`) : 'none'}`,
+        `Tags: ${t.tags.map((g) => oneLine(g.name)).join(', ') || 'none'}`,
+        `Created by ${oneLine(t.creator.name)} on ${t.createdAt.slice(0, 10)}; updated ${t.updatedAt.slice(0, 10)}`,
       ];
       if (t.deletedAt) lines.push('This task is deleted (in the trash).');
       if (t.blocked && t.status.category !== 'done') {
-        lines.push(`Blocked (from ${t.blocked.groupName}'s standup on ${t.blocked.date}).`);
+        lines.push(
+          `Blocked (from ${oneLine(t.blocked.groupName)}'s standup on ${t.blocked.date}).`,
+        );
       }
       lines.push(
         '',
@@ -235,7 +249,7 @@ export function registerTools(server: McpServer, kite: Kite): void {
         '',
         section(
           `Subtasks (${t.subtaskProgress.done}/${t.subtaskProgress.total} done)`,
-          t.subtasks.map((s) => `[${s.done ? 'x' : ' '}] ${s.title}`),
+          t.subtasks.map((s) => `[${s.done ? 'x' : ' '}] ${oneLine(s.title)}`),
         ),
       );
       if (include_comments) {
@@ -247,7 +261,7 @@ export function registerTools(server: McpServer, kite: Kite): void {
           ...thread.map((c) =>
             c.body === null
               ? '- (deleted comment)'
-              : `- ${c.author.name}, ${c.createdAt.slice(0, 16).replace('T', ' ')} UTC:\n${userContent(c.bodyText, `comment by ${c.author.name}`)}`,
+              : `- ${oneLine(c.author.name)}, ${c.createdAt.slice(0, 16).replace('T', ' ')} UTC:\n${userContent(c.bodyText, `comment by ${c.author.name}`)}`,
           ),
         );
       }
@@ -269,8 +283,8 @@ export function registerTools(server: McpServer, kite: Kite): void {
       return spaces
         .map((s) =>
           section(
-            s.name,
-            s.projects.map((p) => `${p.key} · ${p.name}`),
+            oneLine(s.name),
+            s.projects.map((p) => `${p.key} · ${oneLine(p.name)}`),
           ),
         )
         .join('\n\n');
@@ -320,7 +334,7 @@ export function registerTools(server: McpServer, kite: Kite): void {
         tasks.length > LIST_LIMIT
           ? `\n…and ${tasks.length - LIST_LIMIT} more; narrow the filter.`
           : '';
-      return `${section(`${p.key} · ${p.name} (${tasks.length})`, shown)}${more}`;
+      return `${section(`${p.key} · ${oneLine(p.name)} (${tasks.length})`, shown)}${more}`;
     }),
   );
 
@@ -334,18 +348,19 @@ export function registerTools(server: McpServer, kite: Kite): void {
     },
     run(async ({ workspace }) => {
       const ws = await kite.workspace(workspace);
-      const members = await kite.members(ws.id);
-      const today = new Date().toISOString().slice(0, 10);
+      const [members, me] = await Promise.all([kite.members(ws.id), kite.me()]);
+      // "Out of office" is about the person's own day, not UTC's.
+      const today = todayIn(me.preferences.timezone);
       return section(
-        `Members of ${ws.name}`,
+        `Members of ${oneLine(ws.name)}`,
         members.map((m) => {
-          const away = m.absences.find((a) => a.startDate <= today && a.endDate >= today);
+          const away = currentAbsence(m.absences, today);
           return [
-            m.user.name,
+            oneLine(m.user.name),
             m.user.email,
             m.role,
-            m.title,
-            away ? `out of office until ${away.endDate}` : null,
+            m.title ? oneLine(m.title) : null,
+            away ? `out of office until ${away.until}` : null,
           ]
             .filter(Boolean)
             .join(' · ');
@@ -376,11 +391,11 @@ export function registerTools(server: McpServer, kite: Kite): void {
       const items = unread_only ? page.items.filter((n) => n.readAt === null) : page.items;
       const lines = items.map((n) => {
         const subject = n.task
-          ? `${n.task.key} ${n.task.title}`
+          ? `${n.task.key} ${oneLine(n.task.title)}`
           : n.standup
-            ? `standup ${n.standup.groupName} ${n.standup.date}`
+            ? `standup ${oneLine(n.standup.groupName)} ${n.standup.date}`
             : '';
-        const who = n.actor?.name ?? 'Kite';
+        const who = oneLine(n.actor?.name ?? 'Kite');
         const snippet = n.snippet ? `\n${userContent(n.snippet, `${n.type} from ${who}`)}` : '';
         return `${n.readAt ? '' : '[unread] '}${n.type} · ${who} · ${subject} · ${n.createdAt.slice(0, 16).replace('T', ' ')} UTC${snippet}`;
       });
@@ -483,10 +498,24 @@ export function registerTools(server: McpServer, kite: Kite): void {
         t = await kite.api.apiSend(`/tasks/${t.id}`, taskDetailSchema, 'PATCH', patch);
       }
       if (userIds !== undefined) {
-        const row = await kite.api.apiSend(`/tasks/${t.id}/assignees`, taskListItemSchema, 'PUT', {
-          userIds,
-        });
-        return `Updated ${taskLine(row)}`;
+        try {
+          const row = await kite.api.apiSend(
+            `/tasks/${t.id}/assignees`,
+            taskListItemSchema,
+            'PUT',
+            { userIds },
+          );
+          return `Updated ${taskLine(row)}`;
+        } catch (err) {
+          if (Object.keys(patch).length === 0) throw err;
+          // The other fields are already saved; say so instead of reporting a plain failure.
+          const reason = errorResult(err)
+            .content.map((c) => (c.type === 'text' ? c.text : ''))
+            .join('');
+          throw new ToolError(
+            `Saved ${Object.keys(patch).join(', ')} on ${t.key}, but changing assignees failed: ${reason}`,
+          );
+        }
       }
       return `Updated ${taskLine(t)}`;
     }),
@@ -531,7 +560,9 @@ export function registerTools(server: McpServer, kite: Kite): void {
       await kite.api.apiSend(`/tasks/${t.id}/comments`, commentSchema, 'POST', {
         body: richBody(body, people),
       });
-      const tagged = people.length ? ` (mentioned: ${people.map((p) => p.name).join(', ')})` : '';
+      const tagged = people.length
+        ? ` (mentioned: ${people.map((p) => oneLine(p.name)).join(', ')})`
+        : '';
       return `Commented on ${t.key}${tagged}\n${kite.taskUrl(ws, t.key)}`;
     }),
   );

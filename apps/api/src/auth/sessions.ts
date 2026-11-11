@@ -19,7 +19,7 @@ export const sessionExpiry = (now = new Date()) => new Date(now.getTime() + SESS
 
 /**
  * A session that still works at `now`: not expired, and signed in less than
- * `SESSION_MAX_AGE_MS` ago. MCP tokens (Settings → Connect Claude) have no 90-day cap: they
+ * `SESSION_MAX_AGE_MS` ago. MCP tokens (Settings → Claude) have no 90-day cap: they
  * still lapse after 30 days unused, and Signed-in devices or a password reset ends them.
  */
 export function liveSession(now: Date): SQL | undefined {

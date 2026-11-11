@@ -4,7 +4,7 @@ import type { InjectOptions } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { hashToken } from '../src/auth/tokens.js';
 import { one } from '../src/db/rows.js';
-import { sessions } from '../src/db/schema/index.js';
+import { sessions, users } from '../src/db/schema/index.js';
 import {
   ORIGIN,
   PASSWORD,
@@ -19,7 +19,7 @@ import { createTestApp } from './helpers.js';
 
 const DAY = 24 * 60 * 60 * 1000;
 
-describe('MCP tokens (Settings → Connect Claude)', () => {
+describe('MCP tokens (Settings → Claude)', () => {
   let ctx: Awaited<ReturnType<typeof createTestApp>>;
 
   beforeAll(async () => {
@@ -98,6 +98,15 @@ describe('MCP tokens (Settings → Connect Claude)', () => {
     });
     expect(foreign.statusCode).toBe(403);
     expect(errorCode(foreign)).toBe('CSRF_REJECTED');
+  });
+
+  it('is refused to the platform admin', async () => {
+    const user = await createUser(ctx.db);
+    await ctx.db.update(users).set({ platformRole: 'vade' }).where(eq(users.id, user.id));
+    const cookie = await login(ctx.app, user.email);
+    const res = await createToken(cookie);
+    expect(res.statusCode).toBe(403);
+    expect(errorCode(res)).toBe('FORBIDDEN');
   });
 
   it('password sign-in cannot ask for an mcp session', async () => {

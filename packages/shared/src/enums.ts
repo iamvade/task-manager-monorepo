@@ -61,7 +61,7 @@ export type PlatformRole = z.infer<typeof platformRoleSchema>;
 
 /**
  * What a session was signed in from: the web app (cookie), a native app (bearer token), or an
- * MCP token made in Settings → Connect Claude (bearer token, never from a password sign-in).
+ * MCP token made in Settings → Claude (bearer token, never from a password sign-in).
  */
 export const SESSION_CLIENTS = ['web', 'mobile', 'mcp'] as const;
 export const sessionClientSchema = z.enum(SESSION_CLIENTS);

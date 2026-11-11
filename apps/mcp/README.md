@@ -27,7 +27,7 @@ Phase 1 of the Claude Desktop integration. A one-click `.mcpb` package and a rem
 
 2. **Create a token** in Kite: **Settings → Claude → Create token**. The token is shown once. The page also shows a ready `claude_desktop_config.json` entry.
 
-3. **Add it to Claude Desktop**: Settings → Developer → Edit Config, then merge in the entry and replace the path with your checkout's absolute path:
+3. **Add it to Claude Desktop**: merge the entry into its `claude_desktop_config.json` (macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`; the app's developer settings can open it) and replace the path with your checkout's absolute path:
 
    ```json
    {
@@ -45,7 +45,7 @@ Phase 1 of the Claude Desktop integration. A one-click `.mcpb` package and a rem
    }
    ```
 
-4. **Restart Claude Desktop.** "kite-tasks" appears under the tools (🔨) menu.
+4. **Restart Claude Desktop.** "kite-tasks" then shows among its connected tools; ask something like "what's on my plate today in Kite?"
 
 | Variable         | Required | Meaning                                                                                                                                                                                                  |
 | ---------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -6,8 +6,14 @@
 import type { MyTask, TaskListItem, UserRef } from '@kite/shared';
 import { statusLabel } from './resolve.js';
 
+/**
+ * One line of text people typed (titles, names): whitespace runs, newlines included, become one
+ * space, so a title can't forge extra lines or headings in a tool result.
+ */
+export const oneLine = (text: string) => text.replace(/\s+/g, ' ').trim();
+
 const names = (people: readonly UserRef[]) =>
-  people.length ? people.map((p) => p.name).join(', ') : 'unassigned';
+  people.length ? people.map((p) => oneLine(p.name)).join(', ') : 'unassigned';
 
 /** Text people wrote, fenced; a closing tag inside it can't end the fence early. */
 export function userContent(text: string, source: string): string {
@@ -22,7 +28,7 @@ export function taskLine(
     assignees: readonly UserRef[];
   },
 ): string {
-  const parts = [task.key, task.title, statusLabel(task.status)];
+  const parts = [task.key, oneLine(task.title), oneLine(statusLabel(task.status))];
   if (task.priority !== 'none') parts.push(task.priority);
   if (task.dueDate) parts.push(`due ${task.dueDate}`);
   parts.push(names(task.assignees));

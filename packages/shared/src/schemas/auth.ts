@@ -116,7 +116,7 @@ export const signedInDeviceSchema = z
   .meta({ id: 'SignedInDevice' });
 export type SignedInDevice = z.infer<typeof signedInDeviceSchema>;
 
-/** Settings → Connect Claude: makes a bearer token for a local MCP server (Claude Desktop). */
+/** Settings → Claude: makes a bearer token for a local MCP server (Claude Desktop). */
 export const createMcpTokenSchema = z
   .object({
     /** Shown in Signed-in devices; defaults to `Claude Desktop`. */
