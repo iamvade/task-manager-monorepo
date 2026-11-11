@@ -1,8 +1,9 @@
 import type { SessionClient } from '@kite/shared';
-import { and, eq, lt } from 'drizzle-orm';
+import { and, eq, gt, lt, or, type SQL } from 'drizzle-orm';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { secureCookies, webBasePath, type Config } from '../config.js';
 import type { DbOrTx } from '../db/client.js';
+import { one } from '../db/rows.js';
 import { sessions } from '../db/schema/index.js';
 import { parseDevice } from '../feedback/device.js';
 import { hashToken, newToken } from './tokens.js';
@@ -16,10 +17,28 @@ export const SESSION_REFRESH_MS = 24 * 60 * 60 * 1000;
 
 export const sessionExpiry = (now = new Date()) => new Date(now.getTime() + SESSION_TTL_MS);
 
+/**
+ * A session that still works at `now`: not expired, and signed in less than
+ * `SESSION_MAX_AGE_MS` ago. MCP tokens (Settings → Connect Claude) have no 90-day cap: they
+ * still lapse after 30 days unused, and Signed-in devices or a password reset ends them.
+ */
+export function liveSession(now: Date): SQL | undefined {
+  return and(
+    gt(sessions.expiresAt, now),
+    or(
+      eq(sessions.client, 'mcp'),
+      gt(sessions.createdAt, new Date(now.getTime() - SESSION_MAX_AGE_MS)),
+    ),
+  );
+}
+
 export interface NewSession {
-  /** The raw token: the cookie value (web) or returned once in the body (mobile). */
+  /** The raw token: the cookie value (web) or returned once in the body (mobile, MCP). */
   token: string;
   expiresAt: Date;
+  /** The id Signed-in devices lists and revokes by. */
+  publicId: string;
+  deviceLabel: string | null;
 }
 
 /** What a sign-in request says about itself (`client`, `deviceName` from the login/accept body). */
@@ -47,14 +66,18 @@ export async function createSession(
 ): Promise<NewSession> {
   const token = newToken();
   const expiresAt = sessionExpiry();
-  await db.insert(sessions).values({
-    id: hashToken(token),
-    userId,
-    client: origin.client ?? 'web',
-    deviceLabel: deviceLabel(request, origin.deviceName),
-    expiresAt,
-  });
-  return { token, expiresAt };
+  const rows = await db
+    .insert(sessions)
+    .values({
+      id: hashToken(token),
+      userId,
+      client: origin.client ?? 'web',
+      deviceLabel: deviceLabel(request, origin.deviceName),
+      expiresAt,
+    })
+    .returning({ publicId: sessions.publicId, deviceLabel: sessions.deviceLabel });
+  const row = one(rows, 'session');
+  return { token, expiresAt, publicId: row.publicId, deviceLabel: row.deviceLabel };
 }
 
 export async function deleteExpiredSessions(db: DbOrTx, userId: string): Promise<void> {

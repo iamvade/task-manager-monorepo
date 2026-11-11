@@ -47,7 +47,7 @@ export default tseslint.config(
     ...tseslint.configs.disableTypeChecked,
   },
   {
-    files: ['apps/api/**/*.ts', 'packages/shared/**/*.ts'],
+    files: ['apps/api/**/*.ts', 'apps/mcp/**/*.ts', 'packages/shared/**/*.ts'],
     languageOptions: { globals: globals.node },
   },
   {

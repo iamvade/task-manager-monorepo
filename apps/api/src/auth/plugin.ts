@@ -1,13 +1,13 @@
-import { and, eq, gt } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { sessions, users } from '../db/schema/index.js';
 import { errorBody, httpError } from '../errors.js';
 import {
   SESSION_COOKIE,
-  SESSION_MAX_AGE_MS,
   SESSION_REFRESH_MS,
   SESSION_TTL_MS,
   clearSessionCookie,
+  liveSession,
   sessionExpiry,
   setSessionCookie,
 } from './sessions.js';
@@ -77,7 +77,7 @@ export function originAllowed(request: FastifyRequest, webOrigin: string): boole
 /**
  * Looks up the session (cookie or bearer token) without failing the request. Pushes the expiry
  * forward (and re-sends the cookie) when the last refresh was more than a day ago, but never past
- * `SESSION_MAX_AGE_MS` after sign-in. A bearer request never gets a cookie set or cleared.
+ * `SESSION_MAX_AGE_MS` after sign-in (MCP tokens: no cap, see `liveSession`). A bearer request never gets a cookie set or cleared.
  */
 export async function resolveSession(
   request: FastifyRequest,
@@ -95,13 +95,7 @@ export async function resolveSession(
     .select({ user: users, expiresAt: sessions.expiresAt })
     .from(sessions)
     .innerJoin(users, eq(users.id, sessions.userId))
-    .where(
-      and(
-        eq(sessions.id, sessionId),
-        gt(sessions.expiresAt, now),
-        gt(sessions.createdAt, new Date(now.getTime() - SESSION_MAX_AGE_MS)),
-      ),
-    )
+    .where(and(eq(sessions.id, sessionId), liveSession(now)))
     .limit(1);
   if (!row) {
     if (via === 'cookie') clearSessionCookie(reply, config);

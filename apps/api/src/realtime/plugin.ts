@@ -1,13 +1,13 @@
 import websocket from '@fastify/websocket';
 import { REALTIME_CLOSE_UNAUTHORIZED } from '@kite/shared';
-import { and, gt, inArray } from 'drizzle-orm';
+import { and, inArray } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import { sessions, workspaceMembers } from '../db/schema/index.js';
 import { LocalBroadcaster, type Broadcaster } from './broadcaster.js';
 import { RealtimeHub } from './hub.js';
 import { toRealtime } from './messages.js';
 import { activeMember } from '../auth/membership.js';
-import { SESSION_MAX_AGE_MS } from '../auth/sessions.js';
+import { liveSession } from '../auth/sessions.js';
 
 /** Ping every socket this often; one that missed the previous ping is dropped. */
 const HEARTBEAT_MS = 25_000;
@@ -78,11 +78,7 @@ export async function revalidate(app: FastifyInstance): Promise<void> {
     .select({ id: sessions.id })
     .from(sessions)
     .where(
-      and(
-        inArray(sessions.id, [...new Set(conns.map((c) => c.sessionId))]),
-        gt(sessions.expiresAt, now),
-        gt(sessions.createdAt, new Date(now.getTime() - SESSION_MAX_AGE_MS)),
-      ),
+      and(inArray(sessions.id, [...new Set(conns.map((c) => c.sessionId))]), liveSession(now)),
     );
   const members = await app.db
     .select({ workspaceId: workspaceMembers.workspaceId, userId: workspaceMembers.userId })

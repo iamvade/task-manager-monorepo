@@ -8,6 +8,7 @@ import {
   paletteKeySchema,
   platformRoleSchema,
   sessionClientSchema,
+  signInClientSchema,
   themeSchema,
   workspaceRoleSchema,
 } from '../enums.js';
@@ -35,7 +36,7 @@ export const timezoneSchema = z.string().refine((tz) => {
  * session in the signed-in devices list. Absent `client` = the web app.
  */
 const sessionRequestFields = {
-  client: sessionClientSchema.optional(),
+  client: signInClientSchema.optional(),
   deviceName: z.string().trim().min(1).max(80).optional(),
 };
 
@@ -114,6 +115,29 @@ export const signedInDeviceSchema = z
   })
   .meta({ id: 'SignedInDevice' });
 export type SignedInDevice = z.infer<typeof signedInDeviceSchema>;
+
+/** Settings → Connect Claude: makes a bearer token for a local MCP server (Claude Desktop). */
+export const createMcpTokenSchema = z
+  .object({
+    /** Shown in Signed-in devices; defaults to `Claude Desktop`. */
+    name: z.string().trim().min(1).max(80).optional(),
+  })
+  .strict()
+  .meta({ id: 'CreateMcpToken' });
+export type CreateMcpToken = z.infer<typeof createMcpTokenSchema>;
+
+/** The new MCP token: `token` is shown once (only its SHA-256 is stored). */
+export const mcpTokenSchema = z
+  .object({
+    /** The session's id in `GET /auth/sessions` (revoke with `DELETE /auth/sessions/:id`). */
+    id: z.uuid(),
+    token: z.string(),
+    deviceLabel: z.string(),
+    /** Sliding: moves forward while the token is used; no 90-day cap for MCP tokens. */
+    expiresAt: z.iso.datetime(),
+  })
+  .meta({ id: 'McpToken' });
+export type McpToken = z.infer<typeof mcpTokenSchema>;
 
 export const updateMeSchema = z
   .object({
