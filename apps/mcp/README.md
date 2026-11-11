@@ -133,7 +133,7 @@ pnpm --filter @kite/mcp pack:mcpb   # → apps/mcp/dist/kite-tasks.mcpb
 | `src/format.ts`         | Text output and the `<user_content>` fence                                      |
 | `src/tools.ts`          | The twelve tools and error messages                                             |
 | `src/server.ts`         | `McpServer` with its instructions                                               |
-| `mcpb/manifest.json`    | The extension's manifest (v0.3); its `version` is filled in from `package.json` |
+| `mcpb/manifest.json`    | The extension's manifest (v0.2); its `version` is filled in from `package.json` |
 | `scripts/pack-mcpb.mjs` | Builds, stages, validates and packs `dist/kite-tasks.mcpb`                      |
 
 `@kite/shared` ships TypeScript source, so tsup bundles everything (shared, the SDK, zod) into one `dist/index.js`. Rebuild after pulling changes to the shared schemas.

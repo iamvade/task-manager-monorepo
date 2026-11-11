@@ -32,6 +32,8 @@ export function ClaudeSection() {
   const { t } = useTranslation();
   const tokens = useMcpTokens();
   const create = useCreateMcpToken();
+  // Asked up front, so the steps don't replace the manual config just after a token appears.
+  useExtensionAvailable();
   const [name, setName] = useState('');
   const [created, setCreated] = useState<McpToken | null>(null);
   const nameId = useId();

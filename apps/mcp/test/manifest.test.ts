@@ -1,3 +1,4 @@
+import { getMcpConfigForManifest } from '@anthropic-ai/mcpb';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { describe, expect, it } from 'vitest';
@@ -34,6 +35,40 @@ describe('the .mcpb manifest', () => {
 
   it('takes its version from package.json, like the server', () => {
     expect(SERVER_VERSION).toBe(pkg.version);
+  });
+});
+
+describe('the manifest through Claude Desktop’s own loader (mcpb getMcpConfigForManifest)', () => {
+  const load = (userConfig: Record<string, string>) =>
+    getMcpConfigForManifest({
+      manifest: manifest as unknown as Parameters<typeof getMcpConfigForManifest>[0]['manifest'],
+      extensionPath: '/ext/kite-tasks',
+      systemDirs: {},
+      userConfig,
+      pathSeparator: '/',
+    });
+
+  it('runs the bundle with the settings, and the server accepts a blank workspace', async () => {
+    const config = await load({
+      kite_url: 'https://kite.example.com/task-manager',
+      kite_token: TOKEN,
+    });
+    expect(config?.args).toEqual(['/ext/kite-tasks/server/index.mjs']);
+    const env = config?.env ?? {};
+    expect(env).toEqual({
+      KITE_URL: 'https://kite.example.com/task-manager',
+      KITE_TOKEN: TOKEN,
+      KITE_WORKSPACE: '',
+    });
+    expect(readConfig(env)).toEqual({
+      baseUrl: 'https://kite.example.com/task-manager',
+      token: TOKEN,
+      workspace: undefined,
+    });
+  });
+
+  it('does not start the server while a required setting is missing', async () => {
+    expect(await load({ kite_url: 'https://kite.example.com' })).toBeUndefined();
   });
 });
 

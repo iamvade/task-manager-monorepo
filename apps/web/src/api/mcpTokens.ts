@@ -41,7 +41,7 @@ export const EXTENSION_URL = () => appUrl('/downloads/kite-tasks.mcpb');
  */
 export function useExtensionAvailable() {
   return useQuery({
-    queryKey: ['claude-extension'],
+    queryKey: queryKeys.claudeExtension,
     queryFn: async () => {
       try {
         const res = await fetch(EXTENSION_URL(), { method: 'HEAD' });
