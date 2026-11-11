@@ -181,7 +181,7 @@ docker compose ps
 docker compose logs --tail=50 migrate api
 ```
 
-There are a few seconds of downtime while the API restarts; open browsers reconnect by themselves. Migrations only move forward. To roll back, check out the previous version (`git checkout <tag-or-commit>`), build and `up -d` again; if the newer version had applied a migration, restore the backup from step 1 (below) as well.
+There are a few seconds of downtime while the API restarts; open browsers reconnect by themselves. The web image also builds the Claude Desktop extension and serves it at `/downloads/kite-tasks.mcpb` (Settings → Claude → Download); people using it download and open it again after an update. Migrations only move forward. To roll back, check out the previous version (`git checkout <tag-or-commit>`), build and `up -d` again; if the newer version had applied a migration, restore the backup from step 1 (below) as well.
 
 To keep older images around for a faster rollback, set `KITE_TAG` in `.env` to the version you're building (e.g. `KITE_TAG=2026-10-12`) before `docker compose build`; switching `KITE_TAG` back and running `up -d` then needs no rebuild.
 
