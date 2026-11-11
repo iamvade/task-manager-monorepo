@@ -13,6 +13,7 @@ const READ_ONLY = [
   'list_workspaces',
   'my_tasks',
   'search',
+  'standup_today',
 ];
 const WRITES = [
   'add_comment',
@@ -20,6 +21,7 @@ const WRITES = [
   'complete_subtask',
   'complete_task',
   'create_task',
+  'post_standup',
   'update_task',
 ];
 

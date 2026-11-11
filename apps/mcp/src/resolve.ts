@@ -5,6 +5,7 @@
 import {
   nameSearchKey,
   parseTaskKey,
+  type StandupGroup,
   type Status,
   type StatusCategory,
   type WorkspaceMember,
@@ -68,6 +69,8 @@ export function matchMember(
   members: readonly WorkspaceMember[],
   query: string,
   meId: string,
+  /** What to say when nobody matches (after `Nobody called "…" `). */
+  nobody = 'in this workspace. Use list_members to see who is there.',
 ): WorkspaceMember {
   const active = members.filter((m) => m.deactivatedAt === null);
   const raw = fold(query.replace(/^@/, ''));
@@ -91,9 +94,7 @@ export function matchMember(
       throw new ToolError(`"${query}" matches several people: ${names}. Use the email.`);
     }
   }
-  throw new ToolError(
-    `Nobody called "${query}" in this workspace. Use list_members to see who is there.`,
-  );
+  throw new ToolError(`Nobody called "${query}" ${nobody}`);
 }
 
 /** `app-142` → `APP-142`; anything else is a `ToolError`. */
@@ -140,4 +141,38 @@ export function matchSubtask<T extends { title: string }>(
     if (found) return found;
   }
   throw new ToolError(`No subtask "${query}". Subtasks: ${list}.`);
+}
+
+/**
+ * The standup group a call means. Standup content is for a group's members only, so only groups
+ * I am in can be picked: the one named (exact name, else a unique start of it), else my only
+ * group. Several and none named, or a group I'm not in, is a `ToolError`.
+ */
+export function matchStandupGroup(groups: readonly StandupGroup[], query?: string): StandupGroup {
+  const mine = groups.filter((g) => g.isMember);
+  const listOf = (list: readonly StandupGroup[]) =>
+    list.map((g) => `"${g.name.replace(/\s+/g, ' ').trim()}"`).join(', ') || 'none';
+  const named = query?.trim();
+  if (named) {
+    const q = fold(named);
+    const exact = groups.filter((g) => fold(g.name) === q || g.id === named);
+    const hits = exact.length > 0 ? exact : groups.filter((g) => fold(g.name).startsWith(q));
+    const [hit, ...more] = hits;
+    if (!hit) {
+      throw new ToolError(`No standup group "${named}". Your groups: ${listOf(mine)}.`);
+    }
+    if (more.length > 0) {
+      throw new ToolError(`"${named}" matches several standup groups: ${listOf(hits)}.`);
+    }
+    if (!hit.isMember) {
+      throw new ToolError(
+        `You are not a member of the standup group ${listOf([hit])}; standup updates are for the group's members only. Your groups: ${listOf(mine)}.`,
+      );
+    }
+    return hit;
+  }
+  const [only, ...others] = mine;
+  if (!only) throw new ToolError('You are not a member of any standup group in this workspace.');
+  if (others.length === 0) return only;
+  throw new ToolError(`You are in several standup groups; pass \`group\`: ${listOf(mine)}.`);
 }

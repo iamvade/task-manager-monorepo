@@ -6,11 +6,13 @@
 import {
   meResponseSchema,
   sidebarResponseSchema,
+  standupGroupSchema,
   statusSchema,
   workspaceMemberSchema,
   type MeResponse,
   type SidebarProject,
   type SidebarResponse,
+  type StandupGroup,
   type Status,
   type WorkspaceMember,
 } from '@kite/shared';
@@ -108,6 +110,14 @@ export class Kite {
     );
   }
 
+  /** Not cached: `myPosted` and membership change during a conversation. */
+  standupGroups(workspaceId: string): Promise<StandupGroup[]> {
+    return this.api.apiFetch(
+      `/workspaces/${workspaceId}/standup-groups`,
+      z.array(standupGroupSchema),
+    );
+  }
+
   /** The project with this key (or name) in the workspace. */
   async project(workspaceId: string, keyOrName: string): Promise<SidebarProject> {
     const { spaces } = await this.sidebar(workspaceId);
@@ -126,5 +136,10 @@ export class Kite {
   /** A link to open in the browser: `{baseUrl}/w/{slug}/t/{KEY}`. */
   taskUrl(workspace: Workspace, key: string): string {
     return `${this.baseUrl}/w/${workspace.slug}/t/${key}`;
+  }
+
+  /** A standup group's day page: `{baseUrl}/w/{slug}/standup/{groupId}/{date}`. */
+  standupUrl(workspace: Workspace, groupId: string, date: string): string {
+    return `${this.baseUrl}/w/${workspace.slug}/standup/${groupId}/${date}`;
   }
 }
