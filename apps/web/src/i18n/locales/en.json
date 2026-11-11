@@ -945,7 +945,8 @@
       "members": "Members",
       "tags": "Tags",
       "sprints": "Sprints",
-      "archived": "Archived"
+      "archived": "Archived",
+      "claude": "Claude"
     },
     "profile": {
       "name": "Name",
@@ -1122,6 +1123,25 @@
       "restore": "Restore",
       "adminsOnly": "Only admins and the person who created a project can restore it.",
       "loadError": "Couldn’t load archived projects."
+    },
+    "claude": {
+      "title": "Connect Claude Desktop",
+      "intro": "Let Claude Desktop read your tasks and make everyday changes as you: create tasks, change status, assignees and due dates, comment and mark tasks done. It can’t delete anything.",
+      "nameLabel": "Token name",
+      "create": "Create token",
+      "tokenLabel": "Token for {{name}}",
+      "tokenOnce": "Copy it now: it won’t be shown again. Anyone who has it can act as you in Kite.",
+      "copyToken": "Copy token",
+      "configLabel": "Claude Desktop config (claude_desktop_config.json)",
+      "copyConfig": "Copy config",
+      "configHint": "Replace the path with where kite-tasks is on your computer, build the server once (pnpm --filter @kite/mcp build), then restart Claude Desktop.",
+      "tokens": "Your tokens",
+      "none": "No tokens yet.",
+      "used": "Created {{created}} · last used {{used}}",
+      "revoke": "Revoke",
+      "revokeTitle": "Revoke “{{name}}”?",
+      "revokeBody": "Claude Desktop stops working with this token right away. This can’t be undone.",
+      "revoked": "Token revoked"
     }
   },
   "errors": {

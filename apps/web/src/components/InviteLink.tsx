@@ -8,18 +8,20 @@ import { Button } from './ui/Button';
 /**
  * A freshly created invite (or password reset) link with Copy (Settings → Members, the admin
  * console). There is no email delivery and only the token's hash is stored, so this is the one
- * time it is shown. `label` and `note` replace the invite wording.
+ * time it is shown. `label`, `note` and `copyLabel` replace the invite wording.
  */
 export function InviteLink({
   email,
   link,
   label,
   note,
+  copyLabel,
 }: {
   email: string;
   link: string;
   label?: string;
   note?: string;
+  copyLabel?: string;
 }) {
   const { t } = useTranslation();
   const linkId = useId();
@@ -45,7 +47,7 @@ export function InviteLink({
             void copy(link);
           }}
         >
-          {copied ? t('header.linkCopied') : t('header.copyLink')}
+          {copied ? t('header.linkCopied') : (copyLabel ?? t('header.copyLink'))}
         </Button>
       </div>
       <p className="m-0 text-[12px] text-muted">{note ?? t('settings.members.linkOnce')}</p>

@@ -8,6 +8,7 @@ Team task manager (spaces → projects → tasks) with List, Board and Calendar 
 | ----------------- | ------------------------------------------------------------------------ |
 | `apps/web`        | Vite + React 18 SPA (React Router, TanStack Query, Tailwind v4, i18next) |
 | `apps/api`        | Fastify 5 REST API (`/api/v1`), Drizzle ORM, PostgreSQL 16, OpenAPI docs |
+| `apps/mcp`        | Local MCP server for Claude Desktop ([setup](apps/mcp/README.md))        |
 | `packages/shared` | zod schemas, DTO types and enums used by both apps                       |
 | `design/`         | Design exports (read as source; they don't render standalone)            |
 
