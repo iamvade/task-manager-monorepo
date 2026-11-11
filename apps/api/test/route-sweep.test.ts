@@ -51,6 +51,8 @@ const NOT_WORKSPACE_SCOPED = [
   'POST /auth/logout',
   'GET /auth/me',
   'GET /auth/sessions',
+  // My own MCP token (Settings → Claude); a bearer caller gets 403 COOKIE_SESSION_REQUIRED.
+  'POST /auth/mcp-tokens',
   'PATCH /me',
   // The caller's own counts over their own workspaces (the outsider sees only theirs).
   'GET /me/notifications/unread-counts',
@@ -241,6 +243,7 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
     const todo = w.status('todo').id;
     bodies = {
       'POST /auth/login': { email: 'nobody@kite.test', password: 'whatever1' },
+      'POST /auth/mcp-tokens': {},
       'PATCH /me': { locale: 'en' },
       'POST /workspaces/{workspaceId}/invites': { email: 'x@kite.test' },
       'POST /invites/{token}/accept': { name: 'X', password: 'password123' },

@@ -87,6 +87,7 @@ const pages = (ids: Ids): [string, string][] => [
   ['Settings · tags', '/w/kite-studio/settings?tab=tags'],
   ['Settings · sprints', '/w/kite-studio/settings?tab=sprints'],
   ['Settings · archived', '/w/kite-studio/settings?tab=archived'],
+  ['Settings · Claude', '/w/kite-studio/settings?tab=claude'],
   ['Task page', `/w/kite-studio/t/${ids.taskKey}`],
   ['Project list', `/w/kite-studio/p/${ids.project}/list`],
   ['Project board', `/w/kite-studio/p/${ids.project}/board`],

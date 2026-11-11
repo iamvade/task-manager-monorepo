@@ -59,10 +59,17 @@ export const PLATFORM_ROLES = ['vade'] as const;
 export const platformRoleSchema = z.enum(PLATFORM_ROLES);
 export type PlatformRole = z.infer<typeof platformRoleSchema>;
 
-/** What a session was signed in from: the web app (cookie) or a native app (bearer token). */
-export const SESSION_CLIENTS = ['web', 'mobile'] as const;
+/**
+ * What a session was signed in from: the web app (cookie), a native app (bearer token), or an
+ * MCP token made in Settings → Claude (bearer token, never from a password sign-in).
+ */
+export const SESSION_CLIENTS = ['web', 'mobile', 'mcp'] as const;
 export const sessionClientSchema = z.enum(SESSION_CLIENTS);
 export type SessionClient = z.infer<typeof sessionClientSchema>;
+
+/** The clients a password sign-in or invite accept may ask for (`mcp` tokens come only from Settings). */
+export const SIGN_IN_CLIENTS = ['web', 'mobile'] as const;
+export const signInClientSchema = z.enum(SIGN_IN_CLIENTS);
 
 /**
  * Notification types, highest priority first (one notification per recipient per event: the

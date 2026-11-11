@@ -2,21 +2,23 @@ import {
   REALTIME_CLOSE_UNAUTHORIZED,
   apiErrorSchema,
   authResultSchema,
+  createMcpTokenSchema,
   loginRequestSchema,
+  mcpTokenSchema,
   meResponseSchema,
   signedInDeviceSchema,
 } from '@kite/shared';
-import { and, desc, eq, gt } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { buildMe } from '../auth/me.js';
 import { verifyPassword } from '../auth/password.js';
 import { requireAuth } from '../auth/plugin.js';
 import {
-  SESSION_MAX_AGE_MS,
   clearSessionCookie,
   createSession,
   deleteExpiredSessions,
+  liveSession,
   setSessionCookie,
 } from '../auth/sessions.js';
 import { sessions, users } from '../db/schema/index.js';
@@ -61,7 +63,10 @@ export const authRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       const session = await createSession(app.db, user.id, request, { client, deviceName });
       const me = await buildMe(app.db, user);
       if (client === 'mobile') {
-        return { ...me, session: { ...session, expiresAt: session.expiresAt.toISOString() } };
+        return {
+          ...me,
+          session: { token: session.token, expiresAt: session.expiresAt.toISOString() },
+        };
       }
       setSessionCookie(reply, session.token, app.config);
       return me;
@@ -96,7 +101,7 @@ export const authRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Auth'],
         summary: 'Signed-in devices',
         description:
-          'My live sessions (web and mobile), most recently used first; `current` is the one this request uses. `lastSeenAt` moves at most once a day.',
+          'My live sessions (web, mobile and MCP tokens), most recently used first; `current` is the one this request uses. `lastSeenAt` moves at most once a day.',
         response: { 200: z.array(signedInDeviceSchema), 401: apiErrorSchema },
       },
     },
@@ -106,13 +111,7 @@ export const authRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       const rows = await app.db
         .select()
         .from(sessions)
-        .where(
-          and(
-            eq(sessions.userId, user.id),
-            gt(sessions.expiresAt, now),
-            gt(sessions.createdAt, new Date(now.getTime() - SESSION_MAX_AGE_MS)),
-          ),
-        )
+        .where(and(eq(sessions.userId, user.id), liveSession(now)))
         .orderBy(desc(sessions.lastSeenAt), desc(sessions.createdAt));
       return rows.map((row) => ({
         id: row.publicId,
@@ -123,6 +122,47 @@ export const authRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         expiresAt: row.expiresAt.toISOString(),
         current: row.id === sessionId,
       }));
+    },
+  );
+
+  app.post(
+    '/auth/mcp-tokens',
+    {
+      preHandler: app.authenticate,
+      schema: {
+        tags: ['Auth'],
+        summary: 'Create an MCP token',
+        description:
+          'Settings → Claude: a bearer token for a local MCP server (Claude Desktop) that acts as me. Returned once; listed in `GET /auth/sessions` with `client: "mcp"` and revoked with `DELETE /auth/sessions/:id`. Same 30-day sliding expiry as other sessions but no 90-day cap; a password reset ends it. Only from a web session (cookie): a bearer request (app or MCP token) answers 403 `COOKIE_SESSION_REQUIRED`, so a leaked token can’t make more; the platform admin gets 403 `FORBIDDEN`. The token is the whole account: what Claude may do is limited by the MCP server’s tools, not by the server.',
+        body: createMcpTokenSchema,
+        response: { 201: mcpTokenSchema, 401: apiErrorSchema, 403: apiErrorSchema },
+      },
+    },
+    async (request, reply) => {
+      const { user, via } = requireAuth(request);
+      if (via !== 'cookie') {
+        throw httpError(
+          403,
+          'COOKIE_SESSION_REQUIRED',
+          'MCP tokens can only be created from the web app',
+        );
+      }
+      // The platform admin is in no workspace (nothing for the tools to do) and an uncapped
+      // token reaching /admin is not worth the risk.
+      if (user.platformRole !== null) {
+        throw httpError(403, 'FORBIDDEN', 'The platform admin cannot create MCP tokens');
+      }
+      await deleteExpiredSessions(app.db, user.id);
+      const session = await createSession(app.db, user.id, request, {
+        client: 'mcp',
+        deviceName: request.body.name ?? 'Claude Desktop',
+      });
+      return reply.code(201).send({
+        id: session.publicId,
+        token: session.token,
+        deviceLabel: session.deviceLabel ?? 'Claude Desktop',
+        expiresAt: session.expiresAt.toISOString(),
+      });
     },
   );
 

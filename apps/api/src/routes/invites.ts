@@ -317,7 +317,10 @@ export const inviteRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       const { newSession } = result;
       if (!newSession) return me;
       if (client === 'mobile') {
-        return { ...me, session: { ...newSession, expiresAt: newSession.expiresAt.toISOString() } };
+        return {
+          ...me,
+          session: { token: newSession.token, expiresAt: newSession.expiresAt.toISOString() },
+        };
       }
       setSessionCookie(reply, newSession.token, app.config);
       return me;

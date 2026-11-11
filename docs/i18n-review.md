@@ -617,6 +617,30 @@ Admins and owners only; not designed.
 | `shell.dnd.dropped` | {{name}} was moved. | «{{name}}» шилжлээ. | screen reader |
 | `shell.dnd.cancelled` | Moving {{name}} was cancelled. | «{{name}}» шилжүүлэлтийг цуцаллаа. | screen reader |
 
+## Settings → Claude (derived, 2026-11-11)
+
+Not designed; built from the Settings pieces (`features/settings/ClaudeSection.tsx`). The tab label `settings.tabs.claude` is "Claude" in both languages.
+
+| key | en | mn (draft) | where |
+|---|---|---|---|
+| `settings.claude.title` | Connect Claude Desktop | Claude Desktop холбох | section heading |
+| `settings.claude.intro` | Let Claude Desktop read your tasks and make everyday changes as you: create tasks, change status, assignees and due dates, comment and mark tasks done. It can’t delete anything. | Claude Desktop таны даалгавруудыг уншиж, таны нэрээр өдөр тутмын өөрчлөлт хийнэ: даалгавар үүсгэх, төлөв, хариуцагч, дуусах огноо солих, сэтгэгдэл бичих, дууссан болгох. Юу ч устгаж чадахгүй. | section description |
+| `settings.claude.nameLabel` | Token name | Токены нэр | token name field |
+| `settings.claude.create` | Create token | Токен үүсгэх | create button |
+| `settings.claude.tokenLabel` | Token for {{name}} | Токен: {{name}} | new token box label |
+| `settings.claude.tokenOnce` | Copy it now: it won’t be shown again. Anyone who has it can act as you in Kite. | Одоо хуулж аваарай: дахин харагдахгүй. Үүнийг авсан хэн ч Kite-д таны нэрээр ажиллах боломжтой. | new token box note |
+| `settings.claude.copyToken` | Copy token | Токен хуулах | copy token button |
+| `settings.claude.configLabel` | Claude Desktop config (claude_desktop_config.json) | Claude Desktop-ын тохиргоо (claude_desktop_config.json) | config box label |
+| `settings.claude.copyConfig` | Copy config | Тохиргоог хуулах | copy config button |
+| `settings.claude.configHint` | Replace the path with where kite-tasks is on your computer, build the server once (pnpm --filter @kite/mcp build), then restart Claude Desktop. | Замыг өөрийн компьютер дээрх kite-tasks-ын байршлаар солиод, серверийг нэг удаа build хийж (pnpm --filter @kite/mcp build), Claude Desktop-оо дахин эхлүүлнэ үү. | config box note |
+| `settings.claude.tokens` | Your tokens | Таны токенууд | token list heading |
+| `settings.claude.none` | No tokens yet. | Одоогоор токен алга. | empty token list |
+| `settings.claude.used` | Created {{created}} · last used {{used}} | Үүсгэсэн {{created}} · сүүлд ашигласан {{used}} | token row meta (dates) |
+| `settings.claude.revoke` | Revoke | Цуцлах | row button + confirm button |
+| `settings.claude.revokeTitle` | Revoke “{{name}}”? | «{{name}}» токеныг цуцлах уу? | confirm dialog title |
+| `settings.claude.revokeBody` | Claude Desktop stops working with this token right away. This can’t be undone. | Энэ токентой Claude Desktop шууд ажиллахаа болино. Буцаах боломжгүй. | confirm dialog body |
+| `settings.claude.revoked` | Token revoked | Токен цуцлагдлаа | toast |
+
 ## Open questions
 
 1. **Unscheduled**: drafted "Огноогүй" (no date) rather than "Хуваарьгүй"; the hint uses "…хуваарьт оруулна уу". Pick one term.

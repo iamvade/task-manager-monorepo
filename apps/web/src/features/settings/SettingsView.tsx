@@ -7,6 +7,7 @@ import { SettingsIcon } from '../../components/icons';
 import { UnderlineTabs } from '../../components/ui/UnderlineTabs';
 import { PageHeader } from '../views/PageHeader';
 import { ArchivedProjectsSection } from './ArchivedProjectsSection';
+import { ClaudeSection } from './ClaudeSection';
 import { MembersSection } from './MembersSection';
 import { NotificationsSection, ProjectLevelsSection } from './NotificationsSection';
 import { PreferencesSection } from './PreferencesSection';
@@ -23,6 +24,7 @@ const TABS = [
   'tags',
   'sprints',
   'archived',
+  'claude',
 ] as const;
 const tabSchema = z.enum(TABS).catch('profile');
 
@@ -88,6 +90,7 @@ export function SettingsView() {
           {tab === 'sprints' && workspace && (
             <SprintsSection workspaceId={workspace.id} role={workspace.role} />
           )}
+          {tab === 'claude' && <ClaudeSection />}
           {tab === 'archived' && workspace && (
             <ArchivedProjectsSection workspaceId={workspace.id} role={workspace.role} />
           )}
