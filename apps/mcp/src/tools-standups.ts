@@ -340,7 +340,7 @@ async function helpersOf(
         others,
         query,
         me.user.id,
-        `among the other members of ${oneLine(group.name)}: ${list}.`,
+        `among the other members of ${oneLine(group.name)} (${list}).`,
       ).user.id;
     }),
   );

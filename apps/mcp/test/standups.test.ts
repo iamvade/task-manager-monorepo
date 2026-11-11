@@ -376,7 +376,7 @@ describe('post_standup', () => {
     const outsider = await call('post_standup', { blockers: [{ text: 'x', helpers: ['Bat'] }] });
     expect(outsider.isError).toBe(true);
     expect(outsider.text).toBe(
-      'Nobody called "Bat" among the other members of Mobile team: nobody else.',
+      'Nobody called "Bat" among the other members of Mobile team (nobody else).',
     );
     expect(writes(calls)).toEqual([]);
   });
