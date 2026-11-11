@@ -3,8 +3,8 @@
   "name": "kite-tasks",
   "display_name": "Kite Tasks",
   "version": "0.0.0",
-  "description": "Read your Kite tasks and make everyday changes as you: create, update, complete, comment.",
-  "long_description": "Connects Claude Desktop to your team's Kite Tasks. Claude can read My Tasks, search, open tasks with their comments, list projects, members and your inbox, and create, update, complete or comment on tasks as you. It can't delete anything. Create a token in Kite: Settings → Claude.",
+  "description": "Read your Kite tasks, standups and customer feedback, and make everyday changes as you.",
+  "long_description": "Connects Claude Desktop to your team's Kite Tasks. Claude can read My Tasks, search, open tasks with their comments, list projects, members and your inbox, and create, update, complete or comment on tasks and add or check off subtasks as you. It can read your standup group's day and write your update, and read the customer feedback inbox and link reports to tasks. It can't delete anything. Create a token in Kite: Settings → Claude.",
   "author": {
     "name": "Kite Tasks"
   },

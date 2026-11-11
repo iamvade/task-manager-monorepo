@@ -2,6 +2,7 @@
  * The tools Claude gets. A curated set, not one tool per endpoint: reads, and the everyday
  * writes (create, update, comment, complete). Nothing deletes, archives or changes settings —
  * the token itself could, so this list is the only thing keeping Claude to these actions.
+ * Task tools are here; subtasks, standups and feedback have a file each (`tools-*.ts`).
  */
 import {
   PRIORITIES,

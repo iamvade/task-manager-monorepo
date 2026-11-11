@@ -5,8 +5,10 @@ import { ConfigError, isInsecureRemote, readConfig } from '../src/config.js';
 import { userContent } from '../src/format.js';
 import {
   ToolError,
+  feedbackRef,
   matchMember,
   matchStatus,
+  matchSubtask,
   parseDate,
   statusLabel,
   taskKey,
@@ -122,5 +124,28 @@ describe('userContent', () => {
     expect(fenced.match(/<\/user_content>/g)).toHaveLength(1);
     expect(fenced).toMatch(/^<user_content source="comment by X">/);
     expect(fenced.endsWith('</user_content>')).toBe(true);
+  });
+});
+
+describe('matchSubtask', () => {
+  const subs = [{ title: 'Write tests' }, { title: '3' }, { title: 'Ship' }];
+
+  it('takes a position or an exact title; a title wins over a position', () => {
+    expect(matchSubtask(subs, '1')).toBe(subs[0]);
+    expect(matchSubtask(subs, '#3')).toBe(subs[2]);
+    expect(matchSubtask(subs, ' SHIP ')).toBe(subs[2]);
+    expect(matchSubtask(subs, '3')).toBe(subs[1]);
+  });
+
+  it('never guesses from part of a title', () => {
+    expect(() => matchSubtask(subs, 'Write')).toThrow(/No subtask "Write"\. Subtasks: 1\. Write/);
+    expect(() => matchSubtask(subs, '0')).toThrow(ToolError);
+  });
+});
+
+describe('feedbackRef', () => {
+  it('normalizes a ref and rejects anything else', () => {
+    expect(feedbackRef(' fb-1042 ')).toBe('FB-1042');
+    expect(() => feedbackRef('1042')).toThrow(/not a feedback ref/);
   });
 });
