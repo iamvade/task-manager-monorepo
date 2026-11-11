@@ -114,3 +114,30 @@ export function parseDate(input: string | null): string | null {
   if (d.toISOString().slice(0, 10) !== value) throw new ToolError(`${value} is not a real date.`);
   return value;
 }
+
+/**
+ * One of a task's subtasks: its 1-based position in the list (`2`, `#2`) or its exact title
+ * (case and spacing aside). A title several subtasks share is a `ToolError` listing positions.
+ */
+export function matchSubtask<T extends { title: string }>(
+  subtasks: readonly T[],
+  query: string,
+): T {
+  const list = subtasks
+    .map((s, i) => `${i + 1}. ${s.title.replace(/\s+/g, ' ').trim()}`)
+    .join('; ');
+  if (subtasks.length === 0) throw new ToolError('This task has no subtasks.');
+  const q = fold(query);
+  const hits = subtasks.filter((s) => fold(s.title) === q);
+  const [hit, ...more] = hits;
+  if (hit && more.length === 0) return hit;
+  if (hit) {
+    throw new ToolError(`Several subtasks are called "${query}". Use the position: ${list}.`);
+  }
+  const position = /^#?(\d{1,4})$/.exec(q);
+  if (position) {
+    const found = subtasks[Number(position[1]) - 1];
+    if (found) return found;
+  }
+  throw new ToolError(`No subtask "${query}". Subtasks: ${list}.`);
+}

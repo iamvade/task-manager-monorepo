@@ -21,6 +21,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { names, oneLine, section, taskLine, userContent } from './format.js';
 import type { Kite } from './kite.js';
+import { registerSubtaskTools } from './tools-subtasks.js';
 import { ToolError, matchStatus, parseDate, statusLabel } from './resolve.js';
 import {
   READ,
@@ -200,7 +201,15 @@ export function registerTools(server: McpServer, kite: Kite): void {
         '',
         section(
           `Subtasks (${t.subtaskProgress.done}/${t.subtaskProgress.total} done)`,
-          t.subtasks.map((s) => `[${s.done ? 'x' : ' '}] ${oneLine(s.title)}`),
+          t.subtasks.map((s, i) =>
+            [
+              `${i + 1}. [${s.done ? 'x' : ' '}] ${oneLine(s.title)}`,
+              s.assignee ? oneLine(s.assignee.name) : null,
+              s.dueDate ? `due ${s.dueDate}` : null,
+            ]
+              .filter(Boolean)
+              .join(' · '),
+          ),
         ),
       );
       if (include_comments) {
@@ -517,4 +526,6 @@ export function registerTools(server: McpServer, kite: Kite): void {
       return `Commented on ${t.key}${tagged}\n${kite.taskUrl(ws, t.key)}`;
     }),
   );
+
+  registerSubtaskTools(server, kite, lookups);
 }

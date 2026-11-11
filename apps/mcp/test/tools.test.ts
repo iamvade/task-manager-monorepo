@@ -4,15 +4,34 @@ import { describe, expect, it } from 'vitest';
 import { richBody } from '../src/tools.js';
 import { BAT, DETAIL, TASK, TOKEN, comment, connect, writes } from './harness.js';
 
+const READ_ONLY = [
+  'get_task',
+  'inbox',
+  'list_members',
+  'list_projects',
+  'list_tasks',
+  'list_workspaces',
+  'my_tasks',
+  'search',
+];
+const WRITES = [
+  'add_comment',
+  'add_subtask',
+  'complete_subtask',
+  'complete_task',
+  'create_task',
+  'update_task',
+];
+
 describe('kite MCP tools', () => {
-  it('lists twelve tools with read-only hints on the readers only', async () => {
+  it('marks exactly the readers read-only and has nothing that deletes', async () => {
     const { client } = await connect({});
     const { tools } = await client.listTools();
     const readOnly = tools.filter((t) => t.annotations?.readOnlyHint).map((t) => t.name);
-    expect(tools).toHaveLength(12);
-    expect(readOnly).not.toContain('create_task');
-    expect(readOnly).toContain('get_task');
-    expect(tools.some((t) => /delete|archive/i.test(t.name))).toBe(false);
+    expect(readOnly.sort()).toEqual(READ_ONLY);
+    expect(tools.map((t) => t.name).sort()).toEqual([...READ_ONLY, ...WRITES].sort());
+    expect(tools.some((t) => /delete|archive|remove/i.test(t.name))).toBe(false);
+    expect(tools.every((t) => t.annotations?.destructiveHint !== true)).toBe(true);
   });
 
   it('sends the token as a bearer header', async () => {

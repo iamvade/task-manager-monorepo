@@ -92,6 +92,14 @@
     {
       "name": "add_comment",
       "description": "Comment on a task, optionally @mentioning people"
+    },
+    {
+      "name": "add_subtask",
+      "description": "Add a subtask, optionally assigned and with a due date"
+    },
+    {
+      "name": "complete_subtask",
+      "description": "Check off a subtask or uncheck it"
     }
   ],
   "compatibility": {
