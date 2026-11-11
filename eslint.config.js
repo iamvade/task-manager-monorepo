@@ -12,6 +12,7 @@ export default tseslint.config(
       '**/node_modules/**',
       '**/dist/**',
       '**/coverage/**',
+      '**/.mcpb-stage/**',
       'design/**',
       'apps/api/drizzle/**',
       'apps/mobile/.expo/**',
@@ -43,11 +44,11 @@ export default tseslint.config(
     },
   },
   {
-    files: ['**/*.js'],
+    files: ['**/*.js', '**/*.mjs'],
     ...tseslint.configs.disableTypeChecked,
   },
   {
-    files: ['apps/api/**/*.ts', 'apps/mcp/**/*.ts', 'packages/shared/**/*.ts'],
+    files: ['apps/api/**/*.ts', 'apps/mcp/**/*.{ts,mjs}', 'packages/shared/**/*.ts'],
     languageOptions: { globals: globals.node },
   },
   {
