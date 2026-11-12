@@ -1,6 +1,6 @@
 {
   "name": "@kite/mcp",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "description": "MCP server that lets Claude read and update Kite tasks as you: local (stdio, Claude Desktop) and remote (HTTP, the Claude connector).",

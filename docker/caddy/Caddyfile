@@ -24,6 +24,28 @@
 		reverse_proxy api:3000
 	}
 
+	# The remote Claude connector (when the `connector` profile runs): the MCP endpoint, and the
+	# OAuth metadata documents clients look for under /.well-known (RFC 9728, RFC 8414; with a
+	# sub-path the outer proxy sends the host-root forms here too, see docs/DEPLOY.md). Without
+	# these the paths would fall through to the app's index.html.
+	@mcp path /mcp /mcp/
+	handle @mcp {
+		request_body {
+			max_size 1MB
+		}
+		reverse_proxy mcp:3001
+	}
+	@oauth_resource path /.well-known/oauth-protected-resource /.well-known/oauth-protected-resource/*
+	handle @oauth_resource {
+		rewrite * /api/v1/oauth/resource-metadata
+		reverse_proxy api:3000
+	}
+	@oauth_server path /.well-known/oauth-authorization-server /.well-known/oauth-authorization-server/* /.well-known/openid-configuration /.well-known/openid-configuration/*
+	handle @oauth_server {
+		rewrite * /api/v1/oauth/metadata
+		reverse_proxy api:3000
+	}
+
 	# The single-page app: real files, else index.html for client routes.
 	handle {
 		root * /srv

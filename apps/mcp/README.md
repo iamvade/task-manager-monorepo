@@ -1,21 +1,35 @@
 # Kite MCP server (`@kite/mcp`)
 
-Last updated: 2026-11-11 08:31 PM CST
+Last updated: 2026-11-12 11:45 AM CST
 
-A local [MCP](https://modelcontextprotocol.io) server that lets **Claude Desktop** read your Kite tasks and make everyday changes **as you**. Claude Desktop starts it as a child process and talks to it over stdio. The server calls the normal Kite REST API (`/api/v1`) with a personal token, so access checks, activity history, notifications and realtime updates work exactly as in the web app.
+An [MCP](https://modelcontextprotocol.io) server that lets **Claude** read your Kite tasks and make everyday changes **as you**. It calls the normal Kite REST API (`/api/v1`) with your token, so access checks, activity history, notifications and realtime updates work exactly as in the web app. The same 19 tools run in two ways:
 
-It ships as a **Claude Desktop extension** (`kite-tasks.mcpb`) that every Kite server serves from Settings → Claude, so teammates install it with a double-click: no checkout, no Node (Claude Desktop brings its own). A remote connector with OAuth (Claude on the web and phone) comes later.
+- **Remote connector** (`dist/http.js`): a Kite server that has it turned on gives one address (`<Kite address>/mcp`). You add it in Claude and sign in with your Kite account. Works in Claude on the web, the desktop app and the phone apps; nothing to install.
+- **Claude Desktop extension** (`dist/index.js`, stdio): `kite-tasks.mcpb` from Settings → Claude, installed with a double-click and a pasted token. For servers without the connector, or Kite on a private network that Claude's servers can't reach.
 
 ## Contents
 
+- [Connect with the remote connector](#connect-with-the-remote-connector)
 - [Install the extension](#install-the-extension)
 - [Setup from a checkout (developers)](#setup-from-a-checkout-developers)
 - [Tools](#tools)
 - [How it resolves names](#how-it-resolves-names)
 - [Security](#security)
+- [Running the remote connector](#running-the-remote-connector)
 - [Development](#development)
 - [Troubleshooting](#troubleshooting)
 - [Known limitations](#known-limitations)
+
+## Connect with the remote connector
+
+1. In Kite, open **Settings → Claude** and copy the **Connector address** (it ends in `/mcp`). If the page shows no address, this server doesn't run the connector: use the extension below.
+2. In Claude (web or desktop app): **Customize → Connectors → Add custom connector**, paste the address and add it. Leave the OAuth option on "Use Claude's published identity".
+3. Claude opens Kite: sign in if asked, check the account shown, and choose **Allow**.
+4. Ask Claude something like "what's on my plate today in Kite?" Once connected it is also available in the Claude app on your phone.
+
+Settings → Claude lists what is connected, with **Disconnect**. A sign-in lasts while it is used and ends after 30 days without use, on Disconnect, or when your password is reset. On Team and Enterprise plans an Owner adds the connector for the organization first.
+
+<sub>[↑ Back to contents](#contents)</sub>
 
 ## Install the extension
 
@@ -136,7 +150,44 @@ Read tools carry `readOnlyHint`, so Claude Desktop can treat them differently fr
 - Lifetime: 30 days sliding (each day of use extends it). Unlike other sessions there is no 90-day cap. A password reset or Revoke ends the token at once.
 - Text people wrote (descriptions, comments, notification snippets, standup updates, blockers and replies, feedback bodies, previews and notes) comes back fenced in `<user_content>`, and the server's instructions tell Claude to treat it as data, not instructions. Feedback comes from the public form, so anyone on the internet can write it: its body is always fenced and its title is kept to one line.
 - Feedback submitters' contact details (email, phone, device, user agent) are never returned by any tool.
+- **Remote connector.** Only allow-listed apps can ask for access (Claude's published client identity; there is no client registration), a code is only ever sent to that app's pinned callback, PKCE is required, and you are asked every time. Access tokens last one hour and are never extended; the refresh token is replaced on every use, and a replayed code or an old refresh token ends the sign-in. The endpoint accepts only tokens issued for its own address: an extension token or a browser session is refused with 401. Kite's MCP endpoint and REST API are one resource server (same deployment and issuer), so the endpoint uses your token on the API; it is never sent anywhere else. The platform admin account cannot be connected.
 - stdout carries only the protocol; logs go to stderr and never include the token. Plain `http://` to anything but localhost logs a warning because the token would travel unencrypted.
+
+<sub>[↑ Back to contents](#contents)</sub>
+
+## Running the remote connector
+
+The connector is two parts of one deployment: the API's OAuth routes (`CONNECTOR_ENABLED=true`, `apps/api/src/oauth/`) and this package's HTTP server. In production both come from `docker-compose.prod.yml` with `COMPOSE_PROFILES=connector`; see [docs/DEPLOY.md](../../docs/DEPLOY.md#claude-connector-optional).
+
+| Variable                     |                                                                                                                                                                                             |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `KITE_PUBLIC_URL` (required) | The address people open Kite at, with any sub-path. Tokens are issued for `<this>/mcp`, and links in answers start with it.                                                                 |
+| `KITE_API_URL`               | How to reach the API from here (`http://api:3000` in the compose file). Defaults to the public address.                                                                                     |
+| `PORT`, `HOST`               | Default `3001` and `127.0.0.1` (the image sets `0.0.0.0`).                                                                                                                                  |
+| `MCP_ALLOWED_ORIGINS`        | Extra browser origins, comma separated. Requests without an `Origin`, from Kite's own origin, `https://claude.ai` and `https://claude.com` are always accepted; a refused origin is logged. |
+
+How it behaves:
+
+- `POST /mcp` only (Streamable HTTP, JSON responses). **Stateless**: a new server and transport per request, no session id, nothing shared between people. `GET` and `DELETE` answer 405. `GET /health` for the container health check.
+- Without a valid token it answers `401` with `WWW-Authenticate: Bearer resource_metadata="<address>/api/v1/oauth/resource-metadata"`, which is how Claude finds where to sign in. When the API is down it answers `503`, not `401`, so Claude doesn't drop the sign-in.
+- Protocol versions: up to **2025-11-25** (the pinned SDK's latest and the newest Claude documents). The 2026-07-28 revision is not supported yet.
+- The web server must route `<address>/mcp` here and the OAuth metadata paths (`/.well-known/oauth-protected-resource…`, `/.well-known/oauth-authorization-server…`, `/.well-known/openid-configuration…`) to the API; `docker/caddy/Caddyfile` does, and under a sub-path the outer nginx needs the host-root locations in `docker/nginx/kite-subpath.conf`.
+
+Locally:
+
+```bash
+# API with CONNECTOR_ENABLED=true (apps/api/.env), then:
+KITE_PUBLIC_URL=http://localhost:5173 KITE_API_URL=http://127.0.0.1:3000 pnpm --filter @kite/mcp dev:http
+pnpm --filter @kite/web dev      # proxies /mcp and the metadata paths like Caddy
+```
+
+`scripts/oauth-e2e.mjs` runs the whole flow as a scripted client (discovery, sign-in and Allow through the API, PKCE code exchange, tools, replay, refresh rotation, revoke). It needs the test client in the API's `OAUTH_EXTRA_CLIENTS` (the script's header has the value) and must never be pointed at production:
+
+```bash
+KITE_URL=http://localhost:5173 node apps/mcp/scripts/oauth-e2e.mjs
+```
+
+To try it in Claude itself the address must be public HTTPS (Claude connects from Anthropic's servers), e.g. a tunnel to the web dev server, with the API's `WEB_ORIGIN` and `KITE_PUBLIC_URL` set to the tunnel address.
 
 <sub>[↑ Back to contents](#contents)</sub>
 
@@ -173,19 +224,24 @@ pnpm --filter @kite/mcp pack:mcpb   # → apps/mcp/dist/kite-tasks.mcpb
 
 ## Troubleshooting
 
-| Symptom                                                | Fix                                                                                                                   |
-| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| "Kite rejected the token"                              | Revoked, expired (30 days unused) or reset password: create a new token, update `KITE_TOKEN`, restart Claude Desktop. |
-| "Could not reach Kite at KITE_URL"                     | Server down, wrong URL, or a missing sub-path in `KITE_URL`.                                                          |
-| "answered in a format this server does not understand" | The Kite server is newer than this build: `git pull && pnpm --filter @kite/mcp build`, restart Claude Desktop.        |
-| "You are in several workspaces"                        | Set `KITE_WORKSPACE`, or name the workspace in your request.                                                          |
-| Server not listed in Claude Desktop                    | Check `~/Library/Logs/Claude/mcp*.log` (macOS); usually a wrong path or `node` not on `PATH`.                         |
+| Symptom                                                | Fix                                                                                                                                                                                                                              |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| "Kite rejected the token"                              | Revoked, expired (30 days unused) or reset password: create a new token, update `KITE_TOKEN`, restart Claude Desktop.                                                                                                            |
+| "Could not reach Kite at KITE_URL"                     | Server down, wrong URL, or a missing sub-path in `KITE_URL`.                                                                                                                                                                     |
+| "answered in a format this server does not understand" | The Kite server is newer than this build: `git pull && pnpm --filter @kite/mcp build`, restart Claude Desktop.                                                                                                                   |
+| "You are in several workspaces"                        | Set `KITE_WORKSPACE`, or name the workspace in your request.                                                                                                                                                                     |
+| Server not listed in Claude Desktop                    | Check `~/Library/Logs/Claude/mcp*.log` (macOS); usually a wrong path or `node` not on `PATH`.                                                                                                                                    |
+| Connector: Claude can't connect or sign-in never opens | The address must be public HTTPS reachable over IPv4. `curl -i -X POST <address>/mcp` must answer `401` with `WWW-Authenticate`, and the `resource_metadata` URL in it must answer JSON (HTML means the proxy isn't routing it). |
+| Connector: "This app isn't allowed to connect to Kite" | The app isn't on the server's allow-list (only Claude's published identity; in Claude keep "Use Claude's published identity").                                                                                                   |
+| Connector: "Kite no longer accepts this sign-in"       | Disconnected, 30 days unused, or a password reset: reconnect in Claude (Customize → Connectors).                                                                                                                                 |
+| Connector: requests answer `403 Origin not allowed`    | The server log names the origin; add it to `MCP_ALLOWED_ORIGINS` if it is legitimate.                                                                                                                                            |
 
 <sub>[↑ Back to contents](#contents)</sub>
 
 ## Known limitations
 
-- No auto-update: after a Kite update, download and open the extension again.
+- Remote connector: only Claude's apps (web, desktop, phone) can connect; other MCP clients, Claude Code included, are not on the allow-list. MCP protocol 2026-07-28 is not supported yet.
+- Extension: no auto-update: after a Kite update, download and open the extension again.
 - The extension isn't signed.
 - No sprints or tags tools yet. Subtasks can be added and checked off, not renamed, reassigned or reordered.
 - Standups: your own update only. No reactions, replies, resolving blockers, live meetings or past days.

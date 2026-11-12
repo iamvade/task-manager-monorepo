@@ -268,6 +268,35 @@ docker compose up -d api
 - Push only works over https (the `DOMAIN` address). On iPhone and iPad (iOS 16.4+), Safari allows it only once Kite is added to the Home Screen (Share → Add to Home Screen) and opened from there; Settings explains this on those devices.
 - Signing out, signing out a device in Settings, or a password reset removes that browser's subscription.
 
+## Claude connector (optional)
+
+Lets people add Kite to Claude by address (`https://$DOMAIN$BASE_PATH/mcp`) and sign in with their Kite account: Claude on the web, the desktop app and the phone apps, nothing to install. It adds one small container (`mcp`, the MCP server from `apps/mcp`) and turns on the API's OAuth routes.
+
+```sh
+nano .env                    # add both lines:
+#   COMPOSE_PROFILES=connector
+#   CONNECTOR_ENABLED=true
+docker compose build && docker compose up -d
+```
+
+- **Reachability:** Claude connects from Anthropic's servers, not from the person's device. The address must be public HTTPS with an IPv4 (`A`) record. If a firewall or WAF filters by source, allow Anthropic's outbound ranges (`160.79.104.0/21` and `153.61.208.0/20`, see <https://platform.claude.com/docs/en/api/ip-addresses>) to `/mcp`, `/api/v1/oauth/token`, `/api/v1/oauth/revoke` and the `/.well-known/` paths below. A server on a private network can't use the connector; the Claude Desktop extension (Settings → Claude) still works there.
+- **Who can connect:** only Claude's published client identity is accepted, and an authorization code is only ever sent to Claude's own callback (`https://claude.ai/api/mcp/auth_callback`). There is no client registration. `OAUTH_EXTRA_CLIENTS` (JSON, see `apps/api/.env.example`) adds clients; leave it unset in production unless you know why you need one.
+- **Sub-path behind nginx:** OAuth clients look for metadata at the host root (`/.well-known/…/task-manager…`), outside the forwarded prefix. Add the three `/.well-known` locations at the end of [`docker/nginx/kite-subpath.conf`](../docker/nginx/kite-subpath.conf) to the site, then reload nginx. If Claude still can't discover the server under a sub-path, give Kite its own host name: that is `.env` only (`DOMAIN`, no `BASE_PATH`), no code changes.
+- **Sign-ins:** each person sees and disconnects theirs in Settings → Claude. Access tokens last an hour; a sign-in ends after 30 days without use, on Disconnect or on a password reset. The API throttles failed token requests per IP in memory, another reason to run exactly one `api` container.
+
+Check it (all must answer JSON, and the last one `401` with a `WWW-Authenticate` header):
+
+```sh
+B=https://$DOMAIN            # the host, without the sub-path
+P=$BASE_PATH                 # e.g. /task-manager, or empty
+curl -s $B/.well-known/oauth-protected-resource$P/mcp
+curl -s $B/.well-known/oauth-authorization-server$P
+curl -s $B$P/api/v1/oauth/metadata
+curl -si -X POST $B$P/mcp -H 'content-type: application/json' -d '{}' | head -12
+```
+
+Then in Claude: Customize → Connectors → Add custom connector → `https://$DOMAIN$BASE_PATH/mcp`. Turning it off again: remove both `.env` lines, `docker compose up -d --remove-orphans`; existing sign-ins stop working.
+
 ## Operations
 
 ```sh
