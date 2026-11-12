@@ -35,3 +35,4 @@ export * from './schemas/admin.js';
 export * from './paths.js';
 export * from './push.js';
 export * from './schemas/push.js';
+export * from './schemas/oauth.js';

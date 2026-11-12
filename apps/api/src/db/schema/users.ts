@@ -31,6 +31,42 @@ export const users = pgTable('users', {
   createdAt: createdAt(),
 });
 
+/**
+ * A remote Claude connector sign-in (OAuth): what Settings → Claude lists and revokes. It owns
+ * the refresh token (hash only); each refresh rotates it and adds a one-hour access token, a
+ * `sessions` row with `client: 'connector'` pointing here. Deleting the grant ends them all.
+ */
+export const oauthGrants = pgTable(
+  'oauth_grants',
+  {
+    id: id(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /** The allow-listed client (Claude's published identity URL). */
+    clientId: text('client_id').notNull(),
+    /** Its name when the person agreed, for the Settings list. */
+    clientName: text('client_name').notNull(),
+    /** The connector address the tokens are for (RFC 8707 audience). */
+    resource: text('resource').notNull(),
+    refreshHash: text('refresh_hash').notNull().unique(),
+    /**
+     * The refresh token before the last rotation: seen again within the grace window it is only
+     * refused (two refreshes raced); later it means the token leaked, and the grant is deleted.
+     */
+    prevRefreshHash: text('prev_refresh_hash'),
+    rotatedAt: timestamptz('rotated_at'),
+    createdAt: createdAt(),
+    lastUsedAt: timestamptz('last_used_at').notNull().defaultNow(),
+    /** 30 days after the last refresh. */
+    expiresAt: timestamptz('expires_at').notNull(),
+  },
+  (t) => [
+    index('oauth_grants_user_id_idx').on(t.userId),
+    index('oauth_grants_prev_refresh_hash_idx').on(t.prevRefreshHash),
+  ],
+);
+
 export const sessions = pgTable(
   'sessions',
   {
@@ -48,6 +84,8 @@ export const sessions = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     client: sessionClientEnum('client').notNull().default('web'),
+    /** Set for `connector` sessions: the sign-in this access token belongs to. */
+    grantId: uuid('grant_id').references(() => oauthGrants.id, { onDelete: 'cascade' }),
     /** `Chrome on macOS`, or the name a native app sent. */
     deviceLabel: text('device_label'),
     expiresAt: timestamptz('expires_at').notNull(),
@@ -55,7 +93,7 @@ export const sessions = pgTable(
     lastSeenAt: timestamptz('last_seen_at').notNull().defaultNow(),
     createdAt: createdAt(),
   },
-  (t) => [index('sessions_user_id_idx').on(t.userId)],
+  (t) => [index('sessions_user_id_idx').on(t.userId), index('sessions_grant_id_idx').on(t.grantId)],
 );
 
 /**

@@ -4,7 +4,8 @@ import { createDb } from '../src/db/client.js';
 
 /** Builds the app against the test database. Call `close()` in afterAll. */
 export async function createTestApp(overrides: Partial<Config> = {}, options: AppOptions = {}) {
-  const config = { ...loadConfig(), ...overrides };
+  // The connector's OAuth routes are on in tests so the route sweep and docs test cover them.
+  const config = { ...loadConfig(), CONNECTOR_ENABLED: true, ...overrides };
   if (!config.TEST_DATABASE_URL) {
     throw new Error('TEST_DATABASE_URL must be set to run API tests.');
   }

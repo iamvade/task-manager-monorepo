@@ -1,4 +1,4 @@
-import type { McpToken, SignedInDevice } from '@kite/shared';
+import type { McpToken, OAuthGrant, SignedInDevice } from '@kite/shared';
 import { useId, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -8,6 +8,7 @@ import {
   useMcpTokens,
   useRevokeMcpToken,
 } from '../../api/mcpTokens';
+import { useConnector, useRevokeGrant } from '../../api/oauth';
 import { useCurrentWorkspace } from '../../api/workspaces';
 import { useAuth } from '../../auth/useAuth';
 import { InviteLink } from '../../components/InviteLink';
@@ -25,10 +26,124 @@ import { desktopConfig } from './claudeConfig';
 import { SettingsSection, settingsInput } from './SettingsRow';
 
 /**
- * Settings → Claude (not designed; built from the Settings pieces): make a token for the local
- * MCP server (`apps/mcp`), copy it with a ready Claude Desktop config, and revoke old ones.
+ * Settings → Claude (not designed; built from the Settings pieces). Where the server has the
+ * remote connector it leads: one address to add in Claude, then sign in, plus the apps
+ * connected that way. The Claude Desktop extension and its tokens follow, folded away.
  */
 export function ClaudeSection() {
+  const { t } = useTranslation();
+  const connector = useConnector();
+  if (connector.isPending) return <Skeleton className="h-24 w-full" />;
+  if (!connector.data) return <DesktopTokens />;
+  return (
+    <div className="flex flex-col gap-8">
+      <SettingsSection
+        title={t('settings.claude.connector.title')}
+        description={t('settings.claude.connector.intro')}
+      >
+        <div className="border-t border-subtle">
+          <InviteLink
+            email=""
+            link={connector.data.connectorUrl}
+            label={t('settings.claude.connector.addressLabel')}
+            note={t('settings.claude.connector.addressNote')}
+            copyLabel={t('settings.claude.copyAddress')}
+          />
+        </div>
+        <ol className="m-0 mt-3 flex list-none flex-col gap-4 rounded-[8px] border border-subtle px-3 py-3">
+          <Step n={1} title={t('settings.claude.connector.step1')} />
+          <Step n={2} title={t('settings.claude.connector.step2')} />
+          <Step n={3} title={t('settings.claude.connector.step3')}>
+            <p className="m-0 text-[12px] text-muted">
+              {t('settings.claude.connector.mobileNote')}
+            </p>
+          </Step>
+        </ol>
+      </SettingsSection>
+
+      <SettingsSection title={t('settings.claude.connector.connected')}>
+        {connector.data.grants.length ? (
+          <ul className="m-0 flex list-none flex-col p-0">
+            {connector.data.grants.map((grant) => (
+              <GrantRow key={grant.id} grant={grant} />
+            ))}
+          </ul>
+        ) : (
+          <p className="m-0 border-t border-subtle py-3.5 text-[13px] text-muted">
+            {t('settings.claude.connector.none')}
+          </p>
+        )}
+      </SettingsSection>
+
+      <details>
+        <summary className="cursor-pointer text-[13px] text-2">
+          {t('settings.claude.connector.other')}
+        </summary>
+        <div className="mt-6">
+          <DesktopTokens />
+        </div>
+      </details>
+    </div>
+  );
+}
+
+/** One app signed in through the connector, with Disconnect. */
+function GrantRow({ grant }: { grant: OAuthGrant }) {
+  const { t } = useTranslation();
+  const { formatDate } = useDates();
+  const { me } = useAuth();
+  const revoke = useRevokeGrant();
+  const [confirming, setConfirming] = useState(false);
+  const day = (iso: string) => formatDate(todayFor(me?.preferences.timezone, new Date(iso)));
+
+  return (
+    <li className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-subtle py-3">
+      <div className="flex min-w-0 flex-[1_1_220px] flex-col">
+        <span className="truncate text-[13px] font-medium">{grant.clientName}</span>
+        <span className="text-[12px] text-muted">
+          {t('settings.claude.connector.used', {
+            created: day(grant.createdAt),
+            used: day(grant.lastUsedAt),
+          })}
+        </span>
+      </div>
+      <Button
+        size="sm"
+        aria-label={`${t('settings.claude.connector.disconnect')}: ${grant.clientName}`}
+        onClick={() => {
+          setConfirming(true);
+        }}
+      >
+        {t('settings.claude.connector.disconnect')}
+      </Button>
+      <ConfirmDialog
+        open={confirming}
+        title={t('settings.claude.connector.disconnectTitle', { name: grant.clientName })}
+        body={t('settings.claude.connector.disconnectBody', { name: grant.clientName })}
+        confirmLabel={t('settings.claude.connector.disconnect')}
+        tone="danger"
+        pending={revoke.isPending}
+        onConfirm={() => {
+          revoke.mutate(grant.id, {
+            onSuccess: () => {
+              setConfirming(false);
+              toast({ message: t('settings.claude.connector.disconnected') });
+            },
+          });
+        }}
+        onClose={() => {
+          setConfirming(false);
+        }}
+      />
+    </li>
+  );
+}
+
+/**
+ * The Claude Desktop extension (local MCP server, `apps/mcp`): make a token, copy it with a
+ * ready config, and revoke old ones.
+ */
+function DesktopTokens() {
   const { t } = useTranslation();
   const tokens = useMcpTokens();
   const create = useCreateMcpToken();
@@ -168,7 +283,7 @@ function NewToken({ token }: { token: McpToken }) {
 const DOWNLOAD_BUTTON =
   'inline-flex h-8 items-center justify-center rounded-[8px] px-3 text-[13px] font-medium whitespace-nowrap no-underline';
 
-function Step({ n, title, children }: { n: number; title: string; children: ReactNode }) {
+function Step({ n, title, children }: { n: number; title: string; children?: ReactNode }) {
   return (
     <li className="flex gap-3">
       <span

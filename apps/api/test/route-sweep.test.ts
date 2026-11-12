@@ -70,6 +70,17 @@ const NOT_WORKSPACE_SCOPED = [
   'POST /public/feedback/{slug}/uploads',
   'POST /public/feedback/{slug}',
   'DELETE /public/feedback/uploads/{uploadId}',
+  // The remote Claude connector's OAuth server: public metadata and token endpoints, and the
+  // caller's own sign-ins (web session only; a bearer caller gets 403 COOKIE_SESSION_REQUIRED).
+  'GET /oauth/metadata',
+  'GET /oauth/resource-metadata',
+  'POST /oauth/authorize/check',
+  'POST /oauth/authorize',
+  'POST /oauth/token',
+  'POST /oauth/revoke',
+  'GET /oauth/grants',
+  'DELETE /oauth/grants/{grantId}',
+  'GET /oauth/token-info',
 ];
 
 const doc = (text: string) => ({
@@ -229,6 +240,7 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       ref: 'FB-1001',
       uploadId: fb.id,
       sessionId: memberSession.id,
+      grantId: fb.id,
     };
 
     const ws = w.ws.id;
@@ -241,7 +253,18 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
     };
 
     const todo = w.status('todo').id;
+    const authorizeParams = {
+      clientId: 'https://claude.ai/oauth/mcp-oauth-client-metadata',
+      redirectUri: 'https://claude.ai/api/mcp/auth_callback',
+      responseType: 'code',
+      codeChallenge: 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM',
+      codeChallengeMethod: 'S256',
+    };
     bodies = {
+      'POST /oauth/authorize/check': authorizeParams,
+      'POST /oauth/authorize': { ...authorizeParams, approve: true },
+      'POST /oauth/token': { grant_type: 'refresh_token', refresh_token: 'x', client_id: 'x' },
+      'POST /oauth/revoke': { token: 'x' },
       'POST /auth/login': { email: 'nobody@kite.test', password: 'whatever1' },
       'POST /auth/mcp-tokens': {},
       'PATCH /me': { locale: 'en' },

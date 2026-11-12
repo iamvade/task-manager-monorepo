@@ -62,6 +62,8 @@ export default defineConfig({
         SEED_LANG: 'en',
         REPORTS_CACHE_TTL_MS: '0',
         LOG_LEVEL: 'warn',
+        // The remote Claude connector: its consent page and Settings → Claude are checked by axe.
+        CONNECTOR_ENABLED: 'true',
       },
     },
     {

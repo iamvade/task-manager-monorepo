@@ -59,6 +59,11 @@ const tags = [
     name: 'Admin',
     description: 'Platform admin (role vade): create workspaces and invite their owners',
   },
+  {
+    name: 'OAuth',
+    description:
+      'The remote Claude connector (when CONNECTOR_ENABLED): OAuth 2.1 authorization server for allow-listed clients, and my connector sign-ins',
+  },
   { name: 'Realtime', description: 'WebSocket: live changes and presence' },
 ];
 

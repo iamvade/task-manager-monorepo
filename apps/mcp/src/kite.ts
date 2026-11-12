@@ -33,6 +33,7 @@ interface Cached<T> {
 
 export class Kite {
   readonly api: ApiClient;
+  /** The address people open Kite at: every link a tool returns starts with it. */
   readonly baseUrl: string;
   private readonly defaultWorkspace: string | undefined;
   private readonly now: () => number;
@@ -46,7 +47,7 @@ export class Kite {
     this.defaultWorkspace = config.workspace;
     this.now = options.now ?? Date.now;
     this.api = createApiClient({
-      baseUrl: `${config.baseUrl}/api/v1`,
+      baseUrl: `${config.apiBaseUrl ?? config.baseUrl}/api/v1`,
       headers: () => ({
         Authorization: `Bearer ${config.token}`,
         'User-Agent': options.userAgent ?? 'kite-mcp',

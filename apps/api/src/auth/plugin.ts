@@ -27,6 +27,13 @@ declare module 'fastify' {
   interface FastifyRequest {
     auth: AuthContext | null;
   }
+  interface FastifyContextConfig {
+    /**
+     * A route other servers call (the OAuth token endpoint): without a session cookie it is
+     * allowed from any Origin. With the cookie the usual rule stands.
+     */
+    crossOrigin?: boolean;
+  }
   interface FastifyInstance {
     /** preHandler: 401 unless the request carries a live session; sets `request.auth`. */
     authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
@@ -77,7 +84,8 @@ export function originAllowed(request: FastifyRequest, webOrigin: string): boole
 /**
  * Looks up the session (cookie or bearer token) without failing the request. Pushes the expiry
  * forward (and re-sends the cookie) when the last refresh was more than a day ago, but never past
- * `SESSION_MAX_AGE_MS` after sign-in (MCP tokens: no cap, see `liveSession`). A bearer request never gets a cookie set or cleared.
+ * `SESSION_MAX_AGE_MS` after sign-in (MCP tokens: no cap, see `liveSession`; connector access
+ * tokens: never pushed). A bearer request never gets a cookie set or cleared.
  */
 export async function resolveSession(
   request: FastifyRequest,
@@ -92,7 +100,7 @@ export async function resolveSession(
   const sessionId = hashToken(token);
   const now = new Date();
   const [row] = await db
-    .select({ user: users, expiresAt: sessions.expiresAt })
+    .select({ user: users, expiresAt: sessions.expiresAt, client: sessions.client })
     .from(sessions)
     .innerJoin(users, eq(users.id, sessions.userId))
     .where(and(eq(sessions.id, sessionId), liveSession(now)))
@@ -102,7 +110,9 @@ export async function resolveSession(
     return null;
   }
 
-  if (row.expiresAt.getTime() - now.getTime() < SESSION_TTL_MS - SESSION_REFRESH_MS) {
+  // A connector access token lives one hour and is replaced by a refresh, never extended.
+  const slides = row.client !== 'connector';
+  if (slides && row.expiresAt.getTime() - now.getTime() < SESSION_TTL_MS - SESSION_REFRESH_MS) {
     await db
       .update(sessions)
       .set({ expiresAt: sessionExpiry(now), lastSeenAt: now })
@@ -133,6 +143,8 @@ export function registerAuth(app: FastifyInstance): void {
   // already keeps the cookie off most of them; this closes the rest (see `originAllowed`).
   app.addHook('onRequest', async (request, reply) => {
     if (!UNSAFE_METHODS.has(request.method)) return;
+    // Server-to-server routes carry their own proof (a code, a refresh token) and no cookie.
+    if (request.routeOptions.config.crossOrigin && !hasSessionCookie(request)) return;
     if (!originAllowed(request, webOrigin)) {
       return reply.code(403).send(errorBody('CSRF_REJECTED', 'Request origin not allowed'));
     }
