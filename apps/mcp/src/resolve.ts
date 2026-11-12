@@ -3,8 +3,11 @@
  * guesses: no match or several matches is a `ToolError` that lists the choices.
  */
 import {
+  formatFeedbackRef,
   nameSearchKey,
+  parseFeedbackRef,
   parseTaskKey,
+  type StandupGroup,
   type Status,
   type StatusCategory,
   type WorkspaceMember,
@@ -68,6 +71,8 @@ export function matchMember(
   members: readonly WorkspaceMember[],
   query: string,
   meId: string,
+  /** What to say when nobody matches (after `Nobody called "…" `). */
+  nobody = 'in this workspace. Use list_members to see who is there.',
 ): WorkspaceMember {
   const active = members.filter((m) => m.deactivatedAt === null);
   const raw = fold(query.replace(/^@/, ''));
@@ -91,9 +96,7 @@ export function matchMember(
       throw new ToolError(`"${query}" matches several people: ${names}. Use the email.`);
     }
   }
-  throw new ToolError(
-    `Nobody called "${query}" in this workspace. Use list_members to see who is there.`,
-  );
+  throw new ToolError(`Nobody called "${query}" ${nobody}`);
 }
 
 /** `app-142` → `APP-142`; anything else is a `ToolError`. */
@@ -113,4 +116,72 @@ export function parseDate(input: string | null): string | null {
   }
   if (d.toISOString().slice(0, 10) !== value) throw new ToolError(`${value} is not a real date.`);
   return value;
+}
+
+/**
+ * One of a task's subtasks: its 1-based position in the list (`2`, `#2`) or its exact title
+ * (case and spacing aside). A title several subtasks share is a `ToolError` listing positions.
+ */
+export function matchSubtask<T extends { title: string }>(
+  subtasks: readonly T[],
+  query: string,
+): T {
+  const list = subtasks
+    .map((s, i) => `${i + 1}. ${s.title.replace(/\s+/g, ' ').trim()}`)
+    .join('; ');
+  if (subtasks.length === 0) throw new ToolError('This task has no subtasks.');
+  const q = fold(query);
+  const hits = subtasks.filter((s) => fold(s.title) === q);
+  const [hit, ...more] = hits;
+  if (hit && more.length === 0) return hit;
+  if (hit) {
+    throw new ToolError(`Several subtasks are called "${query}". Use the position: ${list}.`);
+  }
+  const position = /^#?(\d{1,4})$/.exec(q);
+  if (position) {
+    const found = subtasks[Number(position[1]) - 1];
+    if (found) return found;
+  }
+  throw new ToolError(`No subtask "${query}". Subtasks: ${list}.`);
+}
+
+/**
+ * The standup group a call means. Standup content is for a group's members only, so only groups
+ * I am in can be picked: the one named (exact name, else a unique start of it), else my only
+ * group. Several and none named, or a group I'm not in, is a `ToolError`.
+ */
+export function matchStandupGroup(groups: readonly StandupGroup[], query?: string): StandupGroup {
+  const mine = groups.filter((g) => g.isMember);
+  const listOf = (list: readonly StandupGroup[]) =>
+    list.map((g) => `"${g.name.replace(/\s+/g, ' ').trim()}"`).join(', ') || 'none';
+  const named = query?.trim();
+  if (named) {
+    const q = fold(named);
+    const exact = groups.filter((g) => fold(g.name) === q || g.id === named);
+    const hits = exact.length > 0 ? exact : groups.filter((g) => fold(g.name).startsWith(q));
+    const [hit, ...more] = hits;
+    if (!hit) {
+      throw new ToolError(`No standup group "${named}". Your groups: ${listOf(mine)}.`);
+    }
+    if (more.length > 0) {
+      throw new ToolError(`"${named}" matches several standup groups: ${listOf(hits)}.`);
+    }
+    if (!hit.isMember) {
+      throw new ToolError(
+        `You are not a member of the standup group ${listOf([hit])}; standup updates are for the group's members only. Your groups: ${listOf(mine)}.`,
+      );
+    }
+    return hit;
+  }
+  const [only, ...others] = mine;
+  if (!only) throw new ToolError('You are not a member of any standup group in this workspace.');
+  if (others.length === 0) return only;
+  throw new ToolError(`You are in several standup groups; pass \`group\`: ${listOf(mine)}.`);
+}
+
+/** `fb-1042` → `FB-1042`; anything else is a `ToolError`. */
+export function feedbackRef(input: string): string {
+  const number = parseFeedbackRef(input);
+  if (number === null) throw new ToolError(`"${input}" is not a feedback ref like FB-1042.`);
+  return formatFeedbackRef(number);
 }
