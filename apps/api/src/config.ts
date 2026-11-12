@@ -25,6 +25,62 @@ const optionalString = z
   .optional()
   .transform((value) => (value === '' ? undefined : value));
 
+export interface OAuthClient {
+  name: string;
+  /** Matched exactly; the only places an authorization code is ever sent. */
+  redirectUris: string[];
+}
+
+const extraClientsSchema = z.record(
+  z.string().min(1).max(2048),
+  z.object({
+    name: z.string().trim().min(1).max(80),
+    redirectUris: z.array(z.string().max(2048)).min(1),
+  }),
+);
+
+const LOOPBACK = new Set(['localhost', '127.0.0.1', '[::1]']);
+
+/** Whether a client may be sent back to this URI: https, or http on loopback outside production. */
+function redirectUriAllowed(value: string, production: boolean): boolean {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    return false;
+  }
+  if (url.hash || url.username || url.password) return false;
+  if (url.protocol === 'https:') return true;
+  return !production && url.protocol === 'http:' && LOOPBACK.has(url.hostname);
+}
+
+/** `OAUTH_EXTRA_CLIENTS` parsed; call only on a validated config. */
+export function parseExtraClients(raw: string | undefined): Record<string, OAuthClient> {
+  return raw ? extraClientsSchema.parse(JSON.parse(raw)) : {};
+}
+
+function extraClientsProblem(raw: string, production: boolean): string | null {
+  let json: unknown;
+  try {
+    json = JSON.parse(raw);
+  } catch {
+    return 'Must be JSON: {"<client id>": {"name": "...", "redirectUris": ["https://..."]}}';
+  }
+  const parsed = extraClientsSchema.safeParse(json);
+  if (!parsed.success) {
+    return 'Must be {"<client id>": {"name": "...", "redirectUris": ["https://..."]}}';
+  }
+  for (const [clientId, client] of Object.entries(parsed.data)) {
+    const bad = client.redirectUris.find((uri) => !redirectUriAllowed(uri, production));
+    if (bad) {
+      return `Client ${clientId}: redirect URI ${bad} must be https without a fragment${
+        production ? '' : ' (or http on localhost)'
+      }`;
+    }
+  }
+  return null;
+}
+
 const envSchema = z
   .object({
     /** Required (no default) so a deploy that forgets it doesn't silently run in dev mode. */
@@ -88,8 +144,24 @@ const envSchema = z
         .regex(/^(mailto:|https:\/\/)/, 'Must start with mailto: or https://')
         .optional(),
     ),
+    /**
+     * The remote Claude connector: the OAuth routes (`/oauth/*`) that let people add Kite to
+     * Claude by URL (`<WEB_ORIGIN>/mcp`) and sign in. Off = the routes do not exist.
+     */
+    CONNECTOR_ENABLED: z.stringbool().default(false),
+    /**
+     * More OAuth clients besides Claude's published identity, as JSON:
+     * `{"<client id>": {"name": "...", "redirectUris": ["https://..."]}}`. Redirect URIs must be
+     * https; plain http on a loopback address is accepted outside production (test clients).
+     */
+    OAUTH_EXTRA_CLIENTS: optionalString,
   })
   .superRefine((env, ctx) => {
+    if (env.OAUTH_EXTRA_CLIENTS) {
+      const problem = extraClientsProblem(env.OAUTH_EXTRA_CLIENTS, env.NODE_ENV === 'production');
+      if (problem)
+        ctx.addIssue({ code: 'custom', path: ['OAUTH_EXTRA_CLIENTS'], message: problem });
+    }
     if (env.STORAGE_DRIVER === 's3' && !env.S3_BUCKET) {
       ctx.addIssue({
         code: 'custom',

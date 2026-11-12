@@ -8,7 +8,7 @@ import {
   meResponseSchema,
   signedInDeviceSchema,
 } from '@kite/shared';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, ne } from 'drizzle-orm';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { buildMe } from '../auth/me.js';
@@ -101,7 +101,7 @@ export const authRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Auth'],
         summary: 'Signed-in devices',
         description:
-          'My live sessions (web, mobile and MCP tokens), most recently used first; `current` is the one this request uses. `lastSeenAt` moves at most once a day.',
+          'My live sessions (web, mobile and MCP tokens; connector sign-ins are in `GET /oauth/grants`), most recently used first; `current` is the one this request uses. `lastSeenAt` moves at most once a day.',
         response: { 200: z.array(signedInDeviceSchema), 401: apiErrorSchema },
       },
     },
@@ -111,7 +111,10 @@ export const authRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       const rows = await app.db
         .select()
         .from(sessions)
-        .where(and(eq(sessions.userId, user.id), liveSession(now)))
+        // Connector access tokens are listed as sign-ins (`GET /oauth/grants`), not one by one.
+        .where(
+          and(eq(sessions.userId, user.id), liveSession(now), ne(sessions.client, 'connector')),
+        )
         .orderBy(desc(sessions.lastSeenAt), desc(sessions.createdAt));
       return rows.map((row) => ({
         id: row.publicId,

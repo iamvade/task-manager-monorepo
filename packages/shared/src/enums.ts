@@ -60,14 +60,16 @@ export const platformRoleSchema = z.enum(PLATFORM_ROLES);
 export type PlatformRole = z.infer<typeof platformRoleSchema>;
 
 /**
- * What a session was signed in from: the web app (cookie), a native app (bearer token), or an
- * MCP token made in Settings → Claude (bearer token, never from a password sign-in).
+ * What a session was signed in from: the web app (cookie), a native app (bearer token), an
+ * MCP token made in Settings → Claude (bearer token, never from a password sign-in), or the
+ * remote Claude connector (`connector`: a one-hour access token issued by the OAuth token
+ * endpoint; it never slides and belongs to an `oauth_grants` row).
  */
-export const SESSION_CLIENTS = ['web', 'mobile', 'mcp'] as const;
+export const SESSION_CLIENTS = ['web', 'mobile', 'mcp', 'connector'] as const;
 export const sessionClientSchema = z.enum(SESSION_CLIENTS);
 export type SessionClient = z.infer<typeof sessionClientSchema>;
 
-/** The clients a password sign-in or invite accept may ask for (`mcp` tokens come only from Settings). */
+/** The clients a password sign-in or invite accept may ask for (`mcp` tokens come only from Settings, `connector` ones from OAuth). */
 export const SIGN_IN_CLIENTS = ['web', 'mobile'] as const;
 export const signInClientSchema = z.enum(SIGN_IN_CLIENTS);
 

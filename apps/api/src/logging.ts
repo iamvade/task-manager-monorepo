@@ -6,7 +6,11 @@ import type { Config } from './config.js';
 /** Invite and reset tokens travel in the URL path; anyone reading logs could otherwise use them. */
 const SECRET_PATH = /(\/(?:invites|password-resets)\/)[^/?#]+/g;
 
-export const redactUrl = (url: string): string => url.replace(SECRET_PATH, '$1[redacted]');
+/** OAuth requests carry codes and state in the query string; none of it is logged. */
+const OAUTH_QUERY = /(\/oauth\/[^?#]*)\?.*$/;
+
+export const redactUrl = (url: string): string =>
+  url.replace(SECRET_PATH, '$1[redacted]').replace(OAUTH_QUERY, '$1?[redacted]');
 
 /**
  * Values bound to a failed query: drizzle appends them to the message (`\nparams: ...`, possibly
@@ -70,6 +74,15 @@ export const LOG_REDACT = {
     '*.token',
     '*.tokenHash',
     'err.params',
+    // OAuth token requests and responses.
+    'code',
+    'code_verifier',
+    'refresh_token',
+    'access_token',
+    'body.code',
+    'body.code_verifier',
+    'body.refresh_token',
+    'body.access_token',
   ],
   censor: '[redacted]',
 };

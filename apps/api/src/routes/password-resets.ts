@@ -9,7 +9,7 @@ import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { hashPassword } from '../auth/password.js';
 import { findPendingReset } from '../auth/password-reset.js';
-import { passwordResets, sessions, users } from '../db/schema/index.js';
+import { oauthGrants, passwordResets, sessions, users } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
 
 const tokenParams = z.object({ token: z.string().min(1).max(100) });
@@ -50,7 +50,7 @@ export const passwordResetRoutes: FastifyPluginCallbackZod = (app, _opts, done) 
         tags: ['Auth'],
         summary: 'Set a new password',
         description:
-          'Uses the reset link once: sets the password, signs the person out everywhere (sessions deleted, sockets closed with 4401) and clears their failed sign-in count. Does not sign in. 404 `RESET_INVALID` once used or expired.',
+          'Uses the reset link once: sets the password, signs the person out everywhere (sessions and connector sign-ins deleted, sockets closed with 4401) and clears their failed sign-in count. Does not sign in. 404 `RESET_INVALID` once used or expired.',
         security: [],
         params: tokenParams,
         body: passwordResetRequestSchema,
@@ -73,6 +73,8 @@ export const passwordResetRoutes: FastifyPluginCallbackZod = (app, _opts, done) 
           .delete(sessions)
           .where(eq(sessions.userId, row.user.id))
           .returning({ id: sessions.id });
+        // Connector sign-ins too: a refresh token must not outlive the reset.
+        await tx.delete(oauthGrants).where(eq(oauthGrants.userId, row.user.id));
         return { email: row.user.email, ended: deleted.map((s) => s.id) };
       });
       for (const id of ended) app.realtime.hub.closeSession(id, REALTIME_CLOSE_UNAUTHORIZED);

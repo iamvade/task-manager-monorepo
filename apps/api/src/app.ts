@@ -58,6 +58,8 @@ import { createStorage } from './storage/index.js';
 import { PushService } from './push/service.js';
 import { webPushTransport, type PushTransport } from './push/transport.js';
 import { pushRoutes } from './routes/push.js';
+import { oauthRoutes } from './routes/oauth.js';
+import { scheduleOAuthCleanup } from './oauth/cleanup-job.js';
 import type { Storage } from './storage/storage.js';
 
 declare module 'fastify' {
@@ -149,6 +151,7 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
   scheduleFeedbackCleanup(app);
   scheduleArchiveJob(app);
   scheduleStandupNotices(app);
+  if (config.CONNECTOR_ENABLED) scheduleOAuthCleanup(app);
   if (docsEnabled(config)) await registerDocs(app);
 
   await app.register(
@@ -185,6 +188,8 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
       await api.register(feedbackRoutes);
       await api.register(publicFeedbackRoutes);
       await api.register(realtimeRoutes);
+      // The remote Claude connector: without the switch its routes do not exist.
+      if (config.CONNECTOR_ENABLED) await api.register(oauthRoutes);
     },
     { prefix: '/api/v1' },
   );
