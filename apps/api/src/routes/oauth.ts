@@ -181,13 +181,10 @@ export const oauthRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       noStore(reply);
       const wait = throttle.retryAfter(request.ip);
       if (wait > 0) {
-        return reply
-          .header('retry-after', wait)
-          .code(429)
-          .send({
-            error: 'temporarily_unavailable',
-            error_description: 'Too many failed requests',
-          });
+        return reply.header('retry-after', wait).code(429).send({
+          error: 'temporarily_unavailable',
+          error_description: 'Too many failed requests',
+        });
       }
       const result = await issueTokens(app.db, app.config, request.body);
       if (!result.ok) {
@@ -216,13 +213,10 @@ export const oauthRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       noStore(reply);
       const wait = throttle.retryAfter(request.ip);
       if (wait > 0) {
-        return reply
-          .header('retry-after', wait)
-          .code(429)
-          .send({
-            error: 'temporarily_unavailable',
-            error_description: 'Too many failed requests',
-          });
+        return reply.header('retry-after', wait).code(429).send({
+          error: 'temporarily_unavailable',
+          error_description: 'Too many failed requests',
+        });
       }
       const ended = request.body.token ? await revokeToken(app.db, request.body.token) : null;
       if (ended) closeSessions(ended);

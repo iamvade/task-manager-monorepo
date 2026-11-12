@@ -6,6 +6,11 @@ export interface McpConfig {
   token: string;
   /** Workspace slug to use when a tool call names none. */
   workspace: string | undefined;
+  /**
+   * Where API requests go when that differs from `baseUrl` (the HTTP server calls the API inside
+   * the deployment, while links must use the address people open). Defaults to `baseUrl`.
+   */
+  apiBaseUrl?: string;
 }
 
 export class ConfigError extends Error {

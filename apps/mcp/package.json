@@ -3,12 +3,14 @@
   "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "Local MCP server (stdio) that lets Claude Desktop read and update Kite tasks as you.",
+  "description": "MCP server that lets Claude read and update Kite tasks as you: local (stdio, Claude Desktop) and remote (HTTP, the Claude connector).",
   "bin": {
     "kite-mcp": "dist/index.js"
   },
   "scripts": {
     "dev": "tsx src/index.ts",
+    "dev:http": "tsx src/http.ts",
+    "start:http": "node dist/http.js",
     "build": "tsup",
     "typecheck": "tsc",
     "test": "vitest run",

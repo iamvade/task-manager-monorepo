@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 const apiTarget = process.env.API_PROXY_TARGET ?? 'http://127.0.0.1:3000';
+const mcpTarget = process.env.MCP_PROXY_TARGET ?? 'http://127.0.0.1:3001';
 
 /**
  * `BASE_PATH=/task-manager` builds the app for a sub-path (`/task-manager/…`, behind a proxy that
@@ -24,7 +25,20 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     // Same-origin /api in dev so session cookies just work (`ws`: the realtime socket too).
-    proxy: { '/api': { target: apiTarget, changeOrigin: false, ws: true } },
+    proxy: {
+      '/api': { target: apiTarget, changeOrigin: false, ws: true },
+      // The remote Claude connector, as Caddy routes it in production: the MCP HTTP server
+      // (`pnpm --filter @kite/mcp dev:http`) and the OAuth metadata documents.
+      '/mcp': { target: mcpTarget, changeOrigin: false },
+      '^/\\.well-known/oauth-protected-resource': {
+        target: apiTarget,
+        rewrite: () => '/api/v1/oauth/resource-metadata',
+      },
+      '^/\\.well-known/(oauth-authorization-server|openid-configuration)': {
+        target: apiTarget,
+        rewrite: () => '/api/v1/oauth/metadata',
+      },
+    },
   },
   build: {
     rolldownOptions: {

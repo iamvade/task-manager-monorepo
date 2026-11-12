@@ -44,6 +44,37 @@ const CODE_MESSAGES: Record<string, string> = {
   INVALID_TASK: 'A linked task is not a task of this workspace.',
 };
 
+/** What the person should do about a failure: it differs between the two ways of running. */
+interface Hints {
+  unauthorized: string;
+  outdated: string;
+  unreachable: string;
+}
+
+const DESKTOP_HINTS: Hints = {
+  unauthorized:
+    'Kite rejected the token (revoked or expired). Create a new one in Kite: Settings → Claude, then update KITE_TOKEN and restart Claude Desktop.',
+  outdated:
+    'Kite answered in a format this server does not understand: the Kite server is probably newer than this kite-mcp build. Rebuild it (pnpm --filter @kite/mcp build) and restart Claude Desktop.',
+  unreachable: 'Could not reach Kite at KITE_URL',
+};
+
+/** The remote connector: nothing is installed or configured on the person's side. */
+const CONNECTOR_HINTS: Hints = {
+  unauthorized:
+    'Kite no longer accepts this sign-in (disconnected or expired). Reconnect Kite in Claude: Customize → Connectors.',
+  outdated:
+    'Kite answered in a format this connector does not understand. Its administrator needs to update the Kite connector.',
+  unreachable: 'The connector could not reach Kite',
+};
+
+let hints = DESKTOP_HINTS;
+
+/** Set once at start-up by the HTTP entry point; the stdio server keeps the desktop wording. */
+export function useConnectorHints(): void {
+  hints = CONNECTOR_HINTS;
+}
+
 /** Explains failures in words Claude can act on; never includes the token. */
 export function errorResult(err: unknown): CallToolResult {
   let message: string;
@@ -51,16 +82,14 @@ export function errorResult(err: unknown): CallToolResult {
   else if (isApiError(err)) {
     const known = CODE_MESSAGES[err.code];
     if (err.status === 401) {
-      message =
-        'Kite rejected the token (revoked or expired). Create a new one in Kite: Settings → Claude, then update KITE_TOKEN and restart Claude Desktop.';
+      message = hints.unauthorized;
     } else if (known) message = known;
     else if (err.status === 404) message = `Not found in Kite (${err.message}).`;
     else message = `Kite said ${err.status} ${err.code}: ${err.message}`;
   } else if (err instanceof Error && err.name === 'ZodError') {
-    message =
-      'Kite answered in a format this server does not understand: the Kite server is probably newer than this kite-mcp build. Rebuild it (pnpm --filter @kite/mcp build) and restart Claude Desktop.';
+    message = hints.outdated;
   } else if (err instanceof NetworkError) {
-    message = `Could not reach Kite at KITE_URL (${err.message}). Is the server running?`;
+    message = `${hints.unreachable} (${err.message}). Is the server running?`;
   } else {
     message = `Unexpected error: ${err instanceof Error ? err.message : String(err)}`;
   }
