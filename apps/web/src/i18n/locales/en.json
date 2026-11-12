@@ -1152,7 +1152,25 @@
       "workspaceNote": "Workspace (optional): {{slug}}",
       "step3": "Ask Claude",
       "step3Hint": "For example: “What’s on my plate today in Kite?” Teammates do the same with their own token.",
-      "manualSummary": "Set up without the extension (developers)"
+      "manualSummary": "Set up without the extension (developers)",
+      "connector": {
+        "title": "Connect Claude",
+        "intro": "Add Kite to Claude with one address and sign in with your Kite account. Nothing to install. Claude can read your tasks and make everyday changes as you: create tasks, change status, assignees and due dates, comment, post your standup. It can’t delete anything.",
+        "addressLabel": "Connector address",
+        "addressNote": "Works in Claude on the web and in the desktop app.",
+        "step1": "In Claude, open Customize → Connectors and choose “Add custom connector”.",
+        "step2": "Paste the address and add it.",
+        "step3": "Sign in to Kite and choose Allow.",
+        "mobileNote": "After that it’s also available in the Claude app on your phone.",
+        "connected": "Connected",
+        "none": "Nothing connected yet.",
+        "used": "Connected {{created}} · last used {{used}}",
+        "disconnect": "Disconnect",
+        "disconnectTitle": "Disconnect {{name}}?",
+        "disconnectBody": "{{name}} stops working with your Kite account right away. You can connect it again later.",
+        "disconnected": "Disconnected",
+        "other": "Other ways to connect (Claude Desktop extension)"
+      }
     }
   },
   "errors": {
@@ -2384,5 +2402,24 @@
     "notFoundTitle": "This feedback page doesn’t exist",
     "notFoundBody": "Check the link you were given, or ask the team that shared it for a new one.",
     "loading": "Loading…"
+  },
+  "oauth": {
+    "consent": {
+      "title": "Connect {{app}} to Kite?",
+      "signedInAs": "Signed in as {{name}} ({{email}}).",
+      "canTitle": "{{app}} will be able to act as you:",
+      "canRead": "See your tasks, projects, standups, inbox and feedback in every workspace you belong to.",
+      "canWrite": "Create and update tasks and subtasks, comment, link feedback and post your standup.",
+      "cannot": "It can’t delete anything. You can disconnect it any time in Settings → Claude.",
+      "returnTo": "After you choose, you’ll go back to {{host}}.",
+      "allow": "Allow",
+      "switchAccount": "Use a different account",
+      "invalidTitle": "This request can’t be completed",
+      "invalidBody": "The link that brought you here is incomplete or out of date. Go back to the app and try connecting again.",
+      "notAllowedBody": "This app isn’t allowed to connect to Kite.",
+      "adminTitle": "Not available for this account",
+      "adminBody": "The platform admin account can’t be connected to Claude. Sign in with your own workspace account.",
+      "backToKite": "Go to Kite"
+    }
   }
 }

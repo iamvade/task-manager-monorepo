@@ -697,3 +697,47 @@ The feedback designs ship `STR.mn` tables for the inbox, empty state, detail, cr
 - **Activity lines not drawn** (`feedback.detail.event.*`): "{{key}} ажлаас салгасан", "{{key}} устгагдсан тул салгасан", "хариуцагчийг хассан · {{key}} шинэчлэгдсэн"; toasts `feedback.bulk.*`, `feedback.detail.{linked,unlinked,failed,noteFailed}`, `feedback.create.{created,failed}`, `feedback.duplicates.{closedAll,notifySubject}`.
 - **Public form messages not drawn** (`feedbackPublic.*`): file type not allowed, upload failed / rate limited / storage full, the file limit note, "too long" errors, 429 "try again in N minutes", send failure. The intro reads "{{workspace}} баг …" instead of the design's "Kite Studio-гийн баг" (the genitive suffix depends on the name).
 - **"Reply by email" subject**: "Re: {{title}} ({{ref}})"; "Notify all" subject "Таны илгээсэн санал хүсэлтийн талаар ({{refs}})".
+
+## Remote Claude connector (derived, 2026-11-12)
+
+Not designed. The consent page (`pages/OAuthConsentPage.tsx`, `/oauth/authorize`) is built like the invite and reset pages; Settings → Claude leads with the connector when the server has it (`features/settings/ClaudeSection.tsx`). Cancel on the consent page is `common.cancel`; Copy address is `settings.claude.copyAddress`.
+
+| key | en | mn (draft) | where |
+|---|---|---|---|
+| `oauth.consent.title` | Connect {{app}} to Kite? | {{app}}-г Kite-тай холбох уу? | consent page heading ({{app}} = Claude) |
+| `oauth.consent.signedInAs` | Signed in as {{name}} ({{email}}). | {{name}} ({{email}}) нэрээр нэвтэрсэн. | under the heading |
+| `oauth.consent.canTitle` | {{app}} will be able to act as you: | {{app}} таны нэрээр дараахыг хийх боломжтой болно: | above the list |
+| `oauth.consent.canRead` | See your tasks, projects, standups, inbox and feedback in every workspace you belong to. | Таны байгаа бүх ажлын орчны даалгавар, төсөл, стэндап, ирсэн мэдэгдэл, санал хүсэлтийг харах. | list item |
+| `oauth.consent.canWrite` | Create and update tasks and subtasks, comment, link feedback and post your standup. | Даалгавар, дэд даалгавар үүсгэх, өөрчлөх, сэтгэгдэл бичих, санал хүсэлтийг холбох, таны стэндапыг нийтлэх. | list item |
+| `oauth.consent.cannot` | It can’t delete anything. You can disconnect it any time in Settings → Claude. | Юу ч устгаж чадахгүй. Тохиргоо → Claude хэсгээс хүссэн үедээ салгаж болно. | under the list |
+| `oauth.consent.returnTo` | After you choose, you’ll go back to {{host}}. | Сонголт хийсний дараа {{host}} руу буцна. | small note ({{host}} = claude.ai) |
+| `oauth.consent.allow` | Allow | Зөвшөөрөх | primary button |
+| `oauth.consent.switchAccount` | Use a different account | Өөр бүртгэлээр нэвтрэх | link under the buttons (signs out, then sign-in) |
+| `oauth.consent.invalidTitle` | This request can’t be completed | Энэ хүсэлтийг гүйцэтгэх боломжгүй | error state heading |
+| `oauth.consent.invalidBody` | The link that brought you here is incomplete or out of date. Go back to the app and try connecting again. | Таныг энд авчирсан холбоос дутуу эсвэл хуучирсан байна. Апп руугаа буцаж дахин холбоно уу. | error state: broken or old link |
+| `oauth.consent.notAllowedBody` | This app isn’t allowed to connect to Kite. | Энэ апп Kite-тай холбогдох зөвшөөрөлгүй. | error state: app not on the allow-list |
+| `oauth.consent.adminTitle` | Not available for this account | Энэ бүртгэлд боломжгүй | platform admin refusal heading |
+| `oauth.consent.adminBody` | The platform admin account can’t be connected to Claude. Sign in with your own workspace account. | Платформын админы бүртгэлийг Claude-тай холбох боломжгүй. Ажлын орчны өөрийн бүртгэлээр нэвтэрнэ үү. | platform admin refusal text |
+| `oauth.consent.backToKite` | Go to Kite | Kite руу очих | error state button |
+| `settings.claude.connector.title` | Connect Claude | Claude холбох | section heading |
+| `settings.claude.connector.intro` | Add Kite to Claude with one address and sign in with your Kite account. Nothing to install. Claude can read your tasks and make everyday changes as you: create tasks, change status, assignees and due dates, comment, post your standup. It can’t delete anything. | Kite-г Claude-д нэг хаягаар нэмээд Kite бүртгэлээрээ нэвтэрнэ. Юу ч суулгах шаардлагагүй. Claude таны даалгавруудыг уншиж, таны нэрээр өдөр тутмын өөрчлөлт хийнэ: даалгавар үүсгэх, төлөв, хариуцагч, дуусах огноо солих, сэтгэгдэл бичих, стэндап нийтлэх. Юу ч устгаж чадахгүй. | section description |
+| `settings.claude.connector.addressLabel` | Connector address | Холбогчийн хаяг | address box label |
+| `settings.claude.connector.addressNote` | Works in Claude on the web and in the desktop app. | Claude-ын вэб болон компьютерын апп дээр ажиллана. | address box note |
+| `settings.claude.connector.step1` | In Claude, open Customize → Connectors and choose “Add custom connector”. | Claude дээр Customize → Connectors-ыг нээж, «Add custom connector»-ыг сонгоно. | step 1 (Claude’s own menu names stay in English) |
+| `settings.claude.connector.step2` | Paste the address and add it. | Хаягаа буулгаад нэмнэ. | step 2 |
+| `settings.claude.connector.step3` | Sign in to Kite and choose Allow. | Kite-д нэвтэрч, «Зөвшөөрөх»-ийг дарна. | step 3 |
+| `settings.claude.connector.mobileNote` | After that it’s also available in the Claude app on your phone. | Үүний дараа утасны Claude апп дээр ч ашиглах боломжтой. | under step 3 |
+| `settings.claude.connector.connected` | Connected | Холбогдсон | list heading |
+| `settings.claude.connector.none` | Nothing connected yet. | Одоогоор холбогдсон зүйл алга. | empty list |
+| `settings.claude.connector.used` | Connected {{created}} · last used {{used}} | Холбосон {{created}} · сүүлд ашигласан {{used}} | row meta (dates) |
+| `settings.claude.connector.disconnect` | Disconnect | Салгах | row button + confirm button |
+| `settings.claude.connector.disconnectTitle` | Disconnect {{name}}? | {{name}}-г салгах уу? | confirm dialog title |
+| `settings.claude.connector.disconnectBody` | {{name}} stops working with your Kite account right away. You can connect it again later. | {{name}} таны Kite бүртгэлтэй шууд ажиллахаа болино. Дараа дахин холбож болно. | confirm dialog body |
+| `settings.claude.connector.disconnected` | Disconnected | Салгагдлаа | toast |
+| `settings.claude.connector.other` | Other ways to connect (Claude Desktop extension) | Холбох бусад арга (Claude Desktop өргөтгөл) | folded section with the extension and its tokens |
+
+Open questions:
+
+1. «Холбогч» for connector (Claude’s UI says “Connector”): keep, or leave the English word?
+2. «Салгах» (disconnect) here vs «Цуцлах» (revoke) for extension tokens: two words on one page on purpose (an app vs a token); confirm.
+3. `oauth.consent.title` puts a suffix on the app name («Claude-г»); it reads right for “Claude” but may not for other names (only allow-listed apps appear).

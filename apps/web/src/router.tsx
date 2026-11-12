@@ -83,6 +83,15 @@ export const routes: RouteObject[] = [
         ),
       },
       {
+        // The remote Claude connector's consent step. Outside `RequireAuth`: it sends signed-out
+        // people to sign in itself and refuses the platform admin instead of bouncing to /admin.
+        path: '/oauth/authorize',
+        lazy: page(
+          () => import('./pages/OAuthConsentPage'),
+          (m) => m.OAuthConsentPage,
+        ),
+      },
+      {
         element: <RequireAuth />,
         children: [
           {

@@ -1,3 +1,4 @@
+import { createHash, randomBytes } from 'node:crypto';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { ADMIN, MEMBER, VADE } from './users';
@@ -109,6 +110,86 @@ const pages = (ids: Ids): [string, string][] => [
   ['Feedback · filtered', '/w/kite-studio/feedback?type=bug&status=linked&status=new'],
 ];
 
+const CLAUDE_CLIENT = 'https://claude.ai/oauth/mcp-oauth-client-metadata';
+const CLAUDE_CALLBACK = 'https://claude.ai/api/mcp/auth_callback';
+
+/** An authorization request as Claude sends it, with the PKCE verifier to redeem its code. */
+function authorizeRequest() {
+  const verifier = randomBytes(32).toString('base64url');
+  const params = {
+    response_type: 'code',
+    client_id: CLAUDE_CLIENT,
+    redirect_uri: CLAUDE_CALLBACK,
+    code_challenge: createHash('sha256').update(verifier).digest('base64url'),
+    code_challenge_method: 'S256',
+    state: 'a11y',
+  };
+  return { verifier, params, query: new URLSearchParams(params).toString() };
+}
+
+test.describe('remote connector (admin)', () => {
+  test.use({ storageState: ADMIN.state });
+
+  for (const scheme of ['light', 'dark'] as const) {
+    test(`OAuth consent page (${scheme})`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme: scheme });
+      await page.goto(`/oauth/authorize?${authorizeRequest().query}`);
+      await expect(page.getByRole('heading', { name: 'Connect Claude to Kite?' })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Allow' })).toBeVisible();
+      await expectAccessible(page, `OAuth consent (${scheme})`);
+
+      // A request that doesn't check out: an error, and the page stays on Kite.
+      await page.goto(
+        '/oauth/authorize?client_id=https://evil.example/c&redirect_uri=https://evil.example/cb',
+      );
+      await expect(page.getByText('This app isn’t allowed to connect to Kite.')).toBeVisible();
+      await expectAccessible(page, `OAuth consent refused (${scheme})`);
+    });
+
+    test(`Settings → Claude with a connected app (${scheme})`, async ({ page, baseURL }) => {
+      await page.emulateMedia({ colorScheme: scheme });
+      // Connect once through the API, as Claude would after Allow.
+      const { verifier, params } = authorizeRequest();
+      const approved = await page.request.post('/api/v1/oauth/authorize', {
+        headers: { origin: baseURL ?? '' },
+        data: {
+          clientId: params.client_id,
+          redirectUri: params.redirect_uri,
+          responseType: 'code',
+          codeChallenge: params.code_challenge,
+          codeChallengeMethod: 'S256',
+          approve: true,
+        },
+      });
+      const { redirectTo } = (await approved.json()) as { redirectTo: string };
+      const code = new URL(redirectTo).searchParams.get('code') ?? '';
+      // `page.request` carries the session cookie, so it needs the web Origin (Claude has neither).
+      const issued = await page.request.post('/api/v1/oauth/token', {
+        headers: { origin: baseURL ?? '' },
+        form: {
+          grant_type: 'authorization_code',
+          code,
+          code_verifier: verifier,
+          client_id: params.client_id,
+          redirect_uri: params.redirect_uri,
+        },
+      });
+      expect(issued.status()).toBe(200);
+
+      await page.goto('/w/kite-studio/settings?tab=claude');
+      await expect(page.getByLabel('Connector address')).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Disconnect: Claude' }).first()).toBeVisible();
+      await expectAccessible(page, `Settings Claude connector (${scheme})`);
+      await page.getByText('Other ways to connect (Claude Desktop extension)').click();
+      await expect(page.getByRole('button', { name: 'Create token' })).toBeVisible();
+      await expectAccessible(page, `Settings Claude connector, extension open (${scheme})`);
+      await page.getByRole('button', { name: 'Disconnect: Claude' }).first().click();
+      await expect(page.getByRole('dialog', { name: 'Disconnect Claude?' })).toBeVisible();
+      await expectAccessible(page, `Settings Claude disconnect dialog (${scheme})`);
+    });
+  }
+});
+
 test.describe('platform admin', () => {
   test.use({ storageState: VADE.state });
 
@@ -163,6 +244,13 @@ test.describe('signed out', () => {
     await page.goto('/invite/not-a-real-token');
     await expect(page.getByRole('link')).toBeVisible();
     await expectAccessible(page, 'Invite');
+  });
+
+  test('OAuth consent sends a signed-out person to sign in', async ({ page }) => {
+    await page.goto(`/oauth/authorize?${authorizeRequest().query}`);
+    await expect(page.locator('input[name="email"]')).toBeVisible();
+    expect(new URL(page.url()).searchParams.get('next')).toContain('/oauth/authorize?');
+    await expectAccessible(page, 'OAuth consent → login');
   });
 
   test('password reset (invalid link)', async ({ page }) => {

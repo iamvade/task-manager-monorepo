@@ -26,9 +26,30 @@ const device = (id: string, client: string, deviceLabel: string) => ({
 const OLD = device('01890000-0000-7000-8000-000000000a01', 'mcp', 'Work Mac');
 const BROWSER = device('01890000-0000-7000-8000-000000000a02', 'web', 'Chrome on macOS');
 
-function renderClaude(extension: 'served' | 'missing' = 'missing') {
+const GRANT = {
+  id: '01890000-0000-7000-8000-000000000b01',
+  clientName: 'Claude',
+  createdAt: '2026-11-02T04:00:00.000Z',
+  lastUsedAt: '2026-11-11T04:00:00.000Z',
+};
+const CONNECTOR_URL = 'https://kite.example/task-manager/mcp';
+
+function renderClaude(
+  extension: 'served' | 'missing' = 'missing',
+  connector: 'off' | 'on' = 'off',
+) {
   let devices = [OLD, BROWSER];
+  let grants = [GRANT];
   const fetchMock = mockApi({
+    // A server without the connector has no such route.
+    'GET /api/v1/oauth/grants': () =>
+      connector === 'on'
+        ? Response.json({ connectorUrl: CONNECTOR_URL, grants })
+        : Response.json({ error: { code: 'NOT_FOUND', message: 'x' } }, { status: 404 }),
+    [`DELETE /api/v1/oauth/grants/${GRANT.id}`]: () => {
+      grants = [];
+      return new Response(null, { status: 204 });
+    },
     'GET /api/v1/auth/me': () => Response.json(ME_EN),
     [`GET /api/v1/workspaces/${WORKSPACE_ID}/sidebar`]: () => Response.json(SIDEBAR),
     'GET /api/v1/auth/sessions': () => Response.json(devices),
@@ -126,6 +147,47 @@ describe('Settings → Claude', () => {
           init?.method === 'DELETE' && typeof url === 'string' && url.endsWith(OLD.id),
       ),
     ).toBe(true);
+  });
+});
+
+describe('Settings → Claude with the remote connector', () => {
+  beforeEach(async () => {
+    localStorage.clear();
+    useUiStore.setState({ lastWorkspaceId: null });
+    useToastStore.setState({ toasts: [] });
+    await i18n.changeLanguage('en');
+  });
+
+  it('leads with the connector address and steps, the extension folded below', async () => {
+    renderClaude('missing', 'on');
+    expect(await screen.findByRole('heading', { name: 'Connect Claude' })).toBeVisible();
+    expect(screen.getByLabelText('Connector address')).toHaveValue(CONNECTOR_URL);
+    expect(screen.getByText('Sign in to Kite and choose Allow.')).toBeVisible();
+    const other = screen.getByText('Other ways to connect (Claude Desktop extension)');
+    const details = other.closest('details');
+    expect(details).not.toHaveAttribute('open');
+    // The extension's tokens are still there, inside the folded part.
+    expect(await within(details as HTMLElement).findByText('Work Mac')).toBeInTheDocument();
+  });
+
+  it('lists connector sign-ins and disconnects one after confirming', async () => {
+    const { fetchMock } = renderClaude('missing', 'on');
+    fireEvent.click(await screen.findByRole('button', { name: 'Disconnect: Claude' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Disconnect Claude?' });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Disconnect' }));
+    expect(await screen.findByText('Nothing connected yet.')).toBeVisible();
+    expect(
+      fetchMock.mock.calls.some(
+        ([url, init]) =>
+          init?.method === 'DELETE' && typeof url === 'string' && url.endsWith(GRANT.id),
+      ),
+    ).toBe(true);
+  });
+
+  it('shows no connector where the server has none', async () => {
+    renderClaude('missing', 'off');
+    expect(await screen.findByRole('heading', { name: 'Connect Claude Desktop' })).toBeVisible();
+    expect(screen.queryByLabelText('Connector address')).toBeNull();
   });
 });
 

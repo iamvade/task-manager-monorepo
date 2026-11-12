@@ -3,6 +3,10 @@ export const queryKeys = {
   me: ['me'] as const,
   /** My live sessions (`GET /auth/sessions`): Settings → Claude lists the MCP tokens. */
   signedInDevices: ['auth', 'sessions'] as const,
+  /** The remote Claude connector's address and my sign-ins through it (Settings → Claude). */
+  oauthGrants: ['oauth', 'grants'] as const,
+  /** The consent page's check of one authorization request. */
+  oauthAuthorizeCheck: (params: unknown) => ['oauth', 'authorize-check', params] as const,
   /** Whether this server serves the Claude Desktop extension (Settings → Claude). */
   claudeExtension: ['claude-extension'] as const,
   /** Whether the server sends Web Push, and its VAPID key. */
