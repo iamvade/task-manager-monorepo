@@ -472,6 +472,8 @@ for (const scheme of ['light', 'dark'] as const) {
           route.fulfill({ status: 200, contentType: 'application/zip', body: '' }),
         );
         await page.goto('/w/kite-studio/settings?tab=claude');
+        // With the remote connector on, the extension is folded below it.
+        await page.getByText('Other ways to connect (Claude Desktop extension)').click();
         await page.getByRole('button', { name: 'Create token' }).click();
         await expect(page.getByRole('link', { name: 'Download for Claude Desktop' })).toBeVisible();
         await page.getByText('Set up without the extension (developers)').click();
