@@ -171,7 +171,7 @@ export const oauthRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['OAuth'],
         summary: 'Token endpoint',
         description:
-          'RFC 6749 §4.1.3 and §6, form encoded, public clients (`client_id` in the body, no secret). `authorization_code` needs `code`, `code_verifier`, `client_id`, `redirect_uri`; `refresh_token` needs `refresh_token`, `client_id`. Answers a one-hour access token (a bearer session that never slides) and a refresh token that is rotated on every use; the sign-in ends 30 days after its last refresh. A code used twice, or a rotated-out refresh token seen more than a minute later, ends the sign-in. Errors are RFC 6749 bodies (`{ error, error_description }`), not Kite’s envelope. Failed requests are throttled per IP (30 per 10 minutes): 429 with `Retry-After`.',
+          'RFC 6749 §4.1.3 and §6, form encoded, public clients (`client_id` in the body, no secret). `authorization_code` needs `code`, `code_verifier`, `client_id`, `redirect_uri`; `refresh_token` needs `refresh_token`, `client_id`. Answers a one-hour access token (a bearer session that never slides) and a refresh token that is rotated on every use; the sign-in ends 30 days after its last refresh. A code used twice, or a rotated-out refresh token seen more than a minute later, ends the sign-in. Errors are RFC 6749 bodies (`{ error, error_description }`), not Kite’s envelope. Failed requests are throttled per IP (after 30 failures in 10 minutes a further failure answers 429 with `Retry-After`); a valid request is always served, since every Claude user comes from the same few addresses.',
         security: [],
         body: oauthTokenRequestSchema,
         response: { 200: oauthTokenResponseSchema, 400: tokenError, 429: oauthErrorSchema },
@@ -179,6 +179,10 @@ export const oauthRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     },
     async (request, reply) => {
       noStore(reply);
+      // Always tried first: every Claude user arrives from the same few addresses, so a valid
+      // request must get through however many bad ones that address has sent.
+      const result = await issueTokens(app.db, app.config, request.body);
+      if (result.ok) return result.tokens;
       const wait = throttle.retryAfter(request.ip);
       if (wait > 0) {
         return reply.header('retry-after', wait).code(429).send({
@@ -186,12 +190,8 @@ export const oauthRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           error_description: 'Too many failed requests',
         });
       }
-      const result = await issueTokens(app.db, app.config, request.body);
-      if (!result.ok) {
-        throttle.fail(request.ip);
-        return reply.code(result.status).send(result.body);
-      }
-      return result.tokens;
+      throttle.fail(request.ip);
+      return reply.code(result.status).send(result.body);
     },
   );
 
@@ -206,21 +206,13 @@ export const oauthRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           'RFC 7009, form encoded. Ends the connector sign-in a refresh or access token belongs to (all its tokens). Always 200, also for an unknown token.',
         security: [],
         body: oauthRevokeRequestSchema,
-        response: { 200: z.object({}), 400: tokenError, 429: oauthErrorSchema },
+        response: { 200: z.object({}), 400: tokenError },
       },
     },
     async (request, reply) => {
       noStore(reply);
-      const wait = throttle.retryAfter(request.ip);
-      if (wait > 0) {
-        return reply.header('retry-after', wait).code(429).send({
-          error: 'temporarily_unavailable',
-          error_description: 'Too many failed requests',
-        });
-      }
       const ended = request.body.token ? await revokeToken(app.db, request.body.token) : null;
       if (ended) closeSessions(ended);
-      else throttle.fail(request.ip);
       return {};
     },
   );

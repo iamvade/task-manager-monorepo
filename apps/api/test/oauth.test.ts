@@ -448,7 +448,7 @@ describe('remote connector: OAuth authorization server', () => {
       expect((await me(tokens.access_token)).statusCode).toBe(401);
     });
 
-    it('throttles failures per IP and never counts successes', async () => {
+    it('throttles failures per IP but always serves a valid request from it', async () => {
       const { tokens } = await connect();
       const ip = randomIp();
       let current: OAuthTokenResponse = tokens;
@@ -464,8 +464,11 @@ describe('remote connector: OAuth authorization server', () => {
       expect(blocked.statusCode).toBe(429);
       expect(Number(blocked.headers['retry-after'])).toBeGreaterThan(0);
       expect(blocked.json()).toMatchObject({ error: 'temporarily_unavailable' });
-      // Another address (the rest of Claude's users) is unaffected.
-      expect((await refresh(current.refresh_token)).statusCode).toBe(200);
+      // Claude's users share a few addresses: a good request from the same one still works.
+      const good = await refresh(current.refresh_token, ip);
+      expect(good.statusCode, good.body).toBe(200);
+      const fresh = await connect();
+      expect((await refresh(fresh.tokens.refresh_token, ip)).statusCode).toBe(200);
     });
 
     it('is reachable from any Origin without a cookie, but not with one', async () => {

@@ -57,11 +57,16 @@
 			X-Content-Type-Options "nosniff"
 			X-Frame-Options "DENY"
 			Referrer-Policy "strict-origin-when-cross-origin"
-			Cross-Origin-Opener-Policy "same-origin"
 			Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
 			# Fonts come from Google Fonts; the editor (TipTap) injects a <style> element.
 			Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' wss://{host}; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
 		}
+		# Every page is isolated from windows of other sites, except the connector's consent
+		# page: Claude opens it in its own window and it ends by going back to Claude's callback.
+		# `same-origin` there would cut that window off from the one that opened it for good, so
+		# the callback could not report back. Framing stays forbidden (X-Frame-Options, CSP).
+		@isolated not path /oauth/authorize
+		header @isolated Cross-Origin-Opener-Policy "same-origin"
 		# Hashed build assets never change; everything else is revalidated.
 		@assets path /assets/*
 		header @assets Cache-Control "public, max-age=31536000, immutable"

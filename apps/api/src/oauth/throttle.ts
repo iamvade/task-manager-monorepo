@@ -1,7 +1,9 @@
 /**
- * Failed token requests per IP in a fixed window. Only failures count: every Claude user reaches
- * the token endpoint from the same few Anthropic addresses, so counting successes would lock
- * everyone out together. In memory, so per API process (there is one).
+ * Failed token requests per IP in a fixed window. Only failures count, and only a failing request
+ * is ever refused: every Claude user reaches the token endpoint from the same few Anthropic
+ * addresses, so the caller tries each request first and asks this only when it failed. It slows
+ * guessing down (the tokens are 256 bits of randomness; this is the second line). In memory, so
+ * per API process (there is one).
  */
 export class FailureThrottle {
   private readonly counts = new Map<string, { failures: number; resetAt: number }>();
