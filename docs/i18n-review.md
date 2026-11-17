@@ -741,3 +741,84 @@ Open questions:
 1. «Холбогч» for connector (Claude’s UI says “Connector”): keep, or leave the English word?
 2. «Салгах» (disconnect) here vs «Цуцлах» (revoke) for extension tokens: two words on one page on purpose (an app vs a token); confirm.
 3. `oauth.consent.title` puts a suffix on the app name («Claude-г»); it reads right for “Claude” but may not for other names (only allow-listed apps appear).
+
+
+## `personal` (70, not designed)
+
+Personal space (notes, to-dos, `[[links]]`, graph). No design exists, so both languages are drafted; please review the Mongolian.
+
+| key | en | mn (draft) |
+|---|---|---|
+| `title` | Personal | Хувийн |
+| `private` | Only you | Зөвхөн танд |
+| `views` | Personal views | Хувийн харагдац |
+| `back` | Back to the list | Жагсаалт руу буцах |
+| `kind.note` | Note | Тэмдэглэл |
+| `kind.todo` | To-do | Хийх зүйл |
+| `kind.notes` | Notes | Тэмдэглэл |
+| `kind.todos` | To-dos | Хийх зүйлс |
+| `topics.label` | Topics | Сэдвүүд |
+| `topics.all` | All | Бүгд |
+| `topics.none` | No topic | Сэдэвгүй |
+| `topics.new` | New topic | Шинэ сэдэв |
+| `topics.name` | Topic name | Сэдвийн нэр |
+| `topics.namePlaceholder` | Topic name | Сэдвийн нэр |
+| `topics.color` | Topic color | Сэдвийн өнгө |
+| `topics.save` | Save | Хадгалах |
+| `topics.edit` | Rename or recolor | Нэр, өнгө солих |
+| `topics.moveUp` | Move up | Дээш зөөх |
+| `topics.moveDown` | Move down | Доош зөөх |
+| `topics.delete` | Delete topic | Сэдэв устгах |
+| `topics.deleteTitle` | Delete “{{name}}”? | «{{name}}»-г устгах уу? |
+| `topics.deleteBody` | Its notes and to-dos stay, under No topic. | Түүний тэмдэглэл, хийх зүйлс Сэдэвгүй хэсэгт үлдэнэ. |
+| `topics.exists` | You already have a topic with this name. | Ийм нэртэй сэдэв танд аль хэдийн бий. |
+| `topics.actions` | Actions for {{name}} | {{name}}: үйлдлүүд |
+| `filter.label` | Show | Харуулах |
+| `filter.all` | All | Бүгд |
+| `filter.unlinked` | Unlinked | Холбоосгүй |
+| `filter.uncreated` | Not created yet | Үүсээгүй |
+| `list.newNote` | New note — type a title and press Enter | Шинэ тэмдэглэл — гарчиг бичээд Enter дарна уу |
+| `list.newTodo` | New to-do — type a title and press Enter | Шинэ хийх зүйл — гарчиг бичээд Enter дарна уу |
+| `list.emptyNotes` | No notes here yet. | Энд тэмдэглэл алга. |
+| `list.emptyTodos` | No to-dos here yet. | Энд хийх зүйл алга. |
+| `list.noUnlinked` | Every note here links somewhere. | Энд байгаа тэмдэглэл бүр холбоостой. |
+| `list.noUncreated` | No links point to missing notes. | Байхгүй тэмдэглэл рүү заасан холбоос алга. |
+| `list.linkedFrom` | Linked from {{titles}} | Холбосон: {{titles}} |
+| `list.create` | Create | Үүсгэх |
+| `item.title` | Title | Гарчиг |
+| `item.body` | Notes | Тэмдэглэл |
+| `item.bodyPlaceholder` | Write… type [[ to link | Бичнэ үү… холбохдоо [[ гэж бичнэ |
+| `item.kind` | Type | Төрөл |
+| `item.topic` | Topic | Сэдэв |
+| `item.due` | Due date | Дуусах огноо |
+| `item.noDue` | No due date | Огноогүй |
+| `item.delete` | Delete | Устгах |
+| `item.deleted` | “{{title}}” deleted | «{{title}}» устлаа |
+| `item.markDone` | Mark “{{title}}” done | «{{title}}»-г дууссан гэж тэмдэглэх |
+| `item.linksTo` | Links to | Холбоосууд |
+| `item.noLinks` | No links yet. Type [[ in the notes to add one. | Холбоос алга. Тэмдэглэлд [[ гэж бичээд нэмнэ үү. |
+| `item.linkedFrom` | Linked from | Энд холбосон |
+| `item.noBacklinks` | No notes link here yet. | Энд холбосон тэмдэглэл алга. |
+| `link.suggestions` | Link suggestions | Холбоосын санал |
+| `link.mine` | Notes and to-dos | Тэмдэглэл, хийх зүйлс |
+| `link.teamTasks` | Team tasks | Багийн ажлууд |
+| `link.create` | Create “{{title}}” | «{{title}}» үүсгэх |
+| `link.withoutCreating` | Link without creating | Үүсгэлгүй холбох |
+| `link.notCreatedHint` | Not created yet: click to create it | Үүсээгүй: дарж үүсгэнэ үү |
+| `link.clickToCreate` | not created yet — click to create | үүсээгүй — дарж үүсгэнэ |
+| `link.unavailable` | Unavailable | Харах боломжгүй |
+| `empty.title` | Your personal space | Таны хувийн орон зай |
+| `empty.body` | Notes and to-dos only you can see, in every workspace. Add a topic, write a note and link notes with [[. | Зөвхөн таны харах тэмдэглэл, хийх зүйлс, бүх ажлын талбарт ижил. Сэдэв нэмж, тэмдэглэл бичээд [[ ашиглан холбоорой. |
+| `empty.pickTitle` | Pick a note | Тэмдэглэл сонгоно уу |
+| `empty.pickBody` | Open a note or to-do from the list, or add a new one. | Жагсаалтаас тэмдэглэл эсвэл хийх зүйл нээх, эсвэл шинээр нэмнэ үү. |
+| `graph.tab` | Graph | Граф |
+| `graph.label` | Graph of notes and their links | Тэмдэглэл ба тэдгээрийн холбоосын граф |
+| `graph.connections` | Connections | Холбоосууд |
+| `graph.zoomIn` | Zoom in | Томруулах |
+| `graph.zoomOut` | Zoom out | Жижигрүүлэх |
+| `graph.fit` | Reset view | Анхны харагдац |
+| `graph.emptyTitle` | Nothing to show | Харуулах зүйл алга |
+| `graph.emptyBody` | Notes and their [[links]] appear here. | Тэмдэглэл болон тэдгээрийн [[холбоос]] энд харагдана. |
+| `shell.personal` | Personal | Хувийн |
+| `palette.actions.goPersonal` | Go to Personal | Хувийн хэсэг рүү очих |
+| `palette.groups.personal` | Personal | Хувийн |
