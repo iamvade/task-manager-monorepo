@@ -8,6 +8,7 @@ import {
   InboxIcon,
   MyTasksIcon,
   PanelCloseIcon,
+  PersonalIcon,
   ReportsIcon,
   SettingsIcon,
   UserPlusIcon,
@@ -76,6 +77,11 @@ export function Sidebar({ onClose }: { onClose?: () => void } = {}) {
               </span>
             )
           }
+        />
+        <NavItem
+          to={ws('/personal')}
+          icon={<PersonalIcon size={16} />}
+          label={t('shell.personal')}
         />
         <StandupNavItem />
         <NavItem

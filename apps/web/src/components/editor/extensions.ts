@@ -1,4 +1,4 @@
-import { Extension, mergeAttributes } from '@tiptap/core';
+import { Extension, mergeAttributes, type AnyExtension } from '@tiptap/core';
 import Mention from '@tiptap/extension-mention';
 import { Placeholder } from '@tiptap/extensions';
 import { ReactRenderer } from '@tiptap/react';
@@ -26,10 +26,23 @@ const labelOf = (attrs: Record<string, unknown>) =>
  */
 export function editorExtensions(
   callbacks: EditorCallbacks,
-  { placeholder, placement }: { placeholder: string; placement: 'top-start' | 'bottom-start' },
+  {
+    placeholder,
+    placement,
+    taskKeys = true,
+    extra = [],
+  }: {
+    placeholder: string;
+    placement: 'top-start' | 'bottom-start';
+    /** Style `KEY-123` in the text (off in personal notes, which link tasks by id). */
+    taskKeys?: boolean;
+    /** More extensions (personal notes' `[[links]]`). */
+    extra?: readonly AnyExtension[];
+  },
 ) {
   return [
-    TaskKeys,
+    ...(taskKeys ? [TaskKeys] : []),
+    ...extra,
     StarterKit.configure({
       heading: { levels: [3, 4] },
       codeBlock: false,

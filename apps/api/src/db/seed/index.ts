@@ -49,6 +49,7 @@ import { buildHistory, planSprints, ubAt } from './history.js';
 import { buildStandups } from './standups.js';
 import { buildFeedback } from './feedback.js';
 import { buildLabs } from './labs.js';
+import { buildPersonal } from './personal.js';
 import { backfillReferences } from '../../tasks/references.js';
 
 export interface SeedOptions {
@@ -160,6 +161,9 @@ export async function runSeed(db: Db, options: SeedOptions): Promise<void> {
     await tx.insert(schema.feedback).values(rows.feedback);
     await tx.insert(schema.feedbackAttachments).values(rows.feedbackAttachments);
     await tx.insert(schema.feedbackActivity).values(rows.feedbackActivity);
+    await tx.insert(schema.personalTopics).values(rows.personalTopics);
+    await tx.insert(schema.personalItems).values(rows.personalItems);
+    await tx.insert(schema.personalLinks).values(rows.personalLinks);
 
     const { labs } = rows;
     await tx.insert(schema.workspaces).values(labs.workspace);
@@ -794,9 +798,17 @@ export function buildRows(
     projectKey: (id) => must(projectKeyById.get(id), `project ${id}`),
   });
 
+  const personal = buildPersonal({
+    clock,
+    pick,
+    ownerId: user(ME).id,
+    task: { id: task('checkout-responsive').row.id, key: 'APP-142' },
+  });
+
   return {
     holidays,
     ...standups,
+    ...personal,
     ...feedbackRows,
     periods: [...periods, ...history.periods],
     memberships: [...memberships, ...history.memberships],

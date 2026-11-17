@@ -6,6 +6,7 @@ import {
   FeedbackIcon,
   InboxIcon,
   MyTasksIcon,
+  PersonalIcon,
   PanelOpenIcon,
   ReportsIcon,
   SearchIcon,
@@ -55,6 +56,9 @@ export function SidebarRail() {
       />
       <RailLink to={ws('/my-tasks')} label={t('shell.myTasks')}>
         <MyTasksIcon size={16} />
+      </RailLink>
+      <RailLink to={ws('/personal')} label={t('shell.personal')}>
+        <PersonalIcon size={16} />
       </RailLink>
       <RailLink
         to={ws('/standup')}

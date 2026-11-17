@@ -3,6 +3,7 @@ import { Command } from 'cmdk';
 import { useMemo, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
+import { usePersonalIndex } from '../../api/personal';
 import { useSearch } from '../../api/search';
 import { useCurrentWorkspace, useSidebar, useWsPath } from '../../api/workspaces';
 import { useLanguage } from '../../components/useLanguage';
@@ -13,6 +14,9 @@ import {
   PlusIcon,
   SearchIcon,
   SettingsIcon,
+  NoteIcon,
+  PersonalIcon,
+  CheckCircleIcon,
 } from '../../components/icons';
 import { Avatar } from '../../components/ui/Avatar';
 import { Kbd } from '../../components/ui/Kbd';
@@ -144,6 +148,15 @@ function PaletteBody({
       }),
     },
     {
+      id: 'go-personal',
+      label: t('palette.actions.goPersonal'),
+      keywords: 'personal notes todo private хувийн тэмдэглэл',
+      icon: <PersonalIcon size={14} />,
+      run: run(() => {
+        void navigate(ws('/personal'));
+      }),
+    },
+    {
       id: 'switch-theme',
       label: t('palette.actions.switchTheme'),
       keywords: 'theme dark light mode загвар харанхуй цайвар',
@@ -190,6 +203,11 @@ function PaletteBody({
   const pages = q ? search.data?.pages : undefined;
   const results = pages?.[0];
   const tasks = pages?.flatMap((page) => page.tasks) ?? [];
+  // My personal notes and to-dos, matched here (the workspace search never sees them).
+  const personal = usePersonalIndex(q.length > 0);
+  const personalItems = q
+    ? (personal.data?.items ?? []).filter((i) => i.title.toLowerCase().includes(q)).slice(0, 5)
+    : [];
   const projects = q ? (results?.projects ?? []) : spaces.flatMap((s) => s.projects).slice(0, 8);
   const people = results?.people ?? [];
   const comments = results?.comments ?? [];
@@ -289,6 +307,33 @@ function PaletteBody({
                 {search.isFetchingNextPage ? t('palette.loading') : t('palette.moreTasks')}
               </Command.Item>
             )}
+          </Command.Group>
+        )}
+
+        {personalItems.length > 0 && (
+          <Command.Group heading={t('palette.groups.personal')} className={groupClass}>
+            {personalItems.map((item) => (
+              <Command.Item
+                key={item.id}
+                value={`personal:${item.id}`}
+                onSelect={run(() => {
+                  void navigate(ws(`/personal/i/${item.id}`));
+                })}
+                className={itemClass}
+              >
+                <span className="flex size-4 flex-none items-center justify-center text-icon">
+                  {item.kind === 'todo' ? <CheckCircleIcon size={14} /> : <NoteIcon size={14} />}
+                </span>
+                <span
+                  className={cn(
+                    'min-w-0 flex-1 truncate',
+                    item.doneAt && 'text-muted line-through',
+                  )}
+                >
+                  {item.title}
+                </span>
+              </Command.Item>
+            ))}
           </Command.Group>
         )}
 
