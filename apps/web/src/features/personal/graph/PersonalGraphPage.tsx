@@ -1,5 +1,5 @@
 import { buildPersonalGraph, type GraphNode, type PaletteKey } from '@kite/shared';
-import { useMemo, useRef, useState, type PointerEvent, type WheelEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router';
 import { useWsPath } from '../../../api/workspaces';
@@ -201,9 +201,20 @@ function GraphCanvas({ layout, labelOf, colorOf, isTodo, onOpen }: GraphCanvasPr
     return box && box.width > 0 ? Math.max(width / box.width, height / box.height) : 1;
   };
 
-  const onWheel = (e: WheelEvent) => {
-    zoom(e.deltaY < 0 ? 1.1 : 1 / 1.1);
-  };
+  // Wheel zooms the graph instead of scrolling the page (React's wheel listener is passive).
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const onWheel = (e: globalThis.WheelEvent) => {
+      e.preventDefault();
+      const factor = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+      setView((v) => ({ ...v, k: Math.min(4, Math.max(0.25, v.k * factor)) }));
+    };
+    svg.addEventListener('wheel', onWheel, { passive: false });
+    return () => {
+      svg.removeEventListener('wheel', onWheel);
+    };
+  }, []);
   const onPointerDown = (e: PointerEvent) => {
     if ((e.target as Element).closest('[data-node]')) return;
     drag.current = { px: e.clientX, py: e.clientY, x: view.x, y: view.y };
@@ -260,7 +271,6 @@ function GraphCanvas({ layout, labelOf, colorOf, isTodo, onOpen }: GraphCanvasPr
         viewBox={`${cx - width / 2} ${cy - height / 2} ${width} ${height}`}
         className="block w-full cursor-grab touch-none select-none active:cursor-grabbing"
         style={{ height: HEIGHT }}
-        onWheel={onWheel}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}

@@ -134,15 +134,24 @@ export function useUpdatePersonalItem() {
     mutationFn: ({ itemId, ...patch }: UpdatePersonalItem & { itemId: string }) =>
       apiSend(`/me/personal/items/${itemId}`, personalItemSchema, 'PATCH', patch),
     onMutate: async ({ itemId, done, body: _body, ...fields }) => {
-      const previous = await patchIndexRow(queryClient, itemId, (row) => ({
-        ...row,
+      const patch = {
         ...fields,
         ...(done === undefined ? {} : { doneAt: done ? new Date().toISOString() : null }),
-      }));
-      return { previous };
+      };
+      const previous = await patchIndexRow(queryClient, itemId, (row) => ({ ...row, ...patch }));
+      // The open item's pane reads the detail: same change there.
+      const detailKey = queryKeys.personalItem(itemId);
+      await queryClient.cancelQueries({ queryKey: detailKey });
+      const previousItem = queryClient.getQueryData<PersonalItem>(detailKey);
+      if (previousItem)
+        queryClient.setQueryData<PersonalItem>(detailKey, { ...previousItem, ...patch });
+      return { previous, previousItem };
     },
-    onError: (_err, _vars, context) => {
+    onError: (_err, { itemId }, context) => {
       if (context?.previous) queryClient.setQueryData(queryKeys.personalIndex, context.previous);
+      if (context?.previousItem) {
+        queryClient.setQueryData(queryKeys.personalItem(itemId), context.previousItem);
+      }
     },
     onSuccess: (item) => {
       writeItem(queryClient, item);

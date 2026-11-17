@@ -66,6 +66,8 @@ function insertLink(editor: Editor, range: Range, node: { type: string; attrs: o
 
 /** `itemLink` / `taskLink` nodes plus the `[[` popup that inserts them. */
 export function personalLinkExtensions(callbacks: PersonalLinkCallbacks) {
+  /** A "Create …" pick is waiting for the server (a second Enter must not create twice). */
+  let creating = false;
   const command = async (editor: Editor, range: Range, row: LinkSuggestion) => {
     if (row.type === 'task') {
       insertLink(editor, range, {
@@ -75,11 +77,24 @@ export function personalLinkExtensions(callbacks: PersonalLinkCallbacks) {
       return;
     }
     if (row.type === 'create') {
-      const created = await callbacks.createItem(row.title);
-      insertLink(editor, range, {
-        type: 'itemLink',
-        attrs: { id: created?.id ?? null, title: created?.title ?? row.title },
-      });
+      if (creating) return;
+      creating = true;
+      // Close the popup at once (the typed `[[…` goes away), then link where it was.
+      editor.chain().focus().deleteRange(range).run();
+      const at = range.from;
+      try {
+        const created = await callbacks.createItem(row.title);
+        insertLink(
+          editor,
+          { from: at, to: at },
+          {
+            type: 'itemLink',
+            attrs: { id: created?.id ?? null, title: created?.title ?? row.title },
+          },
+        );
+      } finally {
+        creating = false;
+      }
       return;
     }
     insertLink(editor, range, {

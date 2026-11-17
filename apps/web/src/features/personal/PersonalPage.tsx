@@ -1,13 +1,12 @@
 import type { PersonalItemKind } from '@kite/shared';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useSearchParams } from 'react-router';
 import { useWsPath } from '../../api/workspaces';
 import { ErrorState } from '../../components/ErrorState';
 import { EmptyState } from '../../components/ui/EmptyState';
-import { Menu } from '../../components/ui/Menu';
-import { ProjectDot } from '../../components/ui/ProjectDot';
 import { Skeleton } from '../../components/ui/Skeleton';
-import { FolderIcon, PersonalIcon } from '../../components/icons';
+import { ChevronDownIcon, FolderIcon, PersonalIcon } from '../../components/icons';
 import { useIsNarrow, useMediaQuery } from '../../lib/useMediaQuery';
 import { ItemList } from './ItemList';
 import { ItemPane } from './ItemPane';
@@ -30,6 +29,7 @@ export function PersonalPage() {
   // Too narrow for three columns: topics move into a menu above the list.
   const compact = useMediaQuery('(max-width: 1099px)');
   const { index, navigate } = usePersonalLinks();
+  const [showTopics, setShowTopics] = useState(false);
 
   const kind: PersonalItemKind = params.get('view') === 'todos' ? 'todo' : 'note';
   const topic: TopicFilter = params.get('topic');
@@ -83,44 +83,41 @@ export function PersonalPage() {
     />
   );
 
+  // Under 1100px the topics column folds into a panel above the list (with every topic action).
   const topicMenu = (
     <div className="border-b border-default px-3 py-2">
-      <Menu
-        label={t('personal.topics.label')}
-        width={240}
-        items={[
-          {
-            id: 'all',
-            label: t('personal.topics.all'),
-            checked: topic === null,
-            onSelect: () => void navigate(ws(`/personal${search({ topic: null })}`)),
-          },
-          {
-            id: 'none',
-            label: t('personal.topics.none'),
-            checked: topic === 'none',
-            onSelect: () => void navigate(ws(`/personal${search({ topic: 'none' })}`)),
-          },
-          ...data.topics.map((x) => ({
-            id: x.id,
-            label: x.name,
-            icon: <ProjectDot color={x.color} size={8} />,
-            checked: topic === x.id,
-            onSelect: () => void navigate(ws(`/personal${search({ topic: x.id })}`)),
-          })),
-        ]}
-        trigger={(props) => (
-          <button
-            type="button"
-            {...props}
-            aria-label={`${t('personal.topics.label')}: ${topicName}`}
-            className="inline-flex h-8 max-w-full items-center gap-1.5 rounded-[8px] border border-default bg-transparent px-2 text-[13px] text-2"
-          >
-            <FolderIcon size={14} className="flex-none text-icon" />
-            <span className="truncate">{topicName}</span>
-          </button>
-        )}
-      />
+      <button
+        type="button"
+        aria-expanded={showTopics}
+        aria-controls="personal-topics-panel"
+        onClick={() => {
+          setShowTopics((v) => !v);
+        }}
+        className="inline-flex h-8 max-w-full items-center gap-1.5 rounded-[8px] border border-default bg-transparent px-2 text-[13px] text-2 hover:bg-hover"
+      >
+        <FolderIcon size={14} className="flex-none text-icon" />
+        <span className="truncate">
+          {t('personal.topics.label')}: {topicName}
+        </span>
+        <ChevronDownIcon size={12} className={showTopics ? 'rotate-180' : undefined} />
+      </button>
+      {showTopics && (
+        <div
+          id="personal-topics-panel"
+          className="mt-2"
+          onClick={(e) => {
+            // Picking a topic folds the panel again.
+            if ((e.target as Element).closest('a')) setShowTopics(false);
+          }}
+        >
+          <TopicsColumn
+            index={data}
+            topic={topic}
+            kind={kind}
+            hrefFor={(x) => ws(`/personal${search({ topic: x, filter: 'all' })}`)}
+          />
+        </div>
+      )}
     </div>
   );
 

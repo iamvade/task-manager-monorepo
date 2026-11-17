@@ -668,7 +668,7 @@ Customer feedback: a public form (no account) and the team's inbox, linked to ta
 
 My private notes and to-dos, grouped by topic and connected with Obsidian-style `[[links]]`. No Claude Design file exists: the screens reuse the app's pieces (PageHeader + UnderlineTabs, sidebar NavItem, list rows, the description editor, Menu, ColorSwatches, ConfirmDialog, EmptyState, the Undo toast) and its tokens; replace with a design when one is exported.
 
-- **Layout**: `/w/:slug/personal` = topics column (220px) · list (320px) · open item. Under 1100px the topics move into a menu above the list; under 640px list and item are separate screens. Tabs: Notes · To-dos · Graph.
+- **Layout**: `/w/:slug/personal` = topics column (220px) · list (320px) · open item. Under 1100px the topics column folds into a panel above the list (all topic actions kept); under 640px list and item are separate screens. Tabs: Notes · To-dos · Graph.
 - **Links**: `[[` opens a popup (my notes and to-dos, "Create …", "Link without creating", then the current workspace's team tasks). Typing `]]` links the exact title (or a note not created yet); a pasted `[[Title]]` becomes a link on blur/save. Item links show the target's current title (accent, underlined); links to notes not created yet are dashed and create the note on click; task links are a mono key chip + title, "Unavailable" when I can no longer see the task.
 - **Item pane**: kind (Note / To-do), topic, due date (to-dos), delete with Undo, title, body, "Links to" and "Linked from" (keyboard-reachable equivalents of the in-editor links).
 - **Helpers**: list filters All / Unlinked (no links in or out) / Not created yet (one row per missing title with Create).

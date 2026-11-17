@@ -66,7 +66,7 @@ export function TaskLinkView({ node }: ReactNodeViewProps) {
           r.kind === 'task' ? 'text-accent-ink' : 'text-muted line-through',
         )}
       >
-        {key}
+        {r.kind === 'task' ? r.task.key : key}
       </span>
       {r.kind === 'task' ? (
         <span className={cn('ml-1 text-[13px] text-2', r.task.closed && 'line-through')}>
