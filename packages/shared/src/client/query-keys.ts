@@ -15,6 +15,10 @@ export const queryKeys = {
   adminWorkspaces: ['admin', 'workspaces'] as const,
   /** The platform admin console's Users search. */
   adminUsers: (q: string) => ['admin', 'users', q] as const,
+  /** My personal space (`GET /me/personal`); prefix of its items, so one invalidation refreshes all. */
+  personal: ['personal'] as const,
+  personalIndex: ['personal', 'index'] as const,
+  personalItem: (itemId: string) => ['personal', 'item', itemId] as const,
   sidebar: (workspaceId: string) => ['workspaces', workspaceId, 'sidebar'] as const,
   members: (workspaceId: string) => ['workspaces', workspaceId, 'members'] as const,
   invites: (workspaceId: string) => ['workspaces', workspaceId, 'invites'] as const,

@@ -42,6 +42,8 @@ interface Ids {
   /** The group's local date (live mode's URL). */
   mobileToday: string;
   designGroup: string;
+  /** Anu's seeded "Design ideas" note (links, a not-created link, a backlink). */
+  personalItem: string;
 }
 
 async function lookup(page: Page): Promise<Ids> {
@@ -64,9 +66,13 @@ async function lookup(page: Page): Promise<Ids> {
   const groups = (await (
     await page.request.get(`/api/v1/workspaces/${ws}/standup-groups`)
   ).json()) as { id: string; name: string; today: string }[];
+  const personal = (await (await page.request.get('/api/v1/me/personal')).json()) as {
+    items: { id: string; title: string }[];
+  };
+  const note = personal.items.find((i) => i.title === 'Design ideas');
   const mobile = groups.find((g) => g.name === 'Mobile team');
   const design = groups.find((g) => g.name === 'Design team');
-  if (!app || !portal || !space || !tasks[0] || !mobile || !design) {
+  if (!app || !portal || !space || !tasks[0] || !mobile || !design || !note) {
     throw new Error('seed data missing');
   }
   return {
@@ -77,6 +83,7 @@ async function lookup(page: Page): Promise<Ids> {
     mobileGroup: mobile.id,
     mobileToday: mobile.today,
     designGroup: design.id,
+    personalItem: note.id,
   };
 }
 
@@ -106,6 +113,11 @@ const pages = (ids: Ids): [string, string][] => [
   ['Standup · settings', `/w/kite-studio/standup/${ids.mobileGroup}/settings`],
   // Anu follows (Bat facilitates); the running meeting is checked in standup-live.spec.ts.
   ['Standup · live', `/w/kite-studio/standup/${ids.mobileGroup}/${ids.mobileToday}/live`],
+  ['Personal · notes', '/w/kite-studio/personal'],
+  ['Personal · note', `/w/kite-studio/personal/i/${ids.personalItem}`],
+  ['Personal · to-dos', '/w/kite-studio/personal?view=todos'],
+  ['Personal · not created yet', '/w/kite-studio/personal?filter=uncreated'],
+  ['Personal · graph', '/w/kite-studio/personal/graph'],
   ['Feedback', '/w/kite-studio/feedback'],
   ['Feedback · filtered', '/w/kite-studio/feedback?type=bug&status=linked&status=new'],
 ];

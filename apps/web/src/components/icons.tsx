@@ -104,6 +104,7 @@ export const MailIcon = make(
   </>,
 );
 export const PlusIcon = make(<path d="M12 5v14M5 12h14" />);
+export const MinusIcon = make(<path d="M5 12h14" />);
 export const ChevronRightIcon = make(<path d="m9 6 6 6-6 6" />, { strokeWidth: 2.5 });
 /** Previous / next period arrows (Calendar toolbar). */
 export const PrevIcon = make(<path d="m15 18-6-6 6-6" />);
@@ -413,4 +414,29 @@ export const ArcIcon = make(<path d="M12 3a9 9 0 1 0 9 9" />, { strokeWidth: 2.5
 export const AlertCircleIcon = make(
   <path d="M12 8v5M12 16h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />,
   { strokeWidth: 2.5 },
+);
+
+// Personal space (not designed; lucide-style shapes)
+/** Notebook (the Personal nav item). */
+export const PersonalIcon = make(
+  <>
+    <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v18H6.5A2.5 2.5 0 0 0 4 22.5z" />
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M9 7h7M9 11h5" />
+  </>,
+);
+/** Page with a folded corner (a personal note). */
+export const NoteIcon = make(
+  <>
+    <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+    <path d="M14 3v6h6M8 13h8M8 17h5" />
+  </>,
+);
+/** Three linked nodes (the Personal graph view). */
+export const GraphIcon = make(
+  <>
+    <circle cx="6" cy="6" r="2.5" />
+    <circle cx="18" cy="8" r="2.5" />
+    <circle cx="10" cy="18" r="2.5" />
+    <path d="M8.3 7 15.6 7.6M7 8.3l2.2 7.3M16.6 10.1l-5 5.9" />
+  </>,
 );

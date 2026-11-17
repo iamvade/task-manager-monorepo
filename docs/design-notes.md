@@ -664,6 +664,16 @@ Customer feedback: a public form (no account) and the team's inbox, linked to ta
 - **Task drawer** (`TaskDetail.dc.html`): "Linked feedback" after "Mentioned in"; Mongolian copy written by us (the design is English only).
 - **Public form** (`PublicFeedback.dc.html`): see `features/feedback/public/`; error summary and field error tokens `--form-error-*`, `--field-error-*`.
 
+## 7. Personal space (built 2026-11-17, not designed)
+
+My private notes and to-dos, grouped by topic and connected with Obsidian-style `[[links]]`. No Claude Design file exists: the screens reuse the app's pieces (PageHeader + UnderlineTabs, sidebar NavItem, list rows, the description editor, Menu, ColorSwatches, ConfirmDialog, EmptyState, the Undo toast) and its tokens; replace with a design when one is exported.
+
+- **Layout**: `/w/:slug/personal` = topics column (220px) · list (320px) · open item. Under 1100px the topics column folds into a panel above the list (all topic actions kept); under 640px list and item are separate screens. Tabs: Notes · To-dos · Graph.
+- **Links**: `[[` opens a popup (my notes and to-dos, "Create …", "Link without creating", then the current workspace's team tasks). Typing `]]` links the exact title (or a note not created yet); a pasted `[[Title]]` becomes a link on blur/save. Item links show the target's current title (accent, underlined); links to notes not created yet are dashed and create the note on click; task links are a mono key chip + title, "Unavailable" when I can no longer see the task.
+- **Item pane**: kind (Note / To-do), topic, due date (to-dos), delete with Undo, title, body, "Links to" and "Linked from" (keyboard-reachable equivalents of the in-editor links).
+- **Helpers**: list filters All / Unlinked (no links in or out) / Not created yet (one row per missing title with Create).
+- **Graph**: `d3-force` layout drawn as SVG with app tokens: notes are circles and to-dos rounded squares in their topic's project color (`--p-dot`), team tasks accent diamonds, notes not created yet dashed outlines; drag to pan, wheel/buttons to zoom, Enter/click opens. A "Connections" list under it says the same in text.
+
 ## Appendix A — Visual reference
 
 ### A.1 Palette keys (light → dark; "—" = not drawn, derive)

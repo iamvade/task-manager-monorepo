@@ -22,6 +22,15 @@ export function richTextToPlain(node: RichTextNode): string {
     return `@${typeof label === 'string' ? label : ''}`;
   }
   if (node.type === 'hardBreak') return '\n';
+  // Personal notes' links (`./personal.ts`): the linked note's title, the task's key.
+  if (node.type === 'itemLink') {
+    const title = node.attrs?.title;
+    return typeof title === 'string' ? title : '';
+  }
+  if (node.type === 'taskLink') {
+    const key = node.attrs?.key;
+    return typeof key === 'string' ? key : '';
+  }
   const inner = (node.content ?? []).map(richTextToPlain);
   const blocks = ['doc', 'bulletList', 'orderedList'];
   return inner.join(blocks.includes(node.type ?? '') ? '\n' : '');
@@ -70,13 +79,23 @@ const NODE_TYPES = new Set([
 ]);
 const MARK_TYPES = new Set(['bold', 'italic', 'strike', 'code', 'underline', 'link']);
 const SAFE_HREF = /^(https?:\/\/|mailto:)/i;
+const NO_EXTRA: ReadonlyMap<string, NodeCheck> = new Map();
+
+/** Checks a node's attrs beyond its type (personal link nodes); returns a problem or null. */
+export type NodeCheck = (node: RichTextNode) => string | null;
 
 /** The first reason `value` isn't an allowed document, or null. */
-function contentProblem(value: unknown): string | null {
+function contentProblem(
+  value: unknown,
+  extra: ReadonlyMap<string, NodeCheck> = NO_EXTRA,
+): string | null {
   if (value === null || typeof value !== 'object') return null;
   const node = value as RichTextNode;
   if (node.type !== undefined && !NODE_TYPES.has(node.type)) {
-    return `Unsupported node type "${node.type}"`;
+    const check = extra.get(node.type);
+    if (!check) return `Unsupported node type "${node.type}"`;
+    const problem = check(node);
+    if (problem) return problem;
   }
   for (const mark of Array.isArray(node.marks) ? node.marks : []) {
     if (!MARK_TYPES.has(mark.type)) return `Unsupported mark type "${mark.type}"`;
@@ -86,7 +105,7 @@ function contentProblem(value: unknown): string | null {
     }
   }
   for (const child of Array.isArray(node.content) ? node.content : []) {
-    const problem = contentProblem(child);
+    const problem = contentProblem(child, extra);
     if (problem) return problem;
   }
   return null;
@@ -118,29 +137,38 @@ function depthOf(value: unknown, depth = 0): number {
 }
 
 /**
+ * A rich-text document schema that also accepts the node types in `extra` (each with its attrs
+ * check). Task descriptions and comments use none (`richTextDocSchema`); personal notes add their
+ * link nodes (`personalDocSchema` in `./personal.ts`), which team content keeps refusing.
+ */
+export function makeRichTextDocSchema(extra: ReadonlyMap<string, NodeCheck> = NO_EXTRA) {
+  return z.preprocess(
+    (value, ctx) => {
+      if (depthOf(value) > MAX_DEPTH) {
+        ctx.addIssue({ code: 'custom', message: 'Document is nested too deeply' });
+        return z.NEVER;
+      }
+      if (JSON.stringify(value).length > MAX_JSON_LENGTH) {
+        ctx.addIssue({ code: 'custom', message: 'Document is too large' });
+        return z.NEVER;
+      }
+      const problem = contentProblem(value, extra);
+      if (problem) {
+        ctx.addIssue({ code: 'custom', message: problem });
+        return z.NEVER;
+      }
+      return value;
+    },
+    richTextNodeSchema.refine((node) => node.type === 'doc', 'Expected a `doc` node'),
+  );
+}
+
+/**
  * Rich-text document in request bodies (task descriptions, comments). Size and nesting are
  * checked before the recursive parse, so a hostile body can't exhaust the stack; node and mark
  * types are limited to what the editor makes, and links to http(s)/mailto.
  */
-export const richTextDocSchema = z.preprocess(
-  (value, ctx) => {
-    if (depthOf(value) > MAX_DEPTH) {
-      ctx.addIssue({ code: 'custom', message: 'Document is nested too deeply' });
-      return z.NEVER;
-    }
-    if (JSON.stringify(value).length > MAX_JSON_LENGTH) {
-      ctx.addIssue({ code: 'custom', message: 'Document is too large' });
-      return z.NEVER;
-    }
-    const problem = contentProblem(value);
-    if (problem) {
-      ctx.addIssue({ code: 'custom', message: problem });
-      return z.NEVER;
-    }
-    return value;
-  },
-  richTextNodeSchema.refine((node) => node.type === 'doc', 'Expected a `doc` node'),
-);
+export const richTextDocSchema = makeRichTextDocSchema();
 
 /**
  * A TipTap document from plain text: a paragraph per blank-line-separated block, line breaks as
@@ -157,10 +185,12 @@ export function plainToRichText(text: string): RichTextNode | null {
     type: 'doc',
     content: blocks.map((block) => ({
       type: 'paragraph',
-      content: block.split('\n').flatMap((line, i): RichTextNode[] => [
-        ...(i > 0 ? [{ type: 'hardBreak' }] : []),
-        ...(line ? [{ type: 'text', text: line }] : []),
-      ]),
+      content: block
+        .split('\n')
+        .flatMap((line, i): RichTextNode[] => [
+          ...(i > 0 ? [{ type: 'hardBreak' }] : []),
+          ...(line ? [{ type: 'text', text: line }] : []),
+        ]),
     })),
   };
 }

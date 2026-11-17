@@ -48,6 +48,8 @@ import { absenceRoutes } from './routes/absences.js';
 import { standupEntryRoutes } from './routes/standup-entries.js';
 import { standupMeetingRoutes } from './routes/standup-meetings.js';
 import { standupGroupRoutes } from './routes/standup-groups.js';
+import { personalRoutes } from './routes/personal.js';
+import { schedulePersonalPurge } from './personal/service.js';
 import { tagRoutes } from './routes/tags.js';
 import { taskActivityRoutes } from './routes/task-activity.js';
 import { taskRoutes } from './routes/tasks.js';
@@ -150,6 +152,7 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
   registerFeedbackEvents(app);
   scheduleFeedbackCleanup(app);
   scheduleArchiveJob(app);
+  schedulePersonalPurge(app);
   scheduleStandupNotices(app);
   if (config.CONNECTOR_ENABLED) scheduleOAuthCleanup(app);
   if (docsEnabled(config)) await registerDocs(app);
@@ -184,6 +187,7 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
       await api.register(notificationRoutes);
       await api.register(pushRoutes);
       await api.register(homeRoutes);
+      await api.register(personalRoutes);
       await api.register(reportRoutes);
       await api.register(feedbackRoutes);
       await api.register(publicFeedbackRoutes);

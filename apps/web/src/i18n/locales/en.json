@@ -125,6 +125,7 @@
     "openNavigation": "Open navigation",
     "closeNavigation": "Close navigation",
     "myTasks": "My Tasks",
+    "personal": "Personal",
     "inbox": "Inbox",
     "reports": "Reports",
     "unread_one": "{{count}} unread",
@@ -887,12 +888,14 @@
       "tasks": "Tasks",
       "projects": "Projects",
       "people": "People",
-      "comments": "Comments"
+      "comments": "Comments",
+      "personal": "Personal"
     },
     "actions": {
       "newTask": "New task",
       "goMyTasks": "Go to My Tasks",
       "goInbox": "Go to Inbox",
+      "goPersonal": "Go to Personal",
       "switchTheme": "Switch theme",
       "switchLanguage": "Switch language",
       "shortcuts": "Keyboard shortcuts"
@@ -2420,6 +2423,94 @@
       "adminTitle": "Not available for this account",
       "adminBody": "The platform admin account can’t be connected to Claude. Sign in with your own workspace account.",
       "backToKite": "Go to Kite"
+    }
+  },
+  "personal": {
+    "title": "Personal",
+    "private": "Only you",
+    "views": "Personal views",
+    "back": "Back to the list",
+    "kind": {
+      "note": "Note",
+      "todo": "To-do",
+      "notes": "Notes",
+      "todos": "To-dos"
+    },
+    "topics": {
+      "label": "Topics",
+      "all": "All",
+      "none": "No topic",
+      "new": "New topic",
+      "name": "Topic name",
+      "namePlaceholder": "Topic name",
+      "color": "Topic color",
+      "save": "Save",
+      "edit": "Rename or recolor",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "delete": "Delete topic",
+      "deleteTitle": "Delete “{{name}}”?",
+      "deleteBody": "Its notes and to-dos stay, under No topic.",
+      "exists": "You already have a topic with this name.",
+      "actions": "Actions for {{name}}"
+    },
+    "filter": {
+      "label": "Show",
+      "all": "All",
+      "unlinked": "Unlinked",
+      "uncreated": "Not created yet"
+    },
+    "list": {
+      "newNote": "New note — type a title and press Enter",
+      "newTodo": "New to-do — type a title and press Enter",
+      "emptyNotes": "No notes here yet.",
+      "emptyTodos": "No to-dos here yet.",
+      "noUnlinked": "Every note here links somewhere.",
+      "noUncreated": "No links point to missing notes.",
+      "linkedFrom": "Linked from {{titles}}",
+      "create": "Create"
+    },
+    "item": {
+      "title": "Title",
+      "body": "Notes",
+      "bodyPlaceholder": "Write… type [[ to link",
+      "kind": "Type",
+      "topic": "Topic",
+      "due": "Due date",
+      "noDue": "No due date",
+      "delete": "Delete",
+      "deleted": "“{{title}}” deleted",
+      "markDone": "Mark “{{title}}” done",
+      "linksTo": "Links to",
+      "noLinks": "No links yet. Type [[ in the notes to add one.",
+      "linkedFrom": "Linked from",
+      "noBacklinks": "No notes link here yet."
+    },
+    "link": {
+      "suggestions": "Link suggestions",
+      "mine": "Notes and to-dos",
+      "teamTasks": "Team tasks",
+      "create": "Create “{{title}}”",
+      "withoutCreating": "Link without creating",
+      "notCreatedHint": "Not created yet: click to create it",
+      "clickToCreate": "not created yet — click to create",
+      "unavailable": "Unavailable"
+    },
+    "empty": {
+      "title": "Your personal space",
+      "body": "Notes and to-dos only you can see, in every workspace. Add a topic, write a note and link notes with [[.",
+      "pickTitle": "Pick a note",
+      "pickBody": "Open a note or to-do from the list, or add a new one."
+    },
+    "graph": {
+      "tab": "Graph",
+      "label": "Graph of notes and their links",
+      "connections": "Connections",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "fit": "Reset view",
+      "emptyTitle": "Nothing to show",
+      "emptyBody": "Notes and their [[links]] appear here."
     }
   }
 }

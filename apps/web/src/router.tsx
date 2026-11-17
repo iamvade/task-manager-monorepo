@@ -39,6 +39,7 @@ const viewRoutes = (level: 'project' | 'space'): RouteObject[] => [
 ];
 
 const reportsRoutes = () => import('./features/reports/ReportsRoutes');
+const personalPage = () => import('./features/personal/PersonalPage');
 const standupPages = () => import('./features/standup/StandupPages');
 
 export const routes: RouteObject[] = [
@@ -123,6 +124,21 @@ export const routes: RouteObject[] = [
                       () => import('./pages/MyTasksPage'),
                       (m) => m.MyTasksPage,
                     ),
+                  },
+                  {
+                    // Personal space: my private notes and to-dos (the same in every workspace).
+                    path: 'personal',
+                    children: [
+                      { index: true, lazy: page(personalPage, (m) => m.PersonalPage) },
+                      { path: 'i/:itemId', lazy: page(personalPage, (m) => m.PersonalPage) },
+                      {
+                        path: 'graph',
+                        lazy: page(
+                          () => import('./features/personal/graph/PersonalGraphPage'),
+                          (m) => m.PersonalGraphPage,
+                        ),
+                      },
+                    ],
                   },
                   {
                     path: 'inbox',

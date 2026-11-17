@@ -81,6 +81,11 @@ const NOT_WORKSPACE_SCOPED = [
   'GET /oauth/grants',
   'DELETE /oauth/grants/{grantId}',
   'GET /oauth/token-info',
+  // My own personal space: listing and creating only ever touch the caller's rows. Routes on a
+  // topic or item id stay in the sweep (the fixtures are the owner's: anyone else gets 404).
+  'GET /me/personal',
+  'POST /me/personal/topics',
+  'POST /me/personal/items',
 ];
 
 const doc = (text: string) => ({
@@ -178,6 +183,13 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       })
     ).json<{ id: string }>();
 
+    const personalTopic = (
+      await w.api('POST', '/me/personal/topics', { name: 'Private', color: 'violet' })
+    ).json<{ id: string }>();
+    const personalItem = (
+      await w.api('POST', '/me/personal/items', { title: 'Private note' })
+    ).json<{ id: string }>();
+
     const png = () => {
       const form = new FormData();
       form.append('file', new Blob([PNG], { type: 'image/png' }), 'shot.png');
@@ -241,6 +253,8 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       uploadId: fb.id,
       sessionId: memberSession.id,
       grantId: fb.id,
+      topicId: personalTopic.id,
+      itemId: personalItem.id,
     };
 
     const ws = w.ws.id;
@@ -345,6 +359,12 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
         ids: [fb.id],
         change: { action: 'status', status: 'closed' },
       },
+      'POST /me/personal/topics': { name: 'Sweep', color: 'blue' },
+      'PATCH /me/personal/topics/{topicId}': { name: 'Renamed' },
+      'POST /me/personal/topics/{topicId}/move': {},
+      'POST /me/personal/items': { title: 'Sweep note' },
+      'PATCH /me/personal/items/{itemId}': { title: 'Edited' },
+      'POST /me/personal/items/{itemId}/move': {},
       'POST /standup-groups/{groupId}/days/{date}/meeting/tasks': {
         taskId: task.id,
         sourceKind: 'today',

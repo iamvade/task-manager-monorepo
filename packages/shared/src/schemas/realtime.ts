@@ -82,6 +82,11 @@ export const realtimeServerMessageSchema = z.discriminatedUnion('type', [
    * notifications in some workspace was created, read or archived (refetch the unread counts).
    */
   z.object({ type: z.literal('notifications.unread_changed') }),
+  /**
+   * Sent to all of the owner's connections, whatever workspace they show: their personal space
+   * (topics, notes, to-dos) changed in another tab. No content: refetch.
+   */
+  z.object({ type: z.literal('personal.changed') }),
   /** A workspace tag was created, renamed, recolored, merged or deleted: refetch tags and tasks. */
   z.object({
     type: z.literal('tags.changed'),

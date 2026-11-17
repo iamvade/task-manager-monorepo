@@ -1,5 +1,5 @@
 import type { RichTextNode } from '@kite/shared';
-import type { Editor } from '@tiptap/core';
+import type { AnyExtension, Editor } from '@tiptap/core';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { useEffect, useRef, type MutableRefObject, type ReactNode } from 'react';
 import { cn } from '../../lib/cn';
@@ -30,6 +30,10 @@ export interface RichTextEditorProps {
   /** Rendered inside the border, under the text (composer actions). */
   footer?: ReactNode;
   className?: string;
+  /** More editor extensions, read once when the editor is created. */
+  extensions?: readonly AnyExtension[];
+  /** Style `KEY-123` keys in the text (default on). */
+  taskKeys?: boolean;
 }
 
 const sameDoc = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
@@ -55,6 +59,8 @@ export function RichTextEditor({
   editorRef,
   footer,
   className,
+  extensions,
+  taskKeys,
 }: RichTextEditorProps) {
   const latest = useRef({ mentions, onSubmit, onEscape, onChange, onFocus, onBlur });
   useEffect(() => {
@@ -76,7 +82,12 @@ export function RichTextEditor({
           suggesting.current = open;
         },
       },
-      { placeholder, placement: variant === 'comment' ? 'top-start' : 'bottom-start' },
+      {
+        placeholder,
+        placement: variant === 'comment' ? 'top-start' : 'bottom-start',
+        taskKeys,
+        extra: extensions,
+      },
     ),
     /* eslint-enable react-hooks/refs */
     content: value ?? '',

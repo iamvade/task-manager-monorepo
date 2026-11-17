@@ -39,6 +39,18 @@ describe('createRealtimeRouter', () => {
     expect(s.stale(queryKeys.unreadCounts)).toBe(true);
   });
 
+  it('refreshes my personal space for any workspace', () => {
+    const s = setup();
+    s.queryClient.setQueryData(queryKeys.personalIndex, {
+      topics: [],
+      items: [],
+      links: [],
+      tasks: [],
+    });
+    s.router.handle({ type: 'personal.changed' });
+    expect(s.stale(queryKeys.personalIndex)).toBe(true);
+  });
+
   it('sends presence of the current workspace to the sink', () => {
     const s = setup();
     s.router.handle({ type: 'ready', workspaceId: WORKSPACE_ID, online: [SARA], viewers: {} });

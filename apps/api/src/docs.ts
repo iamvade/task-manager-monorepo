@@ -46,6 +46,10 @@ const tags = [
   { name: 'Inbox', description: 'My notifications: list, read, archive' },
   { name: 'My Tasks', description: 'My Tasks home: sections, stats and recent activity' },
   {
+    name: 'Personal',
+    description: 'My private topics, notes and to-dos with [[links]] (owner only, every workspace)',
+  },
+  {
     name: 'Reports',
     description: 'Overview, Sprints, Workload and People reports, with CSV exports',
   },
