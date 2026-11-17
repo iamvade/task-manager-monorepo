@@ -197,6 +197,13 @@
       "when": 1794453245121,
       "tag": "0027_oauth_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1794910702806,
+      "tag": "0028_personal_space",
+      "breakpoints": true
     }
   ]
 }

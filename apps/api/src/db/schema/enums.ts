@@ -7,6 +7,7 @@ import {
   MEETING_TASK_SOURCES,
   NOTIFICATION_LEVELS,
   NOTIFICATION_TYPES,
+  PERSONAL_ITEM_KINDS,
   PLATFORM_ROLES,
   PRIORITIES,
   SESSION_CLIENTS,
@@ -38,3 +39,4 @@ export const meetingTaskSourceEnum = pgEnum('meeting_task_source', MEETING_TASK_
 export const feedbackTypeEnum = pgEnum('feedback_type', FEEDBACK_TYPES);
 export const feedbackStatusEnum = pgEnum('feedback_status', FEEDBACK_STATUSES);
 export const feedbackActivityKindEnum = pgEnum('feedback_activity_kind', FEEDBACK_ACTIVITY_KINDS);
+export const personalItemKindEnum = pgEnum('personal_item_kind', PERSONAL_ITEM_KINDS);

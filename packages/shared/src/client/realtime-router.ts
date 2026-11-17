@@ -36,6 +36,11 @@ export function createRealtimeRouter(options: RealtimeRouterOptions) {
         void queryClient.invalidateQueries({ queryKey: queryKeys.unreadCounts });
         return;
       }
+      // Any workspace: my personal space is the same in all of them.
+      if (message.type === 'personal.changed') {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.personal });
+        return;
+      }
       // Messages still in flight for the previous workspace are dropped.
       if ('workspaceId' in message && message.workspaceId !== options.currentWorkspaceId()) return;
       switch (message.type) {

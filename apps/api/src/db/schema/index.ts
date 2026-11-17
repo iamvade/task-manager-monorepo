@@ -12,4 +12,5 @@ export * from './absences.js';
 export * from './feedback.js';
 export * from './push.js';
 export * from './oauth.js';
+export * from './personal.js';
 export * from './relations.js';
