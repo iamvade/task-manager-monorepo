@@ -50,6 +50,11 @@ const tags = [
     description: 'My private topics, notes and to-dos with [[links]] (owner only, every workspace)',
   },
   {
+    name: 'Outlook',
+    description:
+      'My published Outlook calendar (an ICS link): my events, and teammates’ busy time only',
+  },
+  {
     name: 'Reports',
     description: 'Overview, Sprints, Workload and People reports, with CSV exports',
   },

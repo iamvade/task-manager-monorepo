@@ -41,6 +41,11 @@ export function createRealtimeRouter(options: RealtimeRouterOptions) {
         void queryClient.invalidateQueries({ queryKey: queryKeys.personal });
         return;
       }
+      // Any workspace: my Outlook link is the same in all of them.
+      if (message.type === 'outlook.changed') {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.outlook });
+        return;
+      }
       // Messages still in flight for the previous workspace are dropped.
       if ('workspaceId' in message && message.workspaceId !== options.currentWorkspaceId()) return;
       switch (message.type) {

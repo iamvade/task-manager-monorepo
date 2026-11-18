@@ -38,3 +38,5 @@ export * from './schemas/push.js';
 export * from './schemas/oauth.js';
 export * from './personal.js';
 export * from './schemas/personal.js';
+export * from './outlook.js';
+export * from './schemas/outlook.js';

@@ -19,6 +19,13 @@ export const queryKeys = {
   personal: ['personal'] as const,
   personalIndex: ['personal', 'index'] as const,
   personalItem: (itemId: string) => ['personal', 'item', itemId] as const,
+  /** My Outlook calendar link and events; prefix of everything Outlook, so one invalidation refreshes all. */
+  outlook: ['outlook'] as const,
+  outlookConnection: ['outlook', 'connection'] as const,
+  outlookEvents: (from: string, to: string) => ['outlook', 'events', from, to] as const,
+  /** A teammate's busy blocks, per workspace (membership decides who may see them). */
+  outlookBusy: (workspaceId: string, userId: string, from: string, to: string) =>
+    ['outlook', 'busy', workspaceId, userId, from, to] as const,
   sidebar: (workspaceId: string) => ['workspaces', workspaceId, 'sidebar'] as const,
   members: (workspaceId: string) => ['workspaces', workspaceId, 'members'] as const,
   invites: (workspaceId: string) => ['workspaces', workspaceId, 'invites'] as const,

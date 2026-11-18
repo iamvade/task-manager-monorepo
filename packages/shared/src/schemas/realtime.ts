@@ -87,6 +87,11 @@ export const realtimeServerMessageSchema = z.discriminatedUnion('type', [
    * (topics, notes, to-dos) changed in another tab. No content: refetch.
    */
   z.object({ type: z.literal('personal.changed') }),
+  /**
+   * Sent to all of the person's connections, whatever workspace they show: they connected,
+   * changed or disconnected their Outlook calendar link in another tab. No content: refetch.
+   */
+  z.object({ type: z.literal('outlook.changed') }),
   /** A workspace tag was created, renamed, recolored, merged or deleted: refetch tags and tasks. */
   z.object({
     type: z.literal('tags.changed'),

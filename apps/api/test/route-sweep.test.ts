@@ -86,6 +86,12 @@ const NOT_WORKSPACE_SCOPED = [
   'GET /me/personal',
   'POST /me/personal/topics',
   'POST /me/personal/items',
+  // My own Outlook calendar link: only ever the caller's row. A teammate's busy time stays in
+  // the sweep (outsiders get 404).
+  'GET /me/outlook-calendar',
+  'PUT /me/outlook-calendar',
+  'DELETE /me/outlook-calendar',
+  'GET /me/outlook-calendar/events',
 ];
 
 const doc = (text: string) => ({
@@ -264,6 +270,9 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       'GET /me/notifications': `workspaceId=${ws}`,
       'GET /me/home': `workspaceId=${ws}`,
       'GET /me/activity': `workspaceId=${ws}`,
+      'GET /workspaces/{workspaceId}/members/{userId}/outlook-busy':
+        'from=2026-11-01&to=2026-11-30',
+      'GET /me/outlook-calendar/events': 'from=2026-11-01&to=2026-11-30',
     };
 
     const todo = w.status('todo').id;
@@ -279,6 +288,7 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       'POST /oauth/authorize': { ...authorizeParams, approve: true },
       'POST /oauth/token': { grant_type: 'refresh_token', refresh_token: 'x', client_id: 'x' },
       'POST /oauth/revoke': { token: 'x' },
+      'PUT /me/outlook-calendar': { url: 'https://outlook.live.com/owa/calendar/x/calendar.ics' },
       'POST /auth/login': { email: 'nobody@kite.test', password: 'whatever1' },
       'POST /auth/mcp-tokens': {},
       'PATCH /me': { locale: 'en' },
