@@ -141,6 +141,14 @@ export const routes: RouteObject[] = [
                     ],
                   },
                   {
+                    // My published Outlook calendar (the same in every workspace) and teammates' busy time.
+                    path: 'outlook',
+                    lazy: page(
+                      () => import('./features/outlook/OutlookCalendarPage'),
+                      (m) => m.OutlookCalendarPage,
+                    ),
+                  },
+                  {
                     path: 'inbox',
                     lazy: page(
                       () => import('./pages/InboxPage'),

@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { ADMIN, MEMBER, VADE } from './users';
+import { ADMIN, MEMBER, PASSWORD, SARA, VADE } from './users';
 
 /**
  * axe (WCAG 2.1 A/AA) on every screen and overlay, light and dark. A failure lists each rule,
@@ -288,6 +288,47 @@ for (const scheme of ['light', 'dark'] as const) {
           await expectAccessible(page, `${name} (${scheme})`);
         });
       }
+    });
+
+    test('Outlook calendar', async ({ page, browser, baseURL }) => {
+      // Links the e2e API's fake Outlook answers (apps/api/test/e2e-fake-outlook.ts).
+      const link = (who: string) =>
+        `https://outlook.office365.com/owa/calendar/e2e/${who}/calendar.ics`;
+      const origin = { origin: baseURL ?? '' };
+      await page.goto('/w/kite-studio/my-tasks');
+      const mine = await page.request.put('/api/v1/me/outlook-calendar', {
+        headers: origin,
+        data: { url: link('anu') },
+      });
+      expect(mine.status()).toBe(200);
+      // A teammate with a calendar too, for the busy-time view.
+      const sara = await browser.newContext({ storageState: { cookies: [], origins: [] } });
+      const signIn = await sara.request.post('/api/v1/auth/login', {
+        headers: origin,
+        data: { email: SARA.email, password: PASSWORD },
+      });
+      const saraId = ((await signIn.json()) as { user: { id: string } }).user.id;
+      expect(
+        (
+          await sara.request.put('/api/v1/me/outlook-calendar', {
+            headers: origin,
+            data: { url: link('sara') },
+          })
+        ).status(),
+      ).toBe(200);
+      await sara.close();
+
+      await page.goto('/w/kite-studio/outlook');
+      await expect(page.getByText('Weekly sync').first()).toBeVisible();
+      await expectAccessible(page, `Outlook calendar · month (${scheme})`);
+      await page.getByRole('radio', { name: 'Week' }).click();
+      await expect(page.getByText('Room 3').first()).toBeVisible();
+      await expectAccessible(page, `Outlook calendar · week (${scheme})`);
+      await page.goto(`/w/kite-studio/outlook?person=${saraId}`);
+      await expect(page.getByText(/busy time from Outlook/)).toBeVisible();
+      await expect(page.getByText('Weekly sync')).toHaveCount(0);
+      await expectAccessible(page, `Outlook calendar · teammate (${scheme})`);
+      await page.getByRole('radio', { name: 'Month' }).click();
     });
 
     test('overlays', async ({ page }) => {
@@ -584,6 +625,18 @@ test.describe('member', () => {
     await page.goto('/w/kite-studio/settings?tab=tags');
     await expect(page.getByText(/Only admins and owners can create/)).toBeVisible();
     await expectAccessible(page, 'Settings · tags (member)');
+  });
+
+  test('Outlook calendar · setup', async ({ page }) => {
+    // Dorj never connects a calendar: the setup card, in both schemes.
+    for (const scheme of ['light', 'dark'] as const) {
+      await page.emulateMedia({ colorScheme: scheme });
+      await page.goto('/w/kite-studio/outlook');
+      await expect(
+        page.getByRole('heading', { name: 'Connect your Outlook calendar' }),
+      ).toBeVisible();
+      await expectAccessible(page, `Outlook calendar · setup (${scheme})`);
+    }
   });
 
   test('My performance', async ({ page }) => {

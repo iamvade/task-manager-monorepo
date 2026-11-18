@@ -48,7 +48,8 @@ export default defineConfig({
   webServer: [
     {
       // Reset + seed first, so every run starts from the sample data.
-      command: 'pnpm db:e2e && pnpm exec tsx src/server.ts',
+      // The fake Outlook answers the a11y spec's published-calendar links (test-only preload).
+      command: 'pnpm db:e2e && pnpm exec tsx --import ./test/e2e-fake-outlook.ts src/server.ts',
       cwd: apiDir,
       url: `http://127.0.0.1:${String(API_PORT)}/api/v1/health`,
       reuseExistingServer: false,

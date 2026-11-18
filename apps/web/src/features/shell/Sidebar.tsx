@@ -9,6 +9,7 @@ import {
   MyTasksIcon,
   PanelCloseIcon,
   PersonalIcon,
+  CalendarIcon,
   ReportsIcon,
   SettingsIcon,
   UserPlusIcon,
@@ -83,6 +84,7 @@ export function Sidebar({ onClose }: { onClose?: () => void } = {}) {
           icon={<PersonalIcon size={16} />}
           label={t('shell.personal')}
         />
+        <NavItem to={ws('/outlook')} icon={<CalendarIcon size={16} />} label={t('shell.outlook')} />
         <StandupNavItem />
         <NavItem
           to={ws('/inbox')}

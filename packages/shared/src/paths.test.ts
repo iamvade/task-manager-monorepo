@@ -4,6 +4,8 @@ import { switchTarget } from './paths.js';
 describe('switchTarget', () => {
   it('keeps the section, else lands on My Tasks', () => {
     expect(switchTarget('labs', '/w/studio/inbox')).toBe('/w/labs/inbox');
+    // The teammate in `?person=` belongs to the old workspace: only the section is kept.
+    expect(switchTarget('labs', '/w/studio/outlook')).toBe('/w/labs/outlook');
     expect(switchTarget('labs', '/w/studio/p/123/list')).toBe('/w/labs/my-tasks');
   });
 

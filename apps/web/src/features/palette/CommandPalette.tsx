@@ -16,6 +16,7 @@ import {
   SettingsIcon,
   NoteIcon,
   PersonalIcon,
+  CalendarIcon,
   CheckCircleIcon,
 } from '../../components/icons';
 import { Avatar } from '../../components/ui/Avatar';
@@ -154,6 +155,15 @@ function PaletteBody({
       icon: <PersonalIcon size={14} />,
       run: run(() => {
         void navigate(ws('/personal'));
+      }),
+    },
+    {
+      id: 'go-outlook',
+      label: t('palette.actions.goOutlook'),
+      keywords: 'outlook calendar microsoft events busy календарь хуанли',
+      icon: <CalendarIcon size={14} />,
+      run: run(() => {
+        void navigate(ws('/outlook'));
       }),
     },
     {

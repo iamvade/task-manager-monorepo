@@ -60,6 +60,9 @@ import { createStorage } from './storage/index.js';
 import { PushService } from './push/service.js';
 import { webPushTransport, type PushTransport } from './push/transport.js';
 import { pushRoutes } from './routes/push.js';
+import { outlookRoutes } from './routes/outlook.js';
+import { OutlookService } from './outlook/service.js';
+import type { IcsFetch } from './outlook/fetch.js';
 import { oauthRoutes } from './routes/oauth.js';
 import { scheduleOAuthCleanup } from './oauth/cleanup-job.js';
 import type { Storage } from './storage/storage.js';
@@ -80,6 +83,8 @@ declare module 'fastify' {
     loginThrottle: LoginThrottle;
     /** Web Push to subscribed browsers (off without VAPID keys). */
     push: PushService;
+    /** Published Outlook calendars: fetch, short in-memory cache, parse. */
+    outlook: OutlookService;
   }
 }
 
@@ -92,6 +97,8 @@ export interface AppOptions {
   logStream?: NodeJS.WritableStream;
   /** Sends Web Push; defaults to `web-push` with the VAPID keys (none = push is off). */
   pushTransport?: PushTransport;
+  /** Fetches published Outlook calendars; defaults to `fetch` (tests pass a fake). */
+  icsFetch?: IcsFetch;
 }
 
 export async function buildApp(config: Config, db: Db, options: AppOptions = {}) {
@@ -128,6 +135,10 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
       vapid ? (options.pushTransport ?? webPushTransport(vapid)) : null,
       vapid?.publicKey ?? null,
     ),
+  );
+  app.decorate(
+    'outlook',
+    new OutlookService(app, options.icsFetch ?? ((url, init) => fetch(url, init))),
   );
   app.addHook('onClose', async () => {
     await app.push.idle();
@@ -188,6 +199,7 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
       await api.register(pushRoutes);
       await api.register(homeRoutes);
       await api.register(personalRoutes);
+      await api.register(outlookRoutes);
       await api.register(reportRoutes);
       await api.register(feedbackRoutes);
       await api.register(publicFeedbackRoutes);

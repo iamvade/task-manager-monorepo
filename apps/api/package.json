@@ -38,6 +38,7 @@
     "fastify": "^5.12.5",
     "fastify-type-provider-zod": "^7.0.0",
     "fractional-indexing": "^4.0.0",
+    "ical.js": "2.2.1",
     "pg": "^8.23.1",
     "pino": "^10.4.0",
     "uuidv7": "^1.2.1",
