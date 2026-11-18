@@ -194,6 +194,20 @@ describe('Outlook calendar', () => {
     expect(connection.lastError).toBe('unreachable');
   });
 
+  it('does not refetch a dead link on every view', async () => {
+    const w = await world();
+    await connect(w.api, LINK);
+    // A restart forgets the copy; then Outlook stops answering.
+    ctx.app.outlook.forget(w.owner.id);
+    routes[LINK] = () => new Response('gone', { status: 404 });
+    requests = [];
+    const path = '/me/outlook-calendar/events?from=2026-11-16&to=2026-11-22';
+    const first = outlookEventsSchema.parse((await w.api('GET', path)).json());
+    expect(first).toMatchObject({ connected: true, events: [], lastError: 'not_found' });
+    await w.api('GET', path);
+    expect(requests).toHaveLength(1);
+  });
+
   it('limits the range', async () => {
     const w = await world();
     const res = await w.api('GET', '/me/outlook-calendar/events?from=2026-01-01&to=2026-12-31');

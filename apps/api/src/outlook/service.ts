@@ -8,12 +8,15 @@ import { expandEvents, parseCalendar } from './ics.js';
 
 /** A fetched calendar is reused this long before the link is fetched again. */
 export const OUTLOOK_CACHE_TTL_MS = 10 * 60_000;
+/** Expanded date ranges kept per person (a few months back and forth). */
+const EXPANDED_RANGES = 8;
 
 type Row = typeof outlookCalendars.$inferSelect;
 
 interface CacheEntry {
   url: string;
-  text: string;
+  /** Null: the fetch failed and there was no good copy (kept so it isn't retried at once). */
+  text: string | null;
   fetchedAt: number;
 }
 
@@ -38,6 +41,10 @@ const asError = (value: string | null): OutlookError | null => {
 export class OutlookService {
   private readonly cache = new Map<string, CacheEntry>();
   private readonly inFlight = new Map<string, Promise<string>>();
+  private readonly expanded = new Map<
+    string,
+    { text: string; ranges: Map<string, OutlookEvent[]> }
+  >();
 
   constructor(
     private readonly app: FastifyInstance,
@@ -58,6 +65,7 @@ export class OutlookService {
 
   forget(userId: string): void {
     this.cache.delete(userId);
+    this.expanded.delete(userId);
   }
 
   async row(userId: string): Promise<Row | undefined> {
@@ -107,20 +115,23 @@ export class OutlookService {
           .set({ lastError: code })
           .where(eq(outlookCalendars.userId, userId));
       }
-      // Keep the last good copy (if it was for this link), but don't fetch again at once.
+      // Keep the last good copy (if it was for this link), or remember that there is none, and
+      // don't fetch again before the TTL: a dead link must not cost every page view a timeout.
       const stale = sameLink?.text ?? null;
-      if (stale !== null) this.cache.set(userId, { url: row.url, text: stale, fetchedAt: now });
+      this.cache.set(userId, { url: row.url, text: stale, fetchedAt: now });
       return { connected: true, text: stale, lastSyncedAt: row.lastSyncedAt, lastError: code };
     }
   }
 
+  /** One fetch per person and link at a time (a link replaced meanwhile gets its own). */
   private fetchOnce(userId: string, url: string): Promise<string> {
-    const running = this.inFlight.get(userId);
+    const key = `${userId} ${url}`;
+    const running = this.inFlight.get(key);
     if (running) return running;
     const promise = this.probe(url).finally(() => {
-      this.inFlight.delete(userId);
+      this.inFlight.delete(key);
     });
-    this.inFlight.set(userId, promise);
+    this.inFlight.set(key, promise);
     return promise;
   }
 
@@ -128,13 +139,30 @@ export class OutlookService {
    * Occurrences between two calendar dates (inclusive). The window is widened by a day on each
    * side in UTC so every zone's local days are covered; the web places them in the viewer's zone.
    */
-  events(text: string | null, from: string, to: string): OutlookEvent[] {
+  events(userId: string, text: string | null, from: string, to: string): OutlookEvent[] {
     if (text === null) return [];
+    // Expanding a long recurring series walks it from its first occurrence: keep the last few
+    // ranges per person until the text changes (month steps, the teammate view).
+    let memo = this.expanded.get(userId);
+    if (memo?.text !== text) {
+      memo = { text, ranges: new Map() };
+      this.expanded.set(userId, memo);
+    }
+    const key = `${from}|${to}`;
+    const hit = memo.ranges.get(key);
+    if (hit) return hit;
     const root = parseCalendar(text);
-    if (!root) return [];
-    return expandEvents(root, {
-      from: new Date(`${addDays(from, -1)}T00:00:00Z`),
-      to: new Date(`${addDays(to, 2)}T00:00:00Z`),
-    });
+    const events = root
+      ? expandEvents(root, {
+          from: new Date(`${addDays(from, -1)}T00:00:00Z`),
+          to: new Date(`${addDays(to, 2)}T00:00:00Z`),
+        })
+      : [];
+    if (memo.ranges.size >= EXPANDED_RANGES) {
+      const oldest = memo.ranges.keys().next().value;
+      if (oldest !== undefined) memo.ranges.delete(oldest);
+    }
+    memo.ranges.set(key, events);
+    return events;
   }
 }

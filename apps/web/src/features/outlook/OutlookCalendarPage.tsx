@@ -231,6 +231,8 @@ export function OutlookCalendarPage() {
     );
   }
 
+  // The events response knows about refetches the server did on its own.
+  const syncedAt = mine.data?.lastSyncedAt ?? conn.lastSyncedAt;
   const status = person ? (
     <p className="m-0 text-[13px] text-muted">
       {busy.data && !busy.data.connected
@@ -241,9 +243,7 @@ export function OutlookCalendarPage() {
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-muted">
       <span>
         {t('outlook.connectedTo', { host: conn.host ?? '' })}
-        {conn.lastSyncedAt && (
-          <> · {t('outlook.synced', { when: ago(conn.lastSyncedAt, { inline: true }) })}</>
-        )}
+        {syncedAt && <> · {t('outlook.synced', { when: ago(syncedAt, { inline: true }) })}</>}
       </span>
       <Button
         size="sm"

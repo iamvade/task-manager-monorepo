@@ -161,7 +161,7 @@ export const outlookRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       const loaded = await app.outlook.load(user.id, { force: refresh === 'true' });
       return {
         connected: loaded.connected,
-        events: app.outlook.events(loaded.text, from, to),
+        events: app.outlook.events(user.id, loaded.text, from, to),
         lastSyncedAt: loaded.lastSyncedAt?.toISOString() ?? null,
         lastError: loaded.lastError,
       };
@@ -200,7 +200,7 @@ export const outlookRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       if (!target) throw httpError(404, 'NOT_FOUND', 'Member not found');
       const loaded = await app.outlook.load(userId);
       const blocks = app.outlook
-        .events(loaded.text, from, to)
+        .events(userId, loaded.text, from, to)
         .filter((e) => e.showAs !== 'free')
         .map(({ allDay, start, end, showAs }) => ({ allDay, start, end, showAs }));
       return { connected: loaded.connected, blocks };

@@ -171,6 +171,8 @@ function expandSeries(event: Event, uid: string, range: { from: Date; to: Date }
       ? new Date(`${dateOf(next)}T00:00:00Z`)
       : instantOf(next, tzidOf(event.component, 'dtstart'));
     if (original.getTime() >= range.to.getTime() + MOVED_SLACK_MS) break;
+    // Long before the range (an old series): not even a moved occurrence can reach it.
+    if (original.getTime() < range.from.getTime() - MOVED_SLACK_MS) continue;
     const details = event.getOccurrenceDetails(next);
     const item = details.item.component;
     if (isCancelled(item)) continue;
