@@ -7,6 +7,7 @@ import {
   InboxIcon,
   MyTasksIcon,
   PersonalIcon,
+  CalendarIcon,
   PanelOpenIcon,
   ReportsIcon,
   SearchIcon,
@@ -59,6 +60,9 @@ export function SidebarRail() {
       </RailLink>
       <RailLink to={ws('/personal')} label={t('shell.personal')}>
         <PersonalIcon size={16} />
+      </RailLink>
+      <RailLink to={ws('/outlook')} label={t('shell.outlook')}>
+        <CalendarIcon size={16} />
       </RailLink>
       <RailLink
         to={ws('/standup')}

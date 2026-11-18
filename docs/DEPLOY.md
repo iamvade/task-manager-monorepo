@@ -268,6 +268,14 @@ docker compose up -d api
 - Push only works over https (the `DOMAIN` address). On iPhone and iPad (iOS 16.4+), Safari allows it only once Kite is added to the Home Screen (Share → Add to Home Screen) and opened from there; Settings explains this on those devices.
 - Signing out, signing out a device in Settings, or a password reset removes that browser's subscription.
 
+## Outlook calendars
+
+People can show their Outlook events on the "Outlook calendar" page by pasting the ICS link of a calendar they published in Outlook. Nothing to configure, but:
+
+- The API fetches those links over outbound HTTPS (port 443) from `outlook.office365.com`, `outlook.office.com` and `outlook.live.com` only; a firewall that blocks outbound traffic must allow them. Each calendar is fetched at most every 10 minutes per person and kept in the API's memory (one instance, see above).
+- Microsoft 365 admins can turn calendar publishing off for the organization (Exchange sharing policy, "Publish a calendar"). Then Outlook shows no Publish option and this page can't be used.
+- The saved links are secrets (anyone with one reads that calendar). They sit in the database (`outlook_calendars.url`), so they are in the `pg_dump` backups; they never appear in the API's responses or logs.
+
 ## Claude connector (optional)
 
 Lets people add Kite to Claude by address (`https://$DOMAIN$BASE_PATH/mcp`) and sign in with their Kite account: Claude on the web, the desktop app and the phone apps, nothing to install. It adds one small container (`mcp`, the MCP server from `apps/mcp`) and turns on the API's OAuth routes.

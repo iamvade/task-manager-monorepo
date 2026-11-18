@@ -674,6 +674,16 @@ My private notes and to-dos, grouped by topic and connected with Obsidian-style 
 - **Helpers**: list filters All / Unlinked (no links in or out) / Not created yet (one row per missing title with Create).
 - **Graph**: `d3-force` layout drawn as SVG with app tokens: notes are circles and to-dos rounded squares in their topic's project color (`--p-dot`), team tasks accent diamonds, notes not created yet dashed outlines; drag to pan, wheel/buttons to zoom, Enter/click opens. A "Connections" list under it says the same in text.
 
+## 8. Outlook calendar (built 2026-11-18, not designed)
+
+Each person's Outlook events, read-only, from a calendar they publish in Outlook (Settings → Calendar → Shared calendars → Publish a calendar → ICS link). No Microsoft sign-in and no app registration: the API fetches the published link. Built from the Calendar's pieces (`CalendarToolbar`, `calendarDays` / `shiftPeriod`, the month/week shell, day numbers, weekend fills) with its own read-only chips.
+
+- **Sidebar**: "Outlook calendar" after Personal (rail and ⌘K "Go to Outlook calendar" too). `/w/:slug/outlook`; switching workspace keeps the section, not `?person=`.
+- **Not connected**: setup card (title, four steps, the ICS link field with hint, Connect, a lock line on privacy). The server checks the link before saving; refusals show under the field (not an Outlook link / unreachable / not found / not a calendar / too big).
+- **Connected**: toolbar (Today · ‹ › · period · Month/Week), a status line "Connected to outlook.office365.com · updated 5 minutes ago" with Refresh · Change link · Disconnect (ConfirmDialog), a soft banner when the last fetch failed (the last good copy is shown).
+- **Chips** (decision, derived from tokens): busy `bg-accent-soft` / accent ink; tentative dashed accent outline; out of office `--tint-hold`; working elsewhere `bg-chip`; free `bg-subtle` + muted (mine only). Month cells show 3, else 2 + "+N more", which opens that day's week (no popover). Week cards show the time range, title and place. Times are 24-hour in both languages; a timed event over several days shows "From 23:00" / "Until 01:00" on its first/last day. Every chip carries a full aria-label (time, title, place, status).
+- **Teammates**: "Showing" select in the header (My calendar, then each active teammate "(busy time)"). Their view shows only busy blocks labelled by status (Busy, Tentative, Out of office, Working elsewhere): never titles, places or free time; a note says so, or that they haven't connected.
+
 ## Appendix A — Visual reference
 
 ### A.1 Palette keys (light → dark; "—" = not drawn, derive)

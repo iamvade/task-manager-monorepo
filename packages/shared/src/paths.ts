@@ -11,7 +11,7 @@ export function appPath(pathname: string): string {
 }
 
 /** Pages that exist in every workspace: switching keeps you on the same one. */
-const SECTIONS = ['my-tasks', 'inbox', 'feedback', 'reports', 'settings', 'standup'];
+const SECTIONS = ['my-tasks', 'inbox', 'feedback', 'reports', 'settings', 'standup', 'outlook'];
 
 /** Sections that are the same in every workspace (they belong to the person): switching keeps the whole path. */
 const PERSONAL_SECTIONS = ['personal'];

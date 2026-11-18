@@ -118,6 +118,8 @@ const pages = (ids: Ids): [string, string][] => [
   ['Personal · to-dos', '/w/kite-studio/personal?view=todos'],
   ['Personal · not created yet', '/w/kite-studio/personal?filter=uncreated'],
   ['Personal · graph', '/w/kite-studio/personal/graph'],
+  // The seed has no Outlook link (the API can't reach Outlook in e2e): the setup screen.
+  ['Outlook calendar · setup', '/w/kite-studio/outlook'],
   ['Feedback', '/w/kite-studio/feedback'],
   ['Feedback · filtered', '/w/kite-studio/feedback?type=bug&status=linked&status=new'],
 ];

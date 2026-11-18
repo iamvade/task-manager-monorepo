@@ -172,7 +172,8 @@
       "notOver": "{{name}} is not over a place to drop.",
       "dropped": "{{name}} was moved.",
       "cancelled": "Moving {{name}} was cancelled."
-    }
+    },
+    "outlook": "Outlook calendar"
   },
   "workspace": {
     "noneTitle": "No workspace yet",
@@ -898,7 +899,8 @@
       "goPersonal": "Go to Personal",
       "switchTheme": "Switch theme",
       "switchLanguage": "Switch language",
-      "shortcuts": "Keyboard shortcuts"
+      "shortcuts": "Keyboard shortcuts",
+      "goOutlook": "Go to Outlook calendar"
     },
     "personTasks": "View tasks",
     "hints": {
@@ -2511,6 +2513,62 @@
       "fit": "Reset view",
       "emptyTitle": "Nothing to show",
       "emptyBody": "Notes and their [[links]] appear here."
+    }
+  },
+  "outlook": {
+    "title": "Outlook calendar",
+    "showing": "Showing",
+    "myCalendar": "My calendar",
+    "busyOf": "{{name}} (busy time)",
+    "busyOnly": "{{name}}’s busy time from Outlook. Titles and details stay private.",
+    "notConnectedOther": "{{name}} hasn’t connected an Outlook calendar.",
+    "connectedTo": "Connected to {{host}}",
+    "synced": "updated {{when}}",
+    "refresh": "Refresh",
+    "refreshing": "Refreshing…",
+    "changeLink": "Change link",
+    "disconnect": "Disconnect",
+    "disconnectTitle": "Disconnect Outlook calendar?",
+    "disconnectBody": "Kite forgets the link. Your teammates stop seeing your busy time. You can connect again anytime.",
+    "linkLabel": "ICS link",
+    "linkHint": "Paste the link that ends in calendar.ics.",
+    "connect": "Connect",
+    "connecting": "Checking link…",
+    "saveLink": "Save link",
+    "allDay": "All day",
+    "from": "From {{time}}",
+    "until": "Until {{time}}",
+    "untitled": "(No title)",
+    "dayLabel_one": "{{date}}, {{count}} event",
+    "dayLabel_other": "{{date}}, {{count}} events",
+    "showAs": {
+      "busy": "Busy",
+      "tentative": "Tentative",
+      "oof": "Out of office",
+      "elsewhere": "Working elsewhere",
+      "free": "Free"
+    },
+    "setup": {
+      "title": "Connect your Outlook calendar",
+      "body": "See your Outlook events in Kite. Kite reads a calendar you publish from Outlook and refreshes it every few minutes. It never changes your calendar.",
+      "step1": "Open Outlook on the web and go to Settings → Calendar → Shared calendars.",
+      "step2": "Under “Publish a calendar”, choose your calendar and “Can view all details” (or less).",
+      "step3": "Select Publish, then copy the ICS link.",
+      "step4": "Paste it below.",
+      "privacy": "Only you see your events here. Teammates see only when you’re busy, never titles or places. Anyone with the ICS link can read the calendar, so keep it private."
+    },
+    "connectError": {
+      "invalidLink": "This isn’t a published Outlook calendar link. It should start with https://outlook.office365.com or https://outlook.live.com.",
+      "unreachable": "Kite couldn’t reach this calendar. Check the link and try again.",
+      "notFound": "Outlook says this calendar doesn’t exist. It may have been unpublished.",
+      "notCalendar": "This link doesn’t return a calendar. Copy the ICS link, not the HTML one.",
+      "tooLarge": "This calendar is too big to read."
+    },
+    "fetchError": {
+      "unreachable": "Couldn’t refresh from Outlook. Showing the last copy.",
+      "not_found": "Outlook no longer finds this calendar. It may have been unpublished. Change the link or disconnect.",
+      "not_calendar": "The link no longer returns a calendar. Change the link.",
+      "too_large": "The calendar became too big to read."
     }
   }
 }

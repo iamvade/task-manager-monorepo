@@ -17,14 +17,9 @@ export const outlookShowAsSchema = z
 export type OutlookShowAs = z.infer<typeof outlookShowAsSchema>;
 
 /** Where the link may point: Outlook's published-calendar hosts, https only (the API checks). */
-const linkSchema = z
-  .string()
-  .trim()
-  .min(1)
-  .max(2048)
-  .meta({
-    description: 'The ICS link Outlook gives when publishing a calendar (https or webcal).',
-  });
+const linkSchema = z.string().trim().min(1).max(2048).meta({
+  description: 'The ICS link Outlook gives when publishing a calendar (https or webcal).',
+});
 
 export const connectOutlookSchema = z.object({ url: linkSchema }).meta({ id: 'ConnectOutlook' });
 export type ConnectOutlookInput = z.infer<typeof connectOutlookSchema>;
