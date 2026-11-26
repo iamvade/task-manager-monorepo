@@ -1,69 +1,80 @@
-import { useId } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MoreIcon } from '../../components/icons';
-import { useUiStore } from '../../stores/ui';
-import { NavCustomizePopover } from './NavCustomizePopover';
+import { FilterIcon, MoreIcon } from '../../components/icons';
+import { IconButton } from '../../components/ui/IconButton';
+import { Menu } from '../../components/ui/Menu';
+import { cn } from '../../lib/cn';
+import { CustomizeSidebarDialog } from './CustomizeSidebarDialog';
+import { useMoreMenu } from './moreMenu';
 import { NavItem } from './NavItem';
-import { useNavLayout, type NavEntry } from './useNavEntries';
+import { useNavLayout } from './useNavEntries';
 
 /**
  * Sidebar's top links (not designed beyond Main.dc.html's list): Inbox and My Tasks always,
- * then the optional links the user put in the short list (Personal and Standup by default); the rest sit under
- * "More". The filter button edits which optional links are shown. A hidden link whose page is
- * open stays visible so the current page is always in the list.
+ * then the optional links the user shows (Personal and Standup by default; "Show when badged"
+ * ones while they have a badge). "More" opens a menu with the rest and "Customize sidebar…";
+ * the filter button opens the same dialog. A hidden link whose page is open stays listed.
  */
 export function SidebarMenu() {
   const { t } = useTranslation();
-  const { entries, shortList, hidden } = useNavLayout();
-  const moreOpen = useUiStore((s) => s.navMoreOpen);
-  const setMoreOpen = useUiStore((s) => s.setNavMoreOpen);
-  const moreId = useId();
-
-  const pinnedActive = moreOpen ? [] : hidden.filter((e) => e.active);
-  const collapsedBadges = moreOpen ? [] : hidden.filter((e) => !e.active && e.badge);
+  const { shortList, hidden } = useNavLayout();
+  const [customizing, setCustomizing] = useState(false);
+  const more = useMoreMenu(hidden, () => {
+    setCustomizing(true);
+  });
 
   return (
     <div className="flex flex-col gap-0.5">
       <div className="flex h-7 items-center justify-between pr-1 pl-3">
         <span className="text-[12px] font-medium text-muted">{t('shell.menu')}</span>
-        <NavCustomizePopover entries={entries} />
+        <IconButton
+          label={t('shell.customizeSidebar')}
+          size={24}
+          className="text-muted"
+          onClick={() => {
+            setCustomizing(true);
+          }}
+          icon={<FilterIcon size={14} />}
+        />
       </div>
-      {[...shortList, ...pinnedActive].map((entry) => (
-        <Entry key={entry.key} entry={entry} />
+      {shortList.map((entry) => (
+        <NavItem
+          key={entry.key}
+          to={entry.to}
+          icon={entry.icon}
+          label={entry.label}
+          trailing={entry.trailing}
+        />
       ))}
-      {hidden.length > 0 && (
-        <>
+      <Menu
+        label={t('shell.more')}
+        placement="bottom-start"
+        width={260}
+        items={more.items}
+        trigger={(props, open) => (
           <button
+            {...props}
             type="button"
-            aria-expanded={moreOpen}
-            aria-controls={moreId}
-            aria-label={
-              collapsedBadges.length > 0
-                ? `${t('shell.more')}, ${collapsedBadges.map((e) => e.badge).join(', ')}`
-                : undefined
-            }
-            onClick={() => {
-              setMoreOpen(!moreOpen);
-            }}
-            className="flex h-8 items-center gap-2 rounded-[8px] border-0 bg-transparent px-3 text-left text-2 hover:bg-nav-hover"
+            aria-label={more.label}
+            className={cn(
+              'flex h-8 items-center gap-2 rounded-[8px] border-0 bg-transparent px-3 text-left text-2 hover:bg-nav-hover',
+              open && 'bg-nav-hover',
+            )}
           >
             <MoreIcon size={16} className="flex-none text-icon" />
-            <span className="flex-1 truncate font-medium">
-              {moreOpen ? t('shell.less') : t('shell.more')}
-            </span>
-            {collapsedBadges.length > 0 && (
+            <span className="flex-1 truncate font-medium">{t('shell.more')}</span>
+            {more.hasBadge && (
               <span aria-hidden className="size-2 flex-none rounded-full bg-accent" />
             )}
           </button>
-          <div id={moreId} hidden={!moreOpen} className="flex flex-col gap-0.5">
-            {moreOpen && hidden.map((entry) => <Entry key={entry.key} entry={entry} />)}
-          </div>
-        </>
-      )}
+        )}
+      />
+      <CustomizeSidebarDialog
+        open={customizing}
+        onClose={() => {
+          setCustomizing(false);
+        }}
+      />
     </div>
   );
-}
-
-function Entry({ entry }: { entry: NavEntry }) {
-  return <NavItem to={entry.to} icon={entry.icon} label={entry.label} trailing={entry.trailing} />;
 }

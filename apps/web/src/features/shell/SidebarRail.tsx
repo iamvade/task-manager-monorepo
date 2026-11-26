@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { Link, NavLink, useNavigate } from 'react-router';
+import { useState } from 'react';
+import { Link, NavLink } from 'react-router';
 import { useCurrentWorkspace, useSidebar, useWsPath } from '../../api/workspaces';
 import { MoreIcon, PanelOpenIcon, SearchIcon } from '../../components/icons';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
@@ -9,6 +10,8 @@ import { SpaceBadge } from '../../components/ui/SpaceBadge';
 import { Tooltip } from '../../components/ui/Tooltip';
 import { cn } from '../../lib/cn';
 import { useUiStore } from '../../stores/ui';
+import { CustomizeSidebarDialog } from './CustomizeSidebarDialog';
+import { useMoreMenu } from './moreMenu';
 import { useNavLayout, type NavEntry } from './useNavEntries';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 
@@ -21,8 +24,6 @@ export function SidebarRail() {
   const ws = useWsPath();
   const sidebar = useSidebar(workspace?.id);
   const { shortList, hidden } = useNavLayout();
-  const pinnedActive = hidden.filter((e) => e.active);
-  const more = hidden.filter((e) => !e.active);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
 
   const openPalette = useUiStore((s) => s.setPaletteOpen);
@@ -47,12 +48,12 @@ export function SidebarRail() {
         }}
         icon={<SearchIcon size={16} />}
       />
-      {[...shortList, ...pinnedActive].map((entry) => (
+      {shortList.map((entry) => (
         <RailLink key={entry.key} to={entry.to} label={entry.label} badge={entry.badge}>
           {entry.icon}
         </RailLink>
       ))}
-      {more.length > 0 && <RailMore entries={more} />}
+      <RailMore entries={hidden} />
       <div className="my-1 h-px w-6 bg-[var(--border)]" />
       {sidebar.data?.spaces.map((space) => (
         <Tooltip key={space.id} content={space.name} placement="right">
@@ -111,39 +112,40 @@ function RailLink({
   );
 }
 
-/** Rail "More": the optional links not in the short list, as a menu (dot when one needs attention). */
+/** Rail "More": the links not in the short list and "Customize sidebar…" (dot when one needs attention). */
 function RailMore({ entries }: { entries: NavEntry[] }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const badges = entries.filter((e) => e.badge).map((e) => e.badge);
-  const label = badges.length > 0 ? `${t('shell.more')}, ${badges.join(', ')}` : t('shell.more');
+  const [customizing, setCustomizing] = useState(false);
+  const more = useMoreMenu(entries, () => {
+    setCustomizing(true);
+  });
   return (
-    <Menu
-      label={t('shell.more')}
-      placement="right-start"
-      width={200}
-      items={entries.map((entry) => ({
-        id: entry.key,
-        label: entry.label,
-        icon: entry.icon,
-        trailing: entry.trailing,
-        onSelect: () => {
-          void navigate(entry.to);
-        },
-      }))}
-      trigger={(props, open) => (
-        <button
-          {...props}
-          type="button"
-          aria-label={label}
-          className={cn(railButton, 'relative border-0 bg-transparent', open && 'bg-hover')}
-        >
-          <MoreIcon size={16} />
-          {badges.length > 0 && (
-            <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-accent shadow-[0_0_0_2px_var(--bg-sidebar)]" />
-          )}
-        </button>
-      )}
-    />
+    <>
+      <Menu
+        label={t('shell.more')}
+        placement="right-start"
+        width={260}
+        items={more.items}
+        trigger={(props, open) => (
+          <button
+            {...props}
+            type="button"
+            aria-label={more.label}
+            className={cn(railButton, 'relative border-0 bg-transparent', open && 'bg-hover')}
+          >
+            <MoreIcon size={16} />
+            {more.hasBadge && (
+              <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-accent shadow-[0_0_0_2px_var(--bg-sidebar)]" />
+            )}
+          </button>
+        )}
+      />
+      <CustomizeSidebarDialog
+        open={customizing}
+        onClose={() => {
+          setCustomizing(false);
+        }}
+      />
+    </>
   );
 }

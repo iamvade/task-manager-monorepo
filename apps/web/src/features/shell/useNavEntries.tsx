@@ -15,7 +15,7 @@ import {
 import { CountBadge } from '../../components/ui/CountBadge';
 import { waitingForMe } from '../standup/useStandup';
 import { useUiStore } from '../../stores/ui';
-import { FIXED_NAV, type NavKey } from './navItems';
+import { FIXED_NAV, inShortList, type NavKey, type NavPref } from './navItems';
 
 export interface NavEntry {
   key: NavKey;
@@ -114,9 +114,12 @@ export function useNavEntries(): Record<NavKey, NavEntry> {
 
 export interface NavLayout {
   entries: Record<NavKey, NavEntry>;
-  /** The fixed links, then the optional ones the user put in the short list. */
+  /**
+   * The fixed links, then the optional ones in the short list: "Always show", "Show when badged"
+   * with a badge now, and a hidden one whose page is open (the current page is always listed).
+   */
   shortList: NavEntry[];
-  /** Optional links kept under "More", in the user's order. */
+  /** The other optional links, in the user's order: the "More" menu. */
   hidden: NavEntry[];
 }
 
@@ -124,12 +127,14 @@ export interface NavLayout {
 export function useNavLayout(): NavLayout {
   const entries = useNavEntries();
   const prefs = useUiStore((s) => s.navItems);
+  const listed = (pref: NavPref) =>
+    inShortList(pref, !!entries[pref.key].badge) || entries[pref.key].active;
   return {
     entries,
     shortList: [
       ...FIXED_NAV.map((key) => entries[key]),
-      ...prefs.filter((p) => p.shown).map((p) => entries[p.key]),
+      ...prefs.filter(listed).map((p) => entries[p.key]),
     ],
-    hidden: prefs.filter((p) => !p.shown).map((p) => entries[p.key]),
+    hidden: prefs.filter((p) => !listed(p)).map((p) => entries[p.key]),
   };
 }

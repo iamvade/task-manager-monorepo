@@ -844,13 +844,14 @@ Live mode was removed (its `standup.live.*` keys with it); the facilitator write
 | key | en | mn (draft) | where |
 |---|---|---|---|
 | `menu` | Menu | Цэс | Sidebar — header above the top links |
-| `more` | More | Бусад | Sidebar — row that expands the hidden links; rail ⋯ button |
-| `less` | Less | Хураах | Sidebar — the same row while expanded |
-| `customizeMenu` | Customize menu | Цэс тохируулах | Sidebar — filter button aria-label + popover title |
-| `customizeMenuHint` | Inbox and My Tasks are always shown. Pick what else to show. | Мэдэгдэл, Миний ажлууд үргэлж харагдана. Өөр юуг харуулахаа сонгоно уу. | Customize menu — hint |
-| `showInMenu` | Show {{name}} in the menu | Цэсэнд харуулах: {{name}} | Customize menu — checkbox aria-label |
-| `moveUp` / `moveDown` | Move up / Move down | Дээш зөөх / Доош зөөх | Customize menu — reorder buttons (": {name}" appended) |
-| `resetMenu` | Reset to default | Анхны байдалд оруулах | Customize menu — footer |
+| `more` | More | Бусад | Sidebar — row opening the More menu (hidden links + Customize sidebar…); rail ⋯ button |
+| `customizeSidebar` | Customize sidebar | Хажуу самбар тохируулах | Customize dialog title; filter button aria-label |
+| `customizeSidebarItem` | Customize sidebar… | Хажуу самбар тохируулах… | More menu — last item |
+| `customizeSidebarHint` | Inbox and My Tasks are always shown. Drag to reorder the rest. | Мэдэгдэл, Миний ажлууд үргэлж харагдана. Бусдыг чирж эрэмбэлнэ. | Customize dialog — hint |
+| `navAlways` / `navBadged` / `navHidden` | Always show / Show when badged / Don't show | Үргэлж харуулах / Тэмдэгтэй үед харуулах / Харуулахгүй | Customize dialog — per-link dropdown |
+| `reorderItem` | Reorder {{name}} | Зөөх: {{name}} | Customize dialog — drag handle aria-label |
+| `visibilityOf` | Show {{name}} | Харуулах: {{name}} | Customize dialog — dropdown aria-label (": {choice}" appended) |
+| `resetMenu` | Reset to default | Анхны байдалд оруулах | Customize dialog — footer |
 
 ## Backlog status (derived, 2026-11-27)
 
