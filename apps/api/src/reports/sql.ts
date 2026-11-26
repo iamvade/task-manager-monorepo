@@ -1,4 +1,10 @@
-import { CLOSED_CATEGORIES, SIZE_POINTS, SIZES, WAIT_CATEGORIES } from '@kite/shared';
+import {
+  CLOSED_CATEGORIES,
+  PARKED_CATEGORIES,
+  SIZE_POINTS,
+  SIZES,
+  WAIT_CATEGORIES,
+} from '@kite/shared';
 import { sql, type SQL } from 'drizzle-orm';
 import type { DbOrTx } from '../db/client.js';
 
@@ -72,6 +78,15 @@ export const closedAt = (t: string, at: SQL) => sql`exists (
 /** `'todo', 'in_progress', …` for an `in (…)` list; the values are enum constants. */
 export const categoryList = (categories: readonly string[]) =>
   sql.raw(categories.map((c) => `'${c}'`).join(', '));
+
+/**
+ * The task's current status isn't parked (Backlog): nobody is working on it yet, so it stays out
+ * of Workload and overdue counts.
+ */
+export const notParked = (t: string) => sql`not exists (
+  select 1 from statuses pst
+  where pst.id = ${alias(t)}.status_id and pst.category in (${categoryList(PARKED_CATEGORIES)})
+)`;
 
 /** The categories where work waits on someone (Where work waits, Aging, burndown insight). */
 export const waitCategoriesSql = categoryList(WAIT_CATEGORIES);

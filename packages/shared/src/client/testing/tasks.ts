@@ -18,8 +18,9 @@ export function at<T>(list: readonly T[], i: number): T {
 const id = (prefix: string, n: number) =>
   `01890000-0000-7000-8000-${prefix}${String(n).padStart(12 - prefix.length, '0')}`;
 
+// Backlog came last (7), so the other statuses keep the ids tests already use.
 export const STATUSES = STATUS_CATEGORIES.map((category, i) => ({
-  id: id('5', i + 1),
+  id: id('5', category === 'backlog' ? STATUS_CATEGORIES.length : i),
   name: null,
   category,
   color: null,
@@ -32,15 +33,17 @@ export const statusOf = (category: StatusCategory) =>
   );
 
 /**
- * PROJECT with its six default statuses (what `GET /projects/:id` returns); counts match
- * `makeTasks()` (2 to do, 2 in progress, 2 in review, 1 done, none on hold or cancelled).
+ * PROJECT with its seven default statuses (what `GET /projects/:id` returns); counts match
+ * `makeTasks()` (2 to do, 2 in progress, 2 in review, 1 done, none in backlog, on hold or cancelled).
  */
 export const PROJECT_WITH_STATUSES = projectDetailSchema.parse({
   ...PROJECT,
   statuses: STATUSES,
   taskCounts: STATUSES.map((s) => ({
     statusId: s.id,
-    count: { todo: 2, in_progress: 2, review: 2, on_hold: 0, done: 1, cancelled: 0 }[s.category],
+    count: { backlog: 0, todo: 2, in_progress: 2, review: 2, on_hold: 0, done: 1, cancelled: 0 }[
+      s.category
+    ],
   })),
   taskCount: 7,
   doneCount: 1,

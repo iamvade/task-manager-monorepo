@@ -37,7 +37,7 @@ export function statusLabel(status: Pick<Status, 'name' | 'category'>): string {
 
 /**
  * The project's status for `query`: its name (English or Mongolian default names too) or a
- * category key (`todo`, `in_progress`, `review`, `on_hold`, `done`, `cancelled`). A category
+ * category key (`backlog`, `todo`, `in_progress`, `review`, `on_hold`, `done`, `cancelled`). A category
  * picks that category's first status.
  */
 export function matchStatus(statuses: readonly Status[], query: string): Status {

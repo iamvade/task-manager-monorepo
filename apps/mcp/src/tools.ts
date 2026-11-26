@@ -265,7 +265,7 @@ export function registerTools(server: McpServer, kite: Kite): void {
           .string()
           .optional()
           .describe(
-            'Status name or category: todo, in_progress, review, on_hold, done, cancelled.',
+            'Status name or category: backlog, todo, in_progress, review, on_hold, done, cancelled.',
           ),
         assignee: z.string().optional().describe('"me", "unassigned", a name or an email.'),
         query: z.string().min(1).max(200).optional().describe('Text in the title or description.'),

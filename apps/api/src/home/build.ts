@@ -17,7 +17,7 @@ import type { DbOrTx } from '../db/client.js';
 import { projects, spaces, statuses, taskAssignees, tasks } from '../db/schema/index.js';
 import { projectRefColumns } from '../notifications/display.js';
 import { assigneesSql } from '../tasks/list.js';
-import { openStatusSql } from '../tasks/status.js';
+import { workingStatusSql } from '../tasks/status.js';
 import { listMyActivity } from './activity.js';
 
 export const HOME_ACTIVITY_LIMIT = 10;
@@ -100,7 +100,7 @@ export async function buildHome(
           mineIn(user.id, workspaceId),
           // Open tasks, plus done ones due today ("3 of 4 left") or completed this week.
           or(
-            openStatusSql(),
+            workingStatusSql(),
             and(
               eq(statuses.category, 'done'),
               or(
@@ -141,7 +141,7 @@ export async function buildHome(
           eq(projects.workspaceId, workspaceId),
           isNull(projects.archivedAt),
           isNull(tasks.deletedAt),
-          openStatusSql(),
+          workingStatusSql(),
           notExists(
             db
               .select({ one: sql`1` })

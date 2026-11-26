@@ -6,6 +6,7 @@ import { createDb } from '../db/client.js';
 import * as schema from '../db/schema/index.js';
 
 const STATUS_NAMES: Record<StatusCategory, string> = {
+  backlog: 'Backlog',
   todo: 'To Do',
   in_progress: 'In Progress',
   review: 'In Review',
