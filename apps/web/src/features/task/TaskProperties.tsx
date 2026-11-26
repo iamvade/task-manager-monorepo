@@ -7,6 +7,7 @@ import {
   type StatusCategory,
   type UserRef,
 } from '@kite/shared';
+import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router';
@@ -137,6 +138,7 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
   const setAssignees = useSetAssignees();
   const setTags = useSetTags();
   const move = useMoveTaskToProject();
+  const queryClient = useQueryClient();
   const closed = isClosedCategory(task.status.category);
   const statusName = (s: { name: string | null; category: StatusCategory }) =>
     s.name ?? t(`status.${s.category}`);
@@ -166,6 +168,9 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
           toast({ message: t('drawer.movedTo', { project: target.name, key: moved.key }) });
           if (layout === 'page') {
             void navigate(ws(`/t/${moved.key}`), { replace: true });
+          } else if (layout === 'pane') {
+            // The inbox pane shows its notification's task: refetch it for the new key.
+            void queryClient.invalidateQueries({ queryKey: ['notifications'] });
           } else {
             setParams(
               (prev) => {

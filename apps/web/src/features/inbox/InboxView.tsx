@@ -1,10 +1,12 @@
 import { INBOX_TABS, inboxTabSchema, type InboxTab, type Notification } from '@kite/shared';
 import { useTranslation } from 'react-i18next';
+import { useCallback, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import {
   useArchiveNotification,
   useMarkAllNotificationsRead,
   useMarkNotificationRead,
+  useMarkNotificationUnread,
   useNotifications,
   useUnarchiveNotification,
 } from '../../api/notifications';
@@ -31,10 +33,17 @@ import { writeHref } from '../standup/day/links';
 import { waitingForMe } from '../standup/useStandup';
 import { PageHeader } from '../views/PageHeader';
 import { InboxEmpty } from './InboxEmpty';
+import { InboxPane } from './InboxPane';
 import { NotificationRow } from './NotificationRow';
 import { standupHref } from './standupLine';
+import { useInboxKeys } from './useInboxKeys';
+import { INBOX_LIST_WIDTH, useInboxSplit } from './useInboxSplit';
 
-/** Inbox (EmptyInbox.dc.html): header, All / Mentions / Assigned to me / Archived, the rows. */
+/**
+ * Inbox (EmptyInbox.dc.html): header, All / Mentions / Assigned to me / Archived, the rows.
+ * With room for it (not designed, Linear-style), the list is a 440px column and the selected
+ * notification (`?n=<id>`) opens in a side pane instead of the drawer; ↑/↓ J/K E U triage.
+ */
 export function InboxView() {
   const { t } = useTranslation();
   const workspace = useCurrentWorkspace();
@@ -53,63 +62,102 @@ export function InboxView() {
   const markAll = useMarkAllNotificationsRead(workspaceId);
   const counts = query.data?.pages[0]?.counts;
   const unread = counts?.unread ?? 0;
+  const rootRef = useRef<HTMLDivElement>(null);
+  const split = useInboxSplit(rootRef);
+  const items = query.data?.pages.flatMap((p) => p.items);
+  const selectedId = split ? params.get('n') : null;
+  const selected = items?.find((n) => n.id === selectedId) ?? null;
+  const select = useCallback(
+    (id: string | null, replace = false) => {
+      setParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (id) next.set('n', id);
+          else next.delete('n');
+          return next;
+        },
+        { replace },
+      );
+    },
+    [setParams],
+  );
 
-  return (
-    <>
-      <PageHeader
-        title={
-          <h1 className="m-0 flex min-w-0 items-center gap-2 text-[14px] leading-5 font-semibold">
-            <InboxIcon size={16} className="flex-none text-3" />
-            <span className="truncate">{t('shell.inbox')}</span>
-          </h1>
-        }
-        actions={
-          <div className="flex items-center gap-2">
-            <Menu
-              label={t('inbox.projectFilter')}
-              placement="bottom-end"
-              width={240}
-              items={[
-                {
-                  id: 'all',
-                  label: t('inbox.allProjects'),
-                  checked: !project,
-                  onSelect: () => {
-                    setParams(
-                      (prev) => {
-                        const next = new URLSearchParams(prev);
-                        next.delete('project');
-                        return next;
-                      },
-                      { replace: true },
-                    );
-                  },
+  const header = (
+    <PageHeader
+      title={
+        <h1 className="m-0 flex min-w-0 items-center gap-2 text-[14px] leading-5 font-semibold">
+          <InboxIcon size={16} className="flex-none text-3" />
+          <span className="truncate">{t('shell.inbox')}</span>
+        </h1>
+      }
+      actions={
+        <div className="flex items-center gap-2">
+          <Menu
+            label={t('inbox.projectFilter')}
+            placement="bottom-end"
+            width={240}
+            items={[
+              {
+                id: 'all',
+                label: t('inbox.allProjects'),
+                checked: !project,
+                onSelect: () => {
+                  setParams(
+                    (prev) => {
+                      const next = new URLSearchParams(prev);
+                      next.delete('project');
+                      return next;
+                    },
+                    { replace: true },
+                  );
                 },
-                { type: 'separator', id: 'sep' },
-                ...projects.map((p) => ({
-                  id: p.id,
-                  label: p.name,
-                  icon: <ProjectDot color={p.color} size={8} />,
-                  checked: p.id === project?.id,
-                  onSelect: () => {
-                    setParams(
-                      (prev) => {
-                        const next = new URLSearchParams(prev);
-                        next.set('project', p.id);
-                        return next;
-                      },
-                      { replace: true },
-                    );
-                  },
-                })),
-              ]}
-              trigger={(props) => (
-                <ToolbarButton {...props} icon={<FolderIcon size={14} />}>
-                  {project ? project.name : t('inbox.allProjects')}
-                  <ChevronDownIcon size={12} className="text-icon" />
-                </ToolbarButton>
+              },
+              { type: 'separator', id: 'sep' },
+              ...projects.map((p) => ({
+                id: p.id,
+                label: p.name,
+                icon: <ProjectDot color={p.color} size={8} />,
+                checked: p.id === project?.id,
+                onSelect: () => {
+                  setParams(
+                    (prev) => {
+                      const next = new URLSearchParams(prev);
+                      next.set('project', p.id);
+                      return next;
+                    },
+                    { replace: true },
+                  );
+                },
+              })),
+            ]}
+            trigger={(props) => (
+              <ToolbarButton {...props} icon={<FolderIcon size={14} />}>
+                {project ? project.name : t('inbox.allProjects')}
+                <ChevronDownIcon size={12} className="text-icon" />
+              </ToolbarButton>
+            )}
+          />
+          {split ? (
+            <Tooltip content={t('inbox.markAllRead')}>
+              {(props) => (
+                <button
+                  {...props}
+                  type="button"
+                  aria-label={t('inbox.markAllRead')}
+                  disabled={unread === 0}
+                  onClick={() => {
+                    markAll.mutate(undefined);
+                  }}
+                  className={cn(
+                    'flex size-8 items-center justify-center rounded-[8px] border-0 bg-transparent',
+                    unread === 0 ? 'cursor-not-allowed text-faint' : 'text-3 hover:bg-hover',
+                  )}
+                >
+                  <CheckCheckIcon size={16} />
+                </button>
               )}
-            />
+            </Tooltip>
+          ) : (
             <button
               type="button"
               disabled={unread === 0}
@@ -126,52 +174,86 @@ export function InboxView() {
               <CheckCheckIcon size={14} />
               {t('inbox.markAllRead')}
             </button>
-            <Tooltip content={t('inbox.notificationSettings')}>
-              {(props) => (
-                <Link
-                  {...props}
-                  to={ws('/settings?tab=notifications')}
-                  aria-label={t('inbox.notificationSettings')}
-                  className="flex size-8 items-center justify-center rounded-[8px] text-3 hover:bg-hover"
-                >
-                  <BellIcon size={16} />
-                </Link>
-              )}
-            </Tooltip>
-          </div>
-        }
-        tabs={
-          <UnderlineTabs
-            label={t('inbox.filter')}
-            value={tab}
-            items={INBOX_TABS.map((value) => ({
-              value,
-              label: t(`inbox.tabs.${value}`),
-              to: ws(withProject(value === 'all' ? '/inbox' : `/inbox?tab=${value}`)),
-            }))}
-          />
-        }
-      />
+          )}
+          <Tooltip content={t('inbox.notificationSettings')}>
+            {(props) => (
+              <Link
+                {...props}
+                to={ws('/settings?tab=notifications')}
+                aria-label={t('inbox.notificationSettings')}
+                className="flex size-8 items-center justify-center rounded-[8px] text-3 hover:bg-hover"
+              >
+                <BellIcon size={16} />
+              </Link>
+            )}
+          </Tooltip>
+        </div>
+      }
+      tabs={
+        <UnderlineTabs
+          label={t('inbox.filter')}
+          value={tab}
+          items={INBOX_TABS.map((value) => ({
+            value,
+            label: t(`inbox.tabs.${value}`),
+            to: ws(withProject(value === 'all' ? '/inbox' : `/inbox?tab=${value}`)),
+          }))}
+        />
+      }
+    />
+  );
+  const list = (
+    <>
       {tab === 'all' && <StandupWaiting workspaceId={workspaceId} />}
       {query.isError ? (
         <ErrorState error={query.error} />
-      ) : !query.data ? (
+      ) : !items ? (
         <InboxSkeleton />
       ) : (
         <InboxList
           key={`${workspaceId}:${tab}:${project?.id ?? ''}`}
           workspaceId={workspaceId}
           tab={tab}
-          items={query.data.pages.flatMap((p) => p.items)}
+          items={items}
           archivedCount={counts?.archived ?? 0}
           hasMore={query.hasNextPage}
           loadingMore={query.isFetchingNextPage}
           onLoadMore={() => {
             void query.fetchNextPage();
           }}
+          split={split}
+          selectedId={selected?.id ?? null}
+          onSelect={select}
         />
       )}
     </>
+  );
+
+  return (
+    <div ref={rootRef} className={cn('flex min-w-0 flex-1', split ? 'min-h-0' : 'flex-col')}>
+      {split ? (
+        <>
+          <div
+            style={{ width: INBOX_LIST_WIDTH }}
+            className="flex min-h-0 flex-none flex-col overflow-auto border-r border-default"
+          >
+            {header}
+            {list}
+          </div>
+          <InboxPane
+            notification={selected}
+            onClose={() => {
+              select(null, true);
+            }}
+          />
+        </>
+      ) : (
+        <>
+          {header}
+          {list}
+        </>
+      )}
+    </div>
   );
 }
 
@@ -183,6 +265,11 @@ interface InboxListProps {
   hasMore: boolean;
   loadingMore: boolean;
   onLoadMore: () => void;
+  /** Side pane shown: rows select instead of opening the drawer. */
+  split: boolean;
+  selectedId: string | null;
+  /** `replace` for keyboard moves, so Back doesn't step through every row. */
+  onSelect: (id: string | null, replace?: boolean) => void;
 }
 
 function InboxList({
@@ -193,6 +280,9 @@ function InboxList({
   hasMore,
   loadingMore,
   onLoadMore,
+  split,
+  selectedId,
+  onSelect,
 }: InboxListProps) {
   const { t } = useTranslation();
   const openTask = useOpenTask();
@@ -201,10 +291,65 @@ function InboxList({
   const markRead = useMarkNotificationRead(workspaceId);
   const archive = useArchiveNotification(workspaceId);
   const unarchive = useUnarchiveNotification(workspaceId);
-
-  if (items.length === 0) return <InboxEmpty tab={tab} archivedCount={archivedCount} />;
+  const markUnread = useMarkNotificationUnread(workspaceId);
 
   const isUnread = (n: Notification) => n.readAt === null && n.archivedAt === null;
+
+  const open = (n: Notification, replace = false) => {
+    if (isUnread(n)) markRead.mutate(n);
+    if (split) {
+      onSelect(n.id, replace);
+      return;
+    }
+    if (n.task) openTask(n.task.key);
+    else {
+      const href = standupHref(n);
+      if (href) void navigate(ws(href));
+    }
+  };
+
+  const doArchive = (n: Notification) => {
+    // The selected row leaves this tab: select its neighbor (below, else above).
+    if (split && n.id === selectedId && tab !== 'archived') {
+      const i = items.findIndex((x) => x.id === n.id);
+      const neighbor = items[i + 1] ?? items[i - 1];
+      onSelect(neighbor?.id ?? null, true);
+      if (neighbor && isUnread(neighbor)) markRead.mutate(neighbor);
+    }
+    archive.mutate(n, {
+      onSuccess: () => {
+        toast({
+          message: n.task ? t('inbox.archived', { key: n.task.key }) : t('inbox.archivedStandup'),
+          action: {
+            label: t('common.undo'),
+            onClick: () => {
+              unarchive.mutate(n);
+            },
+          },
+        });
+      },
+    });
+  };
+
+  useInboxKeys({
+    enabled: split,
+    items,
+    selectedId,
+    onMove: (n) => {
+      open(n, true);
+    },
+    onArchive: (n) => {
+      if (n.archivedAt === null) doArchive(n);
+      else unarchive.mutate(n);
+    },
+    onToggleRead: (n) => {
+      if (n.archivedAt !== null) return;
+      if (isUnread(n)) markRead.mutate(n);
+      else markUnread.mutate(n);
+    },
+  });
+
+  if (items.length === 0) return <InboxEmpty tab={tab} archivedCount={archivedCount} />;
 
   return (
     <div className="flex flex-col">
@@ -213,33 +358,18 @@ function InboxList({
           <NotificationRow
             key={n.id}
             notification={n}
+            selected={n.id === selectedId}
             onOpen={() => {
-              if (isUnread(n)) markRead.mutate(n);
-              if (n.task) openTask(n.task.key);
-              else {
-                const href = standupHref(n);
-                if (href) void navigate(ws(href));
-              }
+              open(n);
             }}
             onMarkRead={() => {
               markRead.mutate(n);
             }}
+            onMarkUnread={() => {
+              markUnread.mutate(n);
+            }}
             onArchive={() => {
-              archive.mutate(n, {
-                onSuccess: () => {
-                  toast({
-                    message: n.task
-                      ? t('inbox.archived', { key: n.task.key })
-                      : t('inbox.archivedStandup'),
-                    action: {
-                      label: t('common.undo'),
-                      onClick: () => {
-                        unarchive.mutate(n);
-                      },
-                    },
-                  });
-                },
-              });
+              doArchive(n);
             }}
             onUnarchive={() => {
               unarchive.mutate(n);

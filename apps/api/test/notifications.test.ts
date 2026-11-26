@@ -395,6 +395,20 @@ describe('notifications', () => {
       expect(twice?.readAt).toEqual(once?.readAt);
     });
 
+    it('marks a notification unread again, but never an archived one', async () => {
+      const w = await world();
+      await w.createTask({ title: 'T', assigneeIds: [w.sara.user.id] });
+      const [n] = await w.rows(w.sara.user.id);
+      await w.call(w.sara.api, 'POST', `/me/notifications/${n?.id}/read`, undefined, 204);
+      expect((await w.inbox(w.sara.api)).counts.unread).toBe(0);
+      await w.call(w.sara.api, 'POST', `/me/notifications/${n?.id}/unread`, undefined, 204);
+      expect((await w.rows(w.sara.user.id))[0]?.readAt).toBeNull();
+      expect((await w.inbox(w.sara.api)).counts.unread).toBe(1);
+      await w.call(w.sara.api, 'POST', `/me/notifications/${n?.id}/archive`, undefined, 204);
+      await w.call(w.sara.api, 'POST', `/me/notifications/${n?.id}/unread`, undefined, 204);
+      expect((await w.rows(w.sara.user.id))[0]?.readAt).not.toBeNull();
+    });
+
     it('hides notifications on deleted tasks', async () => {
       const w = await world();
       const task = await w.createTask({ title: 'T', assigneeIds: [w.sara.user.id] });
@@ -410,7 +424,7 @@ describe('notifications', () => {
       const w = await world();
       await w.createTask({ title: 'T', assigneeIds: [w.sara.user.id] });
       const [n] = await w.rows(w.sara.user.id);
-      for (const action of ['read', 'archive', 'unarchive']) {
+      for (const action of ['read', 'unread', 'archive', 'unarchive']) {
         const res = await w.dorj.api('POST', `/me/notifications/${n?.id}/${action}`);
         expect(res.statusCode).toBe(404);
       }

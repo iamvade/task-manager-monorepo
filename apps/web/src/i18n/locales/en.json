@@ -884,7 +884,19 @@
       "meta": "{{time}} · {{group}}"
     },
     "archivedStandup": "Notification archived",
-    "standupWaiting": "Your {{group}} standup is waiting for your update"
+    "standupWaiting": "Your {{group}} standup is waiting for your update",
+    "markUnread": "Mark as unread",
+    "pane": "Notification detail",
+    "noneSelected": "No notification selected",
+    "noneSelectedHint": "Pick one from the list, or move with <kbd>↑</kbd> <kbd>↓</kbd> or <kbd>J</kbd> <kbd>K</kbd>. <kbd>E</kbd> archives, <kbd>U</kbd> marks read or unread.",
+    "openStandup": "Open standup",
+    "preview": {
+      "posted": "Posted",
+      "notPosted": "Not yet",
+      "out": "Out of office",
+      "blocker": "Blocker",
+      "reply": "Reply"
+    }
   },
   "palette": {
     "label": "Command palette",
@@ -924,7 +936,8 @@
       "general": "General",
       "list": "List",
       "create": "Quick create",
-      "pickers": "Pickers"
+      "pickers": "Pickers",
+      "inbox": "Inbox"
     },
     "items": {
       "palette": "Open the command palette",
@@ -944,7 +957,10 @@
       "navigate": "Move through options",
       "select": "Select",
       "clear": "Unassign / clear",
-      "closePicker": "Close the picker"
+      "closePicker": "Close the picker",
+      "inboxNextPrev": "Next / previous notification",
+      "inboxArchive": "Archive / move to inbox",
+      "inboxRead": "Mark read / unread"
     }
   },
   "settings": {
