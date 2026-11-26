@@ -1,4 +1,9 @@
-import { CLOSED_CATEGORIES, isClosedCategory, type StatusCategory } from '@kite/shared';
+import {
+  CLOSED_CATEGORIES,
+  isClosedCategory,
+  PARKED_CATEGORIES,
+  type StatusCategory,
+} from '@kite/shared';
 import { and, eq, isNull, notInArray } from 'drizzle-orm';
 import type { DbOrTx } from '../db/client.js';
 import { statuses, taskStatusPeriods } from '../db/schema/index.js';
@@ -14,6 +19,13 @@ type StatusRow = typeof statuses.$inferSelect;
 
 /** Where-condition: the joined `statuses` row is open (not done or cancelled). */
 export const openStatusSql = () => notInArray(statuses.category, [...CLOSED_CATEGORIES]);
+
+/**
+ * Where-condition: open and not parked (Backlog). Someone's current work: My Tasks, the sidebar
+ * count, standup suggestions.
+ */
+export const workingStatusSql = () =>
+  notInArray(statuses.category, [...CLOSED_CATEGORIES, ...PARKED_CATEGORIES]);
 
 /**
  * `completed_at` (done) and `closed_at` (done or cancelled) for a task entering a `to` status:

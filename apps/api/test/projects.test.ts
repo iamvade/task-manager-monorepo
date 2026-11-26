@@ -70,6 +70,7 @@ describe('spaces, projects and the sidebar', () => {
     const first = await createProject(space.id, 'Partner Portal');
     expect(first.key).toBe('PP');
     expect(first.statuses.map((s) => [s.name, s.category])).toEqual([
+      [null, 'backlog'],
       [null, 'todo'],
       [null, 'in_progress'],
       [null, 'review'],
@@ -126,10 +127,10 @@ describe('spaces, projects and the sidebar', () => {
   it('reports task counts per status and the active sprint', async () => {
     const { api, createSpace, createProject } = await setup();
     const project = await createProject((await createSpace('Eng')).id, 'Platform');
-    await addTask(project, 0, 1);
-    await addTask(project, 0, 2);
-    const done = await addTask(project, 4, 3);
-    const deleted = await addTask(project, 4, 4);
+    await addTask(project, 1, 1);
+    await addTask(project, 1, 2);
+    const done = await addTask(project, 5, 3);
+    const deleted = await addTask(project, 5, 4);
     await ctx.db.update(tasks).set({ deletedAt: new Date() }).where(eq(tasks.id, deleted.id));
 
     const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ulaanbaatar' }).format();
@@ -159,11 +160,11 @@ describe('spaces, projects and the sidebar', () => {
     expect(backwards.statusCode).toBe(400);
 
     const detail = projectDetailSchema.parse((await api('GET', `/projects/${project.id}`)).json());
-    expect(detail.taskCounts.map((c) => c.count)).toEqual([2, 0, 0, 0, 1, 0]);
+    expect(detail.taskCounts.map((c) => c.count)).toEqual([0, 2, 0, 0, 0, 1, 0]);
     expect(detail.taskCount).toBe(3);
     expect(detail.doneCount).toBe(1);
     expect(detail.activeSprint?.id).toBe(current.id);
-    expect(done.statusId).toBe(detail.statuses[4]?.id);
+    expect(done.statusId).toBe(detail.statuses[5]?.id);
 
     const sprints = z
       .array(sprintSchema)

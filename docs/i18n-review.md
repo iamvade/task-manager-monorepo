@@ -851,3 +851,12 @@ Live mode was removed (its `standup.live.*` keys with it); the facilitator write
 | `showInMenu` | Show {{name}} in the menu | Цэсэнд харуулах: {{name}} | Customize menu — checkbox aria-label |
 | `moveUp` / `moveDown` | Move up / Move down | Дээш зөөх / Доош зөөх | Customize menu — reorder buttons (": {name}" appended) |
 | `resetMenu` | Reset to default | Анхны байдалд оруулах | Customize menu — footer |
+
+## Backlog status (derived, 2026-11-27)
+
+| key | en | mn (draft) | where |
+|---|---|---|---|
+| `status.backlog` | Backlog | Бэклог | Status name (pickers, List groups, Board columns, pills); also push, CSV and the MCP server |
+| `views.backlog` | Backlog | Бэклог | View row — the button between Active and All |
+
+"Бэклог" is a loanword placeholder; a Mongolian term (e.g. "Нөөц ажил") may read better.

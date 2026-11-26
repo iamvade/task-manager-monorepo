@@ -95,10 +95,10 @@ function Calendar({ scope, scopeId, project, space }: CalendarProps) {
   // Two queries: tasks due on the visible days (narrowed by a URL due filter) and open tasks
   // without a due date. The URL's due range can't match undated tasks, so Unscheduled ignores it.
   const meId = me?.user.id ?? '';
-  const { filters, activeOnly } = view;
+  const { filters, show } = view;
   const base = useMemo(
-    () => toTaskQuery(filters, meId, scope, null, activeOnly),
-    [filters, meId, scope, activeOnly],
+    () => toTaskQuery(filters, meId, scope, null, show),
+    [filters, meId, scope, show],
   );
   const rangeQuery = useMemo(() => {
     const { dueFrom, dueTo, ...rest } = base;

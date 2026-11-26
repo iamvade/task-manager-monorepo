@@ -24,6 +24,7 @@ export const COLUMN_PREFIX = 'column:';
 const noShift: SortingStrategy = () => null;
 
 const TINT: Record<StatusCategory, string> = {
+  backlog: 'bg-tint-backlog text-tint-backlog',
   todo: 'bg-tint-todo-header text-tint-todo',
   in_progress: 'bg-tint-progress text-tint-progress',
   review: 'bg-tint-review text-tint-review',
@@ -259,11 +260,7 @@ export function BoardColumn({
           {tasks.map((task) => (
             <div key={task.id} className="flex flex-col gap-2">
               {placeholderAt === task.id && <DropPlaceholder status={label} />}
-              <SortableCard
-                task={task}
-                href={taskHref(task)}
-                disabled={!dnd || isTempTask(task)}
-              />
+              <SortableCard task={task} href={taskHref(task)} disabled={!dnd || isTempTask(task)} />
             </div>
           ))}
         </SortableContext>

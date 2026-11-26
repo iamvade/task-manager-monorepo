@@ -22,7 +22,7 @@ import {
   taskInScope,
   type ReportContext,
 } from './scope.js';
-import { rows, sizePoints } from './sql.js';
+import { notParked, rows, sizePoints } from './sql.js';
 import { assigneesColumn } from './tasks.js';
 
 /**
@@ -46,7 +46,8 @@ const assignedOpen = (ctx: ReportContext, weekEnd: string) => sql`
     ) is true as counted
   from tasks t
   join task_assignees ta on ta.task_id = t.id
-  where ${taskInScope(ctx, 't')} and t.closed_at is null`;
+  where ${taskInScope(ctx, 't')} and t.closed_at is null
+    and ${notParked('t')}`;
 
 /**
  * Who is listed: every workspace member, or with a scope filter the scoped projects' members

@@ -1,4 +1,4 @@
-import { isClosedCategory, type TaskListItem } from '@kite/shared';
+import { isClosedCategory, isParkedCategory, type TaskListItem } from '@kite/shared';
 import { forwardRef, type HTMLAttributes, type Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -104,7 +104,9 @@ export const TaskCard = forwardRef<HTMLElement, TaskCardProps>(function TaskCard
         </span>
       )}
       <span className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[12px] text-3">
-        {task.dueDate && <DueLine date={task.dueDate} done={closed} />}
+        {task.dueDate && (
+          <DueLine date={task.dueDate} done={closed || isParkedCategory(task.status.category)} />
+        )}
         {subTotal > 0 && (
           <span
             className="flex items-center gap-1.5"

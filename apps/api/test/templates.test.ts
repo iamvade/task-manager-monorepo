@@ -74,7 +74,7 @@ describe('POST /projects/:id/from-template', () => {
     const body = applyTemplateResponseSchema.parse(res.json());
     expect(body.createdCount).toBe(18);
     expect(body.project.taskCount).toBe(18);
-    expect(body.project.taskCounts[0]?.count).toBe(18);
+    expect(body.project.taskCounts[1]?.count).toBe(18);
 
     const rows = await projectTasks(project.id);
     expect(rows.map((t) => t.number)).toEqual(Array.from({ length: 18 }, (_, i) => i + 1));
@@ -82,7 +82,7 @@ describe('POST /projects/:id/from-template', () => {
     expect([...positions].sort()).toEqual(positions);
     expect(new Set(positions).size).toBe(18);
     expect(
-      rows.every((t) => t.createdBy === owner.id && t.statusId === project.statuses[0]?.id),
+      rows.every((t) => t.createdBy === owner.id && t.statusId === project.statuses[1]?.id),
     ).toBe(true);
     expect(rows[0]?.title).toBe('Define launch goals and success metrics');
     const today = todayInZone(owner.timezone);

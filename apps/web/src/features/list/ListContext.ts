@@ -1,5 +1,6 @@
 import {
   isClosedCategory,
+  isParkedCategory,
   type Priority,
   type Size,
   type Status,
@@ -56,6 +57,9 @@ export const isDone = (task: Pick<TaskListItem, 'status'>) => task.status.catego
 /** Done or cancelled: struck through, no due tone, no Blocked marker. */
 export const isClosed = (task: Pick<TaskListItem, 'status'>) =>
   isClosedCategory(task.status.category);
+/** Closed or parked (Backlog): its due date gets no overdue/today tone. */
+export const isUntimed = (task: Pick<TaskListItem, 'status'>) =>
+  isClosedCategory(task.status.category) || isParkedCategory(task.status.category);
 
 /**
  * Main.dc.html grid: [select (project list, not designed)] · name · assignee · tags · [size] · due · more (tags before size and due: user decision 2026-11-27). The name cell reads priority · key · status · title:

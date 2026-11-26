@@ -108,9 +108,9 @@ export function TaskTable({
   // Groups with no tasks are hidden unless View settings → "Show empty groups" is on.
   const showEmptyGroups = useUiStore((s) => s.showEmptyGroups);
   const groups = useMemo(() => {
-    const all = groupTasks(sorted, view.group, { statuses, activeOnly: view.hideInactive });
+    const all = groupTasks(sorted, view.group, { statuses, categories: view.shownCategories });
     return showEmptyGroups ? all : all.filter((g) => g.tasks.length > 0);
-  }, [sorted, view.group, statuses, view.hideInactive, showEmptyGroups]);
+  }, [sorted, view.group, statuses, view.shownCategories, showEmptyGroups]);
   const byId = useMemo(() => new Map(tasks.map((task) => [task.id, task])), [tasks]);
 
   // Collapsed groups, remembered per list.
@@ -447,7 +447,7 @@ export function TaskTable({
 
   const showNoMatches =
     tasks.length === 0 &&
-    (view.activeFilterCount > 0 || view.hideInactive) &&
+    (view.activeFilterCount > 0 || view.shownCategories !== null) &&
     (view.group !== 'status' || groups.length === 0);
 
   return (
@@ -517,7 +517,7 @@ export function TaskTable({
               {activeTask && <TaskRow task={activeTask} height={rowHeight} dragState="overlay" />}
             </DragOverlay>
           </DndContext>
-          {!showNoMatches && !view.hideInactive && (
+          {!showNoMatches && view.shownCategories === null && (
             <FullRow>
               <DoneScopeNote className="px-2 pt-4" />
             </FullRow>

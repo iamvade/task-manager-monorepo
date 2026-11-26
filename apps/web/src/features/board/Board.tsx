@@ -75,9 +75,9 @@ export function Board({ scope, boardKey, label, tasks, project, members }: Board
     () =>
       groupTasks(sortTasks(tasks, view.sort, statusRank), 'status', {
         statuses,
-        activeOnly: view.hideInactive,
+        categories: view.shownCategories,
       }),
-    [tasks, view.sort, statusRank, statuses, view.hideInactive],
+    [tasks, view.sort, statusRank, statuses, view.shownCategories],
   );
   const columnIds = useMemo<ColumnIds[]>(
     () => columns.map((c) => ({ key: c.key, ids: c.tasks.map((x) => x.id) })),

@@ -8,10 +8,11 @@ const bar = (angle: string, color: string, from: number, to: number) =>
 /**
  * Status marker by category (CLAUDE.md "Status markers"): 2px ring; To Do = grey ring,
  * In Progress = amber ring + left-half fill, In Review = accent(-ink) ring + accent 20% fill,
- * Done = solid green. Theme colors come from tokens. Not in the designs (derived): On hold = rose
- * ring with two pause bars, Cancelled = solid grey with a cross.
+ * Done = solid green. Theme colors come from tokens. Not in the designs (derived): Backlog = dashed
+ * grey ring, On hold = rose ring with two pause bars, Cancelled = solid grey with a cross.
  */
 const STYLES: Record<StatusCategory, CSSProperties> = {
+  backlog: { borderColor: 'var(--status-backlog)', borderStyle: 'dashed' },
   todo: { borderColor: 'var(--status-todo)' },
   in_progress: {
     borderColor: 'var(--status-progress)',

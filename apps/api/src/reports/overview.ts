@@ -22,6 +22,7 @@ import {
   isoTs,
   localDate,
   median1,
+  notParked,
   p85,
   rows,
   sizePoints,
@@ -123,11 +124,11 @@ export function completedBlocks(statRows: CompletedStatsRow[]) {
   };
 }
 
-/** Open tasks due before today; `extra` narrows them (People). */
+/** Open, not parked tasks due before today; `extra` narrows them (People). */
 export const overdueQuery = (ctx: ReportContext, extra: SQL = sql`true`) => sql`
   select count(*)::int as count, max(${ctx.today}::date - t.due_date)::int as oldest
   from tasks t
-  where ${taskInScope(ctx, 't')} and t.closed_at is null
+  where ${taskInScope(ctx, 't')} and t.closed_at is null and ${notParked('t')}
     and t.due_date < ${ctx.today}::date and ${extra}`;
 
 /** Monday of the first week in the 24-week throughput window (12 shown + 12 previous). */

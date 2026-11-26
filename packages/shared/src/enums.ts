@@ -19,10 +19,12 @@ export type Size = z.infer<typeof sizeSchema>;
 export const SIZE_POINTS: Readonly<Record<Size, number>> = { S: 1, M: 3, L: 5, XL: 8 };
 
 /**
- * In board order. `on_hold` is open but paused; `cancelled` is closed but not completed (only
- * `done` sets `completed_at` and counts in Reports).
+ * In board order. `backlog` is open but not planned (parked: left out of My Tasks, Workload,
+ * overdue and standups); `on_hold` is open but paused; `cancelled` is closed but not completed
+ * (only `done` sets `completed_at` and counts in Reports).
  */
 export const STATUS_CATEGORIES = [
+  'backlog',
   'todo',
   'in_progress',
   'review',
@@ -37,6 +39,14 @@ export type StatusCategory = z.infer<typeof statusCategorySchema>;
 export const CLOSED_CATEGORIES = ['done', 'cancelled'] as const satisfies readonly StatusCategory[];
 export const isClosedCategory = (category: StatusCategory): boolean =>
   (CLOSED_CATEGORIES as readonly StatusCategory[]).includes(category);
+
+/**
+ * Open categories nobody works on yet: shown only in project/space views (Backlog, All), never in
+ * My Tasks, the sidebar count, Workload, overdue or standup suggestions.
+ */
+export const PARKED_CATEGORIES = ['backlog'] as const satisfies readonly StatusCategory[];
+export const isParkedCategory = (category: StatusCategory): boolean =>
+  (PARKED_CATEGORIES as readonly StatusCategory[]).includes(category);
 
 /** Categories where work waits on someone (Reports "Where work waits", Aging, burndown insight). */
 export const WAIT_CATEGORIES = [
@@ -197,7 +207,7 @@ export const AVATAR_COLORS = [
 export const avatarColorSchema = z.enum(AVATAR_COLORS);
 export type AvatarColor = z.infer<typeof avatarColorSchema>;
 
-/** Categories of the six statuses every project has, in board order. */
+/** Categories of the seven statuses every project has, in board order. */
 export const DEFAULT_STATUS_CATEGORIES = STATUS_CATEGORIES;
 
 /** Project templates offered on the empty-project screen. */

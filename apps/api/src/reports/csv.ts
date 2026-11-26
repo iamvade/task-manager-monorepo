@@ -83,6 +83,7 @@ const LABELS = {
 
 const STATUS_NAMES: Record<Locale, Record<StatusCategory, string>> = {
   en: {
+    backlog: 'Backlog',
     todo: 'To Do',
     in_progress: 'In Progress',
     review: 'In Review',
@@ -91,6 +92,7 @@ const STATUS_NAMES: Record<Locale, Record<StatusCategory, string>> = {
     cancelled: 'Cancelled',
   },
   mn: {
+    backlog: 'Бэклог',
     todo: 'Хийх',
     in_progress: 'Хийгдэж буй',
     review: 'Хянагдаж буй',

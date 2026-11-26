@@ -31,6 +31,7 @@ export const PUSH_STRINGS = {
       digest: '{{group}} standup: {{posted}} of {{expected}} have posted',
     },
     status: {
+      backlog: 'Backlog',
       todo: 'To Do',
       in_progress: 'In Progress',
       review: 'In Review',
@@ -59,6 +60,7 @@ export const PUSH_STRINGS = {
       digest: '{{group}} стэндап: {{expected}}-аас {{posted}} нь бичсэн',
     },
     status: {
+      backlog: 'Бэклог',
       todo: 'Хийх',
       in_progress: 'Хийгдэж буй',
       review: 'Хянагдаж буй',

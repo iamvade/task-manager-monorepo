@@ -75,7 +75,9 @@ describe('matchStatus', () => {
   it('prefers a custom name and lists the choices when nothing matches', () => {
     const custom = [...STATUSES, { ...at(STATUSES, 1), id: 'x', name: 'QA', position: 'b0' }];
     expect(matchStatus(custom, 'qa').id).toBe('x');
-    expect(() => matchStatus(STATUSES, 'shipped')).toThrow(/Statuses: "To Do" \(todo\)/);
+    expect(() => matchStatus(STATUSES, 'shipped')).toThrow(
+      /Statuses: "Backlog" \(backlog\), "To Do" \(todo\)/,
+    );
   });
 
   it('labels default statuses in English', () => {

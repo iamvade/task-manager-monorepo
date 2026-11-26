@@ -149,6 +149,33 @@ describe('project list', () => {
     expect(toggleOf('Дууссан')).toBeInTheDocument();
   });
 
+  it('Backlog (between Active and All) shows only Backlog, and new tasks start there', async () => {
+    const { fetchMock } = api();
+    renderAt(`/w/kite-studio/p/${PROJECT_ID}/list?sprint=none`);
+    await screen.findByRole('table', { name: 'App Redesign төслийн ажлууд' });
+    const show = screen.getByRole('radiogroup', { name: 'Ажил харуулах' });
+    expect(
+      within(show)
+        .getAllByRole('radio')
+        .map((r) => r.textContent),
+    ).toEqual(['Идэвхтэй', 'Бэклог', 'Бүгд']);
+    const listUrls = () =>
+      fetchMock.mock.calls.map(([input]) => href(input)).filter((u) => u.includes('/tasks'));
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Бэклог' }));
+    await waitFor(() => {
+      expect(listUrls().some((u) => u.includes('statusCategory=backlog'))).toBe(true);
+    });
+    expect(screen.queryByRole('button', { name: /^Хийх/ })).toBeNull();
+    expect(screen.queryByText('Сүүлийн 14 хоногт дууссан')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Шинэ ажил' }));
+    expect(useUiStore.getState().createDefaults).toMatchObject({
+      projectId: PROJECT_ID,
+      statusCategory: 'backlog',
+    });
+  });
+
   it('loads done tasks of the last 14 days until "Show all"', async () => {
     const { fetchMock } = api();
     renderAt(LIST);
