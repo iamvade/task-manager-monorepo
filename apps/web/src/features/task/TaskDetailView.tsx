@@ -45,7 +45,7 @@ const INERT = { inert: '' } as Record<string, string>;
 
 interface TaskDetailViewProps {
   taskKey: string;
-  layout: 'drawer' | 'page';
+  layout: 'drawer' | 'pane' | 'page';
   onClose: () => void;
 }
 
@@ -112,7 +112,7 @@ function LoadedTask({
   onClose,
 }: {
   task: TaskDetail;
-  layout: 'drawer' | 'page';
+  layout: 'drawer' | 'pane' | 'page';
   onClose: () => void;
 }) {
   const { t } = useTranslation();

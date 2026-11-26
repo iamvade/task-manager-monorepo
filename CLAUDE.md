@@ -211,7 +211,7 @@ Every app page is under its workspace: **`/w/:slug/...`** (the workspace slug; b
 
 - `/login`, `/invite/:token` (accepting lands in the joined workspace), `/reset-password/:token` (a reset link from the platform admin), `/oauth/authorize` (the remote connector's consent page; signed out → sign in and back)
 - `/` → `/w/<last>/my-tasks`
-- `/my-tasks`, `/inbox`
+- `/my-tasks`, `/inbox` (when the page is ≥ 960px wide the list is a 440px column and `?n=<notificationId>` opens the notification in a side pane: the task detail with `layout="pane"` or a standup preview; ↑/↓ J/K move, E archives, U marks read/unread via `POST /me/notifications/:id/unread`; narrower, rows open the drawer as before. Not designed; `docs/design-notes.md` §1.9)
 - `/personal` (`?view=todos`, `topic=<id>|none`, `filter=unlinked|uncreated`) · `/personal/i/:itemId` · `/personal/graph?topic=` (my private notes and to-dos; see Personal space)
 - `/p/:projectId/list` · `/board` · `/calendar` (task drawer opens via `?task=APP-142`)
 - `/s/:spaceId/list` · `/board` · `/calendar` (space-level views across all the space's projects; calendar has a project filter)

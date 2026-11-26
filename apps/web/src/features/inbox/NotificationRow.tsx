@@ -1,10 +1,17 @@
 import { shortName, type Notification } from '@kite/shared';
 import { Trans, useTranslation } from 'react-i18next';
 import { useAuth } from '../../auth/useAuth';
-import { ArchiveIcon, CheckCheckIcon, StandupIcon, UnarchiveIcon } from '../../components/icons';
+import {
+  ArchiveIcon,
+  CheckCheckIcon,
+  MailIcon,
+  StandupIcon,
+  UnarchiveIcon,
+} from '../../components/icons';
 import { Avatar } from '../../components/ui/Avatar';
 import { IconButton } from '../../components/ui/IconButton';
 import { Tooltip } from '../../components/ui/Tooltip';
+import { cn } from '../../lib/cn';
 import { useDates } from '../../lib/useDates';
 import { useFeedTime } from '../my-tasks/useFeedTime';
 import { inboxLine } from './inboxLine';
@@ -14,6 +21,10 @@ interface NotificationRowProps {
   notification: Notification;
   onOpen: () => void;
   onMarkRead: () => void;
+  /** Read rows offer Mark as unread (inbox split view). */
+  onMarkUnread?: () => void;
+  /** The row shown in the inbox's side pane. */
+  selected?: boolean;
   onArchive: () => void;
   onUnarchive: () => void;
 }
@@ -27,6 +38,8 @@ export function NotificationRow({
   notification: n,
   onOpen,
   onMarkRead,
+  onMarkUnread,
+  selected = false,
   onArchive,
   onUnarchive,
 }: NotificationRowProps) {
@@ -51,10 +64,17 @@ export function NotificationRow({
     : n.snippet;
 
   return (
-    <li className="group relative flex border-b border-subtle hover:bg-subtle has-[:focus-visible]:bg-subtle">
+    <li
+      data-notification-id={n.id}
+      className={cn(
+        'group relative flex border-b border-subtle',
+        selected ? 'bg-hover' : 'hover:bg-subtle has-[:focus-visible]:bg-subtle',
+      )}
+    >
       <button
         type="button"
         onClick={onOpen}
+        aria-current={selected || undefined}
         className="flex min-w-0 flex-1 gap-2.5 border-0 bg-transparent py-2.5 pr-2 pl-6 text-left focus-visible:-outline-offset-2"
       >
         {n.actor ? (
@@ -103,10 +123,17 @@ export function NotificationRow({
       </button>
       <div className="flex flex-none items-start gap-1 py-2 pr-6">
         <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 group-has-[:focus-visible]:opacity-100">
-          {unread && (
+          {unread ? (
             <RowAction label={t('inbox.markRead')} onClick={onMarkRead}>
               <CheckCheckIcon size={14} />
             </RowAction>
+          ) : (
+            onMarkUnread &&
+            n.archivedAt === null && (
+              <RowAction label={t('inbox.markUnread')} onClick={onMarkUnread}>
+                <MailIcon size={14} />
+              </RowAction>
+            )
           )}
           {n.archivedAt === null ? (
             <RowAction label={t('inbox.archive')} onClick={onArchive}>

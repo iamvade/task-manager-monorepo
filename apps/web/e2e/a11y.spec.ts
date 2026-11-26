@@ -44,6 +44,8 @@ interface Ids {
   designGroup: string;
   /** Anu's seeded "Design ideas" note (links, a not-created link, a backlink). */
   personalItem: string;
+  /** Anu's newest inbox notification (opened in the split view's side pane). */
+  notification: string;
 }
 
 const mobileId = (groups: { id: string; name: string }[]) =>
@@ -73,6 +75,10 @@ async function lookup(page: Page): Promise<Ids> {
     items: { id: string; title: string }[];
   };
   const note = personal.items.find((i) => i.title === 'Design ideas');
+  const inbox = (await (
+    await page.request.get(`/api/v1/me/notifications?workspaceId=${ws}&tab=all`)
+  ).json()) as { items: { id: string; task: unknown }[] };
+  const notification = inbox.items.find((n) => n.task)?.id;
   const mobileDay = mobileId(groups)
     ? ((await (
         await page.request.get(`/api/v1/standup-groups/${mobileId(groups)}/days/today`)
@@ -80,7 +86,7 @@ async function lookup(page: Page): Promise<Ids> {
     : null;
   const mobile = groups.find((g) => g.name === 'Mobile team');
   const design = groups.find((g) => g.name === 'Design team');
-  if (!app || !portal || !space || !tasks[0] || !mobile || !design || !note) {
+  if (!app || !portal || !space || !tasks[0] || !mobile || !design || !note || !notification) {
     throw new Error('seed data missing');
   }
   return {
@@ -92,12 +98,14 @@ async function lookup(page: Page): Promise<Ids> {
     mobilePrev: mobileDay?.prevDate ?? mobile.today,
     designGroup: design.id,
     personalItem: note.id,
+    notification,
   };
 }
 
 const pages = (ids: Ids): [string, string][] => [
   ['My Tasks', '/w/kite-studio/my-tasks'],
   ['Inbox', '/w/kite-studio/inbox'],
+  ['Inbox · side pane', `/w/kite-studio/inbox?n=${ids.notification}`],
   ['Settings', '/w/kite-studio/settings'],
   ['Settings · members', '/w/kite-studio/settings?tab=members'],
   ['Settings · tags', '/w/kite-studio/settings?tab=tags'],

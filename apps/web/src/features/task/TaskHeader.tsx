@@ -148,7 +148,7 @@ export function TaskHeader({ onMoveToProject }: TaskHeaderProps) {
           void copyLink();
         }}
       />
-      {layout === 'drawer' && (
+      {layout !== 'page' && (
         <Link
           to={ws(`/t/${task.key}`)}
           aria-label={t('drawer.openFullPage')}
@@ -207,7 +207,7 @@ export function TaskHeader({ onMoveToProject }: TaskHeaderProps) {
           />
         )}
       />
-      {layout === 'drawer' && (
+      {layout !== 'page' && (
         <>
           <div aria-hidden="true" className="h-5 w-px bg-[var(--border)]" />
           <IconButton

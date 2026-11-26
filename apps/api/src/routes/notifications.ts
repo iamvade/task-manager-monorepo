@@ -220,6 +220,39 @@ export const notificationRoutes: FastifyPluginCallbackZod = (app, _opts, done) =
   );
 
   app.post(
+    '/me/notifications/:notificationId/unread',
+    {
+      preHandler: app.authenticate,
+      schema: {
+        tags: ['Inbox'],
+        summary: 'Mark a notification as unread',
+        description:
+          'Inbox triage (U). An archived notification stays read (archived rows never count as unread). Idempotent. 404 for anyone else’s notification.',
+        params,
+        response: { 204: z.null(), 401: err, 404: err },
+      },
+    },
+    async (request, reply) => {
+      const { user } = requireAuth(request);
+      const [row] = await app.db
+        .update(notifications)
+        .set({
+          readAt: sql`case when ${notifications.archivedAt} is null then null else ${notifications.readAt} end`,
+        })
+        .where(
+          and(
+            eq(notifications.id, request.params.notificationId),
+            eq(notifications.userId, user.id),
+          ),
+        )
+        .returning({ id: notifications.id });
+      if (!row) throw httpError(404, 'NOT_FOUND', 'Notification not found');
+      publishUnreadChanged(app, user.id, clientIdOf(request));
+      return reply.code(204).send(null);
+    },
+  );
+
+  app.post(
     '/me/notifications/:notificationId/archive',
     {
       preHandler: app.authenticate,

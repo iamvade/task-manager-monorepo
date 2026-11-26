@@ -147,6 +147,21 @@ export function useMarkNotificationRead(workspaceId: string) {
   );
 }
 
+/** Inbox triage (U): back to unread. Archived notifications stay read (the server agrees). */
+export function useMarkNotificationUnread(workspaceId: string) {
+  return useInboxMutation(
+    workspaceId,
+    (n: Notification) => apiSend(`/me/notifications/${n.id}/unread`, z.null(), 'POST'),
+    (target) => {
+      const counts = target.readAt !== null && target.archivedAt === null;
+      return {
+        item: (n) => (n.id === target.id && n.archivedAt === null ? { ...n, readAt: null } : n),
+        counts: (c) => ({ ...c, unread: c.unread + (counts ? 1 : 0) }),
+      };
+    },
+  );
+}
+
 export function useArchiveNotification(workspaceId: string) {
   return useInboxMutation(
     workspaceId,

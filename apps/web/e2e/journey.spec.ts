@@ -8,7 +8,7 @@ const strings = (lang: 'en' | 'mn') =>
     readFileSync(new URL(`../src/i18n/locales/${lang}.json`, import.meta.url), 'utf8'),
   ) as {
     shell: { myTasks: string; inbox: string; personal: string; settings: string };
-    inbox: { tabs: Record<'all' | 'mentions' | 'assigned' | 'archived', string> };
+    inbox: { tabs: Record<'all' | 'mentions' | 'assigned' | 'archived', string>; pane: string };
     status: Record<'todo' | 'review', string>;
     myTasks: { feed: { mentioned: string } };
   };
@@ -157,9 +157,10 @@ test.describe('task → board → mention → inbox', () => {
     await expect(sara.getByRole('tab', { name: EN.inbox.tabs.mentions })).toBeVisible();
     await expect(nav.getByRole('radio', { name: 'EN' })).toHaveAttribute('aria-checked', 'true');
 
-    // Opening the notification lands on the task.
+    // Opening the notification shows the task in the inbox's side pane (1440px wide).
     await sara.getByRole('listitem').filter({ hasText: title }).getByRole('button').first().click();
-    await expect(sara).toHaveURL(new RegExp(`task=${key}|/t/${key}`));
+    await expect(sara).toHaveURL(/[?&]n=/);
+    await expect(sara.getByRole('region', { name: EN.inbox.pane })).toContainText(key);
     await context.close();
   });
 });

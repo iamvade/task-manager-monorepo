@@ -27,7 +27,10 @@ type ItemKey =
   | 'navigate'
   | 'select'
   | 'clear'
-  | 'closePicker';
+  | 'closePicker'
+  | 'inboxNextPrev'
+  | 'inboxArchive'
+  | 'inboxRead';
 
 /** One shortcut: keys pressed together, or a sequence (`then`) like G → I. */
 interface Shortcut {
@@ -36,7 +39,7 @@ interface Shortcut {
   sequence?: boolean;
 }
 
-const GROUPS: { id: 'general' | 'list' | 'create' | 'pickers'; items: Shortcut[] }[] = [
+const GROUPS: { id: 'general' | 'list' | 'inbox' | 'create' | 'pickers'; items: Shortcut[] }[] = [
   {
     id: 'general',
     items: [
@@ -54,6 +57,14 @@ const GROUPS: { id: 'general' | 'list' | 'create' | 'pickers'; items: Shortcut[]
       { item: 'nextPrev', keys: ['J', 'K'] },
       { item: 'open', keys: ['↵'] },
       { item: 'complete', keys: ['X'] },
+    ],
+  },
+  {
+    id: 'inbox',
+    items: [
+      { item: 'inboxNextPrev', keys: ['J', 'K'] },
+      { item: 'inboxArchive', keys: ['E'] },
+      { item: 'inboxRead', keys: ['U'] },
     ],
   },
   {
