@@ -93,9 +93,6 @@ describe('Standup', () => {
     fireEvent.change(name, { target: { value: 'Mobile squad' } });
     fireEvent.click(screen.getByRole('button', { name: 'Saturday' }));
     fireEvent.click(screen.getByRole('button', { name: 'Friday' }));
-    fireEvent.change(screen.getByLabelText('Meeting'), { target: { value: '' } });
-    fireEvent.click(screen.getByRole('radio', { name: '3 min' }));
-    fireEvent.click(screen.getByRole('radio', { name: 'Alphabetical' }));
     fireEvent.click(screen.getByRole('checkbox', { name: /Show blockers first/ }));
     // Removing the facilitator clears the role.
     fireEvent.click(screen.getByRole('button', { name: `Remove ${SARA.user.name}` }));
@@ -105,9 +102,6 @@ describe('Standup', () => {
         {
           name: 'Mobile squad',
           days: [0, 1, 2, 3, 5],
-          meetingAt: null,
-          secondsPerPerson: 180,
-          speakingOrder: 'alphabetical',
           showBlockersFirst: false,
           memberIds: [ME.user.id, DORJ.user.id],
           facilitatorId: null,

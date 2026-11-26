@@ -175,7 +175,6 @@ export function buildStandups({ clock, pick, workspaceId, user, task }: Ctx) {
     id: uuidv7(),
     workspaceId,
     name: pick(['Дизайн баг', 'Design team']),
-    meetingAt: null,
     facilitatorId: user('anu').id,
     createdBy: user('anu').id,
     createdAt: clock.at({ hoursAgo: 2 }),
@@ -267,6 +266,27 @@ export function buildStandups({ clock, pick, workspaceId, user, task }: Ctx) {
     },
   ];
 
+  // Bat's meeting summary of the previous weekday (today has none yet, as in Standup.dc.html).
+  let summaryDate = addDays(clock.today, -1);
+  while ([0, 6].includes(new Date(`${summaryDate}T00:00:00Z`).getUTCDay())) {
+    summaryDate = addDays(summaryDate, -1);
+  }
+  const summaryAt = new Date(`${summaryDate}T02:40:00Z`);
+  const summaries: Row<typeof schema.standupMeetings>[] = [
+    {
+      id: uuidv7(),
+      groupId: mobile.id,
+      date: summaryDate,
+      facilitatorId: user('bat').id,
+      notes: pick([
+        'Төлбөрийн sandbox түлхүүрийг Дорж санхүүтэй ярина.\nOnboarding-ийн шинэ урсгалыг Баасан гаригт тоглуулж үзнэ.',
+        'Dorj to sort out the payment sandbox keys with finance.\nWe demo the new onboarding flow on Friday.',
+      ]),
+      createdAt: summaryAt,
+      updatedAt: summaryAt,
+    },
+  ];
+
   return {
     standupGroups: [mobile, design],
     standupGroupMembers: [
@@ -277,6 +297,7 @@ export function buildStandups({ clock, pick, workspaceId, user, task }: Ctx) {
     standupBlockers: blockers,
     standupReactions: reactions,
     standupReplies: replies,
+    standupMeetings: summaries,
     absences,
   };
 }

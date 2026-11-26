@@ -359,9 +359,7 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       'PUT /standup-groups/{groupId}/days/{date}/entry': { status: 'draft' },
       'POST /standup-entries/{entryId}/replies': { body: 'Hi' },
       'PATCH /standup-replies/{replyId}': { body: 'Edited' },
-      'POST /standup-groups/{groupId}/days/{date}/meeting/advance': { toUserId: w.owner.id },
-      'PATCH /standup-groups/{groupId}/days/{date}/meeting': { notes: 'Notes' },
-      'POST /standup-groups/{groupId}/days/{date}/meeting/save-notes': {},
+      'PUT /standup-groups/{groupId}/days/{date}/summary': { notes: 'Notes' },
       'POST /public/feedback/{slug}/uploads': png(),
       'POST /public/feedback/{slug}': fbBody,
       'PATCH /feedback/{feedbackId}': { status: 'review' },
@@ -381,7 +379,7 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       'POST /me/personal/items': { title: 'Sweep note' },
       'PATCH /me/personal/items/{itemId}': { title: 'Edited' },
       'POST /me/personal/items/{itemId}/move': {},
-      'POST /standup-groups/{groupId}/days/{date}/meeting/tasks': {
+      'POST /standup-groups/{groupId}/days/{date}/summary/tasks': {
         taskId: task.id,
         sourceKind: 'today',
         sourceEntryId: task.id,

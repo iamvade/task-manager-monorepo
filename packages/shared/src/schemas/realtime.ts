@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { activityTypeSchema, notificationTypeSchema, sizeSchema } from '../enums.js';
-import { standupMeetingSchema } from './standup.js';
 
 /**
  * Realtime protocol of `GET /api/v1/ws`. The server pushes small typed messages after every
@@ -141,17 +140,16 @@ export const realtimeServerMessageSchema = z.discriminatedUnion('type', [
     at: z.iso.datetime(),
   }),
   /**
-   * A standup meeting started, moved to another person, ended, or its notes or created tasks
-   * changed: the whole meeting, so followers update without a refetch. Group members only.
+   * A standup day's meeting summary changed (notes, or a task created from an item): refetch the
+   * day. Group members only, never the tab that wrote it (its editor holds the newer text).
    */
   z.object({
-    type: z.literal('standup.meeting_changed'),
+    type: z.literal('standup.summary_changed'),
     workspaceId: z.uuid(),
     groupId: z.uuid(),
     date: z.iso.date(),
     actorId: z.uuid(),
     at: z.iso.datetime(),
-    meeting: standupMeetingSchema,
   }),
   /** Standup blockers on these tasks opened or closed: refetch their `blocked` marker. */
   z.object({

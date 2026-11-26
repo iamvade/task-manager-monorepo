@@ -822,3 +822,19 @@ Personal space (notes, to-dos, `[[links]]`, graph). No design exists, so both la
 | `shell.personal` | Personal | Хувийн |
 | `palette.actions.goPersonal` | Go to Personal | Хувийн хэсэг рүү очих |
 | `palette.groups.personal` | Personal | Хувийн |
+
+## Standup meeting summary (derived, 2026-11-26)
+
+Live mode was removed (its `standup.live.*` keys with it); the facilitator writes the meeting summary on the group page. Not designed: "Create task" / "Created" / "From …'s blocker/plan" / "Tasks created" keep the live screen's wording from `StandupLive.dc.html` `STR.mn`, the rest is drafted.
+
+| key | en | mn (draft) |
+| --- | --- | --- |
+| `standup.summary.title` | Meeting summary | Уулзалтын тэмдэглэл |
+| `standup.summary.placeholder` | Decisions, follow-ups, who does what… | Шийдвэр, дараагийн алхам, хэн юу хийх… |
+| `standup.summary.hint` | Everyone in the group sees it as you type. Use “Create task” on a Today item or blocker to add follow-ups. | Бичих зуур бүлгийн бүх гишүүн харна. Өнөөдрийн ажил эсвэл саад дээрх “Ажил үүсгэх”-ээр дараагийн алхам нэмнэ. |
+| `standup.summary.by` | By {{name}} | {{name}} бичсэн |
+| `standup.summary.saved` | Saved | Хадгалсан |
+| `standup.summary.noTasks` | Use “Create task” on a Today item or blocker to add it here. | Өнөөдрийн ажил эсвэл саад дээрх “Ажил үүсгэх”-ийг дарж энд нэмнэ. |
+| `standup.settings.updates` | Updates | Шинэчлэлүүд |
+| `standup.settings.updatesSub` | How updates show on the group page. | Бүлгийн хуудсанд шинэчлэлүүд хэрхэн харагдах. |
+| `standup.settings.timeOrder` | The reminder must be before “Post by”. | Сануулга бичих хугацаанаас өмнө байх ёстой. |

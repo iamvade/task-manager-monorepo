@@ -28,11 +28,7 @@ const group = (over: Record<string, unknown> = {}) => ({
   days: [0, 1, 2, 3, 4],
   postBy: '10:00',
   reminderAt: '09:30',
-  meetingAt: '10:15',
   facilitatorId: bat.id,
-  speakingOrder: 'posting_order',
-  secondsPerPerson: 120,
-  totalMeetingMinutes: 15,
   showBlockersFirst: true,
   markLinkedTasksBlocked: true,
   createdAt: AT,
@@ -91,7 +87,6 @@ const day = (over: Record<string, unknown> = {}) => ({
   upcomingDate: DATE,
   editable: true,
   postByAt: '2026-11-11T02:00:00.000Z',
-  meetingAt: null,
   members: [
     { user: me, title: null, state: 'not_yet', postedAt: null, isLate: false, backOn: null },
     { user: bat, title: null, state: 'posted', postedAt: AT, isLate: false, backOn: null },
@@ -101,7 +96,8 @@ const day = (over: Record<string, unknown> = {}) => ({
   entries: [],
   blockers: [],
   myEntry: null,
-  meeting: null,
+  summary: null,
+  canSummarize: false,
   ...over,
 });
 

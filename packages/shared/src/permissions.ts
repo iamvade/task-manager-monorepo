@@ -57,8 +57,9 @@ export function canManageStandupGroup(
 }
 
 /**
- * Starting and driving a standup meeting (caller is in the group): the facilitator; when the
- * group has none or they're out of office that day, admins and owners in the group.
+ * Writing a standup day's meeting summary and creating tasks from its items (caller is in the
+ * group): the facilitator; when the group has none or they were out of office that day, admins
+ * and owners in the group.
  */
 export function canDriveMeeting(
   role: WorkspaceRole,

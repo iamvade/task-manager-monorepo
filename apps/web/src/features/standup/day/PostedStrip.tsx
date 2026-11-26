@@ -11,14 +11,13 @@ import { writeHref } from './links';
 import { useWsPath } from '../../../api/workspaces';
 
 /**
- * "Who has posted" (Standup.dc.html): the count (out of office left out), the due / meeting
- * times in my zone, one 64px column per member, and "Your turn" while I can still post.
+ * "Who has posted" (Standup.dc.html): the count (out of office left out), the due time in
+ * my zone, one 64px column per member, and "Your turn" while I can still post.
  */
 export function PostedStrip({ yourTurn }: { yourTurn: boolean }) {
   const ws = useWsPath();
   const { t, i18n } = useTranslation();
-  const { day, clock, postBy } = useDayView();
-  const meeting = day.meetingAt ? clock(day.meetingAt) : null;
+  const { day, postBy } = useDayView();
   const count = t('standup.day.postedCount', {
     count: day.postedCount,
     // "5-аас 4 нь бичсэн": the Mongolian total carries its "from" suffix.
@@ -33,11 +32,7 @@ export function PostedStrip({ yourTurn }: { yourTurn: boolean }) {
         <span className="text-[14px] font-semibold">
           {day.expectedCount === 0 && day.members.length > 0 ? t('standup.day.everyoneOut') : count}
         </span>
-        <span className="text-[12px] text-muted">
-          {meeting
-            ? t('standup.day.dueByMeeting', { time: postBy, meeting })
-            : t('standup.day.dueBy', { time: postBy })}
-        </span>
+        <span className="text-[12px] text-muted">{t('standup.day.dueBy', { time: postBy })}</span>
       </div>
       <ul className="m-0 flex list-none flex-wrap gap-4 p-0 max-sm:gap-x-2 max-sm:gap-y-3">
         {day.members.map((m) => (

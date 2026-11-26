@@ -45,11 +45,7 @@ describe('standup groups', () => {
       days: [0, 1, 2, 3, 4],
       postBy: '10:00',
       reminderAt: '09:30',
-      meetingAt: '10:15',
       facilitatorId: w.owner.id,
-      speakingOrder: 'posting_order',
-      secondsPerPerson: 120,
-      totalMeetingMinutes: 15,
       showBlockersFirst: true,
       markLinkedTasksBlocked: true,
       isMember: true,
@@ -118,11 +114,7 @@ describe('standup groups', () => {
       days: [4, 0, 2, 2],
       postBy: '10:30',
       reminderAt: null,
-      meetingAt: null,
       timezone: 'Asia/Seoul',
-      secondsPerPerson: 180,
-      speakingOrder: 'alphabetical',
-      totalMeetingMinutes: 20,
       showBlockersFirst: false,
       markLinkedTasksBlocked: false,
     });
@@ -132,11 +124,7 @@ describe('standup groups', () => {
       days: [0, 2, 4],
       postBy: '10:30',
       reminderAt: null,
-      meetingAt: null,
       timezone: 'Asia/Seoul',
-      secondsPerPerson: 180,
-      speakingOrder: 'alphabetical',
-      totalMeetingMinutes: 20,
       showBlockersFirst: false,
       markLinkedTasksBlocked: false,
       canEdit: true,
@@ -155,16 +143,13 @@ describe('standup groups', () => {
       { postBy: '10:10' },
       { postBy: '25:00' },
       { timezone: 'Mars/Olympus' },
-      { secondsPerPerson: 90 },
       { reminderAt: '10:00', postBy: '10:00' },
-      { meetingAt: '09:45', postBy: '10:00' },
       {},
     ]) {
       expect((await w.api('PATCH', url, body)).statusCode, JSON.stringify(body)).toBe(400);
     }
     // Checked against the stored values too.
     expect(errorCode(await w.api('PATCH', url, { reminderAt: '10:30' }))).toBe('INVALID_SCHEDULE');
-    expect(errorCode(await w.api('PATCH', url, { meetingAt: '09:00' }))).toBe('INVALID_SCHEDULE');
     expect(errorCode(await w.api('PATCH', url, { facilitatorId: w.sara.user.id }))).toBe(
       'INVALID_FACILITATOR',
     );

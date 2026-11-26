@@ -6,6 +6,7 @@ import { BanIcon, ChevronDownIcon } from '../../../components/icons';
 import { Avatar } from '../../../components/ui/Avatar';
 import { cn } from '../../../lib/cn';
 import { useDates } from '../../../lib/useDates';
+import { CreateTaskButton } from './CreateTaskButton';
 import { useDayView } from './DayContext';
 import { ReplyField, ReplyThread } from './Replies';
 import { TaskChip } from './TaskChip';
@@ -104,6 +105,12 @@ function BlockerRow({ blocker: b }: { blocker: StandupBlocker }) {
             {b.date < day.date && ` · ${t('standup.day.since', { date: formatDate(b.date) })}`}
           </span>
           {b.task && <TaskChip task={b.task} size="lg" />}
+          <CreateTaskButton
+            source={{ kind: 'blocker', entryId: b.entryId, blockerId: b.id }}
+            text={b.text}
+            author={b.author}
+            task={b.task}
+          />
           {b.helpers.length > 0 && (
             <span className="flex flex-wrap items-center gap-1.5">
               {t('standup.day.canHelp')}

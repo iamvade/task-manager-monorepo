@@ -218,6 +218,20 @@
       "when": 1795683254817,
       "tag": "0030_feedback_topics",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1795685622907,
+      "tag": "0031_standup_summary_created_at",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1795685628920,
+      "tag": "0032_standup_remove_live_meetings",
+      "breakpoints": true
     }
   ]
 }

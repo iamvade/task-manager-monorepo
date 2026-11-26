@@ -178,13 +178,9 @@ export const routes: RouteObject[] = [
                         lazy: page(standupPages, (m) => m.StandupGroupPage),
                       },
                       {
-                        // Full screen: the shell drops its sidebar (`chrome: 'none'`).
+                        // Live mode was removed: old links open the day page.
                         path: ':groupId/:date/live',
-                        handle: { chrome: 'none' },
-                        lazy: page(
-                          () => import('./features/standup/live/StandupLivePage'),
-                          (m) => m.StandupLivePage,
-                        ),
+                        element: <Navigate to=".." relative="path" replace />,
                       },
                       {
                         path: ':groupId/settings',

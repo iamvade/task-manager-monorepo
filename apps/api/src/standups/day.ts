@@ -2,10 +2,10 @@ import {
   awayUntil,
   groupToday,
   isAway,
+  canDriveMeeting,
   isStandupDay,
   nextStandupDay,
   previousStandupDay,
-  zonedInstant,
   type StandupDay,
   type StandupDayMember,
 } from '@kite/shared';
@@ -16,8 +16,8 @@ import type { standupGroups } from '../db/schema/index.js';
 import { standupBlockers, standupEntries, standupGroupMembers } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
 import { groupDtos } from './groups.js';
-import { dayMeetingView } from './meeting.js';
-import { dayEnd, hhmm, holidaySet, postByInstant } from './schedule.js';
+import { daySummaryView } from './summary.js';
+import { dayEnd, holidaySet, postByInstant } from './schedule.js';
 import { blockerViews, entryViews, type StandupViewer } from './views.js';
 
 type GroupRow = typeof standupGroups.$inferSelect;
@@ -125,6 +125,15 @@ export async function buildStandupDay(
       null)
     : null;
   const next = nextStandupDay(group, date, holidays);
+  // Same rule as the summary routes (`mayDrive`, `assertSummaryDay`), from what's loaded here.
+  const canSummarize = () => {
+    if (!dto.isMember || group.archivedAt !== null || date > today) return false;
+    if (!meets && posted.length === 0) return false;
+    const facilitatorId = group.facilitatorId;
+    const facilitatorOut =
+      facilitatorId !== null && isAway({ absences: absences.get(facilitatorId) ?? [] }, date);
+    return canDriveMeeting(viewer.role, facilitatorId, facilitatorOut, viewer.userId);
+  };
 
   return {
     group: dto,
@@ -138,15 +147,13 @@ export async function buildStandupDay(
       : nextStandupDay(group, today, holidays),
     editable: date === today && meets && group.archivedAt === null && dto.isMember,
     postByAt: postByInstant(group, date).toISOString(),
-    meetingAt: group.meetingAt
-      ? zonedInstant(date, hhmm(group.meetingAt), group.timezone).toISOString()
-      : null,
     members,
     postedCount: members.filter((m) => m.state === 'posted').length,
     expectedCount: members.filter((m) => m.state !== 'out').length,
     entries: ordered,
     blockers: [...blockers.filter((b) => !b.resolvedAt), ...blockers.filter((b) => b.resolvedAt)],
     myEntry,
-    meeting: await dayMeetingView(db, group, date),
+    summary: await daySummaryView(db, group, date),
+    canSummarize: canSummarize(),
   };
 }
