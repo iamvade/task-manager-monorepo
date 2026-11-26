@@ -296,7 +296,6 @@
   },
   "table": {
     "label": "{{project}} төслийн ажлууд",
-    "complete": "Дууссан",
     "colName": "Ажлын нэр",
     "colAssignee": "Хариуцагч",
     "colDue": "Дуусах огноо",
@@ -313,7 +312,6 @@
     "newTaskTitle": "Шинэ ажлын нэр",
     "noAssignee": "Хариуцагчгүй",
     "noMatches": "Шүүлтүүрт тохирох ажил алга",
-    "assigneeMore": "{{name}} +{{count}}",
     "subtasks": "{{total}} дэд ажлаас {{done}} дууссан",
     "comments_one": "{{count}} сэтгэгдэл",
     "comments_other": "{{count}} сэтгэгдэл",

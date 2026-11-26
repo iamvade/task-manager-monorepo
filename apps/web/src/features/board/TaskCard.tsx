@@ -92,12 +92,12 @@ export const TaskCard = forwardRef<HTMLElement, TaskCardProps>(function TaskCard
       </span>
       {blocked && <BlockedRow blocked={blocked} />}
       {task.tags.length > 0 && (
-        <span className="flex flex-wrap gap-1">
+        <span className="flex flex-wrap gap-x-3 gap-y-1">
           {shownTags.map((tag) => (
             <TagChip key={tag.id} name={tag.name} color={tag.color} />
           ))}
           {moreTags > 0 && (
-            <span className="flex h-[22px] items-center rounded-[6px] bg-chip px-1.5 text-[12px] font-medium text-chip">
+            <span className="flex h-[22px] items-center text-[12px] font-medium text-muted">
               {t('board.moreTags', { count: moreTags })}
             </span>
           )}

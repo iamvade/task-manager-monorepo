@@ -105,9 +105,15 @@ describe('project list', () => {
     expect(toggleOf('Хийх')).toHaveAttribute('aria-expanded', 'true');
     expect(within(todo).getByText('Audit current navigation patterns')).toBeInTheDocument();
     expect(within(todo).getByText('0/4')).toBeInTheDocument();
-    expect(within(todo).getByText('Temuulen G.')).toBeInTheDocument();
-    // Two assignees: first short name + "+1".
-    expect(within(group('Хийгдэж буй')).getByText('Dorj E. +1')).toBeInTheDocument();
+    // Assignee names only show as a tooltip on the avatars.
+    expect(within(todo).queryByText('Temuulen G.')).not.toBeInTheDocument();
+    const cell = within(todo).getByRole('button', {
+      name: '«Audit current navigation patterns» — хариуцагч',
+    });
+    const avatars = cell.children.item(0) ?? cell;
+    fireEvent.mouseEnter(avatars);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(/^Temuulen/);
+    fireEvent.mouseLeave(avatars);
     expect(screen.getByText('7 ажил · 1 дууссан')).toBeInTheDocument();
 
     const done = toggleOf('Дууссан');

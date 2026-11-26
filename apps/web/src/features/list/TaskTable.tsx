@@ -45,7 +45,6 @@ import {
 import { useAuth } from '../../auth/useAuth';
 import { isEditableTarget } from '../../lib/keyboard';
 import { useCopyLink } from '../../lib/useCopyLink';
-import { useShortNames } from '../../lib/useShortNames';
 import { useDeleteWithUndo } from '../task/useDeleteWithUndo';
 import { useMoveUndoToast } from './useMoveUndoToast';
 import { useUiStore, type CreateDefaults } from '../../stores/ui';
@@ -130,8 +129,6 @@ export function TaskTable({
   const remove = useDeleteWithUndo();
   const createInStatus = useCreateInStatus(project, tasks, members);
   const { copied, copy } = useCopyLink();
-  const memberUsers = useMemo(() => members.map((m) => m.user), [members]);
-  const shortNameOf = useShortNames(memberUsers);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   // Multi-select (project list): ids checked for the bulk bar, and the last toggled row.
@@ -242,7 +239,6 @@ export function TaskTable({
   const visibleIds = groups.flatMap((g) => (isOpen(g) ? g.tasks.map((x) => x.id) : []));
   const actions: ListActions = {
     members,
-    shortNameOf,
     teamIds: new Set(project?.members.map((m) => m.user.id) ?? []),
     tags,
     statuses,
@@ -508,14 +504,11 @@ export function TaskTable({
                   />
                 </span>
               )}
-              <span role="columnheader">
-                <span className="sr-only">{t('table.complete')}</span>
-              </span>
               <span role="columnheader">{t('table.colName')}</span>
               <span role="columnheader">{t('table.colAssignee')}</span>
-              <span role="columnheader">{t('table.colDue')}</span>
-              {showSize && <span role="columnheader">{t('table.colSize')}</span>}
               <span role="columnheader">{t('table.colTags')}</span>
+              {showSize && <span role="columnheader">{t('table.colSize')}</span>}
+              <span role="columnheader">{t('table.colDue')}</span>
               <span role="columnheader">
                 <span className="sr-only">{t('table.actions')}</span>
               </span>

@@ -13,6 +13,7 @@ import {
   UserPlusIcon,
 } from '../../components/icons';
 import { Avatar } from '../../components/ui/Avatar';
+import { Tooltip } from '../../components/ui/Tooltip';
 import { Checkbox } from '../../components/ui/Checkbox';
 import { DueDate } from '../../components/ui/DueDate';
 import { IconButton } from '../../components/ui/IconButton';
@@ -199,10 +200,6 @@ export function TaskRow({
           )}
         </div>
       )}
-      <div role="cell" className="flex items-center justify-center">
-        <StatusCell task={task} inert={inert} />
-      </div>
-
       <div role="cell" className="flex min-w-0 items-center gap-2 pr-4">
         {inert ? (
           <span className="flex size-6 flex-none items-center justify-center">
@@ -237,6 +234,9 @@ export function TaskRow({
             {task.key}
           </span>
         )}
+        <span className="flex flex-none items-center">
+          <StatusCell task={task} inert={inert} />
+        </span>
         <Link
           to={actions.taskHref(task)}
           tabIndex={inert ? -1 : undefined}
@@ -299,22 +299,25 @@ export function TaskRow({
                 open={open}
               >
                 {first ? (
-                  <>
-                    <span className="flex flex-none items-center">
-                      <Avatar user={first} size={24} title={null} ring={others.length > 0} />
-                      {others[0] && (
-                        <Avatar user={others[0]} size={24} title={null} ring className="-ml-1.5" />
-                      )}
-                    </span>
-                    <span className="truncate text-[13px] text-2">
-                      {others.length
-                        ? t('table.assigneeMore', {
-                            name: actions.shortNameOf(first),
-                            count: others.length,
-                          })
-                        : actions.shortNameOf(first)}
-                    </span>
-                  </>
+                  <Tooltip content={task.assignees.map((user) => user.name).join(', ')}>
+                    {(tipProps) => (
+                      <span {...tipProps} className="flex flex-none items-center">
+                        <Avatar user={first} size={24} title={null} ring={others.length > 0} />
+                        {others[0] && (
+                          <Avatar
+                            user={others[0]}
+                            size={24}
+                            title={null}
+                            ring
+                            className="-ml-1.5"
+                          />
+                        )}
+                        {others.length > 1 && (
+                          <span className="ml-1 text-[12px] text-muted">+{others.length - 1}</span>
+                        )}
+                      </span>
+                    )}
+                  </Tooltip>
                 ) : (
                   <EmptyHint icon={<UserPlusIcon size={14} />} />
                 )}
@@ -324,22 +327,36 @@ export function TaskRow({
         )}
       </div>
 
-      <div role="cell" className="flex min-w-0 items-center pr-2">
+      <div role="cell" className="flex min-w-0 items-center overflow-hidden pr-2">
         {inert ? (
-          task.dueDate && <DueDate date={task.dueDate} done={closed} />
+          <span className="flex gap-3 overflow-hidden">
+            {task.tags.map((tag) => (
+              <TagChip key={tag.id} name={tag.name} color={tag.color} />
+            ))}
+          </span>
         ) : (
-          <DuePicker
-            value={task.dueDate}
-            label={t('table.setDue', { name: task.title })}
-            onChange={(date) => {
-              actions.setDue(task, date);
+          <TagPicker
+            value={task.tags}
+            tags={actions.tags}
+            label={t('table.setTags', { name: task.title })}
+            onChange={(tags) => {
+              actions.setTags(task, tags);
             }}
             trigger={(props, open) => (
-              <CellButton label={t('table.setDue', { name: task.title })} props={props} open={open}>
-                {task.dueDate ? (
-                  <DueDate date={task.dueDate} done={closed} />
+              <CellButton
+                label={t('table.setTags', { name: task.title })}
+                props={props}
+                open={open}
+              >
+                {task.tags.length ? (
+                  // All chips; the cell clips the overflow ("+N" is Board-only).
+                  <span className="flex gap-3 overflow-hidden">
+                    {task.tags.map((tag) => (
+                      <TagChip key={tag.id} name={tag.name} color={tag.color} />
+                    ))}
+                  </span>
                 ) : (
-                  <EmptyHint icon={<CalendarIcon size={14} />} />
+                  <EmptyHint icon={<PlusIcon size={14} />} />
                 )}
               </CellButton>
             )}
@@ -376,36 +393,22 @@ export function TaskRow({
         </div>
       )}
 
-      <div role="cell" className="flex min-w-0 items-center overflow-hidden">
+      <div role="cell" className="flex min-w-0 items-center pr-2">
         {inert ? (
-          <span className="flex gap-1 overflow-hidden">
-            {task.tags.map((tag) => (
-              <TagChip key={tag.id} name={tag.name} color={tag.color} />
-            ))}
-          </span>
+          task.dueDate && <DueDate date={task.dueDate} done={closed} />
         ) : (
-          <TagPicker
-            value={task.tags}
-            tags={actions.tags}
-            label={t('table.setTags', { name: task.title })}
-            onChange={(tags) => {
-              actions.setTags(task, tags);
+          <DuePicker
+            value={task.dueDate}
+            label={t('table.setDue', { name: task.title })}
+            onChange={(date) => {
+              actions.setDue(task, date);
             }}
             trigger={(props, open) => (
-              <CellButton
-                label={t('table.setTags', { name: task.title })}
-                props={props}
-                open={open}
-              >
-                {task.tags.length ? (
-                  // All chips; the cell clips the overflow ("+N" is Board-only).
-                  <span className="flex gap-1 overflow-hidden">
-                    {task.tags.map((tag) => (
-                      <TagChip key={tag.id} name={tag.name} color={tag.color} />
-                    ))}
-                  </span>
+              <CellButton label={t('table.setDue', { name: task.title })} props={props} open={open}>
+                {task.dueDate ? (
+                  <DueDate date={task.dueDate} done={closed} />
                 ) : (
-                  <EmptyHint icon={<PlusIcon size={14} />} />
+                  <EmptyHint icon={<CalendarIcon size={14} />} />
                 )}
               </CellButton>
             )}
