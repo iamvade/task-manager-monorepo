@@ -4,6 +4,7 @@ import { cn } from '../../lib/cn';
 import { StatusDot } from './StatusDot';
 
 const TINT: Record<StatusCategory, string> = {
+  backlog: 'bg-tint-backlog text-tint-backlog',
   todo: 'bg-tint-todo text-tint-todo',
   in_progress: 'bg-tint-progress text-tint-progress',
   review: 'bg-tint-review text-tint-review',

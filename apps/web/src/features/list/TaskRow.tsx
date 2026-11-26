@@ -29,7 +29,7 @@ import { TagPicker } from '../pickers/TagPicker';
 import { SizePicker } from '../pickers/SizePicker';
 import { StatusButton } from '../pickers/StatusButton';
 import { useSizeTitle } from '../task/sizeTitle';
-import { gridColumns, isClosed, isDone, useListActions } from './ListContext';
+import { gridColumns, isClosed, isDone, isUntimed, useListActions } from './ListContext';
 import { BlockedPill } from '../standup/BlockedMarker';
 
 interface TaskRowProps {
@@ -137,6 +137,7 @@ export function TaskRow({
   const actions = useListActions();
   const done = isDone(task);
   const closed = isClosed(task);
+  const untimed = isUntimed(task);
   const temp = isTempTask(task);
   const [first, ...others] = task.assignees;
   const inert = temp || dragState === 'overlay';
@@ -395,7 +396,7 @@ export function TaskRow({
 
       <div role="cell" className="flex min-w-0 items-center pr-2">
         {inert ? (
-          task.dueDate && <DueDate date={task.dueDate} done={closed} />
+          task.dueDate && <DueDate date={task.dueDate} done={untimed} />
         ) : (
           <DuePicker
             value={task.dueDate}
@@ -406,7 +407,7 @@ export function TaskRow({
             trigger={(props, open) => (
               <CellButton label={t('table.setDue', { name: task.title })} props={props} open={open}>
                 {task.dueDate ? (
-                  <DueDate date={task.dueDate} done={closed} />
+                  <DueDate date={task.dueDate} done={untimed} />
                 ) : (
                   <EmptyHint icon={<CalendarIcon size={14} />} />
                 )}

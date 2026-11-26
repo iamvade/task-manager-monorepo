@@ -34,9 +34,13 @@ export function ViewToolbar({ project = null, empty = false }: ViewToolbarProps)
   const showEmptyGroups = useUiStore((s) => s.showEmptyGroups);
   const setShowEmptyGroups = useUiStore((s) => s.setShowEmptyGroups);
   const newTask = () => {
-    // Quick create keeps the filtered sprint while the picked project is in it.
+    // Quick create keeps the filtered sprint while the picked project is in it; from the
+    // Backlog view the new task starts in Backlog.
     const sprint = view.sprintId ? { sprintId: view.sprintId } : {};
-    openCreate(project ? { projectId: project.id, ...sprint } : sprint);
+    const status = view.show === 'backlog' ? { statusCategory: 'backlog' as const } : {};
+    openCreate(
+      project ? { projectId: project.id, ...sprint, ...status } : { ...sprint, ...status },
+    );
   };
   const newTaskButton = (
     <Button

@@ -1,3 +1,4 @@
+import type { StatusCategory } from '@kite/shared';
 import { describe, expect, it } from 'vitest';
 import { at, makeTasks, STATUSES } from '../../test/tasks';
 import { groupTasks, sortTasks } from './grouping';
@@ -33,6 +34,7 @@ describe('groupTasks', () => {
   it('shows every project status, done and cancelled collapsed by default', () => {
     const groups = groupTasks(makeTasks(), 'status', { statuses: STATUSES });
     expect(groups.map((g) => [g.labelKey, g.tasks.length, g.defaultCollapsed])).toEqual([
+      ['status.backlog', 0, false],
       ['status.todo', 2, false],
       ['status.in_progress', 2, false],
       ['status.review', 2, false],
@@ -43,9 +45,21 @@ describe('groupTasks', () => {
     expect(groups[1]?.defaults).toEqual({ statusId: STATUSES[1]?.id });
   });
 
+  it('keeps only the shown categories (Active, Backlog)', () => {
+    const keep = (categories: readonly StatusCategory[]) =>
+      groupTasks(makeTasks(), 'status', { statuses: STATUSES, categories }).map((g) => g.labelKey);
+    expect(keep(['todo', 'in_progress', 'review'])).toEqual([
+      'status.todo',
+      'status.in_progress',
+      'status.review',
+    ]);
+    expect(keep(['backlog'])).toEqual(['status.backlog']);
+  });
+
   it('groups the space list by category without inline add', () => {
     const groups = groupTasks(makeTasks(), 'status', { statuses: null });
     expect(groups.map((g) => g.key)).toEqual([
+      'category:backlog',
       'category:todo',
       'category:in_progress',
       'category:review',

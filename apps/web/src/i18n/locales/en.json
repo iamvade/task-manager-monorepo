@@ -227,6 +227,7 @@
     "cancelledAll": "All cancelled tasks",
     "show": "Show tasks",
     "active": "Active",
+    "backlog": "Backlog",
     "all": "All",
     "views": "Views"
   },
@@ -327,6 +328,7 @@
     "selectAll": "Select all visible tasks"
   },
   "status": {
+    "backlog": "Backlog",
     "todo": "To Do",
     "in_progress": "In Progress",
     "review": "In Review",

@@ -1,6 +1,7 @@
 import {
   isAway,
   isClosedCategory,
+  isParkedCategory,
   shortName,
   type Status,
   type StatusCategory,
@@ -317,7 +318,11 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
               open={open}
               label={t('table.colDue')}
               className={cn(
-                task.dueDate ? DUE_TONE_CLASS[dates.dueTone(task.dueDate, closed)] : 'text-faint',
+                task.dueDate
+                  ? DUE_TONE_CLASS[
+                      dates.dueTone(task.dueDate, closed || isParkedCategory(task.status.category))
+                    ]
+                  : 'text-faint',
               )}
             >
               {task.dueDate ? dueLabel(task.dueDate) : t('picker.noDue')}

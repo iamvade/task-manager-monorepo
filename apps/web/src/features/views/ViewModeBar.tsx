@@ -4,14 +4,13 @@ import { BoardIcon, CalendarIcon, ChevronDownIcon, ListIcon } from '../../compon
 import { Menu } from '../../components/ui/Menu';
 import { SegmentedControl } from '../../components/ui/SegmentedControl';
 import { ToolbarButton } from '../../components/ui/ToolbarButton';
-import { SHOW_ALL, useViewParams } from './useViewParams';
+import type { Show } from './show';
+import { useViewParams } from './useViewParams';
 import { VIEWS, type View } from './views';
 
-type Show = 'active' | 'all';
-
 /**
- * Left side of the view row: Active / All (which tasks every view shows; Active = To Do,
- * In Progress, In Review and is the default) and Views ▾ (List / Board / Calendar). Switching
+ * Left side of the view row: Active / Backlog / All (which tasks every view shows; Active = To
+ * Do, In Progress, In Review and is the default; Backlog = Backlog only; All = every status) and Views ▾ (List / Board / Calendar). Switching
  * view keeps the query string (filters are shared).
  */
 export function ViewModeBar({ basePath, value }: { basePath: string; value: View }) {
@@ -29,13 +28,14 @@ export function ViewModeBar({ basePath, value }: { basePath: string; value: View
       <SegmentedControl<Show>
         label={t('views.show')}
         size="toolbar"
-        value={view.activeOnly ? 'active' : 'all'}
+        value={view.show}
         options={[
           { value: 'active', label: t('views.active') },
+          { value: 'backlog', label: t('views.backlog') },
           { value: 'all', label: t('views.all') },
         ]}
         onChange={(show) => {
-          view.update({ show: show === 'all' ? SHOW_ALL : null });
+          view.update({ show: show === 'active' ? null : show });
         }}
       />
       <Menu

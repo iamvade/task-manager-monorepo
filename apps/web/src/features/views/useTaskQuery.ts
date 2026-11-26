@@ -14,12 +14,12 @@ export const RECENT_DONE_DAYS = 14;
  */
 export function useTaskQuery(scope: ListScope) {
   const { me } = useAuth();
-  const { filters, allDone, activeOnly } = useViewParams();
+  const { filters, allDone, show } = useViewParams();
   const meId = me?.user.id ?? '';
   const today = todayFor(me?.preferences.timezone);
   const doneSince = allDone ? null : addDays(today, -(RECENT_DONE_DAYS - 1));
   return useMemo(
-    () => toTaskQuery(filters, meId, scope, doneSince, activeOnly),
-    [filters, meId, scope, doneSince, activeOnly],
+    () => toTaskQuery(filters, meId, scope, doneSince, show),
+    [filters, meId, scope, doneSince, show],
   );
 }

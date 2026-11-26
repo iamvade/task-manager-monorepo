@@ -59,7 +59,11 @@ function stubLayout() {
     const sections = [...document.querySelectorAll('section[aria-label]')];
     const section = this.closest('section[aria-label]');
     const col = section ? sections.indexOf(section) : -1;
-    if (!section) return rect(0, 0, 0, 0);
+    if (!section) {
+      // The drag overlay sits over the lifted (focused) card, not over the first column.
+      const lifted = document.activeElement?.closest('section [data-task-card]');
+      return lifted && lifted !== this ? lifted.getBoundingClientRect() : rect(0, 0, 0, 0);
+    }
     if (this === section) return rect(col * 300, 0, 264, 900);
     const card = this.closest('[data-task-card]');
     if (card && this === card) {

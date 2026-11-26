@@ -34,15 +34,34 @@ describe('toTaskQuery', () => {
 
   it('keeps active categories under Active unless statuses are filtered', () => {
     const active = ['todo', 'in_progress', 'review'];
-    expect(toTaskQuery(readFilters(new URLSearchParams()), ME_ID, 'project', null, true)).toEqual({
+    expect(
+      toTaskQuery(readFilters(new URLSearchParams()), ME_ID, 'project', null, 'active'),
+    ).toEqual({
       statusCategory: active,
     });
     expect(
-      toTaskQuery(readFilters(new URLSearchParams(`status=${S1}`)), ME_ID, 'project', null, true),
+      toTaskQuery(
+        readFilters(new URLSearchParams(`status=${S1}`)),
+        ME_ID,
+        'project',
+        null,
+        'active',
+      ),
     ).toEqual({ statusId: [S1] });
     expect(
-      toTaskQuery(readFilters(new URLSearchParams('status=done')), ME_ID, 'space', null, true),
+      toTaskQuery(readFilters(new URLSearchParams('status=done')), ME_ID, 'space', null, 'active'),
     ).toEqual({ statusCategory: ['done'] });
+  });
+
+  it('keeps only Backlog under Backlog and every status under All', () => {
+    const none = readFilters(new URLSearchParams());
+    expect(toTaskQuery(none, ME_ID, 'project', null, 'backlog')).toEqual({
+      statusCategory: ['backlog'],
+    });
+    expect(toTaskQuery(none, ME_ID, 'space', null, 'all')).toEqual({});
+    expect(
+      toTaskQuery(readFilters(new URLSearchParams('status=todo')), ME_ID, 'space', null, 'backlog'),
+    ).toEqual({ statusCategory: ['todo'] });
   });
 
   it('treats sprint=none and bad dates as no filter', () => {

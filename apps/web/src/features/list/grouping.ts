@@ -8,7 +8,6 @@ import {
   type TaskListItem,
   type UserRef,
 } from '@kite/shared';
-import { ACTIVE_CATEGORIES } from '../views/taskQuery';
 import type { GroupField, SortField } from '../views/useViewParams';
 
 /** What the group header draws before its label. */
@@ -85,12 +84,12 @@ export function sortTasks(
 interface GroupContext {
   /** Project statuses by position; null for the space list (groups = categories). */
   statuses: readonly Status[] | null;
-  /** Active view without a status filter: only To Do / In Progress / In Review groups. */
-  activeOnly?: boolean;
+  /**
+   * Status groups to keep (Active: To Do / In Progress / In Review; Backlog: Backlog); null or
+   * omitted = every status.
+   */
+  categories?: readonly StatusCategory[] | null;
 }
-
-const isActiveCategory = (category: StatusCategory) =>
-  ACTIVE_CATEGORIES.some((c) => c === category);
 
 /**
  * Splits sorted tasks into List groups. Every status gets a group here; the table hides the
@@ -99,26 +98,25 @@ const isActiveCategory = (category: StatusCategory) =>
 export function groupTasks(
   tasks: readonly TaskListItem[],
   group: GroupField,
-  { statuses, activeOnly = false }: GroupContext,
+  { statuses, categories = null }: GroupContext,
 ): TaskGroup[] {
+  const shown = (category: StatusCategory) => !categories || categories.includes(category);
   const base = { defaultCollapsed: false, status: null, name: null, labelKey: null } as const;
   switch (group) {
     case 'status':
       if (!statuses) {
-        return STATUS_CATEGORIES.filter((c) => !activeOnly || isActiveCategory(c)).map(
-          (category) => ({
-            ...base,
-            key: `category:${category}`,
-            labelKey: `status.${category}`,
-            marker: { kind: 'status', category },
-            tasks: tasks.filter((t) => t.status.category === category),
-            defaultCollapsed: isClosedCategory(category),
-            defaults: null,
-          }),
-        );
+        return STATUS_CATEGORIES.filter(shown).map((category) => ({
+          ...base,
+          key: `category:${category}`,
+          labelKey: `status.${category}`,
+          marker: { kind: 'status', category },
+          tasks: tasks.filter((t) => t.status.category === category),
+          defaultCollapsed: isClosedCategory(category),
+          defaults: null,
+        }));
       }
       return statuses
-        .filter((status) => !activeOnly || isActiveCategory(status.category))
+        .filter((status) => shown(status.category))
         .map((status) => ({
           ...base,
           key: `status:${status.id}`,
