@@ -352,6 +352,20 @@ for (const scheme of ['light', 'dark'] as const) {
         await expect(page.getByRole('dialog')).toBeHidden();
       });
 
+      await test.step('sidebar More and Customize menu', async () => {
+        await page.goto('/w/kite-studio/my-tasks');
+        const nav = page.getByRole('navigation', { name: 'Workspace' });
+        await nav.getByRole('button', { name: /^More/ }).click();
+        await expect(nav.getByRole('link', { name: 'Reports' })).toBeVisible();
+        await nav.getByRole('button', { name: 'Customize menu' }).click();
+        const panel = page.getByRole('dialog', { name: 'Customize menu' });
+        await expect(panel.getByRole('checkbox')).toHaveCount(3);
+        await expectAccessible(page, `Sidebar Customize menu (${scheme})`);
+        await page.keyboard.press('Escape');
+        await expect(panel).toBeHidden();
+        await nav.getByRole('button', { name: 'Less' }).click();
+      });
+
       await test.step('feedback panel, link picker and create task', async () => {
         await page.goto('/w/kite-studio/feedback?item=FB-1042');
         const panel = page.getByRole('dialog', { name: 'Feedback FB-1042' });

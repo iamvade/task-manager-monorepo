@@ -4,41 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { NavLink, useNavigate } from 'react-router';
 import { useCreateStandupGroup, useStandupGroups } from '../../api/standups';
 import { useCurrentWorkspace, useWsPath } from '../../api/workspaces';
-import { PlusIcon, StandupIcon } from '../../components/icons';
+import { PlusIcon } from '../../components/icons';
 import { Button } from '../../components/ui/Button';
 import { IconButton } from '../../components/ui/IconButton';
 import { Popover } from '../../components/ui/Popover';
 import { cn } from '../../lib/cn';
-import { NavItem } from '../shell/NavItem';
-import { useWorkspaceRole, waitingForMe } from './useStandup';
-
-/**
- * "Standup" nav item (Standup.dc.html): chat icon, 8px accent dot while I haven't posted today
- * in a group that meets today.
- */
-export function StandupNavItem() {
-  const ws = useWsPath();
-  const { t } = useTranslation();
-  const workspace = useCurrentWorkspace();
-  const groups = useStandupGroups(workspace?.id);
-  const waiting = waitingForMe(groups.data).length > 0;
-  return (
-    <NavItem
-      to={ws('/standup')}
-      icon={<StandupIcon size={16} />}
-      label={t('shell.standup')}
-      trailing={
-        waiting ? (
-          <span
-            role="img"
-            aria-label={t('shell.notPostedToday')}
-            className="size-2 flex-none rounded-full bg-accent"
-          />
-        ) : null
-      }
-    />
-  );
-}
+import { useWorkspaceRole } from './useStandup';
 
 /**
  * "Standup groups" sidebar section: my groups as 30px rows with a 6px dot (accent when active);

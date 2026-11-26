@@ -4,23 +4,16 @@ import { useCurrentWorkspace, useSidebar, useWsPath } from '../../api/workspaces
 import {
   CloseIcon,
   GlobeIcon,
-  FeedbackIcon,
-  InboxIcon,
-  MyTasksIcon,
   PanelCloseIcon,
-  PersonalIcon,
-  CalendarIcon,
-  ReportsIcon,
   SettingsIcon,
   UserPlusIcon,
 } from '../../components/icons';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
-import { CountBadge } from '../../components/ui/CountBadge';
 import { IconButton } from '../../components/ui/IconButton';
 import { useUiStore } from '../../stores/ui';
-import { StandupGroupsSection, StandupNavItem } from '../standup/StandupNav';
-import { NavItem } from './NavItem';
+import { StandupGroupsSection } from '../standup/StandupNav';
 import { NewSpaceButton } from './NewSpaceButton';
+import { SidebarMenu } from './SidebarMenu';
 import { SidebarSearch } from './SidebarSearch';
 import { SpaceList } from './SpaceList';
 import { SidebarUser } from './UserMenu';
@@ -63,59 +56,7 @@ export function Sidebar({ onClose }: { onClose?: () => void } = {}) {
 
       <SidebarSearch />
 
-      <div className="flex flex-col gap-0.5">
-        <NavItem
-          to={ws('/my-tasks')}
-          icon={<MyTasksIcon size={16} />}
-          label={t('shell.myTasks')}
-          trailing={
-            sidebar.data && (
-              <span
-                aria-label={t('shell.openTasks', { count: sidebar.data.myTasksCount })}
-                className="text-[12px] text-muted [[aria-current=page]_&]:font-medium [[aria-current=page]_&]:text-accent-ink"
-              >
-                {sidebar.data.myTasksCount}
-              </span>
-            )
-          }
-        />
-        <NavItem
-          to={ws('/personal')}
-          icon={<PersonalIcon size={16} />}
-          label={t('shell.personal')}
-        />
-        <NavItem to={ws('/outlook')} icon={<CalendarIcon size={16} />} label={t('shell.outlook')} />
-        <StandupNavItem />
-        <NavItem
-          to={ws('/inbox')}
-          icon={<InboxIcon size={16} />}
-          label={t('shell.inbox')}
-          trailing={
-            sidebar.data && sidebar.data.inboxUnreadCount > 0 ? (
-              <CountBadge
-                tone="accent"
-                value={sidebar.data.inboxUnreadCount}
-                label={t('shell.unread', { count: sidebar.data.inboxUnreadCount })}
-              />
-            ) : null
-          }
-        />
-        <NavItem
-          to={ws('/feedback')}
-          icon={<FeedbackIcon size={16} />}
-          label={t('shell.feedback')}
-          trailing={
-            sidebar.data && sidebar.data.feedbackUnreadCount > 0 ? (
-              <CountBadge
-                tone="accent"
-                value={sidebar.data.feedbackUnreadCount}
-                label={t('shell.feedbackNew', { count: sidebar.data.feedbackUnreadCount })}
-              />
-            ) : null
-          }
-        />
-        <NavItem to={ws('/reports')} icon={<ReportsIcon size={16} />} label={t('shell.reports')} />
-      </div>
+      <SidebarMenu />
 
       <StandupGroupsSection />
 

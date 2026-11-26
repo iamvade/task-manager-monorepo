@@ -1,6 +1,7 @@
 import type { Priority, RichTextNode, StatusCategory, TaskDetail } from '@kite/shared';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { DEFAULT_NAV, normalizeNav, type NavPref } from '../features/shell/navItems';
 
 export type CalendarMode = 'month' | 'week';
 
@@ -69,6 +70,10 @@ interface UiState {
    * permission alone.
    */
   pushOptIn: boolean;
+  /** Sidebar's optional links (Outlook, Feedback, Reports): order and which are in the short list. */
+  navItems: NavPref[];
+  /** Sidebar "More" expanded. */
+  navMoreOpen: boolean;
   toggleSidebar: () => void;
   setSpaceOpen: (spaceId: string, open: boolean) => void;
   setLastWorkspace: (workspaceId: string) => void;
@@ -86,6 +91,9 @@ interface UiState {
   setShortcutsOpen: (open: boolean) => void;
   setRenaming: (id: string | null) => void;
   setPushOptIn: (on: boolean) => void;
+  setNavItems: (items: NavPref[]) => void;
+  setNavMoreOpen: (open: boolean) => void;
+  resetNav: () => void;
 }
 
 type UiData = Omit<
@@ -107,6 +115,9 @@ type UiData = Omit<
   | 'setShortcutsOpen'
   | 'setRenaming'
   | 'setPushOptIn'
+  | 'setNavItems'
+  | 'setNavMoreOpen'
+  | 'resetNav'
 >;
 
 export const initialUiState: UiData = {
@@ -127,6 +138,8 @@ export const initialUiState: UiData = {
   shortcutsOpen: false,
   renamingId: null,
   pushOptIn: false,
+  navItems: DEFAULT_NAV.map((p) => ({ ...p })),
+  navMoreOpen: false,
 };
 
 /** Signed out, or before `/auth/me` answers. Signed in: `kite.ui.<userId>`. */
@@ -213,6 +226,15 @@ export const useUiStore = create<UiState>()(
       setPushOptIn: (on) => {
         set({ pushOptIn: on });
       },
+      setNavItems: (items) => {
+        set({ navItems: normalizeNav(items) });
+      },
+      setNavMoreOpen: (open) => {
+        set({ navMoreOpen: open });
+      },
+      resetNav: () => {
+        set({ navItems: DEFAULT_NAV.map((p) => ({ ...p })) });
+      },
     }),
     {
       name: ANONYMOUS_KEY,
@@ -224,6 +246,7 @@ export const useUiStore = create<UiState>()(
           ...current,
           ...saved,
           listColumns: { ...current.listColumns, ...saved.listColumns },
+          navItems: normalizeNav(saved.navItems),
         };
       },
       partialize: (s) => ({
@@ -239,6 +262,8 @@ export const useUiStore = create<UiState>()(
         listColumns: s.listColumns,
         briefOpen: s.briefOpen,
         pushOptIn: s.pushOptIn,
+        navItems: s.navItems,
+        navMoreOpen: s.navMoreOpen,
       }),
     },
   ),

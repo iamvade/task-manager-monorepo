@@ -838,3 +838,16 @@ Live mode was removed (its `standup.live.*` keys with it); the facilitator write
 | `standup.settings.updates` | Updates | Шинэчлэлүүд |
 | `standup.settings.updatesSub` | How updates show on the group page. | Бүлгийн хуудсанд шинэчлэлүүд хэрхэн харагдах. |
 | `standup.settings.timeOrder` | The reminder must be before “Post by”. | Сануулга бичих хугацаанаас өмнө байх ёстой. |
+
+## `shell` — sidebar menu (not designed, 2026-11-27)
+
+| key | en | mn (draft) | where |
+|---|---|---|---|
+| `menu` | Menu | Цэс | Sidebar — header above the top links |
+| `more` | More | Бусад | Sidebar — row that expands the hidden links; rail ⋯ button |
+| `less` | Less | Хураах | Sidebar — the same row while expanded |
+| `customizeMenu` | Customize menu | Цэс тохируулах | Sidebar — filter button aria-label + popover title |
+| `customizeMenuHint` | Inbox, My Tasks, Personal and Standup are always shown. Pick what else to show. | Мэдэгдэл, Миний ажлууд, Хувийн, Стэндап үргэлж харагдана. Өөр юуг харуулахаа сонгоно уу. | Customize menu — hint |
+| `showInMenu` | Show {{name}} in the menu | Цэсэнд харуулах: {{name}} | Customize menu — checkbox aria-label |
+| `moveUp` / `moveDown` | Move up / Move down | Дээш зөөх / Доош зөөх | Customize menu — reorder buttons (": {name}" appended) |
+| `resetMenu` | Reset to default | Анхны байдалд оруулах | Customize menu — footer |
