@@ -158,6 +158,7 @@ export async function runSeed(db: Db, options: SeedOptions): Promise<void> {
     await tx.insert(schema.standupBlockers).values(rows.standupBlockers);
     await tx.insert(schema.standupReactions).values(rows.standupReactions);
     await tx.insert(schema.standupReplies).values(rows.standupReplies);
+    await tx.insert(schema.feedbackTopics).values(rows.feedbackTopics);
     await tx.insert(schema.feedback).values(rows.feedback);
     await tx.insert(schema.feedbackAttachments).values(rows.feedbackAttachments);
     await tx.insert(schema.feedbackActivity).values(rows.feedbackActivity);

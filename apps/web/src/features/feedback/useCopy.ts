@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { publicFeedbackUrl } from '../../api/feedback';
 import { copyText } from '../../lib/clipboard';
 import { toast } from '../../stores/toast';
 
@@ -29,4 +30,23 @@ export function useCopy() {
     );
   };
   return { copied, copy };
+}
+
+/** Copies the public form's link, with a topic preset when given, and says so in a toast. */
+export function useCopyTopicLink(slug: string) {
+  const { t } = useTranslation();
+  return (topic: { key: string; name: string } | null) => {
+    copyText(publicFeedbackUrl(slug, topic?.key)).then(
+      () => {
+        toast({
+          message: topic
+            ? t('feedback.topics.copied', { name: topic.name })
+            : t('feedback.inbox.copied'),
+        });
+      },
+      () => {
+        toast({ message: t('feedback.inbox.copyFailed'), tone: 'danger' });
+      },
+    );
+  };
 }

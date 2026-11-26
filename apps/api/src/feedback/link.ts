@@ -2,7 +2,7 @@ import { formatTaskKey, type FeedbackActivityData, type FeedbackStatus } from '@
 import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import type { DbOrTx, Tx } from '../db/client.js';
-import { feedback, feedbackActivity, projects, tasks } from '../db/schema/index.js';
+import { feedback, feedbackActivity, feedbackTopics, projects, tasks } from '../db/schema/index.js';
 import { httpError } from '../errors.js';
 
 type FeedbackRow = typeof feedback.$inferSelect;
@@ -82,6 +82,38 @@ export async function setStatus(c: FeedbackChange, row: FeedbackRow, status: Fee
     .set({ status, isRead: true, updatedAt: c.now })
     .where(eq(feedback.id, row.id));
   await logFeedback(c, row.id, 'status_change', { from: row.status, to: status });
+  return true;
+}
+
+/**
+ * Sets a feedback's topic (null = none; logs `topic_change`; no-op when unchanged). The topic must
+ * be one of the workspace's (400 `INVALID_REFERENCE`). Doesn't mark the item read: sorting isn't
+ * reading.
+ */
+export async function setTopic(c: FeedbackChange, row: FeedbackRow, topicId: string | null) {
+  if (row.topicId === topicId) return false;
+  const ids = [row.topicId, topicId].filter((id): id is string => id !== null);
+  const found = await c.tx
+    .select({
+      id: feedbackTopics.id,
+      name: feedbackTopics.name,
+      workspaceId: feedbackTopics.workspaceId,
+    })
+    .from(feedbackTopics)
+    .where(inArray(feedbackTopics.id, ids));
+  const snapshot = (id: string | null) => {
+    const t = id ? found.find((f) => f.id === id) : undefined;
+    return t ? { id: t.id, name: t.name } : null;
+  };
+  const to = topicId ? found.find((f) => f.id === topicId) : null;
+  if (topicId && to?.workspaceId !== row.workspaceId) {
+    throw httpError(400, 'INVALID_REFERENCE', 'Pick a topic of this workspace');
+  }
+  await c.tx.update(feedback).set({ topicId, updatedAt: c.now }).where(eq(feedback.id, row.id));
+  await logFeedback(c, row.id, 'topic_change', {
+    fromTopic: snapshot(row.topicId),
+    toTopic: snapshot(topicId),
+  });
   return true;
 }
 

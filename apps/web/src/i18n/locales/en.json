@@ -2215,8 +2215,12 @@
         "unlinkedDeleted": "unlinked this: {{key}} was deleted",
         "assignee": "set assignee to {{names}} · {{key}} updated",
         "unassigned": "removed the assignee · {{key}} updated",
-        "someone": "Someone"
-      }
+        "someone": "Someone",
+        "topic": "changed the topic from {{from}} to {{to}}",
+        "topicSet": "set the topic to {{to}}",
+        "topicCleared": "removed the topic {{from}}"
+      },
+      "topic": "Topic"
     },
     "duplicates": {
       "banner_one": "{{count}} person reported this. All reports are linked to {{key}}.",
@@ -2279,6 +2283,46 @@
       "open": "Open {{ref}}: {{title}}",
       "linked": "Linked {{ref}}",
       "failed": "Couldn't link it. Please try again."
+    },
+    "topics": {
+      "title": "Topics",
+      "manage": "Manage topics…",
+      "hint": "Group feedback by product area. Share a topic’s link and its reports arrive with that topic already picked; people can still change it on the form.",
+      "adminsOnly": "Only admins and owners can change topics. You can copy each topic’s link.",
+      "new": "New topic",
+      "nameLabel": "Name",
+      "keyLabel": "Link key",
+      "keyHint": "In the link as ?topic={{key}}. Changing it breaks links shared with the old key.",
+      "colorLabel": "Color",
+      "colorOf": "Color of {{name}}",
+      "empty": "No topics yet. Add one to share a link per product area.",
+      "count_one": "{{count}} report",
+      "count_other": "{{count}} reports",
+      "copyLink": "Copy link for {{name}}",
+      "copied": "Link for {{name}} copied",
+      "actions": "Actions for {{name}}",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteTitle": "Delete “{{name}}”?",
+      "deleteBody_one": "{{count}} report will have no topic. Links with ?topic={{key}} will open the form without a topic. This can’t be undone.",
+      "deleteBody_other": "{{count}} reports will have no topic. Links with ?topic={{key}} will open the form without a topic. This can’t be undone.",
+      "deleteBodyUnused": "Links with ?topic={{key}} will open the form without a topic. This can’t be undone.",
+      "deleted": "Topic “{{name}}” deleted",
+      "created": "Topic “{{name}}” added",
+      "saved": "Topic saved",
+      "exists": "A topic named “{{name}}” already exists",
+      "keyExists": "Another topic already uses this key",
+      "keyInvalid": "Use lowercase letters, digits and dashes",
+      "loadError": "Couldn’t load topics.",
+      "failed": "Couldn’t save the topic",
+      "linkMenu": "Copy a link with a topic",
+      "linkNoTopic": "Without a topic",
+      "linkByTopic": "With a topic",
+      "filter": "Topic",
+      "filterAll": "All topics",
+      "none": "No topic",
+      "filterLabel": "Filter by topic",
+      "save": "Save"
     }
   },
   "feedbackPublic": {
@@ -2406,7 +2450,9 @@
     "powered": "{{workspace}} · Powered by Kite",
     "notFoundTitle": "This feedback page doesn’t exist",
     "notFoundBody": "Check the link you were given, or ask the team that shared it for a new one.",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "topicLabel": "Topic",
+    "noTopic": "Not sure / other"
   },
   "oauth": {
     "consent": {

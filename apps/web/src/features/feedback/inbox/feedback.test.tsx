@@ -9,7 +9,16 @@ import { createQueryClient } from '../../../queryClient';
 import { routes } from '../../../router';
 import { useToastStore } from '../../../stores/toast';
 import { useUiStore } from '../../../stores/ui';
-import { FREEZE, LINKED, QPAY, TASK_REF, detailOf, listOf } from '../../../test/feedback';
+import {
+  ACCOUNT,
+  CHECKOUT,
+  FREEZE,
+  LINKED,
+  QPAY,
+  TASK_REF,
+  detailOf,
+  listOf,
+} from '../../../test/feedback';
 import { ME, SIDEBAR, WORKSPACE_ID, mockApi } from '../../../test/fixtures';
 import { HOME, HOME_NOW } from '../../../test/home';
 import { at } from '../../../test/tasks';
@@ -120,6 +129,44 @@ describe('Feedback inbox', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Clear' }));
     await waitFor(() => {
       expect(router.state.location.search).toBe('?q=qpay');
+    });
+  });
+
+  it('filters by topic, shows topic badges and sets an item’s topic in the panel', async () => {
+    const topicsUrl = `/api/v1/workspaces/${WORKSPACE_ID}/feedback-topics`;
+    const freeze = { ...FREEZE, topic: CHECKOUT };
+    const { fetchMock, router } = renderFeedback(
+      {
+        [`GET ${topicsUrl}`]: () =>
+          Response.json([
+            { ...ACCOUNT, feedbackCount: 0 },
+            { ...CHECKOUT, feedbackCount: 1 },
+          ]),
+        [`GET ${LIST}/${FREEZE.ref}`]: () => Response.json(detailOf(freeze)),
+        [`POST /api/v1/feedback/${FREEZE.id}/read`]: () => new Response(null, { status: 204 }),
+        [`PATCH /api/v1/feedback/${FREEZE.id}`]: () =>
+          Response.json(detailOf(freeze, { topic: ACCOUNT })),
+      },
+      () => listOf([freeze, QPAY, LINKED]),
+    );
+    await screen.findByRole('table', { name: 'Feedback' });
+    expect(at(rows(), 0)).toHaveTextContent('Checkout');
+
+    fireEvent.click(await screen.findByRole('button', { name: /Topic:/ }));
+    fireEvent.click(await screen.findByRole('menuitemradio', { name: /Checkout/ }));
+    await waitFor(() => {
+      expect(router.state.location.search).toBe('?topic=checkout');
+    });
+    await waitFor(() => {
+      expect(urls(fetchMock).some((u) => u.includes('topic=checkout'))).toBe(true);
+    });
+
+    fireEvent.click(screen.getByRole('link', { name: FREEZE.title }));
+    const panel = await screen.findByRole('dialog', { name: `Feedback ${FREEZE.ref}` });
+    fireEvent.click(await within(panel).findByRole('button', { name: /Topic/ }));
+    fireEvent.click(await screen.findByRole('option', { name: 'Account' }));
+    await waitFor(() => {
+      expect(bodyOf(fetchMock, `/api/v1/feedback/${FREEZE.id}`)).toEqual({ topicId: ACCOUNT.id });
     });
   });
 

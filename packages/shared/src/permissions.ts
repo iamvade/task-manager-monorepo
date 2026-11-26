@@ -25,6 +25,11 @@ export function canManageTags(role: WorkspaceRole): boolean {
   return role !== 'member';
 }
 
+/** Adding, renaming, recoloring, re-keying and deleting feedback topics: admins and owners. */
+export function canManageFeedbackTopics(role: WorkspaceRole): boolean {
+  return role !== 'member';
+}
+
 /**
  * Editing a sprint (name, dates, projects) and deleting an unused one: admins and owners for every
  * one, a member for the ones they created. Any member creates sprints.

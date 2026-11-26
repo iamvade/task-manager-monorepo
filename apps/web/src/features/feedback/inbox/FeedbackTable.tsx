@@ -25,6 +25,7 @@ import { Checkbox } from '../../../components/ui/Checkbox';
 import { IconButton } from '../../../components/ui/IconButton';
 import { Menu } from '../../../components/ui/Menu';
 import { Tooltip } from '../../../components/ui/Tooltip';
+import { TagChip } from '../../../components/ui/TagChip';
 import { cn } from '../../../lib/cn';
 import { useRelativeTime } from '../../../lib/useRelativeTime';
 import { toast } from '../../../stores/toast';
@@ -224,7 +225,14 @@ function FeedbackRow({
         >
           {item.title}
         </Link>
-        <span className="truncate text-[12px] leading-4 text-muted">{item.preview}</span>
+        <span className="flex min-w-0 items-center gap-1.5">
+          {item.topic && (
+            <span className="flex-none">
+              <TagChip name={item.topic.name} color={item.topic.color} />
+            </span>
+          )}
+          <span className="truncate text-[12px] leading-4 text-muted">{item.preview}</span>
+        </span>
       </span>
       <span role="cell" className="flex justify-center">
         {item.attachmentCount > 0 && (

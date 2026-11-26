@@ -10,7 +10,7 @@ import {
   publicFeedbackUploadSchema,
   validateFeedbackForm,
 } from '@kite/shared';
-import { and, desc, eq, gte, inArray, isNull, ne, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, isNull, ne, sql } from 'drizzle-orm';
 import type { FastifyRequest } from 'fastify';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { randomInt } from 'node:crypto';
@@ -21,7 +21,13 @@ import { quotaFull, storedBytes } from '../attachments/quota.js';
 import { normalizeMime, sanitizeFilename } from '../attachments/validate.js';
 import { hashToken, newToken } from '../auth/tokens.js';
 import { one } from '../db/rows.js';
-import { feedback, feedbackActivity, feedbackAttachments, workspaces } from '../db/schema/index.js';
+import {
+  feedback,
+  feedbackActivity,
+  feedbackAttachments,
+  feedbackTopics,
+  workspaces,
+} from '../db/schema/index.js';
 import { httpError } from '../errors.js';
 import { parseDevice } from '../feedback/device.js';
 import { broadcastFeedbackChanged } from '../feedback/link.js';
@@ -40,7 +46,8 @@ const tooMany = (wait: number) =>
 
 /**
  * The public feedback form (`/feedback/:slug` on the web): no account, so every route is public
- * (`security: []`), limited per IP, and only ever reveals the workspace's name.
+ * (`security: []`), limited per IP, and only ever reveals the workspace's name and its feedback
+ * topics' names and link keys (public by design: the form shows them to anyone with the link).
  */
 export const publicFeedbackRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
   const submits = new IpWindowThrottle({ max: 5, windowMs: WINDOW_MS }, () =>
@@ -88,7 +95,7 @@ export const publicFeedbackRoutes: FastifyPluginCallbackZod = (app, _opts, done)
         tags: ['Feedback'],
         summary: 'Public feedback form',
         description:
-          'What the public form needs: the workspace name and the attachment limits. No sign-in. 404 when no workspace has this slug.',
+          'What the public form needs: the workspace name, its feedback topics (key and name only) and the attachment limits. No sign-in. 404 when no workspace has this slug.',
         security: [],
         params: slugParams,
         response: { 200: publicFeedbackFormSchema, 404: err },
@@ -96,7 +103,17 @@ export const publicFeedbackRoutes: FastifyPluginCallbackZod = (app, _opts, done)
     },
     async (request) => {
       const ws = await workspaceBySlug(request.params.slug);
-      return { workspaceName: ws.name, ...PUBLIC_FEEDBACK_FORM_LIMITS, maxFileBytes: maxBytes };
+      const topics = await app.db
+        .select({ key: feedbackTopics.key, name: feedbackTopics.name })
+        .from(feedbackTopics)
+        .where(eq(feedbackTopics.workspaceId, ws.id))
+        .orderBy(asc(sql`lower(${feedbackTopics.name})`), asc(feedbackTopics.name));
+      return {
+        workspaceName: ws.name,
+        topics,
+        ...PUBLIC_FEEDBACK_FORM_LIMITS,
+        maxFileBytes: maxBytes,
+      };
     },
   );
 
@@ -278,6 +295,21 @@ export const publicFeedbackRoutes: FastifyPluginCallbackZod = (app, _opts, done)
           .orderBy(desc(sql`similarity(${feedback.title}, ${title})`))
           .limit(5);
 
+        // A key the workspace doesn't have (renamed or deleted since the link was shared) is
+        // dropped: the report still arrives, without a topic.
+        const [topic] = body.topic
+          ? await tx
+              .select({ id: feedbackTopics.id })
+              .from(feedbackTopics)
+              .where(
+                and(
+                  eq(feedbackTopics.workspaceId, ws.id),
+                  eq(feedbackTopics.key, body.topic.trim().toLowerCase()),
+                ),
+              )
+              .limit(1)
+          : [];
+
         const userAgent = (request.headers['user-agent'] ?? '').slice(0, 1000);
         const row = one(
           await tx
@@ -286,6 +318,7 @@ export const publicFeedbackRoutes: FastifyPluginCallbackZod = (app, _opts, done)
               workspaceId: ws.id,
               number,
               type,
+              topicId: topic?.id ?? null,
               title,
               body: body.body.trim(),
               submitterName: body.name.trim() || null,
