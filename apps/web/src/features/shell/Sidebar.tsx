@@ -10,6 +10,7 @@ import {
 } from '../../components/icons';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import { IconButton } from '../../components/ui/IconButton';
+import { KiteMark } from '../../components/ui/KiteMark';
 import { useUiStore } from '../../stores/ui';
 import { StandupGroupsSection } from '../standup/StandupNav';
 import { NewSpaceButton } from './NewSpaceButton';
@@ -35,7 +36,11 @@ export function Sidebar({ onClose }: { onClose?: () => void } = {}) {
       aria-label={t('shell.workspace')}
       className="box-border flex h-full w-[248px] min-w-[220px] flex-shrink flex-col gap-4 overflow-y-auto border-r border-default bg-sidebar px-2 py-3"
     >
-      <div className="flex items-center gap-2 px-1">
+      <div className="flex items-center gap-1 px-1">
+        <div className="flex h-9 min-w-0 flex-1 items-center gap-2 px-2">
+          <KiteMark className="size-5 flex-none text-default" />
+          <span className="truncate text-[14px] font-semibold">Kite</span>
+        </div>
         <WorkspaceSwitcher />
         {onClose ? (
           <IconButton
