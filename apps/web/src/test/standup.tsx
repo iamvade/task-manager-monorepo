@@ -57,11 +57,7 @@ export const group = (overrides: Partial<StandupGroup>): StandupGroup => ({
   days: [0, 1, 2, 3, 4],
   postBy: '10:00',
   reminderAt: '09:30',
-  meetingAt: '10:15',
   facilitatorId: SARA.user.id,
-  speakingOrder: 'posting_order',
-  secondsPerPerson: 120,
-  totalMeetingMinutes: 15,
   showBlockersFirst: true,
   markLinkedTasksBlocked: true,
   createdAt: '2026-09-01T02:00:00.000Z',
@@ -217,7 +213,6 @@ export const dayOf = (overrides: Partial<StandupDay> = {}): StandupDay => ({
   upcomingDate: '2026-10-08',
   editable: true,
   postByAt: '2026-10-08T02:00:00.000Z',
-  meetingAt: '2026-10-08T02:15:00.000Z',
   members: [
     {
       user: ME_REF,
@@ -249,7 +244,8 @@ export const dayOf = (overrides: Partial<StandupDay> = {}): StandupDay => ({
   entries: [DORJ_ENTRY, SARA_ENTRY],
   blockers: [BLOCKER],
   myEntry: null,
-  meeting: null,
+  summary: null,
+  canSummarize: false,
   ...overrides,
 });
 

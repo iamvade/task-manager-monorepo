@@ -3,6 +3,7 @@ import {
   type StandupBlocker,
   type StandupEntry,
   type StandupTaskRef,
+  type UserRef,
 } from '@kite/shared';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +14,7 @@ import { Menu, type MenuItem } from '../../../components/ui/Menu';
 import { copyText } from '../../../lib/clipboard';
 import { cn } from '../../../lib/cn';
 import { toast } from '../../../stores/toast';
+import { CreateTaskButton } from './CreateTaskButton';
 import { useDayView } from './DayContext';
 import { dayHref, writeHref } from './links';
 import { ReactionBar } from './ReactionBar';
@@ -117,7 +119,14 @@ export function EntryCard({ entry }: { entry: StandupEntry }) {
         </Section>
         <Section kind="today">
           {entry.today.map((item, i) => (
-            <Item key={String(i)} text={item.text} task={item.task} />
+            <Item key={String(i)} text={item.text} task={item.task}>
+              <CreateTaskButton
+                source={{ kind: 'today', entryId: entry.id, itemIndex: i }}
+                text={item.text}
+                author={entry.user}
+                task={item.task}
+              />
+            </Item>
           ))}
         </Section>
         <Section kind="blockers">
@@ -126,7 +135,7 @@ export function EntryCard({ entry }: { entry: StandupEntry }) {
               {t('standup.day.noBlockers')}
             </div>
           ) : (
-            entry.blockers.map((b) => <BlockerItem key={b.id} blocker={b} />)
+            entry.blockers.map((b) => <BlockerItem key={b.id} blocker={b} author={entry.user} />)
           )}
         </Section>
       </div>
@@ -160,11 +169,14 @@ function Item({
   task,
   muted,
   suffix,
+  children,
 }: {
   text: string;
   task: StandupTaskRef | null;
   muted?: boolean;
   suffix?: string;
+  /** "Create task" for the summary. */
+  children?: ReactNode;
 }) {
   // A suggestion copies the task title into `text`: the chip alone says it then.
   const same = task !== null && text.trim() === task.title.trim();
@@ -178,11 +190,12 @@ function Item({
       {!same && <span className="break-words">{text}</span>}
       {suffix && <span>{suffix}</span>}
       {task && <TaskChip task={task} />}
+      {children}
     </div>
   );
 }
 
-function BlockerItem({ blocker }: { blocker: StandupBlocker }) {
+function BlockerItem({ blocker, author }: { blocker: StandupBlocker; author: UserRef }) {
   const helpers = blocker.helpers.map((h) => `@${shortName(h.name)}`).join(' ');
   return (
     <Item
@@ -190,6 +203,13 @@ function BlockerItem({ blocker }: { blocker: StandupBlocker }) {
       task={blocker.task}
       muted={blocker.resolvedAt !== null}
       suffix={helpers ? `· ${helpers}` : undefined}
-    />
+    >
+      <CreateTaskButton
+        source={{ kind: 'blocker', entryId: blocker.entryId, blockerId: blocker.id }}
+        text={blocker.text}
+        author={author}
+        task={blocker.task}
+      />
+    </Item>
   );
 }

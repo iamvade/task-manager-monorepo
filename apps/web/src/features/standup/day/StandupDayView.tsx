@@ -17,10 +17,10 @@ import { DayHeader } from './DayHeader';
 import { EntryCard } from './EntryCard';
 import { dayHref } from './links';
 import { SplitHint } from '../SplitHint';
-import { MeetingSection } from './MeetingSection';
 import { MyPlaceholderCard, OutCard } from './PersonCards';
 import { loadWriteModal } from '../write/loadWriteModal';
 import { PostedStrip } from './PostedStrip';
+import { SummarySection } from './SummarySection';
 import { useWsPath } from '../../../api/workspaces';
 
 const StandupWriteModal = lazy(() =>
@@ -172,7 +172,7 @@ export function StandupDayView({
           )}
           {data.group.canEdit && isToday && <SplitHint count={data.members.length} />}
           <PostedStrip yourTurn={placeholder} />
-          <MeetingSection />
+          <SummarySection />
           {/* On a phone blockers always come first (one column, they're what needs help). */}
           {(data.group.showBlockersFirst || narrow) && <BlockersSection />}
           <section aria-labelledby="standup-updates" className="flex flex-col gap-3">

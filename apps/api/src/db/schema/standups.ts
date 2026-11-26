@@ -5,7 +5,6 @@ import {
   check,
   date,
   index,
-  integer,
   jsonb,
   pgTable,
   primaryKey,
@@ -16,12 +15,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { createdAt, id, position, timestamptz } from './columns.js';
-import {
-  meetingTaskSourceEnum,
-  speakingOrderEnum,
-  standupEntryStatusEnum,
-  standupReactionEnum,
-} from './enums.js';
+import { meetingTaskSourceEnum, standupEntryStatusEnum, standupReactionEnum } from './enums.js';
 import { tasks } from './tasks.js';
 import { users } from './users.js';
 import { workspaces } from './workspaces.js';
@@ -47,12 +41,7 @@ export const standupGroups = pgTable(
     postBy: time('post_by').notNull().default('10:00'),
     /** Null = no reminder. */
     reminderAt: time('reminder_at').default('09:30'),
-    /** Null = no meeting (async only). */
-    meetingAt: time('meeting_at').default('10:15'),
     facilitatorId: uuid('facilitator_id').references(() => users.id, { onDelete: 'set null' }),
-    speakingOrder: speakingOrderEnum('speaking_order').notNull().default('posting_order'),
-    secondsPerPerson: integer('seconds_per_person').notNull().default(120),
-    totalMeetingMinutes: integer('total_meeting_minutes').notNull().default(15),
     showBlockersFirst: boolean('show_blockers_first').notNull().default(true),
     markLinkedTasksBlocked: boolean('mark_linked_tasks_blocked').notNull().default(true),
     createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
@@ -202,9 +191,8 @@ export const standupNotices = pgTable(
 );
 
 /**
- * A screen-shared meeting for one standup day. Live state is kept here (not on the
- * facilitator's screen), so followers, reloads and other tabs agree: the current speaker,
- * when their current turn started and the seconds everyone spoke so far. Never read by Reports.
+ * One standup day's meeting summary: the facilitator's notes and (in `standup_meeting_tasks`) the
+ * tasks they created from the day's items. Made on the first write. Never read by Reports.
  */
 export const standupMeetings = pgTable(
   'standup_meetings',
@@ -214,33 +202,17 @@ export const standupMeetings = pgTable(
       .notNull()
       .references(() => standupGroups.id, { onDelete: 'cascade' }),
     date: date('date', { mode: 'string' }).notNull(),
-    /** Who started (drives) it. */
+    /** Who last wrote the summary (or added a task). */
     facilitatorId: uuid('facilitator_id').references(() => users.id, { onDelete: 'set null' }),
-    startedAt: timestamptz('started_at'),
-    endedAt: timestamptz('ended_at'),
-    /** Meeting notes (plain text, autosaved). */
+    /** Meeting summary (plain text, autosaved). */
     notes: text('notes'),
-    /** "Save notes to standup": the notes and created tasks show on the day page from then on. */
-    notesSavedAt: timestamptz('notes_saved_at'),
-    /** Every group member in speaking order, fixed at start (out of office last). */
-    speakingOrder: uuid('speaking_order')
-      .array()
-      .notNull()
-      .default(sql`'{}'::uuid[]`),
-    /** The person speaking now (null before start and after the end). */
-    currentUserId: uuid('current_user_id').references(() => users.id, { onDelete: 'set null' }),
-    /** When the current person's running turn started (their time = durations + now − this). */
-    currentStartedAt: timestamptz('current_started_at'),
-    /** Seconds each person spoke in finished turns, by user id. */
-    durations: jsonb('durations').$type<Record<string, number>>().notNull().default({}),
-    /** Wall-clock length, stored at the end. */
-    totalSeconds: integer('total_seconds'),
+    createdAt: createdAt(),
     updatedAt: timestamptz('updated_at').notNull().defaultNow(),
   },
   (t) => [unique('standup_meetings_group_id_date_unique').on(t.groupId, t.date)],
 );
 
-/** Tasks created with "Create task" during a meeting, and the item they came from. */
+/** Tasks the facilitator created with "Create task" from a day's items, and their source. */
 export const standupMeetingTasks = pgTable(
   'standup_meeting_tasks',
   {

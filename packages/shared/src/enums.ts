@@ -205,12 +205,7 @@ export const TEMPLATE_IDS = ['product-launch', 'sprint-planning', 'bug-triage'] 
 export const templateIdSchema = z.enum(TEMPLATE_IDS);
 export type TemplateId = z.infer<typeof templateIdSchema>;
 
-/** Standup group meeting: who speaks first. */
-export const SPEAKING_ORDERS = ['posting_order', 'alphabetical', 'random'] as const;
-export const speakingOrderSchema = z.enum(SPEAKING_ORDERS);
-export type SpeakingOrder = z.infer<typeof speakingOrderSchema>;
-
-/** Where a task made with "Create task" in a standup meeting came from. */
+/** Where a task made with "Create task" from a standup day came from. */
 export const MEETING_TASK_SOURCES = ['today', 'blocker'] as const;
 export const meetingTaskSourceSchema = z.enum(MEETING_TASK_SOURCES);
 export type MeetingTaskSource = z.infer<typeof meetingTaskSourceSchema>;

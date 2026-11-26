@@ -110,7 +110,7 @@ export interface StandupInput {
 
 /**
  * Standup groups with about three weeks of history: posts (items linked to the person's real
- * tasks), blockers (some still open, some with helpers), reactions, replies, past meetings with
+ * tasks), blockers (some still open, some with helpers), reactions, replies, past meeting summaries with
  * saved notes, and today partly posted with reminders for those who haven't. Out-of-office
  * periods come from the `vacation` archetype. Deterministic for a given `now`.
  */
@@ -162,7 +162,6 @@ export function buildStandups(def: ScenarioDef, input: StandupInput) {
     const facilitator = g.facilitator ? byKey.get(g.facilitator) : undefined;
     const postBy = g.postBy ?? '10:00';
     const reminderAt = g.reminderAt === undefined ? '09:30' : g.reminderAt;
-    const meetingAt = g.meetingAt === undefined ? '10:15' : g.meetingAt;
     groups.push({
       id: groupId,
       workspaceId: input.workspaceId,
@@ -171,11 +170,7 @@ export function buildStandups(def: ScenarioDef, input: StandupInput) {
       days: [0, 1, 2, 3, 4],
       postBy,
       reminderAt,
-      meetingAt,
       facilitatorId: facilitator?.id ?? null,
-      speakingOrder: g.speakingOrder ?? 'posting_order',
-      secondsPerPerson: g.secondsPerPerson ?? 120,
-      totalMeetingMinutes: g.totalMeetingMinutes ?? 15,
       createdBy: input.ownerId,
       createdAt: new Date(createdAt),
     });
@@ -305,31 +300,17 @@ export function buildStandups(def: ScenarioDef, input: StandupInput) {
         }
       }
 
-      // Past meetings: the facilitator went through everyone who posted, notes saved.
-      if (meetingAt && !isToday && facilitator && posted.length > 0 && r.chance(0.8)) {
-        const startedAt = start + hm(meetingAt) + r.int(0, 4) * MINUTE;
-        const order = [...posted].sort((a, b) => a.postedAt - b.postedAt).map((e) => e.userId);
-        const durations: Record<string, number> = {};
-        let total = 0;
-        for (const id of order) {
-          const s = r.int(35, (g.secondsPerPerson ?? 120) + 50);
-          durations[id] = s;
-          total += s + r.int(2, 8);
-        }
-        const saved = r.chance(0.7);
+      // Past days: the facilitator wrote a meeting summary after the post-by time.
+      if (!isToday && facilitator && posted.length > 0 && r.chance(0.6)) {
+        const at = new Date(start + hm(postBy) + r.int(15, 40) * MINUTE);
         meetings.push({
           id: uuidv7(),
           groupId,
           date,
           facilitatorId: facilitator.id,
-          startedAt: new Date(startedAt),
-          endedAt: new Date(startedAt + total * 1000),
           notes: r.sample(NOTES, r.int(1, 3)).map(text).join('\n'),
-          notesSavedAt: saved ? new Date(startedAt + total * 1000) : null,
-          speakingOrder: order,
-          durations,
-          totalSeconds: total,
-          updatedAt: new Date(startedAt + total * 1000),
+          createdAt: at,
+          updatedAt: at,
         });
       }
 

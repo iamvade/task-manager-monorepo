@@ -535,7 +535,15 @@ Use this layout under ~640px width.
 - Built (2026-10-16) under 640px, same URL (`?write=1`, also the reminder notification's link). Deviations: inputs are 16px (design 15px) so iOS Safari doesn't zoom on focus; the panel follows `visualViewport`, so the sticky footer sits above the keyboard; the footer line reads "Draft saved 09:41 · Visible to…" once a draft has saved; Link a task / Who can help show the choice ("@Bat O. +1" for several) and are cleared from their pickers ("Remove link" row; untick the person). Today chips keep their tag for screen readers only.
 - Phone shell (not drawn): a 56px bar (menu button + workspace name) replaces the sidebar, which opens as a sheet from the left. The standup group page uses 16px gutters, a wrapping header, no "Start standup", and always shows Blockers first. The rest of the app stays desktop-first.
 
-### 5.5 Live meeting — `StandupLive.dc.html`
+### 5.5 Live meeting — `StandupLive.dc.html` (removed 2026-11-26)
+**Removed:** live mode was unreachable before the meeting started, after it ended, for async groups and on past days, so the user replaced it with a **meeting summary on the group page** (not designed; built from the page's tokens and this file's notes panel and "Create task" buttons):
+- A "Meeting summary" section under "Who has posted". The facilitator (or, when the group has none or they were out that day, admins/owners in the group) gets a 4-row textarea, autosaved 2 s after typing and on blur, with a status line (hint / Saving… / Saved / failure); everyone else in the group reads the text (`pre-wrap`) and "By {name}". Hidden for others while empty.
+- "Tasks created" (count badge, dashed empty hint for the facilitator) lists the tasks as the notes panel's cards ("From Dorj’s blocker · App Redesign", assignee avatar).
+- "Create task" (24px dashed accent button) after each Today item and blocker on the update cards and on each Blockers-section row (carried-over ones too), for the facilitator only; once made, everyone sees "Created ✓ APP-150" (solid, accent-soft) linking to the drawer.
+- Works on the group's today and earlier days (a standup day or a day with posts). The meeting time, time per person and speaking order settings are gone.
+
+The original live-mode notes follow for reference.
+
 - Full screen without the app shell. Page #FAFAFB, base 16/24.
 - **Top bar** (64px, white, bottom border):
   - left (min 240): a 10px #DC2626 dot with a 4px #FDECEC ring ("live"), "Mobile team · Standup" 15/600 and "Friday, Oct 9 · 10:15" 12px muted;
@@ -583,15 +591,15 @@ Use this layout under ~640px width.
      - **Standup days**: seven toggle buttons Mon–Sun (min 48 × 36, radius 8, 13/600; on = accent border + accent-soft + accent; `aria-pressed`; titles carry the full weekday). Default Mon–Fri;
      - three selects (auto-fit min 180): **Post by** (09:30 / **10:00** / 10:30 / 11:00), **Reminder** (**09:30** / 09:00 / No reminder) and **Meeting** (**10:15** / 10:30 / No meeting (async only));
      - **Timezone** (Ulaanbaatar (UTC+8) / Seoul (UTC+9) / UTC) with the hint "Members in other timezones see times in their own local time." In the build: the full zone picker from Settings and 15-minute steps for the times.
-  4. **Meeting mode** ("Settings for the screen-shared meeting."):
-     - **Time per person**: segmented 1 / **2** / 3 min;
-     - **Speaking order**: segmented **Posting order** / Alphabetical / Random;
+  4. **Meeting mode** ("Settings for the screen-shared meeting."; since 2026-11-26 **Updates**, "How updates show on the group page.", with only the two checkboxes: the meeting time, time per person and speaking order went with live mode):
+     - ~~**Time per person**: segmented 1 / **2** / 3 min~~;
+     - ~~**Speaking order**: segmented **Posting order** / Alphabetical / Random~~;
      - checkboxes (18px, accent): **Show blockers first** ("Collects every blocker at the top of the group page.", on) and **Mark linked tasks as “Blocked”** ("Tasks linked to a blocker show a marker in List and Board.", on).
 - Not drawn: creating a group (a "+" next to the sidebar "Standup groups" heading opens a name-only popover like New space), deleting or archiving a group (danger zone at the bottom), and validation (reminder before post by, post by before the meeting, at least one day).
 
 ### 5.8 Data model (built 2026-10-16, phase 1)
 Decided by the user's spec, replacing the earlier proposal (no `standup_days` / `standup_items`): see CLAUDE.md "Data model" for the tables. Notes:
-- Items are jsonb lists on `standup_entries` (`yesterday`: `{kind: completed|review|commented|text, taskId?, text}`, `today`: `{kind: task|text, taskId?, text}`); blockers are rows (`standup_blockers`, several helpers); meetings are `standup_meetings` (+ `standup_meeting_tasks`).
+- Items are jsonb lists on `standup_entries` (`yesterday`: `{kind: completed|review|commented|text, taskId?, text}`, `today`: `{kind: task|text, taskId?, text}`); blockers are rows (`standup_blockers`, several helpers); meetings are `standup_meetings` (+ `standup_meeting_tasks`); since 2026-11-26 a row is only a day's meeting summary.
 - `is_late` is stored (posted after `post_by`) but only ever shown for that day.
 - One facilitator per group (`standup_groups.facilitator_id`).
 - **Out of office** is the new general `user_absences` table (dated periods with a note), replacing `workspace_members.away_until/away_note` (answers Q2).

@@ -39,12 +39,15 @@ interface Ids {
   taskKey: string;
   /** Mobile team (has posts) and Design team (empty state). */
   mobileGroup: string;
-  /** The group's local date (live mode's URL). */
-  mobileToday: string;
+  /** The group's previous standup day (Bat's seeded meeting summary). */
+  mobilePrev: string;
   designGroup: string;
   /** Anu's seeded "Design ideas" note (links, a not-created link, a backlink). */
   personalItem: string;
 }
+
+const mobileId = (groups: { id: string; name: string }[]) =>
+  groups.find((g) => g.name === 'Mobile team')?.id;
 
 async function lookup(page: Page): Promise<Ids> {
   const me = (await (await page.request.get('/api/v1/auth/me')).json()) as {
@@ -70,6 +73,11 @@ async function lookup(page: Page): Promise<Ids> {
     items: { id: string; title: string }[];
   };
   const note = personal.items.find((i) => i.title === 'Design ideas');
+  const mobileDay = mobileId(groups)
+    ? ((await (
+        await page.request.get(`/api/v1/standup-groups/${mobileId(groups)}/days/today`)
+      ).json()) as { prevDate: string | null })
+    : null;
   const mobile = groups.find((g) => g.name === 'Mobile team');
   const design = groups.find((g) => g.name === 'Design team');
   if (!app || !portal || !space || !tasks[0] || !mobile || !design || !note) {
@@ -81,7 +89,7 @@ async function lookup(page: Page): Promise<Ids> {
     emptyProject: portal.id,
     taskKey: tasks[0].key,
     mobileGroup: mobile.id,
-    mobileToday: mobile.today,
+    mobilePrev: mobileDay?.prevDate ?? mobile.today,
     designGroup: design.id,
     personalItem: note.id,
   };
@@ -111,8 +119,8 @@ const pages = (ids: Ids): [string, string][] => [
   ['Standup · group', `/w/kite-studio/standup/${ids.mobileGroup}`],
   ['Standup · empty group', `/w/kite-studio/standup/${ids.designGroup}`],
   ['Standup · settings', `/w/kite-studio/standup/${ids.mobileGroup}/settings`],
-  // Anu follows (Bat facilitates); the running meeting is checked in standup-live.spec.ts.
-  ['Standup · live', `/w/kite-studio/standup/${ids.mobileGroup}/${ids.mobileToday}/live`],
+  // Read-only for Anu (Bat facilitates); the editor is checked in standup-summary.spec.ts.
+  ['Standup · meeting summary', `/w/kite-studio/standup/${ids.mobileGroup}/${ids.mobilePrev}`],
   ['Personal · notes', '/w/kite-studio/personal'],
   ['Personal · note', `/w/kite-studio/personal/i/${ids.personalItem}`],
   ['Personal · to-dos', '/w/kite-studio/personal?view=todos'],

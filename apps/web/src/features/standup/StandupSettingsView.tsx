@@ -1,10 +1,7 @@
 import {
-  SECONDS_PER_PERSON,
-  SPEAKING_ORDERS,
   STANDUP_TIMES,
   standupTimesInOrder,
   zonedTimeToZone,
-  type SpeakingOrder,
   type StandupGroup,
   type UpdateStandupGroup,
   type UserRef,
@@ -30,7 +27,6 @@ import { Avatar } from '../../components/ui/Avatar';
 import { Button } from '../../components/ui/Button';
 import { IconButton } from '../../components/ui/IconButton';
 import { Menu } from '../../components/ui/Menu';
-import { SegmentedControl } from '../../components/ui/SegmentedControl';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { cn } from '../../lib/cn';
 import { DEFAULT_TIMEZONE } from '../../lib/dates';
@@ -45,10 +41,7 @@ interface Draft {
   days: number[];
   postBy: string;
   reminderAt: string | null;
-  meetingAt: string | null;
   timezone: string;
-  secondsPerPerson: number;
-  speakingOrder: SpeakingOrder;
   showBlockersFirst: boolean;
   markLinkedTasksBlocked: boolean;
   members: UserRef[];
@@ -60,10 +53,7 @@ const draftOf = (g: StandupGroup): Draft => ({
   days: [...g.days].sort((a, b) => a - b),
   postBy: g.postBy,
   reminderAt: g.reminderAt,
-  meetingAt: g.meetingAt,
   timezone: g.timezone,
-  secondsPerPerson: g.secondsPerPerson,
-  speakingOrder: g.speakingOrder,
   showBlockersFirst: g.showBlockersFirst,
   markLinkedTasksBlocked: g.markLinkedTasksBlocked,
   members: g.members.map((m) => m.user),
@@ -78,12 +68,7 @@ function patchOf(before: Draft, after: Draft): UpdateStandupGroup {
   if (!same(before.days, after.days)) patch.days = after.days;
   if (after.postBy !== before.postBy) patch.postBy = after.postBy;
   if (after.reminderAt !== before.reminderAt) patch.reminderAt = after.reminderAt;
-  if (after.meetingAt !== before.meetingAt) patch.meetingAt = after.meetingAt;
   if (after.timezone !== before.timezone) patch.timezone = after.timezone;
-  if (after.secondsPerPerson !== before.secondsPerPerson) {
-    patch.secondsPerPerson = after.secondsPerPerson as 60 | 120 | 180;
-  }
-  if (after.speakingOrder !== before.speakingOrder) patch.speakingOrder = after.speakingOrder;
   if (after.showBlockersFirst !== before.showBlockersFirst) {
     patch.showBlockersFirst = after.showBlockersFirst;
   }
@@ -233,7 +218,6 @@ function SettingsForm({
       ? [
           t('standup.settings.yourPostBy', { time: local(draft.postBy) }),
           draft.reminderAt && t('standup.settings.yourReminder', { time: local(draft.reminderAt) }),
-          draft.meetingAt && t('standup.settings.yourMeeting', { time: local(draft.meetingAt) }),
         ]
           .filter(Boolean)
           .join(' · ')
@@ -532,24 +516,6 @@ function SettingsForm({
                   <option value="">{t('standup.settings.noReminder')}</option>
                 </select>
               </div>
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor={`${id}-meet`} className={labelClass}>
-                  {t('standup.settings.meetAt')}
-                </label>
-                <select
-                  id={`${id}-meet`}
-                  value={draft.meetingAt ?? ''}
-                  onChange={(e) => {
-                    set({ meetingAt: e.target.value || null });
-                  }}
-                  className={selectClass}
-                >
-                  {timeOptions(draft.meetingAt).map((time) => (
-                    <option key={time}>{time}</option>
-                  ))}
-                  <option value="">{t('standup.settings.noMeeting')}</option>
-                </select>
-              </div>
             </div>
             {showErrors && errors.times && (
               <span role="alert" className="-mt-2 text-[12px] text-danger">
@@ -583,48 +549,10 @@ function SettingsForm({
           </Section>
 
           <Section
-            id={`${id}-meeting`}
-            title={t('standup.settings.meeting')}
-            description={t('standup.settings.meetingSub')}
+            id={`${id}-updates`}
+            title={t('standup.settings.updates')}
+            description={t('standup.settings.updatesSub')}
           >
-            <div className="flex flex-col gap-2">
-              <span id={`${id}-per`} className={labelClass}>
-                {t('standup.settings.timePer')}
-              </span>
-              <SegmentedControl<string>
-                size="md"
-                labelledBy={`${id}-per`}
-                disabled={readOnly}
-                className="self-start"
-                options={SECONDS_PER_PERSON.map((s) => ({
-                  value: String(s),
-                  label: t('standup.settings.minutes', { count: s / 60 }),
-                }))}
-                value={String(draft.secondsPerPerson)}
-                onChange={(v) => {
-                  set({ secondsPerPerson: Number(v) });
-                }}
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <span id={`${id}-order`} className={labelClass}>
-                {t('standup.settings.order')}
-              </span>
-              <SegmentedControl<SpeakingOrder>
-                size="md"
-                labelledBy={`${id}-order`}
-                disabled={readOnly}
-                className="self-start"
-                options={SPEAKING_ORDERS.map((o) => ({
-                  value: o,
-                  label: t(`standup.settings.orders.${o}`),
-                }))}
-                value={draft.speakingOrder}
-                onChange={(speakingOrder) => {
-                  set({ speakingOrder });
-                }}
-              />
-            </div>
             <CheckRow
               checked={draft.showBlockersFirst}
               onChange={(showBlockersFirst) => {

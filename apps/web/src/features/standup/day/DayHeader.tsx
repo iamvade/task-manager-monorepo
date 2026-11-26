@@ -1,14 +1,9 @@
-import { canDriveMeeting, type StandupDay, type StandupGroup } from '@kite/shared';
+import type { StandupDay, StandupGroup } from '@kite/shared';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router';
-import { useStartMeeting } from '../../../api/standups';
-import { useAuth } from '../../../auth/useAuth';
-import { NextIcon, PenIcon, PlayIcon, PrevIcon, SlidersIcon } from '../../../components/icons';
-import { buttonVariants } from '../../../components/ui/buttonStyles';
+import { Link } from 'react-router';
+import { NextIcon, PenIcon, PrevIcon, SlidersIcon } from '../../../components/icons';
 import { Tooltip } from '../../../components/ui/Tooltip';
-import { cn } from '../../../lib/cn';
-import { useWorkspaceRole } from '../useStandup';
 import { useDates } from '../../../lib/useDates';
 import { GroupSwitcher, StandupHeader } from '../StandupHeader';
 import { dayHref, writeHref } from './links';
@@ -18,7 +13,7 @@ const navButton = 'flex size-8 items-center justify-center rounded-[8px] text-3 
 
 /**
  * Group page header (Standup.dc.html): switcher, ‹ date › with a "Today" pill, then Group
- * settings, Write update (when I can still write today) and Start standup / Join live.
+ * settings and Write update (when I can still write today).
  */
 export function DayHeader({
   group,
@@ -105,7 +100,6 @@ export function DayHeader({
               {posted ? t('standup.day.editUpdate') : t('standup.day.writeUpdate')}
             </Link>
           )}
-          {group.isMember && day && <MeetingButton day={day} />}
         </>
       }
     />
@@ -121,63 +115,6 @@ function DisabledNav({ label, icon }: { label: string; icon: ReactNode }) {
       className="flex size-8 cursor-not-allowed items-center justify-center rounded-[8px] text-3 opacity-40"
     >
       {icon}
-    </button>
-  );
-}
-
-const liveButton =
-  'flex h-9 items-center gap-2 rounded-[8px] px-3.5 text-[13px] font-medium no-underline max-sm:hidden';
-
-/**
- * Live mode (a screen-shared meeting, so not on a phone). The person who drives it (the
- * facilitator, or admins in the group when there is none or they're out) gets Start standup;
- * while it runs, everyone else gets Join live. Nothing for groups without a meeting time, on
- * other days, or once the meeting has ended (its notes show on the page).
- */
-function MeetingButton({ day }: { day: StandupDay }) {
-  const ws = useWsPath();
-  const { t } = useTranslation();
-  const { me } = useAuth();
-  const role = useWorkspaceRole();
-  const navigate = useNavigate();
-  const start = useStartMeeting(day.group.id, day.date);
-  const meeting = day.meeting;
-  const liveHref = ws(`/standup/${day.group.id}/${day.date}/live`);
-  const meets =
-    day.group.meetingAt !== null &&
-    day.date === day.today &&
-    day.isStandupDay &&
-    !day.group.archivedAt;
-  if (!meets || !me || !role) return null;
-  const facilitatorOut = day.members.some(
-    (m) => m.user.id === day.group.facilitatorId && m.state === 'out',
-  );
-  const drives = canDriveMeeting(role, day.group.facilitatorId, facilitatorOut, me.user.id);
-
-  if (meeting?.live) {
-    return (
-      <Link to={liveHref} className={cn(buttonVariants.primary, liveButton)}>
-        <span aria-hidden className="size-2 rounded-full bg-white" />
-        {t('standup.day.joinLive')}
-      </Link>
-    );
-  }
-  if (meeting || !drives) return null;
-  return (
-    <button
-      type="button"
-      disabled={start.isPending}
-      onClick={() => {
-        start.mutate(undefined, {
-          onSuccess: () => {
-            void navigate(liveHref);
-          },
-        });
-      }}
-      className={cn(buttonVariants.primary, liveButton, 'border-0 disabled:opacity-60')}
-    >
-      <PlayIcon size={14} />
-      {t('standup.day.startStandup')}
     </button>
   );
 }

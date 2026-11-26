@@ -38,16 +38,21 @@ function renderDay(entry: string, day: StandupDay, extra: Parameters<typeof rend
 describe('Standup group page', () => {
   beforeEach(async () => {
     localStorage.clear();
-    useUiStore.setState({ lastWorkspaceId: null, lastStandupGroupIds: {} });
+    useUiStore.setState({
+      lastWorkspaceId: null,
+      lastStandupGroupIds: {},
+      createOpen: false,
+      createDefaults: {},
+    });
     useToastStore.setState({ toasts: [] });
     await i18n.changeLanguage('en');
   });
 
-  it('shows who has posted (late marked), the due / meeting line and Your turn', async () => {
+  it('shows who has posted (late marked), the due line and Your turn', async () => {
     renderDay(`/w/kite-studio/standup/${MOBILE_ID}`, dayOf());
     const strip = await screen.findByRole('region', { name: 'Who has posted' });
     expect(within(strip).getByText('2 of 3 have posted')).toBeVisible();
-    expect(within(strip).getByText('Due by 10:00 · meeting at 10:15')).toBeVisible();
+    expect(within(strip).getByText('Due by 10:00')).toBeVisible();
     expect(within(strip).getByLabelText('Sara K. · Posted 09:05')).toBeVisible();
     expect(within(strip).getByLabelText('Dorj E. · Posted 10:08, after 10:00')).toBeVisible();
     expect(within(strip).getByLabelText('You · Not yet')).toBeVisible();
@@ -61,12 +66,118 @@ describe('Standup group page', () => {
       `/w/kite-studio/standup/${MOBILE_ID}/2026-10-07`,
     );
     expect(screen.getByRole('button', { name: 'Next day' })).toBeDisabled();
-    // Sara facilitates and is in today: only she starts the meeting.
-    expect(screen.queryByRole('button', { name: 'Start standup' })).toBeNull();
+    // Sara facilitates: no summary editor or Create task for me, and no summary written yet.
+    expect(screen.queryByRole('region', { name: 'Meeting summary' })).toBeNull();
+    expect(screen.queryByRole('button', { name: /^Create task/ })).toBeNull();
     // My placeholder card with the suggestions hint.
     expect(
       await screen.findByText('Suggestions from your activity yesterday are ready'),
     ).toBeVisible();
+  });
+
+  it('lets the facilitator write the summary (autosaved) and create tasks from items', async () => {
+    const puts: unknown[] = [];
+    const posts: unknown[] = [];
+    const created = {
+      task: {
+        id: '01890000-0000-7000-8000-000000000e01',
+        key: 'APP-150',
+        title: 'Test the refund flow',
+        project: { id: '01890000-0000-7000-8000-000000000e02', name: 'App Redesign' },
+      },
+    };
+    renderDay(`/w/kite-studio/standup/${MOBILE_ID}`, dayOf({ canSummarize: true }), {
+      extra: {
+        [`PUT /api/v1/standup-groups/${MOBILE_ID}/days/2026-10-08/summary`]: (init) => {
+          const body = JSON.parse(init?.body as string) as { notes: string };
+          puts.push(body);
+          return Response.json({
+            summary: {
+              id: '01890000-0000-7000-8000-000000000e03',
+              notes: body.notes,
+              updatedBy: ME_REF,
+              updatedAt: '2026-10-08T03:00:00.000Z',
+              tasks: [],
+            },
+          });
+        },
+        [`POST /api/v1/standup-groups/${MOBILE_ID}/days/2026-10-08/summary/tasks`]: (init) => {
+          posts.push(JSON.parse(init?.body as string));
+          return Response.json({ summary: null });
+        },
+      },
+    });
+    const section = await screen.findByRole('region', { name: 'Meeting summary' });
+    const box = within(section).getByLabelText('Meeting summary');
+    fireEvent.change(box, { target: { value: 'Dorj pairs with Bat on refunds' } });
+    fireEvent.blur(box);
+    await waitFor(() => {
+      expect(puts).toEqual([{ notes: 'Dorj pairs with Bat on refunds' }]);
+    });
+    expect(await within(section).findByText('Saved')).toBeVisible();
+
+    // Create task on Dorj's Today item: quick create opens prefilled for Dorj.
+    const card = screen.getByRole('article', { name: 'Dorj E.' });
+    fireEvent.click(
+      within(card).getByRole('button', { name: 'Create task: Test the refund flow' }),
+    );
+    const defaults = useUiStore.getState().createDefaults;
+    expect(useUiStore.getState().createOpen).toBe(true);
+    expect(defaults).toMatchObject({
+      title: 'Test the refund flow',
+      assigneeId: DORJ_ENTRY.user.id,
+    });
+    act(() => {
+      defaults.onCreated?.(created.task as never);
+    });
+    await waitFor(() => {
+      expect(posts).toEqual([
+        {
+          taskId: created.task.id,
+          sourceKind: 'today',
+          sourceEntryId: DORJ_ENTRY.id,
+          sourceItemIndex: 0,
+        },
+      ]);
+    });
+    // Blockers get the button too (in the Blockers section and on the card).
+    expect(
+      screen.getAllByRole('button', { name: 'Create task: Waiting on final tab icons' }),
+    ).toHaveLength(2);
+  });
+
+  it('shows the summary read-only to other members, with the tasks created', async () => {
+    renderDay(
+      `/w/kite-studio/standup/${MOBILE_ID}`,
+      dayOf({
+        summary: {
+          id: '01890000-0000-7000-8000-000000000e03',
+          notes: 'Ship icons by 2pm',
+          updatedBy: SARA_REF,
+          updatedAt: '2026-10-08T03:00:00.000Z',
+          tasks: [
+            {
+              task: { ...TAB_BAR, key: 'APP-151', title: 'Get the icons' },
+              assignee: SARA_REF,
+              source: {
+                user: DORJ_ENTRY.user,
+                kind: 'blocker',
+                entryId: BLOCKER.entryId,
+                blockerId: BLOCKER.id,
+                itemIndex: null,
+              },
+              createdAt: '2026-10-08T03:00:00.000Z',
+            },
+          ],
+        },
+      }),
+    );
+    const section = await screen.findByRole('region', { name: 'Meeting summary' });
+    expect(within(section).getByText('Ship icons by 2pm')).toBeVisible();
+    expect(within(section).queryByRole('textbox')).toBeNull();
+    expect(within(section).getByText(/From Dorj’s blocker/)).toBeVisible();
+    // The blocker now reads "Created ✓ APP-151" for everyone.
+    expect((await screen.findAllByRole('link', { name: /Created\s*APP-151/ })).length).toBe(2);
   });
 
   it('lists blockers with the task, who can help, and resolves optimistically', async () => {

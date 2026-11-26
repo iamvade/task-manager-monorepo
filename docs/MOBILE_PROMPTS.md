@@ -144,7 +144,7 @@ Design file 9: "MobileStandup". The write screen already exists (StandupWriteMob
 1. Group page (from Standup.dc.html): group switcher, date with ‹ › days, member strip (posted / not yet / out of office "back Mon"), Blockers first, then update cards (Yesterday, Today, blockers with linked task and helpers), reactions (👍 👀 ❤️ with who reacted), replies thread, "Write update" sticky button when I haven't posted.
 2. Past day read-only (replies still allowed).
 3. Empty group (from StandupEmpty.dc.html).
-4. Live meeting on the phone (from StandupLive.dc.html): follower view (current speaker, their update, timer, speaking order) and driver view (Next / Previous / End, notes, "Create task" from an item).
+4. Meeting summary on the phone (live mode was removed 2026-11-26; the visuals of StandupLive.dc.html's notes and "Create task" still apply): the facilitator writes the day's summary and creates tasks from Today items and blockers (`PUT|POST /standup-groups/:id/days/:date/summary[/tasks]`, day DTO `summary` / `canSummarize`); members read it.
 5. Out of office sheet (set a date range + note).
 ```
 

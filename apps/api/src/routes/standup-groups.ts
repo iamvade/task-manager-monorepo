@@ -97,7 +97,7 @@ export const standupGroupRoutes: FastifyPluginCallbackZod = (app, _opts, done) =
         tags: ['Standups'],
         summary: 'Create a standup group',
         description:
-          'Admin or owner. Starts with the default schedule (Mon–Fri, post by 10:00, reminder 09:30, meeting 10:15, Ulaanbaatar). Members default to the creator, who becomes facilitator when listed. 400 `INVALID_MEMBER` for someone who isn’t an active member.',
+          'Admin or owner. Starts with the default schedule (Mon–Fri, post by 10:00, reminder 09:30, Ulaanbaatar). Members default to the creator, who becomes facilitator when listed. 400 `INVALID_MEMBER` for someone who isn’t an active member.',
         params: z.object({ workspaceId: z.uuid() }),
         body: createStandupGroupSchema,
         response: { 201: standupGroupSchema, 400: err, 401: err, 403: err, 404: err },
@@ -154,7 +154,7 @@ export const standupGroupRoutes: FastifyPluginCallbackZod = (app, _opts, done) =
       schema: {
         tags: ['Standups'],
         summary: 'Update a standup group',
-        description: `${MANAGE} Any subset of the settings; \`memberIds\` replaces the member list in that order. The facilitator must be a member (400 \`INVALID_FACILITATOR\`); removing them clears it. Times are \`HH:mm\` in the group’s zone on 15-minute steps, reminder before post-by, meeting at or after it (400).`,
+        description: `${MANAGE} Any subset of the settings; \`memberIds\` replaces the member list in that order. The facilitator must be a member (400 \`INVALID_FACILITATOR\`); removing them clears it. Times are \`HH:mm\` in the group’s zone on 15-minute steps, reminder before post-by (400).`,
         params: groupParams,
         body: updateStandupGroupSchema,
         response: { 200: standupGroupSchema, 400: err, 401: err, 403: err, 404: err },
@@ -171,17 +171,9 @@ export const standupGroupRoutes: FastifyPluginCallbackZod = (app, _opts, done) =
           settings.reminderAt !== undefined
             ? settings.reminderAt
             : (group.reminderAt?.slice(0, 5) ?? null),
-        meetingAt:
-          settings.meetingAt !== undefined
-            ? settings.meetingAt
-            : (group.meetingAt?.slice(0, 5) ?? null),
       };
       if (!standupTimesInOrder(times)) {
-        throw httpError(
-          400,
-          'INVALID_SCHEDULE',
-          'The reminder must be before the post-by time, and the meeting at or after it',
-        );
+        throw httpError(400, 'INVALID_SCHEDULE', 'The reminder must be before the post-by time');
       }
       if (memberIds) await requireActiveMembers(app.db, group.workspaceId, memberIds);
 

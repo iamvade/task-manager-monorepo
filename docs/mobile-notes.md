@@ -534,6 +534,8 @@ Behaviour card rules:
   - This differs from the web's first-standup empty state (`hasPosts`).
 
 #### Live follower (08), driver (09), create from item (10)
+> **2026-11-26:** live mode was removed from the web and API (no speaking order, timers or meeting state). Build the phone's version of the day page's **meeting summary** instead: the facilitator's notes editor and "+ Task" on Today and Blocker items (`PUT|POST …/days/:date/summary[/tasks]`, day DTO `summary` / `canSummarize`); followers read it. The notes below are kept for the visual reference.
+
 - **Follower:**
   - Header: ⌄ minimize, "● LIVE 06:40", Leave.
   - Turn segments, "Turn 3 of 5 · Up next: Dorj".

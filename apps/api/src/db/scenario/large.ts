@@ -494,16 +494,14 @@ const STANDUPS: StandupGroupDef[] = [
       ...current('design').slice(0, 5),
     ],
     facilitator: 'pmo',
-    meetingAt: '09:45',
     postBy: '09:30',
     reminderAt: '09:00',
-    speakingOrder: 'alphabetical',
     createdDaysAgo: 45,
     postRate: 0.7,
     mn: 0.9,
   },
   {
-    // Async only; Irmuun joined yesterday (mid-week).
+    // Irmuun joined yesterday (mid-week).
     name: 'Харилцагчийн үйлчилгээ',
     members: [
       'bayarmaa',
@@ -513,7 +511,6 @@ const STANDUPS: StandupGroupDef[] = [
       'irmuun',
     ],
     facilitator: 'bayarmaa',
-    meetingAt: null,
     createdDaysAgo: 30,
     postRate: 0.6,
     mn: 1,
@@ -524,8 +521,6 @@ const STANDUPS: StandupGroupDef[] = [
     name: 'Engineering all-hands',
     members: ['cto', ...ENG.slice(0, 29)],
     facilitator: 'cto',
-    secondsPerPerson: 60,
-    totalMeetingMinutes: 20,
     createdDaysAgo: 25,
     postRate: 0.65,
     mn: 0.75,

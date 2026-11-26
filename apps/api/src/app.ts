@@ -46,7 +46,7 @@ import { statusRoutes } from './routes/statuses.js';
 import { subtaskRoutes } from './routes/subtasks.js';
 import { absenceRoutes } from './routes/absences.js';
 import { standupEntryRoutes } from './routes/standup-entries.js';
-import { standupMeetingRoutes } from './routes/standup-meetings.js';
+import { standupSummaryRoutes } from './routes/standup-summary.js';
 import { standupGroupRoutes } from './routes/standup-groups.js';
 import { personalRoutes } from './routes/personal.js';
 import { schedulePersonalPurge } from './personal/service.js';
@@ -185,7 +185,7 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
       await api.register(absenceRoutes);
       await api.register(standupGroupRoutes);
       await api.register(standupEntryRoutes);
-      await api.register(standupMeetingRoutes);
+      await api.register(standupSummaryRoutes);
       await api.register(statusRoutes);
       await api.register(sprintRoutes);
       await api.register(templateRoutes);

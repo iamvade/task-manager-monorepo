@@ -1,4 +1,4 @@
-import type { AvatarColor, Locale, PaletteKey, SpeakingOrder, WorkspaceRole } from '@kite/shared';
+import type { AvatarColor, Locale, PaletteKey, WorkspaceRole } from '@kite/shared';
 
 /** How a person behaves in the generated history. */
 export type Archetype =
@@ -96,13 +96,9 @@ export interface StandupGroupDef {
   /** Person keys, in group order. */
   members: string[];
   facilitator: string | null;
-  /** `HH:mm` in Asia/Ulaanbaatar; null meeting = async only. */
+  /** `HH:mm` in Asia/Ulaanbaatar. */
   postBy?: string;
   reminderAt?: string | null;
-  meetingAt?: string | null;
-  speakingOrder?: SpeakingOrder;
-  secondsPerPerson?: 60 | 120 | 180;
-  totalMeetingMinutes?: number;
   createdDaysAgo: number;
   /** Share of present members who post on a past standup day (today: about half of that). */
   postRate: number;

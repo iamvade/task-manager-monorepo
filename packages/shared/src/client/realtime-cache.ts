@@ -1,7 +1,6 @@
 import type { Query, QueryClient } from '@tanstack/query-core';
 import type { ProjectDetail } from '../schemas/project.js';
 import type { RealtimeServerMessage, RealtimeTaskMessage } from '../schemas/realtime.js';
-import type { StandupMeeting, StandupMeetingState } from '../schemas/standup.js';
 import type { TaskDetail, TaskListItem, TaskStatusRef } from '../schemas/task.js';
 import type { SidebarResponse } from '../schemas/workspace.js';
 import { TASK_MUTATION, queryKeys } from './query-keys.js';
@@ -216,9 +215,7 @@ export function createMessageHandler(
             queryKey: queryKeys.standupGroups(message.workspaceId),
           });
           return;
-        case 'standup.meeting_changed':
-          // Followers move with the facilitator at once; the day page's summary refetches.
-          setMeeting(queryClient, message.groupId, message.date, message.meeting, message.at);
+        case 'standup.summary_changed':
           void queryClient.invalidateQueries({ queryKey: queryKeys.standupDays(message.groupId) });
           return;
         case 'tasks.blocked.changed':
@@ -433,17 +430,4 @@ export function refreshAfterSprintChange(queryClient: QueryClient, workspaceId: 
   void queryClient.invalidateQueries({ queryKey: queryKeys.taskDetails });
   void queryClient.invalidateQueries({ queryKey: queryKeys.taskLists });
   void queryClient.invalidateQueries({ queryKey: queryKeys.reportsOf(workspaceId) });
-}
-
-/** Puts a meeting into the cache (keeping my `canDrive`), and refreshes the day page's summary. */
-export function setMeeting(
-  queryClient: QueryClient,
-  groupId: string,
-  date: string,
-  meeting: StandupMeeting,
-  serverNow?: string,
-) {
-  queryClient.setQueryData<StandupMeetingState>(queryKeys.standupMeeting(groupId, date), (old) =>
-    old ? { ...old, meeting, serverNow: serverNow ?? old.serverNow } : undefined,
-  );
 }
