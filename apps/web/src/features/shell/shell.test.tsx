@@ -264,7 +264,7 @@ describe('app shell', () => {
     fireEvent.click(await screen.findByRole('radio', { name: 'EN' }));
     expect(await screen.findByRole('link', { name: /My Tasks/ })).toBeInTheDocument();
     expect(screen.getByRole('navigation', { name: 'Breadcrumb' })).toBeInTheDocument();
-    expect(screen.getByRole('radio', { name: 'Active' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Active' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Views' })).toBeInTheDocument();
     expect(await screen.findByText('Oct 6 – Oct 24')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sort: Due date' })).toBeInTheDocument();

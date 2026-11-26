@@ -71,7 +71,7 @@ test.describe('task → board → mention → inbox', () => {
       'App Redesign',
     );
     await expect(page.getByRole('button', { name: 'Views' })).toBeVisible();
-    await expect(page.getByRole('radio', { name: 'Active' })).toBeChecked();
+    await expect(page.getByRole('tab', { name: 'Active' })).toHaveAttribute('aria-selected', 'true');
     await page.locator('body').press('c');
     const modal = page.getByRole('dialog', { name: 'New task' });
     await expect(modal).toBeVisible();
