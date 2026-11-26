@@ -11,18 +11,21 @@ import {
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import { IconButton } from '../../components/ui/IconButton';
 import { KiteMark } from '../../components/ui/KiteMark';
+import { cn } from '../../lib/cn';
 import { useUiStore } from '../../stores/ui';
 import { StandupGroupsSection } from '../standup/StandupNav';
 import { NewSpaceButton } from './NewSpaceButton';
 import { SidebarMenu } from './SidebarMenu';
+import { LIVE_WIDTH_VAR } from './SidebarResizer';
 import { SidebarSearch } from './SidebarSearch';
 import { SpaceList } from './SpaceList';
 import { SidebarUser } from './UserMenu';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 
 /**
- * Expanded sidebar (Main.dc.html): 248px (min 220), --bg-sidebar, gap 16, padding 12/8.
- * In the phone sheet, `onClose` replaces "Collapse sidebar" with closing the sheet.
+ * Expanded sidebar (Main.dc.html): 248px by default, resizable 220–420px by dragging its right
+ * border (`SidebarResizer`); --bg-sidebar, gap 16, padding 12/8.
+ * In the phone sheet, `onClose` replaces "Collapse sidebar" with closing the sheet (fixed 248px).
  */
 export function Sidebar({ onClose }: { onClose?: () => void } = {}) {
   const { t } = useTranslation();
@@ -30,11 +33,16 @@ export function Sidebar({ onClose }: { onClose?: () => void } = {}) {
   const ws = useWsPath();
   const sidebar = useSidebar(workspace?.id);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
+  const width = useUiStore((s) => s.sidebarWidth);
 
   return (
     <nav
       aria-label={t('shell.workspace')}
-      className="box-border flex h-full w-[248px] min-w-[220px] flex-shrink flex-col gap-4 overflow-y-auto border-r border-default bg-sidebar px-2 py-3"
+      style={onClose ? undefined : { width: `var(${LIVE_WIDTH_VAR}, ${width}px)` }}
+      className={cn(
+        'box-border flex h-full flex-col gap-4 overflow-y-auto border-r border-default bg-sidebar px-2 py-3',
+        onClose ? 'w-[248px] min-w-[220px] flex-shrink' : 'flex-none',
+      )}
     >
       <div className="flex items-center gap-1 px-1">
         <div className="flex h-9 min-w-0 flex-1 items-center gap-2 px-2">

@@ -16,6 +16,7 @@ import { ConnectionPill } from './ConnectionPill';
 import { MobileNavBar } from './MobileNav';
 import { Sidebar } from './Sidebar';
 import { SidebarRail } from './SidebarRail';
+import { SidebarResizer } from './SidebarResizer';
 import { useGlobalShortcuts } from './useGlobalShortcuts';
 
 const loadQuickCreate = () => import('../create/QuickCreateModal');
@@ -98,7 +99,14 @@ export function AppShell() {
         )}
       >
         <SkipLink />
-        {narrow ? <MobileNavBar /> : collapsed ? <SidebarRail /> : <Sidebar />}
+        {narrow ? (
+          <MobileNavBar />
+        ) : (
+          <>
+            {collapsed ? <SidebarRail /> : <Sidebar />}
+            <SidebarResizer />
+          </>
+        )}
         <div className="relative flex min-w-0 flex-1">
           <main id="main" tabIndex={-1} className="flex min-w-0 flex-1 flex-col overflow-auto">
             <ErrorBoundary>

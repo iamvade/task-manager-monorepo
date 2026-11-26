@@ -153,6 +153,84 @@ describe('app shell', () => {
     });
   });
 
+  describe('sidebar border', () => {
+    const separator = () => screen.findByRole('separator', { name: 'Хажуу самбарын өргөн' });
+    const nav = () => screen.getByRole('navigation', { name: 'Ажлын орчин' });
+
+    beforeEach(() => {
+      // jsdom has no pointer capture.
+      Element.prototype.setPointerCapture = vi.fn();
+    });
+
+    it('a plain click collapses to the rail and expands again', async () => {
+      api();
+      renderAt('/w/kite-studio/my-tasks');
+
+      const border = await separator();
+      fireEvent.pointerDown(border, { button: 0, pointerId: 1, clientX: 248 });
+      fireEvent.pointerUp(border, { button: 0, pointerId: 1, clientX: 248 });
+      expect(
+        await screen.findByRole('button', { name: 'Хажуу самбарыг дэлгэх' }),
+      ).toBeInTheDocument();
+      expect(useUiStore.getState().sidebarCollapsed).toBe(true);
+
+      fireEvent.pointerDown(border, { button: 0, pointerId: 2, clientX: 56 });
+      fireEvent.pointerUp(border, { button: 0, pointerId: 2, clientX: 56 });
+      expect(
+        await screen.findByRole('button', { name: 'Хажуу самбарыг хураах' }),
+      ).toBeInTheDocument();
+    });
+
+    it('dragging resizes and remembers the width; dragging far left snaps to the rail', async () => {
+      api();
+      renderAt('/w/kite-studio/my-tasks');
+
+      const border = await separator();
+      fireEvent.pointerDown(border, { button: 0, pointerId: 1, clientX: 248 });
+      fireEvent.pointerMove(border, { pointerId: 1, clientX: 300 });
+      fireEvent.pointerMove(border, { pointerId: 1, clientX: 320 });
+      fireEvent.pointerUp(border, { pointerId: 1, clientX: 320 });
+      expect(useUiStore.getState()).toMatchObject({ sidebarWidth: 320, sidebarCollapsed: false });
+      expect(nav().style.width).toBe('var(--sidebar-live-w, 320px)');
+      expect(border).toHaveAttribute('aria-valuenow', '320');
+      expect(JSON.parse(localStorage.getItem(`kite.ui.${ME.user.id}`) ?? '{}')).toMatchObject({
+        state: { sidebarWidth: 320 },
+      });
+
+      // Past the maximum: clamped.
+      fireEvent.pointerDown(border, { button: 0, pointerId: 2, clientX: 320 });
+      fireEvent.pointerMove(border, { pointerId: 2, clientX: 900 });
+      fireEvent.pointerUp(border, { pointerId: 2, clientX: 900 });
+      expect(useUiStore.getState().sidebarWidth).toBe(420);
+
+      fireEvent.pointerDown(border, { button: 0, pointerId: 3, clientX: 420 });
+      fireEvent.pointerMove(border, { pointerId: 3, clientX: 80 });
+      fireEvent.pointerUp(border, { pointerId: 3, clientX: 80 });
+      expect(useUiStore.getState()).toMatchObject({ sidebarWidth: 420, sidebarCollapsed: true });
+    });
+
+    it('works from the keyboard', async () => {
+      api();
+      renderAt('/w/kite-studio/my-tasks');
+
+      const border = await separator();
+      act(() => {
+        useUiStore.getState().setSidebarWidth(248);
+      });
+      fireEvent.keyDown(border, { key: 'ArrowRight' });
+      expect(border).toHaveAttribute('aria-valuenow', '264');
+      for (let i = 0; i < 3; i += 1) fireEvent.keyDown(border, { key: 'ArrowLeft' });
+      expect(border).toHaveAttribute('aria-valuenow', '220');
+      // At the minimum, ← collapses to the rail.
+      fireEvent.keyDown(border, { key: 'ArrowLeft' });
+      expect(useUiStore.getState().sidebarCollapsed).toBe(true);
+      fireEvent.keyDown(border, { key: 'Enter' });
+      expect(useUiStore.getState().sidebarCollapsed).toBe(false);
+      fireEvent.keyDown(border, { key: 'End' });
+      expect(border).toHaveAttribute('aria-valuenow', '420');
+    });
+  });
+
   it('keeps layout state per account on a shared browser', async () => {
     // Another account left the sidebar collapsed on this browser.
     localStorage.setItem(

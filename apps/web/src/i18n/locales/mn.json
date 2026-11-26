@@ -122,6 +122,8 @@
     "search": "Хайх",
     "collapse": "Хажуу самбарыг хураах",
     "expand": "Хажуу самбарыг дэлгэх",
+    "resizeSidebar": "Хажуу самбарын өргөн",
+    "sidebarCollapsed": "Хураасан",
     "openNavigation": "Цэс нээх",
     "closeNavigation": "Цэс хаах",
     "myTasks": "Миний ажлууд",
