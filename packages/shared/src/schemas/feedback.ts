@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { dateSchema } from '../dates.js';
-import { prioritySchema } from '../enums.js';
+import { paletteKeySchema, prioritySchema } from '../enums.js';
 import {
   FEEDBACK_MAX_FILE_BYTES,
   FEEDBACK_MAX_FILES,
@@ -10,9 +10,13 @@ import {
   feedbackActivityKindSchema,
   feedbackReportRefSchema,
   feedbackStatusSchema,
+  feedbackTopicKeySchema,
+  feedbackTopicNameSchema,
   feedbackTypeSchema,
+  FEEDBACK_NO_TOPIC,
+  FEEDBACK_TOPIC_KEY_MAX,
 } from '../feedback.js';
-import { userRefSchema } from './common.js';
+import { NOTHING_TO_UPDATE, nonEmptyPatch, userRefSchema } from './common.js';
 import { taskListItemSchema, taskTitleSchema } from './task.js';
 
 const queryArray = <T extends z.ZodType>(item: T) =>
@@ -21,12 +25,52 @@ const queryArray = <T extends z.ZodType>(item: T) =>
     .optional();
 
 // ---------------------------------------------------------------------------------------------
+// Topics
+
+export const feedbackTopicSchema = z
+  .object({
+    id: z.uuid(),
+    /** In public links: `/feedback/:slug?topic=<key>`. */
+    key: z.string(),
+    name: z.string(),
+    color: paletteKeySchema,
+  })
+  .meta({ id: 'FeedbackTopic' });
+export type FeedbackTopic = z.infer<typeof feedbackTopicSchema>;
+
+/** A topic with how many feedback items carry it (the topics dialog). */
+export const feedbackTopicWithCountSchema = feedbackTopicSchema
+  .extend({ feedbackCount: z.number().int().nonnegative() })
+  .meta({ id: 'FeedbackTopicWithCount' });
+export type FeedbackTopicWithCount = z.infer<typeof feedbackTopicWithCountSchema>;
+
+/** `key` defaults to one made from the name (`feedbackTopicKey`). */
+export const createFeedbackTopicSchema = z
+  .object({
+    name: feedbackTopicNameSchema,
+    key: feedbackTopicKeySchema.optional(),
+    color: paletteKeySchema.default('neutral'),
+  })
+  .meta({ id: 'CreateFeedbackTopic' });
+export type CreateFeedbackTopic = z.input<typeof createFeedbackTopicSchema>;
+
+export const updateFeedbackTopicSchema = z
+  .object({ name: feedbackTopicNameSchema, key: feedbackTopicKeySchema, color: paletteKeySchema })
+  .partial()
+  .strict()
+  .refine(nonEmptyPatch, NOTHING_TO_UPDATE)
+  .meta({ id: 'UpdateFeedbackTopic' });
+export type UpdateFeedbackTopic = z.infer<typeof updateFeedbackTopicSchema>;
+
+// ---------------------------------------------------------------------------------------------
 // Public form (no account)
 
 /** `GET /public/feedback/:slug`: what the public page needs before the person types. */
 export const publicFeedbackFormSchema = z
   .object({
     workspaceName: z.string(),
+    /** The workspace's topics, by name (the form's optional Topic field; empty = no field). */
+    topics: z.array(z.object({ key: z.string(), name: z.string() })),
     maxFiles: z.number().int(),
     maxFileBytes: z.number().int(),
     mimeTypes: z.array(z.string()),
@@ -71,6 +115,12 @@ export const publicFeedbackSubmitSchema = z
     name: z.string().max(1000).default(''),
     email: z.string().max(1000),
     phone: z.string().max(1000).default(''),
+    /** A topic key; one the workspace doesn't have (any more) is ignored. */
+    topic: z
+      .string()
+      .max(FEEDBACK_TOPIC_KEY_MAX * 2)
+      .nullable()
+      .default(null),
     uploads: z
       .array(z.object({ id: z.uuid(), token: z.string().min(1).max(200) }))
       .max(FEEDBACK_MAX_FILES)
@@ -151,6 +201,7 @@ export const feedbackListItemSchema = z
     attachmentCount: z.number().int(),
     submitterName: z.string().nullable(),
     email: z.string(),
+    topic: feedbackTopicSchema.nullable(),
     task: feedbackTaskRefSchema.nullable(),
     isRead: z.boolean(),
     createdAt: z.iso.datetime(),
@@ -163,6 +214,8 @@ export const feedbackListQuerySchema = z.object({
   q: z.string().trim().min(1).max(200).optional(),
   type: feedbackTypeSchema.optional(),
   status: queryArray(feedbackStatusSchema),
+  /** A topic key, or `none` for items without a topic. */
+  topic: z.union([z.literal(FEEDBACK_NO_TOPIC), feedbackTopicKeySchema]).optional(),
   offset: z.coerce.number().int().min(0).max(100_000).default(0),
   limit: z.coerce.number().int().min(1).max(100).default(FEEDBACK_PAGE_SIZE),
 });
@@ -222,6 +275,9 @@ export const feedbackActivityDataSchema = z
     assignees: z.array(z.object({ id: z.uuid(), name: z.string() })),
     /** `similar_found`. */
     similar: z.array(z.object({ id: z.uuid(), ref: z.string() })),
+    /** `topic_change`: snapshots (the topic may be renamed or deleted later). */
+    fromTopic: z.object({ id: z.uuid(), name: z.string() }).nullable(),
+    toTopic: z.object({ id: z.uuid(), name: z.string() }).nullable(),
   })
   .partial();
 export type FeedbackActivityData = z.infer<typeof feedbackActivityDataSchema>;
@@ -260,7 +316,10 @@ export const feedbackDetailSchema = feedbackListItemSchema
 export type FeedbackDetail = z.infer<typeof feedbackDetailSchema>;
 
 export const updateFeedbackSchema = z
-  .object({ status: feedbackStatusSchema })
+  .object({ status: feedbackStatusSchema, topicId: z.uuid().nullable() })
+  .partial()
+  .strict()
+  .refine(nonEmptyPatch, NOTHING_TO_UPDATE)
   .meta({ id: 'UpdateFeedback' });
 export type UpdateFeedback = z.infer<typeof updateFeedbackSchema>;
 

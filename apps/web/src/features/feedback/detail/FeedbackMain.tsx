@@ -303,6 +303,7 @@ const MARK: Partial<Record<FeedbackActivity['kind'], string>> = {
   unlinked: 'var(--fb-status-linked)',
   similar_found: 'var(--accent)',
   assignee_change: 'var(--accent)',
+  topic_change: 'var(--accent)',
 };
 
 function ActivityEntry({ entry, detail }: { entry: FeedbackActivity; detail: FeedbackDetail }) {
@@ -364,6 +365,13 @@ function ActivityEntry({ entry, detail }: { entry: FeedbackActivity; detail: Fee
         return entry.data.reason === 'task_deleted'
           ? t('feedback.detail.event.unlinkedDeleted', { key })
           : t('feedback.detail.event.unlinked', { key });
+      case 'topic_change': {
+        const from = entry.data.fromTopic?.name;
+        const to = entry.data.toTopic?.name;
+        if (from && to) return t('feedback.detail.event.topic', { from, to });
+        if (to) return t('feedback.detail.event.topicSet', { to });
+        return t('feedback.detail.event.topicCleared', { from: from ?? '' });
+      }
       case 'assignee_change': {
         const names = entry.data.assignees?.map((a) => a.name) ?? [];
         return names.length > 0

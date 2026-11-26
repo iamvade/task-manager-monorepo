@@ -48,6 +48,7 @@ import {
   logFeedback,
   requireLinkableTask,
   setStatus,
+  setTopic,
   taskSnapshots,
   unlinkFromTask,
   type FeedbackChange,
@@ -186,8 +187,11 @@ export const feedbackRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       preHandler: app.authenticate,
       schema: {
         tags: ['Feedback'],
-        summary: 'Change a feedback status',
-        description: 'Logs `status_change` and marks it read. Closing keeps the task link.',
+        summary: 'Change a feedback status or topic',
+        description:
+          'A status change logs `status_change` and marks it read; closing keeps the task link. ' +
+          'A topic change (null = none) logs `topic_change`; 400 `INVALID_REFERENCE` for a topic ' +
+          'of another workspace.',
         params: feedbackParams,
         body: updateFeedbackSchema,
         response: { 200: feedbackDetailSchema, 400: err, 401: err, 404: err },
@@ -197,7 +201,9 @@ export const feedbackRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
       const { workspaceId } = await loadFeedbackAccess(request, request.params.feedbackId);
       await change(request, workspaceId, async (c) => {
         const [row] = await lockFeedback(c.tx, workspaceId, [request.params.feedbackId]);
-        if (row) await setStatus(c, row, request.body.status);
+        const { status, topicId } = request.body;
+        if (row && status) await setStatus(c, row, status);
+        if (row && topicId !== undefined) await setTopic(c, row, topicId);
         return { value: null, taskIds: row?.taskId ? [row.taskId] : [] };
       });
       return buildFeedbackDetail(app.db, request.params.feedbackId);

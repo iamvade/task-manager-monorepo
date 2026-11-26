@@ -81,6 +81,8 @@ export const queryKeys = {
   feedbackList: (workspaceId: string, query: object) =>
     ['feedback', workspaceId, 'list', query] as const,
   /** One item by ref (`FB-1042`) or id. */
+  /** The workspace's feedback topics (under `feedbackOf`, so `feedback.changed` refreshes them). */
+  feedbackTopics: (workspaceId: string) => ['feedback', workspaceId, 'topics'] as const,
   feedbackItem: (workspaceId: string, ref: string) =>
     ['feedback', workspaceId, 'item', ref] as const,
   feedbackSuggestions: (feedbackId: string) => ['feedback-suggestions', feedbackId] as const,

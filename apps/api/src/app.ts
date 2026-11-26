@@ -23,6 +23,7 @@ import { registerFeedbackEvents } from './feedback/events.js';
 import { scheduleFeedbackCleanup } from './feedback/cleanup-job.js';
 import { feedbackRoutes } from './routes/feedback.js';
 import { publicFeedbackRoutes } from './routes/feedback-public.js';
+import { feedbackTopicRoutes } from './routes/feedback-topics.js';
 import { registerRealtime } from './realtime/plugin.js';
 import { ReportCache } from './reports/cache.js';
 import { attachmentRoutes } from './routes/attachments.js';
@@ -203,6 +204,7 @@ export async function buildApp(config: Config, db: Db, options: AppOptions = {})
       await api.register(reportRoutes);
       await api.register(feedbackRoutes);
       await api.register(publicFeedbackRoutes);
+      await api.register(feedbackTopicRoutes);
       await api.register(realtimeRoutes);
       // The remote Claude connector: without the switch its routes do not exist.
       if (config.CONNECTOR_ENABLED) await api.register(oauthRoutes);

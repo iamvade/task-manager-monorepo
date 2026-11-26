@@ -672,6 +672,12 @@ Customer feedback: a public form (no account) and the team's inbox, linked to ta
 - **Task drawer** (`TaskDetail.dc.html`): "Linked feedback" after "Mentioned in"; Mongolian copy written by us (the design is English only).
 - **Public form** (`PublicFeedback.dc.html`): see `features/feedback/public/`; error summary and field error tokens `--form-error-*`, `--field-error-*`.
 
+### 6.3 Topics (built 2026-11-26, not designed)
+- A workspace's own list (Checkout, Mobile app…), managed in **Manage topics…** from the link pill's ▾ menu on the inbox (`inbox/TopicsDialog.tsx`, built like Settings → Tags: tag chips, palette colors, `ConfirmDialog` for delete). Every member sees it and copies each topic's link; admins/owners add, edit (name, link key, color) and delete.
+- Link: `/feedback/:slug?topic=<key>`. The key is made from the name (Cyrillic transliterated) and can be edited; renaming keeps it, so shared links keep working. An unknown key is ignored.
+- Public form: an optional "Topic" `<select>` after the type cards (only when the workspace has topics), preset from the link, changeable, "Not sure / other" = none.
+- Inbox: "Topic: …" menu chip before the status chips (`?topic=` key or `none`, narrows the tab and chip counts), a topic tag chip before the preview in the title cell, a Topic picker at the top of the panel's side column (logged as `topic_change`; doesn't mark the item read).
+
 ## 7. Personal space (built 2026-11-17, not designed)
 
 My private notes and to-dos, grouped by topic and connected with Obsidian-style `[[links]]`. No Claude Design file exists: the screens reuse the app's pieces (PageHeader + UnderlineTabs, sidebar NavItem, list rows, the description editor, Menu, ColorSwatches, ConfirmDialog, EmptyState, the Undo toast) and its tokens; replace with a design when one is exported.

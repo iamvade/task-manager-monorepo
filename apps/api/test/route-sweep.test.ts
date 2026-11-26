@@ -189,6 +189,9 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       })
     ).json<{ id: string }>();
 
+    const feedbackTopic = (
+      await w.api('POST', `/workspaces/${w.ws.id}/feedback-topics`, { name: 'Checkout' })
+    ).json<{ id: string }>();
     const personalTopic = (
       await w.api('POST', '/me/personal/topics', { name: 'Private', color: 'violet' })
     ).json<{ id: string }>();
@@ -260,6 +263,7 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
       sessionId: memberSession.id,
       grantId: fb.id,
       topicId: personalTopic.id,
+      feedbackTopicId: feedbackTopic.id,
       itemId: personalItem.id,
     };
 
@@ -367,6 +371,8 @@ describe('route sweep: every operation denies anonymous, cross-site and outside 
         ids: [fb.id],
         change: { action: 'status', status: 'closed' },
       },
+      'POST /workspaces/{workspaceId}/feedback-topics': { name: 'Sweep topic' },
+      'PATCH /feedback-topics/{feedbackTopicId}': { name: 'Renamed topic' },
       'POST /me/personal/topics': { name: 'Sweep', color: 'blue' },
       'PATCH /me/personal/topics/{topicId}': { name: 'Renamed' },
       'POST /me/personal/topics/{topicId}/move': {},

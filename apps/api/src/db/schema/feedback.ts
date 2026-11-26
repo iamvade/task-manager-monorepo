@@ -1,4 +1,4 @@
-import type { FeedbackActivityData, FeedbackDevice } from '@kite/shared';
+import type { FeedbackActivityData, FeedbackDevice, PaletteKey } from '@kite/shared';
 import { sql } from 'drizzle-orm';
 import {
   boolean,
@@ -9,13 +9,41 @@ import {
   pgTable,
   text,
   unique,
+  uniqueIndex,
   uuid,
+  type AnyPgColumn,
 } from 'drizzle-orm/pg-core';
 import { createdAt, id, timestamptz } from './columns.js';
 import { feedbackActivityKindEnum, feedbackStatusEnum, feedbackTypeEnum } from './enums.js';
 import { tasks } from './tasks.js';
 import { users } from './users.js';
 import { workspaces } from './workspaces.js';
+
+/**
+ * A workspace's feedback topics (Checkout, Mobile app…), managed by admins from the inbox. A public
+ * link can preset one by `key` (`/feedback/:slug?topic=checkout`); the key is kept on rename.
+ */
+export const feedbackTopics = pgTable(
+  'feedback_topics',
+  {
+    id: id(),
+    workspaceId: uuid('workspace_id')
+      .notNull()
+      .references(() => workspaces.id, { onDelete: 'cascade' }),
+    key: text('key').notNull(),
+    name: text('name').notNull(),
+    color: text('color').$type<PaletteKey>().notNull().default('neutral'),
+    createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    uniqueIndex('feedback_topics_workspace_id_lower_name_unique').on(
+      t.workspaceId,
+      sql`lower(${t.name})`,
+    ),
+    unique('feedback_topics_workspace_id_key_unique').on(t.workspaceId, t.key),
+  ],
+);
 
 /**
  * Customer feedback sent through the public form (`/feedback/:slug`). Submitters have no account:
@@ -42,6 +70,10 @@ export const feedback = pgTable(
     userAgent: text('user_agent').notNull().default(''),
     /** Parsed from the user agent on the server, plus the browser's screen sizes. */
     device: jsonb('device').$type<FeedbackDevice>().notNull(),
+    /** Deleting the topic leaves the item without one. */
+    topicId: uuid('topic_id').references((): AnyPgColumn => feedbackTopics.id, {
+      onDelete: 'set null',
+    }),
     /** Set null when the task row goes (a soft delete unlinks in `feedback/link.ts`). */
     taskId: uuid('task_id').references(() => tasks.id, { onDelete: 'set null' }),
     /** Email the submitter when the linked task is done (no email service yet: see notify-on-done). */
@@ -57,6 +89,7 @@ export const feedback = pgTable(
     index('feedback_workspace_id_type_idx').on(t.workspaceId, t.type),
     index('feedback_workspace_id_created_at_idx').on(t.workspaceId, t.createdAt.desc()),
     index('feedback_task_id_idx').on(t.taskId),
+    index('feedback_workspace_id_topic_id_idx').on(t.workspaceId, t.topicId),
     // Similar reports at submit time and "Similar tasks" use trigram similarity on the title.
     index('feedback_title_trgm_idx').using('gin', sql`${t.title} gin_trgm_ops`),
     check('feedback_title_length_check', sql`char_length(${t.title}) <= 120`),

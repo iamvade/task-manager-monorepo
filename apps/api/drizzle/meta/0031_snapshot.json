@@ -1,6 +1,6 @@
 {
-  "id": "3c412564-438d-418d-94ff-c4bf061bb786",
-  "prevId": "04385a26-e47f-4baa-ad1f-fb13faf7338c",
+  "id": "6aa220b5-95f7-4c1b-9cd8-0a505bb19a08",
+  "prevId": "2fab53c1-4bcd-400d-b854-266da1a7ee77",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1147,6 +1147,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "topic_id": {
+          "name": "topic_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "task_id": {
           "name": "task_id",
           "type": "uuid",
@@ -1261,6 +1267,27 @@
           "method": "btree",
           "with": {}
         },
+        "feedback_workspace_id_topic_id_idx": {
+          "name": "feedback_workspace_id_topic_id_idx",
+          "columns": [
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "topic_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "feedback_title_trgm_idx": {
           "name": "feedback_title_trgm_idx",
           "columns": [
@@ -1289,6 +1316,19 @@
             "id"
           ],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "feedback_topic_id_feedback_topics_id_fk": {
+          "name": "feedback_topic_id_feedback_topics_id_fk",
+          "tableFrom": "feedback",
+          "tableTo": "feedback_topics",
+          "columnsFrom": [
+            "topic_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
           "onUpdate": "no action"
         },
         "feedback_task_id_tasks_id_fk": {
@@ -1570,6 +1610,121 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.feedback_topics": {
+      "name": "feedback_topics",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "workspace_id": {
+          "name": "workspace_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "color": {
+          "name": "color",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'neutral'"
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "feedback_topics_workspace_id_lower_name_unique": {
+          "name": "feedback_topics_workspace_id_lower_name_unique",
+          "columns": [
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "lower(\"name\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "feedback_topics_workspace_id_workspaces_id_fk": {
+          "name": "feedback_topics_workspace_id_workspaces_id_fk",
+          "tableFrom": "feedback_topics",
+          "tableTo": "workspaces",
+          "columnsFrom": [
+            "workspace_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "feedback_topics_created_by_users_id_fk": {
+          "name": "feedback_topics_created_by_users_id_fk",
+          "tableFrom": "feedback_topics",
+          "tableTo": "users",
+          "columnsFrom": [
+            "created_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "feedback_topics_workspace_id_key_unique": {
+          "name": "feedback_topics_workspace_id_key_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "workspace_id",
+            "key"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -4738,11 +4893,40 @@
           "notNull": false,
           "default": "'09:30'"
         },
+        "meeting_at": {
+          "name": "meeting_at",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'10:15'"
+        },
         "facilitator_id": {
           "name": "facilitator_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
+        },
+        "speaking_order": {
+          "name": "speaking_order",
+          "type": "speaking_order",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'posting_order'"
+        },
+        "seconds_per_person": {
+          "name": "seconds_per_person",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 120
+        },
+        "total_meeting_minutes": {
+          "name": "total_meeting_minutes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 15
         },
         "show_blockers_first": {
           "name": "show_blockers_first",
@@ -5047,9 +5231,59 @@
           "primaryKey": false,
           "notNull": false
         },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ended_at": {
+          "name": "ended_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "notes": {
           "name": "notes",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notes_saved_at": {
+          "name": "notes_saved_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "speaking_order": {
+          "name": "speaking_order",
+          "type": "uuid[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::uuid[]"
+        },
+        "current_user_id": {
+          "name": "current_user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "current_started_at": {
+          "name": "current_started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "durations": {
+          "name": "durations",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "total_seconds": {
+          "name": "total_seconds",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
@@ -5089,6 +5323,19 @@
           "tableTo": "users",
           "columnsFrom": [
             "facilitator_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "standup_meetings_current_user_id_users_id_fk": {
+          "name": "standup_meetings_current_user_id_users_id_fk",
+          "tableFrom": "standup_meetings",
+          "tableTo": "users",
+          "columnsFrom": [
+            "current_user_id"
           ],
           "columnsTo": [
             "id"
@@ -6160,7 +6407,8 @@
         "linked",
         "unlinked",
         "assignee_change",
-        "similar_found"
+        "similar_found",
+        "topic_change"
       ]
     },
     "public.feedback_status": {
@@ -6257,6 +6505,15 @@
         "mobile",
         "mcp",
         "connector"
+      ]
+    },
+    "public.speaking_order": {
+      "name": "speaking_order",
+      "schema": "public",
+      "values": [
+        "posting_order",
+        "alphabetical",
+        "random"
       ]
     },
     "public.standup_entry_status": {

@@ -1,4 +1,5 @@
 import {
+  FEEDBACK_NO_TOPIC,
   FEEDBACK_STATUSES,
   FEEDBACK_TYPES,
   feedbackActivityDataSchema,
@@ -11,6 +12,7 @@ import {
   type FeedbackListResponse,
   type FeedbackReportRef,
   type FeedbackTaskRef,
+  type FeedbackTopic,
 } from '@kite/shared';
 import { and, asc, count, desc, eq, ilike, inArray, isNull, or, sql, type SQL } from 'drizzle-orm';
 import type { DbOrTx } from '../db/client.js';
@@ -18,6 +20,7 @@ import {
   feedback,
   feedbackActivity,
   feedbackAttachments,
+  feedbackTopics,
   projects,
   statuses,
   tasks,
@@ -86,6 +89,31 @@ export async function taskRefs(db: DbOrTx, ids: readonly string[]) {
   return new Map(rows.map((r) => [r.id, toTaskRef(r)]));
 }
 
+type TopicRow = typeof feedbackTopics.$inferSelect;
+export const toTopic = (t: TopicRow): FeedbackTopic => ({
+  id: t.id,
+  key: t.key,
+  name: t.name,
+  color: t.color,
+});
+
+/** Topics by id, as `FeedbackTopic`. */
+export async function topicsById(db: DbOrTx, ids: readonly (string | null)[]) {
+  const wanted = [...new Set(ids.filter((id): id is string => id !== null))];
+  if (wanted.length === 0) return new Map<string, FeedbackTopic>();
+  const rows = await db.select().from(feedbackTopics).where(inArray(feedbackTopics.id, wanted));
+  return new Map(rows.map((t) => [t.id, toTopic(t)]));
+}
+
+/** `topic` filter: a key of this workspace's topics, or `none`. */
+function topicFilter(workspaceId: string, topic: string | undefined): SQL | undefined {
+  if (!topic) return undefined;
+  if (topic === FEEDBACK_NO_TOPIC) return isNull(feedback.topicId);
+  return inArray(feedback.topicId, sqlTopicIds(workspaceId, topic));
+}
+const sqlTopicIds = (workspaceId: string, key: string) =>
+  sql`(select ft.id from feedback_topics ft where ft.workspace_id = ${workspaceId} and ft.key = ${key})`;
+
 const attachmentCountSql = sql<number>`(
   select count(*)::int from feedback_attachments fa where fa.feedback_id = ${feedback.id})`;
 
@@ -120,7 +148,11 @@ export async function listFeedback(
   workspaceId: string,
   query: FeedbackListQuery,
 ): Promise<FeedbackListResponse> {
-  const inWorkspace = eq(feedback.workspaceId, workspaceId);
+  // The topic filter narrows everything, like the search (tabs and chips count inside it).
+  const inWorkspace = and(
+    eq(feedback.workspaceId, workspaceId),
+    topicFilter(workspaceId, query.topic),
+  );
   const search = searchFilter(query.q);
   const ofType = query.type ? eq(feedback.type, query.type) : undefined;
   const ofStatus =
@@ -154,10 +186,16 @@ export async function listFeedback(
       .groupBy(feedback.status),
   ]);
 
-  const linked = await taskRefs(
-    db,
-    rows.flatMap((r) => (r.row.taskId ? [r.row.taskId] : [])),
-  );
+  const [linked, topics] = await Promise.all([
+    taskRefs(
+      db,
+      rows.flatMap((r) => (r.row.taskId ? [r.row.taskId] : [])),
+    ),
+    topicsById(
+      db,
+      rows.map((r) => r.row.topicId),
+    ),
+  ]);
   const typeCounts = Object.fromEntries([
     ['all', byType.reduce((sum, r) => sum + r.n, 0)],
     ...FEEDBACK_TYPES.map((t) => [t, byType.find((r) => r.type === t)?.n ?? 0]),
@@ -167,7 +205,7 @@ export async function listFeedback(
   ) as FeedbackListResponse['statusCounts'];
 
   return {
-    items: rows.map(({ row, attachmentCount }) => toListItem(row, attachmentCount, linked)),
+    items: rows.map(({ row, attachmentCount }) => toListItem(row, attachmentCount, linked, topics)),
     total: totals?.total ?? 0,
     unread: totals?.unread ?? 0,
     typeCounts,
@@ -179,6 +217,7 @@ const toListItem = (
   row: FeedbackRow,
   attachmentCount: number,
   linked: Map<string, FeedbackTaskRef>,
+  topics: Map<string, FeedbackTopic>,
 ): FeedbackListItem => ({
   id: row.id,
   ref: formatFeedbackRef(row.number),
@@ -189,6 +228,7 @@ const toListItem = (
   attachmentCount,
   submitterName: row.submitterName,
   email: row.email,
+  topic: row.topicId ? (topics.get(row.topicId) ?? null) : null,
   task: row.taskId ? (linked.get(row.taskId) ?? null) : null,
   isRead: row.isRead,
   createdAt: row.createdAt.toISOString(),
@@ -213,7 +253,7 @@ export async function reportsOfTask(db: DbOrTx, taskId: string): Promise<Feedbac
 /** `GET /feedback/:id`. */
 export async function buildFeedbackDetail(db: DbOrTx, id: string): Promise<FeedbackDetail> {
   const row = await loadFeedbackRow(db, id);
-  const [files, log, linked, reports] = await Promise.all([
+  const [files, log, linked, reports, topics] = await Promise.all([
     db
       .select()
       .from(feedbackAttachments)
@@ -227,8 +267,9 @@ export async function buildFeedbackDetail(db: DbOrTx, id: string): Promise<Feedb
       .orderBy(asc(feedbackActivity.createdAt), asc(feedbackActivity.id)),
     taskRefs(db, row.taskId ? [row.taskId] : []),
     row.taskId ? reportsOfTask(db, row.taskId) : Promise.resolve([]),
+    topicsById(db, [row.topicId]),
   ]);
-  const { preview: _preview, ...item } = toListItem(row, files.length, linked);
+  const { preview: _preview, ...item } = toListItem(row, files.length, linked, topics);
   return {
     ...item,
     body: row.body,

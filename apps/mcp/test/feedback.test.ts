@@ -31,6 +31,7 @@ const item = (over: Record<string, unknown> = {}) => ({
   attachmentCount: 1,
   submitterName: 'Bold',
   email: EMAIL,
+  topic: null,
   task: null,
   isRead: false,
   createdAt: AT,
@@ -130,6 +131,36 @@ describe('list_feedback', () => {
     const res = await call('list_feedback');
     expect(res.text).toContain(`no name given · linked ${TASK.key}`);
     expect(res.text).not.toContain('customer');
+  });
+});
+
+describe('list_feedback topics', () => {
+  const TOPIC = {
+    id: '01890000-0000-7000-8000-000000000731',
+    key: 'checkout',
+    name: 'Checkout',
+    color: 'blue',
+  };
+  const TOPICS = `GET /workspaces/${WORKSPACE_ID}/feedback-topics`;
+
+  it('resolves a topic by name or key and shows each report’s topic', async () => {
+    const { call, calls } = await connect({
+      [TOPICS]: () => [{ ...TOPIC, feedbackCount: 1 }],
+      [`GET /workspaces/${WORKSPACE_ID}/feedback`]: () => list([item({ topic: TOPIC })]),
+    });
+    const res = await call('list_feedback', { topic: 'CHECKOUT' });
+    expect(res.isError, res.text).toBe(false);
+    expect(calls.find((c) => c.path.endsWith('/feedback'))?.query).toBe('?topic=checkout&limit=20');
+    expect(res.text).toContain('FB-1042 · bug · new · topic Checkout · Login fails');
+    const none = await call('list_feedback', { topic: 'none' });
+    expect(none.isError, none.text).toBe(false);
+  });
+
+  it('never guesses an unknown topic', async () => {
+    const { call } = await connect({ [TOPICS]: () => [{ ...TOPIC, feedbackCount: 0 }] });
+    const res = await call('list_feedback', { topic: 'Payments' });
+    expect(res.isError).toBe(true);
+    expect(res.text).toContain('No feedback topic "Payments". Topics: Checkout (checkout)');
   });
 });
 

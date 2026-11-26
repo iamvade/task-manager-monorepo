@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { transliterate } from './project-key.js';
 
 // Customer feedback: the public form, the team's inbox, links to tasks.
 
@@ -20,6 +21,7 @@ export const FEEDBACK_ACTIVITY_KINDS = [
   'unlinked',
   'assignee_change',
   'similar_found',
+  'topic_change',
 ] as const;
 export const feedbackActivityKindSchema = z.enum(FEEDBACK_ACTIVITY_KINDS);
 export type FeedbackActivityKind = z.infer<typeof feedbackActivityKindSchema>;
@@ -134,3 +136,37 @@ export const feedbackReportRefSchema = z
   })
   .meta({ id: 'FeedbackReportRef' });
 export type FeedbackReportRef = z.infer<typeof feedbackReportRefSchema>;
+
+// ---------------------------------------------------------------------------------------------
+// Topics: a workspace's own list (Checkout, Mobile app…). A public link can preset one
+// (`/feedback/:slug?topic=<key>`); the key stays when the topic is renamed so old links work.
+
+export const FEEDBACK_TOPIC_NAME_MAX = 40;
+export const FEEDBACK_TOPIC_KEY_MAX = 40;
+/** Query parameter of the public form that presets a topic. */
+export const FEEDBACK_TOPIC_PARAM = 'topic';
+/** Inbox filter value for items without a topic. */
+export const FEEDBACK_NO_TOPIC = 'none';
+
+export const feedbackTopicNameSchema = z.string().trim().min(1).max(FEEDBACK_TOPIC_NAME_MAX);
+
+/** Lowercase words joined by `-` (like workspace slugs); `none` is the inbox's "No topic" filter. */
+export const feedbackTopicKeySchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .min(1)
+  .max(FEEDBACK_TOPIC_KEY_MAX)
+  .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'Use lowercase letters, digits and dashes')
+  .refine((key) => key !== FEEDBACK_NO_TOPIC, 'This key is reserved');
+
+/** Suggested key from a topic name (Cyrillic transliterated); `topic` when nothing is left. */
+export function feedbackTopicKey(name: string): string {
+  const key = transliterate(name)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, FEEDBACK_TOPIC_KEY_MAX)
+    .replace(/-+$/, '');
+  return key && key !== FEEDBACK_NO_TOPIC ? key : 'topic';
+}
