@@ -335,9 +335,13 @@ function useSummaryWrite<V>(
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: send,
+    // A day fetch already in flight could land after the write with the old summary.
+    onMutate: () => queryClient.cancelQueries({ queryKey: queryKeys.standupDays(groupId) }),
     onSuccess: ({ summary }) => {
       editDays(queryClient, groupId, (day) => (day.date === date ? { ...day, summary } : day));
     },
+    // Whatever the cancelled fetch was bringing (a new post) comes now, after the write.
+    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.standupDays(groupId) }),
   });
 }
 

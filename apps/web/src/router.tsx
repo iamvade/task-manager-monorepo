@@ -178,6 +178,11 @@ export const routes: RouteObject[] = [
                         lazy: page(standupPages, (m) => m.StandupGroupPage),
                       },
                       {
+                        // Live mode was removed: old links open the day page.
+                        path: ':groupId/:date/live',
+                        element: <Navigate to=".." relative="path" replace />,
+                      },
+                      {
                         path: ':groupId/settings',
                         lazy: page(
                           () => import('./features/standup/StandupSettingsView'),

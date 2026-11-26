@@ -1,11 +1,15 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { standupSummaryResultSchema, type StandupSummaryResult } from '@kite/shared';
+import {
+  REALTIME_CLIENT_HEADER,
+  standupSummaryResultSchema,
+  type StandupSummaryResult,
+} from '@kite/shared';
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { standupMeetings, taskReferences, userAbsences } from '../src/db/schema/index.js';
 import type { apiClient } from './fixtures.js';
-import { errorCode } from './fixtures.js';
+import { ORIGIN, errorCode, login } from './fixtures.js';
 import { createTestApp } from './helpers.js';
 import { standupWorld, testClock } from './standup-setup.js';
 import { taskWorld } from './task-setup.js';
@@ -225,16 +229,29 @@ describe('standup meeting summary', () => {
     ).toEqual({ status: 400, code: 'INVALID_SOURCE' });
   });
 
-  it('tells the group’s members only', async () => {
+  it('tells the group’s members only, not the tab that wrote it', async () => {
     const w = await summaryWorld();
     const publish = vi.spyOn(ctx.app.realtime.broadcaster, 'publish');
     try {
-      await w.anu.api('PUT', w.base(), { notes: 'Hello' });
+      const tab = '01890000-0000-7000-8000-0000000000aa';
+      const r = await ctx.app.inject({
+        method: 'PUT',
+        url: `/api/v1${w.base()}`,
+        headers: {
+          cookie: await login(ctx.app, w.owner.email),
+          origin: ORIGIN,
+          [REALTIME_CLIENT_HEADER]: tab,
+        },
+        payload: { notes: 'Hello' },
+      });
+      expect(r.statusCode, r.body).toBe(200);
       const sent = publish.mock.calls
         .map(([e]) => e)
         .filter((e) => e.message.type === 'standup.summary_changed');
       expect(sent).toHaveLength(1);
       const [e] = sent;
+      // Not back to the tab that wrote it: its editor holds the newer text.
+      expect(e?.exceptClientId).toBe(tab);
       expect(new Set(e && 'userIds' in e.to ? e.to.userIds : [])).toEqual(
         new Set([w.owner.id, w.bat.user.id, w.sara.user.id, w.dorj.user.id]),
       );

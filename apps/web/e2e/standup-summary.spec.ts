@@ -71,7 +71,11 @@ test('Bat writes the meeting summary and creates a task from a blocker; Anu read
     .getByRole('textbox', { name: 'Meeting summary' })
     .fill('Bat renews the sandbox keys today');
   await expect(summary.getByText('Saved', { exact: true })).toBeVisible();
-  await expectAccessible(bat, 'Standup summary editor');
+  for (const scheme of ['light', 'dark'] as const) {
+    await bat.emulateMedia({ colorScheme: scheme });
+    await expectAccessible(bat, `Standup summary editor (${scheme})`);
+  }
+  await bat.emulateMedia({ colorScheme: 'light' });
 
   // Create task from Dorj's blocker: quick create opens prefilled.
   await bat
@@ -97,5 +101,17 @@ test('Bat writes the meeting summary and creates a task from a blocker; Anu read
   await expect(read.getByText('Bat renews the sandbox keys today')).toBeVisible();
   await expect(read.getByText('Payment provider sandbox API keys have expired')).toBeVisible();
   await expect(read.getByRole('textbox')).toHaveCount(0);
+  for (const scheme of ['light', 'dark'] as const) {
+    await anu.emulateMedia({ colorScheme: scheme });
+    await expectAccessible(anu, `Standup summary, read-only (${scheme})`);
+  }
+  for (const scheme of ['light', 'dark'] as const) {
+    await bat.emulateMedia({ colorScheme: scheme });
+    await expectAccessible(bat, `Standup summary with a created task (${scheme})`);
+  }
+
+  // An old live-mode link opens the day page.
+  await anu.goto(`${page}/live`);
+  await expect(anu).toHaveURL(new RegExp(`${page}$`));
   await bat.context().close();
 });
