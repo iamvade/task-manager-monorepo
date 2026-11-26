@@ -66,7 +66,6 @@ import {
   changeStatus,
   closureStamps,
   openStatusPeriods,
-  projectLead,
   switchStatusAcrossProjects,
 } from '../tasks/status.js';
 
@@ -198,7 +197,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Tasks'],
         summary: 'Update a task',
         description:
-          'Title, description (TipTap JSON; its plain text is stored for search, newly @mentioned members follow the task), status, priority, size, start/due date, sprint, reviewer. Writes one activity row per changed field; unchanged values are ignored. A new status puts the task at the end of that status; entering a done status sets `completedAt`, leaving it clears it (`closedAt` likewise for done and cancelled). Entering a review status without a reviewer sets one: `reviewerId` from the same body, else the project lead (`reviewerId: null` keeps it empty). The reviewer must be a workspace member (400 `INVALID_REFERENCE`).',
+          'Title, description (TipTap JSON; its plain text is stored for search, newly @mentioned members follow the task), status, priority, size, start/due date, sprint, reviewer. Writes one activity row per changed field; unchanged values are ignored. A new status puts the task at the end of that status; entering a done status sets `completedAt`, leaving it clears it (`closedAt` likewise for done and cancelled). Entering a review status without a reviewer sets `reviewerId` from the same body, if given. The reviewer must be a workspace member (400 `INVALID_REFERENCE`).',
         params: taskParams,
         body: updateTaskSchema,
         response: { 200: taskDetailSchema, 400: err, 401: err, 404: err },
@@ -548,7 +547,7 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Tasks'],
         summary: 'Duplicate a task',
         description:
-          'Copies the task into the same project under the next number, right after the original in its status: title (or `title` from the body), description, priority, size, start/due date, sprint, assignees, tags and subtasks (unchecked). The reviewer is not copied (a copy in review gets the project lead). Comments, attachments and followers are not copied. Logs `task.created` with `duplicateOf`; the caller, the assignees and members @mentioned in the description follow the copy.',
+          'Copies the task into the same project under the next number, right after the original in its status: title (or `title` from the body), description, priority, size, start/due date, sprint, assignees, tags and subtasks (unchecked). The reviewer is not copied. Comments, attachments and followers are not copied. Logs `task.created` with `duplicateOf`; the caller, the assignees and members @mentioned in the description follow the copy.',
         params: taskParams,
         body: duplicateTaskSchema.nullish(),
         response: { 201: taskDetailSchema, 400: err, 401: err, 404: err },
@@ -574,7 +573,6 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         const sprint = source.sprintId
           ? one(await tx.select().from(sprints).where(eq(sprints.id, source.sprintId)), 'sprint')
           : null;
-        const reviewer = status.category === 'review' ? await projectLead(tx, m.project) : null;
         const number = m.project.taskSeq + 1;
         await tx.update(projects).set({ taskSeq: number }).where(eq(projects.id, m.project.id));
         const copy = one(
@@ -590,7 +588,6 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
               descriptionText: source.descriptionText,
               priority: source.priority,
               size: source.size,
-              reviewerId: reviewer?.id ?? null,
               startDate: source.startDate,
               dueDate: source.dueDate,
               position,
@@ -656,7 +653,6 @@ export const taskRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
           { taskId: copy.id, status, at: m.now, actorId: scope.actorId },
         ]);
         if (sprint) await startInSprint(m, copy.id, sprint);
-        if (reviewer) m.log(copy.id, 'reviewer.changed', { from: null, to: reviewer });
         m.emit('task.created', copy.id, { assigneeIds, mentionedUserIds: mentioned });
         return copy.id;
       });

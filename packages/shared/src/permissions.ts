@@ -14,7 +14,7 @@ export function canManageCreated(
 
 /**
  * Renaming, recoloring and reordering spaces and projects, and moving a project to another space:
- * admins and owners. Members edit a project's brief and lead.
+ * admins and owners.
  */
 export function canManageStructure(role: WorkspaceRole): boolean {
   return role !== 'member';

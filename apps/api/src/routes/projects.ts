@@ -2,7 +2,6 @@ import {
   PALETTE_KEYS,
   apiErrorSchema,
   archivedProjectSchema,
-  richTextToPlain,
   createProjectSchema,
   moveProjectSchema,
   projectDetailSchema,
@@ -29,7 +28,6 @@ import { broadcastSpacesChanged } from '../realtime/spaces.js';
 import { buildProjectDetail } from '../projects/detail.js';
 import { pickProjectKey } from '../projects/keys.js';
 import { insertDefaultStatuses } from '../projects/statuses.js';
-import { requireMembers } from '../tasks/refs.js';
 
 const err = apiErrorSchema;
 const projectParams = z.object({ projectId: z.uuid() });
@@ -193,7 +191,7 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
         tags: ['Projects'],
         summary: 'Update a project',
         description:
-          'Name, key, color, lead (the default reviewer; a workspace member, else 400 `INVALID_REFERENCE`) or the brief (`description`, TipTap JSON; its plain text is stored for search). Any member may edit the lead and the brief; name, key and color are for admins and owners (403). 409 `PROJECT_KEY_TAKEN` when the key is in use.',
+          'Name, key or color. Admins and owners only (403 for members). 409 `PROJECT_KEY_TAKEN` when the key is in use.',
         params: projectParams,
         body: updateProjectSchema,
         response: { 200: projectDetailSchema, 400: err, 401: err, 403: err, 404: err, 409: err },
@@ -201,28 +199,14 @@ export const projectRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
     },
     async (request) => {
       const { project, role } = await loadProjectAccess(request, request.params.projectId);
-      const { name, key, color } = request.body;
-      const structural = name !== undefined || key !== undefined || color !== undefined;
-      if (structural) requireRole(role, 'admin');
-      if (request.body.leadId) {
-        await requireMembers(app.db, project.workspaceId, [request.body.leadId], 'Lead');
-      }
+      requireRole(role, 'admin');
       try {
-        const { description, ...rest } = request.body;
         const [updated] = await app.db
           .update(projects)
-          .set({
-            ...rest,
-            ...(description !== undefined
-              ? {
-                  description,
-                  descriptionText: description ? richTextToPlain(description) : '',
-                }
-              : {}),
-          })
+          .set(request.body)
           .where(eq(projects.id, project.id))
           .returning();
-        if (structural) broadcastSpacesChanged(request, project.workspaceId);
+        broadcastSpacesChanged(request, project.workspaceId);
         return await detail(request, updated ?? project);
       } catch (e) {
         if (isUniqueViolation(e, KEY_CONSTRAINT)) throw keyTaken();

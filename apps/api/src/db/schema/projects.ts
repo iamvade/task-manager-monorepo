@@ -1,4 +1,4 @@
-import type { PaletteKey, RichTextNode } from '@kite/shared';
+import type { PaletteKey } from '@kite/shared';
 import { sql } from 'drizzle-orm';
 import {
   check,
@@ -6,7 +6,6 @@ import {
   foreignKey,
   index,
   integer,
-  jsonb,
   pgTable,
   primaryKey,
   text,
@@ -54,11 +53,6 @@ export const projects = pgTable(
     /** Last issued task number; tasks take `task_seq + 1`. */
     taskSeq: integer('task_seq').notNull().default(0),
     position: position('position').notNull(),
-    /** Default reviewer for tasks entering review. */
-    leadId: uuid('lead_id').references(() => users.id, { onDelete: 'set null' }),
-    /** The project brief (TipTap JSON) and its plain text. */
-    description: jsonb('description').$type<RichTextNode>(),
-    descriptionText: text('description_text').notNull().default(''),
     /** May archive / restore the project, like an admin. Null for projects made before 0007. */
     createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
     archivedAt: timestamptz('archived_at'),

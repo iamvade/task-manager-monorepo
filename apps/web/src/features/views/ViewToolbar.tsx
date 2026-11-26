@@ -18,8 +18,8 @@ interface ViewToolbarProps {
 }
 
 /**
- * Icon-only toolbar: Filter (count of active filters) · Sort · View settings (List: Group by +
- * Show columns; Board: Columns by) · + New Task. Filter, Sort and Group write the URL. The
+ * Icon-only toolbar: Filter (count of active filters) · Sort · View settings (List: Group by,
+ * Show empty groups, Show columns; Board: Columns by) · + New Task. Filter, Sort and Group write the URL. The
  * calendar has no Sort or View settings (Calendar.dc.html).
  */
 export function ViewToolbar({ project = null, empty = false }: ViewToolbarProps) {
@@ -31,6 +31,8 @@ export function ViewToolbar({ project = null, empty = false }: ViewToolbarProps)
   const board = currentView === 'board';
   const listColumns = useUiStore((s) => s.listColumns);
   const setListColumn = useUiStore((s) => s.setListColumn);
+  const showEmptyGroups = useUiStore((s) => s.showEmptyGroups);
+  const setShowEmptyGroups = useUiStore((s) => s.setShowEmptyGroups);
   const newTask = () => {
     // Quick create keeps the filtered sprint while the picked project is in it.
     const sprint = view.sprintId ? { sprintId: view.sprintId } : {};
@@ -81,6 +83,15 @@ export function ViewToolbar({ project = null, empty = false }: ViewToolbarProps)
             view.update({ group: field === 'status' ? null : field });
           },
         })),
+        { type: 'separator', id: 'sep-groups' },
+        {
+          id: 'empty-groups',
+          label: t('toolbar.showEmptyGroups'),
+          checked: showEmptyGroups,
+          onSelect: () => {
+            setShowEmptyGroups(!showEmptyGroups);
+          },
+        },
         { type: 'separator', id: 'sep' },
         { type: 'heading', id: 'columns', label: t('toolbar.columnsMenu') },
         {

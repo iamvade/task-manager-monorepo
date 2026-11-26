@@ -11,9 +11,9 @@ import { AssigneePicker } from '../pickers/AssigneePicker';
 import { AbsenceList } from './AbsenceList';
 
 /**
- * Settings → Members "Deactivate…" (not designed): what the leaver hands over (open tasks,
- * reviews, projects they lead), one optional successor, and the danger confirm. The successor
- * takes their open tasks, reviews and lead roles; without one they're just removed from them.
+ * Settings → Members "Deactivate…" (not designed): what the leaver hands over (open tasks and
+ * reviews), one optional successor, and the danger confirm. The successor takes their open tasks
+ * and reviews; without one they're just removed from them.
  */
 export function DeactivateDialog({
   workspaceId,
@@ -53,14 +53,6 @@ export function DeactivateDialog({
           <ul className="m-0 flex list-none flex-col gap-1 pl-0 text-[13px] text-2">
             <li>{t('members.deactivate.openTasks', { count: handover.data.openTasks })}</li>
             <li>{t('members.deactivate.reviewing', { count: handover.data.reviewing })}</li>
-            <li>
-              {handover.data.leadOf.length === 0
-                ? t('members.deactivate.leadsNone')
-                : t('members.deactivate.leads', {
-                    count: handover.data.leadOf.length,
-                    projects: handover.data.leadOf.map((p) => p.name).join(', '),
-                  })}
-            </li>
           </ul>
         )}
         <div className="flex flex-col gap-1.5">

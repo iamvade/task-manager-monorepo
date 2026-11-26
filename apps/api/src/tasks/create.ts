@@ -16,7 +16,7 @@ import {
   statusSnapshot,
 } from './refs.js';
 import { startInSprint } from './sprint.js';
-import { closureStamps, openStatusPeriods, projectLead } from './status.js';
+import { closureStamps, openStatusPeriods } from './status.js';
 
 /**
  * Creates a task in the mutation's (locked) project under its next number, as the actor:
@@ -37,7 +37,6 @@ export async function createTask(
     : (statusRows.find((s) => s.category === 'todo') ?? statusRows[0]);
   if (!status) throw new Error(`Project ${m.project.id} has no statuses`);
   const sprint = body.sprintId ? await requireSprintIn(tx, m.project.id, body.sprintId) : null;
-  const reviewer = status.category === 'review' ? await projectLead(tx, m.project) : null;
   const assignees = await requireMembers(tx, workspaceId, body.assigneeIds ?? []);
   const tagRows = await requireTags(tx, workspaceId, body.tagIds ?? []);
 
@@ -59,7 +58,6 @@ export async function createTask(
         descriptionText: description ? richTextToPlain(description) : '',
         priority: body.priority ?? 'none',
         size: body.size ?? null,
-        reviewerId: reviewer?.id ?? null,
         startDate: body.startDate ?? null,
         dueDate: body.dueDate ?? null,
         position:
@@ -93,7 +91,6 @@ export async function createTask(
   m.log(task.id, 'task.created', { status: statusSnapshot(status) });
   await openStatusPeriods(tx, [{ taskId: task.id, status, at: m.now, actorId: m.actorId }]);
   if (sprint) await startInSprint(m, task.id, sprint);
-  if (reviewer) m.log(task.id, 'reviewer.changed', { from: null, to: reviewer });
   m.emit('task.created', task.id, {
     assigneeIds: assignees.map((a) => a.id),
     mentionedUserIds: mentioned,

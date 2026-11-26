@@ -92,7 +92,10 @@ interface GroupContext {
 const isActiveCategory = (category: StatusCategory) =>
   ACTIVE_CATEGORIES.some((c) => c === category);
 
-/** Splits sorted tasks into List groups. Status groups always all show (drop targets). */
+/**
+ * Splits sorted tasks into List groups. Every status gets a group here; the table hides the
+ * empty ones unless the user turned on "Show empty groups".
+ */
 export function groupTasks(
   tasks: readonly TaskListItem[],
   group: GroupField,

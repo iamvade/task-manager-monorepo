@@ -235,6 +235,7 @@
     "sort": "Sort: {{field}}",
     "sortBy": "Sort by",
     "groupBy": "Group by",
+    "showEmptyGroups": "Show empty groups",
     "newTask": "New Task",
     "sortFields": {
       "due": "Due date",
@@ -291,12 +292,6 @@
     "noSprints": "No sprints yet",
     "searchPeople": "Search people",
     "searchTags": "Search tags"
-  },
-  "summary": {
-    "tasks_one": "{{count}} task · {{done}} done",
-    "tasks_other": "{{count}} tasks · {{done}} done",
-    "tasksOf_one": "{{count}} of {{total}} tasks · {{done}} done",
-    "tasksOf_other": "{{count}} of {{total}} tasks · {{done}} done"
   },
   "table": {
     "label": "{{project}} tasks",
@@ -1671,16 +1666,6 @@
     "deleted_other": "Deleted {{count}} tasks",
     "clear": "Clear selection"
   },
-  "brief": {
-    "label": "About {{project}}",
-    "title": "Project brief",
-    "empty": "Add a brief: goal, links, who to ask",
-    "none": "No brief yet",
-    "placeholder": "What is this project for? Goals, links, who to ask…",
-    "lead": "Lead",
-    "noLead": "No lead",
-    "setLead": "Project lead"
-  },
   "members": {
     "actions": "More actions for {{name}}",
     "away": {
@@ -1711,9 +1696,6 @@
       "openTasks_other": "{{count}} open tasks assigned",
       "reviewing_one": "Reviewer on {{count}} open task",
       "reviewing_other": "Reviewer on {{count}} open tasks",
-      "leads_one": "Leads {{projects}}",
-      "leads_other": "Leads {{count}} projects: {{projects}}",
-      "leadsNone": "Leads no project",
       "handTo": "Hand their open work to",
       "nobody": "Nobody (just remove them)",
       "confirm": "Deactivate",

@@ -1,12 +1,9 @@
 import type { ProjectDetail } from '@kite/shared';
 import { useTranslation } from 'react-i18next';
-import { useProjectTasks, useSpaceTasks } from '../../api/tasks';
 import { useCurrentWorkspace } from '../../api/workspaces';
 import { FilterChip } from '../../components/ui/FilterChip';
 import { useDates } from '../../lib/useDates';
 import { useFilterOptions, type FilterOption } from '../views/filterOptions';
-import { useTaskQuery } from '../views/useTaskQuery';
-import { useCurrentView } from '../views/useCurrentView';
 import {
   activeFilterFields,
   NO_SPRINT,
@@ -23,22 +20,14 @@ const names = (options: FilterOption[], keys: readonly string[]) =>
     .filter(Boolean)
     .join(', ');
 
-/** Active filter chips + "16 tasks · 4 done" for the filtered list (Main.dc.html, 12/24/0). */
-export function FilterStrip({ project, spaceId }: FilterStripProps) {
+/** Active filter chips for the current view; nothing when no filter is on. */
+export function FilterStrip({ project }: FilterStripProps) {
   const { t } = useTranslation();
   const dates = useDates();
   const workspace = useCurrentWorkspace();
   const view = useViewParams();
   const { filters } = view;
   const options = useFilterOptions(project ?? null, project?.workspaceId ?? workspace?.id);
-
-  // Same query (and cache entry) as the list itself. The calendar shows chips only (its tasks
-  // are a date range, so a count would mislead).
-  const calendar = useCurrentView() === 'calendar';
-  const query = useTaskQuery(project ? 'project' : 'space');
-  const projectTasks = useProjectTasks(calendar ? undefined : project?.id, query);
-  const spaceTasks = useSpaceTasks(calendar ? undefined : spaceId, query);
-  const tasks = calendar ? undefined : (project ? projectTasks : spaceTasks).data;
 
   function value(field: FilterField): string {
     switch (field) {
@@ -69,7 +58,7 @@ export function FilterStrip({ project, spaceId }: FilterStripProps) {
   }
 
   const fields = activeFilterFields(filters);
-  if (calendar && fields.length === 0) return null;
+  if (fields.length === 0) return null;
   return (
     <div className="flex flex-wrap items-center gap-2 px-6 pt-3">
       {fields.map((field) => {
@@ -86,21 +75,6 @@ export function FilterStrip({ project, spaceId }: FilterStripProps) {
           />
         ) : null;
       })}
-      {tasks && (
-        <span className="text-[12px] text-muted">
-          {/* "27 of 139 tasks" whenever filters or the recent-done window hide some. */}
-          {project && tasks.length < project.taskCount
-            ? t('summary.tasksOf', {
-                count: tasks.length,
-                total: project.taskCount,
-                done: tasks.filter((x) => x.status.category === 'done').length,
-              })
-            : t('summary.tasks', {
-                count: tasks.length,
-                done: tasks.filter((x) => x.status.category === 'done').length,
-              })}
-        </span>
-      )}
     </div>
   );
 }

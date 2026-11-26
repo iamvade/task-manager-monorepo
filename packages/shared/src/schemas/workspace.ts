@@ -57,8 +57,6 @@ export const memberHandoverSchema = z
     openTasks: z.number().int(),
     /** Open tasks where they are the reviewer. */
     reviewing: z.number().int(),
-    /** Non-archived projects they lead. */
-    leadOf: z.array(z.object({ id: z.uuid(), key: z.string(), name: z.string() })),
   })
   .meta({ id: 'MemberHandover' });
 export type MemberHandover = z.infer<typeof memberHandoverSchema>;

@@ -236,31 +236,6 @@ describe('quick create', () => {
     expect(title).toHaveValue('Will fail');
   });
 
-  it('starts with the status of the group it was opened from', async () => {
-    const { created } = api();
-    renderAt(LIST);
-    await screen.findByRole('table');
-    fireEvent.click(screen.getByRole('button', { name: 'Add task to In Review' }));
-    const dialog = await screen.findByRole('dialog', { name: 'New task' });
-    expect(
-      await within(dialog).findByRole('button', { name: 'Status: In Review' }),
-    ).toBeInTheDocument();
-    fireEvent.change(within(dialog).getByRole('textbox', { name: 'Task title' }), {
-      target: { value: 'Review copy' },
-    });
-    fireEvent.click(within(dialog).getByRole('button', { name: /Create task/ }));
-    await waitFor(() => {
-      expect(created).toEqual([
-        {
-          title: 'Review copy',
-          statusId: statusOf('review').id,
-          position: 'bottom',
-          sprintId: SPRINT_ID,
-        },
-      ]);
-    });
-  });
-
   it('sets a size under More fields', async () => {
     const { created } = api();
     renderAt(LIST);

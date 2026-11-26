@@ -58,8 +58,8 @@ interface UiState {
   calendarHidden: Record<string, string[]>;
   /** Optional List columns the user turned on (shared by every list). */
   listColumns: ListColumns;
-  /** Project brief panels the user expanded (true) or collapsed (false); missing = collapsed. */
-  briefOpen: Record<string, boolean>;
+  /** List groups with no tasks are shown (View settings); hidden by default. */
+  showEmptyGroups: boolean;
   paletteOpen: boolean;
   shortcutsOpen: boolean;
   /** The space or project whose sidebar row shows the rename field (admins; not persisted). */
@@ -86,7 +86,7 @@ interface UiState {
   setCalendarMode: (mode: CalendarMode) => void;
   toggleCalendarProject: (spaceId: string, projectId: string) => void;
   setListColumn: (column: keyof ListColumns, on: boolean) => void;
-  setBriefOpen: (projectId: string, open: boolean) => void;
+  setShowEmptyGroups: (on: boolean) => void;
   setPaletteOpen: (open: boolean) => void;
   setShortcutsOpen: (open: boolean) => void;
   setRenaming: (id: string | null) => void;
@@ -110,7 +110,7 @@ type UiData = Omit<
   | 'setCalendarMode'
   | 'toggleCalendarProject'
   | 'setListColumn'
-  | 'setBriefOpen'
+  | 'setShowEmptyGroups'
   | 'setPaletteOpen'
   | 'setShortcutsOpen'
   | 'setRenaming'
@@ -133,7 +133,7 @@ export const initialUiState: UiData = {
   calendarMode: 'month',
   calendarHidden: {},
   listColumns: { key: true, size: false },
-  briefOpen: {},
+  showEmptyGroups: false,
   paletteOpen: false,
   shortcutsOpen: false,
   renamingId: null,
@@ -211,8 +211,8 @@ export const useUiStore = create<UiState>()(
       setListColumn: (column, on) => {
         set((s) => ({ listColumns: { ...s.listColumns, [column]: on } }));
       },
-      setBriefOpen: (projectId, open) => {
-        set((s) => ({ briefOpen: { ...s.briefOpen, [projectId]: open } }));
+      setShowEmptyGroups: (on) => {
+        set({ showEmptyGroups: on });
       },
       setPaletteOpen: (open) => {
         set(open ? { paletteOpen: true, shortcutsOpen: false } : { paletteOpen: false });
@@ -260,7 +260,7 @@ export const useUiStore = create<UiState>()(
         calendarMode: s.calendarMode,
         calendarHidden: s.calendarHidden,
         listColumns: s.listColumns,
-        briefOpen: s.briefOpen,
+        showEmptyGroups: s.showEmptyGroups,
         pushOptIn: s.pushOptIn,
         navItems: s.navItems,
         navMoreOpen: s.navMoreOpen,

@@ -163,7 +163,6 @@ async function generate(database: Db) {
       key: `PF${String.fromCharCode(65 + i)}`,
       color: 'blue' as const,
       position: `a${i}`,
-      leadId: pick(personIds),
     }));
     await tx.insert(projects).values(projectRows);
 

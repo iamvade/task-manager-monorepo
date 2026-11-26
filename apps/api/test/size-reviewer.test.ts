@@ -1,4 +1,4 @@
-import { SIZE_POINTS, projectDetailSchema, taskDetailSchema } from '@kite/shared';
+import { SIZE_POINTS, taskDetailSchema } from '@kite/shared';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { TaskEvent } from '../src/events/bus.js';
 import { toRealtime } from '../src/realtime/messages.js';
@@ -47,31 +47,15 @@ describe('task size and reviewer', () => {
     expect(taskDetailSchema.parse(res.json()).size).toBe('L');
   });
 
-  it('defaults the reviewer to the project lead when a task enters review', async () => {
-    const { api, owner, project, person, status, createTask, activities } = await taskWorld(ctx);
-    const lead = await person('member', 'Bat Lead');
-    const res = await api('PATCH', `/projects/${project.id}`, { leadId: lead.user.id });
-    expect(res.statusCode, res.body).toBe(200);
-    expect(projectDetailSchema.parse(res.json()).leadId).toBe(lead.user.id);
-
+  it('leaves the reviewer empty when a task enters review without a pick', async () => {
+    const { api, status, createTask, activities } = await taskWorld(ctx);
     const task = await createTask({ title: 'Review me', statusId: status('in_progress').id });
     const moved = await api('POST', `/tasks/${task.id}/move`, { statusId: status('review').id });
     expect(moved.statusCode, moved.body).toBe(200);
     const detail = taskDetailSchema.parse((await api('GET', `/tasks/${task.id}`)).json());
-    expect(detail.reviewerId).toBe(lead.user.id);
-    expect(detail.reviewer).toMatchObject({ id: lead.user.id, name: 'Bat Lead' });
-
-    // Leaving review keeps the reviewer; coming back doesn't replace it.
-    await api('PATCH', `/tasks/${task.id}`, { statusId: status('in_progress').id });
-    await api('PATCH', `/projects/${project.id}`, { leadId: owner.id });
-    await api('PATCH', `/tasks/${task.id}`, { statusId: status('review').id });
-    const again = taskDetailSchema.parse((await api('GET', `/tasks/${task.id}`)).json());
-    expect(again.reviewerId).toBe(lead.user.id);
-
+    expect(detail.reviewerId).toBeNull();
     const logged = (await activities(task.id)).filter((a) => a.type === 'reviewer.changed');
-    expect(logged.map((a) => a.payload)).toEqual([
-      { from: null, to: { id: lead.user.id, name: 'Bat Lead' } },
-    ]);
+    expect(logged).toEqual([]);
   });
 
   it('uses the reviewer picked with the status change, or none when null', async () => {
@@ -92,7 +76,7 @@ describe('task size and reviewer', () => {
     expect(taskDetailSchema.parse(none.json()).reviewerId).toBeNull();
   });
 
-  it('leaves the reviewer empty without a lead, and rejects non-members', async () => {
+  it('creates a task in review without a reviewer, and rejects non-members', async () => {
     const { api, person, status, createTask } = await taskWorld(ctx);
     const task = await createTask({ title: 'No lead', statusId: status('review').id });
     expect(task.reviewerId).toBeNull();
@@ -101,8 +85,6 @@ describe('task size and reviewer', () => {
     const res = await api('PATCH', `/tasks/${task.id}`, { reviewerId: outsider.user.id });
     expect(res.statusCode).toBe(400);
     expect(errorCode(res)).toBe('INVALID_REFERENCE');
-    const lead = await api('PATCH', `/projects/${task.project.id}`, { leadId: outsider.user.id });
-    expect(errorCode(lead)).toBe('INVALID_REFERENCE');
   });
 
   it('carries size and reviewer in realtime task.updated', async () => {

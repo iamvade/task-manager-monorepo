@@ -16,7 +16,7 @@ import { httpError } from '../errors.js';
 import { insertSprint } from '../sprints/query.js';
 import { sprintSnapshot, statusSnapshot } from '../tasks/refs.js';
 import { openSprintMemberships } from '../tasks/sprint.js';
-import { closureStamps, openStatusPeriods, projectLead } from '../tasks/status.js';
+import { closureStamps, openStatusPeriods } from '../tasks/status.js';
 import { buildProjectDetail } from './detail.js';
 import { listStatuses } from './statuses.js';
 import { TEMPLATES, type Text } from './templates/index.js';
@@ -111,9 +111,6 @@ export async function applyTemplate(
       positionsByStatus.set(status.id, generateNKeysBetween(last, null, n));
     }
 
-    const lead = planned.some((p) => p.status.category === 'review')
-      ? await projectLead(tx, project)
-      : null;
     const created = await tx
       .insert(tasks)
       .values(
@@ -124,7 +121,6 @@ export async function applyTemplate(
           sprintId: sprint?.id ?? null,
           title: pick(def.title),
           priority: def.priority,
-          reviewerId: status.category === 'review' ? (lead?.id ?? null) : null,
           dueDate: def.dueInDays === undefined ? null : addDays(today, def.dueInDays),
           position: positionsByStatus.get(status.id)?.shift() ?? '',
           createdBy: user.id,
@@ -195,14 +191,6 @@ export async function applyTemplate(
               from: null,
               to: sprintSnapshot(sprint),
             } satisfies ActivityPayload<'sprint.changed'>),
-          ]
-        : []),
-      ...(lead && status.category === 'review'
-        ? [
-            row(i, 'reviewer.changed', {
-              from: null,
-              to: lead,
-            } satisfies ActivityPayload<'reviewer.changed'>),
           ]
         : []),
     ]);

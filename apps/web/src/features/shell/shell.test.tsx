@@ -100,7 +100,6 @@ describe('app shell', () => {
     expect(crumb).toHaveTextContent('App Redesign');
     expect(screen.getByRole('img', { name: 'Төслийн 7 гишүүн' })).toHaveTextContent('+3');
     expect(await screen.findByText('10-р сарын 6 – 24')).toBeInTheDocument();
-    expect(screen.getByText('7 ажил · 1 дууссан')).toBeInTheDocument();
     expect(router.state.location.search).toBe(`?sprint=${SPRINT_ID}`);
 
     fireEvent.click(screen.getByRole('button', { name: 'Шүүлтүүрийг арилгах' }));
@@ -190,7 +189,6 @@ describe('app shell', () => {
     expect(screen.getByRole('radio', { name: 'Active' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Views' })).toBeInTheDocument();
     expect(await screen.findByText('Oct 6 – Oct 24')).toBeInTheDocument();
-    expect(screen.getByText('7 tasks · 1 done')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sort: Due date' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'View settings' })).toBeInTheDocument();
     await waitFor(() => {
@@ -368,42 +366,6 @@ describe('app shell', () => {
     await act(() => router.navigate(`/w/kite-studio/s/${SPACE_ID}/list`));
     fireEvent.click(await screen.findByRole('button', { name: 'Орон зайн сонголтууд' }));
     expect(await screen.findByRole('menuitem', { name: 'Орон зайг устгах' })).toBeInTheDocument();
-  });
-
-  it('shows the project brief collapsed with its first line, and sets the lead', async () => {
-    const patches: unknown[] = [];
-    const brief = {
-      type: 'doc',
-      content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'Ship the redesign by Q4' }] },
-      ],
-    };
-    const sara = PROJECT_WITH_STATUSES.members[1]?.user;
-    api({
-      [`GET /api/v1/projects/${PROJECT_ID}`]: () =>
-        Response.json({ ...PROJECT_WITH_STATUSES, description: brief }),
-      [`PATCH /api/v1/projects/${PROJECT_ID}`]: (init) => {
-        patches.push(JSON.parse(init?.body as string));
-        return Response.json({ ...PROJECT_WITH_STATUSES, description: brief, leadId: sara?.id });
-      },
-    });
-    renderAt(`/w/kite-studio/p/${PROJECT_ID}/list`);
-    const region = await screen.findByRole('region', { name: 'App Redesign төслийн тухай' });
-    const toggle = within(region).getByRole('button', { name: /Төслийн товч/ });
-    expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    expect(toggle).toHaveTextContent('Ship the redesign by Q4');
-
-    fireEvent.click(within(region).getByRole('button', { name: 'Ахлагч: Ахлагчгүй' }));
-    fireEvent.click(await screen.findByRole('option', { name: new RegExp(sara?.name ?? '') }));
-    await waitFor(() => {
-      expect(patches).toEqual([{ leadId: sara?.id }]);
-    });
-    expect(
-      await within(region).findByRole('button', { name: `Ахлагч: ${sara?.name ?? ''}` }),
-    ).toBeInTheDocument();
-    fireEvent.click(toggle);
-    expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    expect(within(region).getByRole('textbox', { name: 'Төслийн товч' })).toBeInTheDocument();
   });
 
   it('shows a banner with Restore on an archived project', async () => {
