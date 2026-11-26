@@ -8,16 +8,21 @@ const ids = (values: string[]) => values.filter((v) => UUID.test(v));
 
 export type ListScope = 'project' | 'space';
 
+/** "Active" (the default; `?show=all` turns it off): To Do, In Progress and In Review only. */
+export const ACTIVE_CATEGORIES = ['todo', 'in_progress', 'review'] as const;
+
 /**
  * URL filters → list endpoint query. `me` becomes the viewer's id; the space list filters
  * statuses by category. Sort is applied client-side (so optimistic edits re-sort and switching
  * the sort doesn't refetch), hence not sent. `doneSince` (List/Board) drops older done tasks.
+ * `activeOnly` keeps the active categories unless the Filter menu picks statuses (that wins).
  */
 export function toTaskQuery(
   filters: ViewFilters,
   meId: string,
   scope: ListScope,
   doneSince: string | null = null,
+  activeOnly = false,
 ): TaskListParams {
   const query: TaskListParams = {};
   if (scope === 'space') {
@@ -25,6 +30,9 @@ export function toTaskQuery(
     if (categories.length) query.statusCategory = categories;
   } else if (ids(filters.status).length) {
     query.statusId = ids(filters.status);
+  }
+  if (activeOnly && !query.statusCategory && !query.statusId) {
+    query.statusCategory = [...ACTIVE_CATEGORIES];
   }
   const assignees = filters.assignee
     .map((a) => (a === ASSIGNEE_ME ? meId : a))

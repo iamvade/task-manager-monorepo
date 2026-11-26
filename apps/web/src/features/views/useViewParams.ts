@@ -24,6 +24,8 @@ export const FILTER_PARAMS = [
 export const NO_SPRINT = 'none';
 /** `done=all` = List/Board load every done task, not only the last 14 days (not a filter). */
 export const ALL_DONE = 'all';
+/** `show=all` = every status; without it the views show active tasks only (not a filter). */
+export const SHOW_ALL = 'all';
 /** `assignee=me` stays literal in the URL so a shared link means "the viewer". */
 export const ASSIGNEE_ME = 'me';
 
@@ -129,6 +131,10 @@ export function useViewParams() {
     sprintId: filters.sprint,
     hasFilterParams: FILTER_PARAMS.some((key) => params.has(key)),
     allDone: params.get('done') === ALL_DONE,
+    /** Active (default): only To Do / In Progress / In Review, unless statuses are filtered. */
+    activeOnly: params.get('show') !== SHOW_ALL,
+    /** Active and no status filter: closed and on-hold statuses are left out of the views. */
+    hideInactive: params.get('show') !== SHOW_ALL && filters.status.length === 0,
     activeFilterCount: activeFilterFields(filters).length,
     defaultSort,
     sort: pick(params.get('sort'), SORT_FIELDS, defaultSort),

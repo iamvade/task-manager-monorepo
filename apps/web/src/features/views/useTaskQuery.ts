@@ -5,7 +5,7 @@ import { todayFor } from '../../lib/dates';
 import { toTaskQuery, type ListScope } from './taskQuery';
 import { useViewParams } from './useViewParams';
 
-/** List and Board show done tasks completed in the last 14 days unless `?done=all`. */
+/** Under All, List and Board show done tasks completed in the last 14 days unless `?done=all`. */
 export const RECENT_DONE_DAYS = 14;
 
 /**
@@ -14,12 +14,12 @@ export const RECENT_DONE_DAYS = 14;
  */
 export function useTaskQuery(scope: ListScope) {
   const { me } = useAuth();
-  const { filters, allDone } = useViewParams();
+  const { filters, allDone, activeOnly } = useViewParams();
   const meId = me?.user.id ?? '';
   const today = todayFor(me?.preferences.timezone);
   const doneSince = allDone ? null : addDays(today, -(RECENT_DONE_DAYS - 1));
   return useMemo(
-    () => toTaskQuery(filters, meId, scope, doneSince),
-    [filters, meId, scope, doneSince],
+    () => toTaskQuery(filters, meId, scope, doneSince, activeOnly),
+    [filters, meId, scope, doneSince, activeOnly],
   );
 }

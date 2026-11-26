@@ -74,7 +74,7 @@ function rowOf(title: string): HTMLElement {
 const focused = () => document.activeElement ?? document.body;
 const href = (input: string | URL | Request) =>
   typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
-const LIST = `/w/kite-studio/p/${PROJECT_ID}/list?sprint=none`;
+const LIST = `/w/kite-studio/p/${PROJECT_ID}/list?sprint=none&show=all`;
 
 describe('project list', () => {
   beforeEach(async () => {
@@ -131,6 +131,23 @@ describe('project list', () => {
       [`status:${statusOf('done').id}`]: false,
       [`status:${statusOf('todo').id}`]: true,
     });
+  });
+
+  it('shows only active status groups by default, and everything under All', async () => {
+    const { fetchMock } = api();
+    renderAt(`/w/kite-studio/p/${PROJECT_ID}/list?sprint=none`);
+    await screen.findByRole('table', { name: 'App Redesign төслийн ажлууд' });
+    expect(toggleOf('Хийх')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Дууссан/ })).toBeNull();
+    expect(screen.queryByText('Сүүлийн 14 хоногт дууссан')).toBeNull();
+    const listUrls = () =>
+      fetchMock.mock.calls.map(([input]) => href(input)).filter((u) => u.includes('/tasks'));
+    expect(listUrls().some((u) => u.includes('statusCategory=todo'))).toBe(true);
+
+    expect(screen.getByRole('radio', { name: 'Идэвхтэй' })).toBeChecked();
+    fireEvent.click(screen.getByRole('radio', { name: 'Бүгд' }));
+    expect(await screen.findByText('Сүүлийн 14 хоногт дууссан')).toBeInTheDocument();
+    expect(toggleOf('Дууссан')).toBeInTheDocument();
   });
 
   it('loads done tasks of the last 14 days until "Show all"', async () => {
@@ -362,18 +379,44 @@ describe('project list', () => {
     expect(await screen.findByRole('dialog', { name: 'APP-131 ажил' })).toBeInTheDocument();
   });
 
+  it('has no header row with column names', async () => {
+    api();
+    renderAt(LIST);
+    await screen.findByRole('table', { name: 'App Redesign төслийн ажлууд' });
+    expect(screen.queryAllByRole('columnheader')).toHaveLength(0);
+  });
+
+  it('selects every visible task from the bulk bar', async () => {
+    api();
+    renderAt(LIST);
+    await screen.findByRole('table', { name: 'App Redesign төслийн ажлууд' });
+    fireEvent.click(
+      screen.getByRole('checkbox', { name: '«Audit current navigation patterns» сонгох' }),
+    );
+    const all = await screen.findByRole('checkbox', { name: 'Харагдаж буй бүх ажлыг сонгох' });
+    expect(all).not.toBeChecked();
+    fireEvent.click(all);
+    const boxes = screen.getAllByRole('checkbox', { name: /» сонгох$/ });
+    expect(boxes.length).toBeGreaterThan(1);
+    for (const box of boxes) expect(box).toBeChecked();
+    expect(all).toBeChecked();
+  });
+
   it('shows the optional Size column from the Columns menu', async () => {
     api();
     renderAt(LIST);
     await screen.findByRole('table', { name: 'App Redesign төслийн ажлууд' });
-    expect(screen.queryByRole('columnheader', { name: 'Хэмжээ' })).toBeNull();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Багана' }));
-    fireEvent.click(await screen.findByRole('menuitemradio', { name: 'Хэмжээ' }));
-    expect(await screen.findByRole('columnheader', { name: 'Хэмжээ' })).toBeInTheDocument();
-    const row = rowOf('Audit current navigation patterns');
+    const sizeName = '«Audit current navigation patterns» — хэмжээ';
     expect(
-      within(row).getByRole('button', { name: '«Audit current navigation patterns» — хэмжээ' }),
+      within(rowOf('Audit current navigation patterns')).queryByRole('button', { name: sizeName }),
+    ).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Харагдацын тохиргоо' }));
+    fireEvent.click(await screen.findByRole('menuitemradio', { name: 'Хэмжээ' }));
+    expect(
+      await within(rowOf('Audit current navigation patterns')).findByRole('button', {
+        name: sizeName,
+      }),
     ).toBeInTheDocument();
     expect(useUiStore.getState().listColumns.size).toBe(true);
   });
@@ -384,7 +427,7 @@ describe('project list', () => {
     await screen.findByRole('table', { name: 'App Redesign төслийн ажлууд' });
     expect(within(rowOf('Audit current navigation patterns')).getByText('APP-131')).toBeVisible();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Багана' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Харагдацын тохиргоо' }));
     fireEvent.click(await screen.findByRole('menuitemradio', { name: 'Ажлын дугаар' }));
     await waitFor(() => {
       expect(within(rowOf('Audit current navigation patterns')).queryByText('APP-131')).toBeNull();
@@ -406,7 +449,6 @@ describe('project list', () => {
     });
     renderAt(LIST);
     await screen.findByRole('table');
-    expect(screen.queryByRole('columnheader', { name: 'Ач холбогдол' })).toBeNull();
     fireEvent.click(
       within(rowOf('Audit current navigation patterns')).getByRole('button', {
         name: '«Audit current navigation patterns» — ач холбогдол',

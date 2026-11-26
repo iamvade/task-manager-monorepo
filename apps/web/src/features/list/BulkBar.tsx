@@ -18,6 +18,7 @@ import {
   StatusIcon,
   TrashIcon,
 } from '../../components/icons';
+import { Checkbox } from '../../components/ui/Checkbox';
 import { IconButton } from '../../components/ui/IconButton';
 import { Menu } from '../../components/ui/Menu';
 import { ToolbarButton } from '../../components/ui/ToolbarButton';
@@ -69,6 +70,9 @@ interface BulkBarProps {
   members: readonly WorkspaceMember[];
   teamIds: ReadonlySet<string>;
   onClear: () => void;
+  /** Every visible task is selected (the header row with select-all is gone). */
+  allSelected: boolean;
+  onSelectAll: (on: boolean) => void;
 }
 
 /**
@@ -76,7 +80,15 @@ interface BulkBarProps {
  * Status / Sprint / Assignee (add, replace, remove) / Due / Priority / Delete, ×. Each action
  * is one batch request with one toast whose Undo puts every task back.
  */
-export function BulkBar({ project, tasks, members, teamIds, onClear }: BulkBarProps) {
+export function BulkBar({
+  project,
+  tasks,
+  members,
+  teamIds,
+  onClear,
+  allSelected,
+  onSelectAll,
+}: BulkBarProps) {
   const { t } = useTranslation();
   const sprints = useProjectSprints(project.workspaceId, project.id);
   const update = useBatchUpdate(project.id);
@@ -159,6 +171,12 @@ export function BulkBar({ project, tasks, members, teamIds, onClear }: BulkBarPr
         aria-label={t('bulk.label', { count })}
         className="pointer-events-auto flex max-w-full flex-wrap items-center gap-1.5 rounded-[12px] border border-default bg-surface p-1.5 pl-3.5 shadow-popover"
       >
+        <Checkbox
+          checked={allSelected}
+          onChange={onSelectAll}
+          label={t('table.selectAll')}
+          className="mr-1"
+        />
         <span className="mr-1 text-[13px] font-medium whitespace-nowrap" aria-live="polite">
           {t('bulk.selected', { count })}
         </span>

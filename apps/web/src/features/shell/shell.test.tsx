@@ -114,23 +114,19 @@ describe('app shell', () => {
     api();
     const router = renderAt(`/w/kite-studio/p/${PROJECT_ID}/list?sprint=none`);
 
-    const tabs = await screen.findByRole('tablist', { name: 'Харагдац' });
-    expect(within(tabs).getByRole('tab', { name: 'Жагсаалт' })).toHaveAttribute(
-      'aria-selected',
+    const views = await screen.findByRole('button', { name: 'Харагдац' });
+    fireEvent.click(views);
+    expect(await screen.findByRole('menuitemradio', { name: 'Жагсаалт' })).toHaveAttribute(
+      'aria-checked',
       'true',
     );
-    fireEvent.click(within(tabs).getByRole('tab', { name: 'Самбар' }));
+    fireEvent.click(screen.getByRole('menuitemradio', { name: 'Самбар' }));
     await waitFor(() => {
       expect(router.state.location.pathname).toBe(`/w/kite-studio/p/${PROJECT_ID}/board`);
     });
     expect(router.state.location.search).toBe('?sprint=none');
-    // Routes load lazily: the tabs re-render once the board's chunk is in.
-    await waitFor(() => {
-      expect(within(tabs).getByRole('tab', { name: 'Самбар' })).toHaveAttribute(
-        'aria-selected',
-        'true',
-      );
-    });
+    // Routes load lazily: the button shows the view's name once the board's chunk is in.
+    expect(await screen.findByRole('button', { name: 'Самбар' })).toBeInTheDocument();
   });
 
   it('starts with a skip link that moves focus to the page', async () => {
@@ -191,11 +187,12 @@ describe('app shell', () => {
     fireEvent.click(await screen.findByRole('radio', { name: 'EN' }));
     expect(await screen.findByRole('link', { name: /My Tasks/ })).toBeInTheDocument();
     expect(screen.getByRole('navigation', { name: 'Breadcrumb' })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Board' })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: 'Active' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Views' })).toBeInTheDocument();
     expect(await screen.findByText('Oct 6 – Oct 24')).toBeInTheDocument();
     expect(screen.getByText('7 tasks · 1 done')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sort: Due date' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Group: Status' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'View settings' })).toBeInTheDocument();
     await waitFor(() => {
       expect(fetchMock.mock.calls.some(([, init]) => init?.method === 'PATCH')).toBe(true);
     });

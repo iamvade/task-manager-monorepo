@@ -32,6 +32,19 @@ describe('toTaskQuery', () => {
     });
   });
 
+  it('keeps active categories under Active unless statuses are filtered', () => {
+    const active = ['todo', 'in_progress', 'review'];
+    expect(toTaskQuery(readFilters(new URLSearchParams()), ME_ID, 'project', null, true)).toEqual({
+      statusCategory: active,
+    });
+    expect(
+      toTaskQuery(readFilters(new URLSearchParams(`status=${S1}`)), ME_ID, 'project', null, true),
+    ).toEqual({ statusId: [S1] });
+    expect(
+      toTaskQuery(readFilters(new URLSearchParams('status=done')), ME_ID, 'space', null, true),
+    ).toEqual({ statusCategory: ['done'] });
+  });
+
   it('treats sprint=none and bad dates as no filter', () => {
     const filters = readFilters(new URLSearchParams('sprint=none&dueFrom=10/08'));
     expect(toTaskQuery(filters, ME_ID, 'project')).toEqual({});
