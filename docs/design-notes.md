@@ -10,7 +10,7 @@ Extracted from `design/*.dc.html` in Phase 0 (2026-10-08). The designs are the v
 | Mongolian copy | Only `Main.dc.html` has `STR.mn`. Claude drafts mn for the other screens in Phase 8 and lists new keys in `docs/i18n-review.md` for review. Glossary: Appendix B. |
 | Project visibility | Every workspace member sees and edits every project. `project_members` = the project's team (avatar stack, suggested assignees/mentions first). |
 | Colors | Palette keys in `users.avatar_color`, `spaces.color`, `projects.color`, `tags.color` (replaces `color_bg/color_fg`). Frontend maps key → exact light/dark values (Appendix A). |
-| Default statuses | `statuses.name` nullable. Null → UI shows the translated default for the category (Хийх / To Do …). Renamed → stored name. Six per project: the four drawn plus On Hold and Cancelled (added 2026-10-26, not in the designs; colors and markers derived, A.2). |
+| Default statuses | `statuses.name` nullable. Null → UI shows the translated default for the category (Хийх / To Do …). Renamed → stored name. Seven per project: the four drawn plus On Hold and Cancelled (added 2026-10-26) and Backlog (first, added 2026-11-27); not in the designs, colors and markers derived (A.2). |
 | Role hints | `workspace_members.title` (nullable), e.g. "Eng lead", "QA". "You" is computed. |
 | Week chart (My Tasks) | Current week Mon–Sun. "+N vs last week" compares Mon→today with Mon→same weekday last week. |
 | In scope (not in original phases) | Notification settings (`users.notification_prefs`), space-level List/Board (`/s/:spaceId/list|board`), online presence dots (WS presence). |
@@ -711,8 +711,8 @@ Other derived dark values (`tokens.css`): status tints in-progress rgba(245,158,
 Seed mapping: Research/Checkout=blue, UX/UI=violet, Design system=teal, Analytics=orange, A11y/Mobile web=green, Onboarding=pink, Frontend/iOS/Android/Docs=neutral.
 
 ### A.2 Status, priority, due, accent
-- Status marker 12px (2px ring): todo #A1A1AA → #71717A; in_progress ring + left-half fill #D97706 → #F59E0B; review ring accent + accent 20% fill → ring accent-ink + accent-soft; done solid #16A34A → #22C55E. Derived (not drawn): on_hold ring + two pause bars #E11D48 → #FB7185; cancelled solid #8B8B94 → #6B6B75 with a cross in `--bg`.
-- Status tints (pills, board headers): todo #F1F1F3/#3F3F46 (board header #EDEDF0); in_progress #FDF0DC/#92400E; review accent-soft/accent; done #E3F4E8/#166534. Derived: on_hold #FFE4E6/#9F1239 → rgba(244,63,94,.16)/#FDA4AF; cancelled #F1F1F3/#52525B → #232328/#A1A1AA. Cancelled titles are struck through and muted (List, Board, Calendar, My Tasks, ⌘K); the Cancelled group/column behaves like Done (collapsed in the List, "Cancelled in the last 14 days" note, Undo toast on drop).
+- Status marker 12px (2px ring): todo #A1A1AA → #71717A; in_progress ring + left-half fill #D97706 → #F59E0B; review ring accent + accent 20% fill → ring accent-ink + accent-soft; done solid #16A34A → #22C55E. Derived (not drawn): backlog dashed ring #A1A1AA → #71717A; on_hold ring + two pause bars #E11D48 → #FB7185; cancelled solid #8B8B94 → #6B6B75 with a cross in `--bg`.
+- Status tints (pills, board headers): todo #F1F1F3/#3F3F46 (board header #EDEDF0); in_progress #FDF0DC/#92400E; review accent-soft/accent; done #E3F4E8/#166534. Derived: backlog #F4F4F5/#52525B → #232328/#A1A1AA; on_hold #FFE4E6/#9F1239 → rgba(244,63,94,.16)/#FDA4AF; cancelled #F1F1F3/#52525B → #232328/#A1A1AA. Cancelled titles are struck through and muted (List, Board, Calendar, My Tasks, ⌘K); the Cancelled group/column behaves like Done (collapsed in the List, "Cancelled in the last 14 days" note, Undo toast on drop).
 - Priority: urgent #DC2626 → #F87171; high #EA580C → #FB923C; medium #CA8A04 → #FACC15 (filled); low outline #A1A1AA → #71717A.
 - Due: overdue #C42B1C/500 (Board 600) → #F87171; today #B45309/500 → #FBBF24; soon #3F3F46 → #C9C9D1; later #6B6B74 → #8E8E98; done #A1A1AA (Board #6B6B74) → #5E5E68.
 - Accent ink (dark): #6E56CF→#B4A5FF, #2F6FEB→#93B4FF, #0F766E→#5EEAD4, #3F3F46→#D4D4D8. Soft: light accent+1A, dark accent+33.
@@ -771,6 +771,7 @@ Add the year when the date is outside the current year.
 | List / Board / Calendar | Жагсаалт / Самбар / Календарь |
 | To Do / In Progress / In Review / Done | Хийх / Хийгдэж буй / Хянагдаж буй / Дууссан |
 | On Hold / Cancelled | Түр зогссон / Цуцалсан |
+| Backlog | Бэклог (to review: loanword, see `docs/i18n-review.md`) |
 | Urgent / High / Medium / Low | Яаралтай / Өндөр / Дунд / Бага |
 | Today / Tomorrow | Өнөөдөр / Маргааш |
 | tasks / done | ажил / дууссан |
