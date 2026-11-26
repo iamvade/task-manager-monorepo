@@ -1,6 +1,9 @@
-/** Sidebar menu: four fixed links, then the optional ones the user shows or keeps under "More". */
-export const FIXED_NAV = ['inbox', 'myTasks', 'personal', 'standup'] as const;
-export const OPTIONAL_NAV = ['outlook', 'feedback', 'reports'] as const;
+/** Sidebar menu: two fixed links, then the optional ones the user shows or keeps under "More". */
+export const FIXED_NAV = ['inbox', 'myTasks'] as const;
+export const OPTIONAL_NAV = ['personal', 'standup', 'outlook', 'feedback', 'reports'] as const;
+
+/** Optional links in the short list until the user hides them. */
+const SHOWN_BY_DEFAULT: readonly OptionalNavKey[] = ['personal', 'standup'];
 
 export type FixedNavKey = (typeof FIXED_NAV)[number];
 export type OptionalNavKey = (typeof OPTIONAL_NAV)[number];
@@ -12,14 +15,18 @@ export interface NavPref {
   shown: boolean;
 }
 
-export const DEFAULT_NAV: readonly NavPref[] = OPTIONAL_NAV.map((key) => ({ key, shown: false }));
+export const DEFAULT_NAV: readonly NavPref[] = OPTIONAL_NAV.map((key) => ({
+  key,
+  shown: SHOWN_BY_DEFAULT.includes(key),
+}));
 
 const isOptional = (key: unknown): key is OptionalNavKey =>
   typeof key === 'string' && (OPTIONAL_NAV as readonly string[]).includes(key);
 
 /**
  * Saved prefs made safe: optional keys only, no duplicates, and any optional link the saved
- * list doesn't know (added later) appended hidden.
+ * list doesn't know (added later) put back at its default place with its default visibility
+ * (so lists saved when Personal and Standup were fixed keep them on top, shown).
  */
 export function normalizeNav(saved: unknown): NavPref[] {
   const result: NavPref[] = [];
@@ -31,9 +38,11 @@ export function normalizeNav(saved: unknown): NavPref[] {
       result.push({ key, shown: shown === true });
     }
   }
-  for (const pref of DEFAULT_NAV) {
-    if (!result.some((p) => p.key === pref.key)) result.push({ ...pref });
-  }
+  DEFAULT_NAV.forEach((pref, index) => {
+    if (!result.some((p) => p.key === pref.key)) {
+      result.splice(Math.min(index, result.length), 0, { ...pref });
+    }
+  });
   return result;
 }
 

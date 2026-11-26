@@ -64,7 +64,7 @@ describe('sidebar menu', () => {
     vi.useRealTimers();
   });
 
-  it('shows the four fixed links first; the rest open under More and it is remembered', async () => {
+  it('shows Inbox, My Tasks, Personal, Standup by default; the rest open under More and it is remembered', async () => {
     api();
     renderAt('/w/kite-studio/my-tasks');
     const nav = await waitFor(sidebarNav);
@@ -117,8 +117,8 @@ describe('sidebar menu', () => {
 
     fireEvent.click(within(nav).getByRole('button', { name: 'Цэс тохируулах' }));
     const panel = await screen.findByRole('dialog', { name: 'Цэс тохируулах' });
-    // Only the optional links are editable.
-    expect(within(panel).getAllByRole('checkbox')).toHaveLength(3);
+    // Only the optional links are editable (Personal and Standup included).
+    expect(within(panel).getAllByRole('checkbox')).toHaveLength(5);
     expect(within(panel).queryByText('Мэдэгдэл')).not.toBeInTheDocument();
 
     fireEvent.click(within(panel).getByRole('checkbox', { name: 'Цэсэнд харуулах: Тайлан' }));
@@ -126,9 +126,7 @@ describe('sidebar menu', () => {
       within(panel).getByRole('checkbox', { name: 'Цэсэнд харуулах: Outlook календарь' }),
     );
     fireEvent.click(within(panel).getByRole('button', { name: 'Дээш зөөх: Тайлан' }));
-    expect(
-      within(panel).getByRole('button', { name: 'Дээш зөөх: Outlook календарь' }),
-    ).toBeDisabled();
+    expect(within(panel).getByRole('button', { name: 'Дээш зөөх: Хувийн' })).toBeDisabled();
 
     expect(topLinks(nav)).toEqual([
       'Мэдэгдэл',
@@ -143,6 +141,8 @@ describe('sidebar menu', () => {
     await waitFor(() => {
       expect(saved()).toMatchObject({
         navItems: [
+          { key: 'personal', shown: true },
+          { key: 'standup', shown: true },
           { key: 'reports', shown: true },
           { key: 'outlook', shown: true },
           { key: 'feedback', shown: false },
@@ -152,6 +152,30 @@ describe('sidebar menu', () => {
 
     fireEvent.click(within(panel).getByRole('button', { name: 'Анхны байдалд оруулах' }));
     expect(topLinks(nav)).toEqual(['Мэдэгдэл', 'Миний ажлууд', 'Хувийн', 'Стэндап']);
+  });
+
+  it('hides Personal and Standup under More when unchecked', async () => {
+    api();
+    renderAt('/w/kite-studio/my-tasks');
+    const nav = await waitFor(sidebarNav);
+    await within(nav).findByLabelText('3 уншаагүй');
+
+    fireEvent.click(within(nav).getByRole('button', { name: 'Цэс тохируулах' }));
+    const panel = await screen.findByRole('dialog', { name: 'Цэс тохируулах' });
+    fireEvent.click(within(panel).getByRole('checkbox', { name: 'Цэсэнд харуулах: Хувийн' }));
+    fireEvent.click(within(panel).getByRole('checkbox', { name: 'Цэсэнд харуулах: Стэндап' }));
+    expect(topLinks(nav)).toEqual(['Мэдэгдэл', 'Миний ажлууд']);
+
+    fireEvent.click(within(nav).getByRole('button', { name: 'Бусад' }));
+    expect(topLinks(nav)).toEqual([
+      'Мэдэгдэл',
+      'Миний ажлууд',
+      'Хувийн',
+      'Стэндап',
+      'Outlook календарь',
+      'Санал хүсэлт',
+      'Тайлан',
+    ]);
   });
 
   it('collapsed rail: the short list plus a More menu with the rest', async () => {

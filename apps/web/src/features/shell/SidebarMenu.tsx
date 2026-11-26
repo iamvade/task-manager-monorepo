@@ -1,15 +1,14 @@
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronDownIcon } from '../../components/icons';
-import { cn } from '../../lib/cn';
+import { MoreIcon } from '../../components/icons';
 import { useUiStore } from '../../stores/ui';
 import { NavCustomizePopover } from './NavCustomizePopover';
 import { NavItem } from './NavItem';
 import { useNavLayout, type NavEntry } from './useNavEntries';
 
 /**
- * Sidebar's top links (not designed beyond Main.dc.html's list): Inbox, My Tasks, Personal and
- * Standup always, then the optional links the user put in the short list; the rest sit under
+ * Sidebar's top links (not designed beyond Main.dc.html's list): Inbox and My Tasks always,
+ * then the optional links the user put in the short list (Personal and Standup by default); the rest sit under
  * "More". The filter button edits which optional links are shown. A hidden link whose page is
  * open stays visible so the current page is always in the list.
  */
@@ -48,10 +47,7 @@ export function SidebarMenu() {
             }}
             className="flex h-8 items-center gap-2 rounded-[8px] border-0 bg-transparent px-3 text-left text-2 hover:bg-nav-hover"
           >
-            <ChevronDownIcon
-              size={16}
-              className={cn('flex-none text-icon transition-transform', moreOpen && 'rotate-180')}
-            />
+            <MoreIcon size={16} className="flex-none text-icon" />
             <span className="flex-1 truncate font-medium">
               {moreOpen ? t('shell.less') : t('shell.more')}
             </span>

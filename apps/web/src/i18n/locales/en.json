@@ -156,7 +156,7 @@
     "more": "More",
     "less": "Less",
     "customizeMenu": "Customize menu",
-    "customizeMenuHint": "Inbox, My Tasks, Personal and Standup are always shown. Pick what else to show.",
+    "customizeMenuHint": "Inbox and My Tasks are always shown. Pick what else to show.",
     "showInMenu": "Show {{name}} in the menu",
     "moveUp": "Move up",
     "moveDown": "Move down",
