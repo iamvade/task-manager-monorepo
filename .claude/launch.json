@@ -18,7 +18,7 @@
       "runtimeExecutable": "sh",
       "runtimeArgs": [
         "-c",
-        "cd apps/api && DATABASE_URL=postgres://kite:kite@localhost:5433/kite_e2e PORT=3300 WEB_ORIGIN=http://localhost:5473 pnpm exec tsx src/server.ts"
+        "cd apps/api && NODE_ENV=development DATABASE_URL=postgres://kite:kite@localhost:5434/kite_e2e PORT=3300 WEB_ORIGIN=http://localhost:5473 pnpm exec tsx src/server.ts"
       ],
       "port": 3300
     },
