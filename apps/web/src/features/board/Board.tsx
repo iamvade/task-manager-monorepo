@@ -72,8 +72,12 @@ export function Board({ scope, boardKey, label, tasks, project, members }: Board
     [statuses],
   );
   const columns = useMemo(
-    () => groupTasks(sortTasks(tasks, view.sort, statusRank), 'status', { statuses }),
-    [tasks, view.sort, statusRank, statuses],
+    () =>
+      groupTasks(sortTasks(tasks, view.sort, statusRank), 'status', {
+        statuses,
+        activeOnly: view.hideInactive,
+      }),
+    [tasks, view.sort, statusRank, statuses, view.hideInactive],
   );
   const columnIds = useMemo<ColumnIds[]>(
     () => columns.map((c) => ({ key: c.key, ids: c.tasks.map((x) => x.id) })),
@@ -349,9 +353,7 @@ export function Board({ scope, boardKey, label, tasks, project, members }: Board
             })}
           </div>
           <DragOverlay dropAnimation={null}>
-            {activeTask && (
-              <TaskCard task={activeTask} state="overlay" />
-            )}
+            {activeTask && <TaskCard task={activeTask} state="overlay" />}
           </DragOverlay>
         </DndContext>
       </div>

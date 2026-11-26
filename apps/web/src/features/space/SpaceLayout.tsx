@@ -18,7 +18,7 @@ import { HeaderSkeleton } from '../views/HeaderSkeleton';
 import { PageHeader } from '../views/PageHeader';
 import { ShareButton } from '../views/ShareButton';
 import { useCurrentView } from '../views/useCurrentView';
-import { ViewTabs } from '../views/ViewTabs';
+import { ViewModeBar } from '../views/ViewModeBar';
 import { ViewToolbar } from '../views/ViewToolbar';
 import { FilterStrip } from '../project/FilterStrip';
 import { useStartRename } from '../shell/useStartRename';
@@ -141,7 +141,7 @@ export function SpaceLayout() {
             />
           </>
         }
-        tabs={<ViewTabs basePath={ws(`/s/${space.id}`)} value={view} />}
+        tabs={<ViewModeBar basePath={ws(`/s/${space.id}`)} value={view} />}
         toolbar={<ViewToolbar />}
       />
       <FilterStrip spaceId={space.id} />

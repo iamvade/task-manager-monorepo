@@ -16,7 +16,7 @@ type Handler = (init?: RequestInit) => Response;
 const body = (init?: RequestInit): unknown =>
   typeof init?.body === 'string' ? JSON.parse(init.body) : null;
 const EN_ME = { ...ME, preferences: { ...ME.preferences, locale: 'en' } };
-const BOARD = `/w/kite-studio/p/${PROJECT_ID}/board?sprint=none`;
+const BOARD = `/w/kite-studio/p/${PROJECT_ID}/board?sprint=none&show=all`;
 
 function api(tasks: TaskListItem[], extra: Record<string, Handler> = {}) {
   return mockApi({
@@ -93,7 +93,9 @@ describe('board', () => {
   it('says how many tasks the filters hide, per column and in the count line', async () => {
     const urgent = makeTasks().filter((x) => x.priority === 'urgent');
     api(urgent);
-    const router = renderAt(`/w/kite-studio/p/${PROJECT_ID}/board?sprint=none&priority=urgent`);
+    const router = renderAt(
+      `/w/kite-studio/p/${PROJECT_ID}/board?sprint=none&priority=urgent&show=all`,
+    );
 
     expect(await screen.findByText('2 of 7 tasks · 0 done')).toBeInTheDocument();
     expect(within(column(/^To Do/)).getByText('+2 hidden by filters')).toBeInTheDocument();
@@ -103,7 +105,7 @@ describe('board', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Clear filters to show 2 more in To Do' }));
     await waitFor(() => {
-      expect(router.state.location.search).toBe('?sprint=none');
+      expect(router.state.location.search).toBe('?sprint=none&show=all');
     });
   });
 
@@ -126,7 +128,7 @@ describe('board', () => {
     expect(screen.getByRole('region', { name: 'Done, 1 task' })).toBeInTheDocument();
     expect(screen.getByText('7 tasks · 1 done')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sort: Manual' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Columns: Status' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'View settings' })).toBeInTheDocument();
 
     const audit = within(cardOf('Audit current navigation patterns'));
     expect(audit.getByText('Research')).toBeInTheDocument();
@@ -328,7 +330,7 @@ describe('board', () => {
   it('applies the shared URL filters', async () => {
     const tasks = makeTasks();
     const fetchMock = api(tasks);
-    renderAt(`/w/kite-studio/p/${PROJECT_ID}/board?sprint=none&priority=urgent`);
+    renderAt(`/w/kite-studio/p/${PROJECT_ID}/board?sprint=none&priority=urgent&show=all`);
     await screen.findByRole('region', { name: /^To Do/ });
     const urls = fetchMock.mock.calls.map(([input]) =>
       typeof input === 'string' ? input : input instanceof URL ? input.href : input.url,
@@ -336,6 +338,25 @@ describe('board', () => {
     expect(urls.some((u) => u.includes(`/projects/${PROJECT_ID}/tasks?priority=urgent`))).toBe(
       true,
     );
+  });
+
+  it('shows only active columns by default and asks the API for active categories', async () => {
+    const tasks = makeTasks();
+    const fetchMock = api(tasks);
+    renderAt(`/w/kite-studio/p/${PROJECT_ID}/board?sprint=none`);
+    await screen.findByRole('region', { name: /^To Do/ });
+    expect(screen.getByRole('region', { name: /^In Review/ })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: /^Done/ })).toBeNull();
+    expect(screen.queryByRole('region', { name: /^On Hold/ })).toBeNull();
+    expect(screen.queryByRole('region', { name: /^Cancelled/ })).toBeNull();
+    const urls = fetchMock.mock.calls.map(([input]) =>
+      typeof input === 'string' ? input : input instanceof URL ? input.href : input.url,
+    );
+    expect(
+      urls.some((u) =>
+        u.includes('statusCategory=todo&statusCategory=in_progress&statusCategory=review'),
+      ),
+    ).toBe(true);
   });
 
   it('shows the space board by status category, without a project name on the cards', async () => {

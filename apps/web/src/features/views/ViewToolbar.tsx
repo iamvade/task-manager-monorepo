@@ -1,9 +1,9 @@
 import type { ProjectDetail } from '@kite/shared';
 import { useTranslation } from 'react-i18next';
 import { useCurrentWorkspace } from '../../api/workspaces';
-import { ColumnsIcon, FilterIcon, GroupIcon, PlusIcon, SortIcon } from '../../components/icons';
+import { FilterIcon, PlusIcon, SlidersIcon, SortIcon } from '../../components/icons';
 import { Button } from '../../components/ui/Button';
-import { Menu } from '../../components/ui/Menu';
+import { Menu, type MenuItem } from '../../components/ui/Menu';
 import { ToolbarButton } from '../../components/ui/ToolbarButton';
 import { useUiStore } from '../../stores/ui';
 import { FilterMenu } from './FilterMenu';
@@ -18,9 +18,9 @@ interface ViewToolbarProps {
 }
 
 /**
- * Filter (count of active filters) · Sort · Group · Columns (optional List columns, not in the
- * designs) · divider · + New Task (Main.dc.html toolbar).
- * Filter, Sort and Group write the URL. The calendar has no Sort/Group (Calendar.dc.html).
+ * Icon-only toolbar: Filter (count of active filters) · Sort · View settings (List: Group by +
+ * Show columns; Board: Columns by) · + New Task. Filter, Sort and Group write the URL. The
+ * calendar has no Sort or View settings (Calendar.dc.html).
  */
 export function ViewToolbar({ project = null, empty = false }: ViewToolbarProps) {
   const { t } = useTranslation();
@@ -36,39 +36,85 @@ export function ViewToolbar({ project = null, empty = false }: ViewToolbarProps)
     const sprint = view.sprintId ? { sprintId: view.sprintId } : {};
     openCreate(project ? { projectId: project.id, ...sprint } : sprint);
   };
+  const newTaskButton = (
+    <Button
+      variant="primary"
+      aria-label={t('toolbar.newTask')}
+      title={t('toolbar.newTaskHint')}
+      className="w-8 px-0!"
+      icon={<PlusIcon size={14} strokeWidth={2.5} />}
+      onClick={newTask}
+    />
+  );
 
   if (empty) {
     return (
-      <div className="flex flex-wrap items-center gap-2 pb-2">
-        <button
-          type="button"
+      <div className="flex flex-wrap items-center gap-2 pt-1 pb-2">
+        <ToolbarButton
+          iconOnly
           disabled
-          className="h-8 cursor-not-allowed rounded-[8px] border border-subtle bg-control px-2.5 text-[13px] text-faint"
-        >
-          {t('toolbar.filter')}
-        </button>
-        <div aria-hidden="true" className="mx-1 h-5 w-px bg-[var(--border-control)]" />
-        <Button variant="primary" icon={<PlusIcon size={14} strokeWidth={2.5} />} onClick={newTask}>
-          {t('toolbar.newTask')}
-        </Button>
+          aria-label={t('toolbar.filter')}
+          icon={<FilterIcon size={14} />}
+        />
+        {newTaskButton}
       </div>
     );
   }
 
+  const settingsItems: MenuItem[] = board
+    ? [
+        { type: 'heading', id: 'columns-by', label: t('board.columnsBy') },
+        {
+          id: 'status',
+          label: t('toolbar.groupFields.status'),
+          checked: true,
+          onSelect: () => undefined,
+        },
+      ]
+    : [
+        { type: 'heading', id: 'group-by', label: t('toolbar.groupBy') },
+        ...GROUP_FIELDS.map((field) => ({
+          id: `group:${field}`,
+          label: t(`toolbar.groupFields.${field}`),
+          checked: field === view.group,
+          onSelect: () => {
+            view.update({ group: field === 'status' ? null : field });
+          },
+        })),
+        { type: 'separator', id: 'sep' },
+        { type: 'heading', id: 'columns', label: t('toolbar.columnsMenu') },
+        {
+          id: 'column:key',
+          label: t('toolbar.columnKey'),
+          checked: listColumns.key,
+          onSelect: () => {
+            setListColumn('key', !listColumns.key);
+          },
+        },
+        {
+          id: 'column:size',
+          label: t('toolbar.columnSize'),
+          checked: listColumns.size,
+          onSelect: () => {
+            setListColumn('size', !listColumns.size);
+          },
+        },
+      ];
+
   return (
-    <div className="flex flex-wrap items-center gap-2 pb-2">
+    <div className="flex flex-wrap items-center gap-2 pt-1 pb-2">
       <FilterMenu
         project={project}
         workspaceId={project?.workspaceId ?? workspace?.id}
         trigger={(props) => (
           <ToolbarButton
             {...props}
+            iconOnly
+            aria-label={t('toolbar.filter')}
             icon={<FilterIcon size={14} />}
             count={view.activeFilterCount}
             countLabel={t('toolbar.activeFilters', { count: view.activeFilterCount })}
-          >
-            {t('toolbar.filter')}
-          </ToolbarButton>
+          />
         )}
       />
       {currentView !== 'calendar' && (
@@ -84,80 +130,30 @@ export function ViewToolbar({ project = null, empty = false }: ViewToolbarProps)
               },
             }))}
             trigger={(props) => (
-              <ToolbarButton {...props} icon={<SortIcon size={14} />}>
-                {t('toolbar.sort', { field: t(`toolbar.sortFields.${view.sort}`) })}
-              </ToolbarButton>
+              <ToolbarButton
+                {...props}
+                iconOnly
+                aria-label={t('toolbar.sort', { field: t(`toolbar.sortFields.${view.sort}`) })}
+                icon={<SortIcon size={14} />}
+              />
             )}
           />
-          {board ? (
-            <Menu
-              label={t('board.columnsBy')}
-              items={[
-                {
-                  id: 'status',
-                  label: t('toolbar.groupFields.status'),
-                  checked: true,
-                  onSelect: () => undefined,
-                },
-              ]}
-              trigger={(props) => (
-                <ToolbarButton {...props} icon={<ColumnsIcon size={14} />}>
-                  {t('board.columnsStatus')}
-                </ToolbarButton>
-              )}
-            />
-          ) : (
-            <Menu
-              label={t('toolbar.groupBy')}
-              items={GROUP_FIELDS.map((field) => ({
-                id: field,
-                label: t(`toolbar.groupFields.${field}`),
-                checked: field === view.group,
-                onSelect: () => {
-                  view.update({ group: field === 'status' ? null : field });
-                },
-              }))}
-              trigger={(props) => (
-                <ToolbarButton {...props} icon={<GroupIcon size={14} />}>
-                  {t('toolbar.group', { field: t(`toolbar.groupFields.${view.group}`) })}
-                </ToolbarButton>
-              )}
-            />
-          )}
-          {!board && (
-            <Menu
-              label={t('toolbar.columnsMenu')}
-              items={[
-                {
-                  id: 'key',
-                  label: t('toolbar.columnKey'),
-                  checked: listColumns.key,
-                  onSelect: () => {
-                    setListColumn('key', !listColumns.key);
-                  },
-                },
-                {
-                  id: 'size',
-                  label: t('toolbar.columnSize'),
-                  checked: listColumns.size,
-                  onSelect: () => {
-                    setListColumn('size', !listColumns.size);
-                  },
-                },
-              ]}
-              trigger={(props) => (
-                <ToolbarButton {...props} icon={<ColumnsIcon size={14} />}>
-                  {t('toolbar.columns')}
-                </ToolbarButton>
-              )}
-            />
-          )}
+          <Menu
+            label={t('toolbar.settings')}
+            placement="bottom-end"
+            items={settingsItems}
+            trigger={(props) => (
+              <ToolbarButton
+                {...props}
+                iconOnly
+                aria-label={t('toolbar.settings')}
+                icon={<SlidersIcon size={14} />}
+              />
+            )}
+          />
         </>
       )}
-      <div aria-hidden="true" className="mx-1 h-5 w-px bg-[var(--border-control)]" />
-      <Button variant="primary" icon={<PlusIcon size={14} strokeWidth={2.5} />} onClick={newTask}>
-        {t('toolbar.newTask')}
-      </Button>
+      {newTaskButton}
     </div>
   );
 }

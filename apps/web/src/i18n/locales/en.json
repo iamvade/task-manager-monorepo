@@ -222,14 +222,17 @@
     "doneShowAll": "Show all",
     "doneRecentOnly": "Recent only",
     "cancelledRecent": "Cancelled in the last {{count}} days",
-    "cancelledAll": "All cancelled tasks"
+    "cancelledAll": "All cancelled tasks",
+    "show": "Show tasks",
+    "active": "Active",
+    "all": "All",
+    "views": "Views"
   },
   "toolbar": {
     "filter": "Filter",
     "activeFilters_one": "{{count}} active filter",
     "activeFilters_other": "{{count}} active filters",
     "sort": "Sort: {{field}}",
-    "group": "Group: {{field}}",
     "sortBy": "Sort by",
     "groupBy": "Group by",
     "newTask": "New Task",
@@ -245,10 +248,11 @@
       "priority": "Priority",
       "none": "None"
     },
-    "columns": "Columns",
     "columnsMenu": "Show columns",
     "columnSize": "Size",
-    "columnKey": "Task key"
+    "columnKey": "Task key",
+    "settings": "View settings",
+    "newTaskHint": "New Task (C)"
   },
   "filters": {
     "sprintIs": "Sprint is",
@@ -296,13 +300,9 @@
   },
   "table": {
     "label": "{{project}} tasks",
-    "colName": "Task name",
-    "colAssignee": "Assignee",
     "colDue": "Due date",
     "colPriority": "Priority",
-    "colSize": "Size",
     "colTags": "Tags",
-    "actions": "Actions",
     "addTask": "Add task",
     "markComplete": "Mark {{name}} complete",
     "moreActions": "More actions for {{name}}",
@@ -400,7 +400,6 @@
   },
   "board": {
     "sortManual": "Sort: Manual",
-    "columnsStatus": "Columns: Status",
     "columnLabel_one": "{{status}}, {{count}} task",
     "columnLabel_other": "{{status}}, {{count}} tasks",
     "addTaskTo": "Add task to {{status}}",

@@ -340,10 +340,10 @@ describe('calendar', () => {
       typeof input === 'string' ? input : input instanceof URL ? input.href : input.url,
     );
     expect(urls).toContain(
-      `/api/v1/projects/${PROJECT_ID}/tasks?dueFrom=2026-09-28&dueTo=2026-11-01`,
+      `/api/v1/projects/${PROJECT_ID}/tasks?statusCategory=todo&statusCategory=in_progress&statusCategory=review&dueFrom=2026-09-28&dueTo=2026-11-01`,
     );
     expect(urls).toContain(
-      `/api/v1/projects/${PROJECT_ID}/tasks?hasDueDate=false&includeDone=false`,
+      `/api/v1/projects/${PROJECT_ID}/tasks?statusCategory=todo&statusCategory=in_progress&statusCategory=review&hasDueDate=false&includeDone=false`,
     );
   });
 });

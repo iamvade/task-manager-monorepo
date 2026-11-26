@@ -222,14 +222,17 @@
     "doneShowAll": "Бүгдийг харах",
     "doneRecentOnly": "Зөвхөн сүүлийнх",
     "cancelledRecent": "Сүүлийн {{count}} хоногт цуцалсан",
-    "cancelledAll": "Бүх цуцалсан ажил"
+    "cancelledAll": "Бүх цуцалсан ажил",
+    "show": "Ажил харуулах",
+    "active": "Идэвхтэй",
+    "all": "Бүгд",
+    "views": "Харагдац"
   },
   "toolbar": {
     "filter": "Шүүлтүүр",
     "activeFilters_one": "{{count}} идэвхтэй шүүлтүүр",
     "activeFilters_other": "{{count}} идэвхтэй шүүлтүүр",
     "sort": "Эрэмбэ: {{field}}",
-    "group": "Бүлэглэх: {{field}}",
     "sortBy": "Эрэмбэлэх",
     "groupBy": "Бүлэглэх",
     "newTask": "Шинэ ажил",
@@ -245,10 +248,11 @@
       "priority": "Ач холбогдол",
       "none": "Бүлэглэхгүй"
     },
-    "columns": "Багана",
     "columnsMenu": "Багана харуулах",
     "columnSize": "Хэмжээ",
-    "columnKey": "Ажлын дугаар"
+    "columnKey": "Ажлын дугаар",
+    "settings": "Харагдацын тохиргоо",
+    "newTaskHint": "Шинэ ажил (C)"
   },
   "filters": {
     "sprintIs": "Спринт:",
@@ -296,13 +300,9 @@
   },
   "table": {
     "label": "{{project}} төслийн ажлууд",
-    "colName": "Ажлын нэр",
-    "colAssignee": "Хариуцагч",
     "colDue": "Дуусах огноо",
     "colPriority": "Ач холбогдол",
-    "colSize": "Хэмжээ",
     "colTags": "Шошго",
-    "actions": "Үйлдэл",
     "addTask": "Ажил нэмэх",
     "markComplete": "«{{name}}» ажлыг дууссан гэж тэмдэглэх",
     "moreActions": "«{{name}}» — нэмэлт үйлдэл",
@@ -400,7 +400,6 @@
   },
   "board": {
     "sortManual": "Эрэмбэ: Гараар",
-    "columnsStatus": "Багана: Төлөв",
     "columnLabel_one": "{{status}}, {{count}} ажил",
     "columnLabel_other": "{{status}}, {{count}} ажил",
     "addTaskTo": "«{{status}}» баганад ажил нэмэх",

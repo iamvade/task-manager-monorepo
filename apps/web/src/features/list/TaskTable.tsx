@@ -55,12 +55,11 @@ import { AddTaskRow } from './AddTaskRow';
 import { BulkBar } from './BulkBar';
 import { GroupHeader } from './GroupHeader';
 import { groupTasks, sortTasks, type TaskGroup } from './grouping';
-import { gridColumns, isDone, ListContext, type ListActions } from './ListContext';
+import { isDone, ListContext, type ListActions } from './ListContext';
 import { placeInStatus } from './positions';
 import { statusRef, useCreateInStatus } from './useCreateInStatus';
 import { TaskRow } from './TaskRow';
 import { toast } from '../../stores/toast';
-import { Checkbox } from '../../components/ui/Checkbox';
 import { cn } from '../../lib/cn';
 import { appUrl } from '../../lib/basePath';
 
@@ -107,8 +106,8 @@ export function TaskTable({
     [tasks, view.sort, statusRank],
   );
   const groups = useMemo(
-    () => groupTasks(sorted, view.group, { statuses }),
-    [sorted, view.group, statuses],
+    () => groupTasks(sorted, view.group, { statuses, activeOnly: view.hideInactive }),
+    [sorted, view.group, statuses, view.hideInactive],
   );
   const byId = useMemo(() => new Map(tasks.map((task) => [task.id, task])), [tasks]);
 
@@ -467,7 +466,10 @@ export function TaskTable({
   const firstVisible = visibleIds.find((id) => !id.startsWith('temp-'));
   const tabStop = selectedId && visibleIds.includes(selectedId) ? selectedId : firstVisible;
 
-  const showNoMatches = tasks.length === 0 && view.activeFilterCount > 0 && view.group !== 'status';
+  const showNoMatches =
+    tasks.length === 0 &&
+    (view.activeFilterCount > 0 || view.hideInactive) &&
+    view.group !== 'status';
 
   return (
     <ListContext.Provider value={actions}>
@@ -483,38 +485,6 @@ export function TaskTable({
             selectable && (showSize ? 'min-w-[948px]' : 'min-w-[876px]'),
           )}
         >
-          <div role="rowgroup">
-            <div
-              role="row"
-              className="box-border grid h-9 items-center border-b border-default px-2 text-[12px] font-medium text-muted"
-              style={{ gridTemplateColumns: gridColumns(showSize, selectable) }}
-            >
-              {selectable && (
-                <span role="columnheader" className="flex items-center justify-center">
-                  <Checkbox
-                    checked={visibleIds.length > 0 && visibleIds.every((id) => checked.has(id))}
-                    onChange={(on) => {
-                      setChecked(
-                        on
-                          ? new Set(visibleIds.filter((id) => !id.startsWith('temp-')))
-                          : new Set(),
-                      );
-                    }}
-                    label={t('table.selectAll')}
-                  />
-                </span>
-              )}
-              <span role="columnheader">{t('table.colName')}</span>
-              <span role="columnheader">{t('table.colAssignee')}</span>
-              <span role="columnheader">{t('table.colTags')}</span>
-              {showSize && <span role="columnheader">{t('table.colSize')}</span>}
-              <span role="columnheader">{t('table.colDue')}</span>
-              <span role="columnheader">
-                <span className="sr-only">{t('table.actions')}</span>
-              </span>
-            </div>
-          </div>
-
           {showNoMatches && (
             <FullRow>
               <p className="m-0 px-2 py-8 text-center text-[13px] text-muted">
@@ -571,7 +541,7 @@ export function TaskTable({
               {activeTask && <TaskRow task={activeTask} height={rowHeight} dragState="overlay" />}
             </DragOverlay>
           </DndContext>
-          {!showNoMatches && (
+          {!showNoMatches && !view.hideInactive && (
             <FullRow>
               <DoneScopeNote className="px-2 pt-4" />
             </FullRow>
@@ -585,6 +555,12 @@ export function TaskTable({
           members={members}
           teamIds={actions.teamIds}
           onClear={clearChecked}
+          allSelected={visibleIds.every((id) => id.startsWith('temp-') || checked.has(id))}
+          onSelectAll={(on) => {
+            setChecked(
+              on ? new Set(visibleIds.filter((id) => !id.startsWith('temp-'))) : new Set(),
+            );
+          }}
         />
       )}
     </ListContext.Provider>

@@ -23,7 +23,7 @@ import { toast } from '../../stores/toast';
 import { Breadcrumb } from '../views/Breadcrumb';
 import { PageHeader } from '../views/PageHeader';
 import { ShareButton } from '../views/ShareButton';
-import { ViewTabs } from '../views/ViewTabs';
+import { ViewModeBar } from '../views/ViewModeBar';
 import type { View } from '../views/views';
 import { ViewToolbar } from '../views/ViewToolbar';
 import { NewSprintDialog } from './NewSprintDialog';
@@ -198,7 +198,7 @@ export function ProjectHeader({ project, view }: { project: ProjectDetail; view:
           />
         </>
       }
-      tabs={<ViewTabs basePath={ws(`/p/${project.id}`)} value={view} />}
+      tabs={<ViewModeBar basePath={ws(`/p/${project.id}`)} value={view} />}
       toolbar={<ViewToolbar project={project} empty={project.taskCount === 0} />}
     />
   );

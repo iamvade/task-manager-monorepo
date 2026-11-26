@@ -16,7 +16,7 @@ Radius scale: 3px (kbd inside field chips), 4px (kbd, 16px space badges, inline 
 
 Shadows: only the `--shadow-*` and `--ring-soft` tokens (`--shadow-float` is the StandupEmpty illustration's front card) in `apps/web/src/styles/tokens.css` (no others); scrims (drawer, modal, and the derived image-preview `--scrim-lightbox`) in `styles/index.css`.
 
-Layout: sidebar 248px (min 220px), collapsible to a 56px icon rail. Top bar 56px + 40px view tabs. List rows 44px (comfortable) / 36px (compact). Task drawer 40% width, min 520px, from the right. Quick-create modal 600px wide, 112px from the top.
+Layout: sidebar 248px (min 220px), collapsible to a 56px icon rail. Top bar 56px + the view row (Active/All, Views ▾, icon toolbar; the 40px underline tabs are gone from project/space pages). List rows 44px (comfortable) / 36px (compact). Task drawer 40% width, min 520px, from the right. Quick-create modal 600px wide, 112px from the top.
 
 Standup tokens: `--danger-card-divider` (blocker row dividers), `--blocked-card-border` (Board card of a blocked task, #F3C9C4), `--card-footer` (update card footer, #FCFCFD), `--out-avatar` (out-of-office avatar, #E4E4E7); classes `border-danger-divider`, `border-blocked`, `bg-card-footer`, `bg-out-avatar`.
 

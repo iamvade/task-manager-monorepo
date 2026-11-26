@@ -70,7 +70,8 @@ test.describe('task → board → mention → inbox', () => {
     await expect(page.getByRole('navigation', { name: 'Breadcrumb' })).toContainText(
       'App Redesign',
     );
-    await expect(page.getByRole('tab', { name: 'List' })).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByRole('button', { name: 'Views' })).toBeVisible();
+    await expect(page.getByRole('radio', { name: 'Active' })).toBeChecked();
     await page.locator('body').press('c');
     const modal = page.getByRole('dialog', { name: 'New task' });
     await expect(modal).toBeVisible();
