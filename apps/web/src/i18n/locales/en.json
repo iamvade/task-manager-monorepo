@@ -381,6 +381,7 @@
     "others": "Others",
     "noDue": "No due date",
     "priorityLabel": "Priority",
+    "setPriorityTo": "Set priority to…",
     "tagsLabel": "Tags",
     "dueLabel": "Due date",
     "assigneeLabel": "Assignees",

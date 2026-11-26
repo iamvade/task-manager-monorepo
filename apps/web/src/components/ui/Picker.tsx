@@ -12,6 +12,8 @@ interface PickerProps<T> {
   /** Text used for the default search filter and the option's accessible name. */
   getLabel: (item: T) => string;
   renderItem?: (item: T, state: { selected: boolean; active: boolean }) => ReactNode;
+  /** Shown after the ✓ at the option's right edge (e.g. the priority picker's 0–4 key). */
+  renderTrailing?: (item: T) => ReactNode;
   /** Called with the picked item; multi-select pickers stay open. */
   onSelect: (item: T) => void;
   /** Backspace on an empty search (e.g. unassign). */
@@ -47,6 +49,7 @@ export function Picker<T>({
   getKey,
   getLabel,
   renderItem,
+  renderTrailing,
   onSelect,
   onClear,
   onClose,
@@ -214,6 +217,7 @@ export function Picker<T>({
                     aria-hidden="true"
                   />
                 )}
+                {renderTrailing?.(item)}
               </div>
             </div>
           );

@@ -19,7 +19,6 @@ import { IconButton } from '../../components/ui/IconButton';
 import { Menu } from '../../components/ui/Menu';
 import type { TriggerProps } from '../../components/ui/Popover';
 import { PriorityFlag } from '../../components/ui/PriorityFlag';
-import { ProjectDot } from '../../components/ui/ProjectDot';
 import { TagChip } from '../../components/ui/TagChip';
 import { cn } from '../../lib/cn';
 import { AssigneePicker } from '../pickers/AssigneePicker';
@@ -39,8 +38,6 @@ interface TaskRowProps {
   selected?: boolean;
   /** Roving tab stop: the selected row (or the first one) is tabbable. */
   tabbable?: boolean;
-  /** Space list: the task's project before the title. */
-  showProject?: boolean;
   /** source = the row left behind while dragging; overlay = the copy under the pointer. */
   dragState?: 'source' | 'overlay';
   rowRef?: Ref<HTMLDivElement>;
@@ -131,7 +128,6 @@ export function TaskRow({
   height,
   selected,
   tabbable,
-  showProject,
   dragState,
   rowRef,
   rowProps,
@@ -208,11 +204,33 @@ export function TaskRow({
       </div>
 
       <div role="cell" className="flex min-w-0 items-center gap-2 pr-4">
-        {showProject && (
-          <span className="flex max-w-[160px] flex-none items-center gap-1.5 text-[12px] text-muted">
-            <ProjectDot color={task.project.color} size={8} />
-            <span className="truncate">{task.project.name}</span>
+        {inert ? (
+          <span className="flex size-6 flex-none items-center justify-center">
+            <PriorityFlag priority={task.priority} />
           </span>
+        ) : (
+          <PriorityPicker
+            value={task.priority}
+            label={t('table.setPriority', { name: task.title })}
+            onChange={(priority) => {
+              actions.setPriority(task, priority);
+            }}
+            trigger={(props, open) => (
+              <button
+                type="button"
+                aria-label={t('table.setPriority', { name: task.title })}
+                aria-haspopup="dialog"
+                title={t(`priority.${task.priority}`)}
+                {...props}
+                className={cn(
+                  'flex size-6 flex-none items-center justify-center rounded-[6px] border-0 bg-transparent p-0 hover:bg-hover',
+                  open && 'bg-hover',
+                )}
+              >
+                <PriorityFlag priority={task.priority} label="" />
+              </button>
+            )}
+          />
         )}
         {actions.showKey && (
           <span className="min-w-[64px] flex-none font-mono text-[12px] text-muted">
@@ -323,29 +341,6 @@ export function TaskRow({
                 ) : (
                   <EmptyHint icon={<CalendarIcon size={14} />} />
                 )}
-              </CellButton>
-            )}
-          />
-        )}
-      </div>
-
-      <div role="cell" className="flex min-w-0 items-center pr-2">
-        {inert ? (
-          <PriorityFlag priority={task.priority} showLabel />
-        ) : (
-          <PriorityPicker
-            value={task.priority}
-            label={t('table.setPriority', { name: task.title })}
-            onChange={(priority) => {
-              actions.setPriority(task, priority);
-            }}
-            trigger={(props, open) => (
-              <CellButton
-                label={t('table.setPriority', { name: task.title })}
-                props={props}
-                open={open}
-              >
-                <PriorityFlag priority={task.priority} showLabel />
               </CellButton>
             )}
           />

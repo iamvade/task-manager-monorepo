@@ -338,14 +338,14 @@ describe('board', () => {
     );
   });
 
-  it('shows the space board by status category with each card’s project', async () => {
+  it('shows the space board by status category, without a project name on the cards', async () => {
     const tasks = makeTasks();
     api(tasks, {
       [`GET /api/v1/spaces/${SPACE_ID}/tasks`]: () => Response.json(tasks),
     });
     renderAt(`/w/kite-studio/s/${SPACE_ID}/board`);
     const todo = await screen.findByRole('region', { name: 'To Do, 2 tasks' });
-    expect(within(todo).getAllByText('App Redesign')).toHaveLength(2);
+    expect(within(todo).queryByText('App Redesign')).toBeNull();
     // No inline add across projects; the header "+" opens quick create in that category.
     expect(screen.queryByRole('button', { name: 'Add task' })).toBeNull();
     fireEvent.click(within(todo).getByRole('button', { name: 'Add task to To Do' }));

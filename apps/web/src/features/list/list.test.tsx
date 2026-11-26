@@ -386,6 +386,41 @@ describe('project list', () => {
     expect(useUiStore.getState().listColumns).toEqual({ key: false, size: false });
   });
 
+  it('sets priority from the icon before the key: No priority first, number keys pick', async () => {
+    const patches: unknown[] = [];
+    api((st) => {
+      const audit = at(st.tasks, 0);
+      return {
+        [`PATCH /api/v1/tasks/${audit.id}`]: (init) => {
+          const patch = body(init) as { priority: typeof audit.priority };
+          patches.push(patch);
+          return Response.json({ ...audit, priority: patch.priority });
+        },
+      };
+    });
+    renderAt(LIST);
+    await screen.findByRole('table');
+    expect(screen.queryByRole('columnheader', { name: 'Ач холбогдол' })).toBeNull();
+    fireEvent.click(
+      within(rowOf('Audit current navigation patterns')).getByRole('button', {
+        name: '«Audit current navigation patterns» — ач холбогдол',
+      }),
+    );
+    const search = await screen.findByRole('combobox', { name: 'Ач холбогдол сонгох…' });
+    expect(screen.getAllByRole('option').map((o) => o.textContent)).toEqual([
+      'Ач холбогдолгүй0',
+      'Яаралтай1',
+      'Өндөр2',
+      'Дунд3',
+      'Бага4',
+    ]);
+    fireEvent.keyDown(search, { key: '2' });
+    await waitFor(() => {
+      expect(patches).toEqual([{ priority: 'high' }]);
+    });
+    expect(screen.queryByRole('combobox', { name: 'Ач холбогдол сонгох…' })).toBeNull();
+  });
+
   it('creates a tag from the tag picker and puts it on the task', async () => {
     const created: unknown[] = [];
     const tagged: unknown[] = [];
@@ -642,12 +677,13 @@ describe('space list', () => {
     await i18n.changeLanguage('mn');
   });
 
-  it('lists every project of the space by status category, with the project on each row', async () => {
+  it('lists every project of the space by status category, without a project name on the rows', async () => {
     api((st) => ({ [`GET /api/v1/spaces/${SPACE_ID}/tasks`]: () => Response.json(st.tasks) }));
     renderAt(`/w/kite-studio/s/${SPACE_ID}/list`);
 
     const todo = await waitFor(() => group('Хийх'));
-    expect(within(todo).getAllByText('App Redesign')).toHaveLength(2);
+    expect(within(todo).getAllByRole('row').length).toBeGreaterThan(1);
+    expect(within(todo).queryByText('App Redesign')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Ажил нэмэх' })).not.toBeInTheDocument();
     await act(async () => {
       await Promise.resolve();
