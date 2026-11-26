@@ -5,7 +5,7 @@ import {
   workspaceMemberSchema,
   type MemberHandover,
 } from '@kite/shared';
-import { and, asc, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { requireWorkspaceMember } from '../auth/access.js';
@@ -86,7 +86,7 @@ export const offboardingRoutes: FastifyPluginCallbackZod = (app, _opts, done) =>
         tags: ['Workspaces'],
         summary: 'What a member would hand over',
         description:
-          'Admin or owner. Open tasks assigned to the member, open tasks they review and non-archived projects they lead (the deactivate dialog).',
+          'Admin or owner. Open tasks assigned to the member and open tasks they review (the deactivate dialog).',
         params,
         response: { 200: memberHandoverSchema, 401: err, 403: err, 404: err },
       },
@@ -95,21 +95,8 @@ export const offboardingRoutes: FastifyPluginCallbackZod = (app, _opts, done) =>
       const { workspaceId, userId } = request.params;
       await requireWorkspaceMember(request, workspaceId, 'admin');
       await requireTarget(app.db, workspaceId, userId);
-      const [{ assigned, reviewing }, leadOf] = await Promise.all([
-        handoverTasks(app.db, workspaceId, userId),
-        app.db
-          .select({ id: projects.id, key: projects.key, name: projects.name })
-          .from(projects)
-          .where(
-            and(
-              eq(projects.workspaceId, workspaceId),
-              eq(projects.leadId, userId),
-              isNull(projects.archivedAt),
-            ),
-          )
-          .orderBy(asc(projects.name)),
-      ]);
-      return { openTasks: assigned.length, reviewing: reviewing.length, leadOf };
+      const { assigned, reviewing } = await handoverTasks(app.db, workspaceId, userId);
+      return { openTasks: assigned.length, reviewing: reviewing.length };
     },
   );
 
@@ -121,7 +108,7 @@ export const offboardingRoutes: FastifyPluginCallbackZod = (app, _opts, done) =>
         tags: ['Workspaces'],
         summary: 'Deactivate a member (offboarding)',
         description:
-          'Admin or owner. With `reassignTo` (an active member) the leaver is replaced by that person on their open tasks (as assignee and reviewer) and as project lead and standup facilitator (joining those groups), with the usual activity rows; without it they are just removed from those. Then the membership is deactivated: no access to the workspace (404 everywhere, their sockets close), hidden from pickers, @mentions and Workload, their follows dropped; their history stays. 409 `DEACTIVATE_OWNER` for the owner, `DEACTIVATE_SELF` for yourself; 400 `INVALID_REFERENCE` for a bad `reassignTo`.',
+          'Admin or owner. With `reassignTo` (an active member) the leaver is replaced by that person on their open tasks (as assignee and reviewer) and as standup facilitator (joining those groups), with the usual activity rows; without it they are just removed from those. Then the membership is deactivated: no access to the workspace (404 everywhere, their sockets close), hidden from pickers, @mentions and Workload, their follows dropped; their history stays. 409 `DEACTIVATE_OWNER` for the owner, `DEACTIVATE_SELF` for yourself; 400 `INVALID_REFERENCE` for a bad `reassignTo`.',
         params,
         body: deactivateMemberSchema,
         response: {
@@ -182,10 +169,6 @@ export const offboardingRoutes: FastifyPluginCallbackZod = (app, _opts, done) =>
       }
 
       await app.db.transaction(async (tx) => {
-        await tx
-          .update(projects)
-          .set({ leadId: reassignTo })
-          .where(and(eq(projects.workspaceId, workspaceId), eq(projects.leadId, userId)));
         await handOverFacilitator(tx, workspaceId, userId, reassignTo, app.clock());
         await tx
           .delete(taskFollowers)

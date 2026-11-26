@@ -235,6 +235,7 @@
     "sort": "Эрэмбэ: {{field}}",
     "sortBy": "Эрэмбэлэх",
     "groupBy": "Бүлэглэх",
+    "showEmptyGroups": "Хоосон бүлгийг харуулах",
     "newTask": "Шинэ ажил",
     "sortFields": {
       "due": "Дуусах огноо",
@@ -291,12 +292,6 @@
     "noSprints": "Спринт алга",
     "searchPeople": "Хүн хайх",
     "searchTags": "Шошго хайх"
-  },
-  "summary": {
-    "tasks_one": "{{count}} ажил · {{done}} дууссан",
-    "tasks_other": "{{count}} ажил · {{done}} дууссан",
-    "tasksOf_one": "{{total}}-аас {{count}} ажил · {{done}} дууссан",
-    "tasksOf_other": "{{total}}-аас {{count}} ажил · {{done}} дууссан"
   },
   "table": {
     "label": "{{project}} төслийн ажлууд",
@@ -1671,16 +1666,6 @@
     "deleted_other": "{{count}} ажил устгалаа",
     "clear": "Сонголтыг цуцлах"
   },
-  "brief": {
-    "label": "{{project}} төслийн тухай",
-    "title": "Төслийн товч",
-    "empty": "Товч нэмэх: зорилго, холбоос, хэнээс асуух",
-    "none": "Товч бичигдээгүй",
-    "placeholder": "Энэ төсөл юуны төлөө вэ? Зорилго, холбоос, хэнээс асуух…",
-    "lead": "Ахлагч",
-    "noLead": "Ахлагчгүй",
-    "setLead": "Төслийн ахлагч"
-  },
   "members": {
     "actions": "{{name}} — нэмэлт үйлдэл",
     "away": {
@@ -1711,9 +1696,6 @@
       "openTasks_other": "Оноогдсон {{count}} нээлттэй ажил",
       "reviewing_one": "{{count}} нээлттэй ажлын хянагч",
       "reviewing_other": "{{count}} нээлттэй ажлын хянагч",
-      "leads_one": "{{projects}}-ийн ахлагч",
-      "leads_other": "{{count}} төслийн ахлагч: {{projects}}",
-      "leadsNone": "Төслийн ахлагч биш",
       "handTo": "Нээлттэй ажлыг шилжүүлэх",
       "nobody": "Хэнд ч биш (зөвхөн хасах)",
       "confirm": "Идэвхгүй болгох",

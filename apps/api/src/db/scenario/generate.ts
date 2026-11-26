@@ -400,7 +400,6 @@ export function buildScenario(
       key: pd.key,
       color: pd.color,
       position: projectKeys.get(pd.space)?.[siblings.indexOf(pd)] ?? 'a0',
-      leadId: lead.id,
       archivedAt: pd.archivedDaysAgo === undefined ? null : new Date(end),
       createdAt: new Date(start),
     };

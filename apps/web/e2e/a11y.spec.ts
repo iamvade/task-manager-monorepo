@@ -474,18 +474,14 @@ for (const scheme of ['light', 'dark'] as const) {
         await page.keyboard.press('Escape');
       });
 
-      await test.step('project brief and bulk bar', async () => {
+      await test.step('bulk bar', async () => {
         await page.goto(`/w/kite-studio/p/${ids.project}/list?sprint=none`);
-        const brief = page.getByRole('button', { name: /^Project brief/ });
-        await brief.click();
-        await expect(brief).toHaveAttribute('aria-expanded', 'true');
         const boxes = page.getByRole('checkbox', { name: /^Select / });
         await boxes.nth(0).check();
         await boxes.nth(1).check();
         await expect(page.getByRole('toolbar', { name: /selected task/ })).toBeVisible();
-        await expectAccessible(page, `Brief + bulk bar (${scheme})`);
+        await expectAccessible(page, `Bulk bar (${scheme})`);
         await page.getByRole('button', { name: 'Clear selection' }).click();
-        await brief.click();
       });
 
       await test.step('row status picker', async () => {

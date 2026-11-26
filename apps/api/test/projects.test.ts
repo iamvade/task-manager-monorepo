@@ -120,42 +120,7 @@ describe('spaces, projects and the sidebar', () => {
     expect(projectDetailSchema.parse(updated.json())).toMatchObject({
       name: 'Checkout v2',
       key: 'CO2',
-      description: null,
     });
-
-    // The brief: stored with its plain text; unsafe links and non-doc roots are refused.
-    const brief = {
-      type: 'doc',
-      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Goal: ship v2' }] }],
-    };
-    const withBrief = await api('PATCH', `/projects/${custom.id}`, { description: brief });
-    expect(withBrief.statusCode, withBrief.body).toBe(200);
-    expect(projectDetailSchema.parse(withBrief.json()).description).toEqual(brief);
-    const [row] = await ctx.db
-      .select({ text: projects.descriptionText })
-      .from(projects)
-      .where(eq(projects.id, custom.id));
-    expect(row?.text).toBe('Goal: ship v2');
-    const evil = {
-      type: 'doc',
-      content: [
-        {
-          type: 'paragraph',
-          content: [
-            {
-              type: 'text',
-              text: 'x',
-              marks: [{ type: 'link', attrs: { href: 'javascript:alert(1)' } }],
-            },
-          ],
-        },
-      ],
-    };
-    expect((await api('PATCH', `/projects/${custom.id}`, { description: evil })).statusCode).toBe(
-      400,
-    );
-    const cleared = await api('PATCH', `/projects/${custom.id}`, { description: null });
-    expect(projectDetailSchema.parse(cleared.json()).description).toBeNull();
   });
 
   it('reports task counts per status and the active sprint', async () => {
@@ -348,10 +313,6 @@ describe('spaces, projects and the sidebar', () => {
       expect(res.statusCode, `${method} ${url}`).toBe(403);
       expect(errorCode(res)).toBe('FORBIDDEN');
     }
-    // The brief and the lead stay open to every member.
-    const lead = await asMember('PATCH', `/projects/${p.id}`, { leadId: member.id });
-    expect(lead.statusCode, lead.body).toBe(200);
-
     const admin = await createUser(ctx.db);
     await addMember(ctx.db, ws.id, admin.id, 'admin');
     const asAdmin = apiClient(ctx.app, await login(ctx.app, admin.email));

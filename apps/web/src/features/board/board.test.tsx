@@ -90,15 +90,18 @@ describe('board', () => {
     vi.restoreAllMocks();
   });
 
-  it('says how many tasks the filters hide, per column and in the count line', async () => {
+  it('says how many tasks the filters hide, per column', async () => {
     const urgent = makeTasks().filter((x) => x.priority === 'urgent');
     api(urgent);
     const router = renderAt(
       `/w/kite-studio/p/${PROJECT_ID}/board?sprint=none&priority=urgent&show=all`,
     );
 
-    expect(await screen.findByText('2 of 7 tasks · 0 done')).toBeInTheDocument();
-    expect(within(column(/^To Do/)).getByText('+2 hidden by filters')).toBeInTheDocument();
+    expect(
+      await within(await screen.findByRole('region', { name: /^To Do/ })).findByText(
+        '+2 hidden by filters',
+      ),
+    ).toBeInTheDocument();
     expect(within(column(/^In Progress/)).getByText('+1 hidden by filters')).toBeInTheDocument();
     expect(within(column(/^Done/)).queryByText(/hidden by filters/)).toBeNull();
     expect(within(column(/^Done/)).getByText('Done in the last 14 days')).toBeInTheDocument();
@@ -126,7 +129,6 @@ describe('board', () => {
     expect(screen.getByRole('region', { name: 'In Progress, 2 tasks' })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'In Review, 2 tasks' })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Done, 1 task' })).toBeInTheDocument();
-    expect(screen.getByText('7 tasks · 1 done')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sort: Manual' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'View settings' })).toBeInTheDocument();
 

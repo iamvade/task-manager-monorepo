@@ -76,7 +76,6 @@ export function buildLabs(
     color: 'teal',
     taskSeq: TASKS.length,
     position: generateNKeysBetween(null, null, 1)[0] ?? 'a0',
-    leadId: owner,
     createdBy: owner,
     createdAt: joinedAt,
   } satisfies Row<typeof schema.projects>;

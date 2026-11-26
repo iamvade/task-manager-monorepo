@@ -26,15 +26,13 @@ describe('member offboarding', () => {
       assigneeIds: [dorj.user.id, sara.user.id],
     });
     const review = await w.createTask({ title: 'Review me', statusId: w.status('review').id });
-    let res = await w.api('PATCH', `/tasks/${review.id}`, { reviewerId: dorj.user.id });
+    const res = await w.api('PATCH', `/tasks/${review.id}`, { reviewerId: dorj.user.id });
     expect(res.statusCode, res.body).toBe(200);
     await w.createTask({
       title: 'Done',
       assigneeIds: [dorj.user.id],
       statusId: w.status('done').id,
     });
-    res = await w.api('PATCH', `/projects/${w.project.id}`, { leadId: dorj.user.id });
-    expect(res.statusCode, res.body).toBe(200);
     const base = `/workspaces/${w.ws.id}/members`;
     return { ...w, sara, dorj, solo, pair, review, base };
   }
@@ -45,7 +43,6 @@ describe('member offboarding', () => {
     expect(memberHandoverSchema.parse(handover.json())).toEqual({
       openTasks: 2,
       reviewing: 1,
-      leadOf: [{ id: w.project.id, key: w.project.key, name: w.project.name }],
     });
 
     const res = await w.api('POST', `${w.base}/${w.dorj.user.id}/deactivate`, {
@@ -61,8 +58,6 @@ describe('member offboarding', () => {
     expect(byTitle('Done')?.assignees.map((u) => u.id)).toEqual([w.dorj.user.id]);
     const review = await w.api('GET', `/tasks/${w.review.id}`);
     expect(review.json()).toMatchObject({ reviewerId: w.sara.user.id });
-    const project = await w.api('GET', `/projects/${w.project.id}`);
-    expect(project.json()).toMatchObject({ leadId: w.sara.user.id });
     const types = (await w.activities(w.solo.id)).map((a) => a.type);
     expect(types).toEqual(expect.arrayContaining(['assignee.removed', 'assignee.added']));
 
@@ -119,8 +114,6 @@ describe('member offboarding', () => {
     expect(rows.find((t) => t.title === 'Pair')?.assignees.map((u) => u.id)).toEqual([
       w.sara.user.id,
     ]);
-    const project = await w.api('GET', `/projects/${w.project.id}`);
-    expect(project.json()).toMatchObject({ leadId: null });
   });
 
   it('hands the facilitator role to the successor', async () => {

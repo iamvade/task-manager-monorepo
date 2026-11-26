@@ -47,7 +47,7 @@ import { isEditableTarget } from '../../lib/keyboard';
 import { useCopyLink } from '../../lib/useCopyLink';
 import { useDeleteWithUndo } from '../task/useDeleteWithUndo';
 import { useMoveUndoToast } from './useMoveUndoToast';
-import { useUiStore, type CreateDefaults } from '../../stores/ui';
+import { useUiStore } from '../../stores/ui';
 import { DoneScopeNote } from '../views/DoneScopeNote';
 import type { ListScope } from '../views/taskQuery';
 import { useViewParams } from '../views/useViewParams';
@@ -105,10 +105,12 @@ export function TaskTable({
     () => sortTasks(tasks, view.sort, statusRank),
     [tasks, view.sort, statusRank],
   );
-  const groups = useMemo(
-    () => groupTasks(sorted, view.group, { statuses, activeOnly: view.hideInactive }),
-    [sorted, view.group, statuses, view.hideInactive],
-  );
+  // Groups with no tasks are hidden unless View settings → "Show empty groups" is on.
+  const showEmptyGroups = useUiStore((s) => s.showEmptyGroups);
+  const groups = useMemo(() => {
+    const all = groupTasks(sorted, view.group, { statuses, activeOnly: view.hideInactive });
+    return showEmptyGroups ? all : all.filter((g) => g.tasks.length > 0);
+  }, [sorted, view.group, statuses, view.hideInactive, showEmptyGroups]);
   const byId = useMemo(() => new Map(tasks.map((task) => [task.id, task])), [tasks]);
 
   // Collapsed groups, remembered per list.
@@ -141,7 +143,6 @@ export function TaskTable({
     anchor.current = null;
   }, []);
   const [adding, setAdding] = useState<string | null>(null);
-  const openCreate = useUiStore((s) => s.openCreate);
 
   const firstOf = (category: Status['category']) =>
     statuses?.find((s) => s.category === category) ?? null;
@@ -193,28 +194,6 @@ export function TaskTable({
       status,
       tasks.filter((x) => x.status.id === task.status.id),
     );
-  }
-
-  /** Quick-create defaults for a group's header "+" (project list: the group's fields). */
-  function createDefaultsFor(group: TaskGroup): CreateDefaults {
-    const sprint = view.sprintId ? { sprintId: view.sprintId } : {};
-    if (project && group.defaults) {
-      const { statusId, assigneeIds, priority } = group.defaults;
-      return {
-        projectId: project.id,
-        ...(statusId ? { statusId } : {}),
-        ...(assigneeIds?.[0] ? { assigneeId: assigneeIds[0] } : {}),
-        ...(priority ? { priority } : {}),
-        ...sprint,
-      };
-    }
-    // Space list: groups are status categories, people or priorities across projects.
-    // The filtered sprint applies when it covers the project picked in quick create.
-    const [field, value] = group.key.split(':');
-    if (field === 'category') return { statusCategory: value as Status['category'], ...sprint };
-    if (field === 'assignee' && value && value !== 'none') return { assigneeId: value, ...sprint };
-    if (field === 'priority') return { priority: value as TaskListItem['priority'], ...sprint };
-    return sprint;
   }
 
   function createIn(group: TaskGroup, title: string) {
@@ -469,7 +448,7 @@ export function TaskTable({
   const showNoMatches =
     tasks.length === 0 &&
     (view.activeFilterCount > 0 || view.hideInactive) &&
-    view.group !== 'status';
+    (view.group !== 'status' || groups.length === 0);
 
   return (
     <ListContext.Provider value={actions}>
@@ -525,9 +504,6 @@ export function TaskTable({
                 onStartAdd={() => {
                   if (!isOpen(group)) setGroupCollapsed(listKey, group.key, false);
                   setAdding(group.key);
-                }}
-                onCreate={() => {
-                  openCreate(createDefaultsFor(group));
                 }}
                 onCancelAdd={() => {
                   setAdding((current) => (current === group.key ? null : current));
@@ -597,8 +573,6 @@ interface GroupSectionProps {
   onStartAdd: () => void;
   onCancelAdd: () => void;
   onSubmitAdd: (title: string) => void;
-  /** Header "+": quick-create modal with the group's fields. */
-  onCreate: () => void;
 }
 
 function GroupSection({
@@ -616,7 +590,6 @@ function GroupSection({
   onStartAdd,
   onCancelAdd,
   onSubmitAdd,
-  onCreate,
 }: GroupSectionProps) {
   const { t } = useTranslation();
   const { setNodeRef } = useDroppable({ id: `${GROUP_PREFIX}${group.key}`, disabled: !dndEnabled });
@@ -639,7 +612,6 @@ function GroupSection({
             marker={group.marker}
             open={open}
             onToggle={onToggle}
-            onAdd={onCreate}
             bodyId={bodyId}
           />
         </FullRow>

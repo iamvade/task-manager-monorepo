@@ -114,7 +114,6 @@ describe('project list', () => {
     fireEvent.mouseEnter(avatars);
     expect(await screen.findByRole('tooltip')).toHaveTextContent(/^Temuulen/);
     fireEvent.mouseLeave(avatars);
-    expect(screen.getByText('7 ажил · 1 дууссан')).toBeInTheDocument();
 
     const done = toggleOf('Дууссан');
     expect(done).toHaveAttribute('aria-expanded', 'false');
@@ -701,20 +700,25 @@ describe('project list', () => {
     expect(useUiStore.getState().createDefaults).toEqual({ projectId: PROJECT_ID });
   });
 
-  it('a group header "+" opens quick create with the group\'s status', async () => {
+  it('hides empty groups until View settings shows them', async () => {
     api();
-    renderAt(LIST);
+    renderAt(`/w/kite-studio/p/${PROJECT_ID}/list?sprint=none&show=all`);
     await screen.findByRole('table');
-    fireEvent.click(
-      within(group('Хийгдэж буй')).getByRole('button', {
-        name: '«Хийгдэж буй» бүлэгт ажил нэмэх',
-      }),
-    );
-    expect(useUiStore.getState().createDefaults).toEqual({
-      projectId: PROJECT_ID,
-      statusId: statusOf('in_progress').id,
-    });
-    expect(await screen.findByRole('dialog', { name: 'Шинэ ажил' })).toBeInTheDocument();
+    expect(toggleOf('Хийх')).toBeInTheDocument();
+    // No header "+" on list groups.
+    expect(screen.queryByRole('button', { name: /бүлэгт ажил нэмэх$/ })).toBeNull();
+    // On hold and Cancelled have no tasks.
+    expect(screen.queryByRole('button', { name: /^Түр зогссон/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /^Цуцалсан/ })).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Харагдацын тохиргоо' }));
+    const toggle = await screen.findByRole('menuitemradio', { name: 'Хоосон бүлгийг харуулах' });
+    expect(toggle).toHaveAttribute('aria-checked', 'false');
+    fireEvent.click(toggle);
+    expect(await screen.findByRole('button', { name: /^Түр зогссон/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Цуцалсан/ })).toBeInTheDocument();
+    expect(useUiStore.getState().showEmptyGroups).toBe(true);
+    useUiStore.setState({ showEmptyGroups: false });
   });
 });
 

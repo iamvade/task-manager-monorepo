@@ -232,6 +232,13 @@
       "when": 1795685628920,
       "tag": "0032_standup_remove_live_meetings",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1795714396043,
+      "tag": "0033_drop_project_lead_brief",
+      "breakpoints": true
     }
   ]
 }

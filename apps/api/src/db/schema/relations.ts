@@ -63,7 +63,6 @@ export const spacesRelations = relations(spaces, ({ one, many }) => ({
 export const projectsRelations = relations(projects, ({ one, many }) => ({
   workspace: one(workspaces, { fields: [projects.workspaceId], references: [workspaces.id] }),
   space: one(spaces, { fields: [projects.spaceId], references: [spaces.id] }),
-  lead: one(users, { fields: [projects.leadId], references: [users.id] }),
   members: many(projectMembers),
   favorites: many(favorites),
   statuses: many(statuses),

@@ -179,7 +179,6 @@ describe('Settings', () => {
         Response.json({
           openTasks: 3,
           reviewing: 1,
-          leadOf: [{ id: PROJECT.id, key: 'APP', name: 'App Redesign' }],
         }),
       [`POST /api/v1/workspaces/${WORKSPACE_ID}/members/${DORJ.user.id}/deactivate`]: (init) => {
         posts.push(JSON.parse(init?.body as string));
@@ -198,7 +197,6 @@ describe('Settings', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Deactivate Dorj E.?' });
     expect(await within(dialog).findByText('3 open tasks assigned')).toBeInTheDocument();
     expect(within(dialog).getByText('Reviewer on 1 open task')).toBeInTheDocument();
-    expect(within(dialog).getByText('Leads App Redesign')).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole('button', { name: /^Hand their open work to/ }));
     fireEvent.click(await screen.findByRole('option', { name: /Sara K\./ }));
     fireEvent.click(within(dialog).getByRole('button', { name: 'Deactivate' }));

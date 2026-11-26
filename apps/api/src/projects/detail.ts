@@ -79,8 +79,6 @@ export async function buildProjectDetail(
     position: project.position,
     createdAt: project.createdAt.toISOString(),
     isFavorite: favorite.length > 0,
-    leadId: project.leadId,
-    description: project.description ?? null,
     statuses: statusRows.map(toStatusDto),
     members,
     activeSprint: sprint,

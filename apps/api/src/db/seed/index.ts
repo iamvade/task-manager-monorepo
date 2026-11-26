@@ -23,7 +23,6 @@ import {
   ATTACHMENTS,
   CARRIED_OVER,
   DESCRIPTIONS,
-  PROJECT_BRIEFS,
   EVENTS,
   ME,
   PASSWORD,
@@ -194,20 +193,6 @@ export async function runSeed(db: Db, options: SeedOptions): Promise<void> {
 }
 
 /** Every seed row, built in memory (exported for tests). */
-/** The project's brief as rows (`PROJECT_BRIEFS`), in the seed's language. */
-const briefRow = (pick: (text: Text) => string, ref: string) => {
-  const brief = PROJECT_BRIEFS[ref];
-  if (!brief) return {};
-  const text = pick(brief);
-  return {
-    description: {
-      type: 'doc',
-      content: [{ type: 'paragraph', content: [{ type: 'text', text }] }],
-    },
-    descriptionText: text,
-  };
-};
-
 export function buildRows(
   clock: Clock,
   pick: (text: Text) => string,
@@ -289,7 +274,6 @@ export function buildRows(
         color: pr.color,
         taskSeq: 0,
         position: must(positions(siblings)[index], 'project position'),
-        ...briefRow(pick, ref),
         createdAt: HISTORY_PROJECTS.includes(ref)
           ? new Date(historyStart.getTime() - 21 * DAY_MS)
           : clock.at(pr.createdAt),
