@@ -3,6 +3,7 @@ import type {
   FeedbackListItem,
   FeedbackListResponse,
   FeedbackTaskRef,
+  FeedbackTopic,
 } from '@kite/shared';
 import { PROJECT_ID, SPACE_ID } from './fixtures';
 
@@ -31,6 +32,19 @@ export const TASK_REF: FeedbackTaskRef = {
   completedAt: null,
 };
 
+export const CHECKOUT = {
+  id: '01890000-0000-7000-8000-000000000801',
+  key: 'checkout',
+  name: 'Checkout',
+  color: 'blue',
+} as const satisfies FeedbackTopic;
+export const ACCOUNT = {
+  id: '01890000-0000-7000-8000-000000000802',
+  key: 'account',
+  name: 'Account',
+  color: 'violet',
+} as const satisfies FeedbackTopic;
+
 export const item = (n: number, extra: Partial<FeedbackListItem> = {}): FeedbackListItem => ({
   id: id(n),
   ref: `FB-${String(1040 + n)}`,
@@ -41,6 +55,7 @@ export const item = (n: number, extra: Partial<FeedbackListItem> = {}): Feedback
   attachmentCount: 0,
   submitterName: `Person ${String(n)}`,
   email: `person${String(n)}@example.com`,
+  topic: null,
   task: null,
   isRead: false,
   createdAt: '2026-10-08T03:00:00.000Z',

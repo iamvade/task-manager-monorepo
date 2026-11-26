@@ -5,6 +5,7 @@ import {
   type FeedbackDevice,
   type FeedbackStatus,
   type FeedbackType,
+  type PaletteKey,
 } from '@kite/shared';
 import { uuidv7 } from 'uuidv7';
 import type * as schema from '../schema/index.js';
@@ -61,8 +62,17 @@ const TABLET: FeedbackDevice = {
   viewport: '820×1100',
 };
 
+/** Feedback topics of the demo workspace (managed from the inbox; links preset one by key). */
+const TOPICS = [
+  { key: 'checkout', name: ['Төлбөр, сагс', 'Checkout'], color: 'blue' },
+  { key: 'account', name: ['Бүртгэл, нэвтрэх', 'Account'], color: 'violet' },
+  { key: 'mobile-app', name: ['Гар утасны апп', 'Mobile app'], color: 'teal' },
+] as const satisfies { key: string; name: Text; color: PaletteKey }[];
+type TopicKey = (typeof TOPICS)[number]['key'];
+
 interface FeedbackDef {
   type: FeedbackType;
+  topic?: TopicKey;
   status: FeedbackStatus;
   read: boolean;
   title: Text;
@@ -108,6 +118,7 @@ const FEEDBACK: FeedbackDef[] = [
     status: 'closed',
     read: true,
     title: ['Төлбөр хийх хурдан болсон', 'Checkout feels much faster now'],
+    topic: 'checkout',
     body: [
       'Өмнөхөөсөө хоёр алхам цөөхөн болсон нь их таалагдлаа. Баярлалаа!',
       'Love that there are two fewer steps than before. Thank you!',
@@ -123,6 +134,7 @@ const FEEDBACK: FeedbackDef[] = [
     status: 'closed',
     read: true,
     title: ['Нэвтрэх код ирэхгүй байна', 'Login code never arrives'],
+    topic: 'account',
     body: [
       'Unitel дугаар дээр SMS ирээгүй. Одоо зассан байна, баярлалаа.',
       'No SMS on my Unitel number. It works now, thanks.',
@@ -172,6 +184,7 @@ const FEEDBACK: FeedbackDef[] = [
     status: 'linked',
     read: true,
     title: ['Бүтээгдэхүүний зураг жижиг байна', 'Product photos feel small'],
+    topic: 'mobile-app',
     body: [
       'Жагсаалтад зургийг томруулж харах боломжгүй байна.',
       'There’s no way to see a bigger photo from the list.',
@@ -187,6 +200,7 @@ const FEEDBACK: FeedbackDef[] = [
     status: 'linked',
     read: true,
     title: ['Таблет дээр төлбөрийн хуудас уншихад хэцүү', 'Checkout is hard to read on my tablet'],
+    topic: 'checkout',
     body: [
       'iPad дээр бичиг жижиг, товчнууд хоорондоо хэт ойрхон байна.',
       'On my iPad the text is tiny and the buttons are too close together.',
@@ -202,6 +216,7 @@ const FEEDBACK: FeedbackDef[] = [
     status: 'review',
     read: true,
     title: ['Бараан горим хэрэгтэй байна', 'Dark mode, please'],
+    topic: 'mobile-app',
     body: ['Шөнө дэлгэц хэт гэрэлтэй байна.', 'The screen is too bright at night.'],
     name: ['Хулан М.', 'Khulan M.'],
     email: 'khulan.m@gmail.com',
@@ -220,6 +235,7 @@ const FEEDBACK: FeedbackDef[] = [
     status: 'linked',
     read: true,
     title: ['Сагсаа дараа нь үргэлжлүүлэх', 'Save my cart for later'],
+    topic: 'checkout',
     body: [
       'Утсаараа нэмсэн барааг компьютер дээрээ үргэлжлүүлэн авмаар байна.',
       'I want to add on my phone and finish on my laptop.',
@@ -254,6 +270,7 @@ const FEEDBACK: FeedbackDef[] = [
     status: 'linked',
     read: true,
     title: ['Сагсны тоо шинэчлэгдэхгүй байна', 'Cart badge count doesn’t update'],
+    topic: 'checkout',
     body: [
       'Бараа нэмсний дараа доод цэсний тоо хуучнаараа үлдэж байна.',
       'After adding an item the number on the bottom bar stays the same.',
@@ -288,6 +305,7 @@ const FEEDBACK: FeedbackDef[] = [
     status: 'new',
     read: false,
     title: ['Байгууллагын нэхэмжлэх авч болох уу?', 'Can I get a company invoice?'],
+    topic: 'account',
     body: [
       'Компанийн нэрээр худалдан авалт хийсэн, НӨАТ-ын баримт хэрэгтэй.',
       'I bought on behalf of my company and need a VAT receipt.',
@@ -335,6 +353,7 @@ const FEEDBACK: FeedbackDef[] = [
     status: 'new',
     read: false,
     title: ['Төлбөр төлөх алхам дээр апп гацаж байна', 'App freezes on the payment step'],
+    topic: 'checkout',
     body: [
       'iPhone 13, iOS 17. Карт сонгоод “Төлөх” дарахад дэлгэц хөдлөхгүй болж байна.\n\nАлхмууд:\n1. Сагсанд бараа нэмэх\n2. Төлбөр рүү орох\n3. Карт сонгоод “Төлөх” дарах\n\nАпп бүрэн гацаж, дахин нээх хэрэгтэй болдог.',
       'iPhone 13, iOS 17. After choosing a card and tapping “Pay” the screen stops responding.\n\nSteps:\n1. Add an item to the cart\n2. Go to checkout\n3. Choose a card and tap “Pay”\n\nThe app freezes completely and I have to restart it.',
@@ -355,6 +374,7 @@ const FEEDBACK: FeedbackDef[] = [
     status: 'new',
     read: false,
     title: ['QPay-ээр төлөх боломж нэмээч', 'Please add QPay as a payment option'],
+    topic: 'checkout',
     body: [
       'Ихэнх найзууд маань QPay ашигладаг. Карт байхгүй үед их хэрэгтэй.',
       'Most of my friends use QPay — really useful when you don’t have a card.',
@@ -394,6 +414,17 @@ export function buildFeedback(ctx: Ctx) {
   const ids: string[] = [];
   const at = (hoursAgo: number, plusMinutes = 0) =>
     new Date(clock.now.getTime() - hoursAgo * 3_600_000 + plusMinutes * 60_000);
+  const topics: Row<typeof schema.feedbackTopics>[] = TOPICS.map((t) => ({
+    id: uuidv7(),
+    workspaceId,
+    key: t.key,
+    name: pick(t.name),
+    color: t.color,
+    createdBy: user('anu').id,
+    createdAt: at(300),
+  }));
+  const topicId = (key: TopicKey | undefined) =>
+    key ? (topics.find((t) => t.key === key)?.id ?? null) : null;
 
   FEEDBACK.forEach((def, i) => {
     const id = uuidv7();
@@ -420,6 +451,7 @@ export function buildFeedback(ctx: Ctx) {
       userAgent: '',
       device: def.device,
       taskId: snapshot?.id ?? null,
+      topicId: topicId(def.topic),
       isRead: def.read,
       createdAt: created,
       updatedAt: created,
@@ -478,6 +510,7 @@ export function buildFeedback(ctx: Ctx) {
   });
 
   return {
+    feedbackTopics: topics,
     feedback,
     feedbackAttachments: files,
     feedbackActivity: log,

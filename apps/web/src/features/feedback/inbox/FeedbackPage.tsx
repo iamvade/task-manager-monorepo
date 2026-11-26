@@ -1,27 +1,43 @@
 import {
+  FEEDBACK_NO_TOPIC,
   FEEDBACK_PAGE_SIZE,
+  feedbackTopicKeySchema,
   FEEDBACK_STATUSES,
   FEEDBACK_TYPES,
   feedbackStatusSchema,
   feedbackTypeSchema,
   type FeedbackStatus,
+  type FeedbackTopicWithCount,
 } from '@kite/shared';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useSearchParams } from 'react-router';
-import { publicFeedbackUrl, useFeedbackList, type FeedbackListParams } from '../../../api/feedback';
+import {
+  publicFeedbackUrl,
+  useFeedbackList,
+  useFeedbackTopics,
+  type FeedbackListParams,
+} from '../../../api/feedback';
 import { useCurrentWorkspace } from '../../../api/workspaces';
 import { ErrorState } from '../../../components/ErrorState';
-import { CheckIcon, CopyIcon, FeedbackIcon, SearchIcon } from '../../../components/icons';
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  CopyIcon,
+  FeedbackIcon,
+  SearchIcon,
+} from '../../../components/icons';
+import { Menu, type MenuItem } from '../../../components/ui/Menu';
 import { Skeleton } from '../../../components/ui/Skeleton';
 import { UnderlineTabs } from '../../../components/ui/UnderlineTabs';
 import { cn } from '../../../lib/cn';
 import { PageHeader } from '../../views/PageHeader';
 import { FeedbackDrawer } from '../detail/FeedbackDrawer';
 import { FeedbackStatusDot, TypeDot } from '../parts';
-import { useCopy } from '../useCopy';
+import { useCopy, useCopyTopicLink } from '../useCopy';
 import { FeedbackEmpty } from './FeedbackEmpty';
 import { FeedbackTable } from './FeedbackTable';
+import { TopicsDialog } from './TopicsDialog';
 import { BASE_PATH } from '../../../lib/basePath';
 
 const SEARCH_DELAY_MS = 250;
@@ -34,6 +50,11 @@ function useFilters() {
     .getAll('status')
     .flatMap((s) => feedbackStatusSchema.safeParse(s).data ?? []);
   const q = params.get('q') ?? '';
+  const rawTopic = params.get('topic');
+  const topic =
+    rawTopic === FEEDBACK_NO_TOPIC
+      ? FEEDBACK_NO_TOPIC
+      : feedbackTopicKeySchema.safeParse(rawTopic).data;
   const page = Math.max(1, Number.parseInt(params.get('page') ?? '1', 10) || 1);
   const { pathname } = useLocation();
   // The search box writes `q` from a timer, which can fire after a click navigated (opened an
@@ -69,7 +90,7 @@ function useFilters() {
     const s = next.toString();
     return s ? `?${s}` : '?';
   };
-  return { params, type, statuses, q, page, update, setPage, typeHref };
+  return { params, type, statuses, topic, q, page, update, setPage, typeHref };
 }
 
 /** Feedback inbox (Feedback.dc.html): search, type tabs, status chips, the table, the panel. */
@@ -77,7 +98,9 @@ export function FeedbackPage() {
   const { t } = useTranslation();
   const workspace = useCurrentWorkspace();
   const workspaceId = workspace?.id ?? '';
-  const { type, statuses, q, page, update, setPage, typeHref } = useFilters();
+  const { type, statuses, topic, q, page, update, setPage, typeHref } = useFilters();
+  const topics = useFeedbackTopics(workspace?.id);
+  const [managing, setManaging] = useState(false);
   const [search, setSearch] = useState(q);
   // The box drives `q` after a pause; a back/forward to another `q` drives the box.
   const [shownQ, setShownQ] = useState(q);
@@ -103,12 +126,13 @@ export function FeedbackPage() {
     q: q || undefined,
     type,
     status: statuses.length > 0 ? statuses : undefined,
+    topic,
     offset: (page - 1) * FEEDBACK_PAGE_SIZE,
     limit: FEEDBACK_PAGE_SIZE,
   };
   const list = useFeedbackList(workspace?.id, listParams);
   const data = list.data;
-  const nothingYet = data?.typeCounts.all === 0 && !q;
+  const nothingYet = data?.typeCounts.all === 0 && !q && !topic;
 
   const toggleStatus = (status: FeedbackStatus) => {
     update((next) => {
@@ -146,7 +170,16 @@ export function FeedbackPage() {
                 />
               </label>
             )}
-            {workspace && <PublicLinkPill slug={workspace.slug} compact={nothingYet} />}
+            {workspace && (
+              <PublicLinkPill
+                slug={workspace.slug}
+                compact={nothingYet}
+                topics={topics.data ?? []}
+                onManage={() => {
+                  setManaging(true);
+                }}
+              />
+            )}
           </div>
         }
         tabs={
@@ -205,6 +238,18 @@ export function FeedbackPage() {
                 </button>
               );
             })}
+            {((topics.data?.length ?? 0) > 0 || topic) && (
+              <TopicFilter
+                topics={topics.data ?? []}
+                value={topic}
+                onChange={(next) => {
+                  update((params) => {
+                    if (next) params.set('topic', next);
+                    else params.delete('topic');
+                  });
+                }}
+              />
+            )}
             {statuses.length > 0 && (
               <button
                 type="button"
@@ -233,15 +278,57 @@ export function FeedbackPage() {
         </>
       )}
       <FeedbackDrawer workspaceId={workspaceId} order={data?.items ?? []} />
+      {workspace && (
+        <TopicsDialog
+          open={managing}
+          onClose={() => {
+            setManaging(false);
+          }}
+          workspaceId={workspace.id}
+          slug={workspace.slug}
+          role={workspace.role}
+        />
+      )}
     </>
   );
 }
 
-/** The public form's address and a copy button (header; empty state has a bigger one). */
-function PublicLinkPill({ slug, compact }: { slug: string; compact: boolean }) {
+/**
+ * The public form's address and a copy button (header; empty state has a bigger one), plus a menu
+ * to copy a link with a topic picked and to manage the topics.
+ */
+function PublicLinkPill({
+  slug,
+  compact,
+  topics,
+  onManage,
+}: {
+  slug: string;
+  compact: boolean;
+  topics: readonly FeedbackTopicWithCount[];
+  onManage: () => void;
+}) {
   const { t } = useTranslation();
   const { copied, copy } = useCopy();
+  const copyTopic = useCopyTopicLink(slug);
   const url = publicFeedbackUrl(slug);
+  const items: MenuItem[] = [
+    ...(topics.length > 0
+      ? ([
+          { type: 'heading', id: 'by-topic', label: t('feedback.topics.linkByTopic') },
+          ...topics.map((topic) => ({
+            id: topic.id,
+            label: topic.name,
+            icon: <CopyIcon size={14} />,
+            onSelect: () => {
+              copyTopic(topic);
+            },
+          })),
+          { type: 'separator', id: 'sep' },
+        ] satisfies MenuItem[])
+      : []),
+    { id: 'manage', label: t('feedback.topics.manage'), onSelect: onManage },
+  ];
   const button = (
     <button
       type="button"
@@ -251,7 +338,6 @@ function PublicLinkPill({ slug, compact }: { slug: string; compact: boolean }) {
       aria-live="polite"
       className={cn(
         'flex h-9 items-center gap-1.5 px-3 text-[13px] font-medium',
-        compact && 'rounded-[8px] border border-default',
         copied ? 'bg-success-soft text-success-soft' : 'bg-surface text-default hover:bg-hover',
       )}
     >
@@ -259,15 +345,110 @@ function PublicLinkPill({ slug, compact }: { slug: string; compact: boolean }) {
       {copied ? t('feedback.inbox.copied') : t('feedback.inbox.copyLink')}
     </button>
   );
-  if (compact) return button;
+  const menu = (
+    <Menu
+      label={t('feedback.topics.linkMenu')}
+      placement="bottom-end"
+      width={240}
+      items={items}
+      trigger={(props) => (
+        <button
+          type="button"
+          {...props}
+          aria-label={t('feedback.topics.linkMenu')}
+          className="flex h-9 w-8 items-center justify-center bg-surface text-icon hover:bg-hover"
+        >
+          <ChevronDownIcon size={12} />
+        </button>
+      )}
+    />
+  );
+  const divider = <span className="h-full w-px bg-[var(--border)]" aria-hidden="true" />;
   return (
     <div className="flex h-9 items-center overflow-hidden rounded-[8px] border border-default">
-      <span title={url} className="max-w-[200px] truncate px-2.5 font-mono text-[12px] text-muted">
-        {url.replace(/^https?:\/\//, '')}
-      </span>
-      <span className="h-full w-px bg-[var(--border)]" aria-hidden="true" />
+      {!compact && (
+        <>
+          <span
+            title={url}
+            className="max-w-[200px] truncate px-2.5 font-mono text-[12px] text-muted"
+          >
+            {url.replace(/^https?:\/\//, '')}
+          </span>
+          {divider}
+        </>
+      )}
       {button}
+      {divider}
+      {menu}
     </div>
+  );
+}
+
+/** "Topic: …" filter next to the status chips (`?topic=` key, or `none`). */
+function TopicFilter({
+  topics,
+  value,
+  onChange,
+}: {
+  topics: readonly FeedbackTopicWithCount[];
+  value: string | undefined;
+  onChange: (value: string | null) => void;
+}) {
+  const { t } = useTranslation();
+  const current = topics.find((x) => x.key === value);
+  const shown =
+    value === FEEDBACK_NO_TOPIC
+      ? t('feedback.topics.none')
+      : (current?.name ?? value ?? t('feedback.topics.filterAll'));
+  return (
+    <Menu
+      label={t('feedback.topics.filterLabel')}
+      width={240}
+      items={[
+        {
+          id: 'all',
+          label: t('feedback.topics.filterAll'),
+          checked: !value,
+          onSelect: () => {
+            onChange(null);
+          },
+        },
+        { type: 'separator', id: 'sep' },
+        ...topics.map((x) => ({
+          id: x.id,
+          label: x.name,
+          checked: x.key === value,
+          trailing: <span className="text-[12px] text-muted tabular-nums">{x.feedbackCount}</span>,
+          onSelect: () => {
+            onChange(x.key);
+          },
+        })),
+        {
+          id: 'none',
+          label: t('feedback.topics.none'),
+          checked: value === FEEDBACK_NO_TOPIC,
+          onSelect: () => {
+            onChange(FEEDBACK_NO_TOPIC);
+          },
+        },
+      ]}
+      trigger={(props) => (
+        <button
+          type="button"
+          {...props}
+          className={cn(
+            'inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-[12px] font-medium',
+            value
+              ? 'border-[var(--accent)] bg-accent-soft text-default'
+              : 'border-default bg-surface text-2 hover:bg-hover',
+          )}
+        >
+          <span className="text-muted">{t('feedback.topics.filter')}:</span>
+          <span className="max-w-[160px] truncate">{shown}</span>
+          <ChevronDownIcon size={10} className="text-icon" />
+        </button>
+      )}
+    />
   );
 }
 

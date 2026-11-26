@@ -3,6 +3,7 @@ import {
   isClosedCategory,
   type FeedbackDetail,
   type FeedbackStatus,
+  type FeedbackTopic,
 } from '@kite/shared';
 import { lazy, Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +12,9 @@ import {
   useFeedbackTaskSuggestions,
   useLinkFeedback,
   useSetFeedbackAssignees,
+  useFeedbackTopics,
   useSetFeedbackStatus,
+  useSetFeedbackTopic,
   useUnlinkFeedback,
 } from '../../../api/feedback';
 import { useWorkspaceMembers } from '../../../api/workspaces';
@@ -26,6 +29,7 @@ import { Avatar } from '../../../components/ui/Avatar';
 import { Picker } from '../../../components/ui/Picker';
 import { Popover } from '../../../components/ui/Popover';
 import { StatusDot } from '../../../components/ui/StatusDot';
+import { TagChip } from '../../../components/ui/TagChip';
 import { cn } from '../../../lib/cn';
 import { DUE_TONE_CLASS } from '../../../lib/dates';
 import { useDates } from '../../../lib/useDates';
@@ -43,6 +47,85 @@ const CreateTaskModal = lazy(() =>
 const fieldLabel = 'text-[12px] font-medium text-muted';
 const fieldButton =
   'box-border flex h-[38px] w-full items-center gap-2 rounded-[8px] border border-default bg-surface px-3 text-left text-[14px] font-medium';
+
+interface TopicOption {
+  id: string | null;
+  name: string;
+  color: FeedbackTopic['color'];
+}
+
+/** The item's topic (the workspace's list, or none); any member changes it. */
+function TopicField({ workspaceId, detail }: { workspaceId: string; detail: FeedbackDetail }) {
+  const { t } = useTranslation();
+  const topics = useFeedbackTopics(workspaceId);
+  const setTopic = useSetFeedbackTopic(workspaceId);
+  const options: TopicOption[] = [
+    ...(topics.data ?? []).map((x) => ({ id: x.id, name: x.name, color: x.color })),
+    { id: null, name: t('feedback.topics.none'), color: 'neutral' },
+  ];
+  // Hidden while the workspace has no topics and this item has none.
+  if (!detail.topic && (topics.data?.length ?? 0) === 0) return null;
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span id="fb-topic-l" className={fieldLabel}>
+        {t('feedback.detail.topic')}
+      </span>
+      <Popover
+        label={t('feedback.detail.topic')}
+        width={280}
+        trigger={(props, open) => (
+          <button
+            type="button"
+            {...props}
+            aria-haspopup="listbox"
+            aria-expanded={open}
+            aria-labelledby="fb-topic-l fb-topic-v"
+            className={cn(fieldButton, 'hover:bg-hover')}
+          >
+            <span id="fb-topic-v" className="flex min-w-0 flex-1 items-center">
+              {detail.topic ? (
+                <TagChip name={detail.topic.name} color={detail.topic.color} />
+              ) : (
+                <span className="font-normal text-muted">{t('feedback.topics.none')}</span>
+              )}
+            </span>
+            <ChevronDownIcon size={12} className="text-icon" />
+          </button>
+        )}
+      >
+        {(close) => (
+          <Picker<TopicOption>
+            items={options}
+            value={detail.topic?.id ?? 'none'}
+            getKey={(x) => x.id ?? 'none'}
+            getLabel={(x) => x.name}
+            label={t('feedback.detail.topic')}
+            onClose={close}
+            onSelect={(x) => {
+              close();
+              if (x.id === (detail.topic?.id ?? null)) return;
+              setTopic.mutate(
+                { id: detail.id, topicId: x.id },
+                {
+                  onError: () => {
+                    toast({ message: t('feedback.detail.failed'), tone: 'danger' });
+                  },
+                },
+              );
+            }}
+            renderItem={(x) =>
+              x.id ? (
+                <TagChip name={x.name} color={x.color} />
+              ) : (
+                <span className="text-muted">{x.name}</span>
+              )
+            }
+          />
+        )}
+      </Popover>
+    </div>
+  );
+}
 
 /** Side column: status, linked task, assignee (the task's), details, the linked reports. */
 export function FeedbackSide({
@@ -110,6 +193,7 @@ export function FeedbackSide({
         </Popover>
       </div>
 
+      <TopicField workspaceId={workspaceId} detail={detail} />
       <LinkedTask workspaceId={workspaceId} detail={detail} />
       <Assignee workspaceId={workspaceId} detail={detail} />
 

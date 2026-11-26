@@ -3,6 +3,7 @@ import {
   FEEDBACK_BODY_MIN,
   FEEDBACK_FIELD_ERRORS,
   FEEDBACK_TITLE_MAX,
+  FEEDBACK_TOPIC_PARAM,
   validateFeedbackForm,
   type FeedbackFieldError,
   type FeedbackFormField,
@@ -12,6 +13,7 @@ import {
 } from '@kite/shared';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router';
 import { ApiError } from '../../../api/client';
 import { submitPublicFeedback } from '../../../api/feedback';
 import { cn } from '../../../lib/cn';
@@ -99,6 +101,12 @@ export function FeedbackForm({
 }: FeedbackFormProps) {
   const { t } = useTranslation();
   const [type, setType] = useState<FeedbackType | null>(null);
+  // A shared link can preset the topic (`?topic=checkout`); the person can still change it.
+  const [searchParams] = useSearchParams();
+  const [topic, setTopic] = useState(() => {
+    const preset = searchParams.get(FEEDBACK_TOPIC_PARAM)?.trim().toLowerCase();
+    return form.topics.some((x) => x.key === preset) ? (preset ?? '') : '';
+  });
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [name, setName] = useState(initialContact.name);
@@ -185,6 +193,7 @@ export function FeedbackForm({
     try {
       const result = await submitPublicFeedback(slug, {
         type,
+        topic: topic || null,
         title,
         body,
         name,
@@ -320,6 +329,30 @@ export function FeedbackForm({
             error={errors.type ? t(`feedbackPublic.err.${errors.type}`) : null}
             onChange={edit('type', setType)}
           />
+
+          {form.topics.length > 0 && (
+            <div>
+              <label htmlFor="fb-topic" className="mb-2 block text-[14px] font-semibold">
+                {t('feedbackPublic.topicLabel')}{' '}
+                <span className="font-normal text-muted">{t('feedbackPublic.optional')}</span>
+              </label>
+              <select
+                id="fb-topic"
+                value={topic}
+                onChange={(e) => {
+                  setTopic(e.target.value);
+                }}
+                className={cn(inputBase, 'h-[46px]', inputState(false))}
+              >
+                <option value="">{t('feedbackPublic.noTopic')}</option>
+                {form.topics.map((x) => (
+                  <option key={x.key} value={x.key}>
+                    {x.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div>
             <div className="mb-2 flex items-baseline justify-between gap-3">

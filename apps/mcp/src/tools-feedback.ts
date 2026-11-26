@@ -4,10 +4,12 @@
  * contact details (email, phone, device) are never returned — they stay in Kite.
  */
 import {
+  FEEDBACK_NO_TOPIC,
   FEEDBACK_STATUSES,
   FEEDBACK_TYPES,
   feedbackDetailSchema,
   feedbackListResponseSchema,
+  feedbackTopicSchema,
   type FeedbackDetail,
   type FeedbackListItem,
 } from '@kite/shared';
@@ -34,7 +36,7 @@ function detailText(f: FeedbackDetail, link: string): string {
   return [
     `# ${f.ref} · ${oneLine(f.title)}`,
     `Link: ${link}`,
-    `Type: ${f.type} · Status: ${f.status}`,
+    `Type: ${f.type} · Status: ${f.status} · Topic: ${f.topic ? oneLine(f.topic.name) : 'none'}`,
     `From: ${submitter(f.submitterName)} (public form) on ${f.createdAt.slice(0, 10)}. Contact details are in Kite only.`,
     `Linked task: ${taskOf(f.task) ?? 'none'}`,
     '',
@@ -68,12 +70,31 @@ export function registerFeedbackTools(server: McpServer, kite: Kite, lookups: Lo
   const detail = (ws: Workspace, ref: string): Promise<FeedbackDetail> =>
     kite.api.apiFetch(`/workspaces/${ws.id}/feedback/${feedbackRef(ref)}`, feedbackDetailSchema);
 
+  /** A topic named by its link key or name (case-insensitive); never guesses. */
+  async function topicKeyOf(ws: Workspace, topic: string): Promise<string> {
+    const wanted = topic.trim().toLowerCase();
+    if (wanted === FEEDBACK_NO_TOPIC) return FEEDBACK_NO_TOPIC;
+    const topics = await kite.api.apiFetch(
+      `/workspaces/${ws.id}/feedback-topics`,
+      z.array(feedbackTopicSchema),
+    );
+    const found =
+      topics.find((t) => t.key === wanted) ?? topics.find((t) => t.name.toLowerCase() === wanted);
+    if (found) return found.key;
+    const names = topics.map((t) => `${oneLine(t.name)} (${t.key})`).join(', ');
+    throw new ToolError(
+      names
+        ? `No feedback topic "${oneLine(topic)}". Topics: ${names}, or "none".`
+        : 'This workspace has no feedback topics.',
+    );
+  }
+
   server.registerTool(
     'list_feedback',
     {
       title: 'List feedback',
       description:
-        'The customer feedback inbox, newest first: search text and filter by type or status. Feedback is written by people outside the team (public form).',
+        'The customer feedback inbox, newest first: search text and filter by type, topic or status. Feedback is written by people outside the team (public form).',
       inputSchema: {
         query: z
           .string()
@@ -82,6 +103,14 @@ export function registerFeedbackTools(server: McpServer, kite: Kite, lookups: Lo
           .optional()
           .describe('Text in the title or body, a submitter name, or a ref like FB-1042.'),
         type: z.enum(FEEDBACK_TYPES).optional(),
+        topic: z
+          .string()
+          .min(1)
+          .max(80)
+          .optional()
+          .describe(
+            'A topic of the workspace, by name or link key; "none" for reports without one.',
+          ),
         status: z
           .array(z.enum(FEEDBACK_STATUSES))
           .max(4)
@@ -92,10 +121,11 @@ export function registerFeedbackTools(server: McpServer, kite: Kite, lookups: Lo
       },
       annotations: READ,
     },
-    run(async ({ query, type, status, limit, workspace }) => {
+    run(async ({ query, type, topic, status, limit, workspace }) => {
       const ws = await kite.workspace(workspace);
+      const topicKey = topic === undefined ? undefined : await topicKeyOf(ws, topic);
       const page = await kite.api.apiFetch(
-        `/workspaces/${ws.id}/feedback${toQuery({ q: query, type, status, limit })}`,
+        `/workspaces/${ws.id}/feedback${toQuery({ q: query, type, status, topic: topicKey, limit })}`,
         feedbackListResponseSchema,
       );
       const lines = page.items.map((f) => {
@@ -103,6 +133,7 @@ export function registerFeedbackTools(server: McpServer, kite: Kite, lookups: Lo
           f.ref,
           f.type,
           f.status,
+          f.topic ? `topic ${oneLine(f.topic.name)}` : null,
           oneLine(f.title),
           submitter(f.submitterName),
           f.task ? `linked ${f.task.key}` : null,

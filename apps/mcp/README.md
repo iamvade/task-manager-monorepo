@@ -107,7 +107,7 @@ If `node` isn't found (Claude Desktop doesn't load your shell's `PATH`), put the
 | `complete_subtask`      | write | Check off a subtask by position or exact title, or uncheck it                                          |
 | `standup_today`         | read  | My standup group today: who posted, open blockers, my update or draft, everyone's updates, suggestions |
 | `post_standup`          | write | Write my update (yesterday, today, blockers with a linked task and helpers); post it or save a draft   |
-| `list_feedback`         | read  | Feedback inbox: search, type, status (≤ 50)                                                            |
+| `list_feedback`         | read  | Feedback inbox: search, type, topic, status (≤ 50)                                                     |
 | `get_feedback`          | write | One report by ref (`FB-1042`): body, attachments, linked task, notes. Marks it read for the team       |
 | `link_feedback_to_task` | write | Link a report to a task; moves an existing link only with `replace`                                    |
 

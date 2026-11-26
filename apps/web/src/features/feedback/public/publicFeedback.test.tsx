@@ -1,4 +1,4 @@
-import type { PublicFeedbackUpload } from '@kite/shared';
+import type { PublicFeedbackForm, PublicFeedbackUpload } from '@kite/shared';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { RouterProvider, createMemoryRouter } from 'react-router';
@@ -18,8 +18,9 @@ vi.mock('../../../api/feedback', async (importOriginal) => ({
 }));
 
 const SLUG = 'kite-studio';
-const FORM = {
+const FORM: PublicFeedbackForm = {
   workspaceName: 'Kite Studio',
+  topics: [],
   maxFiles: 5,
   maxFileBytes: 10 * 1024 * 1024,
   mimeTypes: ['image/png', 'image/jpeg', 'video/mp4', 'video/quicktime', 'application/pdf'],
@@ -35,13 +36,13 @@ const RESULT = {
 
 type Handler = (init?: RequestInit) => Response | Promise<Response>;
 
-function renderPage(extra: Record<string, Handler> = {}) {
+function renderPage(extra: Record<string, Handler> = {}, { form = FORM, search = '' } = {}) {
   const fetchMock = mockApi({
-    [`GET /api/v1/public/feedback/${SLUG}`]: () => Response.json(FORM),
+    [`GET /api/v1/public/feedback/${SLUG}`]: () => Response.json(form),
     ...extra,
   });
   const router = createMemoryRouter([{ path: '/feedback/:slug', Component: PublicFeedbackPage }], {
-    initialEntries: [`/feedback/${SLUG}`],
+    initialEntries: [`/feedback/${SLUG}${search}`],
   });
   render(
     <QueryClientProvider client={createQueryClient()}>
@@ -323,6 +324,42 @@ describe('PublicFeedbackPage', () => {
     await screen.findByRole('heading', { name: 'Thank you! We’ve received your feedback' });
     expect(sent).toMatchObject({ uploads: [] });
     expect(screen.getByText(/0 attachments · Just now/)).toBeInTheDocument();
+  });
+
+  it('presets the topic from the link and lets the person change it', async () => {
+    let sent: unknown = null;
+    renderPage(
+      {
+        [`POST /api/v1/public/feedback/${SLUG}`]: (init) => {
+          sent = JSON.parse(init?.body as string);
+          return Response.json(RESULT, { status: 201 });
+        },
+      },
+      {
+        form: {
+          ...FORM,
+          topics: [
+            { key: 'account', name: 'Account' },
+            { key: 'checkout', name: 'Checkout' },
+          ],
+        },
+        search: '?topic=checkout',
+      },
+    );
+    const select = await screen.findByRole('combobox', { name: /Topic/ });
+    expect(select).toHaveValue('checkout');
+    fireEvent.change(select, { target: { value: 'account' } });
+    fillValid();
+    submit();
+    await waitFor(() => {
+      expect(sent).toMatchObject({ topic: 'account' });
+    });
+  });
+
+  it('has no Topic field when the workspace has no topics, and ignores an unknown key', async () => {
+    renderPage({}, { search: '?topic=gone' });
+    await screen.findByRole('button', { name: 'Send feedback' });
+    expect(screen.queryByRole('combobox', { name: /Topic/ })).toBeNull();
   });
 
   it('sends, shows the reference, and "Submit another" keeps the contact details', async () => {

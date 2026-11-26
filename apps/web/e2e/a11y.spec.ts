@@ -375,6 +375,24 @@ for (const scheme of ['light', 'dark'] as const) {
         await expectAccessible(page, `Feedback bulk bar (${scheme})`);
       });
 
+      await test.step('feedback topics: filter, link menu and manage dialog', async () => {
+        await page.goto('/w/kite-studio/feedback?topic=checkout');
+        await page.getByRole('button', { name: /^Topic:/ }).click();
+        await expect(page.getByRole('menu', { name: /^Topic:/ })).toBeVisible();
+        await expectAccessible(page, `Feedback topic filter (${scheme})`);
+        await page.keyboard.press('Escape');
+        await page.getByRole('button', { name: 'Copy a link with a topic' }).click();
+        await page.getByRole('menuitem', { name: 'Manage topics…' }).click();
+        const dialog = page.getByRole('dialog', { name: 'Topics' });
+        await expect(dialog.getByText('?topic=checkout')).toBeVisible();
+        await dialog.getByRole('button', { name: 'New topic' }).click();
+        await expect(dialog.getByRole('form', { name: 'New topic' })).toBeVisible();
+        await expectAccessible(page, `Feedback topics dialog (${scheme})`);
+        await page.keyboard.press('Escape');
+        await dialog.getByRole('button', { name: 'Close' }).click();
+        await expect(dialog).toBeHidden();
+      });
+
       await test.step('image preview', async () => {
         await page.goto(`/w/kite-studio/p/${ids.project}/list?task=${ids.taskKey}`);
         const drawer = page.getByRole('dialog');

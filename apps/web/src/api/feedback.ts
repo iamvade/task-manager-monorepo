@@ -7,6 +7,9 @@ import {
   feedbackListResponseSchema,
   feedbackOptionsSchema,
   feedbackTaskSuggestionsSchema,
+  feedbackTopicSchema,
+  feedbackTopicWithCountSchema,
+  FEEDBACK_TOPIC_PARAM,
   publicFeedbackFormSchema,
   publicFeedbackResultSchema,
   publicFeedbackUploadSchema,
@@ -16,6 +19,8 @@ import {
   type FeedbackListQuery,
   type FeedbackListResponse,
   type FeedbackStatus,
+  type CreateFeedbackTopic,
+  type UpdateFeedbackTopic,
   type PublicFeedbackSubmit,
   type PublicFeedbackUpload,
   type SidebarResponse,
@@ -32,7 +37,9 @@ import { ApiError, apiFetch, apiSend, parseRetryAfter, toQuery } from './client'
 import { queryKeys } from '@kite/shared/client';
 import { apiUrl, appUrl } from '../lib/basePath';
 
-export type FeedbackListParams = Partial<Pick<FeedbackListQuery, 'q' | 'type' | 'status'>> & {
+export type FeedbackListParams = Partial<
+  Pick<FeedbackListQuery, 'q' | 'type' | 'status' | 'topic'>
+> & {
   offset?: number;
   limit?: number;
 };
@@ -47,8 +54,61 @@ export const feedbackAttachmentUrl = (
     `/feedback/${feedbackId}/attachments/${attachmentId}/download${inline ? '?inline=true' : ''}`,
   );
 
-/** The public form's address, as the inbox shares it. */
-export const publicFeedbackUrl = (slug: string) => appUrl(`/feedback/${slug}`);
+/** The public form's address, as the inbox shares it; a topic key presets the form's Topic. */
+export const publicFeedbackUrl = (slug: string, topicKey?: string | null) =>
+  appUrl(
+    `/feedback/${slug}${topicKey ? `?${FEEDBACK_TOPIC_PARAM}=${encodeURIComponent(topicKey)}` : ''}`,
+  );
+
+/** The workspace's feedback topics by name, with their item counts. */
+export function useFeedbackTopics(workspaceId: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.feedbackTopics(workspaceId ?? ''),
+    queryFn: () =>
+      apiFetch(
+        `/workspaces/${workspaceId ?? ''}/feedback-topics`,
+        z.array(feedbackTopicWithCountSchema),
+      ),
+    enabled: Boolean(workspaceId),
+  });
+}
+
+/** Admins: add a topic (callers show a taken name or key next to the field). */
+export function useCreateFeedbackTopic(workspaceId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    meta: { errorToast: false },
+    mutationFn: (body: CreateFeedbackTopic) =>
+      apiSend(`/workspaces/${workspaceId}/feedback-topics`, feedbackTopicSchema, 'POST', body),
+    onSettled: () => {
+      settleFeedback(queryClient, workspaceId);
+    },
+  });
+}
+
+/** Admins: rename, recolor or re-key a topic. */
+export function useUpdateFeedbackTopic(workspaceId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    meta: { errorToast: false },
+    mutationFn: ({ topicId, ...patch }: UpdateFeedbackTopic & { topicId: string }) =>
+      apiSend(`/feedback-topics/${topicId}`, feedbackTopicSchema, 'PATCH', patch),
+    onSettled: () => {
+      settleFeedback(queryClient, workspaceId);
+    },
+  });
+}
+
+/** Admins: delete a topic (its items keep no topic). */
+export function useDeleteFeedbackTopic(workspaceId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (topicId: string) => apiSend(`/feedback-topics/${topicId}`, z.null(), 'DELETE'),
+    onSettled: () => {
+      settleFeedback(queryClient, workspaceId);
+    },
+  });
+}
 
 export function useFeedbackList(workspaceId: string | undefined, params: FeedbackListParams) {
   return useQuery({
@@ -193,6 +253,15 @@ function useDetailMutation<V>(
     },
   });
 }
+
+/** Sets an item's topic (null = none) from the panel. */
+export const useSetFeedbackTopic = (workspaceId: string) =>
+  useDetailMutation(
+    workspaceId,
+    ({ id, topicId }: { id: string; topicId: string | null }) =>
+      apiSend(`/feedback/${id}`, feedbackDetailSchema, 'PATCH', { topicId }),
+    false,
+  );
 
 export const useAddFeedbackNote = (workspaceId: string) =>
   useDetailMutation(
