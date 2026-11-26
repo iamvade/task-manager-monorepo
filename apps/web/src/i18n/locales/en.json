@@ -287,7 +287,6 @@
   },
   "table": {
     "label": "{{project}} tasks",
-    "complete": "Complete",
     "colName": "Task name",
     "colAssignee": "Assignee",
     "colDue": "Due date",
@@ -304,7 +303,6 @@
     "newTaskTitle": "New task title",
     "noAssignee": "No assignee",
     "noMatches": "No tasks match these filters",
-    "assigneeMore": "{{name}} +{{count}}",
     "subtasks": "{{done}} of {{total}} subtasks done",
     "comments_one": "{{count}} comment",
     "comments_other": "{{count}} comments",

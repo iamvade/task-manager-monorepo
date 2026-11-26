@@ -13,8 +13,6 @@ import { createContext, useContext } from 'react';
 /** Data and actions every row of one List needs (provided by TaskTable). */
 export interface ListActions {
   members: readonly WorkspaceMember[];
-  /** Short display name, kept distinct when two members' short names collide. */
-  shortNameOf: (user: UserRef) => string;
   /** Project team ids (assignee picker suggestions); empty on the space list. */
   teamIds: ReadonlySet<string>;
   tags: readonly Tag[];
@@ -60,8 +58,9 @@ export const isClosed = (task: Pick<TaskListItem, 'status'>) =>
   isClosedCategory(task.status.category);
 
 /**
- * Main.dc.html grid: [select (project list, not designed)] · status (the design's checkbox) · name · assignee · due · [size] · tags · more. Priority is
- * an icon button before the key in the name cell (Linear-style, user decision 2026-11-27); size is optional (not in the designs).
+ * Main.dc.html grid: [select (project list, not designed)] · name · assignee · tags · [size] · due · more (tags before size and due: user decision 2026-11-27). The name cell reads priority · key · status · title:
+ * priority and status (the design's checkbox, its own column there) are icon buttons in it (Linear-style, user decisions
+ * 2026-11-27); size is optional (not in the designs).
  */
 export const gridColumns = (showSize: boolean, selectable = false) =>
-  `${selectable ? '28px ' : ''}40px minmax(0, 1fr) 152px 120px ${showSize ? '72px ' : ''}224px 40px`;
+  `${selectable ? '28px ' : ''}minmax(0, 1fr) 96px 224px ${showSize ? '72px ' : ''}120px 40px`;

@@ -382,7 +382,7 @@ export function TaskProperties({ moveOpen, onMoveOpenChange }: TaskPropertiesPro
       </PropertyRow>
 
       <PropertyRow icon={<TagIcon size={14} />} label={t('table.colTags')}>
-        <div className="flex flex-wrap items-center gap-1 pl-2.5">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pl-2.5">
           {task.tags.map((tag) => (
             <TagChip key={tag.id} name={tag.name} color={tag.color} />
           ))}
