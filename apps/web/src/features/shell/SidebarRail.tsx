@@ -30,7 +30,7 @@ export function SidebarRail() {
   return (
     <nav
       aria-label={t('shell.workspace')}
-      className="box-border flex h-full w-14 flex-none flex-col items-center gap-2 overflow-y-auto border-r border-default bg-sidebar py-3"
+      className="relative box-border flex h-full w-14 flex-none flex-col items-center gap-2 overflow-y-auto border-r border-default bg-sidebar py-3"
     >
       <WorkspaceSwitcher variant="rail" />
       <IconButton
