@@ -107,8 +107,8 @@ export function AppShell() {
             <SidebarResizer />
           </>
         )}
-        <div className="relative flex min-w-0 flex-1">
-          <main id="main" tabIndex={-1} className="flex min-w-0 flex-1 flex-col overflow-auto">
+        <div className="relative flex min-h-0 min-w-0 flex-1">
+          <main id="main" tabIndex={-1} className="relative flex min-w-0 flex-1 flex-col overflow-auto">
             <ErrorBoundary>
               <Outlet />
             </ErrorBoundary>

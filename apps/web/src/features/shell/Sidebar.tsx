@@ -40,7 +40,7 @@ export function Sidebar({ onClose }: { onClose?: () => void } = {}) {
       aria-label={t('shell.workspace')}
       style={onClose ? undefined : { width: `var(${LIVE_WIDTH_VAR}, ${width}px)` }}
       className={cn(
-        'box-border flex h-full flex-col gap-4 overflow-y-auto border-r border-default bg-sidebar px-2 py-3',
+        'relative box-border flex h-full flex-col gap-4 overflow-y-auto border-r border-default bg-sidebar px-2 py-3',
         onClose ? 'w-[248px] min-w-[220px] flex-shrink' : 'flex-none',
       )}
     >
