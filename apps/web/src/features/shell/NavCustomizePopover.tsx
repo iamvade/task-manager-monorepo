@@ -10,9 +10,9 @@ import type { NavEntry } from './useNavEntries';
 import type { NavKey } from './navItems';
 
 /**
- * "Customize menu" (sidebar filter button; not designed): which optional links (Outlook,
- * Feedback, Reports) join the short list, and their order. Inbox, My Tasks, Personal and
- * Standup are fixed and not listed. Changes apply at once.
+ * "Customize menu" (sidebar filter button; not designed): which optional links (Personal,
+ * Standup, Outlook, Feedback, Reports) join the short list, and their order. Inbox and My Tasks
+ * are fixed and not listed. Changes apply at once.
  */
 export function NavCustomizePopover({ entries }: { entries: Record<NavKey, NavEntry> }) {
   const { t } = useTranslation();
