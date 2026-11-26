@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { KiteMark } from '../components/ui/KiteMark';
 
 interface AuthLayoutProps {
   title: string;
@@ -16,12 +17,7 @@ export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
     <div className="flex min-h-screen flex-col bg-subtle">
       <header className="flex h-14 items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <span
-            aria-hidden="true"
-            className="flex size-6 items-center justify-center rounded-[6px] bg-accent text-[13px] font-semibold text-white"
-          >
-            K
-          </span>
+          <KiteMark className="size-6 text-default" />
           <span className="text-[14px] font-semibold">Kite</span>
         </div>
         <LanguageSwitcher />

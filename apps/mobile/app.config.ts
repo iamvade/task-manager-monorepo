@@ -65,9 +65,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     android: {
       package: bundleId,
       adaptiveIcon: {
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#0A0A0A',
         foregroundImage: './assets/android-icon-foreground.png',
-        backgroundImage: './assets/android-icon-background.png',
         monochromeImage: './assets/android-icon-monochrome.png',
       },
       predictiveBackGestureEnabled: false,
@@ -89,7 +88,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           image: './assets/splash-icon.png',
           imageWidth: 120,
           backgroundColor: '#FFFFFF',
-          dark: { image: './assets/splash-icon.png', backgroundColor: '#111113' },
+          dark: { image: './assets/splash-icon-dark.png', backgroundColor: '#111113' },
         },
       ],
       ['expo-build-properties', { android: { usesCleartextTraffic: dev } }],
