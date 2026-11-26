@@ -81,10 +81,8 @@ interface UiState {
    * permission alone.
    */
   pushOptIn: boolean;
-  /** Sidebar's optional links (Outlook, Feedback, Reports): order and which are in the short list. */
+  /** Sidebar's optional links (Personal … Reports): order and where each shows. */
   navItems: NavPref[];
-  /** Sidebar "More" expanded. */
-  navMoreOpen: boolean;
   toggleSidebar: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
   setSidebarWidth: (width: number) => void;
@@ -105,7 +103,6 @@ interface UiState {
   setRenaming: (id: string | null) => void;
   setPushOptIn: (on: boolean) => void;
   setNavItems: (items: NavPref[]) => void;
-  setNavMoreOpen: (open: boolean) => void;
   resetNav: () => void;
 }
 
@@ -131,7 +128,6 @@ type UiData = Omit<
   | 'setRenaming'
   | 'setPushOptIn'
   | 'setNavItems'
-  | 'setNavMoreOpen'
   | 'resetNav'
 >;
 
@@ -155,7 +151,6 @@ export const initialUiState: UiData = {
   renamingId: null,
   pushOptIn: false,
   navItems: DEFAULT_NAV.map((p) => ({ ...p })),
-  navMoreOpen: false,
 };
 
 /** Signed out, or before `/auth/me` answers. Signed in: `kite.ui.<userId>`. */
@@ -251,9 +246,6 @@ export const useUiStore = create<UiState>()(
       setNavItems: (items) => {
         set({ navItems: normalizeNav(items) });
       },
-      setNavMoreOpen: (open) => {
-        set({ navMoreOpen: open });
-      },
       resetNav: () => {
         set({ navItems: DEFAULT_NAV.map((p) => ({ ...p })) });
       },
@@ -287,7 +279,6 @@ export const useUiStore = create<UiState>()(
         showEmptyGroups: s.showEmptyGroups,
         pushOptIn: s.pushOptIn,
         navItems: s.navItems,
-        navMoreOpen: s.navMoreOpen,
       }),
     },
   ),

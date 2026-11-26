@@ -1,14 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_NAV, moveNav, normalizeNav } from './navItems';
+import { DEFAULT_NAV, normalizeNav, reorderNav, visibilitiesFor } from './navItems';
+
+const keys = (prefs: { key: string }[]) => prefs.map((p) => p.key);
 
 describe('normalizeNav', () => {
-  it('falls back to the defaults (Personal and Standup shown, the rest hidden)', () => {
+  it('falls back to the defaults (Personal and Standup always shown, the rest hidden)', () => {
     expect(normalizeNav(undefined)).toEqual(DEFAULT_NAV);
     expect(normalizeNav('junk')).toEqual(DEFAULT_NAV);
-    expect(DEFAULT_NAV.filter((p) => p.shown).map((p) => p.key)).toEqual(['personal', 'standup']);
+    expect(keys(DEFAULT_NAV.filter((p) => p.visibility === 'always'))).toEqual([
+      'personal',
+      'standup',
+    ]);
   });
 
-  it('puts links missing from an older saved list back at their default place, shown as default', () => {
+  it("reads lists saved with `shown: boolean` as Always show / Don't show", () => {
     expect(
       normalizeNav([
         { key: 'reports', shown: true },
@@ -16,57 +21,66 @@ describe('normalizeNav', () => {
         { key: 'feedback', shown: false },
       ]),
     ).toEqual([
-      { key: 'personal', shown: true },
-      { key: 'standup', shown: true },
-      { key: 'reports', shown: true },
-      { key: 'outlook', shown: false },
-      { key: 'feedback', shown: false },
+      { key: 'personal', visibility: 'always' },
+      { key: 'standup', visibility: 'always' },
+      { key: 'reports', visibility: 'always' },
+      { key: 'outlook', visibility: 'hidden' },
+      { key: 'feedback', visibility: 'hidden' },
     ]);
   });
 
-  it('keeps Personal and Standup hidden once the user hid them', () => {
+  it('keeps "Show when badged" only for links that can have a badge', () => {
     expect(
       normalizeNav([
-        { key: 'standup', shown: false },
-        { key: 'personal', shown: false },
-      ]).slice(0, 2),
+        { key: 'feedback', visibility: 'badged' },
+        { key: 'reports', visibility: 'badged' },
+        { key: 'standup', visibility: 'badged' },
+      ]).filter((p) => p.key !== 'personal' && p.key !== 'outlook'),
     ).toEqual([
-      { key: 'standup', shown: false },
-      { key: 'personal', shown: false },
+      { key: 'feedback', visibility: 'badged' },
+      { key: 'reports', visibility: 'hidden' },
+      { key: 'standup', visibility: 'badged' },
     ]);
+    expect(visibilitiesFor('feedback')).toEqual(['always', 'badged', 'hidden']);
+    expect(visibilitiesFor('reports')).toEqual(['always', 'hidden']);
   });
 
   it('keeps the saved order, drops fixed/unknown/duplicate keys and adds missing ones', () => {
     expect(
       normalizeNav([
-        { key: 'reports', shown: true },
-        { key: 'inbox', shown: false },
-        { key: 'nope', shown: true },
-        { key: 'reports', shown: false },
+        { key: 'reports', visibility: 'always' },
+        { key: 'inbox', visibility: 'hidden' },
+        { key: 'nope', visibility: 'always' },
+        { key: 'reports', visibility: 'hidden' },
         null,
-        { key: 'outlook', shown: 'yes' },
+        { key: 'outlook', visibility: 'yes' },
       ]),
     ).toEqual([
-      { key: 'personal', shown: true },
-      { key: 'standup', shown: true },
-      { key: 'reports', shown: true },
-      { key: 'feedback', shown: false },
-      { key: 'outlook', shown: false },
+      { key: 'personal', visibility: 'always' },
+      { key: 'standup', visibility: 'always' },
+      { key: 'reports', visibility: 'always' },
+      { key: 'feedback', visibility: 'hidden' },
+      { key: 'outlook', visibility: 'hidden' },
     ]);
   });
 });
 
-describe('moveNav', () => {
-  it('swaps with a neighbor and ignores moves past the ends', () => {
-    const keys = ['personal', 'standup', 'outlook', 'feedback', 'reports'];
-    expect(moveNav(DEFAULT_NAV, 0, 1).map((p) => p.key)).toEqual([
-      'standup',
+describe('reorderNav', () => {
+  it('moves a link to where another one is', () => {
+    expect(keys(reorderNav(DEFAULT_NAV, 'reports', 'personal'))).toEqual([
+      'reports',
       'personal',
+      'standup',
       'outlook',
+      'feedback',
+    ]);
+    expect(keys(reorderNav(DEFAULT_NAV, 'personal', 'outlook'))).toEqual([
+      'standup',
+      'outlook',
+      'personal',
       'feedback',
       'reports',
     ]);
-    expect(moveNav(DEFAULT_NAV, 0, -1).map((p) => p.key)).toEqual(keys);
-    expect(moveNav(DEFAULT_NAV, 4, 1).map((p) => p.key)).toEqual(keys);
+    expect(reorderNav(DEFAULT_NAV, 'personal', 'personal')).toEqual(DEFAULT_NAV);
   });
 });

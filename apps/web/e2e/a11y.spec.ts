@@ -352,18 +352,22 @@ for (const scheme of ['light', 'dark'] as const) {
         await expect(page.getByRole('dialog')).toBeHidden();
       });
 
-      await test.step('sidebar More and Customize menu', async () => {
+      await test.step('sidebar More menu and Customize sidebar', async () => {
         await page.goto('/w/kite-studio/my-tasks');
         const nav = page.getByRole('navigation', { name: 'Workspace' });
         await nav.getByRole('button', { name: /^More/ }).click();
-        await expect(nav.getByRole('link', { name: 'Reports' })).toBeVisible();
-        await nav.getByRole('button', { name: 'Customize menu' }).click();
-        const panel = page.getByRole('dialog', { name: 'Customize menu' });
-        await expect(panel.getByRole('checkbox')).toHaveCount(3);
-        await expectAccessible(page, `Sidebar Customize menu (${scheme})`);
+        const menu = page.getByRole('menu', { name: /^More/ });
+        await expect(menu.getByRole('menuitem', { name: 'Reports' })).toBeVisible();
+        await expectAccessible(page, `Sidebar More menu (${scheme})`);
+        await menu.getByRole('menuitem', { name: 'Customize sidebar…' }).click();
+        const panel = page.getByRole('dialog', { name: 'Customize sidebar' });
+        await expect(panel.getByRole('button', { name: /^Reorder / })).toHaveCount(5);
+        await panel.getByRole('button', { name: /^Show Feedback:/ }).click();
+        await expect(page.getByRole('menuitemradio', { name: 'Show when badged' })).toBeVisible();
+        await expectAccessible(page, `Customize sidebar dialog + visibility menu (${scheme})`);
+        await page.keyboard.press('Escape');
         await page.keyboard.press('Escape');
         await expect(panel).toBeHidden();
-        await nav.getByRole('button', { name: 'Less' }).click();
       });
 
       await test.step('feedback panel, link picker and create task', async () => {

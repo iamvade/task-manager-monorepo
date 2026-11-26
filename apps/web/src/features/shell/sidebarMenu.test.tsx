@@ -39,9 +39,22 @@ const topLinks = (nav: HTMLElement) => {
   const menu = within(nav).getByText('Цэс').closest('div')?.parentElement;
   if (!menu) throw new Error('no menu');
   return within(menu)
-    .getAllByRole('link')
+    .getAllByRole('link', { hidden: true })
     .map((a) => a.textContent.replace(/\d+/g, '').trim());
 };
+/** Opens a row's dropdown in the Customize dialog and picks a visibility. */
+async function setVisibility(panel: HTMLElement, name: string, choice: string) {
+  fireEvent.click(within(panel).getByRole('button', { name: new RegExp(`^Харуулах: ${name}:`) }));
+  // The menu is named by its trigger ("Харуулах: Тайлан: Харуулахгүй").
+  const menu = await screen.findByRole('menu', { name: new RegExp(`^Харуулах: ${name}:`) });
+  fireEvent.click(within(menu).getByRole('menuitemradio', { name: choice }));
+}
+async function openCustomize(nav: HTMLElement) {
+  fireEvent.click(within(nav).getByRole('button', { name: /^Бусад/ }));
+  const menu = await screen.findByRole('menu', { name: 'Бусад' });
+  fireEvent.click(within(menu).getByRole('menuitem', { name: 'Хажуу самбар тохируулах…' }));
+  return screen.findByRole('dialog', { name: 'Хажуу самбар тохируулах' });
+}
 const saved = () =>
   (JSON.parse(localStorage.getItem(`kite.ui.${ME.user.id}`) ?? '{}') as { state?: unknown }).state;
 
@@ -54,7 +67,6 @@ describe('sidebar menu', () => {
       openSpaces: {},
       lastWorkspaceId: null,
       navItems: initialUiState.navItems,
-      navMoreOpen: false,
     });
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date('2026-10-08T03:00:00Z'));
@@ -64,32 +76,23 @@ describe('sidebar menu', () => {
     vi.useRealTimers();
   });
 
-  it('shows Inbox, My Tasks, Personal, Standup by default; the rest open under More and it is remembered', async () => {
+  it('shows Inbox, My Tasks, Personal, Standup by default; More opens a menu with the rest', async () => {
     api();
-    renderAt('/w/kite-studio/my-tasks');
+    const router = renderAt('/w/kite-studio/my-tasks');
     const nav = await waitFor(sidebarNav);
     await within(nav).findByLabelText('3 уншаагүй');
 
     expect(topLinks(nav)).toEqual(['Мэдэгдэл', 'Миний ажлууд', 'Хувийн', 'Стэндап']);
-    const more = within(nav).getByRole('button', { name: 'Бусад' });
-    expect(more).toHaveAttribute('aria-expanded', 'false');
-
-    fireEvent.click(more);
-    expect(within(nav).getByRole('button', { name: 'Хураах' })).toHaveAttribute(
-      'aria-expanded',
-      'true',
-    );
-    expect(topLinks(nav)).toEqual([
-      'Мэдэгдэл',
-      'Миний ажлууд',
-      'Хувийн',
-      'Стэндап',
-      'Outlook календарь',
-      'Санал хүсэлт',
-      'Тайлан',
-    ]);
+    fireEvent.click(within(nav).getByRole('button', { name: 'Бусад' }));
+    const menu = await screen.findByRole('menu', { name: 'Бусад' });
+    expect(
+      within(menu)
+        .getAllByRole('menuitem')
+        .map((el) => el.textContent),
+    ).toEqual(['Outlook календарь', 'Санал хүсэлт', 'Тайлан', 'Хажуу самбар тохируулах…']);
+    fireEvent.click(within(menu).getByRole('menuitem', { name: 'Тайлан' }));
     await waitFor(() => {
-      expect(saved()).toMatchObject({ navMoreOpen: true });
+      expect(router.state.location.pathname).toMatch(/^\/w\/kite-studio\/reports/);
     });
   });
 
@@ -109,43 +112,28 @@ describe('sidebar menu', () => {
     expect(await within(nav).findByRole('button', { name: 'Бусад, 2 шинэ' })).toBeInTheDocument();
   });
 
-  it('customizes which optional links are shown and their order; Reset restores', async () => {
+  it('customizes where each optional link shows; Reset restores', async () => {
     api();
     renderAt('/w/kite-studio/my-tasks');
     const nav = await waitFor(sidebarNav);
     await within(nav).findByLabelText('3 уншаагүй');
 
-    fireEvent.click(within(nav).getByRole('button', { name: 'Цэс тохируулах' }));
-    const panel = await screen.findByRole('dialog', { name: 'Цэс тохируулах' });
+    const panel = await openCustomize(nav);
     // Only the optional links are editable (Personal and Standup included).
-    expect(within(panel).getAllByRole('checkbox')).toHaveLength(5);
+    expect(within(panel).getAllByRole('button', { name: /^Зөөх: / })).toHaveLength(5);
     expect(within(panel).queryByText('Мэдэгдэл')).not.toBeInTheDocument();
 
-    fireEvent.click(within(panel).getByRole('checkbox', { name: 'Цэсэнд харуулах: Тайлан' }));
-    fireEvent.click(
-      within(panel).getByRole('checkbox', { name: 'Цэсэнд харуулах: Outlook календарь' }),
-    );
-    fireEvent.click(within(panel).getByRole('button', { name: 'Дээш зөөх: Тайлан' }));
-    expect(within(panel).getByRole('button', { name: 'Дээш зөөх: Хувийн' })).toBeDisabled();
-
-    expect(topLinks(nav)).toEqual([
-      'Мэдэгдэл',
-      'Миний ажлууд',
-      'Хувийн',
-      'Стэндап',
-      'Outlook календарь',
-      'Тайлан',
-    ]);
-    fireEvent.click(within(panel).getByRole('button', { name: 'Дээш зөөх: Тайлан' }));
-    expect(topLinks(nav).slice(4)).toEqual(['Тайлан', 'Outlook календарь']);
+    await setVisibility(panel, 'Тайлан', 'Үргэлж харуулах');
+    await setVisibility(panel, 'Стэндап', 'Харуулахгүй');
+    expect(topLinks(nav)).toEqual(['Мэдэгдэл', 'Миний ажлууд', 'Хувийн', 'Тайлан']);
     await waitFor(() => {
       expect(saved()).toMatchObject({
         navItems: [
-          { key: 'personal', shown: true },
-          { key: 'standup', shown: true },
-          { key: 'reports', shown: true },
-          { key: 'outlook', shown: true },
-          { key: 'feedback', shown: false },
+          { key: 'personal', visibility: 'always' },
+          { key: 'standup', visibility: 'hidden' },
+          { key: 'outlook', visibility: 'hidden' },
+          { key: 'feedback', visibility: 'hidden' },
+          { key: 'reports', visibility: 'always' },
         ],
       });
     });
@@ -154,28 +142,46 @@ describe('sidebar menu', () => {
     expect(topLinks(nav)).toEqual(['Мэдэгдэл', 'Миний ажлууд', 'Хувийн', 'Стэндап']);
   });
 
-  it('hides Personal and Standup under More when unchecked', async () => {
-    api();
+  it('offers "Show when badged" only for links with a badge; such a link shows while it has one', async () => {
+    api({ ...SIDEBAR, feedbackUnreadCount: 2 });
     renderAt('/w/kite-studio/my-tasks');
     const nav = await waitFor(sidebarNav);
     await within(nav).findByLabelText('3 уншаагүй');
 
-    fireEvent.click(within(nav).getByRole('button', { name: 'Цэс тохируулах' }));
-    const panel = await screen.findByRole('dialog', { name: 'Цэс тохируулах' });
-    fireEvent.click(within(panel).getByRole('checkbox', { name: 'Цэсэнд харуулах: Хувийн' }));
-    fireEvent.click(within(panel).getByRole('checkbox', { name: 'Цэсэнд харуулах: Стэндап' }));
-    expect(topLinks(nav)).toEqual(['Мэдэгдэл', 'Миний ажлууд']);
+    // The filter button opens the same dialog.
+    fireEvent.click(within(nav).getByRole('button', { name: 'Хажуу самбар тохируулах' }));
+    const panel = await screen.findByRole('dialog', { name: 'Хажуу самбар тохируулах' });
 
-    fireEvent.click(within(nav).getByRole('button', { name: 'Бусад' }));
+    fireEvent.click(within(panel).getByRole('button', { name: /^Харуулах: Тайлан:/ }));
+    const reports = await screen.findByRole('menu', { name: /^Харуулах: Тайлан:/ });
+    expect(
+      within(reports)
+        .getAllByRole('menuitemradio')
+        .map((el) => el.textContent),
+    ).toEqual(['Үргэлж харуулах', 'Харуулахгүй']);
+    fireEvent.keyDown(reports, { key: 'Escape' });
+
+    await setVisibility(panel, 'Санал хүсэлт', 'Тэмдэгтэй үед харуулах');
     expect(topLinks(nav)).toEqual([
       'Мэдэгдэл',
       'Миний ажлууд',
       'Хувийн',
       'Стэндап',
-      'Outlook календарь',
       'Санал хүсэлт',
-      'Тайлан',
     ]);
+  });
+
+  it('keeps a "Show when badged" link under More while it has no badge', async () => {
+    api();
+    useUiStore.setState({
+      navItems: initialUiState.navItems.map((p) =>
+        p.key === 'feedback' ? { ...p, visibility: 'badged' as const } : p,
+      ),
+    });
+    renderAt('/w/kite-studio/my-tasks');
+    const nav = await waitFor(sidebarNav);
+    await within(nav).findByLabelText('3 уншаагүй');
+    expect(topLinks(nav)).toEqual(['Мэдэгдэл', 'Миний ажлууд', 'Хувийн', 'Стэндап']);
   });
 
   it('collapsed rail: the short list plus a More menu with the rest', async () => {
@@ -192,5 +198,13 @@ describe('sidebar menu', () => {
     await waitFor(() => {
       expect(router.state.location.pathname).toMatch(/^\/w\/kite-studio\/reports/);
     });
+
+    // The rail's More also leads to Customize sidebar.
+    fireEvent.click(within(nav).getByRole('button', { name: 'Бусад' }));
+    const again = await screen.findByRole('menu', { name: 'Бусад' });
+    fireEvent.click(within(again).getByRole('menuitem', { name: 'Хажуу самбар тохируулах…' }));
+    expect(
+      await screen.findByRole('dialog', { name: 'Хажуу самбар тохируулах' }),
+    ).toBeInTheDocument();
   });
 });
