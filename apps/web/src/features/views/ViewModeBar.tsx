@@ -2,20 +2,21 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
 import { BoardIcon, CalendarIcon, ChevronDownIcon, ListIcon } from '../../components/icons';
 import { Menu } from '../../components/ui/Menu';
-import { SegmentedControl } from '../../components/ui/SegmentedControl';
 import { ToolbarButton } from '../../components/ui/ToolbarButton';
-import type { Show } from './show';
+import { UnderlineTabs } from '../../components/ui/UnderlineTabs';
+import { SHOWS, type Show } from './show';
 import { useViewParams } from './useViewParams';
 import { VIEWS, type View } from './views';
 
 /**
- * Left side of the view row: Active / Backlog / All (which tasks every view shows; Active = To
- * Do, In Progress, In Review and is the default; Backlog = Backlog only; All = every status) and Views ▾ (List / Board / Calendar). Switching
- * view keeps the query string (filters are shared).
+ * Left side of the view row: Active / Backlog / All as underline tabs (which tasks every view
+ * shows; Active = To Do, In Progress, In Review and is the default; Backlog = Backlog only; All =
+ * every status) and Views ▾ (List / Board / Calendar). Both keep the rest of the query string
+ * (filters are shared).
  */
 export function ViewModeBar({ basePath, value }: { basePath: string; value: View }) {
   const { t } = useTranslation();
-  const { search } = useLocation();
+  const { pathname, search } = useLocation();
   const navigate = useNavigate();
   const view = useViewParams();
   const icons = {
@@ -23,20 +24,19 @@ export function ViewModeBar({ basePath, value }: { basePath: string; value: View
     board: <BoardIcon size={15} />,
     calendar: <CalendarIcon size={15} />,
   };
+  const showHref = (show: Show) => {
+    const next = new URLSearchParams(search);
+    if (show === 'active') next.delete('show');
+    else next.set('show', show);
+    const query = next.toString();
+    return query ? `${pathname}?${query}` : pathname;
+  };
   return (
-    <div className="flex items-center gap-2 pt-1 pb-2">
-      <SegmentedControl<Show>
+    <div className="flex items-center gap-3">
+      <UnderlineTabs
         label={t('views.show')}
-        size="toolbar"
         value={view.show}
-        options={[
-          { value: 'active', label: t('views.active') },
-          { value: 'backlog', label: t('views.backlog') },
-          { value: 'all', label: t('views.all') },
-        ]}
-        onChange={(show) => {
-          view.update({ show: show === 'active' ? null : show });
-        }}
+        items={SHOWS.map((show) => ({ value: show, label: t(`views.${show}`), to: showHref(show) }))}
       />
       <Menu
         label={t('views.view')}
