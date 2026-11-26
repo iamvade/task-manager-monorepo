@@ -46,7 +46,8 @@ const tooMany = (wait: number) =>
 
 /**
  * The public feedback form (`/feedback/:slug` on the web): no account, so every route is public
- * (`security: []`), limited per IP, and only ever reveals the workspace's name.
+ * (`security: []`), limited per IP, and only ever reveals the workspace's name and its feedback
+ * topics' names and link keys (public by design: the form shows them to anyone with the link).
  */
 export const publicFeedbackRoutes: FastifyPluginCallbackZod = (app, _opts, done) => {
   const submits = new IpWindowThrottle({ max: 5, windowMs: WINDOW_MS }, () =>
