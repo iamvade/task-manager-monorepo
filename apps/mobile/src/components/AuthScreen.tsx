@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeProvider';
+import { KiteMark } from './KiteMark';
 
 interface AuthScreenProps {
   title: string;
@@ -9,7 +10,7 @@ interface AuthScreenProps {
   children: ReactNode;
 }
 
-/** Signed-out screens (sign in, invite, no workspace): brand tile, title, then the form. */
+/** Signed-out screens (sign in, invite, no workspace): the Kite mark, title, then the form. */
 export function AuthScreen({ title, subtitle, children }: AuthScreenProps) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
@@ -29,12 +30,8 @@ export function AuthScreen({ title, subtitle, children }: AuthScreenProps) {
           },
         ]}
       >
-        <View
-          importantForAccessibility="no-hide-descendants"
-          accessibilityElementsHidden
-          style={[styles.tile, { backgroundColor: theme.colors.accent }]}
-        >
-          <Text style={[styles.tileText, { fontFamily: theme.fontFor(600) }]}>K</Text>
+        <View importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
+          <KiteMark size={40} />
         </View>
         <View style={styles.heading}>
           <Text
@@ -66,8 +63,6 @@ export function AuthScreen({ title, subtitle, children }: AuthScreenProps) {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { flexGrow: 1, gap: 24 },
-  tile: { width: 40, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  tileText: { color: '#FFFFFF', fontSize: 20, lineHeight: 24 },
   heading: { gap: 6 },
   body: { gap: 16 },
 });

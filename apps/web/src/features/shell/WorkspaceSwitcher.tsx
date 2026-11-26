@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from 'react-router';
 import { useUnreadCounts } from '../../api/notifications';
 import { useCurrentWorkspace } from '../../api/workspaces';
 import { useAuth } from '../../auth/useAuth';
-import { ChevronsUpDownIcon } from '../../components/icons';
 import { CountBadge } from '../../components/ui/CountBadge';
 import { Menu } from '../../components/ui/Menu';
 import { WorkspaceTile } from '../../components/ui/WorkspaceTile';
@@ -20,10 +19,12 @@ function UnreadDot() {
 }
 
 /**
- * "K Kite Studio ⇅" button (36px; the rail shows just the 28px tile) opening a menu of my
- * workspaces, each with its unread count. Not in the designs beyond the button.
+ * The workspace's tile as a button (sidebar header: 32px next to Collapse; rail: 36px with the
+ * 28px tile) opening a menu of my workspaces, each with its unread count. The sidebar header
+ * shows the Kite logo, so the switcher is just the tile (the design's full-width
+ * "K Kite Studio ⇅" button was replaced 2026-11-27).
  */
-export function WorkspaceSwitcher({ variant = 'sidebar' }: { variant?: 'sidebar' | 'rail' }) {
+export function WorkspaceSwitcher({ variant = 'compact' }: { variant?: 'compact' | 'rail' }) {
   const { t } = useTranslation();
   const { me } = useAuth();
   const current = useCurrentWorkspace();
@@ -81,14 +82,12 @@ export function WorkspaceSwitcher({ variant = 'sidebar' }: { variant?: 'sidebar'
             type="button"
             {...props}
             aria-label={label}
-            className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-[8px] border-0 bg-transparent px-2 text-left hover:bg-hover"
+            className="relative flex size-8 flex-none items-center justify-center rounded-[8px] border-0 bg-transparent p-0 hover:bg-hover"
           >
             <span className="relative flex">
               <WorkspaceTile name={current.name} />
               {elsewhere && <UnreadDot />}
             </span>
-            <span className="flex-1 truncate text-[14px] font-semibold">{current.name}</span>
-            <ChevronsUpDownIcon size={14} className="flex-none text-icon" />
           </button>
         )
       }
