@@ -33,8 +33,19 @@ export interface ListColumns {
   size: boolean;
 }
 
+/** Expanded sidebar width (px): 248 by default, dragged between these by its right border. */
+export const SIDEBAR_DEFAULT_WIDTH = 248;
+export const SIDEBAR_MIN_WIDTH = 220;
+export const SIDEBAR_MAX_WIDTH = 420;
+
+export function clampSidebarWidth(width: unknown): number {
+  if (typeof width !== 'number' || !Number.isFinite(width)) return SIDEBAR_DEFAULT_WIDTH;
+  return Math.round(Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, width)));
+}
+
 interface UiState {
   sidebarCollapsed: boolean;
+  sidebarWidth: number;
   /** Expanded spaces in the sidebar tree; missing = collapsed. */
   openSpaces: Record<string, boolean>;
   lastWorkspaceId: string | null;
@@ -75,6 +86,8 @@ interface UiState {
   /** Sidebar "More" expanded. */
   navMoreOpen: boolean;
   toggleSidebar: () => void;
+  setSidebarCollapsed: (collapsed: boolean) => void;
+  setSidebarWidth: (width: number) => void;
   setSpaceOpen: (spaceId: string, open: boolean) => void;
   setLastWorkspace: (workspaceId: string) => void;
   setLastStandupGroup: (workspaceId: string, groupId: string) => void;
@@ -99,6 +112,8 @@ interface UiState {
 type UiData = Omit<
   UiState,
   | 'toggleSidebar'
+  | 'setSidebarCollapsed'
+  | 'setSidebarWidth'
   | 'setSpaceOpen'
   | 'setLastWorkspace'
   | 'setLastStandupGroup'
@@ -122,6 +137,7 @@ type UiData = Omit<
 
 export const initialUiState: UiData = {
   sidebarCollapsed: false,
+  sidebarWidth: SIDEBAR_DEFAULT_WIDTH,
   openSpaces: {},
   lastWorkspaceId: null,
   lastStandupGroupIds: {},
@@ -154,6 +170,12 @@ export const useUiStore = create<UiState>()(
       ...initialUiState,
       toggleSidebar: () => {
         set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed }));
+      },
+      setSidebarCollapsed: (collapsed) => {
+        set({ sidebarCollapsed: collapsed });
+      },
+      setSidebarWidth: (width) => {
+        set({ sidebarWidth: clampSidebarWidth(width) });
       },
       setSpaceOpen: (spaceId, open) => {
         set((s) => ({ openSpaces: { ...s.openSpaces, [spaceId]: open } }));
@@ -247,10 +269,12 @@ export const useUiStore = create<UiState>()(
           ...saved,
           listColumns: { ...current.listColumns, ...saved.listColumns },
           navItems: normalizeNav(saved.navItems),
+          sidebarWidth: clampSidebarWidth(saved.sidebarWidth),
         };
       },
       partialize: (s) => ({
         sidebarCollapsed: s.sidebarCollapsed,
+        sidebarWidth: s.sidebarWidth,
         openSpaces: s.openSpaces,
         lastWorkspaceId: s.lastWorkspaceId,
         lastStandupGroupIds: s.lastStandupGroupIds,
@@ -291,6 +315,7 @@ function withDefaults(stored: Partial<UiData> | null): UiData {
     ...initialUiState,
     ...stored,
     listColumns: { ...initialUiState.listColumns, ...stored?.listColumns },
+    sidebarWidth: clampSidebarWidth(stored?.sidebarWidth),
   };
 }
 

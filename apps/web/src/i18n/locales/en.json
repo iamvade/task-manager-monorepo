@@ -122,6 +122,8 @@
     "search": "Search",
     "collapse": "Collapse sidebar",
     "expand": "Expand sidebar",
+    "resizeSidebar": "Resize sidebar",
+    "sidebarCollapsed": "Collapsed",
     "openNavigation": "Open navigation",
     "closeNavigation": "Close navigation",
     "myTasks": "My Tasks",
