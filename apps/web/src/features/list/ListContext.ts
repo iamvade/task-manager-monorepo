@@ -60,8 +60,8 @@ export const isClosed = (task: Pick<TaskListItem, 'status'>) =>
   isClosedCategory(task.status.category);
 
 /**
- * Main.dc.html grid: [select (project list, not designed)] · status (the design's checkbox) · name · assignee · due · priority · [size] · tags · more. Size is
- * optional (not in the designs) and sits next to priority.
+ * Main.dc.html grid: [select (project list, not designed)] · status (the design's checkbox) · name · assignee · due · [size] · tags · more. Priority is
+ * an icon button before the key in the name cell (Linear-style, user decision 2026-11-27); size is optional (not in the designs).
  */
 export const gridColumns = (showSize: boolean, selectable = false) =>
-  `${selectable ? '28px ' : ''}40px minmax(0, 1fr) 152px 120px 112px ${showSize ? '72px ' : ''}224px 40px`;
+  `${selectable ? '28px ' : ''}40px minmax(0, 1fr) 152px 120px ${showSize ? '72px ' : ''}224px 40px`;

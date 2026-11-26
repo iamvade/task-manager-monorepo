@@ -6,7 +6,6 @@ import { CalendarIcon, DoneCircleIcon, SubtaskIcon } from '../../components/icon
 import { AvatarStack } from '../../components/ui/AvatarStack';
 import { PriorityFlag } from '../../components/ui/PriorityFlag';
 import { ProgressBar } from '../../components/ui/ProgressBar';
-import { ProjectDot } from '../../components/ui/ProjectDot';
 import { TagChip } from '../../components/ui/TagChip';
 import { cn } from '../../lib/cn';
 import { useDates } from '../../lib/useDates';
@@ -21,8 +20,6 @@ interface TaskCardProps extends HTMLAttributes<HTMLElement> {
   /** `?…&task=KEY` (opens the drawer); none on the drag overlay. */
   href?: string;
   state?: CardState;
-  /** Space board: the task's project above the title. */
-  showProject?: boolean;
 }
 
 /** Due line tones on the Board: overdue 600 + "· Overdue", today 500, done muted. */
@@ -53,7 +50,7 @@ function DueLine({ date, done }: { date: string; done: boolean }) {
  * (40%, dashed); `overlay` = the lifted card under the pointer (rotated 2.5°, accent border).
  */
 export const TaskCard = forwardRef<HTMLElement, TaskCardProps>(function TaskCard(
-  { task, href, state = 'idle', showProject, className, ...props },
+  { task, href, state = 'idle', className, ...props },
   ref,
 ) {
   const { t } = useTranslation();
@@ -67,12 +64,6 @@ export const TaskCard = forwardRef<HTMLElement, TaskCardProps>(function TaskCard
 
   const body = (
     <>
-      {showProject && (
-        <span className="flex min-w-0 items-center gap-1.5 text-[12px] text-muted">
-          <ProjectDot color={task.project.color} size={8} />
-          <span className="truncate">{task.project.name}</span>
-        </span>
-      )}
       <span className="flex items-start gap-2">
         {done && (
           <DoneCircleIcon

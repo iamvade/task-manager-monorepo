@@ -483,8 +483,8 @@ export function TaskTable({
           role="table"
           aria-label={label}
           className={cn(
-            showSize ? 'min-w-[1032px]' : 'min-w-[960px]',
-            selectable && (showSize ? 'min-w-[1060px]' : 'min-w-[988px]'),
+            showSize ? 'min-w-[920px]' : 'min-w-[848px]',
+            selectable && (showSize ? 'min-w-[948px]' : 'min-w-[876px]'),
           )}
         >
           <div role="rowgroup">
@@ -514,7 +514,6 @@ export function TaskTable({
               <span role="columnheader">{t('table.colName')}</span>
               <span role="columnheader">{t('table.colAssignee')}</span>
               <span role="columnheader">{t('table.colDue')}</span>
-              <span role="columnheader">{t('table.colPriority')}</span>
               {showSize && <span role="columnheader">{t('table.colSize')}</span>}
               <span role="columnheader">{t('table.colTags')}</span>
               <span role="columnheader">
@@ -556,7 +555,6 @@ export function TaskTable({
                 dndEnabled={dndEnabled}
                 selectedId={selectedId}
                 tabStop={tabStop}
-                showProject={scope === 'space'}
                 adding={adding === group.key}
                 onToggle={() => {
                   setGroupCollapsed(listKey, group.key, isOpen(group));
@@ -625,7 +623,6 @@ interface GroupSectionProps {
   dndEnabled: boolean;
   selectedId: string | null;
   tabStop: string | undefined;
-  showProject: boolean;
   adding: boolean;
   onToggle: () => void;
   onStartAdd: () => void;
@@ -645,7 +642,6 @@ function GroupSection({
   dndEnabled,
   selectedId,
   tabStop,
-  showProject,
   adding,
   onToggle,
   onStartAdd,
@@ -694,7 +690,6 @@ function GroupSection({
                 disabled={!dndEnabled || isTempTask(task)}
                 selected={task.id === selectedId}
                 tabbable={task.id === tabStop}
-                showProject={showProject}
               />
             ))}
           </SortableContext>
@@ -720,7 +715,6 @@ interface SortableTaskRowProps {
   disabled: boolean;
   selected: boolean;
   tabbable: boolean;
-  showProject: boolean;
 }
 
 type Listener<E> = ((event: E) => void) | undefined;

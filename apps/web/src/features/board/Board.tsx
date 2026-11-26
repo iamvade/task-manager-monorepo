@@ -340,7 +340,6 @@ export function Board({ scope, boardKey, label, tasks, project, members }: Board
                     );
                   }}
                   taskHref={taskHref}
-                  showProject={scope === 'space'}
                   hiddenCount={hiddenIn(column)}
                   onShowHidden={() => {
                     view.update(clearedFilters(Boolean(project?.activeSprint)));
@@ -351,7 +350,7 @@ export function Board({ scope, boardKey, label, tasks, project, members }: Board
           </div>
           <DragOverlay dropAnimation={null}>
             {activeTask && (
-              <TaskCard task={activeTask} state="overlay" showProject={scope === 'space'} />
+              <TaskCard task={activeTask} state="overlay" />
             )}
           </DragOverlay>
         </DndContext>

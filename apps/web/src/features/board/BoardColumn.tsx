@@ -38,12 +38,10 @@ function SortableCard({
   task,
   href,
   disabled,
-  showProject,
 }: {
   task: TaskListItem;
   href: string | undefined;
   disabled: boolean;
-  showProject: boolean;
 }) {
   const { attributes, listeners, setNodeRef, isDragging } = useSortable({ id: task.id, disabled });
   const onPointerDown = listeners?.onPointerDown as Listener<ReactPointerEvent<HTMLElement>>;
@@ -54,7 +52,6 @@ function SortableCard({
       task={task}
       href={isTempTask(task) ? undefined : href}
       state={isDragging ? 'ghost' : 'idle'}
-      showProject={showProject}
       aria-roledescription={disabled ? undefined : attributes['aria-roledescription']}
       aria-describedby={disabled ? undefined : attributes['aria-describedby']}
       onPointerDown={onPointerDown}
@@ -130,7 +127,6 @@ export interface BoardColumnProps {
   /** Header "+" and "Add task to …": the quick-create modal in this column. */
   onCreate: () => void;
   taskHref: (task: TaskListItem) => string;
-  showProject: boolean;
   /** Tasks of this status the active filters hide ("+3 hidden by filters"); 0 = no line. */
   hiddenCount?: number;
   onShowHidden?: () => void;
@@ -158,7 +154,6 @@ export function BoardColumn({
   onCancelAdd,
   onCreate,
   taskHref,
-  showProject,
   hiddenCount = 0,
   onShowHidden,
 }: BoardColumnProps) {
@@ -268,7 +263,6 @@ export function BoardColumn({
                 task={task}
                 href={taskHref(task)}
                 disabled={!dnd || isTempTask(task)}
-                showProject={showProject}
               />
             </div>
           ))}
