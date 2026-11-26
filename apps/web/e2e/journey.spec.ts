@@ -7,7 +7,7 @@ const strings = (lang: 'en' | 'mn') =>
   JSON.parse(
     readFileSync(new URL(`../src/i18n/locales/${lang}.json`, import.meta.url), 'utf8'),
   ) as {
-    shell: { myTasks: string; inbox: string; reports: string; settings: string };
+    shell: { myTasks: string; inbox: string; personal: string; settings: string };
     inbox: { tabs: Record<'all' | 'mentions' | 'assigned' | 'archived', string> };
     status: Record<'todo' | 'review', string>;
     myTasks: { feed: { mentioned: string } };
@@ -143,7 +143,7 @@ test.describe('task → board → mention → inbox', () => {
     // 6. Switch to English: labels follow, and the choice sticks after a reload.
     await nav.getByRole('radio', { name: 'EN' }).click();
     await expect(sara.locator('html')).toHaveAttribute('lang', 'en');
-    for (const label of [EN.shell.myTasks, EN.shell.inbox, EN.shell.reports, EN.shell.settings]) {
+    for (const label of [EN.shell.myTasks, EN.shell.inbox, EN.shell.personal, EN.shell.settings]) {
       await expect(nav.getByRole('link', { name: new RegExp(label) }).first()).toBeVisible();
     }
     for (const tab of Object.values(EN.inbox.tabs)) {

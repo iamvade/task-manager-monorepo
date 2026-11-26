@@ -1,4 +1,5 @@
 import { Check } from 'lucide-react';
+import type { Placement } from '@floating-ui/react';
 import type { KeyboardEvent, ReactElement, ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 import { Popover, type TriggerProps } from './Popover';
@@ -25,7 +26,7 @@ interface MenuProps {
   items: readonly MenuItem[];
   /** Accessible name of the menu. */
   label: string;
-  placement?: 'bottom-start' | 'bottom-end';
+  placement?: Extract<Placement, 'bottom-start' | 'bottom-end' | 'right-start'>;
   width?: number;
 }
 

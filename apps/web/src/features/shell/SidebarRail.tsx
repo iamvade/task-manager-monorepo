@@ -1,25 +1,15 @@
 import { useTranslation } from 'react-i18next';
-import { Link, NavLink } from 'react-router';
-import { useStandupGroups } from '../../api/standups';
+import { Link, NavLink, useNavigate } from 'react-router';
 import { useCurrentWorkspace, useSidebar, useWsPath } from '../../api/workspaces';
-import {
-  FeedbackIcon,
-  InboxIcon,
-  MyTasksIcon,
-  PersonalIcon,
-  CalendarIcon,
-  PanelOpenIcon,
-  ReportsIcon,
-  SearchIcon,
-  StandupIcon,
-} from '../../components/icons';
+import { MoreIcon, PanelOpenIcon, SearchIcon } from '../../components/icons';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import { IconButton } from '../../components/ui/IconButton';
+import { Menu } from '../../components/ui/Menu';
 import { SpaceBadge } from '../../components/ui/SpaceBadge';
 import { Tooltip } from '../../components/ui/Tooltip';
 import { cn } from '../../lib/cn';
 import { useUiStore } from '../../stores/ui';
-import { waitingForMe } from '../standup/useStandup';
+import { useNavLayout, type NavEntry } from './useNavEntries';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 
 const railButton = 'flex size-9 items-center justify-center rounded-[8px] text-3 hover:bg-hover';
@@ -30,7 +20,9 @@ export function SidebarRail() {
   const workspace = useCurrentWorkspace();
   const ws = useWsPath();
   const sidebar = useSidebar(workspace?.id);
-  const standupGroups = useStandupGroups(workspace?.id);
+  const { shortList, hidden } = useNavLayout();
+  const pinnedActive = hidden.filter((e) => e.active);
+  const more = hidden.filter((e) => !e.active);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
 
   const openPalette = useUiStore((s) => s.setPaletteOpen);
@@ -55,47 +47,12 @@ export function SidebarRail() {
         }}
         icon={<SearchIcon size={16} />}
       />
-      <RailLink to={ws('/my-tasks')} label={t('shell.myTasks')}>
-        <MyTasksIcon size={16} />
-      </RailLink>
-      <RailLink to={ws('/personal')} label={t('shell.personal')}>
-        <PersonalIcon size={16} />
-      </RailLink>
-      <RailLink to={ws('/outlook')} label={t('shell.outlook')}>
-        <CalendarIcon size={16} />
-      </RailLink>
-      <RailLink
-        to={ws('/standup')}
-        label={t('shell.standup')}
-        badge={waitingForMe(standupGroups.data).length > 0 ? t('shell.notPostedToday') : undefined}
-      >
-        <StandupIcon size={16} />
-      </RailLink>
-      <RailLink
-        to={ws('/inbox')}
-        label={t('shell.inbox')}
-        badge={
-          sidebar.data && sidebar.data.inboxUnreadCount > 0
-            ? t('shell.unread', { count: sidebar.data.inboxUnreadCount })
-            : undefined
-        }
-      >
-        <InboxIcon size={16} />
-      </RailLink>
-      <RailLink
-        to={ws('/feedback')}
-        label={t('shell.feedback')}
-        badge={
-          sidebar.data && sidebar.data.feedbackUnreadCount > 0
-            ? t('shell.feedbackNew', { count: sidebar.data.feedbackUnreadCount })
-            : undefined
-        }
-      >
-        <FeedbackIcon size={16} />
-      </RailLink>
-      <RailLink to={ws('/reports')} label={t('shell.reports')}>
-        <ReportsIcon size={16} />
-      </RailLink>
+      {[...shortList, ...pinnedActive].map((entry) => (
+        <RailLink key={entry.key} to={entry.to} label={entry.label} badge={entry.badge}>
+          {entry.icon}
+        </RailLink>
+      ))}
+      {more.length > 0 && <RailMore entries={more} />}
       <div className="my-1 h-px w-6 bg-[var(--border)]" />
       {sidebar.data?.spaces.map((space) => (
         <Tooltip key={space.id} content={space.name} placement="right">
@@ -151,5 +108,42 @@ function RailLink({
         </NavLink>
       )}
     </Tooltip>
+  );
+}
+
+/** Rail "More": the optional links not in the short list, as a menu (dot when one needs attention). */
+function RailMore({ entries }: { entries: NavEntry[] }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const badges = entries.filter((e) => e.badge).map((e) => e.badge);
+  const label = badges.length > 0 ? `${t('shell.more')}, ${badges.join(', ')}` : t('shell.more');
+  return (
+    <Menu
+      label={t('shell.more')}
+      placement="right-start"
+      width={200}
+      items={entries.map((entry) => ({
+        id: entry.key,
+        label: entry.label,
+        icon: entry.icon,
+        trailing: entry.trailing,
+        onSelect: () => {
+          void navigate(entry.to);
+        },
+      }))}
+      trigger={(props, open) => (
+        <button
+          {...props}
+          type="button"
+          aria-label={label}
+          className={cn(railButton, 'relative border-0 bg-transparent', open && 'bg-hover')}
+        >
+          <MoreIcon size={16} />
+          {badges.length > 0 && (
+            <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-accent shadow-[0_0_0_2px_var(--bg-sidebar)]" />
+          )}
+        </button>
+      )}
+    />
   );
 }
