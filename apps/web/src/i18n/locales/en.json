@@ -166,6 +166,7 @@
     "visibilityOf": "Show {{name}}",
     "resetMenu": "Reset to default",
     "standupGroups": "Standup groups",
+    "favorites": "Favorites",
     "notPostedToday": "You haven’t posted today",
     "newStandupGroup": "New standup group",
     "standupGroupName": "Group name",

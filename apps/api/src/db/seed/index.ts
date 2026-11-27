@@ -125,6 +125,7 @@ export async function runSeed(db: Db, options: SeedOptions): Promise<void> {
     await tx.insert(schema.spaces).values(rows.spaces);
     await tx.insert(schema.projects).values(rows.projects);
     await tx.insert(schema.projectMembers).values(rows.projectMembers);
+    await tx.insert(schema.favorites).values(rows.favorites);
     await tx.insert(schema.statuses).values(rows.statuses);
     await tx.insert(schema.sprints).values(rows.sprints);
     await tx.insert(schema.sprintProjects).values(rows.sprintProjects);
@@ -286,6 +287,10 @@ export function buildRows(
   const projectMembers = projects.flatMap((p) =>
     p.def.members.map((ref) => ({ projectId: p.row.id, userId: user(ref).id })),
   );
+  // Anu starred App Redesign (the sidebar's Favorites section; not drawn in the designs).
+  const favorites: Row<typeof schema.favorites>[] = [
+    { userId: user('anu').id, projectId: project('app').row.id },
+  ];
 
   const statusKeys = positions(DEFAULT_STATUS_CATEGORIES.length);
   const statuses: StatusRow[] = projects.flatMap((p) =>
@@ -810,6 +815,7 @@ export function buildRows(
     spaces: spaces.map((s) => s.row),
     projects: projects.map((p) => p.row),
     projectMembers,
+    favorites,
     statuses,
     sprints,
     sprintProjects,
