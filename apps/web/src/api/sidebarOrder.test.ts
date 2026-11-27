@@ -1,7 +1,7 @@
 import type { SidebarResponse } from '@kite/shared';
 import { describe, expect, it } from 'vitest';
 import { PROJECT_ID, SIDEBAR, SPACE_ID } from '../test/fixtures';
-import { withProjectMoved, withRenamed, withSpaceMoved } from './sidebarOrder';
+import { withFavorite, withProjectMoved, withRenamed, withSpaceMoved } from './sidebarOrder';
 
 const data = SIDEBAR as SidebarResponse;
 const ENGINEERING = '01890000-0000-7000-8000-000000000011';
@@ -40,5 +40,17 @@ describe('sidebar order', () => {
     expect(renamed.spaces[0]?.projects[0]?.name).toBe('App 2027');
     expect(renamed.favorites[0]?.name).toBe('App 2027');
     expect(withRenamed(data, SPACE_ID, 'Design').spaces[0]?.name).toBe('Design');
+  });
+
+  it('stars and unstars a project, keeping favorites by name', () => {
+    const q4 = data.spaces[0]?.projects[2];
+    if (!q4) throw new Error('fixture');
+    const one = withFavorite(data, q4.id, true);
+    const two = withFavorite(one, PROJECT_ID, true);
+    expect(two.favorites.map((p) => p.name)).toEqual(['App Redesign', 'Q4 Roadmap']);
+    expect(withFavorite(two, PROJECT_ID, true).favorites).toHaveLength(2);
+    expect(withFavorite(two, q4.id, false).favorites.map((p) => p.name)).toEqual(['App Redesign']);
+    expect(withFavorite(data, PROJECT_ID, false)).toBe(data);
+    expect(withFavorite(data, 'nope', true)).toBe(data);
   });
 });

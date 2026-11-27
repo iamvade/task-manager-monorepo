@@ -14,6 +14,7 @@ import { KiteMark } from '../../components/ui/KiteMark';
 import { cn } from '../../lib/cn';
 import { useUiStore } from '../../stores/ui';
 import { StandupGroupsSection } from '../standup/StandupNav';
+import { FavoritesSection } from './FavoritesSection';
 import { NewSpaceButton } from './NewSpaceButton';
 import { SidebarMenu } from './SidebarMenu';
 import { LIVE_WIDTH_VAR } from './SidebarResizer';
@@ -70,6 +71,8 @@ export function Sidebar({ onClose }: { onClose?: () => void } = {}) {
       <SidebarSearch />
 
       <SidebarMenu />
+
+      <FavoritesSection />
 
       <StandupGroupsSection />
 

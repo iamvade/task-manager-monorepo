@@ -91,6 +91,47 @@ describe('app shell', () => {
     );
   });
 
+  it('lists favorites in the sidebar and updates them from the header star', async () => {
+    let favorite = false;
+    const sidebar = () => {
+      const app = SIDEBAR.spaces[0]?.projects[0];
+      return Response.json({ ...SIDEBAR, favorites: favorite && app ? [app] : [] });
+    };
+    const project = () => Response.json({ ...PROJECT_WITH_STATUSES, isFavorite: favorite });
+    api({
+      [`GET /api/v1/workspaces/${WORKSPACE_ID}/sidebar`]: sidebar,
+      [`GET /api/v1/projects/${PROJECT_ID}`]: project,
+      [`PUT /api/v1/projects/${PROJECT_ID}/favorite`]: () => {
+        favorite = true;
+        return new Response(null, { status: 204 });
+      },
+      [`DELETE /api/v1/projects/${PROJECT_ID}/favorite`]: () => {
+        favorite = false;
+        return new Response(null, { status: 204 });
+      },
+    });
+    renderAt(`/w/kite-studio/p/${PROJECT_ID}/list`);
+
+    const nav = await waitFor(sidebarNav);
+    await within(nav).findByRole('link', { name: /App Redesign/ });
+    expect(within(nav).queryByRole('list', { name: 'Дуртай' })).not.toBeInTheDocument();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Дуртайд нэмэх' }));
+    const list = await within(nav).findByRole('list', { name: 'Дуртай' });
+    expect(within(list).getByRole('link', { name: 'App Redesign' })).toHaveAttribute(
+      'href',
+      `/w/kite-studio/p/${PROJECT_ID}/list`,
+    );
+    await waitFor(() => {
+      expect(favorite).toBe(true);
+    });
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Дуртайгаас хасах' }));
+    await waitFor(() => {
+      expect(within(nav).queryByRole('list', { name: 'Дуртай' })).not.toBeInTheDocument();
+    });
+  });
+
   it('shows the project header and auto-applies the active sprint filter', async () => {
     api();
     const router = renderAt(`/w/kite-studio/p/${PROJECT_ID}/list`);

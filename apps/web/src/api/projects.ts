@@ -4,12 +4,14 @@ import {
   projectDetailSchema,
   type CreateProject,
   type ProjectDetail,
+  type SidebarResponse,
   type TemplateId,
 } from '@kite/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { ApiError, apiFetch, apiSend } from './client';
 import { queryKeys } from '@kite/shared/client';
+import { withFavorite } from './sidebarOrder';
 
 export function useProject(projectId: string | undefined) {
   return useQuery({
@@ -74,25 +76,34 @@ export function useSetArchived(workspaceId: string) {
   });
 }
 
-/** Favorite on/off, optimistic on the project header; the sidebar favorites list is refetched. */
+/** Favorite on/off, optimistic on the project header and the sidebar's Favorites section. */
 export function useToggleFavorite(project: Pick<ProjectDetail, 'id' | 'workspaceId'>) {
   const queryClient = useQueryClient();
   const key = queryKeys.project(project.id);
+  const sidebarKey = queryKeys.sidebar(project.workspaceId);
   return useMutation({
     mutationFn: (favorite: boolean) =>
       apiSend(`/projects/${project.id}/favorite`, z.null(), favorite ? 'PUT' : 'DELETE'),
     onMutate: async (favorite) => {
-      await queryClient.cancelQueries({ queryKey: key });
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: key }),
+        queryClient.cancelQueries({ queryKey: sidebarKey }),
+      ]);
       const previous = queryClient.getQueryData<ProjectDetail>(key);
+      const previousSidebar = queryClient.getQueryData<SidebarResponse>(sidebarKey);
       if (previous) queryClient.setQueryData(key, { ...previous, isFavorite: favorite });
-      return { previous };
+      if (previousSidebar) {
+        queryClient.setQueryData(sidebarKey, withFavorite(previousSidebar, project.id, favorite));
+      }
+      return { previous, previousSidebar };
     },
     onError: (_err, _favorite, context) => {
       if (context?.previous) queryClient.setQueryData(key, context.previous);
+      if (context?.previousSidebar) queryClient.setQueryData(sidebarKey, context.previousSidebar);
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: key });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.sidebar(project.workspaceId) });
+      void queryClient.invalidateQueries({ queryKey: sidebarKey });
     },
   });
 }

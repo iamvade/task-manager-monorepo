@@ -600,6 +600,12 @@ Sign in, invite, No workspace and the workspace switcher reuse the web's `auth.*
 | `workspace.joinLinkInvalid` | That doesn’t look like an invite link. | Энэ урилгын холбоос биш бололтой. | drafted |
 | `workspace.signOutOf` | Sign out of {{email}} | {{email}}-ээс гарах | design (the suffix doesn't follow the email's vowels) |
 
+## Sidebar favorites (derived, 2026-11-27)
+
+| key | en | mn (draft) | where |
+|---|---|---|---|
+| `shell.favorites` | Favorites | Дуртай | sidebar section heading (from the header's "Дуртайд нэмэх") |
+
 ## Sidebar rename and reorder (derived, 2026-10-30)
 
 Admins and owners only; not designed.

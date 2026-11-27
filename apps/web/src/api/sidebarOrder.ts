@@ -56,3 +56,20 @@ export function withRenamed(data: SidebarResponse, id: string, name: string): Si
     favorites: data.favorites.map(rename),
   };
 }
+
+/** The sidebar with a project starred or unstarred (favorites by name, like the API). */
+export function withFavorite(
+  data: SidebarResponse,
+  projectId: string,
+  favorite: boolean,
+): SidebarResponse {
+  const rest = data.favorites.filter((p) => p.id !== projectId);
+  if (!favorite) return rest.length === data.favorites.length ? data : { ...data, favorites: rest };
+  let project: SidebarProject | undefined;
+  for (const s of data.spaces) project ??= s.projects.find((p) => p.id === projectId);
+  if (!project) return data;
+  return {
+    ...data,
+    favorites: [...rest, project].sort((a, b) => a.name.localeCompare(b.name)),
+  };
+}
