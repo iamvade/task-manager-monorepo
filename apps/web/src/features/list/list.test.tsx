@@ -143,8 +143,8 @@ describe('project list', () => {
       fetchMock.mock.calls.map(([input]) => href(input)).filter((u) => u.includes('/tasks'));
     expect(listUrls().some((u) => u.includes('statusCategory=todo'))).toBe(true);
 
-    expect(screen.getByRole('radio', { name: 'Идэвхтэй' })).toBeChecked();
-    fireEvent.click(screen.getByRole('radio', { name: 'Бүгд' }));
+    expect(screen.getByRole('tab', { name: 'Идэвхтэй' })).toHaveAttribute('aria-selected', 'true');
+    fireEvent.click(screen.getByRole('tab', { name: 'Бүгд' }));
     expect(await screen.findByText('Сүүлийн 14 хоногт дууссан')).toBeInTheDocument();
     expect(toggleOf('Дууссан')).toBeInTheDocument();
   });
@@ -153,16 +153,16 @@ describe('project list', () => {
     const { fetchMock } = api();
     renderAt(`/w/kite-studio/p/${PROJECT_ID}/list?sprint=none`);
     await screen.findByRole('table', { name: 'App Redesign төслийн ажлууд' });
-    const show = screen.getByRole('radiogroup', { name: 'Ажил харуулах' });
+    const show = screen.getByRole('tablist', { name: 'Ажил харуулах' });
     expect(
       within(show)
-        .getAllByRole('radio')
+        .getAllByRole('tab')
         .map((r) => r.textContent),
     ).toEqual(['Идэвхтэй', 'Бэклог', 'Бүгд']);
     const listUrls = () =>
       fetchMock.mock.calls.map(([input]) => href(input)).filter((u) => u.includes('/tasks'));
 
-    fireEvent.click(screen.getByRole('radio', { name: 'Бэклог' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Бэклог' }));
     await waitFor(() => {
       expect(listUrls().some((u) => u.includes('statusCategory=backlog'))).toBe(true);
     });

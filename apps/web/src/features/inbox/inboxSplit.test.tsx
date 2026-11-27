@@ -19,11 +19,13 @@ vi.mock('./useInboxSplit', () => ({ INBOX_LIST_WIDTH: 440, useInboxSplit: () => 
 
 const EN_ME = { ...ME, preferences: { ...ME.preferences, locale: 'en' } };
 const REPLY = standupNotification('standup_reply', { snippet: 'Sent the keys' });
-const ACTOR = MENTION.actor ?? ME.user;
+// The shared fixture types avatarColor as a plain string; narrow it to a palette key.
+const ME_REF = { ...ME.user, avatarColor: 'indigo' as const };
+const ACTOR = MENTION.actor ?? ME_REF;
 const REMINDER = standupNotification('standup_reminder', { actor: null });
 const DIGEST = standupNotification('standup_digest', {
   actor: null,
-  digest: { posted: [ACTOR], notPosted: [ME.user], out: [], openBlockers: 2 },
+  digest: { posted: [ACTOR], notPosted: [ME_REF], out: [], openBlockers: 2 },
 });
 const INBOX = page([MENTION, STATUS, ASSIGNED, REPLY], { unread: 3, archived: 0 });
 const NO_CONTENT = () => new Response(null, { status: 204 });
